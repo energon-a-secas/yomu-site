@@ -71,7 +71,11 @@ function wordNode(s, i, j, rec, key, chain, cuts, whole, env) {
   // Not for a prefix: お and ご can only lead a noun (costs.js), and as
   // one-kana words at the full price おすすめ read as おす|すめ, "push, live!".
   if (j - i === 1 && isKana(s) && cls !== 'pref') cost += COST.oneKana;
-  if (rec.x && !whole) cost += COST.xSplit;
+  // A key that is another key plus a particle (今日は) is split so the
+  // particle is taught, except where JMdict calls the whole an adverb:
+  // いつも is "always", not いつ "when" plus も, and 実は is "actually",
+  // not 実 "fruit" plus the topic marker.
+  if (rec.x && !whole && !/(^| )adv( |$)/.test(rec.p || '')) cost += COST.xSplit;
   if (cls === 'aux') cost += COST.aux;
   return { i, j, s, cls, rec, key, chain, cuts, cost, kanaSpelled };
 }

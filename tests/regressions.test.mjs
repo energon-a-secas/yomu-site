@@ -504,3 +504,22 @@ test('the result does not depend on what an earlier text loaded', async () => {
     assert.equal(JSON.stringify(await analyze(text, { dict: warm })), cold, text);
   }
 });
+
+// ── A word that ends like a particle ─────────────────────────────────────
+
+test('an adverb that ends like a particle stays one word (was いつ|も, 実|は mid-sentence)', async () => {
+  for (const [text, word, said] of [
+    ['私はいつも朝ごはんを食べます。', 'いつも', 'itsumo'],
+    ['私は実は行きたくない。', '実は', 'jitsuwa'],
+    ['本当にありがとう。', '本当に', 'hontooni'],
+  ]) {
+    const r = await run(text);
+    const t = tok(r, word);
+    assert.ok(t, `${text}: ${word} is one token, got ${cut(r)}`);
+    assert.equal(t.romaji.said, said, text);
+  }
+  // The split the rule exists for still happens: 今日は before more text is
+  // today plus the topic marker, not the greeting.
+  const r = await run('今日は雨です。');
+  assert.ok(tok(r, '今日') && tok(r, 'は'), cut(r));
+});
