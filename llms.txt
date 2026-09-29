@@ -1,0 +1,91 @@
+# Yomu
+
+> A Japanese reader at https://yomu.neorgon.com/: paste a line and it is split
+> into words, with furigana over the kanji, a romaji line for how it is said
+> (Genki's convention: sayoonara, sensee, watashi wa) and one for how it is
+> spelled (sa-yo-u-na-ra), notes on the special sounds and the grammar in the
+> line, and a table of its kanji. Everything runs in the browser from
+> committed dictionary files. Any Neorgon site on the allowlist can embed it
+> in an iframe and send it text over postMessage. Nothing is uploaded.
+
+## What a reading contains
+
+Each token has a kind (word, inflected, particle, copula, katakana, name,
+number, punct, and a few more), its surface, its dictionary form, its reading
+in hiragana, furigana per kanji where the data allows, its beats, and two
+romaji lines:
+
+- said: long vowels doubled only inside one morpheme (思う stays omou),
+  particles は へ を read wa e o, n' before a vowel or y, never macrons
+- spelled: kana by kana with a hyphen between beats
+
+Sound notes: particle-wa, particle-e, particle-o, fossil-wa (こんにちは),
+long-vowel, small-tsu, youon, dakuten, handakuten, n-assimilation, devoiced
+(written s(u)kides(u)), ji-zu, foreign-sound, bar, repeat-mark,
+special-reading (今日 read as a whole), counter-change (いっぷん).
+
+Grammar notes: every particle, the copula forms, polite and plain verb
+endings, te-forms (te-kudasai, te-iru, te-shimau, te-miru), desire, potential,
+passive, causative, volitional, imperative, the conditionals ば, たら, なら and
+と, i-adjective forms, invitations and offers.
+
+The full contract, including the token shape, is docs/ANALYZER.md in the
+repository: https://github.com/energon-a-secas/yomu-site
+
+## Embedding Yomu: yomu-embed/1
+
+Frame URL: https://yomu.neorgon.com/?embed=1&lang=en (or lang=es). A top-level
+page with ?embed=1 shows the normal site, because a frame with no host would
+have nothing to read.
+
+Text never travels in the frame URL. Every message is { v: 1, type, ... }.
+
+Host to Yomu:
+
+- yomu:hello (no fields): post it on the iframe's load event; Yomu can be
+  ready before the host listens
+- yomu:load { text, lang? }: read this text, at most 2,000 characters
+- yomu:lang { lang }: switch the interface language
+
+Yomu to host:
+
+- yomu:ready { version }: on boot and in reply to every hello
+- yomu:height { height }: the document height in CSS pixels, at most once per
+  animation frame, so the host can size the frame
+- yomu:read { tokens, unknown }: a load finished; unknown counts the tokens
+  with no dictionary support
+- yomu:error { message }: a load could not be read
+
+Yomu accepts messages only from https://runcible.neorgon.com and Runcible's
+development server (http://localhost:8878, http://127.0.0.1:8878), checks
+that the message came from its parent window, and posts only to the origin of
+the last accepted hello. A new host is added to js/embed.js and docs/EMBED.md
+in the same commit.
+
+The embedded page keeps its text box, so a host that opens Yomu as a page of
+its own (no text sent) still lets the learner paste.
+
+## Linking to Yomu with text
+
+https://yomu.neorgon.com/#t=<encodeURIComponent(text)> reads the text once and
+then removes the fragment. Build this only for text you authored (a lesson's
+phrase), never for text a person typed.
+
+## Privacy
+
+The pasted text is kept only in this browser's localStorage under
+yomu-site:text so a reload keeps it, with a visible Clear. It is never put in
+the URL, the page title or an attribute. The DeepL and Google Translate
+links are built at the moment they are clicked, which is the only way the
+text leaves the page.
+
+## Data and licences
+
+- JMdict and KANJIDIC, by the Electronic Dictionary Research and Development
+  Group, CC BY-SA 4.0: the glosses, readings and kanji information
+- KanjiVG, by Ulrich Apel, CC BY-SA 3.0: the parts of each kanji
+- Tatoeba, CC BY 2.0 FR: used only to rank how common each word is; no
+  sentence ships
+- The phrase library, the notes and the deinflection rules are written for
+  Yomu and are public domain. Nothing is taken from Genki, the Japan
+  Foundation apps, Tofugu, Yomitan, rikaichan or 10ten.
