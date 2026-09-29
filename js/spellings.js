@@ -43,12 +43,19 @@ export function recordBand(rec) {
 }
 
 /**
+ * Less than one step of any other cost: `t` (0 to 5) orders records the
+ * prices tie on, and must never outweigh a price.
+ */
+const TIE_STEP = 1 / 8;
+
+/**
  * What a record under a kana key pays against the key's best record: 隙 pays
- * four bands against 好き, 飼う two against 買う. Records of one band tie,
- * except that an auxiliary wins, because the grammar leans on it.
- * COST.kanaForKanji still applies on top: a word usually written in kana is
- * the likelier reading of kana, which is what keeps うち "one's house" (家,
- * usually kana) ahead of 内.
+ * four bands against 好き, 飼う two against 買う. Among records of one band
+ * the auxiliary wins, because the grammar leans on it, and then the one the
+ * corpus matched more often (`t`, from the builder), so no tie is left to the
+ * order the records were written in. COST.kanaForKanji still applies on top:
+ * a word usually written in kana is the likelier reading of kana, which is
+ * what keeps うち "one's house" (家, usually kana) ahead of 内.
  *
  * @param {string} key   a kana key
  * @param {object} rec   one of its records
@@ -58,7 +65,7 @@ export function kanaHomographCost(key, rec, dict) {
   if (hasKanji(key)) return 0;
   const recs = dict.get(key);
   if (!recs || recs.length < 2 || !recs.includes(rec)) return 0;
-  const raw = recs.map((r) => bandPrice(recordBand(r), r));
+  const raw = recs.map((r) => bandPrice(recordBand(r), r) + (r.t || 0) * TIE_STEP);
   return raw[recs.indexOf(rec)] - Math.min(...raw);
 }
 

@@ -55,6 +55,14 @@ needs from another key (`o`, `b`, `c`) is on its record, built by
 `tools/lib/prices.mjs`. A cost that reads a second key with `dict.get` must be
 shipped the same way, or it reads whatever an earlier paste happened to load.
 
+**Record order is filing order, and no reading may depend on it.** Two
+records of a kana key that every context-free price ties are ordered by the
+builder's `t` (the corpus count of their spellings), and the regression test
+reads its cases with every key's records reversed and rotated. Kanji keys
+with several readings (方 かた and ほう, 中 なか and ちゅう) still tie on the
+same count, so reversing the records changes 185 of 3,016 test texts; a new
+signal for those is open work, not a reason to reorder the data.
+
 **Every JSON file is at most 140,000 bytes.** `tools/check-data.mjs` fails on
 141 KB. The builders pack contiguous key ranges up to that size.
 

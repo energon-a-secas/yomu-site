@@ -72,7 +72,7 @@ function checkLicence(rel, block, at = '_licence') {
 
 // ── Per-format checks ─────────────────────────────────────────────────────
 
-const RECORD_FIELDS = new Set(['r', 'g', 'p', 'f', 'k', 'u', 'x', 'q', 'w', 'o', 'b', 'c']);
+const RECORD_FIELDS = new Set(['r', 'g', 'p', 'f', 'k', 'u', 'x', 'q', 'w', 'o', 'b', 'c', 't']);
 
 function checkDictShard(rel, doc) {
   const keys = Object.keys(doc.entries || {});

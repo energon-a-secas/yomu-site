@@ -23,9 +23,13 @@
  *      morpheme ends and the next begins, kept only where that splits a
  *      pair the said line would merge (o+う, e+い): そのうち is その|内, so
  *      it is said sonouchi. spellings.js `kanaCuts` reads it.
+ *   t  on a record of a kana key that another record of it ties with on
+ *      every price the lattice knows before context: its place among them
+ *      by how often the corpus matched its kanji spelling (stampTies).
+ *      spellings.js `kanaHomographCost` reads it.
  */
 import { hasKanji, isHiragana, isAllKana, isKatakana } from '../../js/kana.js';
-import { homographCost, COST } from '../../js/costs.js';
+import { homographCost, bandOf, COST } from '../../js/costs.js';
 import { bandPrice, MERGEABLE } from '../../js/spellings.js';
 import { align } from '../../js/furigana.js';
 import { readingsOfType, selection } from './kanjidic.mjs';
@@ -199,14 +203,53 @@ export function stampPlaces(view) {
 }
 
 /**
- * Stamp `o`, `b` and `c` on the records the page is shipped, computed from
- * those same records, so they say what the page would have worked out from
- * the shards itself.
+ * What the lattice charges one record of a kana key before its neighbours
+ * are known: the band price kanaHomographCost reads, COST.kanaForKanji for
+ * a word normally written in kanji met in hiragana, and the q band bandOf
+ * lets it use. Two records at one price are a tie the lattice would settle
+ * by which came first.
  */
-export function stampShipped(entries, kanjiInfo) {
+function contextFreePrice(key, rec, dict) {
+  const hiragana = !isKatakana(key[0]);
+  const spelled = hiragana && rec.k && rec.k.length && !rec.u ? COST.kanaForKanji : 0;
+  const q = bandOf(key, rec, dict);
+  return bandPrice(rec.b !== undefined ? rec.b : fallbackBand(rec), rec) + spelled + COST.q[q >= 1 && q <= 5 ? q : 0];
+}
+
+/**
+ * `t` for the records of one kana key that the bands price the same: their
+ * order by how often the corpus matched their own kanji spelling, the one
+ * matched most first (and carrying no `t`). The bands are five buckets, so
+ * two words can share one and still be far apart: 所 and 床 are both band 3
+ * under とこ once 所's band is discounted for being ところ first, and 祖父
+ * and 辞意 both band 4 under じい; the counts say 所 and 祖父. A record with
+ * no spelling counts nothing, so いくら stays "how much" (幾ら) over the roe
+ * (イクラ). Equal counts keep the order the builder already chose.
+ */
+function stampTies(key, recs, dict, counts) {
+  const price = recs.map((r) => contextFreePrice(key, r, dict));
+  const matched = (r) => Math.max(0, ...spellingsOf(r).map((s) => counts.get(s) || 0));
+  let stamped = 0;
+  for (const p of new Set(price)) {
+    const group = recs.map((r, n) => ({ r, n })).filter(({ n }) => price[n] === p);
+    if (group.length < 2) continue;
+    group.sort((a, b) => matched(b.r) - matched(a.r) || a.n - b.n);
+    group.forEach(({ r }, t) => { if (t) { r.t = t; stamped += 1; } });
+  }
+  return stamped;
+}
+
+/**
+ * Stamp `o`, `b`, `c` and `t` on the records the page is shipped, computed
+ * from those same records, so they say what the page would have worked out
+ * from the shards itself, and settle what it would have left to record order.
+ *
+ * @param {Map<string, number>} counts  greedy matches per key in the corpus
+ */
+export function stampShipped(entries, kanjiInfo, counts) {
   stampPlaces(entries);
   const dict = { get: (k) => entries.get(k) };
-  const stats = { o: 0, b: 0, c: 0 };
+  const stats = { o: 0, b: 0, c: 0, t: 0 };
   for (const [key, recs] of entries) {
     for (const rec of recs) {
       if (rec.o) stats.o += 1;
@@ -217,6 +260,7 @@ export function stampShipped(entries, kanjiInfo) {
       const c = kanaCutsOf(key, rec, dict);
       if (c.length) { rec.c = c; stats.c += 1; }
     }
+    if (!hasKanji(key) && recs.length > 1) stats.t += stampTies(key, recs, dict, counts);
   }
   return stats;
 }

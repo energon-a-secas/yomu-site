@@ -245,7 +245,7 @@ function saidWa(key, f) {
   return f.entry.sense.some((s) => s.info.some((i) => WA_NOTE.test(i)));
 }
 
-function buildEntries(jmdict, kanjidic, bands) {
+function buildEntries(jmdict, kanjidic, bands, counts) {
   const table = readingTable(kanjidic);
   const kanjiInfo = kunTable(kanjidic);
   const { forms, keys } = collect(jmdict);
@@ -302,7 +302,7 @@ function buildEntries(jmdict, kanjidic, bands) {
       else stats.partial += 1;
     }
   }
-  Object.assign(stats, stampShipped(entries, kanjiInfo));
+  Object.assign(stats, stampShipped(entries, kanjiInfo, counts));
   return { entries, keys };
 }
 
@@ -364,7 +364,7 @@ function main() {
   const { keys: keySet } = collect(jmdict);
   const counts = countKeys(sentences, keySet);
   const bands = bandsOf(counts);
-  const { entries } = buildEntries(jmdict, kanjidic, bands);
+  const { entries } = buildEntries(jmdict, kanjidic, bands, counts);
 
   const all = [...entries.keys()].sort();
   const maxKey = all.reduce((m, k) => Math.max(m, k.length), 0);
@@ -425,7 +425,7 @@ function main() {
     `filter ${filter.n} keys, ${filter.m} bits, ${filter.k} hashes, ${fmtBytes(filterBytes)} (${filterBytes} B)`,
     `multi-kanji keys (first record): split ${stats.split}, partly split ${stats.partial}, * ${stats.star}`,
     `x ${stats.x} keys, w ${stats.w} records, keys over ${MAX_RECORDS} records ${stats.capped}`,
-    `shipped for the page: o ${stats.o} records, b ${stats.b}, c ${stats.c}`,
+    `shipped for the page: o ${stats.o} records, b ${stats.b}, c ${stats.c}, t ${stats.t}`,
     `q bands 1-5: ${qs.join(' / ')}; unranked ${all.length - [...bands.keys()].filter((k) => entries.has(k)).length}`,
     `senses whose first gloss was passed over (dash or banned word) ${stats.skippedGloss}; records dropped for an empty g ${stats.emptyG}`,
     gone.length ? `removed stale shards: ${gone.join(' ')}` : 'no stale shards',

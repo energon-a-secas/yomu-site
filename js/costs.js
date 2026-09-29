@@ -121,6 +121,7 @@ export const COST = Object.freeze({
   // the 15 its q1 band saved it, so the number wins there and only there.
   durationKey: 40,
   nounVerb: 30,       // a noun straight into a verb, no particle (connect)
+  suffixAfterPredicate: 40, // a suffix-first noun met in kana after a verb or adjective (connect)
   homographSpelling: 10, // per place this kanji sits down its reading's list
   homographAffix: 10, // an affix-first record, where another is not
   homographKanaUsual: 20, // a record marked usually-kana, met in kanji
@@ -303,6 +304,12 @@ function pairCost(prev, next) {
   // the suffix: 三日後 is みっかご and 十分後 じゅっぷんご, where 後 on its
   // own is あと; 五人分 is ぶん, not ふん.
   if (n === 'noun' && p === 'num' && next.rec && tagsOf(next.rec).some((t) => SUFFIX_TAGS.has(t))) return -20;
+  // A word whose first use is a suffix (氏 is "suf n pn ctr") attaches to a
+  // noun; straight after a verb or an adjective it is almost never meant.
+  // classOf reads it as a noun, for 氏 alone, so this is its own rule:
+  // かわいいし read "cute Mr." once 氏 made the six records under し, where
+  // し after a predicate is "and what's more".
+  if (n === 'noun' && (p === 'verb' || p === 'adj') && next.rec && next.kanaSpelled && SUFFIX_TAGS.has(tagsOf(next.rec)[0])) return COST.suffixAfterPredicate;
   // A word usually written in kanji, met in hiragana straight after a noun,
   // is more often a particle and a word than a compound: わたしのうち is
   // の|うち "my house", not 農地 "farmland", こんどはへん is は|へん, and

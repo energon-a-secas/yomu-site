@@ -57,7 +57,7 @@ same text and the same data give the same tokens.
 | `bloom.js` | the key filter: its hash, reading it, and building it (the builder imports this file) | nothing |
 | `lattice.js` | the best path through a run, and the tokens built from it | `kana.js`, `deinflect.js`, `costs.js`, `names.js`, `candidates.js`, `spellings.js` |
 | `candidates.js` | every node that could start at one position of a run, with its own cost | `kana.js`, `deinflect.js`, `numbers.js`, `costs.js`, `names.js`, `key-rules.js`, `spellings.js` |
-| `spellings.js` | what a kana word learns from its kanji spelling, read off the record: the rank of kana homographs (すき is 好き before 隙, `b`) and the morpheme cuts of a kana compound (そのうち is その\|内, `c`) | `kana.js`, `costs.js` |
+| `spellings.js` | what a kana word learns from its kanji spelling, read off the record: the rank of kana homographs (すき is 好き before 隙, `b`, ties by `t`) and the morpheme cuts of a kana compound (そのうち is その\|内, `c`) | `kana.js`, `costs.js` |
 | `costs.js` | the closed classes (particles, copula), every cost, connection costs, homograph ranking | `kana.js` |
 | `key-rules.js` | dictionary keys the lattice refuses (ですか, ませんか, 雨が降る, になると) | `kana.js`, `costs.js` |
 | `names.js` | which kanji runs are names, and a per-kanji guess at their reading | `kana.js`, `deinflect.js`, `numbers.js` |
@@ -187,9 +187,15 @@ corpus sentences the core was not chosen from:
 | `o` | on a record of a kanji key with several records: how far down the kanji lists of its first reading's records this spelling sits, 3 when that reading lists it nowhere (本 is the ほん record's first spelling, the もと record's second); absent means 0 |
 | `b` | on a record of a kana key with several records: the band of its kanji spelling, taken two worse where that band is earned by another reading (入る by はいる, 五 by ご) or by a conjugated stem (動 by 動いて); absent means the key's own band two worse |
 | `c` | on a record of a hiragana key: offsets where its kanji spelling says one morpheme ends and the next begins, only where that splits a pair the said line would merge (そのうち is その\|内, `[2]`) |
+| `t` | on a record of a kana key that another record of the key ties with on every price known before context (band, kanji met in kana, q): its place among them, 1 to 5, by how often the corpus matched its own kanji spelling; absent on the one matched most |
 
 `o`, `b` and `c` are what the page used to fetch other shards to learn;
-`tools/lib/prices.mjs` works them out once, from the records it ships.
+`tools/lib/prices.mjs` works them out once, from the records it ships. `t`
+is what the page used to leave to record order: 貴方 and 彼方 are one band
+under あなた, 所 and 床 one band under とこ, and whichever JMdict filed first
+won. A record with no spelling counts nothing, so いくら stays 幾ら "how much"
+over the roe. `tests/regressions.test.mjs` reads a set of these with every
+key's records reversed and rotated and expects the same words.
 
 A key holds at most six records. A kana key's records are different words,
 so before the cap they are ordered by the corpus: common spellings first,

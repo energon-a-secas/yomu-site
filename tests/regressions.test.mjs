@@ -160,6 +160,72 @@ test('御 is a prefix first: ご注文 is honorific, not 語 "word"', async () =
   }
 });
 
+// ── Ties the data settles, not the order the records are written in ───────
+
+/**
+ * The committed dictionary with every key's records served in another order.
+ * A reading that changes here was decided by which record came first, which
+ * says nothing about Japanese: JMdict's sequence numbers are filing order.
+ */
+function reordered(base, how) {
+  const cache = new Map();
+  return {
+    ready: base.ready, need: base.need, kanji: base.kanji, get maxKey() { return base.maxKey; },
+    get(key) {
+      const recs = base.get(key);
+      if (!recs || recs.length < 2) return recs;
+      if (!cache.has(key)) cache.set(key, how(recs));
+      return cache.get(key);
+    },
+  };
+}
+const ORDERS = [['as shipped', (r) => r], ['reversed', (r) => [...r].reverse()], ['rotated', (r) => [...r.slice(1), r[0]]]];
+
+test('kana homographs are read by their spellings\' evidence, in any record order: どう, ご, また, はし', async () => {
+  const base = diskDict();
+  const cases = [
+    // usually written in kana, where 銅 and 胴 are rare and 動's band is its verb's (動いて)
+    ['一緒にどうですか', 'どう', '如何'], ['どうしましたか', 'どう', '如何'],
+    // a prefix before a noun, over 五 and 語
+    ['ご注文はお決まりですか', 'ご', '御'], ['ごかぞくはおげんきですか', 'ご', '御'],
+    // usually kana, over 股
+    ['じゃあ、また', 'また', '又'], ['またきてください', 'また', '又'],
+    // band 1, over 端 (2) and 箸 (3)
+    ['はしをわたる', 'はし', '橋'],
+    // one band each, and the corpus count decides: 貴方 over 彼方, 所 over 床
+    ['あなたはだれですか', 'あなた', '貴方'], ['さっきいたとこじゃない', 'とこ', '所'],
+    // a spelling the corpus matched beats a record with none: 幾ら over the roe
+    ['このシャツはいくらですか', 'いくら', '幾ら'],
+  ];
+  for (const [order, how] of ORDERS) {
+    const d = reordered(base, how);
+    for (const [text, surface, spelling] of cases) {
+      const t = (await analyze(text, { dict: d })).tokens.find((x) => x.surface === surface);
+      const got = t && t.entry ? (t.entry.k || t.entry.g)[0] : 'nothing';
+      assert.equal(got, spelling, `${order}: ${text}: ${surface} read as ${got}`);
+    }
+  }
+});
+
+test('a word whose first use is a suffix does not follow an adjective in kana: かわいいし is "and", not 氏 "Mr."', async () => {
+  const r = await run('だってあんなにかわいいし、しぐさもおんなのこみたいだし');
+  const t = r.tokens.find((x) => x.surface === 'し');
+  assert.equal(gloss(t), 'and', cut(r));
+  // and 氏 still follows a name, where it belongs
+  assert.equal(tok(await run('田中氏'), '氏').base, '氏');
+});
+
+test('records the bands tie are ordered by the corpus in the data (t), and the page reads that order', async () => {
+  const d = diskDict();
+  await d.need(['とこ', 'あなた', 'じい']);
+  for (const [key, first] of [['とこ', '所'], ['あなた', '貴方'], ['じい', '祖父']]) {
+    const recs = d.get(key);
+    const winner = recs.find((r) => r.k && r.k[0] === first);
+    assert.ok(winner && !winner.t, `${key}: ${first} carries t ${winner && winner.t}`);
+    assert.ok(recs.some((r) => r.t), `${key}: no record carries t`);
+  }
+});
+
 // ── Segmentation ─────────────────────────────────────────────────────────
 
 test('a prefix may lead an adjective: 超おいしかった (was 超|おい|しかった, "nephew, scold")', async () => {
