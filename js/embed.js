@@ -138,6 +138,15 @@ export function createEmbed({ win, version, allowed = ALLOWED_ORIGINS, onLoad, o
     });
   }
 
+  /**
+   * Escape pressed inside the frame. The host's sheet cannot hear a key that
+   * lands in another origin's document, so the frame says it for the host:
+   * a learner who clicked into the text box can still close the sheet.
+   */
+  function escape() {
+    if (target) send('yomu:escape', {}, target);
+  }
+
   function start() {
     win.addEventListener('message', onMessage);
     announce();
@@ -147,7 +156,7 @@ export function createEmbed({ win, version, allowed = ALLOWED_ORIGINS, onLoad, o
     win.removeEventListener('message', onMessage);
   }
 
-  return { start, stop, queueHeight, onMessage, get target() { return target; } };
+  return { start, stop, queueHeight, escape, onMessage, get target() { return target; } };
 }
 
 // ── The page side ─────────────────────────────────────────────────────────
@@ -212,6 +221,14 @@ export function startEmbed({ version, onLoad, onLang }) {
   if (typeof globalThis.ResizeObserver === 'function') {
     new globalThis.ResizeObserver(() => embed.queueHeight()).observe(doc.body);
   }
+  // Not while a dialog of Yomu's own is open (Escape closes that first), not
+  // mid-composition (Escape cancels the IME), and not when a handler here
+  // already used the key.
+  doc.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape' || e.isComposing || e.defaultPrevented) return;
+    if (doc.querySelector('dialog[open]')) return;
+    embed.escape();
+  });
   embed.start();
   return embed;
 }

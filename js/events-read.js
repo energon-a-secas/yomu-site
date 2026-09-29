@@ -174,5 +174,9 @@ export function bindInput() {
     }
   });
   ta.addEventListener('compositionend', () => readSoon());
-  autosize(ta);
+  // Measured once the page has its styles: reading scrollHeight while the
+  // document is still loading forces a layout, which Firefox reports in
+  // every embedded frame.
+  if (document.readyState === 'complete') autosize(ta);
+  else addEventListener('load', () => autosize(ta), { once: true });
 }

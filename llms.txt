@@ -55,6 +55,8 @@ Yomu to host:
 - yomu:read { tokens, unknown }: a load finished; unknown counts the tokens
   with no dictionary support
 - yomu:error { message }: a load could not be read
+- yomu:escape (no fields): Escape was pressed inside the frame; a host that
+  shows Yomu in a closable sheet closes it
 
 Yomu accepts messages only from https://runcible.neorgon.com and Runcible's
 development server (http://localhost:8878, http://127.0.0.1:8878), checks

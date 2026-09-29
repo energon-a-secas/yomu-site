@@ -110,8 +110,22 @@ function pinKanji(kid) {
   }
 }
 
-function unlightKanji(kid) {
-  if (Number(kid) !== state.pinnedKanji) lightKanji(kid, false);
+/**
+ * The kanji the focused word lights. A pointer passing over one of them and
+ * leaving must not put it out while the word is still the one chosen, the
+ * same rule pinKanji keeps for an unpinned kanji. `leaving` is the word focus
+ * is moving away from, whose kanji do go out.
+ */
+function heldKids(leaving = null) {
+  const a = document.activeElement;
+  const tok = a && a.closest ? a.closest('#reading-body .tok') : null;
+  if (!tok || tok === leaving) return new Set();
+  return new Set([...tok.querySelectorAll('.kj[data-kid]')].map((k) => k.dataset.kid));
+}
+
+function unlightKanji(kid, leaving = null) {
+  if (Number(kid) === state.pinnedKanji || heldKids(leaving).has(String(kid))) return;
+  lightKanji(kid, false);
 }
 
 /** Pointer and focus, entering and leaving, for one kind of target. */
@@ -139,7 +153,7 @@ function bindLights() {
     reading.addEventListener('focusout', (e) => {
       const tok = e.target.closest('.tok');
       if (!tok) return;
-      for (const kid of new Set([...tok.querySelectorAll('.kj[data-kid]')].map((k) => k.dataset.kid))) unlightKanji(kid);
+      for (const kid of new Set([...tok.querySelectorAll('.kj[data-kid]')].map((k) => k.dataset.kid))) unlightKanji(kid, tok);
     });
     reading.addEventListener('click', (e) => {
       const tok = e.target.closest('.tok');

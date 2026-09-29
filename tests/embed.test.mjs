@@ -290,3 +290,17 @@ test('isEmbedded reads ?embed=1 and nothing else', () => {
   assert.equal(isEmbedded('?embed=true'), false);
   assert.equal(isEmbedded(''), false);
 });
+
+test('escape tells the host that greeted it, and nobody before a hello', () => {
+  const { sent, embed, dispatch } = setup();
+  const before = sent.length;
+  embed.escape();
+  assert.equal(of(sent, 'yomu:escape').length, 0, 'no host has said hello yet');
+  assert.equal(sent.length, before);
+  dispatch({ v: 1, type: 'yomu:hello' });
+  embed.escape();
+  const esc = of(sent, 'yomu:escape');
+  assert.equal(esc.length, 1);
+  assert.equal(esc[0].origin, RUNCIBLE);
+  assert.equal(esc[0].msg.v, 1);
+});

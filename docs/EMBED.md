@@ -35,6 +35,7 @@ Every message is `{ v: 1, type, ...fields }`.
 | `yomu:height` | `height` (CSS px) | the document height, so the host can size the frame; throttled to one per animation frame |
 | `yomu:read` | `tokens`, `unknown` | a `yomu:load` finished: how many tokens, how many had no dictionary support |
 | `yomu:error` | `message` | a `yomu:load` could not be read (data failed to load, text too long) |
+| `yomu:escape` | none | Escape was pressed inside the frame (not in a dialog of Yomu's own, not mid-composition); a host that shows Yomu in a closable sheet closes it, since a key pressed in the frame never reaches the host's document |
 
 ## Origins
 
