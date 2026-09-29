@@ -254,7 +254,7 @@ function toToken(node, path, k, run, dict, env) {
 
   // What analyze.js needs to build furigana and the said line, and nothing
   // the page should keep: analyze removes `aid` once it has used it.
-  const aid = { f: rec ? rec.f : undefined, cuts: [...(node.cuts || []), ...kanaCuts(node, dict, env.spelled)], parts: node.parts || null };
+  const aid = { f: rec ? rec.f : undefined, cuts: [...(node.cuts || []), ...kanaCuts(node)], parts: node.parts || null };
   aid.v5u = !!rec && !node.chain.length && /\bv5u(-s)?\b/.test(rec.p) && node.s.endsWith('う');
   aid.finalWa = !!rec && (!!rec.w || (!!rec.x && node.key.endsWith('は')) || FINAL_WA.has(node.key));
   if (!rec && FINAL_WA.has(node.s)) aid.finalWa = true;
@@ -308,13 +308,11 @@ function particleWa(node, dict, env, depth = 0) {
  * @param {Map} [opts.kanji]   char -> kanji info, for reading names
  * @param {string} [opts.after] 'noun' when the run directly follows latin
  *                              text or a number, so ABCです connects as a noun
- * @param {object} [opts.spelled] kanji spellings loaded for the kana words
- *                              of a first pass (spellings.js)
  * @returns {object[]} tokens with offsets relative to the run, and an `aid`
  *   field analyze.js consumes
  */
 export function segmentRun(run, dict, opts = {}) {
-  const env = { maxKey: dict.maxKey || 12, kanji: opts.kanji, after: opts.after, before: opts.before, dict, spelled: opts.spelled };
+  const env = { maxKey: dict.maxKey || 12, kanji: opts.kanji, after: opts.after, before: opts.before, dict };
   const path = bestPath(run, dict, env);
   return path.map((node, k) => toToken(node, path, k, run, dict, env));
 }

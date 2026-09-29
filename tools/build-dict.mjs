@@ -29,10 +29,9 @@ import {
   writeJson, serialize, MAX_BYTES, SITE, fmtBytes, pruneStale,
 } from './lib/emit.mjs';
 import { readingTable, splitReading, needsSplit } from './lib/split.mjs';
-import { isAllKana, isKatakana } from '../js/kana.js';
-import { kanaRecordPrice, bandPrice } from '../js/spellings.js';
-import { COST } from '../js/costs.js';
-import { readingsOfType, selection } from './lib/kanjidic.mjs';
+import { isAllKana } from '../js/kana.js';
+import { byEvidence, kunTable, stampPlaces, stampShipped } from './lib/prices.mjs';
+import { chooseCore, filterDoc } from './lib/layout.mjs';
 import { countKeys, bandsOf, sentencesOf } from './lib/freq.mjs';
 
 const TOOL = 'tools/build-dict.mjs';
@@ -246,52 +245,6 @@ function saidWa(key, f) {
   return f.entry.sense.some((s) => s.info.some((i) => WA_NOTE.test(i)));
 }
 
-/** A band that sorts after every real one: the key was never matched. */
-const UNRANKED = 6;
-
-/** Every spelling counts as loaded at build time: the whole dictionary is here. */
-const ALL = Object.freeze({ has: () => true });
-
-/** Each shipped kanji's kun readings, which spellingBand reads for its stem rule. */
-function kunTable(kanjidic) {
-  return new Map(selection(kanjidic).map((c) => [c.literal, { kun: readingsOfType(c, 'ja_kun') }]));
-}
-
-/**
- * A kana key's records in the order the corpus supports, before the cap.
- *
- * Each record is priced the way the page prices it in kana text
- * (js/spellings.js, kanaRecordPrice): the band of its own kanji spelling,
- * discounted where that band is someone else's (入る is q1 because of はいる,
- * 動 because every 動いて was counted as 動), plus COST.kanaForKanji when the
- * word is normally written in kanji. Common first, then that price, then
- * JMdict order. A kanji key keeps JMdict order: its records share one string
- * and so one count, and nothing in the corpus tells them apart.
- *
- * Before this, かく led with 掻く "to scratch" (usually kana, so first by
- * the kana-word rule) and 書く "to write", q1, was the seventh record and was
- * cut, so かきます read "to scratch".
- */
-function byEvidence(key, list, dict, kanjiInfo) {
-  if (list.length < 2 || !isAllKana(key)) return list;
-  const hiragana = !isKatakana(key[0]);
-  const price = ({ f, rec }) => {
-    if (f.kind !== 'kana') return 0;
-    // A word with no kanji spelling at all (the particle は, the
-    // sentence-final もの) is what the kana key counted, so the key's band
-    // is its own. The page prices it two bands worse, as a word with no
-    // evidence of its own; a particle never reaches that price, because the
-    // closed class supplies it (costs.js), so only the order here needs it.
-    if (!rec.k) return bandPrice(rec.q || UNRANKED, rec);
-    const spelled = hiragana && !rec.u ? COST.kanaForKanji : 0;
-    return kanaRecordPrice(key, rec, dict, ALL, kanjiInfo) + spelled;
-  };
-  return list
-    .map((x, n) => ({ x, order: [x.f.common ? 0 : 1, price(x), n] }))
-    .sort((a, b) => byRank(a.order, b.order))
-    .map(({ x }) => x);
-}
-
 function buildEntries(jmdict, kanjidic, bands) {
   const table = readingTable(kanjidic);
   const kanjiInfo = kunTable(kanjidic);
@@ -312,6 +265,7 @@ function buildEntries(jmdict, kanjidic, bands) {
     if (list.length) full.set(key, list);
   }
   const view = new Map([...full].map(([k, list]) => [k, list.map((x) => x.rec)]));
+  stampPlaces(view);
   const dict = { get: (k) => view.get(k) };
 
   const entries = new Map();
@@ -319,7 +273,7 @@ function buildEntries(jmdict, kanjidic, bands) {
     const ordered = byEvidence(key, list, dict, kanjiInfo);
     if (ordered.length > MAX_RECORDS) stats.capped += 1;
     entries.set(key, ordered.slice(0, MAX_RECORDS).map(({ f, rec }) => {
-      const { q, ...out } = rec;
+      const { q, o, ...out } = rec;
       if (saidWa(key, f)) { out.w = 1; stats.w += 1; }
       return out;
     }));
@@ -348,6 +302,7 @@ function buildEntries(jmdict, kanjidic, bands) {
       else stats.partial += 1;
     }
   }
+  Object.assign(stats, stampShipped(entries, kanjiInfo));
   return { entries, keys };
 }
 
@@ -411,13 +366,31 @@ function main() {
   const bands = bandsOf(counts);
   const { entries } = buildEntries(jmdict, kanjidic, bands);
 
-  const sorted = [...entries.keys()].sort();
+  const all = [...entries.keys()].sort();
+  const maxKey = all.reduce((m, k) => Math.max(m, k.length), 0);
   const licence = licenceBlock('edrdg', TOOL, {
     upstream: [upstream('jmdict'), upstream('kanjidic'), upstream('tatoebaJpn')],
-    inputs: [['tatoeba', 'q, a frequency band per key; no sentence ships']],
+    inputs: [['tatoeba', 'q, a frequency band per key, and which keys the core holds; no sentence ships']],
   });
-  const docs = pack(sorted, entries, licence);
 
+  // The core first: the keys texts ask for most, per byte (tools/lib/layout.mjs).
+  const coreHeader = Buffer.byteLength(serialize({
+    _licence: licence, format: 'yomu-dict-core/1', first: all[all.length - 1], last: all[all.length - 1], entries: {},
+  }));
+  const lineBytes = (k) => Buffer.byteLength(`${JSON.stringify(k)}: ${JSON.stringify(entries.get(k))},\n`);
+  const { core, sampled } = chooseCore(new Set(all), sentences, maxKey, lineBytes, MAX_BYTES - coreHeader);
+  const coreKeys = all.filter((k) => core.has(k));
+  const coreDoc = {
+    _licence: licence,
+    format: 'yomu-dict-core/1',
+    first: coreKeys[0],
+    last: coreKeys[coreKeys.length - 1],
+    entries: Object.fromEntries(coreKeys.map((k) => [k, entries.get(k)])),
+  };
+  const coreBytes = writeJson(path.join(OUT, 'core.json'), coreDoc);
+
+  const sorted = all.filter((k) => !core.has(k));
+  const docs = pack(sorted, entries, licence);
   const written = [];
   const shards = [];
   const sizes = [];
@@ -428,12 +401,15 @@ function main() {
     written.push(file);
     shards.push({ src: `data/dict/${name}`, first: doc.first });
   });
-  const maxKey = sorted.reduce((m, k) => Math.max(m, k.length), 0);
+  const filter = filterDoc(new Set(sorted), licence);
+  const filterBytes = writeJson(path.join(OUT, 'filter.json'), filter);
   const index = {
     _licence: licence,
-    format: 'yomu-dict-index/1',
-    keys: sorted.length,
+    format: 'yomu-dict-index/2',
+    keys: all.length,
     maxKey,
+    core: { src: 'data/dict/core.json', keys: coreKeys.length },
+    filter: { src: 'data/dict/filter.json' },
     shards,
   };
   const indexBytes = writeJson(path.join(OUT, 'index.json'), index, 'shards');
@@ -443,11 +419,14 @@ function main() {
   const records = [...entries.values()].reduce((a, r) => a + r.length, 0);
   const qs = [1, 2, 3, 4, 5].map((b) => [...bands.values()].filter((v) => v === b).length);
   const out = [
-    `keys ${sorted.length} (${keySet.size} common spellings), records ${records}, maxKey ${maxKey} UTF-16 units`,
-    `shards ${docs.length}: min ${fmtBytes(Math.min(...sizes))} (${Math.min(...sizes)} B), max ${fmtBytes(Math.max(...sizes))} (${Math.max(...sizes)} B), total ${fmtBytes(total)} (${total} B); index ${fmtBytes(indexBytes)}`,
+    `keys ${all.length} (${keySet.size} common spellings), records ${records}, maxKey ${maxKey} UTF-16 units`,
+    `core ${coreKeys.length} keys, ${fmtBytes(coreBytes)} (${coreBytes} B), chosen over ${sampled} sampled sentences`,
+    `range shards ${docs.length}: min ${fmtBytes(Math.min(...sizes))} (${Math.min(...sizes)} B), max ${fmtBytes(Math.max(...sizes))} (${Math.max(...sizes)} B), total ${fmtBytes(total)} (${total} B); index ${fmtBytes(indexBytes)}`,
+    `filter ${filter.n} keys, ${filter.m} bits, ${filter.k} hashes, ${fmtBytes(filterBytes)} (${filterBytes} B)`,
     `multi-kanji keys (first record): split ${stats.split}, partly split ${stats.partial}, * ${stats.star}`,
     `x ${stats.x} keys, w ${stats.w} records, keys over ${MAX_RECORDS} records ${stats.capped}`,
-    `q bands 1-5: ${qs.join(' / ')}; unranked ${sorted.length - [...bands.keys()].filter((k) => entries.has(k)).length}`,
+    `shipped for the page: o ${stats.o} records, b ${stats.b}, c ${stats.c}`,
+    `q bands 1-5: ${qs.join(' / ')}; unranked ${all.length - [...bands.keys()].filter((k) => entries.has(k)).length}`,
     `senses whose first gloss was passed over (dash or banned word) ${stats.skippedGloss}; records dropped for an empty g ${stats.emptyG}`,
     gone.length ? `removed stale shards: ${gone.join(' ')}` : 'no stale shards',
     `sentences counted ${sentences.length}; wall time ${((Date.now() - t0) / 1000).toFixed(1)} s`,

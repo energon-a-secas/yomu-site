@@ -13,7 +13,8 @@ import assert from 'node:assert/strict';
 import { performance } from 'node:perf_hooks';
 
 import { analyze, normalize } from '../js/analyze.js';
-import { run, cut, saidLine, diskDict } from './helpers/disk.mjs';
+import { createDict } from '../js/dict.js';
+import { run, cut, saidLine, diskDict, fetchJson, DATA } from './helpers/disk.mjs';
 
 const tok = (r, surface) => r.tokens.find((t) => t.surface === surface);
 const ids = (t) => (t ? t.grammar.map((g) => g.id) : []);
@@ -333,4 +334,68 @@ test('a long run of kanji with no kana is read in time that grows with its lengt
   assert.ok(ms < 5000, `${ms.toFixed(0)} ms for 2,000 kanji`);
   const r = await analyze(long, { dict: d });
   assert.equal(r.tokens.map((t) => t.surface).join(''), long);
+});
+
+// ── Loading ──────────────────────────────────────────────────────────────
+
+/** The sentences the shard count was measured on, and a 500-character paragraph written for this test. */
+const PARAGRAPH = '私の名前はマリアです。メキシコから来ました。今、東京の大学で日本語と経済を勉強しています。毎朝六時半に起きて、コーヒーを飲みながら新聞を読みます。それから電車で学校へ行きます。駅まで歩いて十分かかります。授業は九時から始まって、午後三時ごろ終わります。昼ご飯はたいてい友だちと学生食堂で食べます。安くておいしいですが、いつも込んでいます。授業のあとで、図書館で宿題をしたり、本を借りたりします。週末は時々アルバイトをします。駅の近くの喫茶店で働いていて、お客さんと話すのが楽しいです。先週の日曜日は雨が降っていたので、一日中うちにいました。部屋を掃除して、洗濯をして、夜は母に長い手紙を書きました。来月、国から両親が遊びに来ます。いっしょに京都や奈良へ行って、古いお寺を見るつもりです。両親は日本語がぜんぜんわからないので、わたしが通訳をしなければなりません。少し心配ですが、とても楽しみにしています。日本に来てから半年がたちました。最初は漢字が難しくて、ひらがなしか読めませんでしたが、今は簡単な小説も読めるようになりました。これからも毎日少しずつがんばりたいと思います。春には花見に行きたいです。';
+const MEASURED = [
+  '今日はいい天気ですね。', 'わたしはがくせいです。', 'すもももももももものうち', '日本語を勉強しています。',
+  'こんにちは、田中です。よろしくおねがいします。', '雨が降ったら、うちにいます。', 'きのうともだちとえいがをみました。',
+  '駅まで十分かかります。', PARAGRAPH,
+];
+
+/** A fresh dictionary that records every file it fetches, and every need() call. */
+function countingDict() {
+  const files = [];
+  const inner = createDict({ fetchJson: (path) => { files.push(path.slice(DATA.length + 1)); return fetchJson(path); }, base: `${DATA}/` });
+  const needs = [];
+  const d = { ...inner, need: (keys) => { needs.push(new Set(keys)); return inner.need(keys); }, get maxKey() { return inner.maxKey; } };
+  return { d, files, needs, inner };
+}
+
+const dictFiles = (files) => files.filter((f) => /^dict\/(core|w\d+)\.json$/.test(f));
+
+test('a text asks the dictionary once: no second pass for kanji spellings or readings (a kana sentence loaded up to 20 of 27 shards)', async () => {
+  for (const text of MEASURED.slice(0, 8)) {
+    const { d, needs } = countingDict();
+    await analyze(text, { dict: d });
+    assert.equal(needs.length, 1, `${text}: ${needs.length} rounds of dict.need`);
+  }
+  assert.equal(PARAGRAPH.length, 500);
+});
+
+test('the measured sentences fetch a median of five dictionary files or fewer (it was 16)', async () => {
+  const counts = [];
+  for (const text of MEASURED) {
+    const { d, files } = countingDict();
+    await analyze(text, { dict: d });
+    counts.push(dictFiles(files).length);
+  }
+  const sorted = [...counts].sort((a, b) => a - b);
+  assert.ok(sorted[(sorted.length - 1) >> 1] <= 5, `files per sentence: ${counts.join(' ')}`);
+  // a short sentence stays well under the 27 range shards it used to reach
+  for (const [k, n] of counts.slice(0, 8).entries()) assert.ok(n <= 10, `${MEASURED[k]}: ${n} files`);
+});
+
+test('a range shard is fetched only for a key it holds: the filter turns the rest away', async () => {
+  for (const text of ['わたしはがくせいです。', 'きのうともだちとえいがをみました。']) {
+    const { d, files, needs } = countingDict();
+    await analyze(text, { dict: d });
+    const asked = needs[0];
+    for (const f of dictFiles(files).filter((x) => x.startsWith('dict/w'))) {
+      const doc = await fetchJson(`${DATA}/${f}`);
+      assert.ok([...asked].some((k) => Object.hasOwn(doc.entries, k)), `${text}: ${f} holds none of its keys`);
+    }
+  }
+});
+
+test('the result does not depend on what an earlier text loaded', async () => {
+  const warm = diskDict();
+  await analyze(PARAGRAPH, { dict: warm });
+  for (const text of MEASURED.slice(0, 8)) {
+    const cold = JSON.stringify(await analyze(text, { dict: diskDict() }));
+    assert.equal(JSON.stringify(await analyze(text, { dict: warm })), cold, text);
+  }
 });

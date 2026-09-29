@@ -32,8 +32,10 @@ const read = (rel) => JSON.parse(readFileSync(join(SITE, rel), 'utf8'));
 
 const dictIndex = read('data/dict/index.json');
 const dictShards = dictIndex.shards.map((s) => ({ ...s, doc: read(s.src) }));
+const dictCore = read(dictIndex.core.src);
 const dict = new Map();
 for (const s of dictShards) for (const [k, v] of Object.entries(s.doc.entries)) dict.set(k, v);
+for (const [k, v] of Object.entries(dictCore.entries)) dict.set(k, v);
 
 const kanjiIndex = read('data/kanji/index.json');
 const kanjiShards = kanjiIndex.shards.map((s) => ({ ...s, doc: read(s.src) }));
@@ -61,11 +63,46 @@ function runs(key) {
 
 // ── The dictionary index and the shard rule ──────────────────────────────
 
-test('the dictionary index counts what the shards hold', () => {
-  assert.equal(dictIndex.format, 'yomu-dict-index/1');
+test('the dictionary index counts what the core and the shards hold', () => {
+  assert.equal(dictIndex.format, 'yomu-dict-index/2');
   assert.equal(dictIndex.keys, dict.size);
   assert.equal(dictIndex.keys, 38415);
   assert.equal(dictIndex.maxKey, Math.max(...[...dict.keys()].map((k) => k.length)));
+  assert.equal(dictIndex.core.keys, Object.keys(dictCore.entries).length);
+  const ranged = dictShards.reduce((n, s) => n + Object.keys(s.doc.entries).length, 0);
+  assert.equal(ranged + dictIndex.core.keys, dict.size, 'a key is in the core and a range shard both');
+});
+
+test('the core is under the cap, in key order, and holds the words every text asks for', () => {
+  assert.equal(dictCore.format, 'yomu-dict-core/1');
+  assert.ok(statSync(join(SITE, dictIndex.core.src)).size <= CAP);
+  const keys = Object.keys(dictCore.entries);
+  for (let i = 1; i < keys.length; i += 1) assert.ok(keys[i - 1] < keys[i], `core at ${keys[i]}`);
+  for (const k of ['は', 'が', 'です', 'ます', 'する', 'いる', 'ある', 'の', 'に']) assert.ok(keys.includes(k), `${k} is not in the core`);
+});
+
+test('the key filter lets every range key through and turns most absent keys away', async () => {
+  const { readFilter } = await import('../js/bloom.js');
+  const doc = read(dictIndex.filter.src);
+  assert.equal(doc.format, 'yomu-dict-filter/1');
+  assert.ok(statSync(join(SITE, dictIndex.filter.src)).size <= CAP);
+  const bloom = readFilter(doc);
+  for (const s of dictShards) for (const key of Object.keys(s.doc.entries)) assert.ok(bloom.has(key), key);
+  // strings that are no key: the filter's promise is one false "maybe" in
+  // about 2,000 at 16 bits a key (docs/ANALYZER.md); 1 in 500 is the alarm
+  let yes = 0;
+  let tried = 0;
+  for (const a of 'あいうえおかきくけこさしすせそたちつてとなにぬねの') {
+    for (const b of 'はひふへほまみむめもやゆよらりるれろわをん') {
+      for (const c of 'がぎぐげござじずぜぞ') {
+        const k = a + b + c + b;
+        if (dict.has(k)) continue;
+        tried += 1;
+        if (bloom.has(k)) yes += 1;
+      }
+    }
+  }
+  assert.ok(tried > 5000 && yes / tried < 1 / 500, `${yes} of ${tried} absent keys got a maybe`);
 });
 
 test('every shard is under the cap and in key order', () => {

@@ -2,25 +2,26 @@
 //
 //   normalize ─▶ pieces (Japanese runs, latin, numbers, punctuation, space)
 //             ─▶ dict.need(every key the runs might look up) + kanji info
-//             ─▶ dict.need(the readings of keys with several records)
 //             ─▶ segmentRun per run ─▶ enrich each token ─▶ sounds, grammar
 //
-// It is async only because shards load on demand. Given the same text and the
-// same data it returns the same tokens, and it never touches the DOM, so
-// `npm test` runs it under node with the shards read from disk.
+// It is async only because shards load on demand, and it loads them once:
+// what a key needs to know about another key (the band of a kana word's
+// kanji spelling, where that spelling cuts it, how far down its reading
+// lists a kanji spelling) is shipped on the record, so no second fetch
+// follows the first. Given the same text and the same data it returns the
+// same tokens, and it never touches the DOM, so `npm test` runs it under
+// node with the shards read from disk.
 //
 // `analyzeCore` is everything except the two annotation passes owned by
 // sounds.js and grammar.js; `analyze` is the entry point the page calls.
 
 import { beats, said, spelled, toKata, isKanji, isJapanese, isAllKana } from './kana.js';
 import { keysForRun, segmentRun } from './lattice.js';
-import { homographKeys } from './costs.js';
 import { align, splitByKanji } from './furigana.js';
 import { createDict } from './dict.js';
 import { detectSounds } from './sounds.js';
 import { annotateGrammar } from './grammar.js';
 import { NAME_VARIANTS } from './names.js';
-import { spellingKeys, spellingKanji } from './spellings.js';
 
 /** The kinds that are Japanese words, as opposed to what sits between them. */
 export const JAPANESE_KINDS = Object.freeze(new Set([
@@ -278,14 +279,10 @@ export async function analyzeCore(input, { dict } = {}) {
   // A variant a name may use (𠮷) is read from the character it varies.
   const chars = [...new Set([...text].filter((ch) => isKanji(ch)).flatMap((ch) => (NAME_VARIANTS[ch] ? [ch, NAME_VARIANTS[ch]] : [ch])))];
   const [, kanjiInfo] = await Promise.all([
-    dict.need(keys).then(() => dict.need(homographKeys(keys, dict))),
+    dict.need(keys),
     chars.length ? dict.kanji(chars) : Promise.resolve(new Map()),
   ]);
 
-  // Each run is read twice: once to find its kana words, and again once the
-  // kanji spellings of those words are loaded, so a kana homograph is ranked
-  // by its spelling (すき is 好き, not 隙) and a kana compound is cut where
-  // its spelling is (そのうち is その|内). spellings.js says why.
   const runOpts = parts.map((p, k) => {
     if (p.type !== 'jp') return null;
     const prev = parts[k - 1];
@@ -300,16 +297,10 @@ export async function analyzeCore(input, { dict } = {}) {
       before: !!(next && next.type === 'latin'),
     };
   });
-  const first = parts.flatMap((p, k) => (runOpts[k] ? segmentRun(p.text, dict, runOpts[k]) : []));
-  const spelled = spellingKeys(first, dict);
-  const stems = spellingKanji(spelled.keys);
-  const [, stemInfo] = await Promise.all([dict.need(spelled.keys), stems.length ? dict.kanji(stems) : new Map()]);
-  spelled.kanji = stemInfo;
-
   const tokens = [];
   parts.forEach((p, k) => {
     if (!runOpts[k]) { tokens.push(plainToken(p)); return; }
-    for (const t of segmentRun(p.text, dict, { ...runOpts[k], spelled })) {
+    for (const t of segmentRun(p.text, dict, runOpts[k])) {
       t.start += p.start;
       t.end += p.start;
       enrich(t);

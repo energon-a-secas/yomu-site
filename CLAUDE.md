@@ -44,11 +44,16 @@ tokens) are read wa, e, o; the fossil は of こんにちは rides on the record
 flag. Devoicing is a note in Genki's s(u)kides(u) notation, never a change to
 the romaji line.
 
-**A key resolves to the last shard whose `first` is <= the key, in plain JS
-string order.** The builder and `js/dict.js` must agree on that order (UTF-16
-code units, not locale). A text fetches only the shards its substrings and
-deinflected bases fall in, which is several files for a normal sentence and
-all 27 for a long one; they are cached after the first read.
+**A key is in the core or in one range shard, and a range shard is fetched
+only when the filter lets one of the text's keys through.** A key outside
+`data/dict/core.json` resolves to the last range shard whose `first` is <= the
+key, in plain JS string order; the builder and `js/dict.js` must agree on that
+order (UTF-16 code units, not locale), and both hash with `js/bloom.js`. A
+sentence loads a median of three dictionary files (it was eighteen), a long
+paragraph most of them. The analyzer calls `dict.need` once: anything a key
+needs from another key (`o`, `b`, `c`) is on its record, built by
+`tools/lib/prices.mjs`. A cost that reads a second key with `dict.get` must be
+shipped the same way, or it reads whatever an earlier paste happened to load.
 
 **Every JSON file is at most 140,000 bytes.** `tools/check-data.mjs` fails on
 141 KB. The builders pack contiguous key ranges up to that size.

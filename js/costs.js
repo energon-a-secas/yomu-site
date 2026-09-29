@@ -168,7 +168,7 @@ export function homographCost(key, rec, dict) {
   if (!recs || recs.length < 2 || !recs.includes(rec)) return 0;
   // Relative to the key's own best record, so a key with several records
   // never loses to a different key for having them.
-  const raw = recs.map((r) => homographRaw(key, r, recs, dict));
+  const raw = recs.map((r) => homographRaw(key, r, recs));
   return raw[recs.indexOf(rec)] - Math.min(...raw);
 }
 
@@ -193,7 +193,7 @@ const AFFIX = new Set(['pref', 'suf', 'n-pref', 'n-suf', 'ctr']);
 const SUFFIX_TAGS = new Set(['suf', 'n-suf', 'ctr']);
 const tagsOf = (r) => String(r.p || '').split(' ');
 
-function homographRaw(key, rec, recs, dict) {
+function homographRaw(key, rec, recs) {
   const tags = tagsOf(rec);
   let cost = rec.u ? COST.homographKanaUsual : 0;
   if (TEXTBOOK[key] && rec.r && rec.r[0] !== TEXTBOOK[key]) cost += COST.homographSpelling;
@@ -202,12 +202,10 @@ function homographRaw(key, rec, recs, dict) {
   if (verb(rec) && tags.includes('suf') && recs.some((r) => r !== rec && verb(r) && !tagsOf(r).includes('suf'))) {
     cost += COST.homographAffix;
   }
-  const kana = rec.r && rec.r.length ? dict.get(rec.r[0]) : null;
-  if (kana) {
-    const places = kana.map((x) => (x.k || []).indexOf(key)).filter((n) => n >= 0);
-    cost += COST.homographSpelling * (places.length ? Math.min(...places) : 3);
-  }
-  return cost;
+  // How far down its reading's kana records this spelling sits, which the
+  // builder works out and ships as `o` (tools/lib/prices.mjs), so the
+  // reading's shard is never fetched to find it out.
+  return cost + COST.homographSpelling * (rec.o || 0);
 }
 
 /**
@@ -223,16 +221,6 @@ export function bandOf(key, rec, dict) {
   if (PARTICLE.has(key)) return 0;
   const recs = (dict && dict.get(key)) || [];
   return recs.some((r) => r !== rec && isInterjection(r)) ? 0 : rec.q;
-}
-
-/** The readings homographCost looks up, for dict.need before segmenting. */
-export function homographKeys(keys, dict) {
-  const out = new Set();
-  for (const k of keys) {
-    const recs = hasKanji(k) ? dict.get(k) : null;
-    if (recs && recs.length > 1) for (const r of recs) if (r.r && r.r[0]) out.add(r.r[0]);
-  }
-  return out;
 }
 
 /** The class a dictionary record connects as. */

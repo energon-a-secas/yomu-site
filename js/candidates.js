@@ -65,7 +65,7 @@ function wordNode(s, i, j, rec, key, chain, cuts, whole, env) {
   const cls = chainClass(chain, classOf(rec.p));
   if (refused(s, key, rec, cls, i === 0 && !env.after, env.dict)) return null;
   let cost = COST.word + qCost(bandOf(key, rec, env.dict)) + COST.step * chain.length
-    + homographCost(key, rec, env.dict) + kanaHomographCost(key, rec, env.dict, env.spelled);
+    + homographCost(key, rec, env.dict) + kanaHomographCost(key, rec, env.dict);
   const kanaSpelled = !!(rec.k && rec.k.length && !rec.u && !hasKanji(s) && !isKatakana(s[0]));
   if (kanaSpelled) cost += COST.kanaForKanji;
   // Not for a prefix: お and ご can only lead a noun (costs.js), and as

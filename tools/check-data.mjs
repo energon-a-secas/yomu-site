@@ -20,6 +20,8 @@
  *     is the rule the page uses to pick a shard (docs/ANALYZER.md)
  *   - an index that does not list every shard file, or lists one that is
  *     not there, or disagrees with a shard about its first key or characters
+ *   - a key in both the dictionary core and a range shard, or a range key
+ *     the key filter would call absent (the page would never fetch it)
  *   - a string anywhere, object keys included, carrying U+2014
  *   - a dictionary record with an empty `g`
  *
@@ -30,6 +32,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { walkStrings, EM_DASH } from './lib/licence.mjs';
 import { MAX_BYTES, SITE, fmtBytes } from './lib/emit.mjs';
+import { readFilter } from '../js/bloom.js';
 
 const DATA = process.argv[2] ? path.resolve(process.argv[2]) : path.join(SITE, 'data');
 // Paths are reported, and index `src` values resolved, relative to the
@@ -69,7 +72,7 @@ function checkLicence(rel, block, at = '_licence') {
 
 // ── Per-format checks ─────────────────────────────────────────────────────
 
-const RECORD_FIELDS = new Set(['r', 'g', 'p', 'f', 'k', 'u', 'x', 'q', 'w']);
+const RECORD_FIELDS = new Set(['r', 'g', 'p', 'f', 'k', 'u', 'x', 'q', 'w', 'o', 'b', 'c']);
 
 function checkDictShard(rel, doc) {
   const keys = Object.keys(doc.entries || {});
@@ -109,7 +112,10 @@ function checkKanjiShard(rel, doc) {
 // is authored by hand and has its own test (tests/library.test.mjs).
 const FORMATS = {
   'yomu-dict-index/1': null,
+  'yomu-dict-index/2': null,
   'yomu-dict/1': checkDictShard,
+  'yomu-dict-core/1': checkDictShard,
+  'yomu-dict-filter/1': null,
   'yomu-kanji-index/1': null,
   'yomu-kanji/1': checkKanjiShard,
   'yomu-library/1': null,
@@ -146,6 +152,35 @@ function checkDictIndex(docs) {
       }
     }
   });
+  // The core (yomu-dict-index/2) holds keys no range shard may hold, and
+  // the filter must let every range key through: a key it called absent
+  // would never be fetched and would read as unknown.
+  const coreDoc = index.core && docs.get(index.core.src);
+  if (index.core && !coreDoc) fail(rel, `lists the core ${index.core.src}, which is not there`);
+  if (coreDoc) {
+    const rangeKeys = new Set(listed.flatMap((s) => Object.keys((docs.get(s.src) || {}).entries || {})));
+    const coreKeys = Object.keys(coreDoc.entries || {});
+    for (const key of coreKeys) {
+      total += 1;
+      longest = Math.max(longest, key.length);
+      if (rangeKeys.has(key)) fail(index.core.src, `${JSON.stringify(key)} is in a range shard as well`);
+    }
+    if (index.core.keys !== coreKeys.length) fail(rel, `says the core holds ${index.core.keys} keys, it holds ${coreKeys.length}`);
+  }
+  if (index.filter) {
+    const doc = docs.get(index.filter.src);
+    let bloom = null;
+    try { bloom = doc && readFilter(doc); } catch (err) { fail(index.filter.src, err.message); }
+    if (!doc) fail(rel, `lists the filter ${index.filter.src}, which is not there`);
+    let missed = 0;
+    if (bloom) {
+      for (const s of listed) {
+        for (const key of Object.keys((docs.get(s.src) || {}).entries || {})) {
+          if (!bloom.has(key)) { missed += 1; if (missed <= 3) fail(index.filter.src, `calls ${JSON.stringify(key)} absent`); }
+        }
+      }
+    }
+  }
   if (index.keys !== total) fail(rel, `keys is ${index.keys}, the shards hold ${total}`);
   if (index.maxKey !== longest) fail(rel, `maxKey is ${index.maxKey}, the longest key is ${longest}`);
 }

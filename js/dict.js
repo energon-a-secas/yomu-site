@@ -3,7 +3,14 @@
 // docs/ANALYZER.md, "Data formats", is the contract. The whole dictionary is
 // tens of thousands of keys; a sentence needs a handful of shards. So nothing
 // is fetched until the lattice has said which keys it might look up, and then
-// only the shards those keys fall in, all at once.
+// only the shards that hold one of them, all at once.
+//
+// Three files decide which: the core (data/dict/core.json), the keys texts
+// ask for most, which every text loads; the filter (data/dict/filter.json),
+// which says a key outside the core is surely absent or may be present; and
+// the range shards, fetched only for a key the filter lets through. A text of
+// twenty kana asks about two hundred substrings, and before the filter each
+// one fetched the shard it would sort into, which was most of them.
 //
 // This module knows nothing about Japanese. It maps a string to the last shard
 // whose `first` is <= that string, in plain JS string order (UTF-16 code
@@ -14,6 +21,8 @@
 // It runs in the page and under node: the caller hands in `fetchJson`, and the
 // paths it is asked for are the paths the index names, resolved against
 // `base`.
+
+import { readFilter } from './bloom.js';
 
 /**
  * Where a published path lands. `base` is the data/ directory, relative to the
@@ -69,6 +78,10 @@ export function createDict({ fetchJson, base = 'data/' } = {}) {
   let firsts = [];           // index.shards[].first, in order
   const shards = new Map();  // shard number -> entries object, once loaded
   const pending = new Map(); // shard number -> promise, while loading
+  let core = null;           // the core's entries, once loaded
+  let coring = null;         // its promise
+  let filter = null;         // { has(key) }, once loaded
+  let filtering = null;      // its promise
 
   let kanjiIndex = null;
   let kanjiIndexing = null;
@@ -103,6 +116,39 @@ export function createDict({ fetchJson, base = 'data/' } = {}) {
     return lastAtMost(firsts, String(key));
   }
 
+  /**
+   * One of the two files every text needs once the index is in: the core
+   * and the filter. An index without them (yomu-dict-index/1) has neither,
+   * and every key's range shard is fetched, as before.
+   */
+  function loadExtra(what, ref, read) {
+    const path = resolve(ref.src);
+    return Promise.resolve()
+      .then(() => fetchJson(path))
+      .then(read)
+      .catch((e) => { throw loadError(what, path, e); });
+  }
+
+  function loadCore() {
+    if (core || !index.core) return Promise.resolve();
+    if (!coring) {
+      coring = loadExtra('The dictionary core', index.core, (doc) => {
+        if (!doc || typeof doc.entries !== 'object' || doc.entries === null) throw new Error('it has no entries');
+        core = doc.entries;
+      }).catch((e) => { coring = null; throw e; });
+    }
+    return coring;
+  }
+
+  function loadFilter() {
+    if (filter || !index.filter) return Promise.resolve();
+    if (!filtering) {
+      filtering = loadExtra('The key filter', index.filter, (doc) => { filter = readFilter(doc); })
+        .catch((e) => { filtering = null; throw e; });
+    }
+    return filtering;
+  }
+
   function loadShard(n) {
     if (shards.has(n)) return Promise.resolve();
     if (pending.has(n)) return pending.get(n);
@@ -132,12 +178,17 @@ export function createDict({ fetchJson, base = 'data/' } = {}) {
    */
   async function need(keys) {
     await loadIndex();
+    // The core is not needed to decide which range shards to fetch (the
+    // filter holds only keys outside it), so it loads alongside them.
+    const coreLoad = loadCore();
+    await loadFilter();
     const wanted = new Set();
     for (const k of keys || []) {
+      if (filter && !filter.has(String(k))) continue;
       const n = shardFor(k);
       if (n >= 0 && !shards.has(n)) wanted.add(n);
     }
-    await Promise.all([...wanted].map(loadShard));
+    await Promise.all([coreLoad, ...[...wanted].map(loadShard)]);
   }
 
   /**
@@ -147,6 +198,7 @@ export function createDict({ fetchJson, base = 'data/' } = {}) {
    */
   function get(key) {
     if (!index) return undefined;
+    if (core && Object.prototype.hasOwnProperty.call(core, key)) return core[key];
     const n = shardFor(key);
     const entries = n >= 0 ? shards.get(n) : undefined;
     if (!entries || !Object.prototype.hasOwnProperty.call(entries, key)) return undefined;
@@ -240,8 +292,8 @@ export function createDict({ fetchJson, base = 'data/' } = {}) {
     kanji,
     /** Longest key in the dictionary; the lattice never looks further. */
     get maxKey() { return index && index.maxKey ? index.maxKey : 12; },
-    /** How many shards are loaded, for tests and the performance note. */
-    get loaded() { return shards.size; },
+    /** How many dictionary files (the core and range shards) are loaded, for tests and the performance note. */
+    get loaded() { return shards.size + (core ? 1 : 0); },
     shardFor,
   });
 }

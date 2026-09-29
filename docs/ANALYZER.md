@@ -16,20 +16,23 @@ text ──normalize──▶ lines ──runs──▶ [jp run | other]
                                       │
                            candidates(run)  ◀── deinflect(substring)
                                       │
-                           dict.need(keys) ──fetch shards──▶ dict.get(key)
-                           dict.need(readings of keys with several records)
+                           dict.need(keys) ──index, filter, core──▶ range shards
+                                      │     the filter lets through ──▶ dict.get(key)
                                       │
-                           lattice(run, edges) ──first path──▶ kana words on it
-                                      │
-                           dict.need(kanji spellings of those kana words)
-                                      │
-                           lattice(run, edges, spelled) ──best path──▶ tokens
+                           lattice(run, edges) ──best path──▶ tokens
                                       │
                            enrich(token): reading, furigana, morae,
                                           romaji said/spelled, sounds[], grammar[]
                                       │
                            kanjiList(tokens) ◀── kanji shards
 ```
+
+One call to `dict.need`, one path. What a key needs to know about another
+key is shipped on its record by the builder (`o`, `b`, `c` below), so the
+analyzer never fetches a second key to price the first. Until 2026-09-29 it
+segmented each run twice, fetching the kanji spellings of the kana words on
+the first path and the readings of kanji keys with several records, and a
+kana sentence loaded up to 20 of the 27 shards.
 
 `analyze(text, { lang })` in `js/analyze.js` is the only entry point the view
 calls. It returns `{ text, tokens, kanji, unknown }`: `text` is the normalized
@@ -50,10 +53,11 @@ same text and the same data give the same tokens.
 |---|---|---|
 | `kana.js` | script tests, hiragana/katakana folding, morae, romaji (spelled and said) | nothing |
 | `deinflect.js` | the rule table and `deinflect(surface)` | nothing |
-| `dict.js` | the shard index, fetching, `need(keys)`, `get(key)`, kanji info | nothing (fetch only) |
+| `dict.js` | the shard index, the core and the key filter, fetching, `need(keys)`, `get(key)`, kanji info | `bloom.js` |
+| `bloom.js` | the key filter: its hash, reading it, and building it (the builder imports this file) | nothing |
 | `lattice.js` | the best path through a run, and the tokens built from it | `kana.js`, `deinflect.js`, `costs.js`, `names.js`, `candidates.js`, `spellings.js` |
 | `candidates.js` | every node that could start at one position of a run, with its own cost | `kana.js`, `deinflect.js`, `numbers.js`, `costs.js`, `names.js`, `key-rules.js`, `spellings.js` |
-| `spellings.js` | what a kana word learns from its kanji spelling: the rank of kana homographs (すき is 好き before 隙) and the morpheme cuts of a kana compound (そのうち is その\|内) | `kana.js`, `costs.js`, `furigana.js` |
+| `spellings.js` | what a kana word learns from its kanji spelling, read off the record: the rank of kana homographs (すき is 好き before 隙, `b`) and the morpheme cuts of a kana compound (そのうち is その\|内, `c`) | `kana.js`, `costs.js` |
 | `costs.js` | the closed classes (particles, copula), every cost, connection costs, homograph ranking | `kana.js` |
 | `key-rules.js` | dictionary keys the lattice refuses (ですか, ませんか, 雨が降る, になると) | `kana.js`, `costs.js` |
 | `names.js` | which kanji runs are names, and a per-kanji guess at their reading | `kana.js`, `deinflect.js`, `numbers.js` |
@@ -123,16 +127,42 @@ Built by hand-run scripts under `tools/`, committed, never fetched from an
 upstream by the page. Every JSON file carries a `_licence` block and stays
 under 140 KB.
 
-`data/dict/index.json`, format `yomu-dict-index/1`:
+`data/dict/index.json`, format `yomu-dict-index/2`:
 
 ```json
-{ "_licence": {}, "format": "yomu-dict-index/1",
-  "keys": 38415, "maxKey": 12,
-  "shards": [ { "src": "data/dict/w00.json", "first": "ぁ" } ] }
+{ "_licence": {}, "format": "yomu-dict-index/2",
+  "keys": 38415, "maxKey": 22,
+  "core": { "src": "data/dict/core.json", "keys": 1192 },
+  "filter": { "src": "data/dict/filter.json" },
+  "shards": [ { "src": "data/dict/w00.json", "first": "〇" } ] }
 ```
 
-A key belongs to the last shard whose `first` is `<=` the key, compared with
-plain JS string order (UTF-16 code units) in both the builder and the page.
+A key is in the core or in exactly one range shard, never both. The core
+(`yomu-dict-core/1`, the shard shape below) holds the keys texts ask the
+dictionary for most, per byte: the builder cuts every tenth corpus sentence
+into the keys `candidates.js` would look up and fills 140 KB with the keys the
+most sentences needed (`tools/lib/layout.mjs`). Every text loads it. A key
+outside it belongs to the last range shard whose `first` is `<=` the key,
+compared with plain JS string order (UTF-16 code units) in both the builder
+and the page, and that shard is fetched only when the filter says the key may
+be there.
+
+`data/dict/filter.json`, format `yomu-dict-filter/1`, is a Bloom filter over
+every range key: `{ n, m, k, bits }`, `n` keys, `m` bits, `k` hashes, the bits
+in base64 (bit i at byte i >> 3, mask 1 << (i & 7)), hashed as `js/bloom.js`
+hashes (FNV-1a over UTF-16 code units, two offsets, double hashing). It never
+calls a present key absent (`tools/check-data.mjs` tests every range key) and
+calls about one absent key in 2,000 present. Its size was measured, over 4,979
+corpus sentences the core was not chosen from:
+
+| bits per key | filter | dictionary files per text: median, mean, p90 |
+|---:|---:|---|
+| before 2026-09-29: no core, no filter, two passes | none | 18, 17.43, 22 |
+| 8 | 51.0 KB | 6, 5.84, 9 |
+| 12 | 75.8 KB | 4, 3.82, 6 |
+| 14 | 88.2 KB | 3, 3.51, 6 |
+| **16** | **100.6 KB** | **3, 3.41, 6** |
+| 20 | 125.4 KB | 3, 3.35, 5 |
 
 `data/dict/wNN.json`, format `yomu-dict/1`:
 
@@ -154,6 +184,12 @@ plain JS string order (UTF-16 code units) in both the builder and the page.
 | `u` | 1 when the entry is usually written in kana |
 | `x` | 1 when the key is another key plus a trailing particle (今日は, 実は, 一緒に): the lattice prefers the split unless the key is the whole run |
 | `q` | frequency band from Tatoeba, 1 (most frequent) to 5; absent means unranked |
+| `o` | on a record of a kanji key with several records: how far down the kanji lists of its first reading's records this spelling sits, 3 when that reading lists it nowhere (本 is the ほん record's first spelling, the もと record's second); absent means 0 |
+| `b` | on a record of a kana key with several records: the band of its kanji spelling, taken two worse where that band is earned by another reading (入る by はいる, 五 by ご) or by a conjugated stem (動 by 動いて); absent means the key's own band two worse |
+| `c` | on a record of a hiragana key: offsets where its kanji spelling says one morpheme ends and the next begins, only where that splits a pair the said line would merge (そのうち is その\|内, `[2]`) |
+
+`o`, `b` and `c` are what the page used to fetch other shards to learn;
+`tools/lib/prices.mjs` works them out once, from the records it ships.
 
 A key holds at most six records. A kana key's records are different words,
 so before the cap they are ordered by the corpus: common spellings first,
