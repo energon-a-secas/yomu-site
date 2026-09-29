@@ -1,0 +1,176 @@
+{
+  "_licence": {
+    "text": "The two sentences and every token field were written by hand for Yomu's tests, following the token shape in docs/ANALYZER.md. Sound types and grammar ids use the names js/sounds.js and js/grammar.js emit, checked against them. Public domain.",
+    "kanji": "Readings and meanings in the kanji list are facts of the kind KANJIDIC records (EDRDG, CC BY-SA 4.0), typed here from general knowledge, not copied from a file.",
+    "screen": "Dictionary: JMdict and KANJIDIC, EDRDG, CC BY-SA 4.0."
+  },
+  "format": "yomu-analysis-sample/1",
+  "note": "Covers particles (は へ と を), long vowels in kanji and katakana (学校, 先生, コーヒー), small tsu (学校), furigana over single kanji and pairs, two conjugated verbs with deinflection chains, devoicing, a newline and sentence punctuation.",
+  "text": "私は学校へ行きました。\n先生とコーヒーを飲んでいます。",
+  "tokens": [
+    {
+      "i": 0, "kind": "word", "surface": "私", "start": 0, "end": 1, "base": "私",
+      "reading": "わたし",
+      "furigana": [{ "text": "私", "ruby": "わたし" }],
+      "morae": ["わ", "た", "し"],
+      "romaji": { "said": "watashi", "spelled": "wa-ta-shi" },
+      "entry": { "r": ["わたし", "わたくし"], "g": ["I", "me"], "p": "pn", "q": 1 },
+      "alts": 0, "chain": [], "sounds": [], "grammar": [],
+      "kanji": ["私"], "confidence": "dict"
+    },
+    {
+      "i": 1, "kind": "particle", "surface": "は", "start": 1, "end": 2, "base": "は",
+      "reading": "は",
+      "furigana": [{ "text": "は" }],
+      "morae": ["は"],
+      "romaji": { "said": "wa", "spelled": "ha" },
+      "entry": { "g": ["topic marker"], "p": "prt", "q": 1 },
+      "alts": 0, "chain": [],
+      "sounds": [{ "type": "particle-wa", "at": [0, 1], "detail": "wa" }],
+      "grammar": [{ "id": "topic-wa" }],
+      "kanji": [], "confidence": "dict"
+    },
+    {
+      "i": 2, "kind": "word", "surface": "学校", "start": 2, "end": 4, "base": "学校",
+      "reading": "がっこう",
+      "furigana": [{ "text": "学", "ruby": "がっ" }, { "text": "校", "ruby": "こう" }],
+      "morae": ["が", "っ", "こ", "う"],
+      "romaji": { "said": "gakkoo", "spelled": "ga-k-ko-u" },
+      "entry": { "r": ["がっこう"], "g": ["school"], "p": "n", "f": "がっ|こう", "q": 1 },
+      "alts": 0, "chain": [],
+      "sounds": [
+        { "type": "dakuten", "at": [0, 1], "detail": "か" },
+        { "type": "small-tsu", "at": [1, 2], "detail": "k" },
+        { "type": "long-vowel", "at": [2, 4], "detail": "oo", "mark": "う" }
+      ],
+      "grammar": [],
+      "kanji": ["学", "校"], "confidence": "dict"
+    },
+    {
+      "i": 3, "kind": "particle", "surface": "へ", "start": 4, "end": 5, "base": "へ",
+      "reading": "へ",
+      "furigana": [{ "text": "へ" }],
+      "morae": ["へ"],
+      "romaji": { "said": "e", "spelled": "he" },
+      "entry": { "g": ["toward", "to (a place)"], "p": "prt", "q": 1 },
+      "alts": 0, "chain": [],
+      "sounds": [{ "type": "particle-e", "at": [0, 1], "detail": "e" }],
+      "grammar": [{ "id": "direction-e" }],
+      "kanji": [], "confidence": "dict"
+    },
+    {
+      "i": 4, "kind": "inflected", "surface": "行きました", "start": 5, "end": 10, "base": "行く",
+      "reading": "いきました",
+      "furigana": [{ "text": "行", "ruby": "い" }, { "text": "きました" }],
+      "morae": ["い", "き", "ま", "し", "た"],
+      "romaji": { "said": "ikimashita", "spelled": "i-ki-ma-shi-ta" },
+      "entry": { "r": ["いく", "ゆく"], "g": ["to go", "to move (towards)", "to head (towards)"], "p": "v5k-s vi", "q": 1 },
+      "alts": 0,
+      "chain": [{ "rule": "masu-past", "label": "polite past" }],
+      "sounds": [{ "type": "devoiced", "at": [3, 4], "detail": "ikimash(i)ta" }],
+      "grammar": [{ "id": "polite-past" }],
+      "kanji": ["行"], "confidence": "rule"
+    },
+    {
+      "i": 5, "kind": "punct", "surface": "。", "start": 10, "end": 11, "base": "。",
+      "reading": "", "furigana": [{ "text": "。" }], "morae": [],
+      "romaji": { "said": "", "spelled": "" },
+      "entry": null, "alts": 0, "chain": [], "sounds": [], "grammar": [], "kanji": [], "confidence": "dict"
+    },
+    {
+      "i": 6, "kind": "newline", "surface": "\n", "start": 11, "end": 12, "base": "\n",
+      "reading": "", "furigana": [{ "text": "\n" }], "morae": [],
+      "romaji": { "said": "", "spelled": "" },
+      "entry": null, "alts": 0, "chain": [], "sounds": [], "grammar": [], "kanji": [], "confidence": "dict"
+    },
+    {
+      "i": 7, "kind": "word", "surface": "先生", "start": 12, "end": 14, "base": "先生",
+      "reading": "せんせい",
+      "furigana": [{ "text": "先", "ruby": "せん" }, { "text": "生", "ruby": "せい" }],
+      "morae": ["せ", "ん", "せ", "い"],
+      "romaji": { "said": "sensee", "spelled": "se-n-se-i" },
+      "entry": { "r": ["せんせい"], "g": ["teacher", "master", "doctor"], "p": "n", "f": "せん|せい", "q": 1 },
+      "alts": 0, "chain": [],
+      "sounds": [
+        { "type": "long-vowel", "at": [2, 4], "detail": "ee", "mark": "い" }
+      ],
+      "grammar": [],
+      "kanji": ["先", "生"], "confidence": "dict"
+    },
+    {
+      "i": 8, "kind": "particle", "surface": "と", "start": 14, "end": 15, "base": "と",
+      "reading": "と",
+      "furigana": [{ "text": "と" }],
+      "morae": ["と"],
+      "romaji": { "said": "to", "spelled": "to" },
+      "entry": { "g": ["with", "and"], "p": "prt", "q": 1 },
+      "alts": 0, "chain": [], "sounds": [],
+      "grammar": [{ "id": "to-and" }],
+      "kanji": [], "confidence": "dict"
+    },
+    {
+      "i": 9, "kind": "katakana", "surface": "コーヒー", "start": 15, "end": 19, "base": "コーヒー",
+      "reading": "こーひー",
+      "furigana": [{ "text": "コーヒー" }],
+      "morae": ["こ", "ー", "ひ", "ー"],
+      "romaji": { "said": "koohii", "spelled": "ko-o-hi-i" },
+      "entry": { "g": ["coffee"], "p": "n", "q": 1 },
+      "alts": 0, "chain": [],
+      "sounds": [
+        { "type": "long-vowel", "at": [0, 2], "detail": "oo", "mark": "ー" },
+        { "type": "bar", "at": [1, 2], "detail": "o" },
+        { "type": "long-vowel", "at": [2, 4], "detail": "ii", "mark": "ー" },
+        { "type": "bar", "at": [3, 4], "detail": "i" }
+      ],
+      "grammar": [],
+      "kanji": [], "confidence": "dict"
+    },
+    {
+      "i": 10, "kind": "particle", "surface": "を", "start": 19, "end": 20, "base": "を",
+      "reading": "を",
+      "furigana": [{ "text": "を" }],
+      "morae": ["を"],
+      "romaji": { "said": "o", "spelled": "wo" },
+      "entry": { "g": ["object marker"], "p": "prt", "q": 1 },
+      "alts": 0, "chain": [],
+      "sounds": [{ "type": "particle-o", "at": [0, 1], "detail": "o" }],
+      "grammar": [{ "id": "object-o" }],
+      "kanji": [], "confidence": "dict"
+    },
+    {
+      "i": 11, "kind": "inflected", "surface": "飲んでいます", "start": 20, "end": 26, "base": "飲む",
+      "reading": "のんでいます",
+      "furigana": [{ "text": "飲", "ruby": "の" }, { "text": "んでいます" }],
+      "morae": ["の", "ん", "で", "い", "ま", "す"],
+      "romaji": { "said": "nondeimasu", "spelled": "no-n-de-i-ma-su" },
+      "entry": { "r": ["のむ"], "g": ["to drink", "to swallow", "to take (medicine)"], "p": "v5m vt", "q": 1 },
+      "alts": 1,
+      "chain": [
+        { "rule": "masu", "label": "polite" },
+        { "rule": "te-iru", "label": "ongoing" },
+        { "rule": "te", "label": "te form" }
+      ],
+      "sounds": [
+        { "type": "dakuten", "at": [2, 3], "detail": "て" },
+        { "type": "devoiced", "at": [5, 6], "detail": "nondeimas(u)" }
+      ],
+      "grammar": [{ "id": "te-iru" }, { "id": "polite" }],
+      "kanji": ["飲"], "confidence": "rule"
+    },
+    {
+      "i": 12, "kind": "punct", "surface": "。", "start": 26, "end": 27, "base": "。",
+      "reading": "", "furigana": [{ "text": "。" }], "morae": [],
+      "romaji": { "said": "", "spelled": "" },
+      "entry": null, "alts": 0, "chain": [], "sounds": [], "grammar": [], "kanji": [], "confidence": "dict"
+    }
+  ],
+  "kanji": [
+    { "ch": "私", "on": ["シ"], "kun": ["わたくし", "わたし"], "m": ["private", "I", "me"], "s": 7, "g": 6, "parts": ["禾", "厶"] },
+    { "ch": "学", "on": ["ガク"], "kun": ["まな.ぶ"], "m": ["study", "learning", "science"], "s": 8, "g": 1, "parts": ["⺍", "冖", "子"] },
+    { "ch": "校", "on": ["コウ", "キョウ"], "kun": [], "m": ["school", "proof"], "s": 10, "g": 1, "parts": ["木", "交"] },
+    { "ch": "行", "on": ["コウ", "ギョウ"], "kun": ["い.く", "ゆ.く", "おこな.う"], "m": ["going", "journey", "carry out"], "s": 6, "g": 2, "parts": ["彳", "亍"] },
+    { "ch": "先", "on": ["セン"], "kun": ["さき", "ま.ず"], "m": ["before", "ahead", "previous"], "s": 6, "g": 1, "parts": ["⺧", "儿"] },
+    { "ch": "生", "on": ["セイ", "ショウ"], "kun": ["い.きる", "う.まれる", "なま"], "m": ["life", "birth", "genuine"], "s": 5, "g": 1, "parts": ["生"] },
+    { "ch": "飲", "on": ["イン"], "kun": ["の.む"], "m": ["drink", "smoke", "take"], "s": 12, "g": 3, "parts": ["飠", "欠"] }
+  ]
+}

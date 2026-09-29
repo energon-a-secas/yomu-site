@@ -1,0 +1,46 @@
+---
+config:
+  theme: base
+  themeVariables:
+    primaryColor: "#0f172a"
+    primaryTextColor: "#e2e8f0"
+    primaryBorderColor: "#0063e5"
+    lineColor: "#38bdf8"
+    secondaryColor: "#1e293b"
+    tertiaryColor: "#1e293b"
+    clusterBkg: "#f0f7ff"
+    clusterBorder: "#bfdbfe"
+    edgeLabelBackground: "#e8f0ff"
+    mainBkg: "#0f172a"
+    nodeBorder: "#0063e5"
+    titleColor: "#1e1b4b"
+    fontFamily: "ui-sans-serif, system-ui, -apple-system, sans-serif"
+    fontSize: "13px"
+---
+flowchart TB
+    User([Learner]) -->|"pastes Japanese"| HTML["index.html\nText box, reading, side column"]
+    Host([Runcible]) -->|"yomu:load via postMessage"| embed["embed.js\nyomu-embed/1"]
+
+    subgraph Page["Page (ES modules)"]
+        HTML --> app["app.js\nEntry point"]
+        app --> events["events.js\nInput, selection, hover and tap"]
+        events --> reader["reader.js\nSeam to the analyzer"]
+        events --> render["render*.js\nReading, word panel, kanji table, notes"]
+        events --> speech["speech.js\nJapanese voice, sound it out"]
+        embed --> reader
+    end
+
+    subgraph Analyzer["Analyzer (no DOM, tested under node)"]
+        reader --> analyze["analyze.js\nText in, tokens out"]
+        analyze --> lattice["lattice.js + costs.js\nCheapest path"]
+        lattice --> deinflect["deinflect.js\nConjugation rules"]
+        lattice --> numbers["numbers.js + names.js\nCounters, name guesses"]
+        analyze --> furigana["furigana.js\nReading per kanji"]
+        analyze --> kana["kana.js\nBeats, said and spelled romaji"]
+        analyze --> notes["sounds.js + grammar.js\nSpecial sounds, grammar ids"]
+        lattice --> dict["dict.js\nLoads only the shards needed"]
+    end
+
+    dict -->|"fetch"| Data[("data/dict: 27 JMdict shards\ndata/kanji: 3 KANJIDIC shards")]
+    state["state.js\nPreferences, text"] <-->|"yomu-site:preferences\nyomu-site:text"| Storage[("localStorage")]
+    events --> state

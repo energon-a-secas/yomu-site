@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<!-- Same policy as index.html minus the analytics hosts: this page loads only
+     its own files and the fleet's base.css. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline' https://cdn.neorgon.org/v1.0.0/; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>View harness | Yomu</title>
+<link rel="stylesheet" href="https://cdn.neorgon.org/v1.0.0/styles/base.css">
+<link rel="stylesheet" href="../css/style.css">
+<style>
+  /* Harness chrome only. The page's regions come from index.html itself and
+     are styled by css/style.css, so what is seen here is what a visitor sees;
+     a rule added here that touched a page class would be a second opinion the
+     site never gets. */
+  .hz { max-width: 1200px; width: 100%; margin: 0 auto; padding: var(--space-4) var(--space-4) 0; }
+  .hz h1 { font-size: var(--text-lg); }
+  .hz p { font-size: var(--text-sm); color: var(--text-secondary); line-height: 1.5; margin-top: var(--space-1); }
+  #hz-results { list-style: none; margin-top: var(--space-3); font-size: var(--text-xs); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  #hz-results li { padding: 2px 0; }
+  #hz-results li[data-ok="true"]::before { content: "PASS  "; color: #34d399; }
+  #hz-results li[data-ok="false"]::before { content: "FAIL  "; color: #fb7185; }
+  #hz-summary { font-weight: 600; margin-top: var(--space-2); }
+</style>
+</head>
+<body>
+  <section class="hz" aria-labelledby="hz-title">
+    <h1 id="hz-title">Yomu view harness</h1>
+    <p>The page's own markup, read from index.html, painted from tests/fixtures/analysis-sample.json instead of the analyzer, then checked. The checks run once on load; the page stays live afterwards for a look by hand.</p>
+    <p id="hz-summary" role="status">Running</p>
+    <ol id="hz-results"></ol>
+  </section>
+  <div id="hz-page"></div>
+  <script type="module" src="harness.js"></script>
+</body>
+</html>

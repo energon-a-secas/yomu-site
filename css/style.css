@@ -1,0 +1,718 @@
+/* ── Reset & base ──────────────────────────────────────────── */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+/*
+ * ── Design tokens ─────────────────────────────────────────────
+ *
+ * Canonical tokens (colors, font, type scale, spacing, radii) come from the CDN:
+ *   https://cdn.neorgon.org/v1.0.0/styles/base.css   (linked in index.html)
+ * Do NOT redeclare them here. The block below holds only what base.css does
+ * not define, plus this site's accent.
+ *
+ * The accent is indigo and is spent on three things only: the chosen word,
+ * a light (a kanji or a note found in the text) and the dotted mark under a
+ * special sound. That keeps it under a tenth of any screen, which is what lets
+ * a light be seen at all.
+ *
+ * Contrast, measured: --on-accent on --accent is 7.51:1. --accent-bright on
+ * --bg is 4.496:1, a hair under AA for body text, so it is used for marks,
+ * borders and focus rings (3:1 is the bar there) and never for small text.
+ */
+
+:root {
+  --accent: #4338ca;
+  --accent-bright: #6366f1;
+  --on-accent: #f9f9f9;
+  --accent-wash: color-mix(in srgb, var(--accent) 22%, transparent);
+  --accent-lit: color-mix(in srgb, var(--accent) 42%, transparent);
+  --mark: var(--accent-bright);
+
+  /* Japanese is set in the platform's Japanese face, never a webfont: a CJK
+     font is megabytes, and every device that can type Japanese has one. */
+  --ja: 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Yu Gothic UI', 'Yu Gothic', 'Meiryo', 'Noto Sans CJK JP', 'Noto Sans JP', sans-serif;
+
+  --read-w: 72ch;
+  --side-w: 22rem;
+
+  --surface-toast: #1a1730;
+  --danger: #be123c;
+  --danger-text: #fda4af;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --control-height: 44px;
+  --control-height-sm: 36px;
+  --shadow-card: 0 12px 28px rgba(15, 23, 42, 0.5);
+  --shadow-modal: 0 24px 48px rgba(2, 6, 23, 0.58);
+  --z-toast: 500;
+}
+
+/* Author display values would otherwise defeat the hidden attribute. */
+[hidden] { display: none !important; }
+
+html { min-height: 100%; color-scheme: dark; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  min-height: 100%;
+  color: var(--text-primary);
+  display: flex; flex-direction: column;
+}
+body:has(dialog[open]) { overflow: hidden; }
+
+main#main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  width: 100%;
+}
+main#main:focus { outline: none; }
+
+[lang="ja"] { font-family: var(--ja); }
+[lang="ja-Latn"] { font-family: var(--font); }
+
+.quiet { color: var(--text-muted); font-size: var(--text-sm); line-height: 1.55; }
+
+/* ── Header ────────────────────────────────────────────────────
+ * Owned by the Neorgon Header Kit (css/neorgon-header.css). Only the
+ * language toggle's two codes are this site's. */
+.lang-code { color: var(--text-muted); font-weight: 500; }
+.lang-code--on { color: var(--text-primary); font-weight: 700; }
+
+/* ── Buttons ───────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--control-height);
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  line-height: 1.2;
+  text-decoration: none;
+  cursor: pointer;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-primary);
+  transition: background-color var(--dur), color var(--dur), border-color var(--dur);
+  -webkit-tap-highlight-color: transparent;
+}
+.btn:disabled,
+.btn[aria-disabled="true"] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.btn--sm {
+  min-height: var(--control-height-sm);
+  padding: 0 var(--space-3);
+  font-size: var(--text-xs);
+}
+.btn--primary { background: var(--accent); color: var(--on-accent); }
+.btn--secondary {
+  background: var(--surface-2);
+  color: var(--text-primary);
+  border-color: var(--border-strong);
+}
+.btn--secondary:hover { background: rgba(255, 255, 255, 0.1); }
+.btn--ghost {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.92);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+.btn--ghost:hover { background: rgba(255, 255, 255, 0.1); color: var(--text-primary); }
+.btn[aria-pressed="true"] {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+button:active, .btn:active { transform: scale(0.98); transition-duration: var(--dur-fast); }
+
+/* A link that reads as a word in a sentence, button or anchor alike. */
+.text-link {
+  display: inline;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-primary);
+  font: inherit;
+  text-align: left;
+  text-decoration: underline;
+  text-decoration-color: var(--accent-bright);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.text-link:hover { text-decoration-thickness: 2px; }
+.text-link:active { transform: none; }
+
+/* ── Forms ─────────────────────────────────────────────────── */
+.textarea {
+  width: 100%; min-width: 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface-1); color: var(--text-primary);
+  font: inherit; font-size: 1rem;
+}
+.textarea::placeholder { color: var(--text-muted); }
+.textarea:focus-visible { outline: 2px solid var(--accent-bright); outline-offset: 1px; border-color: transparent; }
+.field__hint { font-size: var(--text-sm); color: var(--text-muted); line-height: 1.5; }
+
+/* ── Native dialog ────────────────────────────────────────────
+   showModal() supplies the inert background, focus containment and Escape. */
+dialog.dialog {
+  margin: auto; padding: 0;
+  width: min(520px, calc(100% - 32px));
+  max-height: calc(100dvh - 32px);
+  overflow: auto;
+  background: var(--bg); color: var(--text-primary);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-modal);
+}
+dialog.dialog--wide { width: min(760px, calc(100% - 16px)); }
+.dialog::backdrop { background: rgb(2 4 12 / 85%); }
+.dialog__header {
+  position: sticky; top: 0; z-index: 1;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--space-4); padding: var(--space-3) var(--space-6);
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+.dialog__header h2 { font-size: var(--text-xl); }
+.dialog__body { padding: var(--space-4) var(--space-6) var(--space-6); line-height: 1.55; }
+
+/* ── The page ──────────────────────────────────────────────────
+ * One column by default: the reading, then the side column as a section
+ * under it with Word, Kanji and Notes as tabs. From 1100px (and never in an
+ * embed) the side column stands beside the reading and sticks. */
+.embed-bar {
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--text-sm);
+  text-align: right;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.yomu {
+  width: 100%;
+  max-width: calc(var(--read-w) + var(--space-4) * 2);
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-4) 64px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 40px;
+  align-items: start;
+  flex: 1;
+}
+.yomu > * { min-width: 0; }
+.yomu-read { display: flex; flex-direction: column; gap: var(--space-4); }
+
+/* ── Input ─────────────────────────────────────────────────── */
+.input { display: flex; flex-direction: column; gap: var(--space-2); }
+.input-head { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-4); }
+.input-label { font-size: var(--text-sm); font-weight: 600; color: var(--text-secondary); }
+.yomu-text {
+  font-family: var(--ja);
+  font-size: 1.25rem;
+  line-height: 1.6;
+  min-height: 3.6rem;
+  /* The box grows with its text up to here, then scrolls: a 2,000-character
+     paste made it 2,000px tall and put the reading far below the fold. */
+  max-height: min(40dvh, 18rem);
+  resize: none;
+  overflow-y: auto;
+}
+.too-long { color: var(--text-secondary); }
+
+.status { min-height: 1.25rem; font-size: var(--text-sm); color: var(--text-muted); }
+.status:empty { min-height: 0; }
+.read-error {
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  color: var(--danger-text);
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3);
+  overflow-wrap: anywhere;
+}
+
+/* ── Empty state ───────────────────────────────────────────── */
+.empty { display: flex; flex-direction: column; gap: var(--space-2); padding-top: var(--space-2); }
+.empty-title { font-size: var(--text-lg); font-weight: 600; }
+.examples { list-style: none; display: flex; flex-direction: column; margin-top: var(--space-2); border-top: 1px solid var(--border-subtle); }
+.example {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-1) var(--space-4);
+  width: 100%;
+  min-height: 44px;
+  padding: var(--space-3) var(--space-2);
+  border: 0; border-bottom: 1px solid var(--border-subtle);
+  background: transparent; color: var(--text-primary);
+  font: inherit; text-align: left; cursor: pointer;
+}
+.example:hover { background: var(--surface-1); }
+.example:active { transform: none; }
+.example-ja { font-size: 1.25rem; }
+.example-tr { font-size: var(--text-sm); color: var(--text-muted); }
+
+/* ── Tools above the reading ───────────────────────────────── */
+.tools {
+  display: flex; flex-direction: column; gap: var(--space-2);
+  padding-bottom: var(--space-4);
+  margin-bottom: var(--space-4);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.tools-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-6); }
+.tools-row + .tools-row { gap: var(--space-2); }
+.tools-note { font-size: var(--text-xs); color: var(--text-muted); line-height: 1.5; }
+
+.seg { display: inline-flex; align-items: center; }
+.seg-label { font-size: var(--text-xs); color: var(--text-muted); margin-right: var(--space-2); }
+.seg-btn {
+  min-height: 32px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  color: var(--text-secondary);
+  font: inherit; font-size: var(--text-xs); font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--dur), color var(--dur);
+}
+.seg-btn + .seg-btn { margin-left: -1px; }
+.seg-label + .seg-btn { border-radius: var(--radius-sm) 0 0 var(--radius-sm); }
+.seg-btn:last-child { border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+.seg-btn:hover { color: var(--text-primary); }
+.seg-btn[aria-pressed="true"] { background: rgba(255, 255, 255, 0.14); color: var(--text-primary); }
+.seg-btn:focus-visible { position: relative; z-index: 1; }
+
+.send { display: inline-flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+.send .seg-label { margin-right: 0; }
+.tools-row > .send { margin-left: var(--space-4); }
+
+/* ── The reading ───────────────────────────────────────────────
+ * Every word is a button: the surface with its ruby, then its romaji line.
+ * A line is a wrapping flex row aligned on the first baseline, which is the
+ * surface's, so surfaces share a baseline whether or not they carry ruby and
+ * the romaji lines fall level under them. */
+.reading-hint { font-size: var(--text-xs); color: var(--text-muted); margin-bottom: var(--space-3); }
+.reading-body { font-family: var(--ja); }
+.reading-line {
+  display: flex; flex-wrap: wrap; align-items: baseline;
+  gap: var(--space-3) 2px;
+  margin-bottom: var(--space-4);
+}
+.reading-line--blank { min-height: 1rem; }
+.tok-group { display: inline-flex; align-items: baseline; }
+
+.tok {
+  display: inline-flex; flex-direction: column; align-items: center;
+  gap: 1px;
+  min-width: 0; max-width: 100%;
+  padding: 3px 4px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  line-height: 1.2;
+  cursor: pointer;
+  transition: background-color var(--dur), opacity var(--dur), border-color var(--dur);
+  -webkit-tap-highlight-color: transparent;
+}
+.tok:active { transform: none; }
+.tok:hover { background: var(--surface-2); }
+.tok[aria-pressed="true"] { background: var(--accent-wash); border-color: var(--accent-bright); }
+/* No dictionary support: a dashed outline, so a guess reads as one without colour. */
+.tok--guess { border-style: dashed; border-color: var(--border-strong); }
+
+.tok-surface { font-size: 1.75rem; font-weight: 500; line-height: 1.3; overflow-wrap: anywhere; }
+.tok-surface ruby { ruby-position: over; }
+.tok-surface rt { font-size: 0.46em; font-weight: 400; color: var(--text-secondary); line-height: 1.1; }
+/* Particles, the copula and conjugated endings are lighter than the words
+   that carry the meaning, so the eye lands on the content first. */
+.tok--light .tok-surface, .tok-ending { color: color-mix(in srgb, var(--text-primary) 66%, transparent); font-weight: 400; }
+.tok-romaji {
+  font-size: 0.8125rem;
+  line-height: 1.25;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.tok-plain { font-size: 1.75rem; line-height: 1.3; color: var(--text-secondary); padding: 3px 1px; overflow-wrap: anywhere; }
+.tok-plain--latin { font-family: var(--font); font-size: 1.25rem; }
+.tok-plain--space { min-width: 0.4em; }
+
+#reading[data-furigana="off"] rt { display: none; }
+#reading[data-romaji="said"] .tok-romaji--spelled,
+#reading[data-romaji="spelled"] .tok-romaji--said,
+#reading[data-romaji="off"] .tok-romaji { display: none; }
+
+/* Special sounds: a dotted underline, a shape as well as a colour. A mark
+   inside a ruby is drawn under the kanji it belongs to, so every mark on a
+   line sits on the same baseline. A voiced mark (゛ ゜) is already visible on
+   the kana itself, so it is not underlined; it lights with its line under
+   "In this text" like every other sound. */
+.snd, .snd-base .kj, .snd-whole .tok-surface {
+  border-bottom: 2px dotted var(--mark);
+  padding-bottom: 1px;
+}
+rt .snd { border-bottom: 0; padding-bottom: 0; }
+.snd:is([data-snd="dakuten"], [data-snd="handakuten"], [data-snd="dakuten handakuten"]),
+.snd-base:is([data-snd="dakuten"], [data-snd="handakuten"]) .kj,
+.snd-whole:is([data-snd="dakuten"], [data-snd="handakuten"]) .tok-surface,
+#reading[data-highlights="off"] :is(.snd, .snd-base .kj, .snd-whole .tok-surface) {
+  border-bottom-color: transparent;
+}
+
+/* Lights. A light is a class and never moves layout. While one is on, the
+   rest of the reading steps back, so what is lit is found by contrast in
+   brightness too, not only by hue. */
+.reading-body .is-lit.snd,
+.reading-body ruby.is-lit .kj,
+.reading-body ruby.is-lit rt {
+  background: var(--accent-lit);
+  border-bottom: 2px solid var(--mark);
+  border-radius: 2px;
+}
+.reading-body .tok.is-lit { background: var(--accent-lit); border-color: var(--accent-bright); }
+.reading-body.has-lit .tok:not(.is-lit):not(:has(.is-lit)),
+.reading-body.has-lit .tok-plain { opacity: 0.4; }
+.kj { border-radius: 2px; }
+.kj.is-lit {
+  background: var(--accent-lit);
+  outline: 1px solid var(--accent-bright);
+  outline-offset: 1px;
+}
+
+/* ── In this text ──────────────────────────────────────────── */
+.region-title {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text-secondary);
+  margin-bottom: var(--space-3);
+}
+.in-text { padding-top: var(--space-4); border-top: 1px solid var(--border-subtle); }
+.it-group + .it-group { margin-top: var(--space-4); }
+.it-head { font-size: var(--text-xs); font-weight: 600; color: var(--text-muted); margin-bottom: var(--space-1); }
+.it-list {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  column-gap: var(--space-6);
+}
+.it-line {
+  display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3);
+  width: 100%;
+  min-height: 36px;
+  padding: var(--space-2);
+  border: 0; border-bottom: 1px solid var(--border-subtle);
+  background: transparent; color: var(--text-primary);
+  font: inherit; font-size: var(--text-sm); text-align: left;
+  cursor: pointer;
+  transition: background-color var(--dur);
+}
+.it-line:active { transform: none; }
+.it-line:hover, .it-line:focus-visible { background: var(--surface-2); }
+.it-line[aria-pressed="true"] { background: var(--accent-wash); }
+.it-count { color: var(--text-muted); font-size: var(--text-xs); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* ── Side column ───────────────────────────────────────────── */
+.side { display: flex; flex-direction: column; gap: var(--space-8); }
+.side-tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: calc(var(--space-4) - var(--space-8)); }
+.side-tab {
+  flex: 1;
+  min-height: 44px;
+  border: 0; border-bottom: 2px solid transparent;
+  background: transparent; color: var(--text-secondary);
+  font: inherit; font-size: var(--text-sm); font-weight: 600;
+  cursor: pointer;
+}
+.side-tab:active { transform: none; }
+.side-tab[aria-pressed="true"] { color: var(--text-primary); border-bottom-color: var(--accent-bright); }
+.side-close {
+  display: none;
+  min-width: 44px; min-height: 44px;
+  border: 0; background: transparent; color: var(--text-secondary);
+  font: inherit; font-size: 1.25rem; line-height: 1;
+  cursor: pointer;
+}
+.side-close:hover, .side-close:focus-visible { color: var(--text-primary); }
+
+/* One column: only the chosen tab's panel, and the tab names it. :where()
+   keeps these light so the two-column rules below win without !important. */
+.side:where([data-tab="word"]) .side-panel:where(:not(#panel-word)),
+.side:where([data-tab="kanji"]) .side-panel:where(:not(#panel-kanji)),
+.side:where([data-tab="notes"]) .side-panel:where(:not(#panel-notes)) { display: none; }
+.side-panel > .region-title {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0, 0, 0, 0); white-space: nowrap;
+}
+.side-empty { font-size: var(--text-sm); color: var(--text-muted); line-height: 1.55; }
+.side-hint { font-size: var(--text-xs); color: var(--text-muted); line-height: 1.5; margin-bottom: var(--space-2); }
+
+/* ── The Word panel ────────────────────────────────────────── */
+.word-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2) var(--space-4); }
+.word-surface {
+  font-size: 2.75rem; font-weight: 500; line-height: 1.35;
+  padding: 0 var(--space-1);
+  border-radius: var(--radius-sm);
+  transition: background-color var(--dur);
+  overflow-wrap: anywhere;
+}
+.word-surface rt { font-size: 0.4em; font-weight: 400; color: var(--text-secondary); }
+.word-surface.is-on { background: var(--accent-lit); }
+.word-reading { font-size: 1.125rem; color: var(--text-secondary); }
+.word-romaji {
+  display: grid; grid-template-columns: auto 1fr; align-items: baseline;
+  gap: var(--space-1) var(--space-3);
+  margin-top: var(--space-2);
+}
+.word-romaji > div { display: contents; }
+.word-romaji dt { font-size: var(--text-xs); color: var(--text-muted); }
+.word-romaji dd { font-size: var(--text-base); overflow-wrap: anywhere; }
+.word-part { margin-top: var(--space-6); }
+.word-sub { font-size: var(--text-xs); font-weight: 600; color: var(--text-muted); margin-bottom: var(--space-2); }
+.word-part p { font-size: var(--text-sm); line-height: 1.55; }
+.word-part p + p { margin-top: var(--space-1); }
+.word-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-3); }
+.word-warn { color: var(--text-secondary); }
+.word-out { margin-top: var(--space-6); font-size: var(--text-sm); }
+
+.beats { list-style: none; display: flex; flex-wrap: wrap; gap: 6px; border-radius: var(--radius-sm); }
+.beat {
+  display: inline-flex; flex-direction: column; align-items: center;
+  min-width: 44px;
+  padding: 6px 8px 4px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  transition: background-color var(--dur), border-color var(--dur);
+}
+.beat-kana { font-size: 1.375rem; line-height: 1.2; }
+.beat-romaji { font-size: var(--text-xs); color: var(--text-secondary); }
+.beat.is-on { background: var(--accent-lit); border-color: var(--accent-bright); }
+.beats.is-on .beat { background: var(--accent-wash); border-color: var(--accent-bright); }
+
+.glosses { padding-left: 1.4em; font-size: var(--text-sm); line-height: 1.55; }
+.chain { list-style: none; display: flex; flex-direction: column; gap: 2px; font-size: var(--text-sm); }
+.chain-step { line-height: 1.5; }
+.chain-step + .chain-step::before { content: "↓ "; color: var(--text-muted); }
+.chain-step--base [lang="ja"], .chain-step--surface { font-size: 1.125rem; }
+.word-notes { list-style: none; display: flex; flex-direction: column; gap: var(--space-3); font-size: var(--text-sm); line-height: 1.5; }
+.word-notes li { display: flex; flex-direction: column; align-items: flex-start; }
+.word-part .word-gist { color: var(--text-muted); margin-top: 0; }
+
+/* ── The note ──────────────────────────────────────────────── */
+.note-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); }
+.note-title { font-size: var(--text-lg); font-weight: 600; line-height: 1.3; }
+.note-title:focus { outline: none; }
+.note-rule, .note-pattern { font-size: var(--text-sm); line-height: 1.6; color: var(--text-secondary); margin-top: var(--space-2); }
+.note-pattern .kj-key { margin-right: var(--space-1); }
+.note-sub { font-size: var(--text-xs); font-weight: 600; color: var(--text-muted); margin: var(--space-4) 0 var(--space-2); }
+.ex-list { list-style: none; display: flex; flex-direction: column; gap: var(--space-3); }
+.ex { display: flex; flex-direction: column; gap: 1px; font-size: var(--text-sm); line-height: 1.45; }
+.ex-tag { font-size: var(--text-xs); font-weight: 600; color: var(--text-muted); }
+.ex-ja { font-size: 1.125rem; }
+.ex-kana { color: var(--text-secondary); }
+.ex-spelled { font-size: var(--text-xs); color: var(--text-muted); }
+.ex-gloss { color: var(--text-secondary); }
+
+/* ── The kanji table ───────────────────────────────────────── */
+.kj-list { list-style: none; display: flex; flex-direction: column; border-top: 1px solid var(--border-subtle); }
+.kj-row {
+  display: grid; grid-template-columns: 3rem minmax(0, 1fr); align-items: start;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-2);
+  border: 0; border-bottom: 1px solid var(--border-subtle);
+  background: transparent; color: var(--text-primary);
+  font: inherit; text-align: left;
+  cursor: pointer;
+  transition: background-color var(--dur);
+}
+.kj-row:active { transform: none; }
+.kj-row:hover, .kj-row:focus-visible, .kj-row.is-lit, .kj-row[aria-pressed="true"] { background: var(--surface-2); }
+.kj-char {
+  display: grid; place-items: center;
+  width: 3rem; height: 3rem;
+  font-size: 2rem; line-height: 1;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.kj-row.is-lit .kj-char, .kj-row[aria-pressed="true"] .kj-char { background: var(--accent-lit); border-color: var(--accent-bright); }
+.kj-main { display: flex; flex-direction: column; gap: 2px; min-width: 0; padding-top: 2px; }
+.kj-line { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px var(--space-3); font-size: var(--text-sm); line-height: 1.45; }
+.kj-line--quiet { font-size: var(--text-xs); color: var(--text-secondary); }
+.kj-item { white-space: nowrap; }
+.kj-here [lang="ja"] { font-size: var(--text-base); }
+.kj-mean { color: var(--text-secondary); }
+.kj-key { font-size: var(--text-xs); color: var(--text-muted); }
+
+/* ── Phrases ───────────────────────────────────────────────── */
+#phrases-body > .quiet { margin-bottom: var(--space-6); }
+.ph-cat + .ph-cat { margin-top: var(--space-8); }
+.ph-cat-title { font-size: var(--text-base); font-weight: 600; margin-bottom: var(--space-1); }
+.ph-list { list-style: none; }
+.ph {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-2) var(--space-4);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.ph-main { display: flex; flex-direction: column; gap: 2px; }
+.ph-ja { font-size: 1.25rem; line-height: 1.4; }
+.ph-kana { font-size: var(--text-sm); color: var(--text-secondary); }
+.ph-tr { font-size: var(--text-sm); }
+.ph-meta, .ph-note { font-size: var(--text-xs); color: var(--text-muted); }
+.ph-actions { display: flex; flex-direction: column; align-items: stretch; gap: var(--space-2); }
+.ph-chunk { grid-column: 1 / -1; display: flex; flex-direction: column; gap: var(--space-2); }
+.dlg { padding: var(--space-3) 0 var(--space-4); border-bottom: 1px solid var(--border-subtle); }
+.dlg-title { font-size: var(--text-base); font-weight: 600; }
+.dlg-lines { list-style: none; display: flex; flex-direction: column; gap: var(--space-2); margin: var(--space-3) 0; }
+.dlg-lines li { display: grid; grid-template-columns: 1.5rem minmax(0, 1fr); column-gap: var(--space-2); }
+.dlg-speaker { grid-row: span 2; font-size: var(--text-xs); color: var(--text-muted); padding-top: 4px; }
+.dlg-ja { font-size: 1.125rem; }
+.dlg-tr { grid-column: 2; font-size: var(--text-xs); color: var(--text-muted); }
+
+/* ── Toast ─────────────────────────────────────────────────── */
+.toast {
+  position: fixed;
+  bottom: var(--space-6);
+  right: var(--space-6);
+  z-index: var(--z-toast);
+  max-width: min(360px, calc(100vw - var(--space-8)));
+  background: var(--surface-toast);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-card);
+  pointer-events: none;
+  transform: translateY(8px);
+  opacity: 0;
+  transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+}
+.toast.visible { opacity: 1; transform: translateY(0); }
+
+/* ── Footer ────────────────────────────────────────────────────
+   Owned by the Neorgon Footer Kit (css/neorgon-footer.css). */
+
+/* ── Focus ─────────────────────────────────────────────────── */
+:focus-visible { outline: 2px solid var(--accent-bright); outline-offset: 2px; }
+
+.skip-link {
+  position: absolute;
+  top: 0;
+  transform: translateY(-110%);
+  left: var(--space-4);
+  z-index: 1000;
+  padding: var(--space-2) var(--space-4);
+  background: var(--text-primary);
+  color: var(--bg);
+  font-weight: 600;
+  font-size: var(--text-sm);
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  text-decoration: none;
+  transition: transform var(--dur) var(--ease-out);
+}
+.skip-link:focus { transform: translateY(0); }
+
+/* ── Two columns ───────────────────────────────────────────── */
+@media (min-width: 1100px) {
+  html:not([data-embed="1"]) .yomu {
+    max-width: calc(var(--read-w) + var(--side-w) + 56px + var(--space-8) * 2);
+    grid-template-columns: minmax(0, var(--read-w)) var(--side-w);
+    gap: 56px;
+    padding: var(--space-8) var(--space-8) 80px;
+  }
+  /* With nothing read yet there is no side column, so the input stands in
+     the middle of the page rather than beside an empty one. */
+  html:not([data-embed="1"]) .yomu:has(> .side[hidden]) {
+    max-width: calc(var(--read-w) + var(--space-8) * 2);
+    grid-template-columns: minmax(0, 1fr);
+  }
+  html:not([data-embed="1"]) .side {
+    position: sticky;
+    top: 72px;
+    max-height: calc(100dvh - 88px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    padding-right: var(--space-2);
+  }
+  html:not([data-embed="1"]) .side-tabs { display: none; }
+  html:not([data-embed="1"]) .side-panel { display: block; }
+  html:not([data-embed="1"]) #panel-notes[data-empty] { display: none; }
+  html:not([data-embed="1"]) .side-panel > .region-title {
+    position: static; width: auto; height: auto; overflow: visible; clip: auto; white-space: normal;
+  }
+}
+
+/* ── One column: the side column as a sheet ─────────────────────
+   Once a word is chosen, a note opened or the Kanji tab picked, the side
+   column rides at the bottom of the screen, and the text stays in view
+   above it. Scrolling the page down to the side column, as it did, left the
+   reading off screen at every word, and lit kanji nobody could see. Not in
+   an embed: its frame is as tall as its content, so there is nothing to
+   ride on. */
+@media (max-width: 1099px) {
+  html:not([data-embed="1"]) .side[data-sheet] {
+    position: sticky; bottom: 0; z-index: 2;
+    max-height: 50dvh;
+    overflow-y: auto; overscroll-behavior: contain;
+    margin: 0 calc(var(--space-4) * -1);
+    padding: 0 var(--space-4) var(--space-4);
+    background: var(--bg);
+    border-top: 1px solid var(--border-strong);
+    box-shadow: var(--shadow-modal);
+  }
+  html:not([data-embed="1"]) .side[data-sheet] .side-tabs {
+    position: sticky; top: 0; z-index: 1;
+    background: var(--bg);
+  }
+  html:not([data-embed="1"]) .side[data-sheet] .side-close { display: inline-block; }
+  /* A word chosen near the bottom is scrolled up above the sheet. */
+  html:not([data-embed="1"]) .yomu:has(> .side[data-sheet]) .tok { scroll-margin-bottom: calc(50dvh + var(--space-4)); }
+}
+
+/* ── Embed (docs/EMBED.md) ─────────────────────────────────────
+   The text box stays: a host that opens Yomu as a page of its own (Runcible's
+   reader route) sends no text, and a frame with no way to paste is a blank
+   panel. A host that does send text fills the same box, so it can be edited. */
+html[data-embed="1"] .yomu { padding-top: var(--space-4); padding-bottom: var(--space-6); }
+/* The host sizes the frame from the body's height (yomu:height). A body held
+   to the viewport's height, as base.css and the footer kit both hold it,
+   reports the frame's own height back, so the frame could grow and never
+   shrink. In an embed the body is as tall as what it holds. */
+html[data-embed="1"] body,
+html[data-embed="1"] body:has(> .neo-footer) { min-height: 0; }
+
+/* ── Touch ─────────────────────────────────────────────────── */
+@media (pointer: coarse) {
+  :root { --control-height-sm: 44px; }
+  .seg-btn { min-height: 44px; }
+  .tok { min-width: 44px; min-height: 44px; }
+  .it-line, .kj-row { min-height: 44px; }
+  .word-notes .text-link, .word-out .text-link { display: inline-flex; align-items: center; min-height: 44px; }
+}
+
+/* ── Narrow ────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .tok-surface, .tok-plain { font-size: 1.5rem; }
+  .tools-row { gap: var(--space-2) var(--space-4); }
+  .tools-row > .send { margin-left: 0; }
+  .word-surface { font-size: 2.25rem; }
+  .ph { grid-template-columns: minmax(0, 1fr); }
+  .ph-actions { flex-direction: row; flex-wrap: wrap; }
+  .dialog__header, .dialog__body { padding-left: var(--space-4); padding-right: var(--space-4); }
+  .toast { left: var(--space-4); right: var(--space-4); max-width: none; }
+}
+
+/* ── Reduced motion ────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

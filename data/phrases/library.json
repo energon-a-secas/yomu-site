@@ -1,0 +1,1579 @@
+{
+  "_licence": {
+    "source": "Written for Yomu. Every phrase note, situation, translation and dialogue is original to this project; no textbook, app or corpus was copied or paraphrased.",
+    "text": "Original to this project and dedicated to the public domain.",
+    "url": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "spdx": "CC0-1.0",
+    "derived": false,
+    "id": "authored",
+    "screen": "none",
+    "generated_by": "authored by hand, checked by tests/library.test.mjs",
+    "generated_at": "2026-09-28"
+  },
+  "format": "yomu-library/1",
+  "categories": [
+    {
+      "id": "greetings",
+      "title": { "en": "Greetings", "es": "Saludos" },
+      "items": [
+        "ohayou-gozaimasu", "konnichiwa", "konbanwa", "oyasuminasai", "sayounara", "jaa-mata",
+        "ittekimasu", "itterasshai", "tadaima", "okaerinasai", "itadakimasu", "gochisousama",
+        "hajimemashite", "ogenki-desu-ka", "okagesama-de", "otsukaresama", "osaki-ni-shitsurei", "akemashite"
+      ]
+    },
+    {
+      "id": "thanks",
+      "title": { "en": "Thanks and apologies", "es": "Agradecer y disculparse" },
+      "items": [
+        "arigatou-gozaimasu", "arigatou-gozaimashita", "doumo", "douitashimashite",
+        "sumimasen", "gomennasai", "moushiwake-arimasen", "shitsurei-shimasu", "daijoubu-desu"
+      ]
+    },
+    {
+      "id": "introductions",
+      "title": { "en": "Introductions", "es": "Presentarse" },
+      "items": [
+        "watashi-wa-maria", "onamae-wa", "dochira-kara", "mekishiko-kara", "daigakusei",
+        "kaishain", "nihongo-benkyou", "yoroshiku", "kochira-koso"
+      ]
+    },
+    {
+      "id": "classroom",
+      "title": { "en": "In class and asking for help", "es": "En clase y al pedir ayuda" },
+      "items": [
+        "mou-ichido", "yukkuri", "dou-iu-imi", "nihongo-de-nanto", "wakarimasen",
+        "wakarimashita", "shitsumon", "hiragana-de-kaite", "tetsudatte"
+      ]
+    },
+    {
+      "id": "shopping",
+      "title": { "en": "Shopping and eating out", "es": "De compras y en el restaurante" },
+      "items": [
+        "irasshaimase", "miteiru-dake", "kore-o-kudasai", "ikura-desu-ka", "kaado-de",
+        "fukuro-irimasen", "futari-desu", "menyuu", "osusume", "koohii-hitotsu", "okaikei"
+      ]
+    },
+    {
+      "id": "directions",
+      "title": { "en": "Directions and time", "es": "Cómo llegar y la hora" },
+      "items": [
+        "eki-wa-doko", "toire-wa-doko", "massugu", "migi-ni-magatte", "koko-kara-chikai",
+        "michi-ni-mayoi", "ima-nanji", "nanji-made"
+      ]
+    },
+    {
+      "id": "feelings",
+      "title": { "en": "Feelings and reactions", "es": "Sentimientos y reacciones" },
+      "items": [
+        "sugoi", "oishii", "yokatta", "zannen", "tanoshikatta", "sou-desu-ne", "hontou-desu-ka"
+      ]
+    }
+  ],
+  "phrases": [
+    {
+      "id": "ohayou-gozaimasu",
+      "ja": "おはようございます",
+      "kana": "おはようございます",
+      "en": "Good morning.",
+      "es": "Buenos días.",
+      "register": "set",
+      "chunk": true,
+      "note": {
+        "en": "Literally 'it is early', made polite: ございます is an old polite 'there is, to be' that survives fossilised inside greetings. Friends and family say おはよう alone.",
+        "es": "Literalmente 'es temprano', en forma cortés: ございます es un antiguo 'hay, ser' cortés que sobrevive fosilizado dentro de los saludos. Entre amigos y en familia basta con おはよう."
+      },
+      "situation": {
+        "en": "In the morning until about ten, and at many workplaces the first greeting of a shift at any hour.",
+        "es": "Por la mañana hasta eso de las diez, y en muchos trabajos el primer saludo del turno a cualquier hora."
+      }
+    },
+    {
+      "id": "konnichiwa",
+      "ja": "こんにちは",
+      "kana": "こんにちは",
+      "en": "Hello.",
+      "es": "Hola.",
+      "register": "set",
+      "chunk": true,
+      "note": {
+        "en": "Literally 'as for today', the opening of an older, longer greeting whose end was dropped. The last は is the topic particle, so it is said wa.",
+        "es": "Literalmente 'en cuanto a hoy', el comienzo de un saludo antiguo más largo cuyo final se perdió. La última は es la partícula de tema, por eso se pronuncia wa."
+      },
+      "situation": {
+        "en": "From late morning to early evening, mostly to people outside your family.",
+        "es": "Desde media mañana hasta el atardecer, sobre todo con personas fuera de tu familia."
+      }
+    },
+    {
+      "id": "konbanwa",
+      "ja": "こんばんは",
+      "kana": "こんばんは",
+      "en": "Good evening.",
+      "es": "Buenas noches (al saludar).",
+      "register": "set",
+      "chunk": true,
+      "note": {
+        "en": "The same pattern with 今晩, 'this evening', and the same は said wa. It greets; it never says goodbye.",
+        "es": "El mismo patrón con 今晩, 'esta noche', y la misma は que se pronuncia wa. Sirve para saludar, nunca para despedirse."
+      },
+      "situation": {
+        "en": "When you meet or call someone after dark.",
+        "es": "Al encontrarte o llamar a alguien cuando ya oscureció."
+      }
+    },
+    {
+      "id": "oyasuminasai",
+      "ja": "おやすみなさい",
+      "kana": "おやすみなさい",
+      "en": "Good night.",
+      "es": "Buenas noches (al irse a dormir).",
+      "register": "set",
+      "chunk": true,
+      "note": {
+        "en": "From 休む, 'to rest': a polite 'rest well'. It is only for parting at night; to greet someone in the evening, say こんばんは.",
+        "es": "Viene de 休む, 'descansar': un 'descansa' cortés. Solo sirve para despedirse de noche; para saludar por la noche se dice こんばんは."
+      },
+      "situation": {
+        "en": "When someone goes to bed, or when you part late at night.",
+        "es": "Cuando alguien se va a dormir, o al despedirse tarde por la noche."
+      }
+    },
+    {
+      "id": "sayounara",
+      "ja": "さようなら",
+      "kana": "さようなら",
+      "en": "Goodbye.",
+      "es": "Adiós.",
+      "register": "set",
+      "chunk": true,
+      "note": {
+        "en": "From an old 'if that is so, then (we part)'. It sounds final, so adults keep it for long partings, while children say it to their teacher every afternoon.",
+        "es": "Viene de un antiguo 'si así es, entonces (nos separamos)'. Suena definitivo, así que los adultos lo reservan para despedidas largas, mientras que los niños se lo dicen a su maestro cada tarde."
+      },
+      "situation": {
+        "en": "Parting for a long time, or at the end of the school day.",
+        "es": "Al despedirse por mucho tiempo, o al terminar el día escolar."
+      }
+    },
+    {
+      "id": "jaa-mata",
+      "ja": "じゃあ、また",
+      "kana": "じゃあまた",
+      "en": "See you.",
+      "es": "Nos vemos.",
+      "register": "plain",
+      "chunk": true,
+      "note": {
+        "en": "じゃあ is 'well then' and また is 'again'. Add a day to fix the date: また明日, see you tomorrow.",
+        "es": "じゃあ es 'bueno, entonces' y また es 'otra vez'. Si agregas un día queda fijada la fecha: また明日, hasta mañana."
+      },
+      "situation": {
+        "en": "Parting with friends or classmates you will see again soon.",
+        "es": "Al despedirte de amigos o compañeros a quienes verás pronto."
+      }
+    },
+    {
+      "id": "ittekimasu",
+      "ja": "行ってきます",
+      "kana": "いってきます",
+      "en": "I'm off, and I'll be back.",
+      "es": "Me voy, ya vuelvo.",
+      "register": "set",
+      "chunk": true,
+      "note": {
+        "en": "Literally 'I will go and come back', so it promises a return. Whoever stays answers いってらっしゃい.",
+        "es": "Literalmente 'voy y vuelvo', así que promete el regreso. Quien se queda responde いってらっしゃい."
+      },
+      "situation": {
+        "en": "Leaving home in the morning, or leaving the office on an errand.",
+        "es": "Al salir de casa por la mañana, o de la oficina para hacer un encargo."
+      }
+    },
+    {
+      "id": "itterasshai",
+      "ja": "行ってらっしゃい",
+      "kana": "いってらっしゃい",
+      "en": "See you later, take care.",
+      "es": "Que te vaya bien.",
+      "register": "set",
+      "chunk": true,
+      "note": {
+        "en": "Literally 'go, and come back', built on いらっしゃる, the respectful 'come'. It is the fixed reply to いってきます.",
+        "es": "Literalmente 've, y vuelve', construido sobre いらっしゃる, el 'venir' respetuoso. Es la respuesta fija a いってきます."
+      },
+      "situation": {
+        "en": "Seeing off someone who will come back later the same day.",
+        "es": "Al despedir a alguien que volverá más tarde el mismo día."
+      }
+    },
+    {
+      "id": "tadaima",
+      "ja": "ただいま",
+      "kana": "ただいま",
+      "en": "I'm home.",
+      "es": "Ya llegué.",
+      "register": "set",
+      "chunk": true,
+      "note": {
+        "en": "Short for ただいま帰りました, 'I have just now come back'. The answer is おかえりなさい.",
+        "es": "Es la forma corta de ただいま帰りました, 'acabo de volver'. La respuesta es おかえりなさい."
+      },
+      "situation": {
+        "en": "Coming back home, or back to the office after being out.",
+        "es": "Al volver a casa, o a la oficina después de salir."
+      }
+    },
+    {
+      "id": "okaerinasai",
+      "ja": "お帰りなさい",
+      "kana": "おかえりなさい",
+      "en": "Welcome back.",
+      "es": "Bienvenido de vuelta.",
+      "register": "set",
+      "chunk": true,
+      "note": {
+        "en": "From 帰る, 'to return', with なさい, a gentle command: the reply to ただいま. Family often shortens it to おかえり.",
+        "es": "Viene de 帰る, 'volver', con なさい, un mandato suave: es la respuesta a ただいま. En familia muchas veces se acorta a おかえり."
+      },
+      "situation": {
+        "en": "When someone comes back home or back to the office.",
+        "es": "Cuando alguien vuelve a casa o a la oficina."
+      }
+    },
+    {
+      "id": "itadakimasu",
+      "ja": "いただきます",
+      "kana": "いただきます",
+      "en": "Thanks for the food (before eating).",
+      "es": "Gracias por la comida (antes de comer).",
+      "register": "set",
+      "chunk": true,
+      "note": {
+        "en": "The humble verb for receiving: you acknowledge the food and whoever cooked or paid for it. Many people put their hands together as they say it.",
+        "es": "Es el verbo humilde de recibir: reconoces la comida y a quien la cocinó o la pagó. Mucha gente junta las manos al decirlo."
+      },
+      "situation": {
+        "en": "Right before the first bite, alone or at a table with others.",
+        "es": "Justo antes del primer bocado, solo o en la mesa con otros."
+      }
+    },
+    {
+      "id": "gochisousama",
+      "ja": "ごちそうさまでした",
+      "kana": "ごちそうさまでした",
+      "en": "Thank you for the meal (after eating).",
+      "es": "Gracias por la comida (después de comer).",
+      "register": "set",
+      "chunk": true,
+      "note": {
+        "en": "ごちそう is a feast, first naming the running about it took to prepare one; さま and でした turn it into thanks. Say it to the cook, to the host, or to the staff as you leave a restaurant.",
+        "es": "ごちそう es un banquete, y al principio nombraba el ir y venir que costaba prepararlo; さま y でした lo convierten en agradecimiento. Se le dice a quien cocinó, al anfitrión o al personal al salir de un restaurante."
+      },
+      "situation": {
+        "en": "When you finish eating.",
+        "es": "Al terminar de comer."
+      }
+    },
+    {
+      "id": "hajimemashite",
+      "ja": "はじめまして",
+      "kana": "はじめまして",
+      "en": "Nice to meet you.",
+      "es": "Mucho gusto.",
+      "register": "set",
+      "chunk": true,
+      "note": {
+        "en": "From 初めて, 'for the first time'. It is usually followed by your name and then よろしくお願いします.",
+        "es": "Viene de 初めて, 'por primera vez'. Normalmente le siguen tu nombre y luego よろしくお願いします."
+      },
+      "situation": {
+        "en": "The first words when you meet someone for the first time.",
+        "es": "Lo primero que dices al conocer a alguien."
+      }
+    },
+    {
+      "id": "ogenki-desu-ka",
+      "ja": "お元気ですか",
+      "kana": "おげんきですか",
+      "en": "How have you been?",
+      "es": "¿Cómo has estado?",
+      "register": "polite",
+      "chunk": true,
+      "note": {
+        "en": "元気 is health and energy, and お makes it about the other person. It is asked after time apart, not as a daily hello the way 'how are you' is.",
+        "es": "元気 es salud y energía, y お lo refiere a la otra persona. Se pregunta después de un tiempo sin verse, no como saludo diario al estilo de '¿cómo estás?'."
+      },
+      "situation": {
+        "en": "Meeting or writing to someone you have not seen for a while.",
+        "es": "Al ver o escribirle a alguien a quien no ves hace tiempo."
+      }
+    },
+    {
+      "id": "okagesama-de",
+      "ja": "おかげさまで",
+      "kana": "おかげさまで",
+      "en": "I'm well, thank you.",
+      "es": "Bien, gracias.",
+      "register": "set",
+      "chunk": true,
+      "note": {
+        "en": "Literally 'thanks to your shade', that is, your protection. It answers お元気ですか with thanks even when the other person did nothing in particular.",
+        "es": "Literalmente 'gracias a tu sombra', es decir, a tu protección. Responde a お元気ですか con un agradecimiento aunque la otra persona no haya hecho nada en particular."
+      },
+      "situation": {
+        "en": "Answering a question about your health, your family or your news.",
+        "es": "Al responder una pregunta sobre tu salud, tu familia o tus novedades."
+      }
+    },
+    {
+      "id": "otsukaresama",
+      "ja": "お疲れさまです",
+      "kana": "おつかれさまです",
+      "en": "Thanks for your hard work.",
+      "es": "Buen trabajo.",
+      "register": "set",
+      "chunk": true,
+      "note": {
+        "en": "From 疲れる, 'to get tired': it recognises the effort the other person is making. Among coworkers it serves as hello and goodbye both.",
+        "es": "Viene de 疲れる, 'cansarse': reconoce el esfuerzo de la otra persona. Entre compañeros de trabajo sirve tanto de saludo como de despedida."
+      },
+      "situation": {
+        "en": "Passing a coworker or classmate, or at the end of a shared task.",
+        "es": "Al cruzarte con un compañero de trabajo o de clase, o al terminar una tarea juntos."
+      }
+    },
+    {
+      "id": "osaki-ni-shitsurei",
+      "ja": "お先に失礼します",
+      "kana": "おさきにしつれいします",
+      "en": "Excuse me for leaving first.",
+      "es": "Con permiso, me retiro primero.",
+      "register": "set",
+      "chunk": true,
+      "note": {
+        "en": "Literally 'I am rude by going ahead'. Those who stay usually answer お疲れさまでした.",
+        "es": "Literalmente 'cometo una descortesía al irme antes'. Quienes se quedan suelen responder お疲れさまでした."
+      },
+      "situation": {
+        "en": "Leaving work, a club or a meeting while others stay on.",
+        "es": "Al salir del trabajo, de un club o de una reunión mientras otros se quedan."
+      }
+    },
+    {
+      "id": "akemashite",
+      "ja": "明けましておめでとうございます",
+      "kana": "あけましておめでとうございます",
+      "en": "Happy New Year.",
+      "es": "Feliz Año Nuevo.",
+      "register": "set",
+      "chunk": true,
+      "note": {
+        "en": "明ける is for the new year to open, and おめでとう is congratulations made polite with ございます. It is said only once the year has begun; in late December people say よいお年を instead.",
+        "es": "明ける es que se abra el año nuevo, y おめでとう es una felicitación, cortés gracias a ございます. Solo se dice cuando el año ya empezó; a fines de diciembre se dice よいお年を."
+      },
+      "situation": {
+        "en": "The first time you see someone in the new year, through early January.",
+        "es": "La primera vez que ves a alguien en el año nuevo, durante los primeros días de enero."
+      }
+    },
+    {
+      "id": "arigatou-gozaimasu",
+      "ja": "ありがとうございます",
+      "kana": "ありがとうございます",
+      "en": "Thank you.",
+      "es": "Gracias.",
+      "register": "set",
+      "chunk": true,
+      "note": {
+        "en": "ありがとう comes from 有り難い, 'hard to come by', rare and so precious. ございます makes it polite; with friends, ありがとう alone.",
+        "es": "ありがとう viene de 有り難い, 'difícil de conseguir', raro y por eso valioso. ございます lo vuelve cortés; con amigos basta ありがとう."
+      },
+      "situation": {
+        "en": "Thanking someone for something they are doing or giving you now.",
+        "es": "Al agradecer algo que alguien hace o te da en este momento."
+      }
+    },
+    {
+      "id": "arigatou-gozaimashita",
+      "ja": "ありがとうございました",
+      "kana": "ありがとうございました",
+      "en": "Thank you (for what you did).",
+      "es": "Gracias (por lo que hizo).",
+      "register": "set",
+      "chunk": true,
+      "note": {
+        "en": "The past form: thanks for something that is over. Teachers hear it at the end of class, and shop staff say it as you leave.",
+        "es": "Es la forma en pasado: agradece algo que ya terminó. Los maestros lo escuchan al final de la clase, y el personal de las tiendas lo dice cuando te vas."
+      },
+      "situation": {
+        "en": "When a favour, a lesson or a purchase has just ended.",
+        "es": "Cuando un favor, una clase o una compra acaba de terminar."
+      }
+    },
+    {
+      "id": "doumo",
+      "ja": "どうも",
+      "kana": "どうも",
+      "en": "Thanks.",
+      "es": "Gracias.",
+      "register": "set",
+      "chunk": true,
+      "note": {
+        "en": "An intensifier, 'very', standing in for どうもありがとう. Alone it is a light thanks, and sometimes a quick hello.",
+        "es": "Es un intensificador, 'muy', en lugar de どうもありがとう. Solo, es un agradecimiento ligero y a veces un saludo rápido."
+      },
+      "situation": {
+        "en": "Small favours: a door held open, change handed back.",
+        "es": "Favores pequeños: alguien te sostiene la puerta o te da el cambio."
+      }
+    },
+    {
+      "id": "douitashimashite",
+      "ja": "どういたしまして",
+      "kana": "どういたしまして",
+      "en": "You're welcome.",
+      "es": "De nada.",
+      "register": "set",
+      "chunk": true,
+      "note": {
+        "en": "Literally 'what have I done?'. It is correct but a little stiff, and many people answer thanks with a simple いいえ, 'no'.",
+        "es": "Literalmente '¿qué he hecho yo?'. Es correcto pero algo rígido, y mucha gente responde al agradecimiento con un simple いいえ, 'no'."
+      },
+      "situation": {
+        "en": "Answering thanks for something you did.",
+        "es": "Al responder a un agradecimiento por algo que hiciste."
+      }
+    },
+    {
+      "id": "sumimasen",
+      "ja": "すみません",
+      "kana": "すみません",
+      "en": "Excuse me. / I'm sorry.",
+      "es": "Disculpe. / Perdón.",
+      "register": "set",
+      "chunk": true,
+      "note": {
+        "en": "From 済む, 'to be settled': 'this does not settle', I remain in your debt. The one word apologises, calls for attention and thanks someone for their trouble.",
+        "es": "Viene de 済む, 'quedar saldado': 'esto no queda saldado', sigo en deuda contigo. La misma palabra pide perdón, llama la atención y agradece una molestia."
+      },
+      "situation": {
+        "en": "Calling staff over, squeezing past someone, or apologising for something small.",
+        "es": "Para llamar a quien atiende, abrirte paso entre la gente o disculparte por algo pequeño."
+      }
+    },
+    {
+      "id": "gomennasai",
+      "ja": "ごめんなさい",
+      "kana": "ごめんなさい",
+      "en": "I'm sorry.",
+      "es": "Lo siento.",
+      "register": "set",
+      "chunk": true,
+      "note": {
+        "en": "A personal apology that asks forgiveness. It suits friends and family; at work or with strangers, すみません or 申し訳ありません fits better.",
+        "es": "Es una disculpa personal que pide perdón. Va bien con amigos y familia; en el trabajo o con desconocidos queda mejor すみません o 申し訳ありません."
+      },
+      "situation": {
+        "en": "Apologising to someone close to you.",
+        "es": "Al pedir perdón a alguien cercano."
+      }
+    },
+    {
+      "id": "moushiwake-arimasen",
+      "ja": "申し訳ありません",
+      "kana": "もうしわけありません",
+      "en": "I am very sorry.",
+      "es": "Le pido disculpas.",
+      "register": "polite",
+      "chunk": true,
+      "note": {
+        "en": "Literally 'there is no excuse'. It is the formal apology of shops, offices and train announcements.",
+        "es": "Literalmente 'no hay excusa'. Es la disculpa formal de tiendas, oficinas y anuncios del tren."
+      },
+      "situation": {
+        "en": "A serious apology, or any apology at work.",
+        "es": "Una disculpa seria, o cualquier disculpa en el trabajo."
+      }
+    },
+    {
+      "id": "shitsurei-shimasu",
+      "ja": "失礼します",
+      "kana": "しつれいします",
+      "en": "Excuse me (for intruding).",
+      "es": "Con permiso.",
+      "register": "set",
+      "chunk": true,
+      "note": {
+        "en": "Literally 'I commit a rudeness'. It asks leave to come in, to go, or to end a phone call.",
+        "es": "Literalmente 'cometo una descortesía'. Pide permiso para entrar, para salir o para terminar una llamada."
+      },
+      "situation": {
+        "en": "Entering a teacher's office, leaving a room, or hanging up the phone.",
+        "es": "Al entrar a la oficina de un maestro, salir de una sala o colgar el teléfono."
+      }
+    },
+    {
+      "id": "daijoubu-desu",
+      "ja": "大丈夫です",
+      "kana": "だいじょうぶです",
+      "en": "It's all right.",
+      "es": "No hay problema.",
+      "register": "polite",
+      "chunk": false,
+      "note": {
+        "en": "大丈夫 means safe, all right. In shops it also turns down an offer politely, such as a bag or a receipt.",
+        "es": "大丈夫 significa seguro, bien. En las tiendas también sirve para rechazar con cortesía algo que te ofrecen, como una bolsa o el recibo."
+      },
+      "situation": {
+        "en": "Reassuring someone who apologised, or declining an offer.",
+        "es": "Para tranquilizar a alguien que se disculpó, o para rechazar un ofrecimiento."
+      }
+    },
+    {
+      "id": "watashi-wa-maria",
+      "ja": "私はマリアです",
+      "kana": "わたしはマリアです",
+      "en": "I'm Maria.",
+      "es": "Soy María.",
+      "register": "polite",
+      "chunk": false,
+      "note": {
+        "en": "は marks the topic and is said wa: 'as for me, (I) am Maria'. Once the topic is clear it is dropped, so マリアです alone is just as common.",
+        "es": "は marca el tema y se pronuncia wa: 'en cuanto a mí, soy María'. Cuando el tema ya está claro se omite, así que マリアです solo es igual de común."
+      },
+      "situation": {
+        "en": "Saying your name, with your own in place of マリア.",
+        "es": "Al decir tu nombre, con el tuyo en lugar de マリア."
+      }
+    },
+    {
+      "id": "onamae-wa",
+      "ja": "お名前は何ですか",
+      "kana": "おなまえはなんですか",
+      "en": "What is your name?",
+      "es": "¿Cómo se llama?",
+      "register": "polite",
+      "chunk": false,
+      "note": {
+        "en": "お makes 名前 polite, so it is for someone else's name, never your own. In speech, お名前は？ with the rest left unsaid is common.",
+        "es": "お vuelve cortés a 名前, así que se usa para el nombre de otra persona, nunca para el tuyo. Al hablar es común decir お名前は？ y dejar el resto sin decir."
+      },
+      "situation": {
+        "en": "Asking someone's name politely.",
+        "es": "Al preguntar con cortesía el nombre de alguien."
+      }
+    },
+    {
+      "id": "dochira-kara",
+      "ja": "どちらから来ましたか",
+      "kana": "どちらからきましたか",
+      "en": "Where are you from?",
+      "es": "¿De dónde es?",
+      "register": "polite",
+      "chunk": false,
+      "note": {
+        "en": "どちら is the polite form of どこ, 'where', and 来ました is the past of 来る, 'to come': 'where did you come from?'.",
+        "es": "どちら es la forma cortés de どこ, 'dónde', y 来ました es el pasado de 来る, 'venir': '¿de dónde vino?'."
+      },
+      "situation": {
+        "en": "Asking a new acquaintance where they are from.",
+        "es": "Al preguntarle a alguien que acabas de conocer de dónde es."
+      }
+    },
+    {
+      "id": "mekishiko-kara",
+      "ja": "メキシコから来ました",
+      "kana": "メキシコからきました",
+      "en": "I'm from Mexico.",
+      "es": "Soy de México.",
+      "register": "polite",
+      "chunk": false,
+      "note": {
+        "en": "から means 'from'. Put your own country or city in its place; to give a nationality instead, say メキシコ人です.",
+        "es": "から significa 'desde'. Pon tu país o tu ciudad en su lugar; para decir la nacionalidad, di メキシコ人です."
+      },
+      "situation": {
+        "en": "Telling someone where you are from.",
+        "es": "Al contar de dónde eres."
+      }
+    },
+    {
+      "id": "daigakusei",
+      "ja": "大学生です",
+      "kana": "だいがくせいです",
+      "en": "I'm a university student.",
+      "es": "Soy estudiante universitario.",
+      "register": "polite",
+      "chunk": false,
+      "note": {
+        "en": "大学 is a university and 生 a student. Japanese has no word for 'a'; your role is stated with です.",
+        "es": "大学 es universidad y 生, estudiante. El japonés no tiene artículos; tu papel se dice con です."
+      },
+      "situation": {
+        "en": "Saying what you do, if you study.",
+        "es": "Al decir a qué te dedicas, si estudias."
+      }
+    },
+    {
+      "id": "kaishain",
+      "ja": "会社員です",
+      "kana": "かいしゃいんです",
+      "en": "I work for a company.",
+      "es": "Trabajo en una empresa.",
+      "register": "polite",
+      "chunk": false,
+      "note": {
+        "en": "会社 is a company and 員 a member. It is the usual answer when you would rather not name your employer.",
+        "es": "会社 es empresa y 員, miembro. Es la respuesta habitual cuando prefieres no nombrar a tu empleador."
+      },
+      "situation": {
+        "en": "Saying what you do for a living.",
+        "es": "Al decir en qué trabajas."
+      }
+    },
+    {
+      "id": "nihongo-benkyou",
+      "ja": "日本語を勉強しています",
+      "kana": "にほんごをべんきょうしています",
+      "en": "I'm studying Japanese.",
+      "es": "Estoy estudiando japonés.",
+      "register": "polite",
+      "chunk": false,
+      "note": {
+        "en": "を marks what is studied, and しています makes it an activity in progress rather than a single act.",
+        "es": "を marca lo que se estudia, y しています lo vuelve una actividad en curso y no un acto puntual."
+      },
+      "situation": {
+        "en": "Explaining why you are in Japan, or why your Japanese is slow and careful.",
+        "es": "Al explicar por qué estás en Japón, o por qué hablas japonés despacio y con cuidado."
+      }
+    },
+    {
+      "id": "yoroshiku",
+      "ja": "よろしくお願いします",
+      "kana": "よろしくおねがいします",
+      "en": "I hope we get along.",
+      "es": "Espero que nos llevemos bien.",
+      "register": "set",
+      "chunk": true,
+      "note": {
+        "en": "Literally 'please (treat me) well'. It closes an introduction and almost any request, and neither English nor Spanish has a neat equivalent.",
+        "es": "Literalmente 'por favor, (trátame) bien'. Cierra una presentación y casi cualquier pedido, y ni el español ni el inglés tienen un equivalente exacto."
+      },
+      "situation": {
+        "en": "At the end of a self-introduction, or when you ask a favour.",
+        "es": "Al final de una presentación, o cuando pides un favor."
+      }
+    },
+    {
+      "id": "kochira-koso",
+      "ja": "こちらこそ、よろしくお願いします",
+      "kana": "こちらこそよろしくおねがいします",
+      "en": "Likewise, I hope we get along too.",
+      "es": "Igualmente, espero que nos llevemos bien.",
+      "register": "set",
+      "chunk": true,
+      "note": {
+        "en": "こちら is 'this side' and こそ stresses it: 'it is I who should say so'. こちらこそ alone also answers thanks or an apology.",
+        "es": "こちら es 'este lado' y こそ lo enfatiza: 'soy yo quien debería decirlo'. こちらこそ solo también responde a un agradecimiento o a una disculpa."
+      },
+      "situation": {
+        "en": "Answering someone who has just said よろしくお願いします.",
+        "es": "Al responder a alguien que acaba de decir よろしくお願いします."
+      }
+    },
+    {
+      "id": "mou-ichido",
+      "ja": "もう一度お願いします",
+      "kana": "もういちどおねがいします",
+      "en": "Once more, please.",
+      "es": "Otra vez, por favor.",
+      "register": "polite",
+      "chunk": true,
+      "note": {
+        "en": "もう一度 is 'one more time'. お願いします after a noun turns it into a polite request.",
+        "es": "もう一度 es 'una vez más'. お願いします después de un sustantivo lo convierte en un pedido cortés."
+      },
+      "situation": {
+        "en": "When you did not catch what was said.",
+        "es": "Cuando no entendiste lo que dijeron."
+      }
+    },
+    {
+      "id": "yukkuri",
+      "ja": "もう少しゆっくり話してください",
+      "kana": "もうすこしゆっくりはなしてください",
+      "en": "Please speak a little more slowly.",
+      "es": "Hable un poco más despacio, por favor.",
+      "register": "polite",
+      "chunk": false,
+      "note": {
+        "en": "もう少し is 'a little more' and ゆっくり 'slowly'. 話してください is the て form of 話す plus ください, the basic polite request.",
+        "es": "もう少し es 'un poco más' y ゆっくり, 'despacio'. 話してください es la forma て de 話す más ください, el pedido cortés básico."
+      },
+      "situation": {
+        "en": "When someone speaks faster than you can follow.",
+        "es": "Cuando alguien habla más rápido de lo que puedes seguir."
+      }
+    },
+    {
+      "id": "dou-iu-imi",
+      "ja": "「やさしい」はどういう意味ですか",
+      "kana": "やさしいはどういういみですか",
+      "en": "What does 'yasashii' mean?",
+      "es": "¿Qué significa 'yasashii'?",
+      "register": "polite",
+      "chunk": false,
+      "note": {
+        "en": "どういう意味 is 'what kind of meaning'; put the word you want explained inside the corner brackets. やさしい is a good one to ask about, since it can mean kind or easy.",
+        "es": "どういう意味 es 'qué tipo de significado'; pon entre las comillas 「」 la palabra que quieres que te expliquen. やさしい es buena para preguntar, porque puede significar amable o fácil."
+      },
+      "situation": {
+        "en": "When you meet a word you do not know.",
+        "es": "Cuando encuentras una palabra que no conoces."
+      }
+    },
+    {
+      "id": "nihongo-de-nanto",
+      "ja": "これは日本語で何と言いますか",
+      "kana": "これはにほんごでなんといいますか",
+      "en": "What is this called in Japanese?",
+      "es": "¿Cómo se dice esto en japonés?",
+      "register": "polite",
+      "chunk": false,
+      "note": {
+        "en": "で marks the means, 'in Japanese', and 何と言いますか is 'what does one say'. Point at the thing as you ask.",
+        "es": "で marca el medio, 'en japonés', y 何と言いますか es 'qué se dice'. Señala la cosa mientras preguntas."
+      },
+      "situation": {
+        "en": "When you know a thing but not its Japanese name.",
+        "es": "Cuando conoces algo pero no su nombre en japonés."
+      }
+    },
+    {
+      "id": "wakarimasen",
+      "ja": "分かりません",
+      "kana": "わかりません",
+      "en": "I don't understand.",
+      "es": "No entiendo.",
+      "register": "polite",
+      "chunk": false,
+      "note": {
+        "en": "The polite negative of 分かる, 'to understand'. Saying すみません first softens it.",
+        "es": "Es la negación cortés de 分かる, 'entender'. Decir すみません antes lo suaviza."
+      },
+      "situation": {
+        "en": "When you do not understand a question or an explanation.",
+        "es": "Cuando no entiendes una pregunta o una explicación."
+      }
+    },
+    {
+      "id": "wakarimashita",
+      "ja": "分かりました",
+      "kana": "わかりました",
+      "en": "I understand. / Got it.",
+      "es": "Entendido.",
+      "register": "polite",
+      "chunk": false,
+      "note": {
+        "en": "The past of 分かる: 'it has become clear to me'. After an instruction it also means 'all right, I will'.",
+        "es": "Es el pasado de 分かる: 'me quedó claro'. Después de una indicación también significa 'de acuerdo, lo haré'."
+      },
+      "situation": {
+        "en": "Confirming that you understood, or agreeing to do something.",
+        "es": "Al confirmar que entendiste, o al aceptar hacer algo."
+      }
+    },
+    {
+      "id": "shitsumon",
+      "ja": "質問があります",
+      "kana": "しつもんがあります",
+      "en": "I have a question.",
+      "es": "Tengo una pregunta.",
+      "register": "polite",
+      "chunk": false,
+      "note": {
+        "en": "質問 is a question and があります says it exists: 'there is a question'. In class, raise your hand first.",
+        "es": "質問 es una pregunta y があります dice que existe: 'hay una pregunta'. En clase, primero levanta la mano."
+      },
+      "situation": {
+        "en": "Asking the teacher for a turn to put a question.",
+        "es": "Al pedirle al maestro un turno para hacer una pregunta."
+      }
+    },
+    {
+      "id": "hiragana-de-kaite",
+      "ja": "ひらがなで書いてください",
+      "kana": "ひらがなでかいてください",
+      "en": "Please write it in hiragana.",
+      "es": "Escríbalo en hiragana, por favor.",
+      "register": "polite",
+      "chunk": false,
+      "note": {
+        "en": "で marks the means again: in hiragana. It helps when a word arrives in kanji you cannot read yet.",
+        "es": "で vuelve a marcar el medio: en hiragana. Sirve cuando una palabra llega en kanji que todavía no sabes leer."
+      },
+      "situation": {
+        "en": "Asking someone to write a word in a script you can read.",
+        "es": "Al pedirle a alguien que escriba una palabra en una escritura que sí puedes leer."
+      }
+    },
+    {
+      "id": "tetsudatte",
+      "ja": "手伝ってもらえますか",
+      "kana": "てつだってもらえますか",
+      "en": "Could you help me?",
+      "es": "¿Me podría ayudar?",
+      "register": "polite",
+      "chunk": false,
+      "note": {
+        "en": "Literally 'can I receive your helping?'. もらえますか makes a request softer than ください does.",
+        "es": "Literalmente '¿puedo recibir tu ayuda?'. もらえますか hace un pedido más suave que ください."
+      },
+      "situation": {
+        "en": "Asking someone for a hand with a task.",
+        "es": "Al pedirle a alguien una mano con una tarea."
+      }
+    },
+    {
+      "id": "irasshaimase",
+      "ja": "いらっしゃいませ",
+      "kana": "いらっしゃいませ",
+      "en": "Welcome (to our shop).",
+      "es": "Bienvenido (a la tienda).",
+      "register": "set",
+      "chunk": true,
+      "note": {
+        "en": "A polite command of いらっしゃる, the respectful 'come': 'please come in'. Staff say it to every customer and expect no reply; a nod is enough.",
+        "es": "Es un mandato cortés de いらっしゃる, el 'venir' respetuoso: 'pase, por favor'. El personal se lo dice a cada cliente y no espera respuesta; basta con un gesto."
+      },
+      "situation": {
+        "en": "What you hear on walking into a shop or restaurant.",
+        "es": "Lo que escuchas al entrar a una tienda o un restaurante."
+      }
+    },
+    {
+      "id": "miteiru-dake",
+      "ja": "見ているだけです",
+      "kana": "みているだけです",
+      "en": "I'm just looking.",
+      "es": "Solo estoy mirando.",
+      "register": "polite",
+      "chunk": false,
+      "note": {
+        "en": "見ている is 'am looking' and だけ is 'only'. It tells staff, kindly, that you do not need help yet.",
+        "es": "見ている es 'estoy mirando' y だけ es 'solo'. Le dice al personal, con amabilidad, que todavía no necesitas ayuda."
+      },
+      "situation": {
+        "en": "When a shop assistant offers help and you are only browsing.",
+        "es": "Cuando alguien de la tienda te ofrece ayuda y solo estás mirando."
+      }
+    },
+    {
+      "id": "kore-o-kudasai",
+      "ja": "これをください",
+      "kana": "これをください",
+      "en": "This one, please.",
+      "es": "Este, por favor.",
+      "register": "polite",
+      "chunk": false,
+      "note": {
+        "en": "を marks the thing you want and ください asks for it. Point as you say これ, 'this'.",
+        "es": "を marca lo que quieres y ください lo pide. Señala al decir これ, 'esto'."
+      },
+      "situation": {
+        "en": "Buying or ordering by pointing.",
+        "es": "Al comprar o pedir señalando."
+      }
+    },
+    {
+      "id": "ikura-desu-ka",
+      "ja": "いくらですか",
+      "kana": "いくらですか",
+      "en": "How much is it?",
+      "es": "¿Cuánto cuesta?",
+      "register": "polite",
+      "chunk": false,
+      "note": {
+        "en": "いくら asks for an amount, and with money it means 'how much'. To be specific, name the thing first: これはいくらですか.",
+        "es": "いくら pregunta por una cantidad, y con dinero significa 'cuánto'. Para precisar, nombra primero la cosa: これはいくらですか."
+      },
+      "situation": {
+        "en": "Asking a price.",
+        "es": "Al preguntar un precio."
+      }
+    },
+    {
+      "id": "kaado-de",
+      "ja": "カードで払えますか",
+      "kana": "カードではらえますか",
+      "en": "Can I pay by card?",
+      "es": "¿Puedo pagar con tarjeta?",
+      "register": "polite",
+      "chunk": false,
+      "note": {
+        "en": "で marks how you pay, and 払えます is 'can pay', the potential form of 払う. Some small shops and restaurants still take cash only.",
+        "es": "で marca cómo pagas, y 払えます es 'puedo pagar', la forma potencial de 払う. Algunas tiendas y restaurantes pequeños todavía aceptan solo efectivo."
+      },
+      "situation": {
+        "en": "Before you order, or at the till.",
+        "es": "Antes de pedir, o en la caja."
+      }
+    },
+    {
+      "id": "fukuro-irimasen",
+      "ja": "袋はいりません",
+      "kana": "ふくろはいりません",
+      "en": "I don't need a bag.",
+      "es": "No necesito bolsa.",
+      "register": "polite",
+      "chunk": false,
+      "note": {
+        "en": "いる here is 'to need' (要る), not the いる of 'to be'. Plastic bags cost a few yen, which is why staff ask.",
+        "es": "Aquí いる es 'necesitar' (要る), no el いる de 'estar'. Las bolsas cuestan unos pocos yenes, por eso el personal pregunta."
+      },
+      "situation": {
+        "en": "Turning down a bag at the till.",
+        "es": "Al rechazar una bolsa en la caja."
+      }
+    },
+    {
+      "id": "futari-desu",
+      "ja": "二人です",
+      "kana": "ふたりです",
+      "en": "Two people.",
+      "es": "Somos dos.",
+      "register": "polite",
+      "chunk": false,
+      "note": {
+        "en": "二人 is read ふたり, an old native count, like 一人, ひとり. From three people on, the counter is 人 read にん: 三人, さんにん.",
+        "es": "二人 se lee ふたり, un conteo antiguo propio del japonés, igual que 一人, ひとり. De tres personas en adelante, el contador es 人 leído にん: 三人, さんにん."
+      },
+      "situation": {
+        "en": "Telling restaurant staff how many are in your group.",
+        "es": "Al decirle al personal del restaurante cuántos son."
+      }
+    },
+    {
+      "id": "menyuu",
+      "ja": "メニューをお願いします",
+      "kana": "メニューをおねがいします",
+      "en": "The menu, please.",
+      "es": "El menú, por favor.",
+      "register": "polite",
+      "chunk": false,
+      "note": {
+        "en": "A noun, を and お願いします asks for that thing. Many places also have a menu with pictures, or plastic models in the window.",
+        "es": "Un sustantivo, を y お願いします piden esa cosa. Muchos lugares tienen además un menú con fotos, o modelos de plástico en la vitrina."
+      },
+      "situation": {
+        "en": "Asking for the menu once you are seated.",
+        "es": "Al pedir el menú cuando ya te sentaste."
+      }
+    },
+    {
+      "id": "osusume",
+      "ja": "おすすめは何ですか",
+      "kana": "おすすめはなんですか",
+      "en": "What do you recommend?",
+      "es": "¿Qué me recomienda?",
+      "register": "polite",
+      "chunk": false,
+      "note": {
+        "en": "おすすめ is a recommendation, from すすめる, 'to recommend'. Staff often point to the dish the place is known for.",
+        "es": "おすすめ es una recomendación, de すすめる, 'recomendar'. El personal suele señalar el plato por el que el lugar es conocido."
+      },
+      "situation": {
+        "en": "When you cannot choose from the menu.",
+        "es": "Cuando no puedes decidir qué pedir del menú."
+      }
+    },
+    {
+      "id": "koohii-hitotsu",
+      "ja": "コーヒーを一つお願いします",
+      "kana": "コーヒーをひとつおねがいします",
+      "en": "One coffee, please.",
+      "es": "Un café, por favor.",
+      "register": "polite",
+      "chunk": false,
+      "note": {
+        "en": "一つ is the general counter for things, and for drinks and dishes it is the safe choice when you do not know the proper counter. Two is 二つ, ふたつ.",
+        "es": "一つ es el contador general para cosas, y para bebidas y platos es la opción segura cuando no conoces el contador exacto. Dos es 二つ, ふたつ."
+      },
+      "situation": {
+        "en": "Ordering one of something.",
+        "es": "Al pedir una unidad de algo."
+      }
+    },
+    {
+      "id": "okaikei",
+      "ja": "お会計をお願いします",
+      "kana": "おかいけいをおねがいします",
+      "en": "The bill, please.",
+      "es": "La cuenta, por favor.",
+      "register": "polite",
+      "chunk": false,
+      "note": {
+        "en": "会計 is the bill or the till, and お makes it polite. In many restaurants you pay at the register by the door rather than at the table.",
+        "es": "会計 es la cuenta o la caja, y お lo vuelve cortés. En muchos restaurantes se paga en la caja junto a la puerta y no en la mesa."
+      },
+      "situation": {
+        "en": "Asking to pay at the end of a meal.",
+        "es": "Al pedir la cuenta al final de la comida."
+      }
+    },
+    {
+      "id": "eki-wa-doko",
+      "ja": "駅はどこですか",
+      "kana": "えきはどこですか",
+      "en": "Where is the station?",
+      "es": "¿Dónde está la estación?",
+      "register": "polite",
+      "chunk": false,
+      "note": {
+        "en": "は sets the topic, the station, and どこ asks where. Start with すみません to catch someone's attention.",
+        "es": "は fija el tema, la estación, y どこ pregunta dónde. Empieza con すみません para llamar la atención de alguien."
+      },
+      "situation": {
+        "en": "Asking the way to the station.",
+        "es": "Al preguntar cómo llegar a la estación."
+      }
+    },
+    {
+      "id": "toire-wa-doko",
+      "ja": "トイレはどこですか",
+      "kana": "トイレはどこですか",
+      "en": "Where is the restroom?",
+      "es": "¿Dónde está el baño?",
+      "register": "polite",
+      "chunk": false,
+      "note": {
+        "en": "トイレ comes from the English 'toilet'. On signs you will also see お手洗い, a politer word.",
+        "es": "トイレ viene del inglés 'toilet'. En los carteles también verás お手洗い, una palabra más cortés."
+      },
+      "situation": {
+        "en": "Asking for the restroom in a shop, a station or a restaurant.",
+        "es": "Al preguntar por el baño en una tienda, una estación o un restaurante."
+      }
+    },
+    {
+      "id": "massugu",
+      "ja": "まっすぐ行ってください",
+      "kana": "まっすぐいってください",
+      "en": "Please go straight ahead.",
+      "es": "Siga derecho, por favor.",
+      "register": "polite",
+      "chunk": false,
+      "note": {
+        "en": "まっすぐ is 'straight' and 行ってください 'please go'. You will hear it in directions, and you can say it to a taxi driver.",
+        "es": "まっすぐ es 'derecho' y 行ってください, 'vaya, por favor'. Lo oirás al pedir indicaciones, y se lo puedes decir a un taxista."
+      },
+      "situation": {
+        "en": "Giving or following directions.",
+        "es": "Al dar o seguir indicaciones."
+      }
+    },
+    {
+      "id": "migi-ni-magatte",
+      "ja": "右に曲がってください",
+      "kana": "みぎにまがってください",
+      "en": "Please turn right.",
+      "es": "Gire a la derecha, por favor.",
+      "register": "polite",
+      "chunk": false,
+      "note": {
+        "en": "に marks the direction and 曲がる is 'to turn'. Left is 左, ひだり.",
+        "es": "に marca la dirección y 曲がる es 'girar'. Izquierda es 左, ひだり."
+      },
+      "situation": {
+        "en": "At a corner, or directing a taxi.",
+        "es": "En una esquina, o al guiar a un taxista."
+      }
+    },
+    {
+      "id": "koko-kara-chikai",
+      "ja": "ここから近いですか",
+      "kana": "ここからちかいですか",
+      "en": "Is it close to here?",
+      "es": "¿Está cerca de aquí?",
+      "register": "polite",
+      "chunk": false,
+      "note": {
+        "en": "から marks the starting point: 'is it near, from here?'. The opposite of 近い is 遠い, とおい, 'far'.",
+        "es": "から marca el punto de partida: '¿está cerca, desde aquí?'. Lo contrario de 近い es 遠い, とおい, 'lejos'."
+      },
+      "situation": {
+        "en": "Checking whether you can walk somewhere.",
+        "es": "Al averiguar si puedes ir caminando a algún lugar."
+      }
+    },
+    {
+      "id": "michi-ni-mayoi",
+      "ja": "道に迷いました",
+      "kana": "みちにまよいました",
+      "en": "I'm lost.",
+      "es": "Me perdí.",
+      "register": "polite",
+      "chunk": false,
+      "note": {
+        "en": "Literally 'I strayed on the way': 道 is the way and 迷う is 'to lose one's way'. The past form says it has already happened.",
+        "es": "Literalmente 'me extravié en el camino': 道 es el camino y 迷う es 'extraviarse'. La forma en pasado dice que ya ocurrió."
+      },
+      "situation": {
+        "en": "When you need someone to set you back on track.",
+        "es": "Cuando necesitas que alguien te oriente."
+      }
+    },
+    {
+      "id": "ima-nanji",
+      "ja": "今何時ですか",
+      "kana": "いまなんじですか",
+      "en": "What time is it?",
+      "es": "¿Qué hora es?",
+      "register": "polite",
+      "chunk": false,
+      "note": {
+        "en": "今 is 'now' and 何時 'what hour', with 何 read なん before 時. Watch 四時, よじ, and 九時, くじ, which are read irregularly.",
+        "es": "今 es 'ahora' y 何時, 'qué hora', con 何 leído なん antes de 時. Ojo con 四時, よじ, y 九時, くじ, que se leen de forma irregular."
+      },
+      "situation": {
+        "en": "Asking a stranger or a friend for the time.",
+        "es": "Al preguntarle la hora a un desconocido o a un amigo."
+      }
+    },
+    {
+      "id": "nanji-made",
+      "ja": "何時までですか",
+      "kana": "なんじまでですか",
+      "en": "Until what time are you open?",
+      "es": "¿Hasta qué hora está abierto?",
+      "register": "polite",
+      "chunk": false,
+      "note": {
+        "en": "まで is 'until': 'until what time is it?'. The same question asks when an event or an offer ends.",
+        "es": "まで es 'hasta': '¿hasta qué hora es?'. La misma pregunta sirve para saber cuándo termina un evento o una oferta."
+      },
+      "situation": {
+        "en": "Asking when a shop, a museum or an event closes.",
+        "es": "Al preguntar a qué hora cierra una tienda, un museo o un evento."
+      }
+    },
+    {
+      "id": "sugoi",
+      "ja": "すごい",
+      "kana": "すごい",
+      "en": "Wow, amazing!",
+      "es": "¡Increíble!",
+      "register": "plain",
+      "chunk": false,
+      "note": {
+        "en": "It once meant 'dreadful' and now means 'amazing' in everyday speech. Tone of voice does most of the work.",
+        "es": "Antes significaba 'terrible' y hoy significa 'increíble' en el habla diaria. El tono de voz hace casi todo el trabajo."
+      },
+      "situation": {
+        "en": "Reacting to anything impressive.",
+        "es": "Al reaccionar ante algo impresionante."
+      }
+    },
+    {
+      "id": "oishii",
+      "ja": "おいしい",
+      "kana": "おいしい",
+      "en": "Delicious!",
+      "es": "¡Delicioso!",
+      "register": "plain",
+      "chunk": false,
+      "note": {
+        "en": "Said with the first bite, it doubles as a compliment to whoever cooked. The kanji spelling 美味しい exists, but kana is more common.",
+        "es": "Dicho con el primer bocado, también es un halago para quien cocinó. Existe la escritura en kanji 美味しい, pero en kana es más común."
+      },
+      "situation": {
+        "en": "Tasting food you like.",
+        "es": "Al probar una comida que te gusta."
+      }
+    },
+    {
+      "id": "yokatta",
+      "ja": "よかった",
+      "kana": "よかった",
+      "en": "What a relief!",
+      "es": "¡Qué bueno!",
+      "register": "plain",
+      "chunk": false,
+      "note": {
+        "en": "The past of いい, 'good', built on its older form よい: 'that turned out well'. It carries relief as much as joy.",
+        "es": "Es el pasado de いい, 'bueno', formado sobre su forma antigua よい: 'salió bien'. Expresa tanto alivio como alegría."
+      },
+      "situation": {
+        "en": "When news or a result turns out fine.",
+        "es": "Cuando una noticia o un resultado sale bien."
+      }
+    },
+    {
+      "id": "zannen",
+      "ja": "残念です",
+      "kana": "ざんねんです",
+      "en": "That's a shame.",
+      "es": "Qué lástima.",
+      "register": "polite",
+      "chunk": false,
+      "note": {
+        "en": "残念 is literally 'a thought that remains': regret, disappointment. With friends, 残念 alone.",
+        "es": "残念 es literalmente 'un pensamiento que queda': pesar, desilusión. Con amigos basta 残念."
+      },
+      "situation": {
+        "en": "When plans fall through or news is disappointing.",
+        "es": "Cuando un plan se cae o una noticia decepciona."
+      }
+    },
+    {
+      "id": "tanoshikatta",
+      "ja": "楽しかったです",
+      "kana": "たのしかったです",
+      "en": "It was fun.",
+      "es": "Fue divertido.",
+      "register": "polite",
+      "chunk": false,
+      "note": {
+        "en": "The past of 楽しい, 'fun': the final い becomes かった. It is a warm way to thank a host after the fact.",
+        "es": "Es el pasado de 楽しい, 'divertido': la い final pasa a かった. Es una forma cálida de agradecerle a un anfitrión después."
+      },
+      "situation": {
+        "en": "After an outing, a class or a party.",
+        "es": "Después de un paseo, una clase o una fiesta."
+      }
+    },
+    {
+      "id": "sou-desu-ne",
+      "ja": "そうですね",
+      "kana": "そうですね",
+      "en": "That's right. / Let me see.",
+      "es": "Así es. / A ver.",
+      "register": "polite",
+      "chunk": true,
+      "note": {
+        "en": "そう is 'so, that way', and ね asks for agreement. Said slowly, it also buys a moment to think.",
+        "es": "そう es 'así', y ね busca acuerdo. Dicho despacio, también da un momento para pensar."
+      },
+      "situation": {
+        "en": "Agreeing with someone, or pausing before you answer.",
+        "es": "Al estar de acuerdo con alguien, o al hacer una pausa antes de responder."
+      }
+    },
+    {
+      "id": "hontou-desu-ka",
+      "ja": "本当ですか",
+      "kana": "ほんとうですか",
+      "en": "Really?",
+      "es": "¿En serio?",
+      "register": "polite",
+      "chunk": false,
+      "note": {
+        "en": "本当 is 'truth': 'is that true?'. In casual speech it shrinks to ほんと？",
+        "es": "本当 es 'verdad': '¿es verdad?'. En el habla informal se reduce a ほんと？"
+      },
+      "situation": {
+        "en": "Reacting to surprising news.",
+        "es": "Al reaccionar ante una noticia sorprendente."
+      }
+    }
+  ],
+  "dialogues": [
+    {
+      "id": "meeting-classmate",
+      "title": { "en": "Meeting a classmate", "es": "Conocer a un compañero de clase" },
+      "scene": {
+        "en": "First day of a university course: Maria asks the student beside a free seat whether she can sit there.",
+        "es": "Primer día de un curso en la universidad: María le pregunta al estudiante junto a un asiento libre si puede sentarse ahí."
+      },
+      "lines": [
+        { "speaker": "A", "ja": "あの、ここ、空いていますか。", "kana": "あのここあいていますか" },
+        { "speaker": "B", "ja": "はい、どうぞ。", "kana": "はいどうぞ" },
+        { "speaker": "A", "ja": "ありがとうございます。はじめまして、マリアです。", "kana": "ありがとうございますはじめましてマリアです" },
+        { "speaker": "B", "ja": "佐藤です。このクラスは初めてですか。", "kana": "さとうですこのクラスははじめてですか" },
+        { "speaker": "A", "ja": "はい、今日からです。よろしくお願いします。", "kana": "はいきょうからですよろしくおねがいします" },
+        { "speaker": "B", "ja": "こちらこそ。分からないことがあったら、聞いてくださいね。", "kana": "こちらこそわからないことがあったらきいてくださいね" }
+      ],
+      "translation": {
+        "en": [
+          "Excuse me, is this seat free?",
+          "Yes, go ahead.",
+          "Thank you. Nice to meet you, I'm Maria.",
+          "I'm Sato. Is this your first time in this class?",
+          "Yes, I start today. I hope we get along.",
+          "Likewise. If there is anything you do not understand, just ask."
+        ],
+        "es": [
+          "Disculpa, ¿está libre este asiento?",
+          "Sí, adelante.",
+          "Gracias. Mucho gusto, soy María.",
+          "Yo soy Sato. ¿Es tu primera vez en esta clase?",
+          "Sí, empiezo hoy. Espero que nos llevemos bien.",
+          "Igualmente. Si hay algo que no entiendas, pregúntame."
+        ]
+      }
+    },
+    {
+      "id": "at-a-cafe",
+      "title": { "en": "At a cafe", "es": "En una cafetería" },
+      "scene": {
+        "en": "Ordering a drink to take away at the counter of a coffee shop.",
+        "es": "Pedir una bebida para llevar en el mostrador de una cafetería."
+      },
+      "lines": [
+        { "speaker": "B", "ja": "いらっしゃいませ。ご注文はお決まりですか。", "kana": "いらっしゃいませごちゅうもんはおきまりですか" },
+        { "speaker": "A", "ja": "カフェラテを一つお願いします。", "kana": "カフェラテをひとつおねがいします" },
+        { "speaker": "B", "ja": "サイズはいかがなさいますか。", "kana": "サイズはいかがなさいますか" },
+        { "speaker": "A", "ja": "小さいのでお願いします。", "kana": "ちいさいのでおねがいします" },
+        { "speaker": "B", "ja": "店内でお召し上がりですか。", "kana": "てんないでおめしあがりですか" },
+        { "speaker": "A", "ja": "いいえ、持ち帰りで。", "kana": "いいえもちかえりで" },
+        { "speaker": "B", "ja": "五百円です。", "kana": "ごひゃくえんです" },
+        { "speaker": "A", "ja": "カードでお願いします。", "kana": "カードでおねがいします" }
+      ],
+      "translation": {
+        "en": [
+          "Welcome. Are you ready to order?",
+          "One latte, please.",
+          "What size would you like?",
+          "A small one, please.",
+          "Will you be having it here?",
+          "No, to take away.",
+          "That is five hundred yen.",
+          "By card, please."
+        ],
+        "es": [
+          "Bienvenido. ¿Ya sabe qué va a pedir?",
+          "Un café latte, por favor.",
+          "¿De qué tamaño lo quiere?",
+          "Uno pequeño, por favor.",
+          "¿Lo va a tomar aquí?",
+          "No, para llevar.",
+          "Son quinientos yenes.",
+          "Con tarjeta, por favor."
+        ]
+      }
+    },
+    {
+      "id": "way-to-station",
+      "title": { "en": "Asking the way to the station", "es": "Preguntar cómo llegar a la estación" },
+      "scene": {
+        "en": "A visitor stops someone on the street to ask for the nearest station.",
+        "es": "Una persona de visita detiene a alguien en la calle para preguntar por la estación más cercana."
+      },
+      "lines": [
+        { "speaker": "A", "ja": "すみません。駅はどちらですか。", "kana": "すみませんえきはどちらですか" },
+        { "speaker": "B", "ja": "駅ですか。この道をまっすぐ行って、二つ目の信号を右です。", "kana": "えきですかこのみちをまっすぐいってふたつめのしんごうをみぎです" },
+        { "speaker": "A", "ja": "二つ目の信号を右ですね。", "kana": "ふたつめのしんごうをみぎですね" },
+        { "speaker": "B", "ja": "はい。曲がると、左に見えますよ。", "kana": "はいまがるとひだりにみえますよ" },
+        { "speaker": "A", "ja": "歩いて何分ぐらいですか。", "kana": "あるいてなんぷんぐらいですか" },
+        { "speaker": "B", "ja": "五分ぐらいです。", "kana": "ごふんぐらいです" },
+        { "speaker": "A", "ja": "分かりました。ありがとうございます。", "kana": "わかりましたありがとうございます" }
+      ],
+      "translation": {
+        "en": [
+          "Excuse me. Which way is the station?",
+          "The station? Go straight along this street and turn right at the second traffic light.",
+          "Right at the second light, then.",
+          "Yes. Once you turn, you will see it on your left.",
+          "About how many minutes is it on foot?",
+          "About five minutes.",
+          "I see. Thank you very much."
+        ],
+        "es": [
+          "Disculpe. ¿Hacia dónde queda la estación?",
+          "¿La estación? Siga derecho por esta calle y gire a la derecha en el segundo semáforo.",
+          "A la derecha en el segundo semáforo, entonces.",
+          "Sí. Cuando gire, la verá a su izquierda.",
+          "¿Cuántos minutos son a pie, más o menos?",
+          "Unos cinco minutos.",
+          "Entendido. Muchas gracias."
+        ]
+      }
+    },
+    {
+      "id": "train-ticket",
+      "title": { "en": "Buying a train ticket", "es": "Comprar un boleto de tren" },
+      "scene": {
+        "en": "At the ticket window of a station, buying a ticket to Osaka.",
+        "es": "En la ventanilla de boletos de una estación, comprando un boleto a Osaka."
+      },
+      "lines": [
+        { "speaker": "A", "ja": "すみません、大阪まで大人一枚お願いします。", "kana": "すみませんおおさかまでおとないちまいおねがいします" },
+        { "speaker": "B", "ja": "片道ですか、往復ですか。", "kana": "かたみちですかおうふくですか" },
+        { "speaker": "A", "ja": "片道です。カードで払えますか。", "kana": "かたみちですカードではらえますか" },
+        { "speaker": "B", "ja": "はい、使えます。千五百円です。", "kana": "はいつかえますせんごひゃくえんです" },
+        { "speaker": "A", "ja": "何番線から出ますか。", "kana": "なんばんせんからでますか" },
+        { "speaker": "B", "ja": "五番線です。階段を上がって右です。", "kana": "ごばんせんですかいだんをあがってみぎです" },
+        { "speaker": "A", "ja": "ありがとうございます。", "kana": "ありがとうございます" }
+      ],
+      "translation": {
+        "en": [
+          "Excuse me, one adult ticket to Osaka, please.",
+          "One way or return?",
+          "One way. Can I pay by card?",
+          "Yes, you can. That is one thousand five hundred yen.",
+          "Which platform does it leave from?",
+          "Platform five. Go up the stairs and it is on the right.",
+          "Thank you."
+        ],
+        "es": [
+          "Disculpe, un boleto de adulto a Osaka, por favor.",
+          "¿Solo ida o ida y vuelta?",
+          "Solo ida. ¿Puedo pagar con tarjeta?",
+          "Sí, puede. Son mil quinientos yenes.",
+          "¿De qué andén sale?",
+          "Del andén cinco. Suba la escalera y está a la derecha.",
+          "Gracias."
+        ]
+      }
+    },
+    {
+      "id": "asking-the-time",
+      "title": { "en": "Asking the time", "es": "Preguntar la hora" },
+      "scene": {
+        "en": "Two friends at dinner lose track of time, and one of them has a last train to catch.",
+        "es": "Dos amigos cenando pierden la noción del tiempo, y uno de ellos tiene que alcanzar el último tren."
+      },
+      "lines": [
+        { "speaker": "A", "ja": "ねえ、今何時？", "kana": "ねえいまなんじ" },
+        { "speaker": "B", "ja": "十一時十五分。", "kana": "じゅういちじじゅうごふん" },
+        { "speaker": "A", "ja": "えっ、もうそんな時間？終電、何時だっけ。", "kana": "えっもうそんなじかんしゅうでんなんじだっけ" },
+        { "speaker": "B", "ja": "十一時四十五分だったと思う。", "kana": "じゅういちじよんじゅうごふんだったとおもう" },
+        { "speaker": "A", "ja": "じゃあ、そろそろ帰ろう。", "kana": "じゃあそろそろかえろう" },
+        { "speaker": "B", "ja": "うん、駅まで一緒に行こう。", "kana": "うんえきまでいっしょにいこう" }
+      ],
+      "translation": {
+        "en": [
+          "Hey, what time is it?",
+          "Quarter past eleven.",
+          "What, already? When is the last train again?",
+          "Eleven forty-five, I think.",
+          "Then we should head home.",
+          "Yeah, let's walk to the station together."
+        ],
+        "es": [
+          "Oye, ¿qué hora es?",
+          "Las once y cuarto.",
+          "¿Qué? ¿Ya es tan tarde? ¿A qué hora era el último tren?",
+          "Creo que a las once y cuarenta y cinco.",
+          "Entonces ya es hora de irnos.",
+          "Sí, vamos juntos a la estación."
+        ]
+      }
+    },
+    {
+      "id": "weekend-plans",
+      "title": { "en": "Making weekend plans", "es": "Hacer planes para el fin de semana" },
+      "scene": {
+        "en": "Two classmates on a Friday afternoon; one of them is planning a hike for Sunday.",
+        "es": "Dos compañeros de clase un viernes por la tarde; uno de ellos está planeando una caminata para el domingo."
+      },
+      "lines": [
+        { "speaker": "A", "ja": "今度の日曜日、何か予定がありますか。", "kana": "こんどのにちようびなにかよていがありますか" },
+        { "speaker": "B", "ja": "特にありません。どうしてですか。", "kana": "とくにありませんどうしてですか" },
+        { "speaker": "A", "ja": "友達と山に登るんです。よかったら、一緒にどうですか。", "kana": "ともだちとやまにのぼるんですよかったらいっしょにどうですか" },
+        { "speaker": "B", "ja": "いいですね。何時にどこで会いますか。", "kana": "いいですねなんじにどこであいますか" },
+        { "speaker": "A", "ja": "朝八時に駅の改札で会いましょう。", "kana": "あさはちじにえきのかいさつであいましょう" },
+        { "speaker": "B", "ja": "分かりました。お弁当を持っていきます。", "kana": "わかりましたおべんとうをもっていきます" },
+        { "speaker": "A", "ja": "雨だったら、また連絡しますね。", "kana": "あめだったらまたれんらくしますね" }
+      ],
+      "translation": {
+        "en": [
+          "Do you have any plans this Sunday?",
+          "Nothing in particular. Why?",
+          "I'm going to climb a mountain with some friends. Would you like to come along?",
+          "Sounds good. What time and where shall we meet?",
+          "Let's meet at eight in the morning at the station ticket gates.",
+          "Got it. I'll bring a packed lunch.",
+          "If it rains, I'll get in touch again."
+        ],
+        "es": [
+          "¿Tienes planes para este domingo?",
+          "Nada en especial. ¿Por qué?",
+          "Voy a subir una montaña con unos amigos. Si quieres, ¿vienes?",
+          "¡Qué bien! ¿A qué hora y dónde nos vemos?",
+          "Veámonos a las ocho de la mañana en la entrada de los andenes de la estación.",
+          "Entendido. Llevaré mi almuerzo.",
+          "Si llueve, te vuelvo a avisar."
+        ]
+      }
+    },
+    {
+      "id": "convenience-store",
+      "title": { "en": "At a convenience store", "es": "En una tienda de conveniencia" },
+      "scene": {
+        "en": "Paying for a boxed lunch at a convenience store, where the clerk asks the usual questions.",
+        "es": "Pagando un almuerzo en caja en una tienda de conveniencia, donde el cajero hace las preguntas de siempre."
+      },
+      "lines": [
+        { "speaker": "B", "ja": "いらっしゃいませ。お弁当、温めますか。", "kana": "いらっしゃいませおべんとうあたためますか" },
+        { "speaker": "A", "ja": "はい、お願いします。", "kana": "はいおねがいします" },
+        { "speaker": "B", "ja": "袋はご利用ですか。", "kana": "ふくろはごりようですか" },
+        { "speaker": "A", "ja": "いいえ、大丈夫です。", "kana": "いいえだいじょうぶです" },
+        { "speaker": "B", "ja": "お箸はお付けしますか。", "kana": "おはしはおつけしますか" },
+        { "speaker": "A", "ja": "はい。あと、スプーンもお願いします。", "kana": "はいあとスプーンもおねがいします" },
+        { "speaker": "B", "ja": "かしこまりました。全部で五百五十円です。", "kana": "かしこまりましたぜんぶでごひゃくごじゅうえんです" },
+        { "speaker": "A", "ja": "これでお願いします。", "kana": "これでおねがいします" }
+      ],
+      "translation": {
+        "en": [
+          "Welcome. Shall I heat up your bento?",
+          "Yes, please.",
+          "Would you like a bag?",
+          "No, I'm fine.",
+          "Shall I put in chopsticks?",
+          "Yes. And a spoon as well, please.",
+          "Certainly. That comes to five hundred and fifty yen.",
+          "With this, please."
+        ],
+        "es": [
+          "Bienvenido. ¿Le caliento el bento?",
+          "Sí, por favor.",
+          "¿Va a querer bolsa?",
+          "No, así está bien.",
+          "¿Le pongo palillos?",
+          "Sí. Y también una cuchara, por favor.",
+          "Con gusto. Son quinientos cincuenta yenes en total.",
+          "Con esto, por favor."
+        ]
+      }
+    },
+    {
+      "id": "host-family-goodbye",
+      "title": { "en": "Saying goodbye to a host family", "es": "Despedirse de una familia anfitriona" },
+      "scene": {
+        "en": "The last morning of a two-week homestay; the student says goodbye to the host mother at the door.",
+        "es": "La última mañana de una estancia de dos semanas; el estudiante se despide de la madre anfitriona en la puerta."
+      },
+      "lines": [
+        { "speaker": "A", "ja": "二週間、いろいろありがとうございました。", "kana": "にしゅうかんいろいろありがとうございました" },
+        { "speaker": "B", "ja": "こちらこそ。毎日にぎやかで、楽しかったよ。", "kana": "こちらこそまいにちにぎやかでたのしかったよ" },
+        { "speaker": "A", "ja": "お母さんの卵焼き、忘れません。", "kana": "おかあさんのたまごやきわすれません" },
+        { "speaker": "B", "ja": "作り方、メールで送るね。", "kana": "つくりかたメールでおくるね" },
+        { "speaker": "A", "ja": "うれしいです。国で作ってみます。", "kana": "うれしいですくにでつくってみます" },
+        { "speaker": "B", "ja": "気をつけてね。着いたら連絡してね。", "kana": "きをつけてねついたられんらくしてね" },
+        { "speaker": "A", "ja": "はい。皆さんもお元気で。", "kana": "はいみなさんもおげんきで" }
+      ],
+      "translation": {
+        "en": [
+          "Thank you for everything these two weeks.",
+          "Thank you too. Every day was lively, and we had fun.",
+          "I will never forget your rolled omelette.",
+          "I'll email you the recipe.",
+          "I'd love that. I'll try making it back home.",
+          "Take care. Let us know when you get home.",
+          "I will. All of you take care too."
+        ],
+        "es": [
+          "Gracias por todo en estas dos semanas.",
+          "Gracias a ti. Todos los días fueron animados y nos divertimos mucho.",
+          "Nunca voy a olvidar su omelet enrollado.",
+          "Te mando la receta por correo.",
+          "¡Qué alegría! Voy a intentar prepararlo en mi país.",
+          "Cuídate. Avísanos cuando llegues.",
+          "Sí. Cuídense ustedes también."
+        ]
+      }
+    }
+  ]
+}

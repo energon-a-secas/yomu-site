@@ -1,0 +1,288 @@
+// The committed dictionary and kanji shards, read from disk the way the page
+// reads them.
+//
+//   node --test tests/data.test.mjs
+//   npm test
+//
+// tools/check-data.mjs holds every file to the format rules; this file holds
+// the data to what the analyzer leans on: that the shard rule in
+// docs/ANALYZER.md finds every key, that a reading split puts the reading back
+// together exactly, and that the handful of words a first lesson uses come out
+// the way a teacher would write them. The last part of the file breaks a copy
+// of data/ on purpose and proves the checker notices each break.
+
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
+import {
+  readFileSync, writeFileSync, mkdtempSync, cpSync, rmSync, statSync,
+} from 'node:fs';
+import { tmpdir } from 'node:os';
+import { dirname, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+import { isKana, isKanji, toHira } from '../js/kana.js';
+
+const HERE = dirname(fileURLToPath(import.meta.url));
+const SITE = resolve(HERE, '..');
+const CHECK = join(SITE, 'tools', 'check-data.mjs');
+const CAP = 140 * 1000;
+
+const read = (rel) => JSON.parse(readFileSync(join(SITE, rel), 'utf8'));
+
+const dictIndex = read('data/dict/index.json');
+const dictShards = dictIndex.shards.map((s) => ({ ...s, doc: read(s.src) }));
+const dict = new Map();
+for (const s of dictShards) for (const [k, v] of Object.entries(s.doc.entries)) dict.set(k, v);
+
+const kanjiIndex = read('data/kanji/index.json');
+const kanjiShards = kanjiIndex.shards.map((s) => ({ ...s, doc: read(s.src) }));
+const kanji = new Map();
+for (const s of kanjiShards) for (const [k, v] of Object.entries(s.doc.entries)) kanji.set(k, v);
+
+/** The page's rule: the last shard whose first is <= the key. */
+function shardFor(key) {
+  let hit = null;
+  for (const s of dictIndex.shards) if (s.first <= key) hit = s; else break;
+  return hit;
+}
+
+/** Kanji runs and the kana between them, as the reading split sees a key. */
+function runs(key) {
+  const out = [];
+  for (const ch of key) {
+    const type = isKanji(ch) ? 'kanji' : 'other';
+    const last = out[out.length - 1];
+    if (last && last.type === type) last.text += ch;
+    else out.push({ type, text: ch });
+  }
+  return out;
+}
+
+// ── The dictionary index and the shard rule ──────────────────────────────
+
+test('the dictionary index counts what the shards hold', () => {
+  assert.equal(dictIndex.format, 'yomu-dict-index/1');
+  assert.equal(dictIndex.keys, dict.size);
+  assert.equal(dictIndex.keys, 38415);
+  assert.equal(dictIndex.maxKey, Math.max(...[...dict.keys()].map((k) => k.length)));
+});
+
+test('every shard is under the cap and in key order', () => {
+  for (const s of dictShards) {
+    assert.ok(statSync(join(SITE, s.src)).size <= CAP, `${s.src} is over the cap`);
+    const keys = Object.keys(s.doc.entries);
+    assert.equal(s.doc.first, keys[0]);
+    assert.equal(s.first, keys[0]);
+    for (let i = 1; i < keys.length; i += 1) assert.ok(keys[i - 1] < keys[i], `${s.src} at ${keys[i]}`);
+  }
+});
+
+test('the last shard whose first is <= a key is the shard that holds it, for every key', () => {
+  for (const s of dictShards) {
+    for (const key of Object.keys(s.doc.entries)) {
+      assert.equal(shardFor(key).src, s.src, key);
+    }
+  }
+});
+
+// ── Records ───────────────────────────────────────────────────────────────
+
+test('records keep to the field limits', () => {
+  for (const [key, recs] of dict) {
+    assert.ok(recs.length >= 1 && recs.length <= 6, `${key} has ${recs.length} records`);
+    for (const r of recs) {
+      assert.ok(r.g.length >= 1 && r.g.length <= 3, `${key}: g`);
+      for (const g of r.g) assert.ok(g.length >= 1 && g.length <= 60, `${key}: ${g}`);
+      assert.equal(typeof r.p, 'string');
+      if (r.q !== undefined) assert.ok([1, 2, 3, 4, 5].includes(r.q), `${key}: q ${r.q}`);
+      if (r.k) assert.ok(r.k.length <= 2, `${key}: k`);
+      for (const f of ['u', 'x', 'w']) if (r[f] !== undefined) assert.equal(r[f], 1, `${key}: ${f}`);
+      if (r.w) assert.ok(key.endsWith('は'), `${key}: w without a final は`);
+    }
+  }
+});
+
+test('f appears exactly on keys with a run of two or more kanji', () => {
+  for (const [key, recs] of dict) {
+    const multi = runs(key).some((r) => r.type === 'kanji' && [...r.text].length >= 2);
+    for (const r of recs) {
+      if (!multi || !r.r) assert.equal(r.f, undefined, key);
+      else assert.equal(typeof r.f, 'string', key);
+    }
+  }
+});
+
+test('a split reading puts the reading back together exactly', () => {
+  let checked = 0;
+  for (const [key, recs] of dict) {
+    for (const r of recs) {
+      if (!r.f) continue;
+      const parts = r.f.split(';');
+      const segs = runs(key);
+      const kanjiRuns = segs.filter((s) => s.type === 'kanji');
+      assert.equal(parts.length, kanjiRuns.length, `${key}: ${r.f}`);
+      // A key with Latin letters or digits in it (無線ＬＡＮ) has no kana to
+      // compare them with; the split of its kanji is still checked above.
+      if (parts.includes('*') || [...key].some((ch) => !isKana(ch) && !isKanji(ch))) continue;
+      let i = 0;
+      let rebuilt = '';
+      for (const s of segs) {
+        if (s.type === 'kanji') {
+          const pieces = parts[i].split('|');
+          assert.equal(pieces.length, [...s.text].length, `${key}: ${r.f}`);
+          rebuilt += pieces.join('');
+          i += 1;
+        } else {
+          rebuilt += toHira(s.text);
+        }
+      }
+      assert.equal(rebuilt, toHira(r.r[0]), `${key}: ${r.f}`);
+      checked += 1;
+    }
+  }
+  assert.ok(checked > 13000, `only ${checked} splits checked`);
+});
+
+test('first-lesson words read the way a teacher writes them', () => {
+  const first = (k) => dict.get(k)[0];
+  assert.deepEqual(first('勉強').r, ['べんきょう']);
+  assert.equal(first('勉強').f, 'べん|きょう');
+  assert.deepEqual(first('勉強').g, ['study', 'diligence', 'experience']);
+  assert.equal(first('学校').f, 'がっ|こう');
+  assert.equal(first('日本語').f, 'に|ほん|ご');
+  assert.equal(first('人々').f, 'ひと|びと');
+  assert.equal(first('今日').f, '*');
+  assert.equal(first('大人').f, '*');
+  assert.equal(first('受付').f, 'うけ|つけ');
+  assert.equal(first('食べる').r[0], 'たべる');
+  assert.match(first('食べる').p, /\bv1\b/);
+  assert.equal(first('行く').f, undefined);
+  assert.deepEqual(first('わたし').k, ['私']);
+  assert.equal(first('わたし').r, undefined);
+});
+
+test('は leads with the particle, and the particle is said wa', () => {
+  const ha = dict.get('は');
+  assert.match(ha[0].p, /\bprt\b/);
+  assert.equal(ha[0].w, 1);
+  assert.ok(ha.slice(1).every((r) => !r.w), 'only the particle is said wa');
+});
+
+test('こんにちは and 今日は: the final は is said wa, and the key is a word plus a particle', () => {
+  for (const k of ['こんにちは', '今日は', 'こんばんは', '実は', 'では', 'には', 'とは']) {
+    assert.ok(dict.get(k).some((r) => r.w === 1), `${k} has no w`);
+  }
+  for (const k of ['今日は', '実は', '一緒に', 'じつは']) assert.equal(dict.get(k)[0].x, 1, `${k} has no x`);
+});
+
+test('x is not set where the particle-looking kana belongs to the word', () => {
+  for (const k of ['この', 'もの', 'えいが', 'しごと', 'きもの', 'いなか', 'かどうか', '愚か']) {
+    if (dict.has(k)) assert.equal(dict.get(k)[0].x, undefined, `${k} has x`);
+  }
+  for (const k of ['には', 'とは']) assert.equal(dict.get(k)[0].x, undefined, `${k} is a particle`);
+});
+
+test('the frequency bands have their stated sizes', () => {
+  const band = new Map();
+  for (const recs of dict.values()) band.set(recs[0].q, (band.get(recs[0].q) || 0) + 1);
+  assert.equal(band.get(1), 1000);
+  assert.equal(band.get(2), 2000);
+  assert.equal(band.get(3), 5000);
+  assert.equal(band.get(4), 12000);
+  assert.equal(dict.get('の')[0].q, 1);
+});
+
+// ── Kanji ─────────────────────────────────────────────────────────────────
+
+test('the kanji index lists exactly the characters in each shard', () => {
+  assert.equal(kanjiIndex.format, 'yomu-kanji-index/1');
+  for (const s of kanjiShards) {
+    assert.ok(statSync(join(SITE, s.src)).size <= CAP, `${s.src} is over the cap`);
+    assert.equal(s.chars, Object.keys(s.doc.entries).join(''));
+  }
+  assert.equal(kanji.size, kanjiIndex.count);
+  assert.ok(kanji.size >= 2500 && kanji.size <= 2700, `${kanji.size} kanji`);
+});
+
+test('kanji are in frequency order, unranked last', () => {
+  const ranks = [...kanji.values()].map((e) => (e.f === undefined ? Infinity : e.f));
+  for (let i = 1; i < ranks.length; i += 1) assert.ok(ranks[i - 1] <= ranks[i], `at ${i}`);
+  assert.equal([...kanji.keys()][0], '日');
+});
+
+test('kanji entries carry readings, meanings and KanjiVG parts', () => {
+  for (const [ch, e] of kanji) {
+    assert.ok(e.m.length >= 1 && e.m.length <= 3, `${ch}: m`);
+    assert.ok(e.parts.length <= 4, `${ch}: parts`);
+    assert.equal(new Set(e.parts).size, e.parts.length, `${ch}: duplicate part`);
+    assert.ok(Number.isInteger(e.s) && e.s > 0, `${ch}: s`);
+  }
+  assert.deepEqual(kanji.get('学').parts, ['⺍', '冖', '子']);
+  assert.deepEqual(kanji.get('語').parts, ['言', '吾']);
+  assert.deepEqual(kanji.get('学').on, ['ガク']);
+  assert.equal(kanji.get('学').g, 1);
+  assert.ok(kanji.get('食').kun.includes('た.べる'));
+});
+
+// ── The checker catches what it says it catches ───────────────────────────
+
+function brokenCopy(mutate) {
+  const dir = mkdtempSync(join(tmpdir(), 'yomu-check-'));
+  cpSync(join(SITE, 'data'), join(dir, 'data'), { recursive: true });
+  const rw = (rel, fn) => {
+    const p = join(dir, rel);
+    const doc = JSON.parse(readFileSync(p, 'utf8'));
+    fn(doc);
+    writeFileSync(p, JSON.stringify(doc));
+  };
+  mutate(rw, dir);
+  const run = spawnSync(process.execPath, [CHECK, join(dir, 'data')], { encoding: 'utf8' });
+  rmSync(dir, { recursive: true, force: true });
+  return run;
+}
+
+test('check-data passes the committed data', () => {
+  const run = spawnSync(process.execPath, [CHECK], { encoding: 'utf8' });
+  assert.equal(run.status, 0, run.stderr);
+});
+
+test('check-data fails each broken rule and names the file', () => {
+  const cases = [
+    ['unsorted keys', (rw) => rw('data/dict/w02.json', (d) => {
+      const [a, b, ...rest] = Object.entries(d.entries);
+      d.entries = Object.fromEntries([b, a, ...rest]);
+      d.first = b[0];
+    }), /w02\.json: keys out of order/],
+    ['a key in the wrong shard', (rw) => rw('data/dict/w04.json', (d) => {
+      d.entries = { ...d.entries, 'ヴ': [{ g: ['x'], p: 'n' }] };
+      d.last = 'ヴ';
+    }), /w04\.json: "ヴ" is outside/],
+    ['an empty g', (rw) => rw('data/dict/w01.json', (d) => {
+      Object.values(d.entries)[3][0].g = [];
+    }), /w01\.json: .* empty g/],
+    ['an em dash', (rw) => rw('data/kanji/k01.json', (d) => {
+      Object.values(d.entries)[0].m[0] = 'a \u2014 b';
+    }), /k01\.json: U\+2014/],
+    ['no acknowledgement', (rw) => rw('data/dict/w05.json', (d) => {
+      delete d._licence.acknowledgement;
+    }), /w05\.json: _licence\.screen is required/],
+    ['an input without a licence', (rw) => rw('data/kanji/k00.json', (d) => {
+      delete d._licence.inputs[0].spdx;
+    }), /k00\.json: _licence\.inputs\[0\]\.spdx is missing/],
+    ['an unknown format', (rw) => rw('data/kanji/k02.json', (d) => {
+      d.format = 'yomu-kanji/2';
+    }), /k02\.json: unknown format/],
+    ['an unlisted shard', (rw, dir) => {
+      cpSync(join(dir, 'data/dict/w03.json'), join(dir, 'data/dict/w99.json'));
+    }, /index\.json: does not list data\/dict\/w99\.json/],
+    ['a file over the cap', (rw) => rw('data/kanji/k02.json', (d) => {
+      d.pad = 'x'.repeat(CAP);
+    }), /k02\.json: .* over the/],
+  ];
+  for (const [name, mutate, expect] of cases) {
+    const run = brokenCopy(mutate);
+    assert.equal(run.status, 1, `${name}: exit ${run.status}`);
+    assert.match(run.stderr, expect, name);
+  }
+});
