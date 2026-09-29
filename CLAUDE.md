@@ -71,6 +71,14 @@ glosses contain a word the fleet's copy rules ban (パワフル is "powerful"); 
 builder drops a banned word only when the sense has another gloss. Do not
 "fix" them in `data/`: rebuild, never hand-edit a shard.
 
+**Words outside JMdict's common set ship by rule, not by count alone.**
+`tools/lib/extra.mjs` names the three rules and `MIN_MATCHES` (5) is
+measured (docs/ANALYZER.md). Lowering it is not free: at 3, 六百 became a
+word instead of a number, 清水 "spring water" instead of the surname, and six
+tests failed; filtering out only conjugations, the full release shipped
+verb stems and phrases (はし read 愛し, くじ read ９時). Rebuild with
+`node tools/build-dict.mjs` and diff the sentence suites before changing it.
+
 **Names are guesses.** JMnedict is not pinned, so a kanji run no dictionary
 key spans (田中, 山田) becomes one `name` token with a per-kanji reading that
 prefers kun readings, and `confidence: 'guess'`. The page says so.

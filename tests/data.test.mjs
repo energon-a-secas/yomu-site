@@ -66,7 +66,7 @@ function runs(key) {
 test('the dictionary index counts what the core and the shards hold', () => {
   assert.equal(dictIndex.format, 'yomu-dict-index/2');
   assert.equal(dictIndex.keys, dict.size);
-  assert.equal(dictIndex.keys, 38415);
+  assert.equal(dictIndex.keys, 39359);
   assert.equal(dictIndex.maxKey, Math.max(...[...dict.keys()].map((k) => k.length)));
   assert.equal(dictIndex.core.keys, Object.keys(dictCore.entries).length);
   const ranged = dictShards.reduce((n, s) => n + Object.keys(s.doc.entries).length, 0);
@@ -223,10 +223,13 @@ test('x is not set where the particle-looking kana belongs to the word', () => {
 test('the frequency bands have their stated sizes', () => {
   const band = new Map();
   for (const recs of dict.values()) band.set(recs[0].q, (band.get(recs[0].q) || 0) + 1);
-  assert.equal(band.get(1), 1000);
-  assert.equal(band.get(2), 2000);
-  assert.equal(band.get(3), 5000);
-  assert.equal(band.get(4), 12000);
+  // The common keys fill the bands exactly (1,000 / 2,000 / 5,000 / 12,000);
+  // a key from outside the common set is put on their scale without moving
+  // one of them (tools/lib/freq.mjs, bandScale), so a band may hold a few
+  // more, never fewer.
+  for (const [b, size] of [[1, 1000], [2, 2000], [3, 5000], [4, 12000]]) {
+    assert.ok(band.get(b) >= size && band.get(b) <= size * 1.06, `q${b} holds ${band.get(b)}`);
+  }
   assert.equal(dict.get('の')[0].q, 1);
 });
 

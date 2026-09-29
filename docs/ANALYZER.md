@@ -127,12 +127,53 @@ Built by hand-run scripts under `tools/`, committed, never fetched from an
 upstream by the page. Every JSON file carries a `_licence` block and stays
 under 140 KB.
 
+The dictionary is cut from jmdict-eng, pinned in `tools/lib/sources.mjs`.
+Its entries with a common spelling (jmdict-eng-common, 22,637 of 218,672)
+all ship. An entry outside that set ships only for one of three reasons, each
+naming the keys it ships under (`tools/lib/extra.mjs` explains them):
+
+- **evidence**: a kanji spelling of two or more characters the corpus matches
+  at least `MIN_MATCHES` (5) times, from an entry that is not an expression,
+  that the analyzer does not already read as a conjugation, a stem, a common
+  key with a particle or an honorific prefix, or a run of common keys read the
+  same way (殺人犯, 犬小屋 いぬごや, 七面鳥, 学園祭 がくえんさい); a suffix
+  (`suf`, `ctr`) also ships under its hiragana reading when that is a common
+  key (置き under おき, for 十分おきに);
+- **kana**: a word usually written in kana, spelled with one shipped kanji,
+  whose hiragana is no key yet (すもも); only the kana ships;
+- **suru**: under a common hiragana key none of whose records takes する, the
+  one outside entry that does, spelled with the most frequent kanji (帰社
+  under きしゃ). A noun that takes no する pays `COST.suruNeedsVs` before one.
+
+A record from outside the common set whose spelling the corpus never matched
+is priced as having no evidence (band 8), so it wins only where the context
+asks for it. Its key's band is set on the common keys' scale, which moves no
+common key's band.
+
+`MIN_MATCHES` was measured over the same 3,016 texts, against the data with
+no entry from outside the common set (38,415 keys, 3,908.5 KB):
+
+| N | keys added | records added | bytes added | name guesses (209) | texts changed |
+|---:|---:|---:|---:|---:|---:|
+| kana and suru only | 58 | 722 | 52.5 KB | 209 | 4 |
+| 20 | 162 | 831 | 62.8 KB | 202 | 21 |
+| 10 | 334 | 1,004 | 80.5 KB | 196 | 33 |
+| **5** | **944** | **1,625** | **146.7 KB** | **179** | **62** |
+| 3 | 1,998 | 2,699 | 261.1 KB | 160 | 87 |
+
+At 5 every changed text reads better (a name guess becomes a word, a compound
+takes its own reading) and the tests pass; at 3, 六百 stops being a number
+and 清水 a surname, and six tests fail. The first version of these rules,
+which filtered out only conjugations and a key with a particle, added 5,679
+keys and 679 KB at 3, and even at 20 read はし as 愛し "lovely" and くじ as
+９時.
+
 `data/dict/index.json`, format `yomu-dict-index/2`:
 
 ```json
 { "_licence": {}, "format": "yomu-dict-index/2",
-  "keys": 38415, "maxKey": 22,
-  "core": { "src": "data/dict/core.json", "keys": 1192 },
+  "keys": 39359, "maxKey": 22,
+  "core": { "src": "data/dict/core.json", "keys": 1178 },
   "filter": { "src": "data/dict/filter.json" },
   "shards": [ { "src": "data/dict/w00.json", "first": "〇" } ] }
 ```
@@ -163,6 +204,10 @@ corpus sentences the core was not chosen from:
 | 14 | 88.2 KB | 3, 3.51, 6 |
 | **16** | **100.6 KB** | **3, 3.41, 6** |
 | 20 | 125.4 KB | 3, 3.35, 5 |
+
+The table was measured on the common set alone (27 range shards). With the
+entries outside it added (28 range shards, 103.1 KB of filter), the shipped
+build reads 3, 3.46, 6 on the same sentences.
 
 `data/dict/wNN.json`, format `yomu-dict/1`:
 
@@ -211,7 +256,7 @@ per character. `parts` are KanjiVG's top-level named elements.
 
 ## Licences
 
-- JMdict and KANJIDIC: Electronic Dictionary Research and Development Group, CC BY-SA 4.0. The acknowledgement is shown on the page whenever a gloss or a kanji reading is.
+- JMdict (jmdict-simplified's jmdict-eng) and KANJIDIC: Electronic Dictionary Research and Development Group, CC BY-SA 4.0. The acknowledgement is shown on the page whenever a gloss or a kanji reading is.
 - KanjiVG: Ulrich Apel, CC BY-SA 3.0, for `parts`.
 - Tatoeba: CC BY 2.0 FR, used only to rank keys; no sentence ships.
 - The phrase library and every note are written here and are public domain.

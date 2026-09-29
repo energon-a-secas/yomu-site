@@ -94,7 +94,7 @@ yomu-site/
 │   ├── speech.js         # speechSynthesis with a Japanese voice
 │   └── embed.js          # the yomu-embed/1 protocol
 ├── data/
-│   ├── dict/             # JMdict common, 27 shards under 140 KB
+│   ├── dict/             # JMdict: a core, 28 range shards and a key filter, each under 140 KB
 │   ├── kanji/            # KANJIDIC and KanjiVG parts, 3 shards
 │   └── phrases/          # the phrase library (original, CC0)
 ├── tools/                # hand-run builders and the data checker

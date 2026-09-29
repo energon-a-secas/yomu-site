@@ -32,7 +32,7 @@ export const SAMPLE_EVERY = 10;
  * text did not need often enough to show in the median; above it, the file
  * grows for nothing.
  */
-export const BITS_PER_KEY = Number(process.env.YOMU_BITS_PER_KEY || 16);
+export const BITS_PER_KEY = Number(process.env.YOMU_BITS_PER_KEY || 16); // env: measuring runs only
 
 const isDigit = (ch) => ch >= '0' && ch <= '9';
 

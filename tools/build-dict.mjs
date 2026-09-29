@@ -8,19 +8,24 @@
  *
  *   node tools/build-dict.mjs        (or: make data)
  *
- * The source is jmdict-eng-common, the JMdict entries with at least one common
- * spelling. Every common spelling, kanji or kana, becomes a key; a key maps to
- * the records of every entry that spells it, so わたし finds 私 and は finds
- * the particle as well as the tooth. The full entry is not shipped: a record
- * is the lean projection a reader needs beside a word (three glosses, the
- * parts of speech, the reading split per kanji, a frequency band), and the
- * rest of JMdict stays upstream.
+ * The source is jmdict-eng, the whole of JMdict in English. Its entries with
+ * at least one common spelling (exactly jmdict-eng-common) ship under every
+ * spelling, and every common spelling, kanji or kana, becomes a key; a key
+ * maps to the records of every entry that spells it, so わたし finds 私 and は
+ * finds the particle as well as the tooth. An entry outside the common set
+ * ships only under the keys tools/lib/extra.mjs chooses for it (すもも, 置き,
+ * 帰社, and the words the corpus has evidence for). The full entry is not
+ * shipped: a record is the lean projection a reader needs beside a word (three
+ * glosses, the parts of speech, the reading split per kanji, a frequency
+ * band), and the rest of JMdict stays upstream.
  *
- * The page never loads the whole dictionary. The keys are sorted in plain JS
- * string order and cut into contiguous shards of at most 140 KB, and the index
- * lists each shard's first key, so a lookup fetches exactly one shard: the
- * last one whose `first` is <= the key. The builder guarantees that rule by
- * construction and tools/check-data.mjs re-checks it on every file.
+ * The page never loads the whole dictionary. The keys texts ask for most go
+ * in one core shard (tools/lib/layout.mjs); the rest are sorted in plain JS
+ * string order and cut into contiguous shards of at most 140 KB, the index
+ * lists each shard's first key, and a key filter says which keys exist, so a
+ * lookup fetches the core and at most the one shard whose `first` is the last
+ * <= the key. The builder guarantees that rule by construction and
+ * tools/check-data.mjs re-checks it on every file.
  */
 import path from 'node:path';
 import { loadZippedJson, loadBz2Text, upstream } from './lib/sources.mjs';
@@ -32,7 +37,9 @@ import { readingTable, splitReading, needsSplit } from './lib/split.mjs';
 import { isAllKana } from '../js/kana.js';
 import { byEvidence, kunTable, stampPlaces, stampShipped } from './lib/prices.mjs';
 import { chooseCore, filterDoc } from './lib/layout.mjs';
-import { countKeys, bandsOf, sentencesOf } from './lib/freq.mjs';
+import { countKeys, bandsOf, bandScale, sentencesOf } from './lib/freq.mjs';
+import { selectExtra, isCommon, MIN_MATCHES } from './lib/extra.mjs';
+import { selection } from './lib/kanjidic.mjs';
 
 const TOOL = 'tools/build-dict.mjs';
 const OUT = path.join(SITE, 'data', 'dict');
@@ -182,24 +189,33 @@ function byRank(a, b) {
 
 // ── Build ─────────────────────────────────────────────────────────────────
 
-function collect(jmdict) {
+/**
+ * Every spelling of every shipped entry, and the keys. A common entry is
+ * shipped under all its spellings and each common one is a key, as before;
+ * an entry outside the common set only under the keys tools/lib/extra.mjs
+ * chose for it, each of which is a key.
+ */
+function collect(jmdict, extras) {
   const forms = new Map();
+  const keys = new Set();
   const push = (text, f) => {
     if (!forms.has(text)) forms.set(text, []);
     forms.get(text).push(f);
+    if (f.common || f.extra) keys.add(text);
   };
   jmdict.words.forEach((entry, index) => {
+    const only = isCommon(entry) ? null : extras.get(index);
+    if (!isCommon(entry) && !only) return;
+    const extra = !!only;
     for (const k of entry.kanji) {
-      if (k.tags.includes('sK')) continue;
-      push(k.text, { entry, index, kind: 'kanji', common: k.common });
+      if (k.tags.includes('sK') || (only && !only.has(k.text))) continue;
+      push(k.text, { entry, index, kind: 'kanji', common: k.common, extra });
     }
     for (const k of entry.kana) {
-      if (k.tags.includes('sk')) continue;
-      push(k.text, { entry, index, kind: 'kana', common: k.common });
+      if (k.tags.includes('sk') || (only && !only.has(k.text))) continue;
+      push(k.text, { entry, index, kind: 'kana', common: k.common, extra });
     }
   });
-  const keys = new Set();
-  for (const [text, list] of forms) if (list.some((f) => f.common)) keys.add(text);
   return { forms, keys };
 }
 
@@ -245,10 +261,10 @@ function saidWa(key, f) {
   return f.entry.sense.some((s) => s.info.some((i) => WA_NOTE.test(i)));
 }
 
-function buildEntries(jmdict, kanjidic, bands, counts) {
+function buildEntries(collected, kanjidic, bands, counts) {
   const table = readingTable(kanjidic);
   const kanjiInfo = kunTable(kanjidic);
-  const { forms, keys } = collect(jmdict);
+  const { forms, keys } = collected;
   // Every record of every key, uncapped, in JMdict order, with its key's
   // band: the dictionary the page would have with no cap, which is what a
   // kana record's spelling is looked up in.
@@ -260,6 +276,9 @@ function buildEntries(jmdict, kanjidic, bands, counts) {
       const rec = recordFor(key, f, table);
       if (!rec.g.length) { stats.emptyG += 1; continue; }
       if (q) rec.q = q;
+      // Carried to tools/lib/prices.mjs, which prices a record from outside
+      // the common set as having no evidence, and removes the mark.
+      if (f.extra) rec.extra = 1;
       list.push({ f, rec });
     }
     if (list.length) full.set(key, list);
@@ -357,19 +376,34 @@ function pack(sorted, entries, licence) {
 
 function main() {
   const t0 = Date.now();
-  const jmdict = loadZippedJson('jmdict');
+  const jmdict = loadZippedJson('jmdictFull');
   const kanjidic = loadZippedJson('kanjidic');
   const sentences = sentencesOf(loadBz2Text('tatoebaJpn'));
+  const shipped = new Set(selection(kanjidic).map((c) => c.literal));
 
-  const { keys: keySet } = collect(jmdict);
-  const counts = countKeys(sentences, keySet);
+  const { extras, stats: extra } = selectExtra(jmdict, sentences, kanjidic, shipped);
+  const collected = collect(jmdict, extras);
+  const keySet = collected.keys;
+  // The common keys are counted and banded among themselves, as before the
+  // entries outside the common set were added, so adding one moves no other
+  // key's band. An added key is counted against every shipped key and put
+  // on the common keys' scale.
+  const commonKeys = new Set([...keySet].filter((k) => collected.forms.get(k).some((f) => f.common)));
+  const counts = countKeys(sentences, commonKeys);
   const bands = bandsOf(counts);
-  const { entries } = buildEntries(jmdict, kanjidic, bands, counts);
+  const scale = bandScale(counts, bands);
+  const shippedCounts = countKeys(sentences, keySet);
+  for (const k of keySet) {
+    if (commonKeys.has(k) || !shippedCounts.get(k)) continue;
+    counts.set(k, shippedCounts.get(k));
+    bands.set(k, scale(shippedCounts.get(k)));
+  }
+  const { entries } = buildEntries(collected, kanjidic, bands, counts);
 
   const all = [...entries.keys()].sort();
   const maxKey = all.reduce((m, k) => Math.max(m, k.length), 0);
   const licence = licenceBlock('edrdg', TOOL, {
-    upstream: [upstream('jmdict'), upstream('kanjidic'), upstream('tatoebaJpn')],
+    upstream: [upstream('jmdictFull'), upstream('kanjidic'), upstream('tatoebaJpn')],
     inputs: [['tatoeba', 'q, a frequency band per key, and which keys the core holds; no sentence ships']],
   });
 
@@ -419,7 +453,8 @@ function main() {
   const records = [...entries.values()].reduce((a, r) => a + r.length, 0);
   const qs = [1, 2, 3, 4, 5].map((b) => [...bands.values()].filter((v) => v === b).length);
   const out = [
-    `keys ${all.length} (${keySet.size} common spellings), records ${records}, maxKey ${maxKey} UTF-16 units`,
+    `keys ${all.length}, records ${records}, maxKey ${maxKey} UTF-16 units`,
+    `outside the common set (N ${MIN_MATCHES}): ${extras.size} entries; of ${extra.candidates} candidate spellings, evidence ${extra.evidence}, suffix ${extra.suffix} (${extra.under} readings under a common kana key); kana ${extra.kana}; suru ${extra.suru}`,
     `core ${coreKeys.length} keys, ${fmtBytes(coreBytes)} (${coreBytes} B), chosen over ${sampled} sampled sentences`,
     `range shards ${docs.length}: min ${fmtBytes(Math.min(...sizes))} (${Math.min(...sizes)} B), max ${fmtBytes(Math.max(...sizes))} (${Math.max(...sizes)} B), total ${fmtBytes(total)} (${total} B); index ${fmtBytes(indexBytes)}`,
     `filter ${filter.n} keys, ${filter.m} bits, ${filter.k} hashes, ${fmtBytes(filterBytes)} (${filterBytes} B)`,

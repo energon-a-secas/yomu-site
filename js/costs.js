@@ -121,6 +121,7 @@ export const COST = Object.freeze({
   // the 15 its q1 band saved it, so the number wins there and only there.
   durationKey: 40,
   nounVerb: 30,       // a noun straight into a verb, no particle (connect)
+  suruNeedsVs: 60,    // ...and more when the verb is する and the noun takes none
   suffixAfterPredicate: 40, // a suffix-first noun met in kana after a verb or adjective (connect)
   homographSpelling: 10, // per place this kanji sits down its reading's list
   homographAffix: 10, // an affix-first record, where another is not
@@ -327,7 +328,15 @@ function pairCost(prev, next) {
     // both the particle wins: 袋|は|いりません, "no bag, thanks", was
     // 袋|はいりません, "the bag does not go in". Adverbs are exempt; they
     // lead verbs all the time (ゆっくり話して).
-    if (prev && isBareNoun(prev)) return COST.nounVerb;
+    if (prev && isBareNoun(prev)) {
+      // する straight after a dictionary noun that does not take it (汽車
+      // has no vs) is not Japanese; after one that does it is -30 above.
+      // Without this, きしゃしました read 汽車 "train" + did, because 汽車
+      // is six bands more frequent than 帰社 "returning to the office", the
+      // one きしゃ that takes する, and 30 either way did not cover it.
+      const suru = next.key === 'する' || next.key === '為る';
+      return COST.nounVerb + (suru && prev.rec ? COST.suruNeedsVs : 0);
+    }
   }
   if (n === 'exp' && p === 'verb' && (next.s === 'ください' || next.s === '下さい')) return -30;
   // An interjection opens an utterance; straight after a particle that does

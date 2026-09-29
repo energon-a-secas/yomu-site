@@ -5,8 +5,8 @@
 //
 // Each test names the input that was wrong and what it read as, so a later
 // change to a cost that brings one back fails here with the case that forced
-// the fix. Where the data itself is missing a word (すもも, 帰社), the test
-// holds only what the analyzer can get right without it.
+// the fix. The words the data was missing (すもも, 帰社, 置き) ship now from
+// outside the common set (tools/lib/extra.mjs), and have tests of their own.
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -264,7 +264,7 @@ test('a noun and した in kana is する in the past, not 下 "below"', async (
   assert.ok(ids(t).includes('past'));
 });
 
-test('without すもも in the data, no particle is doubled and もの is not "because"', async () => {
+test('no particle is doubled and もの is not "because" in the plum tongue twister', async () => {
   const r = await run('すもももももももものうち');
   const words = r.tokens;
   for (let k = 1; k < words.length; k++) {
@@ -273,6 +273,45 @@ test('without すもも in the data, no particle is doubled and もの is not "b
   }
   assert.ok(!words.some((t) => t.surface === 'もの' && t.kind === 'particle'), cut(r));
   assert.equal(cut(await run('ももももも')), 'もも|も|もも');
+});
+
+// ── Words from outside the common set (tools/lib/extra.mjs) ──────────────
+
+test('すもも is in the data now: the tongue twister reads plum, peach, peach (was す|も|もも|も|もも|も|もの)', async () => {
+  const r = await run('すもももももももものうち');
+  assert.equal(cut(r), 'すもも|も|もも|も|もも|の|うち');
+  assert.ok(tok(r, 'すもも').entry.k.includes('李'));
+  assert.equal(saidLine(r), 'sumomo mo momo mo momo no uchi');
+  // the kana ships, the kanji does not: 李 alone is a surname as often as a plum
+  const d = diskDict();
+  await d.need(['すもも', '李']);
+  assert.ok(d.get('すもも'));
+  assert.equal(d.get('李'), undefined);
+});
+
+test('十分おきに is "every ten minutes": 置き is a suffix the common set lacked, and おき was only 沖 "open sea"', async () => {
+  for (const [text, number, reading] of [['十分おきに', '十分', 'じゅっぷん'], ['五分おきに', '五分', 'ごふん'], ['三十分おきにバスが来ます', '三十分', 'さんじゅっぷん']]) {
+    const r = await run(text);
+    const n = tok(r, number);
+    assert.equal(n.kind, 'number', text);
+    assert.equal(n.reading, reading, text);
+    const oki = tok(r, 'おき');
+    assert.ok(oki && oki.entry.k.includes('置き'), `${text}: ${cut(r)} ${gloss(oki)}`);
+  }
+  // and おき on its own is still the sea
+  assert.ok(tok(await run('おきにでる'), 'おき').entry.k.includes('沖'));
+});
+
+test('きしゃしました is 帰社, the one きしゃ that takes する (was 汽車 "train" and did)', async () => {
+  const r = await run('きしゃしました');
+  assert.equal(cut(r), 'きしゃ|しました');
+  assert.ok(tok(r, 'きしゃ').entry.k.includes('帰社'), gloss(tok(r, 'きしゃ')));
+  assert.equal(tok(r, 'しました').base, 'する');
+  // a きしゃ that no する follows keeps the words the corpus knows
+  const twister = await run('きしゃのきしゃがきしゃできしゃした');
+  const kisha = twister.tokens.filter((t) => t.surface === 'きしゃ').map((t) => t.entry.k[0]);
+  assert.equal(kisha[kisha.length - 1], '帰社');
+  assert.ok(!kisha.slice(0, -1).includes('帰社'), kisha.join(' '));
 });
 
 test('ねえ drawn out is one particle (was ね|え, "root, eh")', async () => {

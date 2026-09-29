@@ -86,3 +86,24 @@ export function sentencesOf(tsv) {
   }
   return out;
 }
+
+/**
+ * The band a count of `n` would have in a ranking already cut into bands:
+ * the best band whose lowest count it reaches. A key added to a ranked set
+ * (tools/lib/extra.mjs) is banded on the set's scale, so adding it moves
+ * no other key's band.
+ *
+ * @returns {(n: number) => number | undefined}
+ */
+export function bandScale(counts, bands) {
+  const low = new Map();
+  for (const [k, b] of bands) {
+    const c = counts.get(k) || 0;
+    if (!low.has(b) || c < low.get(b)) low.set(b, c);
+  }
+  return (n) => {
+    if (!(n > 0)) return undefined;
+    for (const [b] of BANDS) if (low.has(b) && n >= low.get(b)) return b;
+    return 5;
+  };
+}

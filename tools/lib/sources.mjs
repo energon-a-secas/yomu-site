@@ -39,6 +39,9 @@ export const CACHE = process.env.YOMU_CACHE
  * printed, so a silent change of source is impossible.
  */
 export const SOURCES = {
+  // The common subset, which the dictionary was cut from until 2026-09-29.
+  // No builder reads it now (jmdictFull below holds it, entry for entry); it
+  // stays as the record the full release was checked against.
   jmdict: {
     name: 'jmdict-simplified jmdict-eng-common',
     release: '3.6.2+20260831182826',
@@ -47,6 +50,21 @@ export const SOURCES = {
     member: 'jmdict-eng-common-3.6.2.json',
     sha256: 'c55c3e84060e2e094801af65867f4e6b0c0a9d86a8d68368881f6ef95ea8d6da',
     bytes: 1440485,
+    licence: 'CC-BY-SA-4.0',
+  },
+  // The whole of JMdict in English, from the same release as the common
+  // subset above: jmdict-eng-common is exactly its entries with a common
+  // spelling (checked when this was pinned: 22,637 entries, every one byte
+  // for byte the same). tools/build-dict.mjs reads this file for both, and
+  // tools/lib/extra.mjs says which entries outside the common set ship.
+  jmdictFull: {
+    name: 'jmdict-simplified jmdict-eng',
+    release: '3.6.2+20260831182826',
+    url: 'https://github.com/scriptin/jmdict-simplified/releases/download/3.6.2%2B20260831182826/jmdict-eng-3.6.2+20260831182826.json.zip',
+    file: 'jmdict-eng.json.zip',
+    member: 'jmdict-eng-3.6.2.json',
+    sha256: '56dda95d763274786281080e6374fc14eb9e7cb5522e6086eca7a17a042a38d0',
+    bytes: 11510405,
     licence: 'CC-BY-SA-4.0',
   },
   kanjidic: {

@@ -112,9 +112,16 @@ export function spellingBand(key, rec, dict, kanjiInfo) {
     }
     best = Math.min(best, band);
   }
-  if (best === Infinity) return shared;
+  // A record from outside the common set (tools/lib/extra.mjs) whose
+  // spelling the corpus never matched has no evidence at all, and must not
+  // borrow the kana key's: 破魔 "exorcism", shipped under はま for はまする,
+  // read every はま as exorcism at the key's band, ahead of 浜 "beach".
+  if (best === Infinity) return rec.extra ? NO_EVIDENCE : shared;
   return rec.u ? Math.min(best, shared) : best;
 }
+
+/** The band of a record with no evidence of its own or of its key's. */
+const NO_EVIDENCE = UNRANKED + 2;
 
 /** One record's price under its kana key: its band in steps, less an auxiliary's tie. */
 export function kanaRecordPrice(key, rec, dict, kanjiInfo) {
@@ -262,5 +269,6 @@ export function stampShipped(entries, kanjiInfo, counts) {
     }
     if (!hasKanji(key) && recs.length > 1) stats.t += stampTies(key, recs, dict, counts);
   }
+  for (const recs of entries.values()) for (const rec of recs) delete rec.extra;
   return stats;
 }
