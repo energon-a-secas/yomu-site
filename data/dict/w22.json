@@ -1,9 +1,12 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng-common 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-08-29"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-09-28"},
 "format": "yomu-dict/1",
-"first": "父さん",
-"last": "私案",
+"first": "爪楊枝",
+"last": "私有",
 "entries": {
+"爪楊枝": [{"r":["つまようじ"],"g":["toothpick"],"p":"n","f":"つま|よう|じ","q":5}],
+"爬虫類": [{"r":["はちゅうるい"],"g":["reptiles"],"p":"n","f":"は|ちゅう|るい","q":4}],
+"父": [{"r":["ちち"],"g":["father","father (e.g. of a discipline)","God"],"p":"n","q":1}],
 "父さん": [{"r":["とうさん"],"g":["father"],"p":"n","q":2}],
 "父兄": [{"r":["ふけい"],"g":["guardians","father and older brother"],"p":"n","f":"ふ|けい","q":4}],
 "父子": [{"r":["ふし"],"g":["father and child"],"p":"n","f":"ふ|し"}],
@@ -1328,8 +1331,6 @@
 "私学": [{"r":["しがく"],"g":["private (non-governmental) school (college, university)"],"p":"n","f":"し|がく"}],
 "私文書": [{"r":["しぶんしょ"],"g":["private document"],"p":"n","f":"し|ぶん|しょ"}],
 "私書箱": [{"r":["ししょばこ"],"g":["post office box"],"p":"n","f":"し|しょ|ばこ"}],
-"私有": [{"r":["しゆう"],"g":["private ownership"],"p":"n vs vt adj-no","f":"し|ゆう","q":5}],
-"私服": [{"r":["しふく"],"g":["ordinary clothes (i.e. non-uniform)","plainclothes police officer"],"p":"n adj-no","f":"し|ふく","q":5}],
-"私案": [{"r":["しあん"],"g":["private plan"],"p":"n","f":"し|あん"}]
+"私有": [{"r":["しゆう"],"g":["private ownership"],"p":"n vs vt adj-no","f":"し|ゆう","q":5}]
 }
 }

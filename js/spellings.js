@@ -66,7 +66,7 @@ export function spellingKeys(tokens, dict) {
  * better of the two, because its spelling is rare by definition: 事 for こと
  * is q1, 蛙 for かえる q3, and 嘴 (beak, usually kana) no longer beats 橋.
  */
-function spellingBand(key, rec, dict, loaded, kanjiInfo) {
+export function spellingBand(key, rec, dict, loaded, kanjiInfo) {
   const shared = (rec.q || 6) + 2;
   let best = Infinity;
   for (const s of spellingsOf(rec)) {
@@ -130,8 +130,23 @@ export function kanaHomographCost(key, rec, dict, spelled) {
   if (!spelled || !spelled.kana.has(key) || hasKanji(key)) return 0;
   const recs = dict.get(key);
   if (!recs || recs.length < 2 || !recs.includes(rec)) return 0;
-  const raw = recs.map((r) => BAND_STEP * spellingBand(key, r, dict, spelled.keys, spelled.kanji) + (isAuxiliary(r) ? 0 : AUX_TIE));
+  const raw = recs.map((r) => kanaRecordPrice(key, r, dict, spelled.keys, spelled.kanji));
   return raw[recs.indexOf(rec)] - Math.min(...raw);
+}
+
+/**
+ * One record's price under its kana key, before it is made relative to the
+ * key's best record: its spelling's band in steps, and the tie an auxiliary
+ * wins. tools/build-dict.mjs orders a kana key's records by this before the
+ * cap, so the records the page is shipped are the ones it would pick.
+ */
+export function kanaRecordPrice(key, rec, dict, loaded, kanjiInfo) {
+  return bandPrice(spellingBand(key, rec, dict, loaded, kanjiInfo), rec);
+}
+
+/** A band in price steps, less the tie an auxiliary wins. */
+export function bandPrice(band, rec) {
+  return BAND_STEP * band + (isAuxiliary(rec) ? 0 : AUX_TIE);
 }
 
 /**

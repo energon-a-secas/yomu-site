@@ -155,6 +155,13 @@ plain JS string order (UTF-16 code units) in both the builder and the page.
 | `x` | 1 when the key is another key plus a trailing particle (今日は, 実は, 一緒に): the lattice prefers the split unless the key is the whole run |
 | `q` | frequency band from Tatoeba, 1 (most frequent) to 5; absent means unranked |
 
+A key holds at most six records. A kana key's records are different words,
+so before the cap they are ordered by the corpus: common spellings first,
+then by what the page would charge each one in kana text (the band of its own
+kanji spelling, discounted where that band is someone else's, as
+`kanaRecordPrice` in `js/spellings.js` prices it), then JMdict order. A kanji
+key keeps JMdict order, because its records share one string and one count.
+
 `data/kanji/index.json` lists the characters in each kanji shard;
 `data/kanji/kNN.json` (format `yomu-kanji/1`) holds
 `{ on: [], kun: [], m: [], s: strokes, g: grade, j: jlpt, f: freq, parts: [] }`

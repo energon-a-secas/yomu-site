@@ -1,9 +1,11 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng-common 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-08-29"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-09-28"},
 "format": "yomu-dict/1",
-"first": "北九州",
-"last": "在住",
+"first": "北アイルランド",
+"last": "在京",
 "entries": {
+"北アイルランド": [{"r":["きたアイルランド"],"g":["Northern Ireland"],"p":"n","q":4}],
+"北上": [{"r":["ほくじょう"],"g":["going north"],"p":"n vs vi","f":"ほく|じょう","q":4}],
 "北九州": [{"r":["きたきゅうしゅう"],"g":["Kitakyushu (city)"],"p":"n","f":"きた|きゅう|しゅう"}],
 "北京": [{"r":["ペキン"],"g":["Beijing (China)"],"p":"n","f":"*","q":3}],
 "北側": [{"r":["きたがわ","ほくそく"],"g":["north side"],"p":"n","f":"きた|がわ","q":4}],
@@ -1313,8 +1315,6 @@
 "圧迫": [{"r":["あっぱく"],"g":["pressure","oppression"],"p":"n vs vt","f":"あっ|ぱく","q":4}],
 "在りし日": [{"r":["ありしひ"],"g":["past days","while still alive"],"p":"n adj-no","q":4}],
 "在る": [{"r":["ある"],"g":["to be","to have","to be located"],"p":"v5r-i vi aux-v","u":1,"q":4}],
-"在京": [{"r":["ざいきょう"],"g":["being in the capital (i.e. Tokyo, or formerly Kyoto)"],"p":"n vs vi adj-no","f":"ざい|きょう"}],
-"在任": [{"r":["ざいにん"],"g":["being in office"],"p":"n vs vi","f":"ざい|にん"}],
-"在住": [{"r":["ざいじゅう"],"g":["residing"],"p":"n vs vi n-suf","f":"ざい|じゅう","q":4}]
+"在京": [{"r":["ざいきょう"],"g":["being in the capital (i.e. Tokyo, or formerly Kyoto)"],"p":"n vs vi adj-no","f":"ざい|きょう"}]
 }
 }

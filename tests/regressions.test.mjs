@@ -139,6 +139,19 @@ test('a kana word is glossed by its commonest spelling (すき was "gap", いる
   assert.equal(gloss(tok(await run('このシャツはいくらですか'), 'いくら')), 'how much');
 });
 
+test('かきます is 書く "to write" (書く was cut from かく by the six-record cap, and it read "to scratch")', async () => {
+  for (const [text, surface] of [['てがみをかきます', 'かきます'], ['ひらがなでかいてください', 'かいて'], ['さくぶんをかきました', 'かきました']]) {
+    const t = tok(await run(text), surface);
+    assert.equal(t.base, 'かく', text);
+    assert.ok(t.entry.k.includes('書く'), `${text}: ${gloss(t)}`);
+  }
+  // the records under a kana key are ordered by their spellings' evidence
+  // before the cap, so the word the corpus knows best is kept and first
+  const d = diskDict();
+  await d.need(['かく']);
+  assert.deepEqual(d.get('かく')[0].k, ['書く']);
+});
+
 test('御 is a prefix first: ご注文 is honorific, not 語 "word"', async () => {
   for (const text of ['ご注文はお決まりですか', '袋はご利用ですか']) {
     const t = tok(await run(text), 'ご');

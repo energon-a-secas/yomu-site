@@ -27,10 +27,10 @@ import { licenceBlock, unshippable, EM_DASH } from './lib/licence.mjs';
 import {
   writeJson, serialize, MAX_BYTES, SITE, fmtBytes, pruneStale,
 } from './lib/emit.mjs';
+import { JOYO_GRADES, readingsOfType, selection } from './lib/kanjidic.mjs';
 
 const TOOL = 'tools/build-kanji.mjs';
 const OUT = path.join(SITE, 'data', 'kanji');
-const JOYO_GRADES = new Set([1, 2, 3, 4, 5, 6, 8]);
 const MAX_MEANINGS = 3;
 const MAX_PARTS = 4;
 
@@ -95,14 +95,6 @@ function partsOf(svg, char) {
 
 // ── KANJIDIC ──────────────────────────────────────────────────────────────
 
-function readingsOfType(character, type) {
-  const out = [];
-  for (const group of character.readingMeaning?.groups || []) {
-    for (const r of group.readings) if (r.type === type && !out.includes(r.value)) out.push(r.value);
-  }
-  return out;
-}
-
 const stats = { passedOver: 0, noSvg: [], noRoot: [] };
 
 /**
@@ -144,16 +136,6 @@ function entryOf(character, svgDir) {
   }
   e.parts = parts;
   return e;
-}
-
-/** Frequency order, most frequent first; unranked last, in KANJIDIC order. */
-function selection(kanjidic) {
-  const chosen = kanjidic.characters
-    .map((c, i) => ({ c, i }))
-    .filter(({ c }) => JOYO_GRADES.has(c.misc.grade) || c.misc.frequency != null);
-  const rank = ({ c }) => (c.misc.frequency == null ? Infinity : c.misc.frequency);
-  chosen.sort((a, b) => rank(a) - rank(b) || a.i - b.i);
-  return chosen.map(({ c }) => c);
 }
 
 function pack(chars, entries, licence) {

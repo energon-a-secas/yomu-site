@@ -1,9 +1,11 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng-common 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-08-29"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-09-28"},
 "format": "yomu-dict/1",
-"first": "不眠症",
-"last": "健康",
+"first": "不相応",
+"last": "健在",
 "entries": {
+"不相応": [{"r":["ふそうおう"],"g":["unsuited"],"p":"adj-na n","f":"ふ|そう|おう","q":4}],
+"不眠": [{"r":["ふみん"],"g":["sleeplessness"],"p":"n adj-no","f":"ふ|みん","q":4}],
 "不眠症": [{"r":["ふみんしょう"],"g":["sleeplessness"],"p":"n","f":"ふ|みん|しょう","q":3}],
 "不確か": [{"r":["ふたしか"],"g":["unreliable"],"p":"adj-na n","f":"ふ|たし","q":4}],
 "不確実": [{"r":["ふかくじつ"],"g":["uncertain"],"p":"adj-na n","f":"ふ|かく|じつ","q":4}],
@@ -1309,8 +1311,6 @@
 "健やか": [{"r":["すこやか"],"g":["vigorous"],"p":"adj-na n","q":4}],
 "健保": [{"r":["けんぽ"],"g":["health insurance"],"p":"n","f":"けん|ぽ"}],
 "健全": [{"r":["けんぜん"],"g":["healthy"],"p":"adj-na n","f":"けん|ぜん","q":3}],
-"健在": [{"r":["けんざい"],"g":["in good health"],"p":"adj-na n","f":"けん|ざい","q":4}],
-"健常者": [{"r":["けんじょうしゃ"],"g":["person with no physical or mental disability"],"p":"n","f":"けん|じょう|しゃ","q":4}],
-"健康": [{"r":["けんこう"],"g":["health","healthy"],"p":"n adj-na","f":"けん|こう","q":1}]
+"健在": [{"r":["けんざい"],"g":["in good health"],"p":"adj-na n","f":"けん|ざい","q":4}]
 }
 }

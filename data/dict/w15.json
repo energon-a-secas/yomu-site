@@ -1,9 +1,11 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng-common 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-08-29"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-09-28"},
 "format": "yomu-dict/1",
-"first": "健康保険",
-"last": "北上",
+"first": "健常者",
+"last": "北",
 "entries": {
+"健常者": [{"r":["けんじょうしゃ"],"g":["person with no physical or mental disability"],"p":"n","f":"けん|じょう|しゃ","q":4}],
+"健康": [{"r":["けんこう"],"g":["health","healthy"],"p":"n adj-na","f":"けん|こう","q":1}],
 "健康保険": [{"r":["けんこうほけん"],"g":["health insurance"],"p":"n","f":"けん|こう|ほ|けん","q":4}],
 "健康的": [{"r":["けんこうてき"],"g":["hygienic"],"p":"adj-na","f":"けん|こう|てき","q":3}],
 "健康診断": [{"r":["けんこうしんだん"],"g":["health checkup"],"p":"n","f":"けん|こう|しん|だん","q":3}],
@@ -1301,8 +1303,6 @@
 "化石": [{"r":["かせき"],"g":["fossil","petrifaction"],"p":"n vs vi","f":"か|せき","q":4}],
 "化粧": [{"r":["けしょう","けわい"],"g":["make-up","decoration"],"p":"n vs vt vi","f":"け|しょう","q":3}],
 "化繊": [{"r":["かせん"],"g":["synthetic fiber"],"p":"n","f":"か|せん"}],
-"北": [{"r":["きた"],"g":["north","the North","North Korea"],"p":"n","q":2}],
-"北アイルランド": [{"r":["きたアイルランド"],"g":["Northern Ireland"],"p":"n","q":4}],
-"北上": [{"r":["ほくじょう"],"g":["going north"],"p":"n vs vi","f":"ほく|じょう","q":4}]
+"北": [{"r":["きた"],"g":["north","the North","North Korea"],"p":"n","q":2}]
 }
 }

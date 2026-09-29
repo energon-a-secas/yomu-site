@@ -1,9 +1,10 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng-common 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-08-29"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-09-28"},
 "format": "yomu-dict/1",
-"first": "サイエンス",
-"last": "ブレイク",
+"first": "ゴールライン",
+"last": "ブルーバード",
 "entries": {
+"ゴールライン": [{"g":["goal line"],"p":"n"}],
 "サイエンス": [{"g":["science"],"p":"n","q":4}],
 "サイクリング": [{"g":["cycling"],"p":"n","q":3}],
 "サイクル": [{"g":["cycle"],"p":"n","q":4}],
@@ -2092,7 +2093,6 @@
 "ブルー": [{"g":["blue","sad"],"p":"n adj-no adj-na","q":3}],
 "ブルーカラー": [{"g":["blue-collar (worker)"],"p":"n","q":4}],
 "ブルース": [{"g":["blues"],"p":"n","q":4}],
-"ブルーバード": [{"g":["bluebird"],"p":"n"}],
-"ブレイク": [{"g":["break (rest)","break (tennis, boxing, snooker, etc.)","becoming popular"],"p":"n vs vi","q":4}]
+"ブルーバード": [{"g":["bluebird"],"p":"n"}]
 }
 }

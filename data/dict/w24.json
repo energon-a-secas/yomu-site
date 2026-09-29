@@ -1,9 +1,11 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng-common 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-08-29"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-09-28"},
 "format": "yomu-dict/1",
-"first": "自由形",
-"last": "財政難",
+"first": "自由主義",
+"last": "財政",
 "entries": {
+"自由主義": [{"r":["じゆうしゅぎ"],"g":["liberalism"],"p":"n","f":"じ|ゆう|しゅ|ぎ","q":4}],
+"自由化": [{"r":["じゆうか"],"g":["liberalization"],"p":"n vs vt","f":"じ|ゆう|か","q":4}],
 "自由形": [{"r":["じゆうがた"],"g":["freestyle (e.g. swimming event)"],"p":"n","f":"じ|ゆう|がた"}],
 "自由経済": [{"r":["じゆうけいざい"],"g":["free economy"],"p":"n","f":"じ|ゆう|けい|ざい"}],
 "自画像": [{"r":["じがぞう"],"g":["self-portrait"],"p":"n","f":"じ|が|ぞう","q":4}],
@@ -1369,8 +1371,6 @@
 "財団": [{"r":["ざいだん"],"g":["foundation (institution)"],"p":"n","f":"ざい|だん","q":4}],
 "財団法人": [{"r":["ざいだんほうじん"],"g":["incorporated foundation"],"p":"n","f":"ざい|だん|ほう|じん"}],
 "財布": [{"r":["さいふ"],"g":["wallet"],"p":"n","f":"さい|ふ","q":2}],
-"財政": [{"r":["ざいせい"],"g":["public finance","financial affairs"],"p":"n","f":"ざい|せい","q":3}],
-"財政投融資": [{"r":["ざいせいとうゆうし"],"g":["Fiscal Investment and Loan Program"],"p":"n","f":"ざい|せい|とう|ゆう|し"}],
-"財政難": [{"r":["ざいせいなん"],"g":["economic difficulties"],"p":"n","f":"ざい|せい|なん","q":5}]
+"財政": [{"r":["ざいせい"],"g":["public finance","financial affairs"],"p":"n","f":"ざい|せい","q":3}]
 }
 }

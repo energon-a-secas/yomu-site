@@ -1,9 +1,11 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng-common 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-08-29"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-09-28"},
 "format": "yomu-dict/1",
-"first": "斑",
-"last": "止める",
+"first": "斉唱",
+"last": "止めどなく",
 "entries": {
+"斉唱": [{"r":["せいしょう"],"g":["singing in unison"],"p":"n vs vt","f":"せい|しょう"}],
+"斎場": [{"r":["さいじょう"],"g":["funeral hall","ceremony site"],"p":"n","f":"さい|じょう"}],
 "斑": [{"r":["むら"],"g":["unevenness (of colour, paint, etc.)","unevenness (of quality, results, behaviour, etc.)","fickleness"],"p":"n adj-na","u":1,"q":4}],
 "斗": [{"r":["と"],"g":["to","square bearing block (at the top of a pillar)","Chinese \"Dipper\" constellation (one of the 28 mansions)"],"p":"n","q":4},{"r":["ます"],"g":["measuring container","box (seating at a theatre, etc.)","square on a grid"],"p":"n","q":4}],
 "料": [{"r":["りょう"],"g":["fee","material"],"p":"n-suf n","q":3}],
@@ -1324,7 +1326,6 @@
 "止す": [{"r":["よす"],"g":["to stop (doing)"],"p":"v5s vt","u":1}],
 "止まる": [{"r":["とまる"],"g":["to stop (moving)","to stop (doing, working, being supplied)","to alight"],"p":"v5r vi","q":3},{"r":["とどまる"],"g":["to remain","to be limited to"],"p":"v5r vi","u":1,"q":3}],
 "止む": [{"r":["やむ"],"g":["to cease"],"p":"v5m vi","q":3}],
-"止めどなく": [{"r":["とめどなく"],"g":["endlessly"],"p":"adv","u":1}],
-"止める": [{"r":["とめる"],"g":["to stop","to park","to prevent"],"p":"v1 vt","q":2},{"r":["やめる"],"g":["to stop (an activity)","to cancel"],"p":"v1 vt","u":1,"q":2},{"r":["とどめる"],"g":["to stop","to have (someone) stay","to fasten"],"p":"v1 vt","q":2}]
+"止めどなく": [{"r":["とめどなく"],"g":["endlessly"],"p":"adv","u":1}]
 }
 }

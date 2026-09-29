@@ -1,9 +1,11 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng-common 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-08-29"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-09-28"},
 "format": "yomu-dict/1",
-"first": "在外",
-"last": "対象外",
+"first": "在任",
+"last": "対論",
 "entries": {
+"在任": [{"r":["ざいにん"],"g":["being in office"],"p":"n vs vi","f":"ざい|にん"}],
+"在住": [{"r":["ざいじゅう"],"g":["residing"],"p":"n vs vi n-suf","f":"ざい|じゅう","q":4}],
 "在外": [{"r":["ざいがい"],"g":["overseas"],"p":"n adj-no","f":"ざい|がい"}],
 "在外公館": [{"r":["ざいがいこうかん"],"g":["diplomatic mission"],"p":"n","f":"ざい|がい|こう|かん"}],
 "在学": [{"r":["ざいがく"],"g":["attending (school, college, etc.)"],"p":"n vs vi","f":"ざい|がく","q":4}],
@@ -1339,8 +1341,6 @@
 "対米": [{"r":["たいべい"],"g":["relating to the USA"],"p":"adj-no","f":"たい|べい"}],
 "対話": [{"r":["たいわ"],"g":["dialogue"],"p":"n vs vt vi","f":"たい|わ","q":4}],
 "対談": [{"r":["たいだん"],"g":["talk"],"p":"n vs vt vi","f":"たい|だん","q":4}],
-"対論": [{"r":["たいろん"],"g":["arguing face to face"],"p":"n vs vt vi","f":"たい|ろん"}],
-"対象": [{"r":["たいしょう"],"g":["target"],"p":"n adj-no","f":"たい|しょう","q":3}],
-"対象外": [{"r":["たいしょうがい"],"g":["outside the scope (of)"],"p":"adj-no n","f":"たい|しょう|がい"}]
+"対論": [{"r":["たいろん"],"g":["arguing face to face"],"p":"n vs vt vi","f":"たい|ろん"}]
 }
 }

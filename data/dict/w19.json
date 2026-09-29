@@ -1,9 +1,12 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng-common 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-08-29"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-09-28"},
 "format": "yomu-dict/1",
-"first": "恐らく",
-"last": "斎場",
+"first": "恋心",
+"last": "文面",
 "entries": {
+"恋心": [{"r":["こいごころ"],"g":["(feelings of) love"],"p":"n","f":"こい|ごころ","q":4}],
+"恋愛": [{"r":["れんあい"],"g":["love"],"p":"n vs vi adj-no","f":"れん|あい","q":2}],
+"恋文": [{"r":["こいぶみ"],"g":["love letter"],"p":"n","f":"こい|ぶみ","q":4}],
 "恐らく": [{"r":["おそらく"],"g":["probably"],"p":"adv","u":1,"q":3}],
 "恐るべき": [{"r":["おそるべき"],"g":["terrible","astonishing"],"p":"adj-f","q":4}],
 "恐る恐る": [{"r":["おそるおそる"],"g":["fearfully"],"p":"adv","q":4}],
@@ -1330,8 +1333,6 @@
 "文部": [{"r":["もんぶ"],"g":["Ministry of Education, Science and Culture (1871-2001)"],"p":"n","f":"もん|ぶ"}],
 "文部省": [{"r":["もんぶしょう"],"g":["Ministry of Education, Science and Culture (1871-2001)"],"p":"n","f":"もん|ぶ|しょう","q":4}],
 "文部科学省": [{"r":["もんぶかがくしょう"],"g":["Ministry of Education, Culture, Sports, Science and…"],"p":"n","f":"もん|ぶ|か|がく|しょう"}],
-"文面": [{"r":["ぶんめん"],"g":["contents of a document (esp. of a letter)"],"p":"n","f":"ぶん|めん","q":4}],
-"斉唱": [{"r":["せいしょう"],"g":["singing in unison"],"p":"n vs vt","f":"せい|しょう"}],
-"斎場": [{"r":["さいじょう"],"g":["funeral hall","ceremony site"],"p":"n","f":"さい|じょう"}]
+"文面": [{"r":["ぶんめん"],"g":["contents of a document (esp. of a letter)"],"p":"n","f":"ぶん|めん","q":4}]
 }
 }

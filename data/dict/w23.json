@@ -1,9 +1,11 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng-common 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-08-29"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-09-28"},
 "format": "yomu-dict/1",
-"first": "私物",
-"last": "自由化",
+"first": "私服",
+"last": "自由",
 "entries": {
+"私服": [{"r":["しふく"],"g":["ordinary clothes (i.e. non-uniform)","plainclothes police officer"],"p":"n adj-no","f":"し|ふく","q":5}],
+"私案": [{"r":["しあん"],"g":["private plan"],"p":"n","f":"し|あん"}],
 "私物": [{"r":["しぶつ"],"g":["private property"],"p":"n","f":"し|ぶつ","q":4}],
 "私生活": [{"r":["しせいかつ"],"g":["private life"],"p":"n","f":"し|せい|かつ","q":4}],
 "私用": [{"r":["しよう"],"g":["personal use","private business"],"p":"n vs adj-no vt","f":"し|よう","q":4}],
@@ -1318,8 +1320,6 @@
 "自然環境": [{"r":["しぜんかんきょう"],"g":["natural environment"],"p":"n","f":"し|ぜん|かん|きょう","q":4}],
 "自然界": [{"r":["しぜんかい"],"g":["nature"],"p":"n","f":"し|ぜん|かい","q":4}],
 "自然科学": [{"r":["しぜんかがく"],"g":["natural science"],"p":"n","f":"し|ぜん|か|がく","q":4}],
-"自由": [{"r":["じゆう"],"g":["freedom"],"p":"n adj-na","f":"じ|ゆう","q":1}],
-"自由主義": [{"r":["じゆうしゅぎ"],"g":["liberalism"],"p":"n","f":"じ|ゆう|しゅ|ぎ","q":4}],
-"自由化": [{"r":["じゆうか"],"g":["liberalization"],"p":"n vs vt","f":"じ|ゆう|か","q":4}]
+"自由": [{"r":["じゆう"],"g":["freedom"],"p":"n adj-na","f":"じ|ゆう","q":1}]
 }
 }

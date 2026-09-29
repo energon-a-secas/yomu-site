@@ -29,12 +29,21 @@ import {
   writeJson, serialize, MAX_BYTES, SITE, fmtBytes, pruneStale,
 } from './lib/emit.mjs';
 import { readingTable, splitReading, needsSplit } from './lib/split.mjs';
-import { isAllKana } from '../js/kana.js';
+import { isAllKana, isKatakana } from '../js/kana.js';
+import { kanaRecordPrice, bandPrice } from '../js/spellings.js';
+import { COST } from '../js/costs.js';
+import { readingsOfType, selection } from './lib/kanjidic.mjs';
 import { countKeys, bandsOf, sentencesOf } from './lib/freq.mjs';
 
 const TOOL = 'tools/build-dict.mjs';
 const OUT = path.join(SITE, 'data', 'dict');
 
+// Six, measured. Once the records are ordered by evidence, 書く is first
+// under かく, and what six cuts is 70 records like 竜 under たつ and 箏
+// under そう. Ten would keep all but six of them for 4.4 KB, but over 3,016
+// texts it read 数か月もたつと as "dragon" and 無理そう as "koto": a rare noun
+// takes the -30 a noun gets before a particle, and one band of evidence (16)
+// does not pay for it.
 const MAX_RECORDS = 6;
 const MAX_SENSES = 3;
 const MAX_GLOSS = 60;
@@ -149,14 +158,14 @@ function recordFor(key, { entry, kind }, table) {
 }
 
 /**
- * Order of the records under one key: spellings that are common in their
- * entry first, then JMdict order. For a kana key, among the common ones, an
- * entry that is itself written in kana (no kanji, the reading marked nokanji,
- * or the first sense usually kana) comes before one whose kanji spelling is
- * the normal one. Without that, は leads with "tooth" and いる with "to
- * shoot", because 歯 and 射る have lower JMdict sequence numbers than the
- * particle and 居る; a reader that sees は written in kana is almost never
- * looking at a tooth.
+ * The JMdict order of the records under one key: spellings that are common
+ * in their entry first, then, for a kana key, an entry that is itself
+ * written in kana (no kanji, the reading marked nokanji, or the first sense
+ * usually kana) before one whose kanji spelling is the normal one, then
+ * JMdict order. Without the kana rule は led with "tooth" and いる with "to
+ * shoot", because 歯 and 射る have lower sequence numbers than the particle
+ * and 居る. This is the order before evidence; `byEvidence` reorders a kana
+ * key's records by the corpus.
  */
 function rank(f, key) {
   const common = f.common ? 0 : 1;
@@ -237,22 +246,83 @@ function saidWa(key, f) {
   return f.entry.sense.some((s) => s.info.some((i) => WA_NOTE.test(i)));
 }
 
+/** A band that sorts after every real one: the key was never matched. */
+const UNRANKED = 6;
+
+/** Every spelling counts as loaded at build time: the whole dictionary is here. */
+const ALL = Object.freeze({ has: () => true });
+
+/** Each shipped kanji's kun readings, which spellingBand reads for its stem rule. */
+function kunTable(kanjidic) {
+  return new Map(selection(kanjidic).map((c) => [c.literal, { kun: readingsOfType(c, 'ja_kun') }]));
+}
+
+/**
+ * A kana key's records in the order the corpus supports, before the cap.
+ *
+ * Each record is priced the way the page prices it in kana text
+ * (js/spellings.js, kanaRecordPrice): the band of its own kanji spelling,
+ * discounted where that band is someone else's (入る is q1 because of はいる,
+ * 動 because every 動いて was counted as 動), plus COST.kanaForKanji when the
+ * word is normally written in kanji. Common first, then that price, then
+ * JMdict order. A kanji key keeps JMdict order: its records share one string
+ * and so one count, and nothing in the corpus tells them apart.
+ *
+ * Before this, かく led with 掻く "to scratch" (usually kana, so first by
+ * the kana-word rule) and 書く "to write", q1, was the seventh record and was
+ * cut, so かきます read "to scratch".
+ */
+function byEvidence(key, list, dict, kanjiInfo) {
+  if (list.length < 2 || !isAllKana(key)) return list;
+  const hiragana = !isKatakana(key[0]);
+  const price = ({ f, rec }) => {
+    if (f.kind !== 'kana') return 0;
+    // A word with no kanji spelling at all (the particle は, the
+    // sentence-final もの) is what the kana key counted, so the key's band
+    // is its own. The page prices it two bands worse, as a word with no
+    // evidence of its own; a particle never reaches that price, because the
+    // closed class supplies it (costs.js), so only the order here needs it.
+    if (!rec.k) return bandPrice(rec.q || UNRANKED, rec);
+    const spelled = hiragana && !rec.u ? COST.kanaForKanji : 0;
+    return kanaRecordPrice(key, rec, dict, ALL, kanjiInfo) + spelled;
+  };
+  return list
+    .map((x, n) => ({ x, order: [x.f.common ? 0 : 1, price(x), n] }))
+    .sort((a, b) => byRank(a.order, b.order))
+    .map(({ x }) => x);
+}
+
 function buildEntries(jmdict, kanjidic, bands) {
   const table = readingTable(kanjidic);
+  const kanjiInfo = kunTable(kanjidic);
   const { forms, keys } = collect(jmdict);
-  const entries = new Map();
+  // Every record of every key, uncapped, in JMdict order, with its key's
+  // band: the dictionary the page would have with no cap, which is what a
+  // kana record's spelling is looked up in.
+  const full = new Map();
   for (const key of keys) {
-    const list = forms.get(key);
-    const ordered = [...list].sort((a, b) => byRank(rank(a, key), rank(b, key)));
-    if (ordered.length > MAX_RECORDS) stats.capped += 1;
-    const recs = [];
-    for (const f of ordered.slice(0, MAX_RECORDS)) {
+    const q = bands.get(key);
+    const list = [];
+    for (const f of [...forms.get(key)].sort((a, b) => byRank(rank(a, key), rank(b, key)))) {
       const rec = recordFor(key, f, table);
       if (!rec.g.length) { stats.emptyG += 1; continue; }
-      if (saidWa(key, f)) { rec.w = 1; stats.w += 1; }
-      recs.push(rec);
+      if (q) rec.q = q;
+      list.push({ f, rec });
     }
-    if (recs.length) entries.set(key, recs);
+    if (list.length) full.set(key, list);
+  }
+  const view = new Map([...full].map(([k, list]) => [k, list.map((x) => x.rec)]));
+  const dict = { get: (k) => view.get(k) };
+
+  const entries = new Map();
+  for (const [key, list] of full) {
+    const ordered = byEvidence(key, list, dict, kanjiInfo);
+    if (ordered.length > MAX_RECORDS) stats.capped += 1;
+    entries.set(key, ordered.slice(0, MAX_RECORDS).map(({ f, rec }) => {
+      const { q, ...out } = rec;
+      if (saidWa(key, f)) { out.w = 1; stats.w += 1; }
+      return out;
+    }));
   }
   // A second pass, because `x` reads the records of another key, and that
   // key may sort after this one.

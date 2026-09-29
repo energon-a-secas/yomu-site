@@ -1,9 +1,11 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng-common 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-08-29"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-09-28"},
 "format": "yomu-dict/1",
-"first": "財源",
-"last": "錯覚",
+"first": "財政投融資",
+"last": "錬金術",
 "entries": {
+"財政投融資": [{"r":["ざいせいとうゆうし"],"g":["Fiscal Investment and Loan Program"],"p":"n","f":"ざい|せい|とう|ゆう|し"}],
+"財政難": [{"r":["ざいせいなん"],"g":["economic difficulties"],"p":"n","f":"ざい|せい|なん","q":5}],
 "財源": [{"r":["ざいげん"],"g":["source of funds"],"p":"n","f":"ざい|げん","q":5}],
 "財産": [{"r":["ざいさん"],"g":["property"],"p":"n","f":"ざい|さん","q":2}],
 "財界": [{"r":["ざいかい"],"g":["financial world"],"p":"n","f":"ざい|かい","q":5}],
@@ -1329,9 +1331,6 @@
 "錦": [{"r":["にしき"],"g":["brocade","fine dress"],"p":"n","q":4}],
 "錨": [{"r":["いかり"],"g":["anchor"],"p":"n","q":4}],
 "錫": [{"r":["すず"],"g":["tin (Sn)"],"p":"n","u":1,"q":5}],
-"錬金術": [{"r":["れんきんじゅつ"],"g":["alchemy","way of making money"],"p":"n","f":"れん|きん|じゅつ","q":4}],
-"錬金術師": [{"r":["れんきんじゅつし"],"g":["alchemist"],"p":"n","f":"れん|きん|じゅつ|し","q":4}],
-"錯乱": [{"r":["さくらん"],"g":["confusion"],"p":"n vs vi","f":"さく|らん","q":4}],
-"錯覚": [{"r":["さっかく"],"g":["illusion","misapprehension"],"p":"n vs vt vi","f":"さっ|かく","q":4}]
+"錬金術": [{"r":["れんきんじゅつ"],"g":["alchemy","way of making money"],"p":"n","f":"れん|きん|じゅつ","q":4}]
 }
 }
