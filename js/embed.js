@@ -144,7 +144,11 @@ export function createEmbed({ win, version, allowed = ALLOWED_ORIGINS, onLoad, o
    * a learner who clicked into the text box can still close the sheet.
    */
   function escape() {
-    if (target) send('yomu:escape', {}, target);
+    // Before any hello the frame still knows who framed it, when the browser
+    // says: an Escape pressed while the host is still loading is not lost.
+    const known = typeof parentOrigin === 'function' ? parentOrigin() : null;
+    const to = target || (known && allowed.includes(known) ? known : null);
+    if (to) send('yomu:escape', {}, to);
   }
 
   function start() {

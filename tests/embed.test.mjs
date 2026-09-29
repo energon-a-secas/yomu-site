@@ -304,3 +304,12 @@ test('escape tells the host that greeted it, and nobody before a hello', () => {
   assert.equal(esc[0].origin, RUNCIBLE);
   assert.equal(esc[0].msg.v, 1);
 });
+
+test('escape before any hello goes to a named parent on the list, and never to one off it', () => {
+  const on = setup({ parentOrigin: () => LOCAL });
+  on.embed.escape();
+  assert.deepEqual(of(on.sent, 'yomu:escape').map((x) => x.origin), [LOCAL]);
+  const off = setup({ parentOrigin: () => 'https://evil.example' });
+  off.embed.escape();
+  assert.equal(of(off.sent, 'yomu:escape').length, 0);
+});
