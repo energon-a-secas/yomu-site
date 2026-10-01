@@ -81,6 +81,29 @@ the URL, the page title or an attribute. The DeepL and Google Translate
 links are built at the moment they are clicked, which is the only way the
 text leaves the page.
 
+## My kanji
+
+https://yomu.neorgon.com/#/kanji is a screen of the kanji a learner saved for
+review, with a review at #/kanji/review. In the reader, each kanji in the
+kanji table and in the Word panel has a save toggle, each row says how many
+texts the kanji was met in, and kanji not saved yet carry a small corner mark
+(Display: Unsaved kanji, Mark or Off). An embedded Yomu has a My kanji link
+in its one-line bar.
+
+- Times seen counts texts: a kanji counts once per reading session, and a
+  session begins when the box gets new content at once (a paste, an example,
+  a phrase, a #t= link, yomu:load) or after it is emptied. A reload counts
+  nothing.
+- Review: Show, then Again (box 1, due tomorrow, and again before the review
+  ends) or Got it (next box, due in 1, 2, 4, 8 or 16 days). Keys: Space, 1, 2,
+  Escape.
+- Kept in this browser's localStorage under yomu-site:kanji: each saved
+  kanji's schedule, and for each kanji met, how often, the first and last day,
+  and up to eight dictionary words with their readings. Never the text.
+- Export writes a yomu-kanji-export/1 JSON file ({ format, exported, saved,
+  seen }); Import validates one and merges it, keeping the higher counts and
+  the earlier first day.
+
 ## Data and licences
 
 - JMdict and KANJIDIC, by the Electronic Dictionary Research and Development

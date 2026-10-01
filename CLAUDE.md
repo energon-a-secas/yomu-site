@@ -102,6 +102,60 @@ only; the phrase library and every note are original. Keep it that way: GPL
 rule tables cannot be copied into this MIT site, and textbook text is
 copyrighted.
 
+## My kanji
+
+The kanji a learner saves for review, and how many texts they met each kanji
+in. `js/kanji-store.js` (pure functions plus the store, no DOM),
+`js/review.js` (one review's queue, no DOM), `js/render-save.js` (the save
+toggle, the unsaved marks, the due count), `js/render-mykanji.js` and
+`js/render-review.js` (the screen), `js/events-kanji.js` (routes, actions,
+keys, backup). `npm test` runs `tests/kanji-store.test.mjs`; the view harness
+checks the toggles and marks.
+
+**One store, `localStorage['yomu-site:kanji']`, Persist kit version 1:**
+`{ saved: { char: { at, box, due, reviews, lapses } }, seen: { char: { n,
+first, last, words } }, session: { id, counted } }`. `words` is at most eight
+`[written, reading]` dictionary forms per kanji (`dictionaryWord` turns
+降っています into 降る ふる); no sentence and no pasted text is ever stored,
+and the test reads the raw store to prove it. Every field is validated on
+load; a store that does not read degrades to empty with a note on the screen,
+and its raw value is copied to `yomu-site:kanji:damaged` first.
+
+**"Times seen" counts texts, not keystrokes.** A session begins in
+`events-read.js`: `loadText()` (an example, a phrase or dialogue, `#t=`, an
+embed `yomu:load`), a paste or drop in the box, Clear, or the box emptied by
+hand (the same state Clear leaves). Each kanji counts once per session, when
+`analyzeNow()` settles, so a kanji typed in later counts after the debounce
+and never per keystroke. The boot restore is `loadText(text, { restore: true
+})`, which begins no session: the counted set is in the store, so a reload
+counts nothing. A new caller of `loadText` that is not new content must pass
+`restore` too.
+
+**`#/kanji` and `#/kanji/review` are routes, never text.** `takeFragmentText`
+reads only `#t=`. The reader is hidden, not emptied, while a route shows.
+Back is `history.back()` only when the history entry before this one (each
+entry is stamped `state.yomuIx`) is the parent route; otherwise it is a
+replaceState, so Back never leaves the site and never steps into a review.
+Start review applies the route at once, because a Space pressed before
+`hashchange` fired landed on the list.
+
+**No kanji is written into an attribute here either.** Toggles find their
+kanji by `data-kid` (the analysis' kanji list) or `data-ix` (the list the
+screen drew), and a toggle's name ("Save 天 to My kanji") is a visually hidden
+label in text nodes. Meanings and readings come from `reader.js kanjiInfo()`
+(the dictionary's kanji shards), never from the store.
+
+**Review schedule:** saved is box 0, due that day; Got it moves up one box,
+due in 1, 2, 4, 8, 16 days (top box repeats 16); Again is box 1, due tomorrow,
+and comes round again in the same review as practice that does not move the
+schedule a second time.
+
+**Safari never focuses a clicked button**, so focus after a repaint is
+restored for keyboard users and cannot be asserted after a mouse click in
+WebKit. The header link is 36px tall on a phone because the header kit sizes
+header controls; everything on the screen itself is 44px under
+`pointer: coarse`.
+
 ## Do not touch
 
 - `js/vendor/wanakana.js`: upstream 5.3.1, MIT, byte for byte.
