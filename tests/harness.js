@@ -13,16 +13,18 @@
 // parsed by DOMParser, whose documents run no scripts, and it is moved in with
 // importNode; no string of markup is ever assigned to innerHTML.
 //
-// Preferences and the saved text share this origin with the real page, so
-// both are put back as they were when the checks finish.
+// Preferences, the saved text and My kanji share this origin with the real
+// page, so all three are put back as they were when the checks finish.
 
 import { useFixture } from '../js/reader.js';
 import { state, loadPrefs, TEXT_KEY } from '../js/state.js';
 import { paintAll } from '../js/render.js';
 import { bindEvents, loadText } from '../js/events.js';
 import { h } from '../js/utils.js';
+import { ui } from '../js/strings.js';
 
 const PREFS_KEY = 'yomu-site:preferences';
+const KANJI_KEY = 'yomu-site:kanji';
 const results = [];
 const $ = (id) => document.getElementById(id);
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -64,11 +66,14 @@ function fire(el, type, init = {}) {
 const restore = [];
 
 async function run() {
-  restore.push(keep(TEXT_KEY), keep(PREFS_KEY));
+  restore.push(keep(TEXT_KEY), keep(PREFS_KEY), keep(KANJI_KEY));
+  // My kanji starts empty, so every kanji in the fixture is unsaved and new.
+  try { localStorage.removeItem(KANJI_KEY); } catch { /* storage blocked */ }
   const fixture = await (await fetch('fixtures/analysis-sample.json')).json();
   let notes = {};
   try { notes = await import('../js/notes.js'); } catch { /* notes are optional here */ }
-  useFixture({ analyze: async () => ({ tokens: fixture.tokens, kanji: fixture.kanji }), notes });
+  const kanji = new Map(fixture.kanji.map((k) => [k.ch, k]));
+  useFixture({ analyze: async () => ({ tokens: fixture.tokens, kanji: fixture.kanji }), notes, kanji });
 
   await mountPage();
   loadPrefs(state);
@@ -109,6 +114,34 @@ async function run() {
     .filter((a) => a.name !== 'placeholder' && a.name !== 'href' && learner.test(a.value)).map((a) => `${el.tagName}.${a.name}`));
   check('no attribute carries the text', leaks.length === 0, leaks.slice(0, 3).join(', '));
 
+  // My kanji in the reader: a bookmark per row, a count, and a mark on every
+  // kanji not saved yet, which saving clears in place.
+  const entries = [...document.querySelectorAll('#kanji-body .kj-entry')];
+  const toggles = entries.map((li) => li.querySelector(':scope > .save-toggle'));
+  check('each kanji row has a save toggle beside its button', entries.length === fixture.kanji.length && toggles.every((b) => b && b.tagName === 'BUTTON' && b.getAttribute('aria-pressed') === 'false'), `${toggles.filter(Boolean).length} of ${fixture.kanji.length}`);
+  check('the toggle is named for its kanji, in text', toggles.every((b, kid) => b.textContent.includes(fixture.kanji[kid].ch) && b.querySelector('[lang="ja"]')), toggles[0] ? toggles[0].textContent : '');
+  check('each row says this is the first time', entries.every((li) => (li.querySelector('.kj-seen') || {}).textContent === ui('seenFirst')), ui('seenFirst'));
+  const marked = () => body.querySelectorAll('.kj.is-unsaved').length;
+  const allKj = body.querySelectorAll('.kj[data-kid]').length;
+  check('every kanji not saved carries the mark', marked() === allKj && allKj > 0, `${marked()} of ${allKj}`);
+  const before = (el) => getComputedStyle(el, '::before').content;
+  const firstKj = body.querySelector('.kj[data-kid="0"]');
+  check('the mark is drawn', before(firstKj) !== 'none' && before(firstKj) !== 'normal', before(firstKj));
+  const keepTok = body.querySelector('.tok');
+  toggles[0].click();
+  await wait(20);
+  check('saving presses the toggle', toggles[0].getAttribute('aria-pressed') === 'true');
+  check('saving clears that kanji\'s mark and no other', body.querySelectorAll('.kj.is-unsaved[data-kid="0"]').length === 0 && marked() === allKj - body.querySelectorAll('.kj[data-kid="0"]').length);
+  check('saving reads nothing again: the reading is the same nodes', keepTok.isConnected);
+  check('the saved kanji is drawn without the mark', ['none', 'normal'].includes(before(firstKj)), before(firstKj));
+  // The header is not in the harness; the embed bar's link carries the same count.
+  const dueCount = document.querySelector('#hz-page [data-due-count]');
+  check('the My kanji link counts one review due', dueCount && !dueCount.hidden && dueCount.textContent.startsWith('1'), dueCount ? dueCount.textContent : 'no count');
+  document.querySelector('[data-pref="unsaved"][data-value="off"]').click();
+  const unsavedKj = body.querySelector('.kj.is-unsaved');
+  check('Unsaved kanji Off hides the mark', unsavedKj && ['none', 'normal'].includes(before(unsavedKj)), unsavedKj ? before(unsavedKj) : 'none left');
+  document.querySelector('[data-pref="unsaved"][data-value="mark"]').click();
+
   // A word, chosen by click: the Word panel, its beats and its chain.
   const iku = toks.find((b) => plain(b.querySelector('.tok-surface')) === '行きました');
   iku.click();
@@ -119,6 +152,13 @@ async function run() {
   check('its beats are chips', beats === 5, `${beats} chips`);
   const chain = [...document.querySelectorAll('.chain-step')].map((li) => li.textContent);
   check('the chain runs from the dictionary form to the text', chain.length >= 3 && chain[0].includes('行く') && chain[chain.length - 1].includes('行きました'), chain.join(' > '));
+  const wordToggle = document.querySelector('#word-body .wk .save-toggle');
+  const kidIku = wordToggle ? wordToggle.dataset.kid : null;
+  check('the Word panel lists its kanji with the same toggle', wordToggle && wordToggle.getAttribute('aria-pressed') === 'false' && wordToggle.textContent.includes('行'));
+  if (wordToggle) wordToggle.click();
+  await wait(20);
+  check('saving from the Word panel presses its row in the table too', document.querySelector(`#kanji-body .save-toggle[data-kid="${kidIku}"]`).getAttribute('aria-pressed') === 'true'
+    && body.querySelectorAll(`.kj.is-unsaved[data-kid="${kidIku}"]`).length === 0);
 
   // The keyboard: one tab stop, arrows move it, Enter chooses.
   check('the reading is one tab stop', body.querySelectorAll('.tok[tabindex="0"]').length === 1);
@@ -158,6 +198,10 @@ async function run() {
   longLine.click();
   await wait(30);
   check('choosing a note line opens its note', $('note-title') && !$('panel-notes').hasAttribute('data-empty'), $('note-title') ? $('note-title').textContent : '');
+
+  const leaksAfter = [...document.querySelectorAll('#hz-page *')].flatMap((el) => [...el.attributes]
+    .filter((a) => a.name !== 'placeholder' && a.name !== 'href' && learner.test(a.value)).map((a) => `${el.tagName}.${a.name}`));
+  check('no attribute carries a kanji after saving either', leaksAfter.length === 0, leaksAfter.slice(0, 3).join(', '));
 
   const failed = results.filter((r) => !r.ok).length;
   $('hz-summary').textContent = failed ? `${failed} of ${results.length} checks failed` : `All ${results.length} checks passed`;

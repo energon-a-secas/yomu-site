@@ -50,6 +50,7 @@ export function paintChrome(state) {
     reading.dataset.furigana = state.prefs.furigana ? 'on' : 'off';
     reading.dataset.romaji = state.prefs.romaji;
     reading.dataset.highlights = state.prefs.highlights ? 'on' : 'off';
+    reading.dataset.unsaved = state.prefs.unsaved;
   }
 
   // The language toggle names the current language in bold and says in its

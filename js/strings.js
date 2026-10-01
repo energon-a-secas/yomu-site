@@ -148,8 +148,8 @@ export const STRINGS = Object.freeze({
 
   kanjiEmpty: { en: 'No kanji in this text.', es: 'No hay kanji en este texto.' },
   kanjiHint: {
-    en: 'Point at a row to find that kanji in the text. On a touch screen, tap it.',
-    es: 'Señala una fila para encontrar ese kanji en el texto. En una pantalla táctil, tócala.',
+    en: 'Point at a row to find that kanji in the text. On a touch screen, tap it. The bookmark saves it to My kanji.',
+    es: 'Señala una fila para encontrar ese kanji en el texto. En una pantalla táctil, tócala. El marcador lo guarda en Mis kanji.',
   },
   here: { en: 'here', es: 'aquí' },
   onReading: { en: 'on', es: 'on' },
@@ -190,6 +190,129 @@ export const STRINGS = Object.freeze({
   translation: { en: 'Translation', es: 'Traducción' },
 
   openInYomu: { en: 'Open in Yomu', es: 'Abrir en Yomu' },
+
+  // My kanji: the save toggle, the counts, the screen, the review, the backup.
+  // A {ch} is filled with a kanji in its own lang="ja" span (render-save.js).
+  myKanji: { en: 'My kanji', es: 'Mis kanji' },
+  dueCountSr: { en: ', {n} due for review', es: ', {n} para repasar' },
+  saveKanji: { en: 'Save {ch} to My kanji', es: 'Guardar {ch} en Mis kanji' },
+  removeKanji: { en: 'Remove {ch} from My kanji', es: 'Quitar {ch} de Mis kanji' },
+  seenTimes: { en: 'seen {n} times', es: 'visto {n} veces' },
+  seenFirst: { en: 'first time', es: 'primera vez' },
+  unsavedKanji: { en: 'Unsaved kanji', es: 'Kanji sin guardar' },
+  mark: { en: 'Mark', es: 'Marcar' },
+  wordKanji: { en: 'Kanji in this word', es: 'Kanji de esta palabra' },
+  today: { en: 'today', es: 'hoy' },
+  tomorrow: { en: 'tomorrow', es: 'mañana' },
+
+  backToReader: { en: 'Back to the reader', es: 'Volver al lector' },
+  myKanjiLead: {
+    en: 'Kanji you save, and every kanji you have read here. They stay in this browser.',
+    es: 'Los kanji que guardas y todos los que leíste aquí. Se quedan en este navegador.',
+  },
+  loadingKanji: { en: 'Loading the kanji details', es: 'Cargando los detalles de los kanji' },
+  kanjiInfoFailed: { en: 'Could not load the kanji details ({detail}).', es: 'No se pudieron cargar los detalles de los kanji ({detail}).' },
+  storeDamaged: {
+    en: 'Your saved kanji could not be read, so My kanji started empty. A copy of the old data is kept in this browser.',
+    es: 'No se pudieron leer tus kanji guardados, así que Mis kanji empezó vacío. Una copia de los datos anteriores queda en este navegador.',
+  },
+  storePartial: {
+    en: 'Part of My kanji could not be read and was left out ({n} entries).',
+    es: 'Una parte de Mis kanji no se pudo leer y quedó fuera ({n} entradas).',
+  },
+  storeBlocked: {
+    en: 'This browser is not keeping My kanji, so it lasts until this page closes.',
+    es: 'Este navegador no está guardando Mis kanji, así que dura hasta que se cierre esta página.',
+  },
+
+  dueHead: { en: 'Due for review', es: 'Para repasar' },
+  dueOne: { en: '1 kanji is due.', es: 'Hay 1 kanji para repasar.' },
+  dueMany: { en: '{n} kanji are due.', es: 'Hay {n} kanji para repasar.' },
+  dueNone: { en: 'Nothing is due. Next review: {day}.', es: 'No hay nada para repasar. Próximo repaso: {day}.' },
+  dueEmpty: {
+    en: 'Nothing to review yet. A kanji you save is due the same day.',
+    es: 'Todavía no hay nada para repasar. Un kanji que guardas se repasa el mismo día.',
+  },
+  startReview: { en: 'Start review', es: 'Empezar el repaso' },
+
+  savedHead: { en: 'Saved', es: 'Guardados' },
+  sortBy: { en: 'Sort', es: 'Ordenar' },
+  sortRecent: { en: 'Recently saved', es: 'Recientes' },
+  sortSeen: { en: 'Most seen', es: 'Más vistos' },
+  sortDue: { en: 'Due', es: 'Por repaso' },
+  filter: { en: 'Filter', es: 'Filtrar' },
+  filterHint: { en: 'A kanji, a meaning or a reading', es: 'Un kanji, un significado o una lectura' },
+  savedEmpty: {
+    en: 'No saved kanji yet. In the reader, the bookmark beside a kanji in the Kanji table or the Word panel saves it.',
+    es: 'Todavía no hay kanji guardados. En el lector, el marcador junto a un kanji en la tabla de kanji o en el panel de la palabra lo guarda.',
+  },
+  filterNone: { en: 'No saved kanji match the filter.', es: 'Ningún kanji guardado coincide con el filtro.' },
+  savedOn: { en: 'saved {day}', es: 'guardado: {day}' },
+  dueOn: { en: 'review {day}', es: 'repaso: {day}' },
+  notSeen: { en: 'not met in a text yet', es: 'todavía no aparece en un texto' },
+  metIn: { en: 'Met in', es: 'Visto en' },
+  meaning: { en: 'Meaning', es: 'Significado' },
+  remove: { en: 'Remove', es: 'Quitar' },
+
+  oftenHead: { en: 'Seen often, not saved', es: 'Vistos a menudo, sin guardar' },
+  oftenEmpty: {
+    en: 'The kanji you read show up here, the ones met most first.',
+    es: 'Aquí aparecen los kanji que lees, primero los que más viste.',
+  },
+  oftenAllSaved: { en: 'Every kanji you have met is saved.', es: 'Todos los kanji que viste están guardados.' },
+
+  backupHead: { en: 'Backup', es: 'Copia de seguridad' },
+  backupLead: {
+    en: 'Export saves a file with your kanji and their counts, never a text. Import adds a file to what is here.',
+    es: 'Exportar guarda un archivo con tus kanji y sus conteos, nunca un texto. Importar suma un archivo a lo que ya hay.',
+  },
+  exportFile: { en: 'Export', es: 'Exportar' },
+  importFile: { en: 'Import', es: 'Importar' },
+  clearAll: { en: 'Clear all', es: 'Borrar todo' },
+  cancel: { en: 'Cancel', es: 'Cancelar' },
+  clearTitle: { en: 'Clear all of My kanji?', es: '¿Borrar todo Mis kanji?' },
+  clearBody: {
+    en: 'This forgets every saved kanji, its review schedule and every count of the kanji you met, in this browser. Export first to keep a copy.',
+    es: 'Esto olvida en este navegador cada kanji guardado, su calendario de repaso y cada conteo de los kanji que viste. Exporta antes para guardar una copia.',
+  },
+  cleared: { en: 'My kanji is empty now.', es: 'Mis kanji quedó vacío.' },
+  exported: { en: 'Saved {file}.', es: 'Se guardó {file}.' },
+  imported: {
+    en: 'Imported: {saved} saved kanji added, {seen} kanji counts added or raised.',
+    es: 'Importado: {saved} kanji guardados nuevos, {seen} conteos de kanji nuevos o mayores.',
+  },
+  importDropped: { en: '{n} damaged entries were left out.', es: 'Se dejaron fuera {n} entradas dañadas.' },
+  importJson: { en: 'That file is not JSON, so nothing was imported.', es: 'Ese archivo no es JSON, así que no se importó nada.' },
+  importFormat: { en: 'That file is not a Yomu kanji backup, so nothing was imported.', es: 'Ese archivo no es una copia de Mis kanji de Yomu, así que no se importó nada.' },
+  importEmpty: { en: 'That backup holds no kanji.', es: 'Esa copia no tiene kanji.' },
+  importSize: { en: 'That file is too large to be a kanji backup.', es: 'Ese archivo es demasiado grande para ser una copia de kanji.' },
+  importRead: { en: 'That file could not be read.', es: 'No se pudo leer ese archivo.' },
+
+  review: { en: 'Review', es: 'Repaso' },
+  reviewOf: { en: '{at} of {of}', es: '{at} de {of}' },
+  reviewAgainTag: { en: 'once more', es: 'una vez más' },
+  reviewPrompt: {
+    en: 'Recall how it is read and what it means, then show the answer.',
+    es: 'Recuerda cómo se lee y qué significa, y luego muestra la respuesta.',
+  },
+  reviewShow: { en: 'Show', es: 'Mostrar' },
+  again: { en: 'Again', es: 'Otra vez' },
+  gotIt: { en: 'Got it', es: 'Lo sabía' },
+  leaveReview: { en: 'Leave the review', es: 'Salir del repaso' },
+  reviewKeys: {
+    en: 'Keys: Space shows the answer, 1 is Again, 2 is Got it, Escape leaves.',
+    es: 'Teclas: Espacio muestra la respuesta, 1 es Otra vez, 2 es Lo sabía, Escape sale.',
+  },
+  reviewNothing: { en: 'Nothing is due right now.', es: 'No hay nada para repasar ahora.' },
+  reviewDone: { en: 'Review done', es: 'Repaso terminado' },
+  reviewSummary: {
+    en: 'You reviewed {n} kanji: {got} on the first try, {again} with Again.',
+    es: 'Repasaste {n} kanji: {got} al primer intento y {again} con Otra vez.',
+  },
+  reviewAgainList: { en: 'Back tomorrow:', es: 'Vuelven mañana:' },
+  nextReview: { en: 'Next review: {day}, {n} kanji.', es: 'Próximo repaso: {day}, {n} kanji.' },
+  backToMyKanji: { en: 'Back to My kanji', es: 'Volver a Mis kanji' },
+  noInfo: { en: 'No details in the kanji dictionary.', es: 'Sin detalles en el diccionario de kanji.' },
   footerNote: {
     en: 'Dictionary: JMdict and KANJIDIC, EDRDG, CC BY-SA 4.0. Your text stays in this browser.',
     es: 'Diccionario: JMdict y KANJIDIC, EDRDG, CC BY-SA 4.0. Tu texto se queda en este navegador.',

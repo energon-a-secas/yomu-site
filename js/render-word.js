@@ -11,6 +11,7 @@ import { ui, t, posWords, currentLang } from './strings.js';
 import { beats as splitBeats, beatRomaji } from './kana.js';
 import { surfaceNode } from './render-reading.js';
 import { noteTitle, noteGist, tokenNotes, humanize } from './render-notes.js';
+import { saveToggle, seenText } from './render-save.js';
 
 /** A token's beats with the romaji each one is spelled with. */
 export function tokenBeats(token) {
@@ -145,10 +146,36 @@ function notesPart(token, noteOf) {
 }
 
 /**
- * @param {object|null} token
- * @param {{ noteOf: Function, kidOf: Function, canSpeak: boolean }} ctx
+ * The word's kanji, each with what it means, how often it was met and the
+ * same save toggle the kanji table has, so a kanji can be kept from the word
+ * it was found in without going to the table.
  */
-export function wordNode(token, { noteOf, kidOf, canSpeak }) {
+function kanjiPart(token, { kidOf, kanjiOf }) {
+  const chars = [...new Set(Array.isArray(token.kanji) ? token.kanji : [])];
+  if (!chars.length || typeof kanjiOf !== 'function') return null;
+  const rows = chars.map((ch) => {
+    const kid = kidOf ? kidOf(ch) : -1;
+    if (kid < 0) return null;
+    const { info, saved, n } = kanjiOf(ch);
+    const meaning = info && Array.isArray(info.m) ? info.m.slice(0, 3).join(', ') : '';
+    const seen = seenText(n);
+    return h('li', { class: 'wk' }, [
+      h('span', { class: 'wk-char', lang: 'ja' }, ch),
+      h('span', { class: 'wk-main' }, [
+        meaning ? h('span', { class: 'wk-mean', lang: 'en' }, meaning) : null,
+        seen ? h('span', { class: 'wk-seen' }, seen) : null,
+      ]),
+      saveToggle(ch, saved, { 'data-act': 'save-kanji', 'data-kid': kid }),
+    ]);
+  }).filter(Boolean);
+  return rows.length ? section('wordKanji', h('ul', { class: 'wk-list', role: 'list' }, rows)) : null;
+}
+
+/**
+ * @param {object|null} token
+ * @param {{ noteOf: Function, kidOf: Function, canSpeak: boolean, kanjiOf?: Function }} ctx
+ */
+export function wordNode(token, { noteOf, kidOf, canSpeak, kanjiOf = null }) {
   if (!token) return h('p', { class: 'side-empty' }, ui('wordEmpty'));
   const romaji = token.romaji || {};
   const kinds = posWords(token);
@@ -167,6 +194,7 @@ export function wordNode(token, { noteOf, kidOf, canSpeak }) {
     beatsPart(token, canSpeak),
     kinds.length ? section('partOfSpeech', h('p', null, withJa(kinds.join('; ')))) : null,
     meaningsPart(token),
+    kanjiPart(token, { kidOf, kanjiOf }),
     chainPart(token, noteOf),
     notesPart(token, noteOf),
     h('p', { class: 'word-out' }, h('a', {

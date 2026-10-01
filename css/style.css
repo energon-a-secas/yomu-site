@@ -9,10 +9,10 @@
  * Do NOT redeclare them here. The block below holds only what base.css does
  * not define, plus this site's accent.
  *
- * The accent is indigo and is spent on three things only: the chosen word,
- * a light (a kanji or a note found in the text) and the dotted mark under a
- * special sound. That keeps it under a tenth of any screen, which is what lets
- * a light be seen at all.
+ * The accent is indigo and is spent on four things only: the chosen word,
+ * a light (a kanji or a note found in the text), the dotted mark under a
+ * special sound, and the one Start review on My kanji. That keeps it under a
+ * tenth of any screen, which is what lets a light be seen at all.
  *
  * Contrast, measured: --on-accent on --accent is 7.51:1. --accent-bright on
  * --bg is 4.496:1, a hair under AA for body text, so it is used for marks,
@@ -123,6 +123,8 @@ main#main:focus { outline: none; }
   border-color: rgba(255, 255, 255, 0.18);
 }
 .btn--ghost:hover { background: rgba(255, 255, 255, 0.1); color: var(--text-primary); }
+.btn--danger { background: var(--danger); color: var(--on-accent); }
+.btn--danger:hover { background: color-mix(in srgb, var(--danger) 85%, white); }
 .btn[aria-pressed="true"] {
   background: rgba(255, 255, 255, 0.12);
   border-color: rgba(255, 255, 255, 0.4);
@@ -189,9 +191,10 @@ dialog.dialog--wide { width: min(760px, calc(100% - 16px)); }
  * under it with Word, Kanji and Notes as tabs. From 1100px (and never in an
  * embed) the side column stands beside the reading and sticks. */
 .embed-bar {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
   padding: var(--space-2) var(--space-4);
   font-size: var(--text-sm);
-  text-align: right;
   border-bottom: 1px solid var(--border-subtle);
 }
 
@@ -341,6 +344,24 @@ dialog.dialog--wide { width: min(760px, calc(100% - 16px)); }
 .tok-plain--space { min-width: 0.4em; }
 
 #reading[data-furigana="off"] rt { display: none; }
+
+/* A kanji not in My kanji yet: a small corner just outside its top left. A
+   shape, so it reads without colour; at the top, so it never meets the dotted
+   mark of a special sound, which runs underneath; and in the muted ink, so a
+   lit kanji (filled, outlined, indigo) still looks nothing like it. A
+   positioned pseudo-element, so drawing it or not never moves a character.
+   Saving the kanji drops the class in place (render-save.js); the Unsaved
+   kanji toggle turns the drawing off. */
+.reading-body .kj { position: relative; }
+#reading[data-unsaved="mark"] .reading-body .kj.is-unsaved::before {
+  content: "";
+  position: absolute;
+  left: -0.07em; top: -0.03em;
+  width: 0.2em; height: 0.2em;
+  border-left: 1.5px solid var(--text-muted);
+  border-top: 1.5px solid var(--text-muted);
+  pointer-events: none;
+}
 #reading[data-romaji="said"] .tok-romaji--spelled,
 #reading[data-romaji="spelled"] .tok-romaji--said,
 #reading[data-romaji="off"] .tok-romaji { display: none; }
@@ -517,12 +538,17 @@ rt .snd { border-bottom: 0; padding-bottom: 0; }
 
 /* ── The kanji table ───────────────────────────────────────── */
 .kj-list { list-style: none; display: flex; flex-direction: column; border-top: 1px solid var(--border-subtle); }
+/* The row's button and its bookmark are siblings, so the hairline is the
+   item's, under both. */
+.kj-entry { display: flex; align-items: flex-start; border-bottom: 1px solid var(--border-subtle); }
+.kj-entry > .save-toggle { margin-top: var(--space-2); }
 .kj-row {
   display: grid; grid-template-columns: 3rem minmax(0, 1fr); align-items: start;
   gap: var(--space-3);
+  flex: 1; min-width: 0;
   width: 100%;
   padding: var(--space-2);
-  border: 0; border-bottom: 1px solid var(--border-subtle);
+  border: 0;
   background: transparent; color: var(--text-primary);
   font: inherit; text-align: left;
   cursor: pointer;
@@ -545,6 +571,144 @@ rt .snd { border-bottom: 0; padding-bottom: 0; }
 .kj-here [lang="ja"] { font-size: var(--text-base); }
 .kj-mean { color: var(--text-secondary); }
 .kj-key { font-size: var(--text-xs); color: var(--text-muted); }
+.kj-seen { color: var(--text-muted); }
+
+/* The save toggle: a bookmark, outlined until the kanji is saved, filled after.
+   The fill is the cue, not a colour, and it is not the accent: a table of
+   twenty saved kanji would otherwise spend the accent twenty times. */
+.save-toggle {
+  flex: none;
+  display: inline-grid; place-items: center;
+  width: 36px; height: 36px;
+  border: 1px solid transparent; border-radius: var(--radius-sm);
+  background: transparent; color: var(--text-muted);
+  cursor: pointer;
+  transition: color var(--dur), background-color var(--dur);
+}
+/* Hover only where there is hover: a tapped toggle kept its grey after the finger left. */
+@media (hover: hover) { .save-toggle:hover { color: var(--text-primary); background: var(--surface-2); } }
+.save-toggle:active { transform: none; }
+.save-icon { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; }
+.save-toggle[aria-pressed="true"] { color: var(--text-primary); }
+.save-toggle[aria-pressed="true"] .save-icon { fill: currentColor; }
+
+/* The Word panel's kanji, each with the same toggle. */
+.wk-list { list-style: none; display: flex; flex-direction: column; border-top: 1px solid var(--border-subtle); }
+.wk {
+  display: grid; grid-template-columns: 2.25rem minmax(0, 1fr) auto; align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-1) 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.wk-char { font-size: 1.5rem; line-height: 1.2; text-align: center; }
+.wk-main { display: flex; flex-direction: column; min-width: 0; font-size: var(--text-sm); line-height: 1.4; }
+.wk-mean { color: var(--text-secondary); overflow-wrap: anywhere; }
+.wk-seen { font-size: var(--text-xs); color: var(--text-muted); }
+
+/* ── My kanji ──────────────────────────────────────────────────
+ * The header link and the embed bar's carry the number due, in plain ink:
+ * a count is information, not an alarm. */
+.mk-open { gap: var(--space-2); }
+.mk-due {
+  display: inline-grid; place-items: center;
+  min-width: 1.4rem; height: 1.25rem;
+  padding: 0 5px;
+  border: 1px solid var(--border-strong); border-radius: 999px;
+  font-size: 0.6875rem; font-weight: 600; font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+.text-link .mk-due { margin-left: var(--space-1); }
+a.mk-open[aria-current="page"] { background: rgba(255, 255, 255, 0.12); border-color: rgba(255, 255, 255, 0.4); }
+.text-link.mk-open[aria-current="page"] { background: none; text-decoration-thickness: 2px; }
+
+.mk {
+  width: 100%;
+  max-width: calc(var(--read-w) + var(--space-4) * 2);
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-4) 64px;
+  flex: 1;
+}
+.mk-back { font-size: var(--text-sm); min-height: 32px; }
+.mk-title { font-size: var(--text-xl); margin-top: var(--space-4); }
+.mk-title:focus, .mk-sec-title:focus { outline: none; }
+.mk-title:focus-visible, .mk-sec-title:focus-visible { outline: 2px solid var(--accent-bright); outline-offset: 2px; }
+.mk-lead { margin-top: var(--space-1); }
+.mk-note { margin-top: var(--space-3); font-size: var(--text-sm); line-height: 1.5; color: var(--text-secondary); }
+.mk-note:empty { display: none; }
+.mk-sec { margin-top: var(--space-8); }
+.mk-sec + .mk-sec { padding-top: var(--space-6); border-top: 1px solid var(--border-subtle); }
+.mk-sec-title { font-size: var(--text-base); font-weight: 600; margin-bottom: var(--space-2); }
+.mk-count { color: var(--text-muted); font-weight: 500; font-variant-numeric: tabular-nums; }
+.mk-line { font-size: var(--text-sm); line-height: 1.55; }
+.mk-line + .mk-line { margin-top: var(--space-1); }
+.mk-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-3); }
+.mk-empty { font-size: var(--text-sm); color: var(--text-muted); line-height: 1.55; }
+.mk-danger { color: var(--danger-text); }
+
+.mk-controls { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-6); margin: var(--space-3) 0; }
+.mk-filter { display: inline-flex; align-items: center; gap: var(--space-2); flex: 1 1 14rem; min-width: 0; }
+.mk-filter .seg-label { margin-right: 0; }
+.mk-filter-input {
+  flex: 1; min-width: 0;
+  min-height: 32px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
+  background: var(--surface-1); color: var(--text-primary);
+  font: inherit; font-size: var(--text-sm);
+}
+.mk-filter-input:focus-visible { outline: 2px solid var(--accent-bright); outline-offset: 1px; border-color: transparent; }
+
+.mk-list { list-style: none; border-top: 1px solid var(--border-subtle); }
+.mk-item {
+  display: grid; grid-template-columns: 3.25rem minmax(0, 1fr) auto; align-items: start;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.mk-char { font-size: 2.25rem; line-height: 1.1; text-align: center; }
+.mk-char--sm { font-size: 1.75rem; }
+.mk-main { display: flex; flex-direction: column; gap: 2px; min-width: 0; font-size: var(--text-sm); line-height: 1.5; }
+.mk-mean { color: var(--text-primary); overflow-wrap: anywhere; }
+.mk-reads { display: flex; flex-wrap: wrap; gap: 0 var(--space-3); color: var(--text-secondary); }
+.mk-reads [lang="ja"] { font-size: var(--text-base); }
+.mk-meta { font-size: var(--text-xs); color: var(--text-muted); }
+.mk-words { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px var(--space-3); margin-top: 2px; }
+.mk-word { font-size: 1.125rem; line-height: 1.9; }
+.mk-word rt { font-size: 0.55em; color: var(--text-secondary); }
+.mk-remove { align-self: start; }
+
+/* ── The review ──────────────────────────────────────────────── */
+.rv-title { display: flex; flex-wrap: wrap; gap: 0 var(--space-2); }
+.rv-tag { color: var(--text-muted); font-weight: 500; }
+.rv-char {
+  margin: var(--space-6) 0 var(--space-4);
+  font-size: clamp(5rem, 22vw, 8rem); line-height: 1;
+  text-align: center;
+  border-radius: var(--radius-sm);
+}
+.rv-char:focus { outline: none; }
+.rv-char:focus-visible { outline: 2px solid var(--accent-bright); outline-offset: 6px; }
+.rv-prompt { text-align: center; }
+.rv-answer {
+  display: flex; flex-direction: column; gap: var(--space-1);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border-subtle);
+  font-size: var(--text-sm); line-height: 1.55;
+}
+.rv-answer:focus { outline: none; }
+.rv-answer:focus-visible { outline: 2px solid var(--accent-bright); outline-offset: 4px; }
+.rv-mean { font-size: var(--text-base); }
+.rv-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-3); margin-top: var(--space-6); }
+.rv-btn { min-width: 9rem; }
+.rv-kbd {
+  display: inline-grid; place-items: center;
+  min-width: 1.5rem; height: 1.25rem; padding: 0 4px;
+  border: 1px solid var(--border-strong); border-radius: 4px;
+  font: inherit; font-size: 0.6875rem; font-weight: 500; color: var(--text-secondary);
+}
+.rv-keys { margin-top: var(--space-4); text-align: center; font-size: var(--text-xs); color: var(--text-muted); }
+.rv-list { font-size: 1.25rem; letter-spacing: 0.1em; }
 
 /* ── Phrases ───────────────────────────────────────────────── */
 #phrases-body > .quiet { margin-bottom: var(--space-6); }
@@ -692,6 +856,11 @@ html[data-embed="1"] body:has(> .neo-footer) { min-height: 0; }
   .seg-btn { min-height: 44px; }
   .tok { min-width: 44px; min-height: 44px; }
   .it-line, .kj-row { min-height: 44px; }
+  .save-toggle { width: 44px; height: 44px; }
+  .mk-back, .mk-filter-input { min-height: 44px; }
+  .text-link.mk-open { display: inline-flex; align-items: center; min-height: 44px; }
+  /* A touch screen has no keys to press, so the key hints go. */
+  .rv-kbd, .rv-keys { display: none; }
   .word-notes .text-link, .word-out .text-link { display: inline-flex; align-items: center; min-height: 44px; }
 }
 
@@ -705,6 +874,10 @@ html[data-embed="1"] body:has(> .neo-footer) { min-height: 0; }
   .ph-actions { flex-direction: row; flex-wrap: wrap; }
   .dialog__header, .dialog__body { padding-left: var(--space-4); padding-right: var(--space-4); }
   .toast { left: var(--space-4); right: var(--space-4); max-width: none; }
+  .mk-item { grid-template-columns: 2.75rem minmax(0, 1fr) auto; gap: var(--space-2); }
+  .mk-char { font-size: 1.875rem; }
+  .mk-controls { gap: var(--space-2) var(--space-4); }
+  .rv-btn { min-width: 0; flex: 1 1 8rem; }
 }
 
 /* ── Reduced motion ────────────────────────────────────────── */

@@ -21,9 +21,12 @@ function init() {
     });
     return;
   }
-  // A link from another Neorgon site wins over what this browser kept.
-  const text = takeFragmentText() ?? savedText(state);
-  if (text) loadText(text).catch(() => {});
+  // A link from another Neorgon site wins over what this browser kept. The
+  // kept text is restored, not loaded anew: My kanji already counted it.
+  const linked = takeFragmentText();
+  const kept = linked === null ? savedText(state) : '';
+  if (linked) loadText(linked).catch(() => {});
+  else if (kept) loadText(kept, { restore: true }).catch(() => {});
   else analyzeNow().catch(() => {});
   // A #t= link followed from the page itself changes only the fragment.
   addEventListener('hashchange', () => { const t = takeFragmentText(); if (t) loadText(t).catch(() => {}); });

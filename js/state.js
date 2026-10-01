@@ -1,6 +1,6 @@
 // The page's state, and the two places any of it is kept.
 //
-// Preferences (language, the three display toggles, slow speech) go through
+// Preferences (language, the four display toggles, slow speech) go through
 // the Persist kit under 'yomu-site:preferences', version 1. The pasted text is
 // kept apart, raw, under 'yomu-site:text', for one reason: a reload should not
 // lose a sentence someone just pasted, and a Clear should be able to forget it
@@ -23,9 +23,11 @@ export const MAX_CHARS = 2000;
 export const RATE = Object.freeze({ normal: 1, slow: 0.6 });
 
 const ROMAJI = ['said', 'spelled', 'off'];
+/** The unsaved-kanji mark in the reading (My kanji): drawn, or not. */
+export const UNSAVED = Object.freeze(['mark', 'off']);
 
 export const state = {
-  prefs: { lang: 'en', furigana: true, romaji: 'said', highlights: true, slow: false },
+  prefs: { lang: 'en', furigana: true, romaji: 'said', highlights: true, unsaved: 'mark', slow: false },
   embed: false,
   text: '',
   truncated: false,
@@ -73,6 +75,7 @@ export function loadPrefs(s, loc = globalThis.location, nav = globalThis.navigat
   if (typeof p.furigana === 'boolean') s.prefs.furigana = p.furigana;
   if (ROMAJI.includes(p.romaji)) s.prefs.romaji = p.romaji;
   if (typeof p.highlights === 'boolean') s.prefs.highlights = p.highlights;
+  if (UNSAVED.includes(p.unsaved)) s.prefs.unsaved = p.unsaved;
   if (typeof p.slow === 'boolean') s.prefs.slow = p.slow;
   return s.prefs;
 }

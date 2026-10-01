@@ -33,9 +33,9 @@ export class LoadError extends Error {
   }
 }
 
-/** For the harness: read from a fixture instead of the analyzer. */
-export function useFixture({ analyze, notes }) {
-  fixture = { analyze, createDict: null, notes: notes || {} };
+/** For the harness: read from a fixture instead of the analyzer. `kanji` is a Map of char to kanji info. */
+export function useFixture({ analyze, notes, kanji = null }) {
+  fixture = { analyze, createDict: null, notes: notes || {}, kanji };
   mods = fixture;
 }
 
@@ -79,6 +79,28 @@ async function modules() {
       });
   }
   return loading;
+}
+
+/**
+ * Kanji information for characters with no text around them: the My kanji
+ * screen lists kanji saved from texts long gone. It goes through the same
+ * dictionary, and the same fetchJson, as a read, so a kanji shard a reading
+ * already loaded is not fetched twice. Resolves to a Map of the characters
+ * the data has; rejects with a LoadError naming the file that failed.
+ */
+export async function kanjiInfo(chars) {
+  const m = await modules();
+  if (fixture) {
+    const out = new Map();
+    for (const ch of chars || []) if (fixture.kanji && fixture.kanji.has(ch)) out.set(ch, fixture.kanji.get(ch));
+    return out;
+  }
+  if (!dict && typeof m.createDict === 'function') dict = m.createDict({ fetchJson });
+  if (!dict || typeof dict.kanji !== 'function') return new Map();
+  const got = await dict.kanji([...new Set(chars || [])]);
+  const out = new Map();
+  if (got && typeof got.forEach === 'function') got.forEach((v, ch) => { if (v) out.set(ch, { ...v, ch }); });
+  return out;
 }
 
 /** Forget the dictionary, so a Retry refetches a shard that failed rather than replaying it. */

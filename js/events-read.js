@@ -4,13 +4,24 @@
 // so both stay under the 500-line rule. Every read carries a sequence number
 // and only the newest may paint, so a slow shard for an old version of the
 // text can never overwrite the reading of the current one.
+//
+// It is also where My kanji counts (kanji-store.js). A read that settles is
+// the newest one and finished, so counting there counts a typed kanji once,
+// after the debounce, and never per keystroke. A reading session begins where
+// the box gets new content at once (loadText, a paste or a drop) or after it
+// was emptied (Clear, or every character deleted, which leaves the page in
+// the same state as Clear); the reload that restores the saved text is not
+// one, which is how a reload counts nothing.
 
 import { state, saveText, forgetText, setText } from './state.js';
 import { $, debounce } from './utils.js';
 import { currentLang } from './strings.js';
 import { read, isLexical, isUnknown, LoadError } from './reader.js';
 import { paintReading, paintStatus, paintSpeech, paintEmpty } from './render.js';
+import { kanjiOrder } from './render-kanji.js';
 import { cancel } from './speech.js';
+import { myKanji, wordsByKanji } from './kanji-store.js';
+import { today } from './render-save.js';
 
 let seq = 0;
 
@@ -22,6 +33,12 @@ export function describe(err) {
 function counts(a) {
   const lex = a.tokens.filter(isLexical);
   return { tokens: lex.length, unknown: lex.filter(isUnknown).length };
+}
+
+/** Count this read's kanji once per session, and keep the words they were met in. */
+function noteKanji(analysis) {
+  analysis.order = kanjiOrder(analysis.tokens);
+  if (analysis.order.length) myKanji().record(analysis.order, wordsByKanji(analysis.tokens), today());
 }
 
 /** Whether a note still has something to point at in this analysis. */
@@ -79,6 +96,7 @@ export async function analyzeNow() {
     if (state.note && !stillIn(analysis, state.note)) state.note = null;
     state.analysis = analysis;
     state.pinnedKanji = null;
+    noteKanji(analysis);
     const n = counts(analysis);
     // The status line says the read is done, in words, because a screen
     // reader hears nothing else change; and it says so when there was no
@@ -124,8 +142,13 @@ export function focusHome() {
   if (target) target.focus({ preventScroll: true });
 }
 
-/** Put text in the box and read it now: an example, a phrase, #t=, the embed. */
-export function loadText(text) {
+/**
+ * Put text in the box and read it now: an example, a phrase, #t=, the embed.
+ * Each of those is a new reading session. `restore` is the one exception: the
+ * saved text coming back on a reload is the session it was, already counted.
+ */
+export function loadText(text, { restore = false } = {}) {
+  if (!restore) myKanji().beginSession();
   const ta = $('yomu-text');
   if (ta) { ta.value = text; autosize(ta); }
   setText(state, text);
@@ -143,6 +166,7 @@ export function clearText() {
   if (ta) { ta.value = ''; autosize(ta); }
   setText(state, '');
   forgetText();
+  myKanji().beginSession();
   state.selected = null;
   state.note = null;
   state.speaking = false;
@@ -158,7 +182,10 @@ export function bindInput() {
   ta.addEventListener('paste', () => { pasted = true; });
   ta.addEventListener('input', (e) => {
     autosize(ta);
+    const had = state.text.trim() !== '';
+    if (e.inputType === 'insertFromDrop' || e.inputType === 'insertFromPaste') pasted = true;
     setText(state, ta.value);
+    if (pasted || (had && !state.text.trim())) myKanji().beginSession();
     saveText(state, ta.value);
     paintStatus(state);
     paintEmpty(state);

@@ -22,6 +22,7 @@ import { loadLibrary, dialogueText, phraseBeats } from './library.js';
 import { phrasesNode, chunkNodes } from './render-phrases.js';
 import { speechReason } from './render-chrome.js';
 import { analyzeNow, loadText, clearText, bindInput, describe, focusHome } from './events-read.js';
+import { KANJI_ACTIONS, bindKanji } from './events-kanji.js';
 
 export { analyzeNow, loadText };
 
@@ -323,8 +324,11 @@ function dropLangParam() {
 
 // ── One click handler ─────────────────────────────────────────────────────
 
+/** Preferences with more than two values keep the value itself; the rest are on and off. */
+const NAMED = new Set(['romaji', 'unsaved']);
+
 function setPref(name, value) {
-  if (name === 'romaji') state.prefs.romaji = value;
+  if (NAMED.has(name)) state.prefs[name] = value;
   else state.prefs[name] = value === 'on';
   savePrefs(state);
   paintChrome(state);
@@ -358,6 +362,7 @@ const ACTIONS = {
   'read-phrase': (b) => { const p = library && library.byId.get(b.dataset.id); if (p) readFromLibrary(p.ja); },
   'read-dialogue': (b) => { const d = library && library.dialogueById.get(b.dataset.id); if (d) readFromLibrary(dialogueText(d)); },
   chunk: (b) => speechOk(b) && chunk(b),
+  ...KANJI_ACTIONS,
 };
 
 export function bindEvents() {
@@ -379,4 +384,5 @@ export function bindEvents() {
     paintSpeech(state);
     paintWord(state);
   });
+  bindKanji();
 }

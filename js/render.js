@@ -13,8 +13,10 @@ import { summarize, inTextNode, noteNode } from './render-notes.js';
 import { wordNode } from './render-word.js';
 import { paintChrome, paintStatus, paintSpeech } from './render-chrome.js';
 import { noteOf } from './reader.js';
+import { myKanji } from './kanji-store.js';
+import { paintSavedMarks } from './render-save.js';
 
-export { paintChrome, paintStatus, paintSpeech };
+export { paintChrome, paintStatus, paintSpeech, paintSavedMarks };
 
 /** The kanji list's index for a character, which is what data-kid holds. */
 export function kidOf(state, ch) {
@@ -83,6 +85,7 @@ export function paintReading(state) {
   if (inTextBody && show) fill(inTextBody, inTextNode(summarize(a.tokens), noteOf, state.note));
   paintSelection(state);
   paintSide(state);
+  paintSavedMarks(state);
 }
 
 /** Which token is chosen, and the one tab stop that follows it. */
@@ -125,16 +128,19 @@ export function paintSide(state) {
   paintWord(state);
   paintNote(state);
   const kanji = $('kanji-body');
-  if (kanji) fill(kanji, kanjiNode(a, a.order || [], state.pinnedKanji));
+  if (kanji) fill(kanji, kanjiNode(a, a.order || [], state.pinnedKanji, myKanji()));
 }
 
 export function paintWord(state) {
   const word = $('word-body');
   if (!word) return;
+  const mine = myKanji();
+  const info = (state.analysis && state.analysis.info) || new Map();
   fill(word, wordNode(selectedToken(state), {
     noteOf,
     kidOf: (ch) => kidOf(state, ch),
     canSpeak: state.speech === 'ok',
+    kanjiOf: (ch) => ({ info: info.get(ch), saved: mine.isSaved(ch), n: mine.seenOf(ch) ? mine.seenOf(ch).n : 0 }),
   }));
 }
 
@@ -153,6 +159,13 @@ export function paintNote(state) {
   }
 }
 
+const afterAll = [];
+
+/** Run `fn` after every paintAll: the My kanji screen is drawn by its own module. */
+export function afterPaintAll(fn) {
+  afterAll.push(fn);
+}
+
 /** Everything, once, at boot and after a language change. */
 export function paintAll(state) {
   const empty = $('empty');
@@ -160,4 +173,5 @@ export function paintAll(state) {
   paintChrome(state);
   paintStatus(state);
   paintReading(state);
+  for (const fn of afterAll) fn(state);
 }

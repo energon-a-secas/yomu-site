@@ -85,8 +85,10 @@
 
   <!-- Neorgon Header Kit contract (packages/neorgon-ui/header/README.md). App mode:
        Yomu is a tool someone uses with a sentence in hand, so the header stays slim
-       and gets out of the way on scroll. Phrases is the one control kept on a phone;
-       the language toggle moves into the kit's overflow menu there. -->
+       and gets out of the way on scroll. Phrases and My kanji are the controls kept
+       on a phone; the language toggle moves into the kit's overflow menu there.
+       My kanji is a link, because it is a place (#/kanji): it carries the number of
+       reviews due, drawn by js/render-save.js. -->
   <header class="header-bar" data-header-mode="app">
     <div class="header-logo">
       <a href="./" class="header-title-link">
@@ -101,6 +103,7 @@
     <div class="header-right">
       <div class="header-actions">
         <button class="btn btn--ghost btn--sm" type="button" id="phrases-open" data-act="phrases" aria-haspopup="dialog" data-keep-mobile data-ui="phrases">Phrases</button>
+        <a class="btn btn--ghost btn--sm mk-open" href="#/kanji" id="mykanji-open" data-keep-mobile><span data-ui="myKanji">My kanji</span><span class="mk-due" data-due-count hidden></span></a>
         <!-- The current language is the bold one; the accessible name says which
              is on and what a press switches to. render-chrome.js rewrites both. -->
         <button class="btn btn--ghost btn--sm" type="button" id="lang-toggle" data-act="lang" data-lang="en" aria-label="Language: English. Switch to Spanish" title="Language: English. Switch to Spanish"><span class="lang-code lang-code--on" data-lang-code="en">EN</span> / <span class="lang-code" data-lang-code="es">ES</span></button>
@@ -124,8 +127,10 @@
        nothing a learner types is ever written into this markup, only into text
        nodes the modules build. -->
   <main id="main" tabindex="-1">
-    <!-- ?embed=1 (docs/EMBED.md): the one line an embedded Yomu keeps. -->
+    <!-- ?embed=1 (docs/EMBED.md): the one line an embedded Yomu keeps, with the
+         way to My kanji, since the header that holds it is hidden in a frame. -->
     <p class="embed-bar" id="embed-bar" hidden>
+      <a class="text-link mk-open" href="#/kanji" id="embed-mykanji"><span data-ui="myKanji">My kanji</span><span class="mk-due" data-due-count hidden></span></a>
       <a class="text-link" href="./" target="_blank" rel="noopener noreferrer"><span data-ui="openInYomu">Open in Yomu</span> ↗</a>
     </p>
 
@@ -148,7 +153,7 @@
 
         <div class="empty" id="empty" hidden></div>
 
-        <section class="reading" id="reading" aria-labelledby="reading-title" data-furigana="on" data-romaji="said" data-highlights="on" hidden>
+        <section class="reading" id="reading" aria-labelledby="reading-title" data-furigana="on" data-romaji="said" data-highlights="on" data-unsaved="mark" hidden>
           <h2 class="sr-only" id="reading-title" data-ui="reading">Reading</h2>
 
           <div class="tools">
@@ -169,6 +174,11 @@
                 <span class="seg-label" id="seg-highlights" data-ui="highlights">Highlights</span>
                 <button class="seg-btn" type="button" data-act="set" data-pref="highlights" data-value="on" aria-pressed="true" data-ui="on">On</button>
                 <button class="seg-btn" type="button" data-act="set" data-pref="highlights" data-value="off" aria-pressed="false" data-ui="off">Off</button>
+              </div>
+              <div class="seg" role="group" aria-labelledby="seg-unsaved">
+                <span class="seg-label" id="seg-unsaved" data-ui="unsavedKanji">Unsaved kanji</span>
+                <button class="seg-btn" type="button" data-act="set" data-pref="unsaved" data-value="mark" aria-pressed="true" data-ui="mark">Mark</button>
+                <button class="seg-btn" type="button" data-act="set" data-pref="unsaved" data-value="off" aria-pressed="false" data-ui="off">Off</button>
               </div>
             </div>
 
@@ -219,6 +229,32 @@
       </aside>
     </div>
 
+    <!-- My kanji (#/kanji, and #/kanji/review for a review). The reader above is
+         hidden, not emptied, while this is shown, so Back finds the text, the
+         reading and the chosen word where they were. js/render-mykanji.js and
+         js/render-review.js draw #mk-body; nothing here holds a learner's text. -->
+    <section class="mk" id="mykanji" aria-labelledby="mk-title" hidden>
+      <button class="text-link mk-back" type="button" id="mk-back" data-act="kanji-back"><span aria-hidden="true">← </span><span id="mk-back-label">Back to the reader</span></button>
+      <h2 class="mk-title" id="mk-title" tabindex="-1" data-ui="myKanji">My kanji</h2>
+      <p class="quiet mk-lead" id="mk-lead" data-ui="myKanjiLead">Kanji you save, and every kanji you have read here. They stay in this browser.</p>
+      <p class="mk-note" id="mk-note" role="status" aria-live="polite"></p>
+      <div class="mk-body" id="mk-body"></div>
+      <input type="file" id="mk-file" accept=".json,application/json" tabindex="-1" hidden>
+    </section>
+
+    <dialog class="dialog" id="mk-clear-dialog" aria-labelledby="mk-clear-title" aria-describedby="mk-clear-body">
+      <div class="dialog__header">
+        <h2 id="mk-clear-title" data-ui="clearTitle">Clear all of My kanji?</h2>
+      </div>
+      <div class="dialog__body">
+        <p id="mk-clear-body" data-ui="clearBody">This forgets every saved kanji, its review schedule and every count of the kanji you met, in this browser. Export first to keep a copy.</p>
+        <div class="mk-confirm">
+          <button class="btn btn--secondary btn--sm" type="button" data-dialog-close data-ui="cancel">Cancel</button>
+          <button class="btn btn--danger btn--sm" type="button" data-act="mk-clear-yes" data-ui="clearAll">Clear all</button>
+        </div>
+      </div>
+    </dialog>
+
     <dialog class="dialog dialog--wide" id="phrases-dialog" aria-labelledby="phrases-title">
       <div class="dialog__header">
         <h2 id="phrases-title" data-ui="phrasesTitle">Phrases</h2>
@@ -241,6 +277,7 @@
       <p><strong>Tatoeba.</strong> Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included. <a href="https://tatoeba.org/en/downloads" target="_blank" rel="noopener noreferrer">tatoeba.org</a></p>
       <p><strong>Written here.</strong> The notes on sounds and grammar, the phrase library and the dialogues were written for Yomu and are in the public domain.</p>
       <p><strong>Your text.</strong> What you paste is read in this browser. It is kept in this browser's local storage so a reload does not lose it, and Clear forgets it. It is never put in the address bar or sent anywhere, unless you click DeepL, Google Translate or Jisho, which open that site in a new tab with the text or the word.</p>
+      <p><strong>My kanji.</strong> The kanji you save, their review dates, how many texts you met each kanji in, and up to eight dictionary words per kanji are kept in this browser's local storage too. The text itself is not. Export writes them to a file on your device; nothing is sent anywhere.</p>
     </template>
   </footer>
 

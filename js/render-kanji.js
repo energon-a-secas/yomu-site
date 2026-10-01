@@ -8,10 +8,15 @@
 // dictionary: the dictionary lists every reading a kanji has, the text uses
 // one. When a reading covers a run (今日 is read きょう as a whole), the run is
 // named beside it, because きょう is not a reading of 今 on its own.
+//
+// Each row also says how many texts the kanji was met in (My kanji counts it,
+// kanji-store.js) and carries a save toggle. The toggle is a sibling of the
+// row's button, not inside it: a button inside a button is not a button.
 
 import { h } from './utils.js';
 import { ui } from './strings.js';
 import { isKanji } from './kana.js';
+import { saveToggle, seenText } from './render-save.js';
 
 /** Kanji characters in order of first appearance. */
 export function kanjiOrder(tokens) {
@@ -56,13 +61,14 @@ function list(label, items, lang) {
   ]);
 }
 
-/** One row. The whole row is the control: it lights the kanji in the text. */
-function row(ch, kid, info, here, pinned) {
+/** One row. The row's button lights the kanji in the text; the bookmark beside it saves it. */
+function row(ch, kid, info, here, pinned, mine) {
   const readings = (here || []).map((x) => (x.run ? `${x.ruby} (${x.run})` : x.ruby));
   const meaning = info && Array.isArray(info.m) && info.m.length ? info.m.join(', ') : '';
   const strokes = info && Number.isInteger(info.s) ? ui('strokes', { n: info.s }) : '';
   const parts = info && Array.isArray(info.parts) ? info.parts.filter((p) => p && p !== ch) : [];
-  return h('li', null, h('button', {
+  const seen = seenText(mine.seenOf(ch) && mine.seenOf(ch).n);
+  return h('li', { class: 'kj-entry' }, [h('button', {
     type: 'button',
     class: 'kj-row',
     'data-act': 'kanji',
@@ -85,22 +91,24 @@ function row(ch, kid, info, here, pinned) {
         parts.length ? list(ui('parts'), parts, 'ja') : null,
         strokes ? h('span', { class: 'kj-read' }, strokes) : null,
       ]) : null,
+      seen ? h('span', { class: 'kj-line kj-line--quiet kj-seen' }, seen) : null,
     ]),
-  ]));
+  ]), saveToggle(ch, mine.isSaved(ch), { 'data-act': 'save-kanji', 'data-kid': kid })]);
 }
 
 /**
  * @param {object} a       the normalized analysis
  * @param {string[]} order kanjiOrder(a.tokens)
  * @param {number|null} pinned  data-kid of a pinned row
+ * @param {{ isSaved: Function, seenOf: Function }} mine  the My kanji store
  */
-export function kanjiNode(a, order, pinned) {
+export function kanjiNode(a, order, pinned, mine) {
   if (!order.length) return h('p', { class: 'side-empty' }, ui('kanjiEmpty'));
   const here = readingsHere(a.tokens);
   const info = a.info || new Map();
   return [
     h('p', { class: 'side-hint' }, ui('kanjiHint')),
-    h('ul', { class: 'kj-list', role: 'list' }, order.map((ch, kid) => row(ch, kid, info.get(ch), here.get(ch), pinned === kid))),
+    h('ul', { class: 'kj-list', role: 'list' }, order.map((ch, kid) => row(ch, kid, info.get(ch), here.get(ch), pinned === kid, mine))),
   ];
 }
 
