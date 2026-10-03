@@ -9,11 +9,21 @@
  *
  *   node tools/build-kanji.mjs        (or: make data)
  *
- * Which characters: every joyo kanji (KANJIDIC grades 1 to 6 and 8) and every
- * character KANJIDIC gives a newspaper frequency rank, which adds the few
- * hundred jinmeiyo and older characters that still turn up in print. That is
- * about 2,600, ordered by frequency so that the first shard holds the
- * characters a reader meets first and a short text usually needs one fetch.
+ * Which characters: all 10,384 in KANJIDIC2, in two parts.
+ *
+ *   listed  every joyo kanji (KANJIDIC grades 1 to 6 and 8) and every
+ *           character KANJIDIC gives a newspaper frequency rank, which adds
+ *           the few hundred jinmeiyo and older characters that still turn up
+ *           in print: 2,600, ordered by frequency so that the first shard holds
+ *           the characters a reader meets first and a short text usually needs
+ *           one fetch. The index lists each shard's characters.
+ *   ranged  the other 7,784, which have no frequency to order them by, in
+ *           plain JS string order. The index gives each shard its first and
+ *           last character, so a rare kanji in a pasted text (鰻, 薔薇's 薔)
+ *           finds its shard without the index naming 7,784 characters.
+ *
+ * Until 2026-10-01 only the listed part shipped, so a character outside it
+ * had no readings and no meaning in the table.
  *
  * `parts` come from KanjiVG, not KANJIDIC: the components KanjiVG names one
  * level under the character (語 is 言 and 吾), which is the level a learner
@@ -27,7 +37,9 @@ import { licenceBlock, unshippable, EM_DASH } from './lib/licence.mjs';
 import {
   writeJson, serialize, MAX_BYTES, SITE, fmtBytes, pruneStale,
 } from './lib/emit.mjs';
-import { JOYO_GRADES, readingsOfType, selection } from './lib/kanjidic.mjs';
+import {
+  JOYO_GRADES, readingsOfType, selection, theRest,
+} from './lib/kanjidic.mjs';
 
 const TOOL = 'tools/build-kanji.mjs';
 const OUT = path.join(SITE, 'data', 'kanji');
@@ -166,28 +178,33 @@ function main() {
   const kanjidic = loadZippedJson('kanjidic');
   const svgDir = loadKanjiVgDir();
   const chosen = selection(kanjidic);
-  const entries = new Map(chosen.map((c) => [c.literal, entryOf(c, svgDir)]));
+  const rest = theRest(kanjidic);
+  const entries = new Map([...chosen, ...rest].map((c) => [c.literal, entryOf(c, svgDir)]));
 
   const licence = licenceBlock('edrdg', TOOL, {
     upstream: [upstream('kanjidic'), upstream('kanjivg')],
     inputs: [['kanjivg', 'parts, the named components under each character']],
   });
-  const docs = pack(chosen.map((c) => c.literal), entries, licence);
+  const listed = pack(chosen.map((c) => c.literal), entries, licence);
+  const ranged = pack(rest.map((c) => c.literal), entries, licence);
 
   const written = [];
   const sizes = [];
   const shards = [];
-  docs.forEach((doc, i) => {
+  [...listed, ...ranged].forEach((doc, i) => {
     const name = `k${String(i).padStart(2, '0')}.json`;
     const file = path.join(OUT, name);
     sizes.push(writeJson(file, doc));
     written.push(file);
-    shards.push({ src: `data/kanji/${name}`, chars: Object.keys(doc.entries).join('') });
+    const chars = Object.keys(doc.entries);
+    shards.push(i < listed.length
+      ? { src: `data/kanji/${name}`, chars: chars.join('') }
+      : { src: `data/kanji/${name}`, first: chars[0], last: chars[chars.length - 1] });
   });
   const indexBytes = writeJson(path.join(OUT, 'index.json'), {
     _licence: licence,
-    format: 'yomu-kanji-index/1',
-    count: chosen.length,
+    format: 'yomu-kanji-index/2',
+    count: chosen.length + rest.length,
     shards,
   }, 'shards');
   const gone = pruneStale(OUT, /^k\d+\.json$/, written);
@@ -197,9 +214,9 @@ function main() {
   const withParts = [...entries.values()].filter((e) => e.parts.length).length;
   const total = sizes.reduce((a, b) => a + b, 0);
   const out = [
-    `kanji ${chosen.length} (joyo ${joyo}, frequency-ranked ${ranked}, both ${joyo + ranked - chosen.length})`,
-    `shards ${docs.length}: ${sizes.map((b) => `${fmtBytes(b)} (${b} B)`).join(', ')}; total ${fmtBytes(total)}; index ${fmtBytes(indexBytes)}`,
-    `with parts ${withParts}; no KanjiVG file ${stats.noSvg.length}${stats.noSvg.length ? ` (${stats.noSvg.join('')})` : ''}; no root group ${stats.noRoot.length}`,
+    `kanji ${chosen.length + rest.length}: listed ${chosen.length} (joyo ${joyo}, frequency-ranked ${ranked}, both ${joyo + ranked - chosen.length}), ranged ${rest.length}`,
+    `shards ${listed.length} listed + ${ranged.length} ranged: ${sizes.map((b) => `${fmtBytes(b)} (${b} B)`).join(', ')}; total ${fmtBytes(total)}; index ${fmtBytes(indexBytes)}`,
+    `with parts ${withParts}; no KanjiVG file ${stats.noSvg.length} (listed ${stats.noSvg.filter((ch) => !ranged.some((d) => Object.hasOwn(d.entries, ch))).length}); no root group ${stats.noRoot.length}`,
     `characters with a meaning passed over (dash or banned word) ${stats.passedOver}`,
     gone.length ? `removed stale shards: ${gone.join(' ')}` : 'no stale shards',
     `wall time ${((Date.now() - t0) / 1000).toFixed(1)} s`,

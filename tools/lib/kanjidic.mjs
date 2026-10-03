@@ -33,3 +33,17 @@ export function selection(kanjidic) {
   chosen.sort((a, b) => rank(a) - rank(b) || a.i - b.i);
   return chosen.map(({ c }) => c);
 }
+
+/**
+ * Every KANJIDIC character selection() leaves out, in plain JS string order
+ * (UTF-16 code units, the order js/dict.js compares in): 7,784 characters no
+ * joyo list and no newspaper count includes, kept in contiguous ranges so a
+ * rare kanji in a pasted text is found by the range it sorts into, and the
+ * index does not have to list them one by one.
+ */
+export function theRest(kanjidic) {
+  const chosen = new Set(selection(kanjidic).map((c) => c.literal));
+  return kanjidic.characters
+    .filter((c) => !chosen.has(c.literal))
+    .sort((a, b) => (a.literal < b.literal ? -1 : a.literal > b.literal ? 1 : 0));
+}

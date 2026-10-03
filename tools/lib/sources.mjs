@@ -67,6 +67,22 @@ export const SOURCES = {
     bytes: 11510405,
     licence: 'CC-BY-SA-4.0',
   },
+  // JMnedict, the EDRDG's names dictionary, from the same release: every
+  // language (there is no English-only cut of it), 743,624 entries of a
+  // spelling, a reading and a type (surname, given, place, company...).
+  // tools/build-names.mjs ships the surnames, given names and place names
+  // the corpus has evidence for. Fetched 2026-10-01; the digest is the one
+  // GitHub's release API lists for the asset, and the bytes matched it.
+  jmnedict: {
+    name: 'jmdict-simplified jmnedict-all',
+    release: '3.6.2+20260831182826',
+    url: 'https://github.com/scriptin/jmdict-simplified/releases/download/3.6.2%2B20260831182826/jmnedict-all-3.6.2+20260831182826.json.zip',
+    file: 'jmnedict-all.json.zip',
+    member: 'jmnedict-all-3.6.2.json',
+    sha256: 'b10873e9b581f580ea5165fc7bc84297f103177d72dcca750633a28843794951',
+    bytes: 13449381,
+    licence: 'CC-BY-SA-4.0',
+  },
   kanjidic: {
     name: 'jmdict-simplified kanjidic2-en',
     release: '3.6.2+20260831182826',

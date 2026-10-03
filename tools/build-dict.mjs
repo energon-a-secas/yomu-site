@@ -29,11 +29,15 @@
  */
 import path from 'node:path';
 import { loadZippedJson, loadBz2Text, upstream } from './lib/sources.mjs';
-import { licenceBlock, unshippable, EM_DASH } from './lib/licence.mjs';
+import { licenceBlock } from './lib/licence.mjs';
 import {
   writeJson, serialize, MAX_BYTES, SITE, fmtBytes, pruneStale,
 } from './lib/emit.mjs';
-import { readingTable, splitReading, needsSplit } from './lib/split.mjs';
+import { readingTable } from './lib/split.mjs';
+import {
+  recordFor, rank, byRank, pack, stats,
+} from './lib/records.mjs';
+import { writeRare } from './lib/rare-emit.mjs';
 import { isAllKana } from '../js/kana.js';
 import { byEvidence, kunTable, stampPlaces, stampShipped } from './lib/prices.mjs';
 import { chooseCore, filterDoc } from './lib/layout.mjs';
@@ -51,16 +55,6 @@ const OUT = path.join(SITE, 'data', 'dict');
 // takes the -30 a noun gets before a particle, and one band of evidence (16)
 // does not pay for it.
 const MAX_RECORDS = 6;
-const MAX_SENSES = 3;
-const MAX_GLOSS = 60;
-const MAX_KANJI = 2;
-
-// Readings that are not shipped in `r`: search-only (sk), irregular (ik) and
-// outdated (ok) kana. こんにちわ is in JMdict as an irregular reading of 今日は
-// so that a search for it finds something; it is not a reading to teach.
-const SKIP_KANA = new Set(['sk', 'ik', 'ok']);
-// The same three, for the kanji spellings a kana key lists in `k`.
-const SKIP_KANJI = new Set(['sK', 'iK', 'oK']);
 
 /** A key that is another key plus one of these is a candidate for `x`. */
 const PARTICLES = new Set([...'はにでともがをへか', 'の']);
@@ -73,119 +67,6 @@ const PARTICLES = new Set([...'はにでともがをへか', 'の']);
  */
 const WA_FLOOR = new Set(['こんにちは', 'こんばんは', 'では', 'には', 'とは']);
 const WA_NOTE = /pronounced (as )?わ(?!\p{Script=Hiragana})/u;
-
-// ── Records ───────────────────────────────────────────────────────────────
-
-function applies(list, key) {
-  return list.includes('*') || list.includes(key);
-}
-
-/** The senses that apply to this spelling; all of them if the tags say none. */
-function sensesFor(entry, key, kind) {
-  const field = kind === 'kanji' ? 'appliesToKanji' : 'appliesToKana';
-  const ok = entry.sense.filter((s) => applies(s[field], key));
-  return ok.length ? ok : entry.sense;
-}
-
-/**
- * At most 60 characters. Cut at a word, and drop a parenthesis the cut left
- * open, because "to be surprised (by something unexpected, et…" reads as a
- * broken page where "to be surprised…" reads as a short gloss.
- */
-function trimGloss(text) {
-  const s = text.trim();
-  if (s.length <= MAX_GLOSS) return s;
-  let cut = s.slice(0, MAX_GLOSS - 1);
-  const space = cut.lastIndexOf(' ');
-  if (space >= MAX_GLOSS / 2) cut = cut.slice(0, space);
-  const open = cut.lastIndexOf('(');
-  if (open >= 10 && cut.indexOf(')', open) < 0) cut = cut.slice(0, open);
-  return `${cut.replace(/[\s,;:(]+$/, '')}…`;
-}
-
-const stats = {
-  skippedGloss: 0, emptyG: 0, capped: 0, split: 0, partial: 0, star: 0, x: 0, w: 0,
-};
-
-/**
- * The first gloss of each of the first three senses.
- *
- * Two house rules reach a gloss, and they are not equal. An em dash can never
- * ship (tools/check-data.mjs fails the file), so a gloss carrying one is passed
- * over. The five banned words are a rule about our own copy, and a gloss is
- * the EDRDG's translation, not our copy: a sense that offers another gloss
- * shows that one instead (強力 shows its second gloss, "strong"), but a sense
- * whose only gloss is the word keeps it, because パワフル with no meaning at all
- * would be a dictionary lying to keep a style rule.
- */
-function glossesOf(senses) {
-  const out = [];
-  for (const sense of senses.slice(0, MAX_SENSES)) {
-    const glosses = sense.gloss.filter((g) => g.lang === 'eng').map((g) => g.text)
-      .filter((g) => !g.includes(EM_DASH));
-    const pick = glosses.find((g) => !unshippable(g)) || glosses[0];
-    if (pick !== sense.gloss[0]?.text) stats.skippedGloss += 1;
-    if (pick) out.push(trimGloss(pick));
-  }
-  return out;
-}
-
-/** Every part-of-speech code the entry uses, in first-seen order. */
-function posOf(entry) {
-  const seen = [];
-  for (const s of entry.sense) for (const p of s.partOfSpeech) if (!seen.includes(p)) seen.push(p);
-  return seen.join(' ');
-}
-
-const commonFirst = (list) => [...list.filter((f) => f.common), ...list.filter((f) => !f.common)];
-
-function recordFor(key, { entry, kind }, table) {
-  const senses = sensesFor(entry, key, kind);
-  const rec = {};
-  if (kind === 'kanji') {
-    const all = entry.kana.filter((k) => applies(k.appliesToKanji, key));
-    const shown = all.filter((k) => !k.tags.some((t) => SKIP_KANA.has(t)));
-    const r = commonFirst(shown.length ? shown : all).map((k) => k.text);
-    if (r.length) rec.r = r;
-  }
-  rec.g = glossesOf(senses);
-  rec.p = posOf(entry);
-  if (kind === 'kanji' && rec.r && needsSplit(key)) rec.f = splitReading(key, rec.r[0], table);
-  if (kind === 'kana') {
-    const form = entry.kana.find((k) => k.text === key);
-    const spellings = entry.kanji
-      .filter((k) => applies(form.appliesToKanji, k.text))
-      .filter((k) => !k.tags.some((t) => SKIP_KANJI.has(t)));
-    const k = commonFirst(spellings).slice(0, MAX_KANJI).map((s) => s.text);
-    if (k.length) rec.k = k;
-  }
-  if (senses[0].misc.includes('uk')) rec.u = 1;
-  return rec;
-}
-
-/**
- * The JMdict order of the records under one key: spellings that are common
- * in their entry first, then, for a kana key, an entry that is itself
- * written in kana (no kanji, the reading marked nokanji, or the first sense
- * usually kana) before one whose kanji spelling is the normal one, then
- * JMdict order. Without the kana rule は led with "tooth" and いる with "to
- * shoot", because 歯 and 射る have lower sequence numbers than the particle
- * and 居る. This is the order before evidence; `byEvidence` reorders a kana
- * key's records by the corpus.
- */
-function rank(f, key) {
-  const common = f.common ? 0 : 1;
-  if (f.kind === 'kanji') return [common, 0, f.index];
-  const form = f.entry.kana.find((k) => k.text === key);
-  const kanaWord = !f.entry.kanji.length || !form.appliesToKanji.length
-    || sensesFor(f.entry, key, 'kana')[0].misc.includes('uk');
-  return [common, kanaWord ? 0 : 1, f.index];
-}
-
-function byRank(a, b) {
-  for (let i = 0; i < a.length; i += 1) if (a[i] !== b[i]) return a[i] - b[i];
-  return 0;
-}
 
 // ── Build ─────────────────────────────────────────────────────────────────
 
@@ -288,10 +169,14 @@ function buildEntries(collected, kanjidic, bands, counts) {
   const dict = { get: (k) => view.get(k) };
 
   const entries = new Map();
+  // Which (entry, spelling) pairs this tier ships, so the second tier can
+  // ship every other one (tools/lib/rare.mjs).
+  const shipped = new Set();
   for (const [key, list] of full) {
     const ordered = byEvidence(key, list, dict, kanjiInfo);
     if (ordered.length > MAX_RECORDS) stats.capped += 1;
     entries.set(key, ordered.slice(0, MAX_RECORDS).map(({ f, rec }) => {
+      shipped.add(`${f.index}\t${key}`);
       const { q, o, ...out } = rec;
       if (saidWa(key, f)) { out.w = 1; stats.w += 1; }
       return out;
@@ -322,56 +207,7 @@ function buildEntries(collected, kanjidic, bands, counts) {
     }
   }
   Object.assign(stats, stampShipped(entries, kanjiInfo, counts));
-  return { entries, keys };
-}
-
-/**
- * Cut the sorted keys into shards of at most MAX_BYTES each. The estimate is
- * the serializer's own line for each key, so it is exact up to the header's
- * first and last fields; a shard that still comes out over is shortened one
- * key at a time until it fits, and the key moves to the next shard.
- */
-function pack(sorted, entries, licence) {
-  const header = Buffer.byteLength(serialize({
-    _licence: licence, format: 'yomu-dict/1', first: '', last: '', entries: {},
-  }));
-  const lineBytes = (k) => Buffer.byteLength(`${JSON.stringify(k)}: ${JSON.stringify(entries.get(k))},\n`);
-  const shards = [];
-  let cur = [];
-  let size = header;
-  for (const k of sorted) {
-    const n = lineBytes(k);
-    const room = MAX_BYTES - Buffer.byteLength(JSON.stringify(cur[0] || k)) - Buffer.byteLength(JSON.stringify(k));
-    if (cur.length && size + n > room) {
-      shards.push(cur);
-      cur = [];
-      size = header;
-    }
-    cur.push(k);
-    size += n;
-  }
-  if (cur.length) shards.push(cur);
-
-  const docs = [];
-  for (let i = 0; i < shards.length; i += 1) {
-    const keys = shards[i];
-    const make = () => ({
-      _licence: licence,
-      format: 'yomu-dict/1',
-      first: keys[0],
-      last: keys[keys.length - 1],
-      entries: Object.fromEntries(keys.map((k) => [k, entries.get(k)])),
-    });
-    let doc = make();
-    while (Buffer.byteLength(serialize(doc)) > MAX_BYTES) {
-      const moved = keys.pop();
-      if (i + 1 === shards.length) shards.push([]);
-      shards[i + 1].unshift(moved);
-      doc = make();
-    }
-    docs.push(doc);
-  }
-  return docs;
+  return { entries, keys, shipped, table };
 }
 
 function main() {
@@ -398,7 +234,7 @@ function main() {
     counts.set(k, shippedCounts.get(k));
     bands.set(k, scale(shippedCounts.get(k)));
   }
-  const { entries } = buildEntries(collected, kanjidic, bands, counts);
+  const { entries, shipped: shippedPairs, table } = buildEntries(collected, kanjidic, bands, counts);
 
   const all = [...entries.keys()].sort();
   const maxKey = all.reduce((m, k) => Math.max(m, k.length), 0);
@@ -449,8 +285,17 @@ function main() {
   const indexBytes = writeJson(path.join(OUT, 'index.json'), index, 'shards');
   const gone = pruneStale(OUT, /^w\d+\.json$/, written);
 
+  // The second tier: everything the first does not ship (tools/lib/rare.mjs).
+  // Its records are built with the same counters, so the first tier's are
+  // read before it runs.
+  const first = { skippedGloss: stats.skippedGloss, emptyG: stats.emptyG };
+  const rare = writeRare({
+    jmdict, shipped: shippedPairs, table, sentences, firstKeys: all, licence,
+  });
+
   const total = sizes.reduce((a, b) => a + b, 0);
   const records = [...entries.values()].reduce((a, r) => a + r.length, 0);
+  const withLs = [...entries.values()].flat().filter((r) => r.ls);
   const qs = [1, 2, 3, 4, 5].map((b) => [...bands.values()].filter((v) => v === b).length);
   const out = [
     `keys ${all.length}, records ${records}, maxKey ${maxKey} UTF-16 units`,
@@ -462,8 +307,11 @@ function main() {
     `x ${stats.x} keys, w ${stats.w} records, keys over ${MAX_RECORDS} records ${stats.capped}`,
     `shipped for the page: o ${stats.o} records, b ${stats.b}, c ${stats.c}, t ${stats.t}`,
     `q bands 1-5: ${qs.join(' / ')}; unranked ${all.length - [...bands.keys()].filter((k) => entries.has(k)).length}`,
-    `senses whose first gloss was passed over (dash or banned word) ${stats.skippedGloss}; records dropped for an empty g ${stats.emptyG}`,
+    `senses whose first gloss was passed over (dash or banned word) ${first.skippedGloss}; records dropped for an empty g ${first.emptyG}`,
+    `shipped records with a language source (ls) ${withLs.length}, wasei (ws) ${withLs.filter((r) => r.ws).length}`,
     gone.length ? `removed stale shards: ${gone.join(' ')}` : 'no stale shards',
+    ...rare,
+    `second tier senses whose first gloss was passed over ${stats.skippedGloss - first.skippedGloss}; records dropped for an empty g ${stats.emptyG - first.emptyG}`,
     `sentences counted ${sentences.length}; wall time ${((Date.now() - t0) / 1000).toFixed(1)} s`,
   ];
   process.stdout.write(`${out.join('\n')}\n`);

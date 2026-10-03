@@ -20,7 +20,7 @@
  * screen is required.
  */
 
-export const GENERATED_AT = '2026-09-28';
+export const GENERATED_AT = '2026-10-01';
 
 // Written as an escape on purpose: a source file that spells the banned
 // character out would itself be a hit for the check it exists to enforce.
@@ -38,6 +38,24 @@ export const LICENCES = {
     links: [
       'https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project',
       'https://www.edrdg.org/wiki/index.php/KANJIDIC_Project',
+    ],
+    screen: 'required',
+  },
+  // JMnedict is the EDRDG's too, under the same licence, and its sample
+  // acknowledgements (https://www.edrdg.org/edrdg/sample.html) name the files
+  // a site uses and allow "any reasonable variant". This is that sample with
+  // the names file named, worded exactly as the dictionary's own above.
+  jmnedict: {
+    source: 'JMnedict / ENAMDICT, Electronic Dictionary Research and Development Group',
+    url: 'https://www.edrdg.org/edrdg/licence.html',
+    spdx: 'CC-BY-SA-4.0',
+    derived: true,
+    id: 'jmnedict',
+    acknowledgement:
+      "This site uses the JMnedict/ENAMDICT dictionary file. This file is the property of the Electronic Dictionary Research and Development Group, and is used in conformance with the Group's licence.",
+    links: [
+      'https://www.edrdg.org/enamdict/enamdict_doc.html',
+      'https://www.edrdg.org/edrdg/licence.html',
     ],
     screen: 'required',
   },
