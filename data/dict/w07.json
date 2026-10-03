@@ -1,9 +1,11 @@
 {
-"_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-08-29"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-09-28"},
+"_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-08-29"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict/1",
-"first": "ちゅうどく",
-"last": "どようび",
+"first": "ちゅうとん",
+"last": "ども",
 "entries": {
+"ちゅうとん": [{"g":["stationing (troops)"],"p":"n vs vi","k":["駐屯"]}],
+"ちゅうどう": [{"g":["middle of the road","the middle (of what one is doing)","middle way"],"p":"n adj-no","k":["中道"]}],
 "ちゅうどく": [{"g":["poisoning","addiction"],"p":"n vs vi n-suf","k":["中毒"]}],
 "ちゅうなんべい": [{"g":["Central and South America"],"p":"n","k":["中南米"]}],
 "ちゅうにち": [{"g":["China and Japan","middle day (of a sumo tournament, theatrical run, etc.)","day of an equinox"],"p":"n","k":["中日"],"b":4},{"g":["resident in Japan…"],"p":"adj-f","k":["駐日"],"b":4,"t":1}],
@@ -669,7 +671,7 @@
 "てんばい": [{"g":["resale"],"p":"n vs vt","k":["転売"]}],
 "てんぷ": [{"g":["attaching (documents, etc.)"],"p":"n vs vt","k":["添付","添附"],"b":3},{"g":["pasting"],"p":"n vs vt","k":["貼付"]}],
 "てんぷく": [{"g":["overturning","overthrow (e.g. of a government)"],"p":"n vs vt vi","k":["転覆","顛覆"]}],
-"てんぷら": [{"g":["tempura"],"p":"n","k":["天ぷら","天麩羅"],"q":4}],
+"てんぷら": [{"g":["tempura"],"p":"n","k":["天ぷら","天麩羅"],"ls":["por","tempero"],"q":4}],
 "てんぼう": [{"g":["view"],"p":"n vs vt","k":["展望"]}],
 "てんぽ": [{"g":["shop"],"p":"n","k":["店舗","店鋪"],"b":4},{"g":["changing (governmental) posts"],"p":"n vs vi","k":["転補"]}],
 "てんまんぐう": [{"g":["Tenmangu shrine…"],"p":"n","k":["天満宮"]}],
@@ -1351,9 +1353,6 @@
 "どべい": [{"g":["mud wall"],"p":"n","k":["土塀"]}],
 "どぼく": [{"g":["engineering works"],"p":"n","k":["土木"]}],
 "どま": [{"g":["dirt floor","pit (theater seating)"],"p":"n","k":["土間"],"q":3}],
-"ども": [{"g":["first-person plural (or singular)","second or third person plural…"],"p":"suf","k":["共"],"u":1,"q":2}],
-"どもる": [{"g":["to stammer"],"p":"v5r vi","k":["吃る"],"u":1,"q":4}],
-"どよう": [{"g":["Saturday"],"p":"n","k":["土曜"]}],
-"どようび": [{"g":["Saturday"],"p":"n adv","k":["土曜日"]}]
+"ども": [{"g":["first-person plural (or singular)","second or third person plural…"],"p":"suf","k":["共"],"u":1,"q":2}]
 }
 }

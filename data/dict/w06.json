@@ -1,9 +1,11 @@
 {
-"_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-08-29"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-09-28"},
+"_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-08-29"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict/1",
-"first": "せんしん",
-"last": "ちゅうどう",
+"first": "せんしょく",
+"last": "ちゅうとはんぱ",
 "entries": {
+"せんしょく": [{"g":["dyeing","staining (a sample)","dyed colour (color)"],"p":"n vs vt vi","k":["染色"]}],
+"せんしょくたい": [{"g":["chromosome"],"p":"n","k":["染色体"]}],
 "せんしん": [{"g":["advanced","seniority"],"p":"adj-no n","k":["先進"],"b":4},{"g":["compiling and presenting poems, texts, etc. to the emperor"],"p":"n vs vt","k":["撰進","選進"]}],
 "せんしんこく": [{"g":["developed country"],"p":"n","k":["先進国"]}],
 "せんじ": [{"g":["wartime"],"p":"n","k":["戦時"]}],
@@ -838,7 +840,7 @@
 "たはた": [{"g":["fields (of rice and other crops)"],"p":"n","k":["田畑","田畠"]}],
 "たはつ": [{"g":["repeated occurrence"],"p":"n vs vi adj-no","k":["多発"]}],
 "たば": [{"g":["bundle"],"p":"n n-suf ctr","k":["束","把"],"q":2}],
-"たばこ": [{"g":["tobacco","tobacco plant (Nicotiana tabacum)"],"p":"n","k":["煙草","莨"],"u":1,"q":2}],
+"たばこ": [{"g":["tobacco","tobacco plant (Nicotiana tabacum)"],"p":"n","k":["煙草","莨"],"u":1,"ls":["por","tabaco"],"q":2}],
 "たばねる": [{"g":["to tie up in a bundle (e.g. straw, hair, bills, letters)","to govern"],"p":"v1 vt","k":["束ねる"]}],
 "たび": [{"g":["time (three times, each time, etc.)"],"p":"n n-suf ctr","k":["度"],"q":3,"b":2},{"g":["travel"],"p":"n","k":["旅"],"q":3,"b":2,"t":1},{"g":["tabi"],"p":"n","k":["足袋","単皮"],"q":3}],
 "たびさき": [{"g":["destination"],"p":"n","k":["旅先"]}],
@@ -1152,7 +1154,7 @@
 "だんとう": [{"g":["mild winter"],"p":"n","k":["暖冬"],"b":4},{"g":["warhead"],"p":"n","k":["弾頭"],"b":6}],
 "だんどう": [{"g":["trajectory","ballistic"],"p":"n adj-no adj-f","k":["弾道"]}],
 "だんどり": [{"g":["programme"],"p":"n vs","k":["段取り"]}],
-"だんな": [{"g":["master (of a house, shop, etc.)","husband","sir"],"p":"n","k":["旦那","檀那"]}],
+"だんな": [{"g":["master (of a house, shop, etc.)","husband","sir"],"p":"n","k":["旦那","檀那"],"ls":["san","dāna"]}],
 "だんねつ": [{"g":["insulation"],"p":"n vs vi adj-no","k":["断熱"]}],
 "だんねん": [{"g":["abandoning (hope, plans)"],"p":"n vs vt","k":["断念"]}],
 "だんぺん": [{"g":["fragment"],"p":"n","k":["断片"]}],
@@ -1376,8 +1378,6 @@
 "ちゅうちょ": [{"g":["hesitation"],"p":"n vs vt vi","k":["躊躇"],"q":4}],
 "ちゅうと": [{"g":["halfway"],"p":"n","k":["中途"]}],
 "ちゅうとう": [{"g":["Middle East"],"p":"n","k":["中東"],"b":3},{"g":["second grade"],"p":"n adj-no","k":["中等"],"b":4}],
-"ちゅうとはんぱ": [{"g":["halfway"],"p":"adj-na adj-no n","k":["中途半端"]}],
-"ちゅうとん": [{"g":["stationing (troops)"],"p":"n vs vi","k":["駐屯"]}],
-"ちゅうどう": [{"g":["middle of the road","the middle (of what one is doing)","middle way"],"p":"n adj-no","k":["中道"]}]
+"ちゅうとはんぱ": [{"g":["halfway"],"p":"adj-na adj-no n","k":["中途半端"]}]
 }
 }

@@ -1,9 +1,10 @@
 {
-"_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-08-29"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-09-28"},
+"_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-08-29"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict/1",
-"first": "ぼうしょく",
-"last": "ようせつ",
+"first": "ぼうし",
+"last": "ようせき",
 "entries": {
+"ぼうし": [{"g":["hat","cap (move)"],"p":"n vs vi","k":["帽子"],"q":4,"b":1},{"g":["prevention"],"p":"n n-suf vs vt","k":["防止"],"q":4,"b":3}],
 "ぼうしょく": [{"g":["spinning and weaving"],"p":"n","k":["紡織"],"b":6},{"g":["protection against corrosion"],"p":"n vs vt","k":["防食","防蝕"]}],
 "ぼうじゅ": [{"g":["interception"],"p":"n vs vt","k":["傍受"]}],
 "ぼうすい": [{"g":["waterproofing"],"p":"n vs vt adj-no","k":["防水"]}],
@@ -1438,7 +1439,6 @@
 "ようするに": [{"g":["in short"],"p":"exp adv","k":["要するに"],"x":1,"q":4}],
 "ようすをみる": [{"g":["to wait and see"],"p":"exp v1","k":["様子を見る"]}],
 "ようせい": [{"g":["appeal","axiom"],"p":"n vs vt vi","k":["要請"],"b":3},{"g":["fairy"],"p":"n adj-no","k":["妖精"],"b":4},{"g":["positive (result)","positive (attitude)"],"p":"adj-no n adj-na","k":["陽性"],"b":4,"t":1},{"g":["training"],"p":"n vs vt","k":["養成"],"b":5}],
-"ようせき": [{"g":["capacity"],"p":"n","k":["容積"]}],
-"ようせつ": [{"g":["welding"],"p":"n vs vt","k":["溶接","熔接"]}]
+"ようせき": [{"g":["capacity"],"p":"n","k":["容積"]}]
 }
 }

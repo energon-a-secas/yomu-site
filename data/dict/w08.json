@@ -1,9 +1,12 @@
 {
-"_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-08-29"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-09-28"},
+"_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-08-29"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict/1",
-"first": "どよめく",
-"last": "ひかえしつ",
+"first": "どもる",
+"last": "ひえる",
 "entries": {
+"どもる": [{"g":["to stammer"],"p":"v5r vi","k":["吃る"],"u":1,"q":4}],
+"どよう": [{"g":["Saturday"],"p":"n","k":["土曜"]}],
+"どようび": [{"g":["Saturday"],"p":"n adv","k":["土曜日"]}],
 "どよめく": [{"g":["to resound","to make a stir"],"p":"v5k vi","k":["響めく","響く"],"u":1}],
 "どらむすこ": [{"g":["lazy son"],"p":"n","k":["ドラ息子","どら息子"]}],
 "どりょく": [{"g":["effort"],"p":"n vs vi","k":["努力"]}],
@@ -247,7 +250,7 @@
 "なわとび": [{"g":["skipping rope","skipping"],"p":"n","k":["縄跳び","縄飛び"],"q":4}],
 "なわばり": [{"g":["stretching a rope around","one's turf","territory (of an animal)"],"p":"n","k":["縄張り","縄張"]}],
 "なんい": [{"g":["southern latitude"],"p":"n","k":["南緯"],"b":4,"t":1},{"g":["(relative) difficulty"],"p":"n","k":["難易"],"b":4}],
-"なんか": [{"g":["something like ..."],"p":"prt adv","q":1,"t":1},{"g":["something","somehow"],"p":"pn adv int","k":["何か"],"q":1},{"g":["softening","softening (of attitude)","weakening (of the market)"],"p":"n vs vi","k":["軟化"],"q":1,"b":6},{"g":["pumpkin (Cucurbita sp.)"],"p":"n","k":["南瓜"],"u":1,"q":1}],
+"なんか": [{"g":["something like ..."],"p":"prt adv","q":1,"t":1},{"g":["something","somehow"],"p":"pn adv int","k":["何か"],"q":1},{"g":["softening","softening (of attitude)","weakening (of the market)"],"p":"n vs vi","k":["軟化"],"q":1,"b":6},{"g":["pumpkin (Cucurbita sp.)"],"p":"n","k":["南瓜"],"u":1,"ls":["por","Cambodia abóbora"],"q":1}],
 "なんかい": [{"g":["how many times"],"p":"n","k":["何回"],"q":3,"b":2},{"g":["difficult to understand"],"p":"adj-na n","k":["難解"],"q":3,"b":4},{"g":["southern sea"],"p":"n","k":["南海"],"q":3,"b":6}],
 "なんかん": [{"g":["barrier"],"p":"n","k":["難関"]}],
 "なんきょく": [{"g":["South Pole","the Antarctic"],"p":"n","k":["南極"],"b":3},{"g":["difficult situation"],"p":"n","k":["難局"],"b":3,"t":1}],
@@ -1412,8 +1415,6 @@
 "ひえ": [{"g":["chilliness"],"p":"n","k":["冷え"],"q":4}],
 "ひえこむ": [{"g":["to get (very) cold","to feel very cold (of the body)","to worsen (of relations, economic conditions, etc.)"],"p":"v5m vi","k":["冷え込む"]}],
 "ひえしょう": [{"g":["sensitivity to cold"],"p":"n","k":["冷え性","冷え症"]}],
-"ひえる": [{"g":["to grow cold"],"p":"v1 vi","k":["冷える"]}],
-"ひかえ": [{"g":["reserve","note","duplicate"],"p":"n n-suf","k":["控え","扣え"],"q":4}],
-"ひかえしつ": [{"g":["waiting room"],"p":"n","k":["控え室","控室"]}]
+"ひえる": [{"g":["to grow cold"],"p":"v1 vi","k":["冷える"]}]
 }
 }

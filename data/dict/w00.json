@@ -1,8 +1,8 @@
 {
-"_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-08-29"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-09-28"},
+"_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-08-29"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict/1",
 "first": "〇",
-"last": "おいつく",
+"last": "おいだす",
 "entries": {
 "〇": [{"r":["れい"],"g":["zero"],"p":"n","q":4,"o":3},{"r":["ゼロ"],"g":["zero","nothing"],"p":"n","q":4,"o":1}],
 "ああ": [{"g":["like that"],"p":"adv","q":2},{"g":["ah!","yes","aah"],"p":"int","q":2,"t":1}],
@@ -519,7 +519,7 @@
 "いくどうおん": [{"g":["(saying) with one voice"],"p":"n adj-no","k":["異口同音"]}],
 "いくにち": [{"g":["(for) how many days","what day (of the month)"],"p":"n","k":["幾日","いく日"]}],
 "いくぶん": [{"g":["somewhat","some"],"p":"adv n","k":["幾分"],"q":4}],
-"いくら": [{"g":["how much","something over","however (much)"],"p":"n adv n-suf","k":["幾ら"],"u":1,"q":1},{"g":["salted salmon roe"],"p":"n","q":1,"t":1}],
+"いくら": [{"g":["how much","something over","however (much)"],"p":"n adv n-suf","k":["幾ら"],"u":1,"q":1},{"g":["salted salmon roe"],"p":"n","ls":["rus","ikra"],"q":1,"t":1}],
 "いけがき": [{"g":["hedge"],"p":"n","k":["生垣","生け垣"]}],
 "いけばな": [{"g":["ikebana"],"p":"n","k":["生け花","生花"]}],
 "いけません": [{"g":["wrong","hopeless","must not do"],"p":"exp","k":["行けません"],"u":1,"q":3}],
@@ -1367,7 +1367,6 @@
 "おいしい": [{"g":["good(-tasting)","attractive (offer, opportunity, etc.)"],"p":"adj-i","k":["美味しい"],"u":1,"q":2}],
 "おいしゃさん": [{"g":["doctor"],"p":"n","k":["お医者さん"]}],
 "おいたち": [{"g":["growth","one's early life"],"p":"n","k":["生い立ち"]}],
-"おいだす": [{"g":["to expel"],"p":"v5s vt","k":["追い出す"]}],
-"おいつく": [{"g":["to catch up (with)","to be compensated"],"p":"v5k vi","k":["追いつく","追い付く"]}]
+"おいだす": [{"g":["to expel"],"p":"v5s vt","k":["追い出す"]}]
 }
 }

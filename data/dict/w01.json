@@ -1,9 +1,10 @@
 {
-"_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-08-29"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-09-28"},
+"_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-08-29"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict/1",
-"first": "おいぬく",
-"last": "かわる",
+"first": "おいつく",
+"last": "かわり",
 "entries": {
+"おいつく": [{"g":["to catch up (with)","to be compensated"],"p":"v5k vi","k":["追いつく","追い付く"]}],
 "おいぬく": [{"g":["to pass (a car)","to surpass"],"p":"v5k vt","k":["追い抜く"]}],
 "おいめ": [{"g":["(feeling of) indebtedness"],"p":"n","k":["負い目"]}],
 "おいわい": [{"g":["congratulation","congratulatory gift"],"p":"n","k":["お祝い","お祝"]}],
@@ -1105,7 +1106,7 @@
 "かっそうろ": [{"g":["runway"],"p":"n","k":["滑走路"]}],
 "かってきまま": [{"g":["self-willed"],"p":"n adj-na","k":["勝手気まま","勝手気儘"]}],
 "かっとう": [{"g":["conflict"],"p":"n vs vi","k":["葛藤"],"b":4},{"g":["allotment","allocation"],"p":"n","k":["割当"]}],
-"かっぱ": [{"g":["arguing (someone) down","proclaiming (the truth)"],"p":"n vs vt","k":["喝破"],"b":6},{"g":["raincoat"],"p":"n","k":["合羽"],"u":1}],
+"かっぱ": [{"g":["arguing (someone) down","proclaiming (the truth)"],"p":"n vs vt","k":["喝破"],"b":6},{"g":["raincoat"],"p":"n","k":["合羽"],"u":1,"ls":["por","capa"]}],
 "かっぱつ": [{"g":["lively"],"p":"adj-na n","k":["活発","活溌"]}],
 "かつぎ": [{"g":["carrier"],"p":"n","k":["担ぎ"],"q":4}],
 "かつぐ": [{"g":["to shoulder","to nominate for a position","to take (someone) for a ride"],"p":"v5g vt","k":["担ぐ"],"q":4}],
@@ -1198,7 +1199,7 @@
 "かべ": [{"g":["wall","barrier","wall (of stones)"],"p":"n","k":["壁"],"q":3}],
 "かべがみ": [{"g":["wallpaper","wallpaper"],"p":"n","k":["壁紙"]}],
 "かほう": [{"g":["lower region"],"p":"n adj-no","k":["下方"]}],
-"かぼちゃ": [{"g":["pumpkin (Cucurbita sp.)"],"p":"n","k":["南瓜"],"u":1,"q":4}],
+"かぼちゃ": [{"g":["pumpkin (Cucurbita sp.)"],"p":"n","k":["南瓜"],"u":1,"ls":["por","Cambodia abóbora"],"q":4}],
 "かま": [{"g":["iron pot"],"p":"n","k":["釜"],"q":2},{"g":["sickle","leading question","sickle-and-chain (weapon)"],"p":"n","k":["鎌"],"q":2,"t":1},{"g":["stove"],"p":"n","k":["窯","竈"],"q":2,"b":6}],
 "かまう": [{"g":["to mind","to be an issue","to keep company"],"p":"v5u vi vt","k":["構う"],"q":4}],
 "かまえる": [{"g":["to set up (a house, store, etc.)","to have at the ready (e.g. a gun)","to adopt a posture"],"p":"v1 vt vi","k":["構える"]}],
@@ -1301,7 +1302,6 @@
 "かわばた": [{"g":["riverside"],"p":"n","k":["川端"]}],
 "かわら": [{"g":["dry riverbed"],"p":"n","k":["河原","川原"],"b":4},{"g":["tile (e.g. roof)"],"p":"n","k":["瓦"],"b":5}],
 "かわらない": [{"g":["constant"],"p":"adj-i","k":["変わらない"],"q":4}],
-"かわり": [{"g":["change","difference","something wrong"],"p":"n","k":["変わり","変り"],"q":3,"b":2,"t":1},{"g":["substitute","stand-in","compensation"],"p":"n adj-no","k":["代わり","替わり"],"q":3,"b":2}],
-"かわる": [{"g":["to change","to move to","to be different"],"p":"v5r vi","k":["変わる","変る"],"q":4,"b":2},{"g":["to succeed","to take the place of","to be exchanged"],"p":"v5r vi","k":["替わる","代わる"],"q":4,"b":4}]
+"かわり": [{"g":["change","difference","something wrong"],"p":"n","k":["変わり","変り"],"q":3,"b":2,"t":1},{"g":["substitute","stand-in","compensation"],"p":"n adj-no","k":["代わり","替わり"],"q":3,"b":2}]
 }
 }

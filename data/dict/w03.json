@@ -1,9 +1,11 @@
 {
-"_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-08-29"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-09-28"},
+"_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-08-29"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict/1",
-"first": "けいこうとう",
-"last": "さいばんかん",
+"first": "けいこう",
+"last": "さいはん",
 "entries": {
+"けいこう": [{"g":["tendency"],"p":"n","k":["傾向"],"b":2},{"g":["carrying (on one's person)"],"p":"n vs vt","k":["携行"]}],
+"けいこうぎょう": [{"g":["light industry"],"p":"n","k":["軽工業"]}],
 "けいこうとう": [{"g":["fluorescent lamp","person who is slow to react"],"p":"n","k":["蛍光灯"]}],
 "けいこく": [{"g":["warning","keikoku (penalty in judo)"],"p":"n vs vt","k":["警告"],"b":2},{"g":["valley (with a river running through it)"],"p":"n","k":["渓谷","谿谷"],"b":5}],
 "けいご": [{"g":["honorific"],"p":"n","k":["敬語"],"b":4},{"g":["bodyguard"],"p":"n vs vt","k":["警護"],"b":6}],
@@ -963,7 +965,7 @@
 "こびと": [{"g":["little person…","little person (i.e. a person with dwarfism)"],"p":"n","k":["小人"]}],
 "こふう": [{"g":["old-fashioned"],"p":"adj-na n","k":["古風"]}],
 "こふん": [{"g":["ancient burial mound"],"p":"n","k":["古墳"]}],
-"こぶ": [{"g":["bump"],"p":"n","k":["瘤"],"u":1,"q":3},{"g":["encouragement"],"p":"n vs vt","k":["鼓舞"],"q":3,"b":4},{"g":["kombu (usu. Saccharina japonica)"],"p":"n","k":["昆布"],"q":3,"b":6}],
+"こぶ": [{"g":["bump"],"p":"n","k":["瘤"],"u":1,"q":3},{"g":["encouragement"],"p":"n vs vt","k":["鼓舞"],"q":3,"b":4},{"g":["kombu (usu. Saccharina japonica)"],"p":"n","k":["昆布"],"ls":["ain",null],"q":3,"b":6}],
 "こぶし": [{"g":["fist"],"p":"n","k":["拳"],"q":4}],
 "こぶね": [{"g":["small boat"],"p":"n","k":["小舟","小船"]}],
 "こぶん": [{"g":["ancient writing (Edo-period or older)","ancient Chinese character (pre-Qin period)"],"p":"n","k":["古文"]}],
@@ -1075,7 +1077,7 @@
 "こんねんど": [{"g":["this year"],"p":"n adv","k":["今年度"]}],
 "こんばん": [{"g":["tonight"],"p":"n adv","k":["今晩"]}],
 "こんばんは": [{"g":["good evening"],"p":"int","k":["今晩は"],"u":1,"x":1,"q":4,"w":1}],
-"こんぶ": [{"g":["kombu (usu. Saccharina japonica)"],"p":"n","k":["昆布"]}],
+"こんぶ": [{"g":["kombu (usu. Saccharina japonica)"],"p":"n","k":["昆布"],"ls":["ain",null]}],
 "こんぼう": [{"g":["mixed yarn"],"p":"n vs vt","k":["混紡"]}],
 "こんぽう": [{"g":["packing"],"p":"n vs vt","k":["梱包"]}],
 "こんぽん": [{"g":["root","foundation"],"p":"n","k":["根本"]}],
@@ -1306,9 +1308,6 @@
 "さいねんしょう": [{"g":["youngest"],"p":"adj-no","k":["最年少"]}],
 "さいのう": [{"g":["talent"],"p":"n","k":["才能"],"b":2},{"g":["adoption (e.g. of a proposal)"],"p":"n vs vt","k":["採納"]}],
 "さいはつ": [{"g":["return"],"p":"n vs vi","k":["再発"]}],
-"さいはん": [{"g":["resale"],"p":"n","k":["再販"],"b":6},{"g":["reprint"],"p":"n vs vt","k":["再版"]}],
-"さいばい": [{"g":["cultivation"],"p":"n vs vt","k":["栽培"]}],
-"さいばん": [{"g":["trial"],"p":"n vs vt adj-no","k":["裁判"]}],
-"さいばんかん": [{"g":["judge"],"p":"n","k":["裁判官"]}]
+"さいはん": [{"g":["resale"],"p":"n","k":["再販"],"b":6},{"g":["reprint"],"p":"n vs vt","k":["再版"]}]
 }
 }

@@ -1,9 +1,11 @@
 {
-"_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-08-29"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-09-28"},
+"_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-08-29"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict/1",
-"first": "しらせ",
-"last": "せんしょくたい",
+"first": "しらぎく",
+"last": "せんしょう",
 "entries": {
+"しらぎく": [{"g":["white chrysanthemum"],"p":"n","k":["白菊"]}],
+"しらずしらず": [{"g":["unconsciously"],"p":"adv","k":["知らず知らず","知らず識らず"]}],
 "しらせ": [{"g":["news","omen"],"p":"n","k":["知らせ","報せ"],"q":4}],
 "しらせる": [{"g":["to notify"],"p":"v1 vt","k":["知らせる","報せる"],"q":4}],
 "しらないうちに": [{"g":["before one knows it"],"p":"exp","k":["知らないうちに"]}],
@@ -1266,7 +1268,7 @@
 "せつぞく": [{"g":["connection","changing trains","conjunction"],"p":"n vs vt vi","k":["接続"]}],
 "せつだん": [{"g":["cutting"],"p":"n vs vt","k":["切断","截断"]}],
 "せつど": [{"g":["moderation"],"p":"n","k":["節度"]}],
-"せつな": [{"g":["moment","kshana"],"p":"n adv","k":["刹那"]}],
+"せつな": [{"g":["moment","kshana"],"p":"n adv","k":["刹那"],"ls":["san","kṣaṇa"]}],
 "せつない": [{"g":["painful","oppressive"],"p":"adj-i","k":["切ない"]}],
 "せつび": [{"g":["equipment"],"p":"n vs vt","k":["設備"]}],
 "せつぼう": [{"g":["earnest desire"],"p":"n vs vt adj-no","k":["切望"]}],
@@ -1338,8 +1340,6 @@
 "せんしゅつ": [{"g":["election"],"p":"n vs vt","k":["選出"]}],
 "せんしゅぼうえい": [{"g":["nonaggressive defense (policy) (defence)"],"p":"n","k":["専守防衛"]}],
 "せんしゅむら": [{"g":["Olympic village"],"p":"n","k":["選手村"]}],
-"せんしょう": [{"g":["winning a war"],"p":"n vs vi","k":["戦勝","戦捷"],"b":4},{"g":["recommendation"],"p":"n vs vt","k":["選奨"],"b":6}],
-"せんしょく": [{"g":["dyeing","staining (a sample)","dyed colour (color)"],"p":"n vs vt vi","k":["染色"]}],
-"せんしょくたい": [{"g":["chromosome"],"p":"n","k":["染色体"]}]
+"せんしょう": [{"g":["winning a war"],"p":"n vs vi","k":["戦勝","戦捷"],"b":4},{"g":["recommendation"],"p":"n vs vt","k":["選奨"],"b":6}]
 }
 }

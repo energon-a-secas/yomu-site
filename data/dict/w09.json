@@ -1,9 +1,11 @@
 {
-"_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-08-29"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-09-28"},
+"_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-08-29"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict/1",
-"first": "ひかえめ",
-"last": "ぼうし",
+"first": "ひかえ",
+"last": "ぼうさん",
 "entries": {
+"ひかえ": [{"g":["reserve","note","duplicate"],"p":"n n-suf","k":["控え","扣え"],"q":4}],
+"ひかえしつ": [{"g":["waiting room"],"p":"n","k":["控え室","控室"]}],
 "ひかえめ": [{"g":["moderate"],"p":"adj-na adj-no n","k":["控えめ","控え目"],"q":4}],
 "ひかえる": [{"g":["to be temperate in","to make notes","to be in preparation for"],"p":"v1 vt vi","k":["控える","扣える"],"q":4}],
 "ひかく": [{"g":["comparison"],"p":"n vs vt","k":["比較"],"b":3},{"g":["leather"],"p":"n","k":["皮革"],"b":4}],
@@ -1436,7 +1438,6 @@
 "ぼうこう": [{"g":["assault","rape (by force)"],"p":"n vs vt vi","k":["暴行"]}],
 "ぼうご": [{"g":["protection"],"p":"n vs vt adj-no","k":["防護"]}],
 "ぼうさい": [{"g":["disaster preparedness"],"p":"n","k":["防災"]}],
-"ぼうさん": [{"g":["Buddhist priest","boy"],"p":"n","k":["坊さん"]}],
-"ぼうし": [{"g":["hat","cap (move)"],"p":"n vs vi","k":["帽子"],"q":4,"b":1},{"g":["prevention"],"p":"n n-suf vs vt","k":["防止"],"q":4,"b":3}]
+"ぼうさん": [{"g":["Buddhist priest","boy"],"p":"n","k":["坊さん"]}]
 }
 }

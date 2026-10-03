@@ -1,11 +1,12 @@
 {
-"_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-08-29"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-09-28"},
+"_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-08-29"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict/1",
-"first": "かわるがわる",
-"last": "けいこうぎょう",
+"first": "かわる",
+"last": "けいこ",
 "entries": {
+"かわる": [{"g":["to change","to move to","to be different"],"p":"v5r vi","k":["変わる","変る"],"q":4,"b":2},{"g":["to succeed","to take the place of","to be exchanged"],"p":"v5r vi","k":["替わる","代わる"],"q":4,"b":4}],
 "かわるがわる": [{"g":["alternately"],"p":"adv","k":["代わる代わる","代る代る"],"q":4}],
-"かん": [{"g":["feeling","tentative","interjection"],"p":"n n-suf suf","k":["感"],"q":2,"b":2,"t":1},{"g":["interval","among","good opportunity"],"p":"n suf adv","k":["間"],"q":2,"b":2},{"g":["can","canned food"],"p":"n ctr","k":["缶"],"q":2,"b":3},{"g":["perception"],"p":"n","k":["勘"],"q":2,"t":2},{"g":["look","spectacle","observation meditation"],"p":"n n-suf","k":["観"],"q":2},{"g":["pipe","wind instrument","vessel"],"p":"n ctr","k":["管"],"q":2,"t":1}],
+"かん": [{"g":["feeling","tentative","interjection"],"p":"n n-suf suf","k":["感"],"q":2,"b":2,"t":1},{"g":["interval","among","good opportunity"],"p":"n suf adv","k":["間"],"q":2,"b":2},{"g":["can","canned food"],"p":"n ctr","k":["缶"],"ls":["dut","kan"],"q":2,"b":3},{"g":["perception"],"p":"n","k":["勘"],"q":2,"t":2},{"g":["look","spectacle","observation meditation"],"p":"n n-suf","k":["観"],"q":2},{"g":["pipe","wind instrument","vessel"],"p":"n ctr","k":["管"],"q":2,"t":1}],
 "かんあん": [{"g":["taking into consideration"],"p":"n vs vt","k":["勘案"]}],
 "かんい": [{"g":["simple","easy"],"p":"adj-na n","k":["簡易"]}],
 "かんいっぱつ": [{"g":["hair's breadth"],"p":"n","k":["間一髪"]}],
@@ -1351,8 +1352,6 @@
 "けいけんち": [{"g":["amount of experience","experience point"],"p":"n","k":["経験値"]}],
 "けいけんほうふ": [{"g":["experienced"],"p":"n adj-na","k":["経験豊富"]}],
 "けいげん": [{"g":["abatement"],"p":"n vs vt vi","k":["軽減"]}],
-"けいこ": [{"g":["practice"],"p":"n vs vt","k":["稽古"],"q":4}],
-"けいこう": [{"g":["tendency"],"p":"n","k":["傾向"],"b":2},{"g":["carrying (on one's person)"],"p":"n vs vt","k":["携行"]}],
-"けいこうぎょう": [{"g":["light industry"],"p":"n","k":["軽工業"]}]
+"けいこ": [{"g":["practice"],"p":"n vs vt","k":["稽古"],"q":4}]
 }
 }
