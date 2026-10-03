@@ -24,6 +24,14 @@ long-vowel, small-tsu, youon, dakuten, handakuten, n-assimilation, devoiced
 (written s(u)kides(u)), ji-zu, foreign-sound, bar, repeat-mark,
 special-reading (今日 read as a whole), counter-change (いっぷん).
 
+Loanword rules, on katakana words: loan-vowel (a vowel after a final
+consonant, shop ショップ), loan-double (ッ after a short vowel), loan-long (ー
+for -er, -or, -ar and long vowels), loan-f (フ, ファ), loan-lr (l written with
+the r column), loan-v (v with the b column), loan-th (th with s or z),
+loan-si (シ, ティ, ディ), loan-wasei (made-in-Japan English), loan-short
+(パソコン from personal computer). A katakana compound with no record of its
+own is one token with parts (インフォームショップ: a guess + shop).
+
 Grammar notes: every particle, the copula forms, polite and plain verb
 endings, te-forms (te-kudasai, te-iru, te-shimau, te-miru), desire, potential,
 passive, causative, volitional, imperative, the conditionals ば, たら, なら and

@@ -27,8 +27,12 @@ text ──normalize──▶ lines ──runs──▶ [jp run | other]
                            dict.needNames(keys) ──names/index.json──▶ nNN
                            rare.refine(span) ──best path over the span──▶ second phase
                                       │
-                           tokens ─▶ enrich(token): reading, furigana, morae,
-                                          romaji said/spelled, sounds[], grammar[]
+                           tokens ─▶ joinKatakana: katakana pieces that touch
+                                     become one compound with parts
+                                      │
+                                    enrich(token): reading, furigana, morae,
+                                          romaji said/spelled, sounds[] (with
+                                          the loanword rules), grammar[]
                                       │
                            kanjiList(tokens) ◀── kanji shards
 ```
@@ -84,9 +88,12 @@ same text and the same data give the same tokens.
 | `key-rules.js` | dictionary keys the lattice refuses (ですか, ませんか, 雨が降る, になると) | `kana.js`, `costs.js` |
 | `names.js` | which kanji runs are names, a per-kanji guess at their reading, and the entry a name from the names tier carries (`NAME_TYPES`, `nameEntry`) | `kana.js`, `deinflect.js`, `numbers.js` |
 | `numbers.js` | reading numbers, counters and 何 + counter, and the sound changes between them | nothing |
-| `sounds.js` | special-sound detection per token, with spans | `kana.js` |
+| `compounds.js` | katakana pieces that touch, joined into one compound token with `parts` | `kana.js` |
+| `loan-align.js` | an English word lined up against katakana beats, consonant by consonant | `kana.js` |
+| `loanwords.js` | the loanword rules per katakana token, as sound entries with spans (`LOAN_TYPES`) | `kana.js`, `loan-align.js` |
+| `sounds.js` | special-sound detection per token, with spans, and the loanword rules | `kana.js`, `loanwords.js` |
 | `grammar.js` | particle, copula and ending notes per token and per pair of tokens | nothing |
-| `notes.js` | every learner-facing explanation string, `{ en, es }` | nothing |
+| `notes.js` | every learner-facing explanation string, `{ en, es }`: sounds (`notes-sounds.js`), loanword rules (`notes-loan.js`), grammar (`notes-grammar.js`) | the three tables |
 | `furigana.js` | aligning a reading to a surface, per kanji where the data allows | `kana.js` |
 | `analyze.js` | the pipeline above: the first pass, the second phase where it guessed, the tokens | all of the above |
 | `render*.js`, `events*.js`, `state.js` | the page | `analyze.js`, `notes.js`, `strings.js` |
@@ -125,8 +132,10 @@ A token the second phase read is shaped the same, with these marks:
 - a **rare word** (a record from `data/dict/rNNN`) has `confidence: 'dict'` and `entry.tier === 2`, set by `dict.js` as the shard loads (the shards do not spend bytes on it), so the page can say "rare word"; its `alts` counts the other rare records of its key;
 - a **name** from the names tier has `kind: 'name'`, `confidence: 'dict'`, its JMnedict reading, and `entry = { r?, g, p: 'n-pr', nt, f?, s? }`: `nt` the JMnedict types (`surname`, `given`, `masc`, `fem`, `place`), `g` the same in English (`['surname', 'place name']`), the way a dictionary gloss is English, and `names.js` `NAME_TYPES` holds each in `{ en, es }` for the page. A name the first pass guessed keeps `entry: null` and `confidence: 'guess'`.
 
-Three fields appear only where they apply:
+These fields appear only where they apply:
 
+- a katakana **compound** (`compounds.js`, below) has `parts: [{ surface, reading, gloss, tier, entry }]`, one per dictionary word or guess the lattice placed in it (`tier` 1 or 2, null for a guess; `gloss` the record's first gloss, null for a guess), and `gloss`, the parts' glosses joined with ` + ` when every part has one (`'tennis + tournament'`), else null. Its own `entry` is null; its `confidence` is `rule` when every part is a dictionary word and `guess` otherwise;
+- a loanword rule (`loan-*` in `sounds`, below) is one entry per type per token, with every place it applies in `spans`, the way the voiced marks are;
 - a `furigana` entry carries `whole: true` when the dictionary says its run is read as a whole (`f` is `*`: 今日 きょう), so nothing shares the ruby out between the characters;
 - a `dakuten`, `handakuten` or `devoiced` sound is one entry per token, with every kana it covers in `spans` (`at` is the first), so a sentence with eight voiced kana lists the mark once per word, not eight times;
 - a `furigana` entry of a `number` token carries `whole: true` when the number and its counter are read as one word (八日 ようか, 二十歳 はたち, 一人 ひとり), exactly as a dictionary `*` does;
@@ -264,7 +273,8 @@ build reads 3, 3.46, 6 on the same sentences.
 | `ws` | 1 when that source is wasei, a word made in Japan from foreign parts: ナイター `ls: ['eng', 'nighter'], ws: 1` (a game under lights). Never without `ls` |
 | `e` | second tier only: 1 when the key is a kana spelling of a common word (リンゴ is 林檎's, カギ 鍵's), which the second phase trusts more than a rare word |
 
-`ls` and `ws` are for the loanword notes; nothing in the lattice reads them.
+`ls` and `ws` are for the loanword rules (`loanwords.js`) and the Word
+panel's "Where it comes from" line; nothing in the lattice reads them.
 The first tier ships 646 records with `ls`, 104 of them with `ws`; the second
 tier 10,772 and 4,182. They added 14.8 KB to the first tier and moved
 three keys out of the core, and no reading changed.
@@ -421,7 +431,7 @@ pass's candidates (same prices) plus:
 | any other name | 112 | over a rare word, under a guess: 陸地 is "land", not the place かちじ; 天上 "the heavens", not a given name |
 | a family name, then a given name | -60 to connect | 鈴木一郎 is two names, not one guess; only in that order (types from JMnedict), because 小田原城 read 小田\|原城, two surnames, while any two names earned it |
 | a name before する | 60 more | ハグしない is "hug", not the surname Hug |
-| katakana guess | 150 + 30 a kana, at least 4 | a run that is known words splits (インフォーム\|ショップ); 40 kana at most |
+| katakana guess | 150 + 30 a kana, at least 4 | a run that is known words splits (インフォーム\|ショップ, which the page then shows as one compound with these parts, below); 40 kana at most |
 
 A known name connects like a noun (a guessed one follows a noun for 0). In
 a katakana span a rare word needs four kana and in kana text three, unless
@@ -527,6 +537,83 @@ files: the rare-word index, the names index, a name shard and a rare shard,
 and for the paragraph one rare-word filter part), and both were already
 above the median. 田中 is now a surname
 with its JMnedict reading and マリア a given name; neither is a guess.
+
+## Katakana compounds and loanword rules (2026-10-03)
+
+### One word, made of parts
+
+The lattice already splits a katakana run that has no record of its own into
+the dictionary words it is written with: the first pass where every piece is
+a first-tier word (アイスクリーム|ショップ), the second phase where it had to
+guess, with the rest of JMdict (スマートフォン|ケース, インフォーム|ショップ).
+That is the cost-minimising search over both tiers, and its floors were
+measured by the second phase (three kana for a common word, four for a rare
+one, no piece starting on ー or a small kana): a shorter floor read
+イン|フォーム and カート|ライト. `compounds.js` does not search again. After
+both passes, `joinKatakana` joins every stretch of two or more `katakana`
+tokens that touch into one token, because Japanese writes a compound as one
+word and Genki's romaji says it as one (infoomushoppu, koohiishoppu), and
+keeps the pieces as `parts`. A part the lattice could only guess stays a
+guess with no gloss, and the page says "not in the dictionary" for it; a run
+the lattice left as one guess has no `parts`, and the page says no split
+covers it. A particle, a name, a number or punctuation between two words
+keeps them apart.
+
+Both passes see the same join, so the boundary still holds as
+`tests/tiers.test.mjs` checks it (the second phase's own tokens are joined
+the same way with it switched off). The said line is built over the whole
+compound with a morpheme cut between the parts, so no long vowel is made
+across two words.
+
+### The rules
+
+`loanwords.js` adds sound entries to a `katakana` token (a compound part by
+part, each against its own record), each `{ type, at, spans, detail }` with
+spans into the reading, one entry per type per token (as the voiced marks
+are). The page tells them from the special sounds by the `loan-` prefix,
+lists them under "Loanword rules" in "In this text", and lights their kana
+on hover like any sound.
+
+| type | where | detail |
+|---|---|---|
+| `loan-vowel` | the vowel added after a word's last consonant: u, o after t and d (shop ショップ, bed ベッド) | `u` or `o` |
+| `loan-double` | ッ before a final (or English-doubled) consonant after a single short vowel (cup カップ) | the held consonant |
+| `loan-long` | ー for English -er, -or, -ar (computer, form, car) or a long vowel: a vowel pair, a silent e, an open syllable, al (team, game, table, ball) | the English letters (`er`, `ea`, `a-e`) |
+| `loan-f` | フ with a small vowel (from the katakana alone), or フ lined up with an English f | `fa`, `fi`, `fe`, `fo`, `fu` |
+| `loan-lr` | an r-column beat lined up with an English l (hotel ホテル) | `l` |
+| `loan-v` | a b-column beat or ヴ lined up with an English v (television テレビ) | `b` or `v` |
+| `loan-th` | an s- or z-column beat lined up with an English th (marathon マラソン, smooth スムーズ) | `s` or `z` |
+| `loan-si` | シ for si (taxi), ティ or チ for ti (party, team), ディ or ジ for di (disk, radio) | `shi`, `ti`, `chi`, `di`, `ji` |
+| `loan-wasei` | the record's `ws` | the `ls` source, or null |
+| `loan-short` | a word that is the first beats of each English word of its gloss (パソコン, デパート) | the English it was cut from |
+
+Every rule but `loan-f` and `loan-wasei` needs English evidence:
+`loan-align.js` lines the katakana up with the English named in `ls`, or
+with the first gloss, consonant by consonant. Every katakana consonant must
+match one of the English word's in order (l with the r column, v with the b
+column, th with s or z, t before i with チ), every English consonant must be
+matched or be one English does not say (the r of form, the gh of light), and
+at most one step may be loose (f written with the h column, as in コーヒー).
+A later gloss counts too, except for a word the dictionary says is usually
+written in kana (`u`), which has a kanji spelling and is a Japanese word: サバ
+is 鯖, and its slang sense "server" lined up as v written バ. A shortened word
+is read only off the source or the first gloss, and needs two consonants
+matched and two English consonants left unsaid. A word whose `ls` names a
+language other than English gets no English rule (ビール is Dutch bier).
+
+Measured over the 4,409 katakana keys of the first tier (each read with its
+first record): 3,034 show at least one rule; `loan-vowel` 1,860, `loan-long`
+1,328, `loan-lr` 1,083, `loan-double` 433, `loan-f` 327, `loan-si` 313,
+`loan-v` 188, `loan-wasei` 104, `loan-short` 93, `loan-th` 47. The rules cost
+0.07 ms a katakana token, warm. A list of 60 common loanwords was written down
+with the rules each should show before the code ran: 54 agreed. Of the six,
+two were the list's mistakes the data corrected (JMdict gives コーヒー an
+English source and シネマ a French one, so シネマ gets no English rule), two
+were rules the list missed (the v of コンビニ, convenience; the ui of
+フルーツ, fruit), and two are misses: スマホ, whose gloss is the one word
+smartphone, is not found to be shortened, and ビル, whose first gloss is
+"multi-floor building", lines up with nothing, so it shows neither the
+shortening nor its l.
 
 ## Licences
 

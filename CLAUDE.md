@@ -93,6 +93,25 @@ into the first pass is what read はし as 愛し: do not. A rare word carries
 still a guess read kun by kun (`names.js`). The page must show JMnedict's
 acknowledgement wherever such a name is shown (`tools/lib/licence.mjs`).
 
+**A katakana compound is one token, and the lattice already chose its
+parts.** `compounds.js` joins katakana pieces that touch (テニス|トーナメント,
+インフォーム|ショップ) into one token with `parts` after both passes; it does
+not search for a split of its own. The second phase's floors (three kana for
+a common word, four for a rare one) are what keep イン|フォーム out, and a
+"fewest parts of two beats" search puts it back. A part with no record stays
+a guess with no gloss: the page says "not in the dictionary", never a gloss
+it made up.
+
+**Loanword rules are sound entries, told apart by the `loan-` prefix.**
+`loanwords.js` adds them to `token.sounds` so the page lights their kana and
+keeps their note open the way it does for a sound; `render-notes.js` groups
+them under "Loanword rules" by the prefix, because the page imports no
+analyzer module before the first text. Every rule but f and wasei needs the
+English lined up consonant by consonant with the `ls` source or the first
+gloss (`loan-align.js`); a word `ls` says is from another language gets none
+(ビール is Dutch), and a later gloss is ignored for a word marked `u` (サバ
+is 鯖, and its slang sense "server" read as v written バ).
+
 **The text stays in the browser.** It persists only under
 `localStorage['yomu-site:text']`, never in the URL, a data attribute, the
 title or the beacon target. `#t=<text>` is read once (for links from other
