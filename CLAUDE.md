@@ -50,10 +50,12 @@ only when the filter lets one of the text's keys through.** A key outside
 key, in plain JS string order; the builder and `js/dict.js` must agree on that
 order (UTF-16 code units, not locale), and both hash with `js/bloom.js`. A
 sentence loads a median of three dictionary files (it was eighteen), a long
-paragraph most of them. The analyzer calls `dict.need` once: anything a key
-needs from another key (`o`, `b`, `c`) is on its record, built by
-`tools/lib/prices.mjs`. A cost that reads a second key with `dict.get` must be
-shipped the same way, or it reads whatever an earlier paste happened to load.
+paragraph most of them. The first pass calls `dict.need` once (the second
+phase calls it again only for the ichidan verb behind a kanji guessed
+alone): anything a key needs from another key (`o`, `b`, `c`) is on its
+record, built by `tools/lib/prices.mjs`. A cost that reads a second key with
+`dict.get` must be shipped the same way, or it reads whatever an earlier
+paste happened to load.
 
 **Record order is filing order, and no reading may depend on it.** Two
 records of a kana key that every context-free price ties are ordered by the
@@ -85,13 +87,27 @@ docs/ANALYZER.md "The second phase") reads a stretch of guessed tokens again
 with the second tier (`data/dict/rare.json`, `rNNN`, `rfNN`: every entry
 and spelling the first tier does not ship) and the names
 (`data/names/`, JMnedict). A token outside such a stretch is the token the
-first pass built, field for field, and `tests/tiers.test.mjs` holds it to
-that; a text with no guess fetches no file of either. Letting the rare words
-into the first pass is what read はし as 愛し: do not. A rare word carries
-`entry.tier === 2`; a name the names tier knows is `kind: 'name'` with
-`confidence: 'dict'` and its JMnedict reading, and one it does not know is
-still a guess read kun by kun (`names.js`). The page must show JMnedict's
-acknowledgement wherever such a name is shown (`tools/lib/licence.mjs`).
+first pass built, field for field (its grammar notes excepted, which are
+worked out after both passes from the token before it), and
+`tests/tiers.test.mjs` holds it to that; a text with no guess fetches no
+file of either. Letting the rare words into the first pass is what read はし
+as 愛し: do not. A rare word carries `entry.tier === 2`; a name the names
+tier knows is `kind: 'name'` with `confidence: 'dict'` and its JMnedict
+reading, and one it does not know is still a guess read kun by kun
+(`names.js`). The footer line names JMnedict and the Sources dialog quotes
+its acknowledgement (`tools/lib/licence.mjs`); both stay while any name can
+show.
+
+**A name's reading and strength are evidence JMnedict holds, and each count
+has a trap.** `tools/lib/jmnedict.mjs` counts the names built on a spelling
+(`ext`), the full names that end with it (`suf`) and longer given names
+(`gext`). A longer given name read the short one as みさ (美咲央), a katakana
+place made バグ a strong name (バグダッド), and places named 東 + something
+read 東大 ひがしおお: each is excluded, and `tests/names.test.mjs` holds the
+rules to a JMnedict of a few entries. A strong katakana name never beats the
+kana spelling of a common word (`e`), and a kanji surname read another way
+than the rare word beats it only when sure (`S`), because the reading is
+what a learner copies (`js/rare.js` outranks).
 
 **A katakana compound is one token, and the lattice already chose its
 parts.** `compounds.js` joins katakana pieces that touch (テニス|トーナメント,
@@ -152,8 +168,10 @@ and its raw value is copied to `yomu-site:kanji:damaged` first.
 
 **"Times seen" counts texts, not keystrokes.** A session begins in
 `events-read.js`: `loadText()` (an example, a phrase or dialogue, `#t=`, an
-embed `yomu:load`), a paste or drop in the box, Clear, or the box emptied by
-hand (the same state Clear leaves). Each kanji counts once per session, when
+embed `yomu:load`), a paste or drop into an empty box or a paste over all of
+it, Clear, or the box emptied by hand (the same state Clear leaves). A paste
+added to the text already there continues its session: a passage pasted line
+by line counted its first line once per line. Each kanji counts once per session, when
 `analyzeNow()` settles, so a kanji typed in later counts after the debounce
 and never per keystroke. The boot restore is `loadText(text, { restore: true
 })`, which begins no session: the counted set is in the store, so a reload
@@ -161,7 +179,12 @@ counts nothing. A new caller of `loadText` that is not new content must pass
 `restore` too.
 
 **`#/kanji` and `#/kanji/review` are routes, never text.** `takeFragmentText`
-reads only `#t=`. The reader is hidden, not emptied, while a route shows.
+reads only `#t=`. The reader is hidden, not emptied, while a route shows. A
+new text the host sends (`yomu:load`, `hostLoad()`) goes back to the reader
+first, by a replaceState that moves no focus: in Runcible a learner who
+closed the sheet on My kanji saw their list again behind the next phrase.
+The same text sent again stays put and is no new session, because WebKit
+fires the frame's load on a hash change and Runcible then resends it.
 Back is `history.back()` only when the history entry before this one (each
 entry is stamped `state.yomuIx`) is the parent route; otherwise it is a
 replaceState, so Back never leaves the site and never steps into a review.
