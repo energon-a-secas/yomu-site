@@ -5,7 +5,9 @@
 //             ─▶ the first pass per run (lattice.js pathOf)
 //             ─▶ the second phase, only where the first pass guessed
 //                (rare.js: rare words and names, fetched for those stretches)
-//             ─▶ tokens ─▶ enrich each token ─▶ sounds, grammar
+//             ─▶ tokens, katakana pieces that touch joined into one
+//                compound with parts (compounds.js)
+//             ─▶ enrich each token ─▶ sounds and loanword rules, grammar
 //
 // It is async only because shards load on demand, and it loads them once:
 // what a key needs to know about another key (the band of a kana word's
@@ -26,6 +28,7 @@ import { createDict } from './dict.js';
 import { detectSounds } from './sounds.js';
 import { annotateGrammar } from './grammar.js';
 import { NAME_VARIANTS } from './names.js';
+import { joinKatakana } from './compounds.js';
 
 /** The kinds that are Japanese words, as opposed to what sits between them. */
 export const JAPANESE_KINDS = Object.freeze(new Set([
@@ -344,7 +347,9 @@ export async function analyzeCore(input, { dict } = {}) {
   const tokens = [];
   parts.forEach((p, k) => {
     if (!firsts[k]) { tokens.push(plainToken(p)); return; }
-    for (const t of runTokens(p.text, firsts[k], seconds[k], dict)) {
+    // Katakana pieces that touch are one compound with parts (compounds.js),
+    // joined after both passes so neither pass's search changes.
+    for (const t of joinKatakana(runTokens(p.text, firsts[k], seconds[k], dict))) {
       t.start += p.start;
       t.end += p.start;
       enrich(t);

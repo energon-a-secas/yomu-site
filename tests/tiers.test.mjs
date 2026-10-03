@@ -133,14 +133,20 @@ test('a katakana run that is known words splits where they are, and nowhere else
   // the whole compound is a rare word
   assert.equal(cut(await run('クリスマスプレゼント')), 'クリスマスプレゼント');
   // "shop" is a word; インフォーム is not, and stays one guess rather than
-  // イン|フォーム ("in (tennis)", "form")
+  // イン|フォーム ("in (tennis)", "form"). The pieces are one word on the
+  // page (compounds.js), and the split is kept as its parts.
   const r = await run('インフォームショップ');
-  assert.equal(cut(r), 'インフォーム|ショップ');
-  assert.equal(r.tokens[0].confidence, 'guess');
-  assert.deepEqual(r.tokens[1].entry.g, ['shop']);
-  assert.equal(saidLine(r), 'infoomu shoppu');
+  assert.equal(cut(r), 'インフォームショップ');
+  const [t] = r.tokens;
+  assert.deepEqual(t.parts.map((p) => p.surface), ['インフォーム', 'ショップ']);
+  assert.equal(t.confidence, 'guess');
+  assert.equal(t.parts[0].entry, null);
+  assert.deepEqual(t.parts[1].entry.g, ['shop']);
+  assert.equal(saidLine(r), 'infoomushoppu');
   // a cut never falls before a bar or after a small tsu
-  for (const t of (await run('チャップリンを見た。')).tokens) assert.ok(!/^[ーッ]/.test(t.surface), t.surface);
+  for (const x of (await run('チャップリンを見た。')).tokens) {
+    for (const p of x.parts || [x]) assert.ok(!/^[ーッ]/.test(p.surface), p.surface);
+  }
 });
 
 test('a common katakana word of three kana is a word inside a split run (テニス was left a guess beside トーナメント)', async () => {
@@ -150,15 +156,19 @@ test('a common katakana word of three kana is a word inside a split run (テニ�
     ['コロナワクチンは受けない。', ['コロナ', 'ワクチン']],
   ]) {
     const r = await run(text);
-    for (const p of parts) {
-      const t = tok(r, p);
-      assert.ok(t, `${p} in ${cut(r)}`);
-      assert.equal(t.confidence, 'dict', `${text}: ${p}`);
-      assert.equal(t.entry.tier, undefined, `${text}: ${p} is a first-tier word`);
+    // one compound on the page (compounds.js), its parts the words
+    const t = r.tokens.find((x) => x.parts && x.parts[0].surface === parts[0]);
+    assert.ok(t, `${parts.join('|')} in ${cut(r)}`);
+    assert.deepEqual(t.parts.map((q) => q.surface), parts, text);
+    assert.equal(t.confidence, 'rule', text);
+    for (const q of t.parts) {
+      assert.ok(q.entry, `${text}: ${q.surface}`);
+      assert.equal(q.tier, 1, `${text}: ${q.surface} is a first-tier word`);
+      assert.equal(q.entry.tier, undefined, `${text}: ${q.surface} is a first-tier word`);
     }
   }
   // a two-kana stub is still no word: インフォーム stays one guess
-  assert.equal(cut(await run('インフォームショップ')), 'インフォーム|ショップ');
+  assert.deepEqual((await run('インフォームショップ')).tokens[0].parts.map((p) => p.surface), ['インフォーム', 'ショップ']);
 });
 
 test('one kanji KANJIDIC reads with okurigana is no rare word: it is the stem the first pass missed (見に行く, 狭過ぎる)', async () => {
