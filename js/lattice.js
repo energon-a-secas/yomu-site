@@ -31,21 +31,35 @@ import { kanaCuts } from './spellings.js';
 export { PARTICLES, PARTICLE_PAIRS, SENTENCE_FINAL, COPULA, COST } from './costs.js';
 export { keysForRun } from './candidates.js';
 
-/** The cheapest path through `run`. `exclude` drops candidates spanning all of it. */
-function bestPath(run, dict, env) {
-  const n = run.length;
-  if (!n) return [];
+/**
+ * The cheapest path through `run`. `exclude` drops candidates spanning all of
+ * it.
+ *
+ * The second phase (js/rare.js) reads one stretch of a run again, between
+ * two nodes the first pass already placed, so the search can be narrowed:
+ * `env.from` and `env.to` are the stretch, `env.left` and `env.right` the
+ * nodes on either side (each connected exactly as the first pass connected
+ * it), and `env.candidatesAt` the candidates to place, in place of
+ * candidates.js. With none of them the search is the first pass, unchanged.
+ */
+export function bestPath(run, dict, env) {
+  const from = env.from || 0;
+  const n = env.to === undefined ? run.length : env.to;
+  if (n <= from) return [];
+  const gen = env.candidatesAt || candidates;
   const ends = Array.from({ length: n + 1 }, () => []);
-  const bos = { i: 0, j: 0, cls: env.after || 'bos', total: 0, back: null, start: true };
-  ends[0].push(bos);
-  for (let i = 0; i < n; i++) {
+  const bos = { i: from, j: from, cls: env.after || 'bos', total: 0, back: null, start: true };
+  ends[from].push(bos);
+  const leftOf = (prev) => (!prev.start ? prev : env.left !== undefined ? env.left : edge(prev));
+  for (let i = from; i < n; i++) {
     if (!ends[i].length) continue;
-    for (const node of candidates(run, i, dict, env)) {
-      if (env.exclude && node.i === 0 && node.j === n) continue;
+    for (const node of gen(run, i, dict, env)) {
+      if (node.j > n) continue;
+      if (env.exclude && node.i === from && node.j === n) continue;
       let best = null;
       let bestCost = Infinity;
       for (const prev of ends[i]) {
-        const c = prev.total + connect(prev.start ? edge(prev) : prev, node) + node.cost;
+        const c = prev.total + connect(leftOf(prev), node) + node.cost;
         if (c < bestCost) { bestCost = c; best = prev; }
       }
       node.total = bestCost;
@@ -56,7 +70,8 @@ function bestPath(run, dict, env) {
   let best = null;
   let bestCost = Infinity;
   for (const node of ends[n]) {
-    const c = node.total + (env.before ? 0 : connect(node, null));
+    const end = env.right !== undefined ? connect(node, env.right) : env.before ? 0 : connect(node, null);
+    const c = node.total + end;
     if (c < bestCost) { bestCost = c; best = node; }
   }
   const path = [];
@@ -213,6 +228,7 @@ function toToken(node, path, k, run, dict, env) {
     base = node.key;
     if (node.cls === 'prt') kind = 'particle';
     else if (node.cls === 'cop') kind = 'copula';
+    else if (node.cls === 'name') kind = 'name';
     else if (node.chain.length) kind = 'inflected';
     else if ([...node.s].every(isKatakana)) kind = 'katakana';
     else kind = 'word';
@@ -247,7 +263,8 @@ function toToken(node, path, k, run, dict, env) {
 
   const token = {
     kind, surface: node.s, start: node.i, end: node.j, base, reading,
-    entry, alts: rec ? Math.max(0, (dict.get(node.key) || []).length - 1) : 0,
+    // A rare word or a name counts its own tier's records (js/rare.js sets it).
+    entry, alts: node.alts !== undefined ? node.alts : rec ? Math.max(0, (dict.get(node.key) || []).length - 1) : 0,
     chain: node.chain ? [...node.chain] : [], confidence,
   };
   if (kind === 'number') token.counterChange = !!node.counterChange;
@@ -258,10 +275,12 @@ function toToken(node, path, k, run, dict, env) {
   aid.v5u = !!rec && !node.chain.length && /\bv5u(-s)?\b/.test(rec.p) && node.s.endsWith('う');
   aid.finalWa = !!rec && (!!rec.w || (!!rec.x && node.key.endsWith('は')) || FINAL_WA.has(node.key));
   if (!rec && FINAL_WA.has(node.s)) aid.finalWa = true;
-  if (kind === 'name' && wholeName(node.s)) {
+  // A name the names tier knows (js/rare.js) is read like a word, from its
+  // record; only a guessed one is read from the characters.
+  if (kind === 'name' && !rec && wholeName(node.s)) {
     token.reading = wholeName(node.s);
     aid.f = '*';
-  } else if (kind === 'name') {
+  } else if (kind === 'name' && !rec) {
     const pieces = guessName(node.s, env.kanji);
     token.reading = pieces.join('');
     aid.f = pieces.every(Boolean) ? pieces.join('|') : undefined;
@@ -312,7 +331,21 @@ function particleWa(node, dict, env, depth = 0) {
  *   field analyze.js consumes
  */
 export function segmentRun(run, dict, opts = {}) {
+  const { path, env } = pathOf(run, dict, opts);
+  return tokensOf(run, path, dict, env);
+}
+
+/**
+ * The first pass over one run, as nodes: what segmentRun reads before it
+ * builds tokens, and what the second phase (js/rare.js) reads again where it
+ * holds guesses. `env` is the run's context, which tokensOf needs back.
+ */
+export function pathOf(run, dict, opts = {}) {
   const env = { maxKey: dict.maxKey || 12, kanji: opts.kanji, after: opts.after, before: opts.before, dict };
-  const path = bestPath(run, dict, env);
+  return { path: bestPath(run, dict, env), env };
+}
+
+/** Tokens for a path through `run`, offsets relative to the run. */
+export function tokensOf(run, path, dict, env) {
   return path.map((node, k) => toToken(node, path, k, run, dict, env));
 }

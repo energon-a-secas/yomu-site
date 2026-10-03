@@ -17,7 +17,7 @@ import { refused } from './key-rules.js';
 import { kanaHomographCost } from './spellings.js';
 
 const isDigitish = (ch) => (ch >= '0' && ch <= '9') || ch === ',';
-const NO_CHAIN = Object.freeze([]);
+export const NO_CHAIN = Object.freeze([]);
 
 /**
  * Every key the lattice might look up in this run: each substring up to the
@@ -61,7 +61,13 @@ function qCost(q) {
   return COST.q[q >= 1 && q <= 5 ? q : 0];
 }
 
-function wordNode(s, i, j, rec, key, chain, cuts, whole, env) {
+/**
+ * One dictionary word as a node: `rec` under `key`, covering [i, j) of the
+ * run as the surface `s`, reached through `chain`. The second phase builds
+ * its rare words with this too (js/rare.js), so a rare word pays every cost
+ * a common one pays, and then its own.
+ */
+export function wordNode(s, i, j, rec, key, chain, cuts, whole, env) {
   const cls = chainClass(chain, classOf(rec.p));
   if (refused(s, key, rec, cls, i === 0 && !env.after, env.dict)) return null;
   let cost = COST.word + qCost(bandOf(key, rec, env.dict)) + COST.step * chain.length

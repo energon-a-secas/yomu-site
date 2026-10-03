@@ -21,8 +21,15 @@
 // It runs in the page and under node: the caller hands in `fetchJson`, and the
 // paths it is asked for are the paths the index names, resolved against
 // `base`.
+//
+// Two more tiers sit behind the first, read only by the second phase
+// (js/rare.js): the rest of JMdict (data/dict/rare.json, `needRare` and
+// `rare`) and the names (data/names/index.json, `needNames` and `name`).
+// js/range-store.js loads them; nothing here fetches either until the second
+// phase asks, so a text the first pass reads in full never touches them.
 
 import { readFilter } from './bloom.js';
+import { createRangeStore, lastAtMost, loadError } from './range-store.js';
 
 /**
  * Where a published path lands. `base` is the data/ directory, relative to the
@@ -45,24 +52,6 @@ function resolver(base) {
   return { dir, resolve };
 }
 
-/** The last index in `firsts` whose value is <= key, or -1. */
-function lastAtMost(firsts, key) {
-  let lo = 0;
-  let hi = firsts.length - 1;
-  let found = -1;
-  while (lo <= hi) {
-    const mid = (lo + hi) >> 1;
-    if (firsts[mid] <= key) { found = mid; lo = mid + 1; } else { hi = mid - 1; }
-  }
-  return found;
-}
-
-/** An Error that names the file, so a broken deploy says which shard. */
-function loadError(what, path, cause) {
-  const err = new Error(`${what} ${path} could not be loaded: ${cause && cause.message ? cause.message : cause}`);
-  err.path = path;
-  return err;
-}
 
 /**
  * @param {object} opts
@@ -85,10 +74,27 @@ export function createDict({ fetchJson, base = 'data/' } = {}) {
 
   let kanjiIndex = null;
   let kanjiIndexing = null;
-  let kanjiOf = new Map();       // char -> kanji shard number, from the index
-  let kanjiFirsts = null;        // or, when the index is ranged like the dict
+  let kanjiOf = new Map();       // char -> kanji shard number, for the listed shards
+  let kanjiRanges = [];          // and { n, first, last } for the ranged ones
+  let kanjiRangeFirsts = [];
   const kanjiShards = new Map();
   const kanjiPending = new Map();
+
+  // The second phase's tiers. A rare record is marked `tier: 2` as it
+  // loads, so a token built from it says so and the page can call it a rare
+  // word; nothing in the shards spends bytes on the mark.
+  const rare = createRangeStore({
+    fetchJson,
+    resolve,
+    indexPath: `${dir}dict/rare.json`,
+    what: 'The rare-word index',
+    onShard: (entries) => {
+      for (const recs of Object.values(entries)) for (const r of recs) r.tier = 2;
+    },
+  });
+  const names = createRangeStore({
+    fetchJson, resolve, indexPath: `${dir}names/index.json`, what: 'The names index',
+  });
 
   function loadIndex() {
     if (index) return Promise.resolve(index);
@@ -215,18 +221,23 @@ export function createDict({ fetchJson, base = 'data/' } = {}) {
         .then(() => fetchJson(path))
         .then((doc) => {
           if (!doc || !Array.isArray(doc.shards)) throw new Error('it has no shards[]');
-          // Two shapes are read: shards that list their characters (`chars`,
-          // a string or an array), or shards ranged by `first` like the
-          // dictionary. The builder picks one; the page reads either.
-          const listed = doc.shards.some((s) => s.chars !== undefined);
-          if (listed) {
-            kanjiOf = new Map();
-            doc.shards.forEach((s, n) => {
-              for (const ch of (typeof s.chars === 'string' ? [...s.chars] : s.chars || [])) kanjiOf.set(ch, n);
-            });
-          } else {
-            kanjiFirsts = doc.shards.map((s) => String(s.first));
-          }
+          // A shard either lists its characters (`chars`, a string or an
+          // array: the 2,600 a reader meets, in frequency order) or gives
+          // the range it holds (`first` and `last`: the 7,784 KANJIDIC
+          // characters nothing ranks, in plain string order). A listed
+          // character is looked up in its shard; any other in the range it
+          // sorts into, so a rare kanji costs one shard and the index stays
+          // the size it was when only the listed ones shipped.
+          kanjiOf = new Map();
+          kanjiRanges = [];
+          doc.shards.forEach((s, n) => {
+            if (s.chars !== undefined) {
+              for (const ch of (typeof s.chars === 'string' ? [...s.chars] : s.chars)) kanjiOf.set(ch, n);
+            } else if (s.first !== undefined) {
+              kanjiRanges.push({ n, first: String(s.first), last: s.last === undefined ? null : String(s.last) });
+            }
+          });
+          kanjiRangeFirsts = kanjiRanges.map((r) => r.first);
           kanjiIndex = doc;
           return doc;
         })
@@ -239,8 +250,13 @@ export function createDict({ fetchJson, base = 'data/' } = {}) {
   }
 
   function kanjiShardFor(ch) {
-    if (kanjiFirsts) return lastAtMost(kanjiFirsts, ch);
-    return kanjiOf.has(ch) ? kanjiOf.get(ch) : -1;
+    if (kanjiOf.has(ch)) return kanjiOf.get(ch);
+    const k = lastAtMost(kanjiRangeFirsts, ch);
+    if (k < 0) return -1;
+    const range = kanjiRanges[k];
+    // Past a range's last character and before the next one's first is a
+    // character KANJIDIC does not have: no shard holds it, so none is fetched.
+    return range.last !== null && ch > range.last ? -1 : range.n;
   }
 
   function loadKanjiShard(n) {
@@ -290,6 +306,16 @@ export function createDict({ fetchJson, base = 'data/' } = {}) {
     need,
     get,
     kanji,
+    /** Load the rare-word shards these keys may be in (the second phase only). */
+    needRare: rare.need,
+    /** A key's rare records, each marked `tier: 2`, or undefined. */
+    rare: rare.get,
+    /** Load the names shards these spellings may be in (the second phase only). */
+    needNames: names.need,
+    /** A name's record `{ r?, n, f?, s? }`, or undefined. */
+    name: names.get,
+    /** Files of the second phase's tiers loaded so far, for tests and the measurements. */
+    get loadedRare() { return rare.loaded + names.loaded; },
     /** Longest key in the dictionary; the lattice never looks further. */
     get maxKey() { return index && index.maxKey ? index.maxKey : 12; },
     /** How many dictionary files (the core and range shards) are loaded, for tests and the performance note. */

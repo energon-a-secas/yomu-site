@@ -2,7 +2,10 @@
 //
 //   normalize ─▶ pieces (Japanese runs, latin, numbers, punctuation, space)
 //             ─▶ dict.need(every key the runs might look up) + kanji info
-//             ─▶ segmentRun per run ─▶ enrich each token ─▶ sounds, grammar
+//             ─▶ the first pass per run (lattice.js pathOf)
+//             ─▶ the second phase, only where the first pass guessed
+//                (rare.js: rare words and names, fetched for those stretches)
+//             ─▶ tokens ─▶ enrich each token ─▶ sounds, grammar
 //
 // It is async only because shards load on demand, and it loads them once:
 // what a key needs to know about another key (the band of a kana word's
@@ -16,7 +19,8 @@
 // sounds.js and grammar.js; `analyze` is the entry point the page calls.
 
 import { beats, said, spelled, toKata, isKanji, isJapanese, isAllKana } from './kana.js';
-import { keysForRun, segmentRun } from './lattice.js';
+import { keysForRun, pathOf, tokensOf } from './lattice.js';
+import { weakSpans, spanKeys, refine } from './rare.js';
 import { align, splitByKanji } from './furigana.js';
 import { createDict } from './dict.js';
 import { detectSounds } from './sounds.js';
@@ -264,6 +268,44 @@ function kanjiList(tokens, kanjiInfo) {
 }
 
 /**
+ * The second phase (rare.js), in place on each run's first-pass path: the
+ * stretches the first pass guessed, read again once the rare words and names
+ * they could be are loaded. A run with no guess is not touched and asks for
+ * nothing, and a text with none fetches no file of either tier. If those
+ * files cannot be loaded the first pass's reading stands: a guess the page
+ * already calls a guess is better than no reading at all.
+ */
+async function secondPhase(parts, firsts, dict) {
+  const none = parts.map(() => null);
+  if (typeof dict.needRare !== 'function') return none;
+  const spans = firsts.map((x, k) => (x ? weakSpans(parts[k].text, x.path) : []));
+  if (!spans.some((list) => list.length)) return none;
+  const keys = { rare: new Set(), names: new Set() };
+  spans.forEach((list, k) => spanKeys(parts[k].text, list, keys, firsts[k] && firsts[k].env.kanji));
+  try {
+    await Promise.all([dict.needRare(keys.rare), dict.needNames(keys.names)]);
+  } catch {
+    return none;
+  }
+  return spans.map((list, k) => (list.length ? refine(parts[k].text, firsts[k].path, list, dict, firsts[k].env) : null));
+}
+
+/**
+ * One run's tokens. Every node the first pass placed outside a guessed
+ * stretch keeps the token the first pass built for it, with the first
+ * pass's neighbours: a particle after a word the second phase found keeps
+ * its gloss, and 何 keeps its なに or なん. Only the stretches the second
+ * phase read again are built from its path, in that path's context.
+ */
+function runTokens(run, first, second, dict) {
+  const before = tokensOf(run, first.path, dict, first.env);
+  if (!second) return before;
+  const kept = new Map(first.path.map((node, k) => [node, before[k]]));
+  const after = tokensOf(run, second, dict, first.env);
+  return second.map((node, k) => kept.get(node) || after[k]);
+}
+
+/**
  * Tokens, kanji and the unknown count, without the sound and grammar passes.
  * @param {string} input
  * @param {{ dict: object }} opts  a dictionary from createDict
@@ -297,10 +339,12 @@ export async function analyzeCore(input, { dict } = {}) {
       before: !!(next && next.type === 'latin'),
     };
   });
+  const firsts = parts.map((p, k) => (runOpts[k] ? pathOf(p.text, dict, runOpts[k]) : null));
+  const seconds = await secondPhase(parts, firsts, dict);
   const tokens = [];
   parts.forEach((p, k) => {
-    if (!runOpts[k]) { tokens.push(plainToken(p)); return; }
-    for (const t of segmentRun(p.text, dict, runOpts[k])) {
+    if (!firsts[k]) { tokens.push(plainToken(p)); return; }
+    for (const t of runTokens(p.text, firsts[k], seconds[k], dict)) {
       t.start += p.start;
       t.end += p.start;
       enrich(t);

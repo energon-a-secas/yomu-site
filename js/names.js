@@ -214,3 +214,32 @@ export function guessName(s, kanji) {
   });
   return pieces;
 }
+
+// ── Names the names tier knows ────────────────────────────────────────────
+
+/**
+ * JMnedict's name types, said in words. `g` on a name's entry is the English
+ * side, because a dictionary gloss is English throughout (the page says so
+ * beside it); `nt` keeps the ids, so the page can say them in Spanish.
+ */
+export const NAME_TYPES = Object.freeze({
+  surname: Object.freeze({ en: 'surname', es: 'apellido' }),
+  given: Object.freeze({ en: 'given name', es: 'nombre de pila' }),
+  masc: Object.freeze({ en: 'given name (male)', es: 'nombre de pila (masculino)' }),
+  fem: Object.freeze({ en: 'given name (female)', es: 'nombre de pila (femenino)' }),
+  place: Object.freeze({ en: 'place name', es: 'nombre de lugar' }),
+});
+
+/**
+ * The entry a name token carries, from a names-tier record `{ r?, n, f?, s? }`
+ * (data/names/, docs/ANALYZER.md): its reading, its types as glosses, the
+ * part of speech `n-pr` the page calls "name", and `nt`, the type ids.
+ */
+export function nameEntry(rec) {
+  const nt = String((rec && rec.n) || '').split(' ').filter((t) => NAME_TYPES[t]);
+  const out = { g: [...new Set(nt.map((t) => NAME_TYPES[t].en))], p: 'n-pr', nt };
+  if (rec && rec.r) out.r = [...rec.r];
+  if (rec && rec.f) out.f = rec.f;
+  if (rec && rec.s) out.s = 1;
+  return out;
+}

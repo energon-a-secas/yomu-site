@@ -140,6 +140,25 @@ export const COST = Object.freeze({
   nameRunPerChar: 10, // each kanji past the second
   tsu: 150,           // one kana plus a final small tsu: あっ, えっ
   unkKana: 400,       // one kana nothing else explains
+
+  // The second phase (js/rare.js), which only ever prices a stretch the
+  // first pass guessed. Each number was set against the guess it replaces
+  // and measured over 3,112 corpus sentences (docs/ANALYZER.md).
+  //
+  // A rare word is any dictionary word plus this: 95 for an unranked noun of
+  // two kanji. A guessed name is 120, but it connects to a noun before it
+  // for 0 where a noun pays 20, so at 0 here ときどき蜃気楼が stayed a guess
+  // and 蜃気楼 alone did not; -15 clears both. It never meets a first-tier
+  // word outside a stretch the first pass guessed.
+  rare: -15,
+  rareCommon: 10,     // ...less this for a kana spelling of a common word (リンゴ is 林檎's)
+  rareBeforeHonorific: 40, // a rare word straight before さん, 様, 君: it is a name
+  nameKnown: 80,      // a surname, or a katakana name, other names are built on (s)
+  nameWeak: 32,       // ...plus this for any other name: 陸地 かちじ, a place, and
+                      // 天上 てんじょう, a given name, lose to the words
+  namePair: -60,      // a family name, then a given name: 鈴木|一郎
+  kataPerChar: 30,    // a katakana guess in the second phase, per kana: a run
+                      // that is two known words (クリスマス|プレゼント) splits
 });
 
 /**
@@ -254,10 +273,39 @@ export function classOf(pos) {
 
 export const NOMINAL = new Set(['noun', 'kata', 'num', 'name', 'suf']);
 
+/**
+ * Words a name is followed by: a rare word met right before one of these is
+ * read as the name it is (清水さん is Mr. Shimizu, not spring water).
+ */
+const HONORIFICS = new Set(['さん', '様', 'さま', '君', 'くん', 'ちゃん', '氏', '殿', '先生']);
+
+/** JMnedict's types for a given name, as names.js nameEntry keeps them in `nt`. */
+const GIVEN = new Set(['given', 'masc', 'fem']);
+
+function familyThenGiven(prev, next) {
+  const a = (prev.rec && prev.rec.nt) || [];
+  const b = (next.rec && next.rec.nt) || [];
+  return a.includes('surname') && b.some((t) => GIVEN.has(t));
+}
+
 /** What it costs for `next` to follow `prev`. null is the edge of the run. */
 export function connect(prev, next) {
-  const extra = prev && prev.countLike && next && isDuration(next) ? COST.durationKey : 0;
-  return extra + pairCost(prev, next);
+  let extra = prev && prev.countLike && next && isDuration(next) ? COST.durationKey : 0;
+  if (prev && prev.rare && next && HONORIFICS.has(next.key || next.s)) extra += COST.rareBeforeHonorific;
+  // A name takes no する, in any form: ハグしない is "won't you hug me?",
+  // and しない ends like an adjective, so no rule below sees the する in it.
+  if (prev && prev.named && next && (next.key === 'する' || next.key === '為る')) extra += COST.suruNeedsVs;
+  // A family name and then a given name, both from the names tier, are one
+  // person's two names, which a single guess over both used to undercut.
+  // Only in that order: two surnames or places side by side are more often
+  // one longer place (小田原城 read 小田|原城, おだ はらじょう, when any two
+  // names earned it).
+  if (prev && prev.named && next && next.named && familyThenGiven(prev, next)) return extra + COST.namePair;
+  // A name the names tier knows is a noun, and pays what a noun pays to
+  // follow another one; a guessed name follows a noun for nothing, which is
+  // how the first pass lets it beat a split, and 本当に陸地 read the place
+  // かちじ over the word "land" while the known name did too.
+  return extra + pairCost(prev, next && next.named ? { ...next, cls: 'noun' } : next);
 }
 
 function isDuration(node) {
