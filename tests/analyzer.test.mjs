@@ -20,21 +20,42 @@ import { SITE, run, cut, saidLine, diskDict } from './helpers/disk.mjs';
 const tok = (r, surface) => r.tokens.find((t) => t.surface === surface);
 const kanjiOf = (r, ch) => r.kanji.find((k) => k.char === ch);
 
+/**
+ * The committed dictionary with the second phase's tiers taken away, which
+ * is the first pass alone: analyze.js skips the second phase for a
+ * dictionary that cannot load them.
+ */
+function firstPassOnly() {
+  const d = diskDict();
+  return { ...d, needRare: undefined, needNames: undefined, get maxKey() { return d.maxKey; } };
+}
+const first = firstPassOnly();
+
 // ── Names ────────────────────────────────────────────────────────────────
 
-test('a kanji run no key covers is one name, read kun by kun, and a guess', async () => {
+test('a kanji run no key covers is one name: the first pass guesses it kun by kun, the names tier reads it', async () => {
   for (const [text, name, reading, said] of [
     ['田中さん', '田中', 'たなか', 'tanaka san'],
     ['鈴木さん', '鈴木', 'すずき', 'suzuki san'],
     ['高橋さん', '高橋', 'たかはし', 'takahashi san'],
     ['中村さん', '中村', 'なかむら', 'nakamura san'],
   ]) {
+    const guessed = await analyze(text, { dict: first });
+    assert.equal(cut(guessed), `${name}|さん`, text);
+    const g = tok(guessed, name);
+    assert.equal(g.kind, 'name');
+    assert.equal(g.confidence, 'guess');
+    assert.equal(g.reading, reading);
+    assert.equal(g.furigana.length, [...name].length, 'one ruby per kanji');
+    // The second phase finds the same surname in JMnedict, with the same
+    // reading, and the token stops being a guess.
     const r = await run(text);
     assert.equal(cut(r), `${name}|さん`, text);
     const t = tok(r, name);
     assert.equal(t.kind, 'name');
-    assert.equal(t.confidence, 'guess');
+    assert.equal(t.confidence, 'dict');
     assert.equal(t.reading, reading);
+    assert.ok(t.entry.g.includes('surname'), `${name}: ${t.entry.g}`);
     assert.equal(saidLine(r), said);
     assert.equal(t.furigana.length, [...name].length, 'one ruby per kanji');
   }

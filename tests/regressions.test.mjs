@@ -403,14 +403,19 @@ test('whispered vowels are one entry per word with every span (しています l
 
 test('names: 口 after the first kanji is ぐち, a few surnames are read whole, 𠮷 reads as 吉', async () => {
   assert.equal(saidLine(await run('山口さんに会いました。')), 'yamaguchi san ni aimashita');
+  // The first pass alone guesses them, whole; the names tier (2026-10-01)
+  // has all three with the same reading, and keeps them whole.
+  const d = diskDict();
+  const first = { ...d, needRare: undefined, needNames: undefined, get maxKey() { return d.maxKey; } };
   for (const [text, name, reading] of [['清水さん', '清水', 'しみず'], ['五十嵐さん', '五十嵐', 'いがらし'], ['長谷川さん', '長谷川', 'はせがわ']]) {
-    const r = await run(text);
-    const t = tok(r, name);
-    assert.ok(t, `${name} in ${cut(r)}`);
-    assert.equal(t.kind, 'name');
-    assert.equal(t.confidence, 'guess');
-    assert.equal(t.reading, reading);
-    assert.deepEqual(t.furigana, [{ text: name, ruby: reading, whole: true }]);
+    for (const [r, confidence] of [[await analyze(text, { dict: first }), 'guess'], [await run(text), 'dict']]) {
+      const t = tok(r, name);
+      assert.ok(t, `${name} in ${cut(r)}`);
+      assert.equal(t.kind, 'name');
+      assert.equal(t.confidence, confidence);
+      assert.equal(t.reading, reading);
+      assert.deepEqual(t.furigana, [{ text: name, ruby: reading, whole: true }]);
+    }
   }
   const r = await run('𠮷野さん');
   assert.equal(r.tokens[0].reading, 'よしの');
@@ -460,7 +465,8 @@ function countingDict() {
   return { d, files, needs, inner };
 }
 
-const dictFiles = (files) => files.filter((f) => /^dict\/(core|w\d+)\.json$/.test(f));
+/** Dictionary files: the core, the range shards, and the second phase's rare-word and names shards. */
+const dictFiles = (files) => files.filter((f) => /^dict\/(core|w\d+|r\d{3})\.json$/.test(f) || /^names\/n\d+\.json$/.test(f));
 
 test('a text asks the dictionary once: no second pass for kanji spellings or readings (a kana sentence loaded up to 20 of 27 shards)', async () => {
   for (const text of MEASURED.slice(0, 8)) {
@@ -471,7 +477,7 @@ test('a text asks the dictionary once: no second pass for kanji spellings or rea
   assert.equal(PARAGRAPH.length, 500);
 });
 
-test('the measured sentences fetch a median of five dictionary files or fewer (it was 16)', async () => {
+test('the measured sentences fetch a median of four dictionary files or fewer, the second phase counted (it was 16)', async () => {
   const counts = [];
   for (const text of MEASURED) {
     const { d, files } = countingDict();
@@ -479,7 +485,9 @@ test('the measured sentences fetch a median of five dictionary files or fewer (i
     counts.push(dictFiles(files).length);
   }
   const sorted = [...counts].sort((a, b) => a - b);
-  assert.ok(sorted[(sorted.length - 1) >> 1] <= 5, `files per sentence: ${counts.join(' ')}`);
+  // Measured 2026-10-03: 1 4 4 2 9 2 5 3 27. The second phase runs for two
+  // of the nine (田中, and マリア in the paragraph), both above the median.
+  assert.ok(sorted[(sorted.length - 1) >> 1] <= 4, `files per sentence: ${counts.join(' ')}`);
   // a short sentence stays well under the 27 range shards it used to reach
   for (const [k, n] of counts.slice(0, 8).entries()) assert.ok(n <= 10, `${MEASURED[k]}: ${n} files`);
 });

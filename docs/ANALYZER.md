@@ -19,9 +19,15 @@ text ──normalize──▶ lines ──runs──▶ [jp run | other]
                            dict.need(keys) ──index, filter, core──▶ range shards
                                       │     the filter lets through ──▶ dict.get(key)
                                       │
-                           lattice(run, edges) ──best path──▶ tokens
+                           lattice(run, edges) ──best path──▶ the first pass
                                       │
-                           enrich(token): reading, furigana, morae,
+                           only where it guessed (a name, a katakana run with
+                           no record, kana nothing explains):
+                           dict.needRare(keys) ──rare.json, kana filters──▶ rNNN
+                           dict.needNames(keys) ──names/index.json──▶ nNN
+                           rare.refine(span) ──best path over the span──▶ second phase
+                                      │
+                           tokens ─▶ enrich(token): reading, furigana, morae,
                                           romaji said/spelled, sounds[], grammar[]
                                       │
                            kanjiList(tokens) ◀── kanji shards
@@ -33,6 +39,20 @@ analyzer never fetches a second key to price the first. Until 2026-09-29 it
 segmented each run twice, fetching the kanji spellings of the kana words on
 the first path and the readings of kanji keys with several records, and a
 kana sentence loaded up to 20 of the 27 shards.
+
+The second phase (2026-10-01, `js/rare.js`) is not a second pass over the
+text. It runs only when the first pass left a guess, reads only the
+stretches of consecutive guessed tokens, between the two tokens the first
+pass placed around them (connected exactly as the first pass connected
+them), and fetches the rest of JMdict and the names for those stretches
+alone, with one call each. The first pass's own candidates and prices
+apply inside a stretch, plus three kinds of node it never had: rare words,
+names, and a katakana guess priced by its length (so a run of known words
+splits). A token outside a stretch is the token the first pass built, with
+the first pass's neighbours, byte for byte: a particle after a word the
+second phase found keeps its gloss, and 何 keeps its なに or なん. A text
+with no guess fetches no file of either tier. See "The second phase" below
+for the prices and the measurements.
 
 `analyze(text, { lang })` in `js/analyze.js` is the only entry point the view
 calls. It returns `{ text, tokens, kanji, unknown }`: `text` is the normalized
@@ -53,20 +73,22 @@ same text and the same data give the same tokens.
 |---|---|---|
 | `kana.js` | script tests, hiragana/katakana folding, morae, romaji (spelled and said) | nothing |
 | `deinflect.js` | the rule table and `deinflect(surface)` | nothing |
-| `dict.js` | the shard index, the core and the key filter, fetching, `need(keys)`, `get(key)`, kanji info | `bloom.js` |
+| `dict.js` | the shard index, the core and the key filter, fetching, `need(keys)`, `get(key)`, kanji info (listed and ranged shards); the second phase's tiers as `needRare`/`rare` and `needNames`/`name` | `bloom.js`, `range-store.js` |
+| `range-store.js` | a tier loaded only when asked: an index, key filters (parts over a range, or one inline), range shards | `bloom.js` |
 | `bloom.js` | the key filter: its hash, reading it, and building it (the builder imports this file) | nothing |
-| `lattice.js` | the best path through a run, and the tokens built from it | `kana.js`, `deinflect.js`, `costs.js`, `names.js`, `candidates.js`, `spellings.js` |
+| `lattice.js` | the best path through a run (or through one stretch of it, between two fixed nodes), and the tokens built from it | `kana.js`, `deinflect.js`, `costs.js`, `names.js`, `candidates.js`, `spellings.js` |
+| `rare.js` | the second phase: which stretches the first pass guessed, the keys they ask the rare words and the names for, and the best path through each with them | `kana.js`, `deinflect.js`, `candidates.js`, `lattice.js`, `costs.js`, `names.js` |
 | `candidates.js` | every node that could start at one position of a run, with its own cost | `kana.js`, `deinflect.js`, `numbers.js`, `costs.js`, `names.js`, `key-rules.js`, `spellings.js` |
 | `spellings.js` | what a kana word learns from its kanji spelling, read off the record: the rank of kana homographs (すき is 好き before 隙, `b`, ties by `t`) and the morpheme cuts of a kana compound (そのうち is その\|内, `c`) | `kana.js`, `costs.js` |
 | `costs.js` | the closed classes (particles, copula), every cost, connection costs, homograph ranking | `kana.js` |
 | `key-rules.js` | dictionary keys the lattice refuses (ですか, ませんか, 雨が降る, になると) | `kana.js`, `costs.js` |
-| `names.js` | which kanji runs are names, and a per-kanji guess at their reading | `kana.js`, `deinflect.js`, `numbers.js` |
+| `names.js` | which kanji runs are names, a per-kanji guess at their reading, and the entry a name from the names tier carries (`NAME_TYPES`, `nameEntry`) | `kana.js`, `deinflect.js`, `numbers.js` |
 | `numbers.js` | reading numbers, counters and 何 + counter, and the sound changes between them | nothing |
 | `sounds.js` | special-sound detection per token, with spans | `kana.js` |
 | `grammar.js` | particle, copula and ending notes per token and per pair of tokens | nothing |
 | `notes.js` | every learner-facing explanation string, `{ en, es }` | nothing |
 | `furigana.js` | aligning a reading to a surface, per kanji where the data allows | `kana.js` |
-| `analyze.js` | the pipeline above | all of the above |
+| `analyze.js` | the pipeline above: the first pass, the second phase where it guessed, the tokens | all of the above |
 | `render*.js`, `events*.js`, `state.js` | the page | `analyze.js`, `notes.js`, `strings.js` |
 
 The analyzer modules (`kana` to `analyze`) never touch the DOM, so `npm test`
@@ -97,6 +119,11 @@ runs them under plain node with the real shards read from disk.
   confidence: 'dict',   // dict | rule | guess ; guess means no dictionary support
 }
 ```
+
+A token the second phase read is shaped the same, with these marks:
+
+- a **rare word** (a record from `data/dict/rNNN`) has `confidence: 'dict'` and `entry.tier === 2`, set by `dict.js` as the shard loads (the shards do not spend bytes on it), so the page can say "rare word"; its `alts` counts the other rare records of its key;
+- a **name** from the names tier has `kind: 'name'`, `confidence: 'dict'`, its JMnedict reading, and `entry = { r?, g, p: 'n-pr', nt, f?, s? }`: `nt` the JMnedict types (`surname`, `given`, `masc`, `fem`, `place`), `g` the same in English (`['surname', 'place name']`), the way a dictionary gloss is English, and `names.js` `NAME_TYPES` holds each in `{ en, es }` for the page. A name the first pass guessed keeps `entry: null` and `confidence: 'guess'`.
 
 Three fields appear only where they apply:
 
@@ -232,7 +259,15 @@ build reads 3, 3.46, 6 on the same sentences.
 | `o` | on a record of a kanji key with several records: how far down the kanji lists of its first reading's records this spelling sits, 3 when that reading lists it nowhere (本 is the ほん record's first spelling, the もと record's second); absent means 0 |
 | `b` | on a record of a kana key with several records: the band of its kanji spelling, taken two worse where that band is earned by another reading (入る by はいる, 五 by ご) or by a conjugated stem (動 by 動いて); absent means the key's own band two worse |
 | `c` | on a record of a hiragana key: offsets where its kanji spelling says one morpheme ends and the next begins, only where that splits a pair the said line would merge (そのうち is その\|内, `[2]`) |
-| `t` | on a record of a kana key that another record of the key ties with on every price known before context (band, kanji met in kana, q): its place among them, 1 to 5, by how often the corpus matched its own kanji spelling; absent on the one matched most |
+| `t` | on a record of a kana key that another record of the key ties with on every price known before context (band, kanji met in kana, q): its place among them, 1 to 5, by how often the corpus matched its own kanji spelling; absent on the one matched most. In the second tier, every record's place among its key's records after the first (see below) |
+| `ls` | where a borrowed word came from, from the record's first sense: `[language, source word or null]`, JMdict's ISO 639-2 code (`eng`, `ger`, `fre`, `por`...) and its source text: アルバイト `['ger', 'Arbeit']`, パン `['por', 'pão']`, an English loan JMdict names no source word for `['eng', null]`. A word built from two sources keeps the first. Absent means JMdict did not say, never that the word is native: JMdict marks a source on 6,219 of its 218,672 entries, so most katakana words carry none |
+| `ws` | 1 when that source is wasei, a word made in Japan from foreign parts: ナイター `ls: ['eng', 'nighter'], ws: 1` (a game under lights). Never without `ls` |
+| `e` | second tier only: 1 when the key is a kana spelling of a common word (リンゴ is 林檎's, カギ 鍵's), which the second phase trusts more than a rare word |
+
+`ls` and `ws` are for the loanword notes; nothing in the lattice reads them.
+The first tier ships 646 records with `ls`, 104 of them with `ws`; the second
+tier 10,772 and 4,182. They added 14.8 KB to the first tier and moved
+three keys out of the core, and no reading changed.
 
 `o`, `b` and `c` are what the page used to fetch other shards to learn;
 `tools/lib/prices.mjs` works them out once, from the records it ships. `t`
@@ -249,14 +284,254 @@ kanji spelling, discounted where that band is someone else's, as
 `kanaRecordPrice` in `js/spellings.js` prices it), then JMdict order. A kanji
 key keeps JMdict order, because its records share one string and one count.
 
-`data/kanji/index.json` lists the characters in each kanji shard;
 `data/kanji/kNN.json` (format `yomu-kanji/1`) holds
 `{ on: [], kun: [], m: [], s: strokes, g: grade, j: jlpt, f: freq, parts: [] }`
-per character. `parts` are KanjiVG's top-level named elements.
+per character. `parts` are KanjiVG's top-level named elements, empty for the
+3,971 characters KanjiVG does not draw (none of them joyo or ranked).
+
+All 10,384 KANJIDIC2 characters ship (2,600 before 2026-10-01: a rare kanji
+in a pasted text had no readings and no meaning in the table). The index,
+`data/kanji/index.json` (format `yomu-kanji-index/2`), has two kinds of
+shard:
+
+- **listed** (`{ src, chars }`): every joyo kanji and every character with a
+  newspaper rank, 2,600, in frequency order, so a short text still loads one
+  kanji shard (k00 to k02 are byte for byte what they were, but for the
+  date in their licence block);
+- **ranged** (`{ src, first, last }`): the other 7,784, which have no
+  frequency to order them by, in plain JS string order. A character the
+  listed shards do not name is looked up in the range it sorts into, and a
+  character past a range's `last` and before the next `first` is one
+  KANJIDIC does not have, so nothing is fetched. The index stays 9.5 KB
+  (9.1 KB before); listing every character would have made it 40 KB on
+  every text with a kanji in it.
+
+### The second tier: the rest of JMdict
+
+Every JMdict entry and spelling the first tier does not ship is in the
+second tier, under its own keys, built by `tools/lib/rare.mjs` in the same
+run as the first (only that run knows which (entry, spelling) pairs the
+first tier shipped). That includes the records the six-record cap dropped,
+the rare entries spelled like a first-tier key (中 "red dragon tile"), the
+other spellings of common entries (リンゴ beside りんご), and the
+spellings JMdict tags search-only (ホント, ギョウザ), which the first tier
+never makes keys and which people write.
+
+- `data/dict/rare.json`, format `yomu-dict-rare-index/1`:
+  `{ keys, maxKey, filters: [{ src, first, last }], shards: [{ src, first }] }`
+- `data/dict/rNNN.json`, format `yomu-dict-rare/1`: the shard shape above,
+  the same record fields, at most 12 records a key (82 keys have more: the
+  one-syllable sounds こう, しょう, where the second phase offers nothing)
+- `data/dict/rfNN.json`, format `yomu-dict-filter/1`: key filters
+
+A key is found the way a first-tier key is: the last shard whose `first` is
+`<=` it. Records of one key are filed by evidence, strongest first: a
+spelling JMdict does not tag irregular, outdated, rarely used or
+search-only; a spelling that is its entry's headword (上気 is じょうき's
+own, a variant of 浮気 "infidelity", and with record order it read
+顔が上気した as an affair); `e`; how often the corpus matched the record's
+own spelling; JMdict's order. `t` is that place, and the second phase
+prices it as a fraction of a step, so no reading depends on the order the
+array happens to have.
+
+The filters cover only the keys from the first that starts with kana to the
+last, in parts of 8,000 keys at 8 bits a key; a key outside that range is
+covered by no filter and its shard is fetched on sight. Simulated from the
+keys each of the 597 of 3,112 corpus sentences that run the second phase
+asks for (files and bytes of the second phase alone, both indexes
+included):
+
+| filters | filter files | files per sentence: median, mean | KB per sentence: median, mean |
+|---|---:|---|---|
+| none | 0 | 4, 5.17 | 341, 503 |
+| parts sized to the cap over every key, 16 bits | 9, 1,177 KB | 5, 5.68 | 478, 566 |
+| the same at 6 bits | 4, 443 KB | 5, 5.36 | 480, 521 |
+| hashed by first character, kana keys, 64 parts, 8 bits | 64, 485 KB | 5, 5.94 | 341, 396 |
+| **ranged, kana keys, 8,000 a part, 8 bits** | **31, 366 KB** | **5, 5.75** | **340, 400** |
+| ranged, kana keys, 2,000 a part, 8 bits | 122, 630 KB | 5, 5.92 | 341, 390 |
+
+A key that starts with a kanji nearly always shares its shard with one
+that exists (one kanji alone is the key of some rare entry), so a filter
+saved it nothing and cost a part; a katakana run asks about many strings
+that are no key (トム, メアリー), and each is a shard not fetched.
+
+### Names: JMnedict
+
+`tools/build-names.mjs` cuts the names from JMnedict (pinned in
+`tools/lib/sources.mjs`, 743,624 entries). It ships spellings of two or
+more characters, all kanji (and 々) or all katakana, typed surname, given,
+masc, fem or place, that are not first-tier keys (the first pass reads
+those as words, so nothing would ask), for one of two reasons:
+
+- **attested**: the Tatoeba corpus has it at least once; a kanji name as a
+  substring, a katakana name only as a whole katakana run (アン is in every
+  アンケート, パソ in every パソコン);
+- **strong**: at least 5 other JMnedict names are built on it. Of a list of
+  102 common surnames, 13 are first-tier keys and Tatoeba has 58 of the
+  rest; this rule brings in the other 31 (石井, 前田, 長谷川), and 8,980
+  names besides.
+
+One kanji alone is left out (森, 林, 東 are words as often as names), and so
+are JMnedict's `unclass` and `person` types: the 2,248 katakana names of
+those types the corpus has as a substring include ケット, パソ and ディ, so
+スーザン, typed `unclass`, stays a guess.
+
+JMnedict lists every reading a spelling was ever given, in kana order (田中
+is たなか, and たんか, だなか, でんちゅう and six more), so the reading is
+chosen by evidence the file holds: `ext`, how many longer JMnedict names
+start with this spelling and this reading (田中 たなか starts 463, たんか
+none; 清水 しみず 350, きよみず 14), each credited to the longest candidate
+reading it extends; then a reading the characters' KANJIDIC readings can
+spell (秀樹 ひでき, not ほつき); then more types; then JMnedict's order. Over
+the 102 surnames it chooses the textbook reading for each of the 89 the
+tier holds.
+
+- `data/names/index.json`, format `yomu-names-index/1`: `{ keys, maxKey,
+  filter: { n, m, k, bits }, shards: [{ src, first }] }`, the filter inline
+  (16 bits a key), so the second phase learns which name shard to fetch
+  from the file it needs anyway
+- `data/names/nNN.json`, format `yomu-names/1`: `{ first, last, entries:
+  { "田中": { "r": ["たなか"], "n": "surname place", "f": "た|なか", "s": 1 } } }`
+
+| Field | Meaning |
+|---|---|
+| `r` | the reading, one; absent for a katakana name, which is read as written |
+| `n` | the types, space separated: `surname`, `given`, `masc`, `fem`, `place` |
+| `f` | the reading split over the kanji, cut like a dictionary `f`; `*` read as a whole |
+| `s` | 1 for a strong name (`ext` of 5 or more) |
+
+### The second phase
+
+`js/rare.js`. A **weak** node is one with no record: a guessed name, a
+katakana run, one kana nothing explains. A **span** is a maximal stretch of
+weak nodes, less a single kana (no rare word of one kana is offered: a rare
+ぬ or ろ is a sound of a word the first pass missed, never the word). The
+second phase asks the rare words for every substring of each span (up to
+24 code units) and the dictionary form behind each, and the names for every
+substring of two or more kanji or katakana (up to 16), with one
+`needRare` and one `needNames`, and reads each span again with the first
+pass's candidates (same prices) plus:
+
+| node | price | why |
+|---|---:|---|
+| rare word | the word's own price, then `COST.rare` (-15): 95 for an unranked noun of two kanji | under the guessed name (120), which connects to a noun before it for 0 where a noun pays 20; at 0, ときどき蜃気楼が stayed a guess |
+| ...a kana spelling of a common word (`e`) | 10 less | リンゴ, カギ, ホント |
+| ...right before さん, 様, 君, ちゃん, 氏, 殿, 先生 | 40 more | before an honorific the guess wins: 悶着さん is a person |
+| name, strong, and a surname or katakana | 80 | under a rare word: 清水さん, ジョン (not "jeon", the dish) |
+| any other name | 112 | over a rare word, under a guess: 陸地 is "land", not the place かちじ; 天上 "the heavens", not a given name |
+| a family name, then a given name | -60 to connect | 鈴木一郎 is two names, not one guess; only in that order (types from JMnedict), because 小田原城 read 小田\|原城, two surnames, while any two names earned it |
+| a name before する | 60 more | ハグしない is "hug", not the surname Hug |
+| katakana guess | 150 + 30 a kana, at least 4 | a run that is known words splits (インフォーム\|ショップ); 40 kana at most |
+
+A known name connects like a noun (a guessed one follows a noun for 0). In
+a katakana span a rare word needs four kana and in kana text three, unless
+it is the whole span (カギ): イン\|フォーム, カート\|ライト and あつ (in
+あつし) were what shorter words did. A first-tier word needs three katakana
+(テニス\|トーナメント, インド\|レストラン, コロナ\|ワクチン), because at four
+the common half of such a run stayed a guess. No piece starts on ー or a
+small kana or right after っ, and no word starts on one at all (酔っぱらい's
+stray っぱ read "leaving open"). A rare particle or copula is never offered.
+
+One kanji as a rare word is offered only between a particle a noun takes
+and the token after it: never before other kana (称\|える, 好\|か\|ない),
+never right after a noun (飛行機\|代 is the suffix だい), and never for a
+kanji KANJIDIC reads with okurigana (み.る, せま.い), which the first pass
+left alone because the word it begins was written in a way it did not
+know. Before that last rule 22 lone kanji in the measured sentences below
+were read as rare words and 11 were wrong, every one such a stem: 見に行く
+read 見 as けん "view (of life)", 狭過ぎる 狭 as せ "narrowness", and 暑がり,
+寒がり, お仕置き, 受入れ, 干からびる the same way. They are guesses again; the
+rule also turns away four that were right (論 in 消費社会論, 嵩, 埒, 書 in
+招待書), which are guesses too.
+
+A name is not read where the first pass's next token is a verb in hiragana
+(オットリしている is おっとり "calm", not a surname) or one hiragana that is
+no particle, copula or suffix, which is okurigana (末永く read the surname
+すえなが and く "section"). A longer token is let through: what follows a
+name is often a phrase the first pass does not call a particle (トムにとって,
+ジョニーという, トムよりも).
+
+#### Measured, 2026-10-03
+
+Every 80th sentence of the Tatoeba export from the 7th (3,112 sentences,
+the set the prices were first set on) and from the 47th (3,111, held out),
+read with the code and data of 8fc56e1 (before) and of this change
+(after). The export was downloaded on 2026-10-03 (248,924 sentences), so
+these sets are not quite the ones of the first measurement. A guess is a
+token with `confidence: 'guess'`: a guessed name, a katakana run with no
+record, and one kana nothing explains (`kind: 'unknown'`).
+
+| | tuned set | held out |
+|---|---:|---:|
+| tokens | 29,982 before, 29,991 after | 30,036 before, 30,054 after |
+| guesses before (names, katakana, unknown kana) | 732 (179, 476, 77) | 713 (205, 434, 74) |
+| guesses after (names, katakana, unknown kana) | 216 (89, 50, 77) | 183 (73, 36, 74) |
+| sentences with a guess, before and after | 593, 177 | 592, 155 |
+| tokens read as rare words, as names from the names tier | 177, 336 | 215, 305 |
+| sentences whose tokens changed | 457 | 474 |
+| first-pass tokens that changed | 0 of 29,250 | 0 of 29,323 |
+
+The last row is the boundary, checked two ways over all 58,573 tokens the
+first pass read from the first tier: against this code with the second
+phase switched off (the same data), and against 8fc56e1 (the data before
+`ls`/`ws`). Both times every such token is the same, field for field, sounds
+and grammar included, once the two new record fields are set aside (183
+tokens differ by `ls` or `ws` alone). `tests/tiers.test.mjs` holds six
+sentences to it. One kana nothing explains is not the second phase's to
+read, which is why that count does not move.
+
+Of 30 changed tokens drawn at an even stride from the 490 distinct changes,
+23 were right (瓢箪 ひょうたん, 内金 うちきん, 元栓 もとせん, 低血糖症
+ていけっとうしょう, ブラウン and ヒル as surnames, ビデオデッキ, 特別\|税) and
+7 were not: 今金 (今\|金, "money on hand now") read as a place, 十名 (ten
+people) as the surname とな, アメ in アメ色 as "American", パタン (a door's
+slam) as "pattern", アリさん (an ant in a story) as a given name, ロック in
+the name ブライアンロック as "lock", and 埒, a guess still, read れつ from its
+kanji. 十名 is the first pass's: 名 is not one of numbers.js's counters, so
+the run reached the second phase as a name.
+
+### Sizes and fetches, 2026-10-03
+
+| tier | keys | records | files | bytes |
+|---|---:|---:|---:|---:|
+| first: core, range shards, filter, index | 39,359 | 43,317 | 31 | 4,070 KB (4,055 KB before `ls`/`ws`; the core holds 1,175 keys, 3 fewer) |
+| second: shards, filters, index | 432,897 | 455,073 | 348 | 44,551 KB |
+| names: shards, index with filter | 14,213 | 14,213 | 8 | 986 KB |
+| kanji: listed, ranged, index | 10,384 characters | | 11 | 1,224 KB (372 KB and 2,600 characters before) |
+
+`data/` grew from 4.5 MB to 50.9 MB (46.4 MB more; the new and changed
+files are 12.5 MB at gzip -9, about what git stores). `data/dict/` is the
+largest directory, with 379 files; none holds more than 1,000.
+
+The nine sentences the first tier's layout was measured on, before (8fc56e1)
+and after, each read with a fresh dictionary. "Dictionary files" are the
+core, range shards, rare shards and name shards; "all" adds the indexes,
+filters and kanji files. KB are 1,000 bytes.
+
+| sentence | dictionary files | all files | KB | KB gzipped |
+|---|---|---|---|---|
+| 今日はいい天気ですね。 | 1, 1 | 5, 5 | 395, 395 | 168, 168 |
+| わたしはがくせいです。 | 4, 4 | 6, 6 | 666, 666 | 240, 240 |
+| すもももももももものうち | 4, 4 | 6, 6 | 666, 666 | 243, 244 |
+| 日本語を勉強しています。 | 2, 2 | 7, 7 | 675, 675 | 247, 246 |
+| こんにちは、田中です。よろしくおねがいします。 | 7, 9 | 11, 15 | 1,235, 1,578 | 411, 507 |
+| 雨が降ったら、うちにいます。 | 2, 2 | 6, 6 | 535, 535 | 207, 207 |
+| きのうともだちとえいがをみました。 | 5, 5 | 7, 7 | 806, 806 | 285, 285 |
+| 駅まで十分かかります。 | 3, 3 | 7, 7 | 675, 675 | 247, 246 |
+| a 500-character paragraph | 25, 27 | 30, 35 | 3,894, 4,248 | 1,141, 1,237 |
+| **median** | **4, 4** | **7, 7** | **675, 675** | **247, 246** |
+
+Seven of the nine read with no guess and fetch exactly the files they did.
+田中 and the paragraph's マリア run the second phase (four and five more
+files: the rare-word index, the names index, a name shard and a rare shard,
+and for the paragraph one rare-word filter part), and both were already
+above the median. 田中 is now a surname
+with its JMnedict reading and マリア a given name; neither is a guess.
 
 ## Licences
 
 - JMdict (jmdict-simplified's jmdict-eng) and KANJIDIC: Electronic Dictionary Research and Development Group, CC BY-SA 4.0. The acknowledgement is shown on the page whenever a gloss or a kanji reading is.
+- JMnedict (jmdict-simplified's jmnedict-all), for `data/names/`: the same Group and licence. Its acknowledgement (`tools/lib/licence.mjs`, the EDRDG's sample text with the names file named) must be on the page whenever a name from the names tier is.
 - KanjiVG: Ulrich Apel, CC BY-SA 3.0, for `parts`.
 - Tatoeba: CC BY 2.0 FR, used only to rank keys; no sentence ships.
 - The phrase library and every note are written here and are public domain.

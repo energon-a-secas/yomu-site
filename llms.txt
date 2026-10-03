@@ -29,6 +29,13 @@ endings, te-forms (te-kudasai, te-iru, te-shimau, te-miru), desire, potential,
 passive, causative, volitional, imperative, the conditionals ば, たら, なら and
 と, i-adjective forms, invitations and offers.
 
+Words outside JMdict's common set and names are read only where the common
+words leave a guess: a rare word is marked as one (entry.tier 2), and a name
+JMnedict knows is a name token with its reading; one it does not know is
+still a guess, read from its kanji. Records of borrowed words carry where
+they came from (ls, e.g. ["ger", "Arbeit"]) and whether they were made in
+Japan (ws).
+
 The full contract, including the token shape, is docs/ANALYZER.md in the
 repository: https://github.com/energon-a-secas/yomu-site
 
@@ -108,6 +115,8 @@ in its one-line bar.
 
 - JMdict and KANJIDIC, by the Electronic Dictionary Research and Development
   Group, CC BY-SA 4.0: the glosses, readings and kanji information
+- JMnedict, by the same Group, CC BY-SA 4.0: the readings and types of the
+  surnames, given names and place names a text may hold
 - KanjiVG, by Ulrich Apel, CC BY-SA 3.0: the parts of each kanji
 - Tatoeba, CC BY 2.0 FR: used only to rank how common each word is; no
   sentence ships

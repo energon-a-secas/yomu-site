@@ -146,10 +146,12 @@ const CASES = [
   ['えきへいって', 'えき|へ|いって', 'えき|へ|いって', 'eki e itte', (r) => {
     assert.equal(lemmaOf(find(r, 'いって')), '行く');
   }],
-  // No dictionary key spans 田中: one name, read kanji by kanji, and a guess.
+  // No dictionary key spans 田中: the first pass guesses a name, and the
+  // second phase finds the surname in JMnedict (data/names/).
   ['田中さん', '田中|さん', 'たなか|さん', 'tanaka san', (r) => {
     assert.equal(r.tokens[0].kind, 'name');
-    assert.equal(r.tokens[0].confidence, 'guess');
+    assert.equal(r.tokens[0].confidence, 'dict');
+    assert.deepEqual(r.tokens[0].entry.nt, ['surname', 'place']);
   }],
 ];
 

@@ -13,9 +13,9 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { spawnSync } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import {
-  readFileSync, writeFileSync, mkdtempSync, cpSync, rmSync, statSync,
+  readFileSync, writeFileSync, mkdtempSync, cpSync, rmSync, statSync, mkdirSync, readdirSync, linkSync, copyFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
@@ -235,20 +235,35 @@ test('the frequency bands have their stated sizes', () => {
 
 // ── Kanji ─────────────────────────────────────────────────────────────────
 
-test('the kanji index lists exactly the characters in each shard', () => {
-  assert.equal(kanjiIndex.format, 'yomu-kanji-index/1');
+test('the kanji index lists the characters of the listed shards and the range of the others', () => {
+  assert.equal(kanjiIndex.format, 'yomu-kanji-index/2');
+  let ranged = 0;
   for (const s of kanjiShards) {
     assert.ok(statSync(join(SITE, s.src)).size <= CAP, `${s.src} is over the cap`);
-    assert.equal(s.chars, Object.keys(s.doc.entries).join(''));
+    const chars = Object.keys(s.doc.entries);
+    if (s.chars !== undefined) {
+      assert.equal(ranged, 0, `${s.src}: a listed shard after a ranged one`);
+      assert.equal(s.chars, chars.join(''));
+    } else {
+      ranged += 1;
+      assert.equal(s.first, chars[0]);
+      assert.equal(s.last, chars[chars.length - 1]);
+    }
   }
   assert.equal(kanji.size, kanjiIndex.count);
-  assert.ok(kanji.size >= 2500 && kanji.size <= 2700, `${kanji.size} kanji`);
+  // every KANJIDIC2 character, since 2026-10-01; 2,600 before
+  assert.equal(kanji.size, 10384);
+  assert.ok(ranged >= 1);
 });
 
-test('kanji are in frequency order, unranked last', () => {
-  const ranks = [...kanji.values()].map((e) => (e.f === undefined ? Infinity : e.f));
+test('listed kanji are in frequency order, unranked last; ranged ones in string order', () => {
+  const listed = kanjiShards.filter((s) => s.chars !== undefined).flatMap((s) => Object.values(s.doc.entries));
+  const ranks = listed.map((e) => (e.f === undefined ? Infinity : e.f));
   for (let i = 1; i < ranks.length; i += 1) assert.ok(ranks[i - 1] <= ranks[i], `at ${i}`);
   assert.equal([...kanji.keys()][0], '日');
+  assert.equal(listed.length, 2600, 'the characters a reader meets first stay where they were');
+  const rest = kanjiShards.filter((s) => s.chars === undefined).flatMap((s) => Object.keys(s.doc.entries));
+  for (let i = 1; i < rest.length; i += 1) assert.ok(rest[i - 1] < rest[i], `at ${rest[i]}`);
 });
 
 test('kanji entries carry readings, meanings and KanjiVG parts', () => {
@@ -267,19 +282,55 @@ test('kanji entries carry readings, meanings and KanjiVG parts', () => {
 
 // ── The checker catches what it says it catches ───────────────────────────
 
-function brokenCopy(mutate) {
+/**
+ * data/ under a temporary directory, each file a hard link to the committed
+ * one (a copy where the two are on different volumes). The second tier made
+ * data/ 50 MB, and copying it once per broken rule took fourteen seconds; a
+ * link costs nothing, and rw() below replaces a file before writing it, so a
+ * committed file is never written through its link.
+ */
+function linkTree(from, to, keep) {
+  mkdirSync(to, { recursive: true });
+  for (const ent of readdirSync(from, { withFileTypes: true })) {
+    const a = join(from, ent.name);
+    const b = join(to, ent.name);
+    if (!keep(a)) continue;
+    if (ent.isDirectory()) linkTree(a, b, keep);
+    else {
+      try { linkSync(a, b); } catch { copyFileSync(a, b); }
+    }
+  }
+}
+
+/**
+ * The second phase's tiers: the rare words in data/dict and the names. A
+ * case that breaks the first tier or the kanji leaves them out of its copy,
+ * which the checker accepts (an index with no shards and no shards with no
+ * index are both nothing to check), so ten checks do not each read 50 MB.
+ */
+const SECOND = /[\\/](names|rare\.json|r\d{3}\.json|rf\d+\.json)$/;
+
+/** Break a copy of data/ and run the checker over it; the caller runs the cases at once. */
+function brokenCopy(mutate, { full = false } = {}) {
   const dir = mkdtempSync(join(tmpdir(), 'yomu-check-'));
-  cpSync(join(SITE, 'data'), join(dir, 'data'), { recursive: true });
+  linkTree(join(SITE, 'data'), join(dir, 'data'), (p) => full || !SECOND.test(p));
   const rw = (rel, fn) => {
     const p = join(dir, rel);
     const doc = JSON.parse(readFileSync(p, 'utf8'));
     fn(doc);
+    rmSync(p);
     writeFileSync(p, JSON.stringify(doc));
   };
   mutate(rw, dir);
-  const run = spawnSync(process.execPath, [CHECK, join(dir, 'data')], { encoding: 'utf8' });
-  rmSync(dir, { recursive: true, force: true });
-  return run;
+  return new Promise((done) => {
+    const child = spawn(process.execPath, [CHECK, join(dir, 'data')]);
+    let stderr = '';
+    child.stderr.on('data', (chunk) => { stderr += chunk; });
+    child.on('close', (status) => {
+      rmSync(dir, { recursive: true, force: true });
+      done({ status, stderr });
+    });
+  });
 }
 
 test('check-data passes the committed data', () => {
@@ -287,7 +338,7 @@ test('check-data passes the committed data', () => {
   assert.equal(run.status, 0, run.stderr);
 });
 
-test('check-data fails each broken rule and names the file', () => {
+test('check-data fails each broken rule and names the file', async () => {
   const cases = [
     ['unsorted keys', (rw) => rw('data/dict/w02.json', (d) => {
       const [a, b, ...rest] = Object.entries(d.entries);
@@ -320,9 +371,26 @@ test('check-data fails each broken rule and names the file', () => {
       d.pad = 'x'.repeat(CAP);
     }), /k02\.json: .* over the/],
   ];
-  for (const [name, mutate, expect] of cases) {
-    const run = brokenCopy(mutate);
-    assert.equal(run.status, 1, `${name}: exit ${run.status}`);
-    assert.match(run.stderr, expect, name);
-  }
+  const second = [
+    ['a rare key outside its range', (rw) => rw('data/dict/r010.json', (d) => {
+      d.entries = { ...d.entries, '〇': [{ g: ['x'], p: 'n' }] };
+    }), /r010\.json: "〇" is outside/],
+    ['a filter part that calls a rare key absent', (rw) => rw('data/dict/rf03.json', (d) => {
+      d.bits = Buffer.alloc(Buffer.from(d.bits, 'base64').length).toString('base64');
+    }), /the filter calls .* absent/],
+    ['a name with a type JMnedict has but the names tier does not ship', (rw) => rw('data/names/n02.json', (d) => {
+      Object.values(d.entries)[0].n = 'company';
+    }), /n02\.json: .* n is not a list of name types/],
+    ['a ranged kanji shard holding a character outside its range', (rw) => rw('data/kanji/k05.json', (d) => {
+      d.entries = { 一: Object.values(d.entries)[0], ...d.entries };
+    }), /k05\.json|kanji\/index\.json/],
+  ];
+  const runs = await Promise.all([
+    ...cases.map(([, mutate]) => brokenCopy(mutate)),
+    ...second.map(([, mutate]) => brokenCopy(mutate, { full: true })),
+  ]);
+  [...cases, ...second].forEach(([name, , expect], k) => {
+    assert.equal(runs[k].status, 1, `${name}: exit ${runs[k].status}`);
+    assert.match(runs[k].stderr, expect, name);
+  });
 });
