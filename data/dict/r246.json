@@ -51,7 +51,7 @@
 "沖釣り": [{"r":["おきづり"],"g":["offshore fishing"],"p":"n","f":"おき|づ"}],
 "沖電": [{"r":["おきでん"],"g":["Okinawa Electric Power Company (abbr)"],"p":"n","f":"おき|でん"}],
 "沖鱛": [{"r":["おきえそ"],"g":["bluntnose lizardfish (Trachinocephalus myops)"],"p":"n","f":"おき|えそ","u":1}],
-"沙": [{"r":["しゃ","さ"],"g":["one hundred-millionth"],"p":"num"},{"r":["すな","いさご"],"g":["sand"],"p":"n","t":1}],
+"沙": [{"r":["すな","いさご"],"g":["sand"],"p":"n"},{"r":["しゃ","さ"],"g":["one hundred-millionth"],"p":"num","t":1}],
 "沙丘": [{"r":["さきゅう","しゃきゅう"],"g":["sand dune"],"p":"n","f":"さ|きゅう"}],
 "沙塵": [{"r":["さじん"],"g":["cloud of dust"],"p":"n","f":"さ|じん"}],
 "沙子": [{"r":["すなご"],"g":["gold dust","sand"],"p":"n","f":"すな|ご"}],

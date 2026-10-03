@@ -1063,7 +1063,7 @@
 "倚り懸かる": [{"r":["よりかかる"],"g":["to lean against","to rely on"],"p":"v5r vi"}],
 "倚り懸る": [{"r":["よりかかる"],"g":["to lean against","to rely on"],"p":"v5r vi"}],
 "倚る": [{"r":["よる"],"g":["to approach","to gather (in one place)","to stop by (while on one's way to another place)"],"p":"v5r vi"}],
-"倚子": [{"r":["いし"],"g":["traditional square chair with armrests and a torii-shaped…"],"p":"n","f":"い|し"},{"r":["いす"],"g":["chair","post"],"p":"n","f":"い|す","t":1}],
+"倚子": [{"r":["いす"],"g":["chair","post"],"p":"n","f":"い|す"},{"r":["いし"],"g":["traditional square chair with armrests and a torii-shaped…"],"p":"n","f":"い|し","t":1}],
 "倚藉": [{"r":["いしゃ"],"g":["relying on"],"p":"n vs","f":"い|しゃ"}],
 "倚門の望": [{"r":["いもんのぼう"],"g":["mother's feeling as she waits for her child to return"],"p":"exp n","f":"い|もん;ぼう"}],
 "倚閭の望": [{"r":["いりょのぼう"],"g":["mother's feeling as she waits for her child to return"],"p":"exp n","f":"い|りょ;ぼう"}],

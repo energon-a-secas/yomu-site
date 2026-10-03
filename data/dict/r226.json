@@ -470,7 +470,7 @@
 "持株比率": [{"r":["もちかぶひりつ"],"g":["shareholding ratio"],"p":"n","f":"もち|かぶ|ひ|りつ"}],
 "持歩く": [{"r":["もちあるく"],"g":["to carry around"],"p":"v5k vt","f":"もち|ある"}],
 "持添える": [{"r":["もちそえる"],"g":["to hold an additional item in one's hand","to use an additional hand to hold"],"p":"v1 vt","f":"もち|そ"}],
-"持物": [{"r":["じもつ","じぶつ"],"g":["object held in the hand of a Buddhist image"],"p":"n","f":"じ|もつ"},{"r":["もちもの"],"g":["things one is carrying","thing one owns","mistress"],"p":"n","f":"もち|もの","t":1}],
+"持物": [{"r":["もちもの"],"g":["things one is carrying","thing one owns","mistress"],"p":"n","f":"もち|もの"},{"r":["じもつ","じぶつ"],"g":["object held in the hand of a Buddhist image"],"p":"n","f":"じ|もつ","t":1}],
 "持直す": [{"r":["もちなおす"],"g":["to recover","to carry in a different way"],"p":"v5s vi vt","f":"もち|なお"}],
 "持碁": [{"r":["じご"],"g":["jigo"],"p":"n","f":"じ|ご"}],
 "持禁": [{"r":["もちきん"],"g":["forbidden to take out (e.g. of a book in a library)"],"p":"adj-no","f":"もち|きん"}],

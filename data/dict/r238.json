@@ -1050,7 +1050,7 @@
 "枡組": [{"r":["ますぐみ"],"g":["square framing (in a house, temple, screen, etc.)"],"p":"n","f":"ます|ぐみ"}],
 "枡組み": [{"r":["ますぐみ"],"g":["square framing (in a house, temple, screen, etc.)"],"p":"n","f":"ます|ぐ"}],
 "枡酒": [{"r":["ますざけ"],"g":["alcohol (esp. sake) served in a small wooden box"],"p":"n","f":"ます|ざけ"}],
-"枢": [{"r":["くるる","くろろ","くる","くるり"],"g":["pivot hinge…","sliding wooden bolt (for holding a door or window shut)"],"p":"n"},{"r":["とぼそ"],"g":["cavities in the frame of a door used as part of a pivot…","door"],"p":"n","t":1},{"r":["とまら"],"g":["extensions on the top and bottom of a door that fit into…"],"p":"n","u":1,"t":2}],
+"枢": [{"r":["とまら"],"g":["extensions on the top and bottom of a door that fit into…"],"p":"n","u":1},{"r":["くるる","くろろ","くる","くるり"],"g":["pivot hinge…","sliding wooden bolt (for holding a door or window shut)"],"p":"n","t":1},{"r":["とぼそ"],"g":["cavities in the frame of a door used as part of a pivot…","door"],"p":"n","t":2}],
 "枢密": [{"r":["すうみつ"],"g":["state secrets"],"p":"n","f":"すう|みつ"}],
 "枢密院": [{"r":["すうみついん"],"g":["Privy Council (abolished in 1947)"],"p":"n","f":"すう|みつ|いん"}],
 "枢戸": [{"r":["くるるど"],"g":["door (with a pivot hinge)"],"p":"n","f":"*"}],

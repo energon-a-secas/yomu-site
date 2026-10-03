@@ -973,7 +973,7 @@
 "生菜食": [{"r":["なまさいしょく"],"g":["raw veganism"],"p":"n","f":"なま|さい|しょく"}],
 "生蕃": [{"r":["せいばん"],"g":["unconquered savage","aboriginal Taiwanese tribes outside Qing China's…"],"p":"n","f":"せい|ばん"}],
 "生蕎麦": [{"r":["きそば"],"g":["100% buckwheat soba"],"p":"n","f":"*"},{"r":["なまそば"],"g":["fresh soba (not dried)"],"p":"n","f":"*","t":1}],
-"生薑": [{"r":["しょうきょう"],"g":["dried ginger root (trad. medicine)"],"p":"n","f":"しょう|きょう"},{"r":["しょうが"],"g":["ginger (Zingiber officinale)"],"p":"n","f":"*","u":1,"t":1}],
+"生薑": [{"r":["しょうが"],"g":["ginger (Zingiber officinale)"],"p":"n","f":"*","u":1},{"r":["しょうきょう"],"g":["dried ginger root (trad. medicine)"],"p":"n","f":"しょう|きょう","t":1}],
 "生薑湯": [{"r":["しょうがゆ"],"g":["ginger tea"],"p":"n","f":"*"}],
 "生薑酢": [{"r":["しょうがず"],"g":["vinegar mixed with ginger juice and soy sauce, etc."],"p":"n","f":"*"}],
 "生薬": [{"r":["しょうやく","きぐすり","せいやく"],"g":["crude drug"],"p":"n","f":"しょう|やく"}],

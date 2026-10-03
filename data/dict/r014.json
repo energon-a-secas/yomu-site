@@ -868,7 +868,7 @@
 "お荷物": [{"r":["おにもつ"],"g":["baggage","burden"],"p":"n","f":"に|もつ"}],
 "お菓子づくり": [{"r":["おかしづくり"],"g":["confectionery making"],"p":"n","f":"か|し"}],
 "お菓子作り": [{"r":["おかしづくり"],"g":["confectionery making"],"p":"n","f":"か|し|づく"}],
-"お菜": [{"r":["おさい"],"g":["side dish"],"p":"n"},{"r":["おかず"],"g":["small dish (usu. one of several accompanying rice)","fill","jack-off material"],"p":"n","u":1,"t":1}],
+"お菜": [{"r":["おかず"],"g":["small dish (usu. one of several accompanying rice)","fill","jack-off material"],"p":"n","u":1},{"r":["おさい"],"g":["side dish"],"p":"n","t":1}],
 "お萩": [{"r":["おはぎ"],"g":["rice ball coated with sweetened red beans, soybean flour…"],"p":"n","u":1}],
 "お蔭": [{"r":["おかげ"],"g":["grace (of God)","assistance","effects"],"p":"n","u":1}],
 "お蔭さま": [{"r":["おかげさま"],"g":["(someone's) assistance","grace (of God)"],"p":"n","u":1}],

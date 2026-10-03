@@ -1,12 +1,9 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-08-29"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict/1",
-"first": "相談",
-"last": "缶コーヒー",
+"first": "相違",
+"last": "罪人",
 "entries": {
-"相談": [{"r":["そうだん"],"g":["consultation"],"p":"n vs vt","f":"そう|だん","q":2}],
-"相談役": [{"r":["そうだんやく"],"g":["counselor"],"p":"n","f":"そう|だん|やく"}],
-"相談所": [{"r":["そうだんじょ","そうだんしょ"],"g":["consultation office"],"p":"n","f":"そう|だん|じょ"}],
 "相違": [{"r":["そうい"],"g":["difference"],"p":"n vs vi","f":"そう|い","q":3}],
 "相関": [{"r":["そうかん"],"g":["correlation"],"p":"n vs vi","f":"そう|かん","q":5}],
 "相関関係": [{"r":["そうかんかんけい"],"g":["correlation"],"p":"n","f":"そう|かん|かん|けい"}],
@@ -1317,6 +1314,10 @@
 "繰入": [{"r":["くりいれ"],"g":["inward transfer (of money)"],"p":"n","f":"くり|いれ"}],
 "纏まる": [{"r":["まとまる"],"g":["to find resolution","to be collected","to be well arranged"],"p":"v5r vi","u":1}],
 "缶": [{"r":["かん"],"g":["can","canned food"],"p":"n ctr","ls":["dut","kan"],"q":3}],
-"缶コーヒー": [{"r":["かんコーヒー"],"g":["canned coffee"],"p":"n","q":4}]
+"缶コーヒー": [{"r":["かんコーヒー"],"g":["canned coffee"],"p":"n","q":4}],
+"缶詰": [{"r":["かんづめ"],"g":["canned food","confining someone (e.g. so they can concentrate on work)","being stuck in a confined space"],"p":"n adj-no","f":"かん|づめ","q":3}],
+"罠": [{"r":["わな"],"g":["trap (for catching animals)","trap"],"p":"n","q":3}],
+"罪": [{"r":["つみ"],"g":["crime","penalty","fault"],"p":"n adj-na adj-no","q":2}],
+"罪人": [{"r":["ざいにん"],"g":["criminal"],"p":"n","f":"ざい|にん","q":4}]
 }
 }

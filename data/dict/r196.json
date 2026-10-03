@@ -66,7 +66,7 @@
 "喫食": [{"r":["きっしょく"],"g":["eating"],"p":"n vs vt","f":"きっ|しょく"}],
 "喫飯": [{"r":["きっぱん"],"g":["taking a meal"],"p":"n vs","f":"きっ|ぱん"}],
 "喫飲": [{"r":["きついん"],"g":["eating and drinking"],"p":"n","f":"きつ|いん"}],
-"喫驚": [{"r":["きっきょう"],"g":["surprise"],"p":"n vs vi","f":"きっ|きょう"},{"r":["びっくり"],"g":["to be surprised","surprise (e.g. surprise party)"],"p":"vs vi adv adj-f","f":"*","u":1,"t":1}],
+"喫驚": [{"r":["びっくり"],"g":["to be surprised","surprise (e.g. surprise party)"],"p":"vs vi adv adj-f","f":"*","u":1},{"r":["きっきょう"],"g":["surprise"],"p":"n vs vi","f":"きっ|きょう","t":1}],
 "喬志": [{"r":["きょうし"],"g":["pride"],"p":"n","f":"きょう|し"}],
 "喬木": [{"r":["きょうぼく"],"g":["tall tree"],"p":"n","f":"きょう|ぼく"}],
 "單槍匹馬": [{"r":["たんそうひつば"],"g":["doing something on one's own without another's help"],"p":"exp","f":"たん|そう|ひつ|ば"}],

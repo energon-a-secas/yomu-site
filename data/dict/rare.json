@@ -1,7 +1,7 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-08-29"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare-index/1",
-"keys": 432897,
+"keys": 432898,
 "maxKey": 37,
 "filters": [{"src":"data/dict/rf00.json","first":"あ","last":"いっぱんリリース"},{"src":"data/dict/rf01.json","first":"いっぴ","last":"おおみ"},{"src":"data/dict/rf02.json","first":"おおみえ","last":"かじかがえる"},{"src":"data/dict/rf03.json","first":"かじかむ","last":"きすうし"},{"src":"data/dict/rf04.json","first":"きすうほう","last":"くろ"},{"src":"data/dict/rf05.json","first":"くろあかこうもり","last":"こくさいうちゅうこうくうがっかい"},{"src":"data/dict/rf06.json","first":"こくさいうちゅうステーション","last":"さんかいしゃ"},{"src":"data/dict/rf07.json","first":"さんかいせい","last":"しょうしんよくよく"},{"src":"data/dict/rf08.json","first":"しょうしんりょこう","last":"じょうほうこうかいじょうれい"},{"src":"data/dict/rf09.json","first":"じょうほうこうかいほう","last":"ぜんかくローマじ"},{"src":"data/dict/rf10.json","first":"ぜんかさんき","last":"だいじょうふ"},{"src":"data/dict/rf11.json","first":"だいじょうぶっきょう","last":"ていろん"},{"src":"data/dict/rf12.json","first":"ていわ","last":"どやしつける"},{"src":"data/dict/rf13.json","first":"どやし付ける","last":"のそり"},{"src":"data/dict/rf14.json","first":"のそりのそり","last":"ひとまとめ"},{"src":"data/dict/rf15.json","first":"ひとまね","last":"へちま"},{"src":"data/dict/rf16.json","first":"へちますい","last":"みての通り"},{"src":"data/dict/rf17.json","first":"みてまわる","last":"ゆうりけいかんすう"},{"src":"data/dict/rf18.json","first":"ゆうりご","last":"わりびきせいど"},{"src":"data/dict/rf19.json","first":"わりびきてがた","last":"インサート・モード"},{"src":"data/dict/rf20.json","first":"インサート編集","last":"オーストラリアくろとき"},{"src":"data/dict/rf21.json","first":"オーストラリアしきフットボール","last":"クレレット"},{"src":"data/dict/rf22.json","first":"クレンジング","last":"サークルレンズ"},{"src":"data/dict/rf23.json","first":"サークル・クラッシャー","last":"スメタナ"},{"src":"data/dict/rf24.json","first":"スメハラ","last":"テロ事件"},{"src":"data/dict/rf25.json","first":"テロ国家","last":"ノミこうい"},{"src":"data/dict/rf26.json","first":"ノミとり","last":"ビューロクラシー"},{"src":"data/dict/rf27.json","first":"ビューロクラット","last":"ヘアピン・カーブ"},{"src":"data/dict/rf28.json","first":"ヘアピン・ショット","last":"ミナミオオガシラ"},{"src":"data/dict/rf29.json","first":"ミナミオポッサム","last":"ルーザー"},{"src":"data/dict/rf30.json","first":"ルーシ","last":"ヾ"}],
 "shards": [
@@ -172,10 +172,10 @@
 {"src":"data/dict/r164.json","first":"一円を笑う者は一円に泣く"},
 {"src":"data/dict/r165.json","first":"一般質問"},
 {"src":"data/dict/r166.json","first":"三暗刻"},
-{"src":"data/dict/r167.json","first":"下司"},
-{"src":"data/dict/r168.json","first":"不飽和結合"},
-{"src":"data/dict/r169.json","first":"中棹"},
-{"src":"data/dict/r170.json","first":"九分九厘"},
+{"src":"data/dict/r167.json","first":"下右"},
+{"src":"data/dict/r168.json","first":"不飽和炭化水素"},
+{"src":"data/dict/r169.json","first":"中核派"},
+{"src":"data/dict/r170.json","first":"九分どおり"},
 {"src":"data/dict/r171.json","first":"二兎を追う者は一兎をも得ず"},
 {"src":"data/dict/r172.json","first":"交換しあい"},
 {"src":"data/dict/r173.json","first":"人身保護"},

@@ -769,7 +769,7 @@
 "里長": [{"r":["さとおさ"],"g":["village chief"],"p":"n","f":"さと|おさ"}],
 "里閭": [{"r":["りりょ"],"g":["village","gate at the entrance to a village"],"p":"n","f":"り|りょ"}],
 "里雪": [{"r":["さとゆき"],"g":["snow that falls on villages"],"p":"n","f":"さと|ゆき"}],
-"重": [{"r":["え"],"g":["-fold"],"p":"suf ctr"},{"r":["じゅう"],"g":["jūbako","heavy","serious"],"p":"n n-pref suf ctr","t":1},{"r":["おも"],"g":["chief","main secondary or supporting role (in kyogen)"],"p":"adj-na n","t":2}],
+"重": [{"r":["おも"],"g":["chief","main secondary or supporting role (in kyogen)"],"p":"adj-na n"},{"r":["え"],"g":["-fold"],"p":"suf ctr","t":1},{"r":["じゅう"],"g":["jūbako","heavy","serious"],"p":"n n-pref suf ctr","t":2}],
 "重々": [{"r":["じゅうじゅう"],"g":["repeatedly","fully (e.g. understand)"],"p":"adv adj-no","f":"じゅう|じゅう"}],
 "重々しい": [{"r":["おもおもしい"],"g":["serious"],"p":"adj-i","f":"おも|おも"}],
 "重あど": [{"r":["おもアド"],"g":["main deuteragonist"],"p":"n"}],

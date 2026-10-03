@@ -2,7 +2,7 @@
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-08-29"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict/1",
 "first": "七日",
-"last": "何種",
+"last": "何者",
 "entries": {
 "七日": [{"r":["なのか"],"g":["7th day of the month","seven days"],"p":"n","f":"なの|か","q":4}],
 "七時": [{"r":["しちじ"],"g":["seven o'clock"],"p":"n","f":"しち|じ","q":3}],
@@ -119,7 +119,6 @@
 "上越": [{"r":["じょうえつ"],"g":["area on Japan Sea side of Japan, including Niigata"],"p":"n","f":"じょう|えつ"}],
 "上達": [{"r":["じょうたつ"],"g":["improvement (e.g. in skill, ability)","communication of opinions of the general populace to those…"],"p":"n vs vi vt","f":"じょう|たつ","q":2}],
 "上部": [{"r":["じょうぶ"],"g":["top part"],"p":"n adj-no","f":"じょう|ぶ","q":4}],
-"上野": [{"r":["こうずけ"],"g":["Kōzuke (former province located in present-day Gunma…"],"p":"n","f":"こう|ずけ","q":3}],
 "上限": [{"r":["じょうげん"],"g":["upper limit","supremum"],"p":"n adj-no","f":"じょう|げん","q":4}],
 "上院": [{"r":["じょういん"],"g":["upper house"],"p":"n","f":"じょう|いん","q":4}],
 "上陸": [{"r":["じょうりく"],"g":["landing","making landfall (of a typhoon)"],"p":"n vs vi","f":"じょう|りく","q":4}],
@@ -1280,6 +1279,7 @@
 "何気なく": [{"r":["なにげなく"],"g":["unintentionally"],"p":"exp adv","f":"なに|げ","q":4}],
 "何気無く": [{"r":["なにげなく"],"g":["unintentionally"],"p":"exp adv","f":"なに|げ|な"}],
 "何百": [{"r":["なんびゃく"],"g":["hundreds"],"p":"n","f":"なん|びゃく","q":3}],
-"何種": [{"r":["なんしゅ"],"g":["how many kinds"],"p":"n","f":"なん|しゅ","q":4},{"r":["なにしゅ"],"g":["what kind"],"p":"n","f":"なに|しゅ","q":4}]
+"何種": [{"r":["なんしゅ"],"g":["how many kinds"],"p":"n","f":"なん|しゅ","q":4},{"r":["なにしゅ"],"g":["what kind"],"p":"n","f":"なに|しゅ","q":4}],
+"何者": [{"r":["なにもの"],"g":["who"],"p":"n","f":"なに|もの","q":3}]
 }
 }

@@ -632,7 +632,7 @@
 "禊祓い": [{"r":["みそぎはらい"],"g":["ritual purification"],"p":"n","f":"みそぎ|はら"}],
 "禊祓え": [{"r":["みそぎはらい"],"g":["ritual purification"],"p":"n","f":"*"}],
 "禊萩": [{"r":["みそはぎ","みぞはぎ"],"g":["Lythrum anceps (species of loosestrife)"],"p":"n","f":"*","u":1}],
-"禍": [{"r":["まが"],"g":["wickedness"],"p":"n"},{"r":["か"],"g":["disaster"],"p":"n n-suf","t":1},{"r":["わざわい"],"g":["disaster"],"p":"n","t":2}],
+"禍": [{"r":["わざわい"],"g":["disaster"],"p":"n"},{"r":["まが"],"g":["wickedness"],"p":"n","t":1},{"r":["か"],"g":["disaster"],"p":"n n-suf","t":2}],
 "禍々しい": [{"r":["まがまがしい"],"g":["ominous","annoying","appearing to be true"],"p":"adj-i","f":"*"}],
 "禍する": [{"r":["わざわいする"],"g":["to be one's ruin"],"p":"vs-i vi"}],
 "禍の府": [{"r":["わざわいのふ"],"g":["sink of iniquity"],"p":"n"}],

@@ -1038,7 +1038,7 @@
 "桃花": [{"r":["とうか"],"g":["peach blossom"],"p":"n","f":"とう|か"}],
 "桃花染": [{"r":["あらぞめ"],"g":["light crimson (dye)"],"p":"n","f":"*"}],
 "桃花鳥": [{"r":["とき"],"g":["Japanese crested ibis (Nipponia nippon)"],"p":"n","f":"*","u":1}],
-"框": [{"r":["かまち"],"g":["door frame"],"p":"n","u":1},{"r":["わく"],"g":["frame","border","limit"],"p":"n n-suf","t":1}],
+"框": [{"r":["わく"],"g":["frame","border","limit"],"p":"n n-suf"},{"r":["かまち"],"g":["door frame"],"p":"n","u":1,"t":1}],
 "案じる": [{"r":["あんじる"],"g":["to be anxious (about)","to think out (e.g. a plan)","to investigate"],"p":"v1 vt"}],
 "案じ顔": [{"r":["あんじがお"],"g":["worried look"],"p":"n"}],
 "案ずる": [{"r":["あんずる"],"g":["to be anxious (about)","to think out (e.g. a plan)","to investigate"],"p":"vz vt"}],

@@ -29,13 +29,19 @@
  * `e`: 上気 is a rare way to write 浮気 "infidelity", and with the mark it
  * read 顔が上気した ("her face flushed") as an affair.
  *
- * The order `t` encodes is evidence, strongest first: a spelling JMdict does
- * not tag irregular, outdated or rarely used; a spelling that is its entry's
- * headword (上気 is じょうき's own, and only a variant of 浮気); `e`; how often
- * the corpus matched the record's own spelling; then JMdict's order.
+ * The order `t` encodes is evidence, strongest first: a spelling the first
+ * tier itself gives a word it ships (its kana record lists it in `k`: うどん
+ * is written 饂飩, which JMdict tags rarely used there and leaves untagged
+ * under ワンタン, so tags alone read 饂飩 as "wonton"); a spelling JMdict
+ * does not tag irregular, outdated or rarely used; a spelling that is its
+ * entry's headword (上気 is じょうき's own, and only a variant of 浮気, whose
+ * kana record does not list it); `e`; how often the corpus matched the
+ * record's own spelling; then JMdict's order.
  */
 import { isAllKana, hasKanji } from '../../js/kana.js';
-import { recordFor, rank, byRank, stats } from './records.mjs';
+import {
+  recordFor, spellingsOf, rank, byRank, stats,
+} from './records.mjs';
 import { isCommon } from './extra.mjs';
 
 export const RARE_FORMAT = 'yomu-dict-rare/1';
@@ -52,7 +58,9 @@ export const MAX_RARE_RECORDS = 12;
 
 /**
  * Every spelling of every entry, minus the (entry, spelling) pairs the first
- * tier shipped. `shipped` holds `${index}\t${key}` for each.
+ * tier shipped. `shipped` holds `${index}\t${key}` for each. A kanji form is
+ * `named` when the first tier ships its entry under a kana key whose record
+ * lists the spelling in `k`.
  *
  * @returns {Map<string, object[]>} key -> the forms that will be its records
  */
@@ -63,11 +71,22 @@ export function rareForms(words, shipped) {
     if (!forms.has(text)) forms.set(text, []);
     forms.get(text).push(f);
   };
+  // The kana keys the first tier ships each entry under.
+  const kanaKeys = new Map();
+  for (const pair of shipped) {
+    const [index, key] = pair.split('\t');
+    if (!isAllKana(key)) continue;
+    if (!kanaKeys.has(index)) kanaKeys.set(index, []);
+    kanaKeys.get(index).push(key);
+  }
   words.forEach((entry, index) => {
     const entryCommon = isCommon(entry);
+    const keys = kanaKeys.get(String(index)) || [];
+    const spelled = new Set(keys.flatMap((key) => spellingsOf(key, entry)));
     entry.kanji.forEach((k, n) => {
       push(k.text, {
         entry, index, kind: 'kanji', common: k.common, entryCommon, head: n === 0, odd: k.tags.some((t) => ODD.has(t)),
+        named: spelled.has(k.text),
       });
     });
     entry.kana.forEach((k, n) => {
@@ -115,7 +134,7 @@ export function rareEntries(forms, table, counts) {
       recs.push({ f, rec, n: matched(key, rec, counts) });
     }
     if (!recs.length) continue;
-    const order = ({ f, rec, n }) => [f.odd ? 1 : 0, f.head ? 0 : 1, rec.e ? 0 : 1, -n];
+    const order = ({ f, rec, n }) => [f.named ? 0 : 1, f.odd ? 1 : 0, f.head ? 0 : 1, rec.e ? 0 : 1, -n];
     recs.sort((a, b) => byRank(order(a), order(b)) || byRank(rank(a.f, key), rank(b.f, key)));
     if (recs.length > MAX_RARE_RECORDS) capped += 1;
     const kept = recs.slice(0, MAX_RARE_RECORDS).map(({ rec }, t) => (t ? { ...rec, t } : rec));

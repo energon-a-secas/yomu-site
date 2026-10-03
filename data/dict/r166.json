@@ -2,7 +2,7 @@
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-08-29"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
 "first": "三暗刻",
-"last": "下右",
+"last": "下台所",
 "entries": {
 "三暗刻": [{"r":["サンアンコー"],"g":["three concealed pungs"],"p":"n","f":"*","ls":["chi","sān àn kè"]}],
 "三曲": [{"r":["さんきょく"],"g":["instrumental trio"],"p":"n","f":"さん|きょく"}],
@@ -971,6 +971,7 @@
 "上部組織": [{"r":["じょうぶそしき"],"g":["umbrella organization"],"p":"n","f":"じょう|ぶ|そ|しき"}],
 "上酒": [{"r":["じょうしゅ"],"g":["high-class sake"],"p":"n","f":"じょう|しゅ"}],
 "上釉": [{"r":["うわぐすり"],"g":["glaze"],"p":"n","f":"*"}],
+"上野": [{"r":["こうずけ"],"g":["Kōzuke (former province located in present-day Gunma…"],"p":"n","f":"こう|ずけ"}],
 "上野学園大学": [{"r":["うえのがくえんだいがく"],"g":["Ueno Gakuen University"],"p":"n","f":"うえ|の|がく|えん|だい|がく"}],
 "上野学園大学短期大学部": [{"r":["うえのがくえんだいがくたんきだいがくぶ"],"g":["Ueno Gakuen Junior College"],"p":"n","f":"うえ|の|がく|えん|だい|がく|たん|き|だい|がく|ぶ"}],
 "上野戦争": [{"r":["うえのせんそう"],"g":["Battle of Ueno (battle of the Boshin war; 1868)"],"p":"n","f":"うえ|の|せん|そう"}],
@@ -1174,7 +1175,6 @@
 "下取り": [{"r":["したどり"],"g":["trade-in"],"p":"n vs vt","f":"した|ど"}],
 "下口": [{"r":["おりぐち","おりくち"],"g":["top (of a flight of stairs)","exit door (e.g. of a bus)"],"p":"n","f":"おり|ぐち"}],
 "下句": [{"r":["しもく"],"g":["last part of a poem or Bible verse"],"p":"n","f":"しも|く"}],
-"下台所": [{"r":["しもだいどころ"],"g":["servants' kitchen"],"p":"n","f":"しも|だい|どころ"}],
-"下右": [{"r":["したみぎ"],"g":["lower right (corner)"],"p":"n","f":"した|みぎ"}]
+"下台所": [{"r":["しもだいどころ"],"g":["servants' kitchen"],"p":"n","f":"しも|だい|どころ"}]
 }
 }

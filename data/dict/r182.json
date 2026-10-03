@@ -1076,7 +1076,7 @@
 "冶金": [{"r":["やきん"],"g":["metallurgy"],"p":"n","f":"や|きん"}],
 "冶金学": [{"r":["やきんがく"],"g":["metallurgy (the science)"],"p":"n","f":"や|きん|がく"}],
 "冶金学者": [{"r":["やきんがくしゃ"],"g":["metallurgist"],"p":"n","f":"や|きん|がく|しゃ"}],
-"冷": [{"r":["れい"],"g":["refrigerator","cold","cold sake"],"p":"n adj-na"},{"r":["ひや"],"g":["cold water","cold sake","cold"],"p":"n pref adj-no","t":1}],
+"冷": [{"r":["ひや"],"g":["cold water","cold sake","cold"],"p":"n pref adj-no"},{"r":["れい"],"g":["refrigerator","cold","cold sake"],"p":"n adj-na","t":1}],
 "冷々": [{"r":["れいれい"],"g":["cold","unconcerned"],"p":"adj-t adv-to","f":"れい|れい"}],
 "冷えきる": [{"r":["ひえきる"],"g":["to become completely chilled"],"p":"v5r vi"}],
 "冷えこみ": [{"r":["ひえこみ"],"g":["getting (very) cold","cooling down (of economic activity)"],"p":"n"}],

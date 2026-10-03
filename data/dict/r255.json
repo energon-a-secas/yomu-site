@@ -1185,7 +1185,7 @@
 "獲って食う": [{"r":["とってくう"],"g":["to catch and eat"],"p":"v5u vt"}],
 "獲らぬタヌキの皮算用": [{"r":["とらぬたぬきのかわざんよう"],"g":["counting one's chickens before they're hatched"],"p":"exp","f":"と;かわ|ざん|よう"}],
 "獲らぬ狸の皮算用": [{"r":["とらぬたぬきのかわざんよう"],"g":["counting one's chickens before they're hatched"],"p":"exp","f":"と;たぬき;かわ|ざん|よう"}],
-"獲る": [{"r":["とる"],"g":["to catch (a wild animal or fish)","to win (a title, prize, etc.)"],"p":"v5r vt"},{"r":["える"],"g":["to get","to understand","to receive something undesirable (e.g. a punishment)"],"p":"v1 vt aux-v","t":1}],
+"獲る": [{"r":["える"],"g":["to get","to understand","to receive something undesirable (e.g. a punishment)"],"p":"v1 vt aux-v"},{"r":["とる"],"g":["to catch (a wild animal or fish)","to win (a title, prize, etc.)"],"p":"v5r vt","t":1}],
 "獲れる": [{"r":["とれる"],"g":["to be caught (of a wild animal or fish)","to be able to catch"],"p":"v1 vi vt"}],
 "獲得代議員数": [{"r":["かくとくだいぎいんすう"],"g":["delegate count"],"p":"n","f":"かく|とく|だい|ぎ|いん|すう"}],
 "獲得免疫": [{"r":["かくとくめんえき"],"g":["acquired immunity"],"p":"n","f":"かく|とく|めん|えき"}],

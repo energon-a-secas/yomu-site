@@ -240,7 +240,7 @@
 "宇都宮線": [{"r":["うつのみやせん"],"g":["Utsunomiya Line"],"p":"n","f":"*"}],
 "宇都宮美術館": [{"r":["うつのみやびじゅつかん"],"g":["Utsunomiya Museum of Art"],"p":"n","f":"*"}],
 "宇頂天": [{"r":["うちょうてん"],"g":["ecstasy","highest heaven"],"p":"n adj-na","f":"う|ちょう|てん"}],
-"守": [{"r":["かみ"],"g":["director (of the provincial governors under the ritsuryō…"],"p":"n"},{"r":["もり"],"g":["babysitting","protecting"],"p":"n","t":1},{"r":["まもり"],"g":["protection","providence","amulet"],"p":"n","t":2}],
+"守": [{"r":["もり"],"g":["babysitting","protecting"],"p":"n"},{"r":["かみ"],"g":["director (of the provincial governors under the ritsuryō…"],"p":"n","t":1},{"r":["まもり"],"g":["protection","providence","amulet"],"p":"n","t":2}],
 "守りきる": [{"r":["まもりきる"],"g":["to hold on to something (secret, lead in a race, etc.)"],"p":"v5r vt"}],
 "守りに入る": [{"r":["まもりにはいる"],"g":["to go on the defensive"],"p":"exp v5r"}],
 "守りぬく": [{"r":["まもりぬく"],"g":["to hold fast"],"p":"v5k vt"}],

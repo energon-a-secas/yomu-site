@@ -1034,7 +1034,7 @@
 "卵黄嚢": [{"r":["らんおうのう"],"g":["yolk sac"],"p":"n","f":"らん|おう|のう"}],
 "卵黄粉": [{"r":["らんおうふん"],"g":["yolk powder"],"p":"n","f":"らん|おう|ふん"}],
 "卸": [{"r":["おろし"],"g":["dropping","grated vegetables, fruit, etc.","grater"],"p":"n-suf n"}],
-"卸し": [{"r":["おろし"],"g":["dropping","grated vegetables, fruit, etc.","grater"],"p":"n-suf n"},{"r":["おろし"],"g":["wholesale"],"p":"n","t":1}],
+"卸し": [{"r":["おろし"],"g":["wholesale"],"p":"n"},{"r":["おろし"],"g":["dropping","grated vegetables, fruit, etc.","grater"],"p":"n-suf n","t":1}],
 "卸したて": [{"r":["おろしたて"],"g":["freshly grated (e.g. daikon)"],"p":"adj-no","u":1}],
 "卸し値": [{"r":["おろしね"],"g":["wholesale price"],"p":"n"}],
 "卸し和え": [{"r":["おろしあえ"],"g":["seasoning of grated daikon with soy and vinegar, usually…"],"p":"n"}],

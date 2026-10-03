@@ -912,7 +912,7 @@
 "壟": [{"r":["おか"],"g":["hill"],"p":"n"}],
 "壟断": [{"r":["ろうだん"],"g":["monopoly"],"p":"n vs vt","f":"ろう|だん"}],
 "壟畝": [{"r":["ろうほ"],"g":["ridges of and paths between fields","countryside"],"p":"n","f":"ろう|ほ"}],
-"士": [{"r":["し"],"g":["man (esp. one who is well-respected)","samurai","person (in a certain profession, esp. licensed)"],"p":"n n-suf"},{"r":["さむらい"],"g":["warrior (esp. of military retainers of daimyos in the Edo…","person with a strong backbone"],"p":"n","t":1}],
+"士": [{"r":["さむらい"],"g":["warrior (esp. of military retainers of daimyos in the Edo…","person with a strong backbone"],"p":"n"},{"r":["し"],"g":["man (esp. one who is well-respected)","samurai","person (in a certain profession, esp. licensed)"],"p":"n n-suf","t":1}],
 "士・農・工・商": [{"r":["しのうこうしょう"],"g":["hierarchy of samurai, farmers, artisans, and merchants in…"],"p":"n"}],
 "士人": [{"r":["しじん"],"g":["samurai","person of extensive learning"],"p":"n","f":"し|じん"}],
 "士分": [{"r":["しぶん"],"g":["status of samurai"],"p":"n","f":"し|ぶん"}],

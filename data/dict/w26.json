@@ -1,15 +1,9 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-08-29"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict/1",
-"first": "過ごす",
-"last": "飽和",
+"first": "過去",
+"last": "餅",
 "entries": {
-"過ごす": [{"r":["すごす"],"g":["to spend (time)","to overdo (esp. alcohol consumption)","to take care of"],"p":"v5s vt suf","q":2}],
-"過ち": [{"r":["あやまち"],"g":["fault"],"p":"n","q":3}],
-"過信": [{"r":["かしん"],"g":["trusting too much"],"p":"n vs vt","f":"か|しん","q":4}],
-"過剰": [{"r":["かじょう"],"g":["excess"],"p":"n adj-na","f":"か|じょう","q":3}],
-"過労": [{"r":["かろう"],"g":["overwork"],"p":"n adj-no","f":"か|ろう","q":3}],
-"過半数": [{"r":["かはんすう"],"g":["majority"],"p":"n","f":"か|はん|すう","q":4}],
 "過去": [{"r":["かこ"],"g":["the past","one's past (that one would prefer remained secret)","past (tense)"],"p":"n adv adj-no","f":"か|こ","q":2}],
 "過多": [{"r":["かた"],"g":["excess"],"p":"n adj-na","f":"か|た","q":4}],
 "過大": [{"r":["かだい"],"g":["excessive"],"p":"adj-na","f":"か|だい","q":4}],
@@ -1329,6 +1323,13 @@
 "飼育": [{"r":["しいく"],"g":["breeding"],"p":"n vs vt","f":"し|いく","q":3}],
 "飽き": [{"r":["あき"],"g":["weariness"],"p":"n","q":2}],
 "飽きる": [{"r":["あきる"],"g":["to get tired of","to become sated"],"p":"v1 suf vi","q":3}],
-"飽和": [{"r":["ほうわ"],"g":["saturation"],"p":"n vs vi","f":"ほう|わ","q":5}]
+"飽和": [{"r":["ほうわ"],"g":["saturation"],"p":"n vs vi","f":"ほう|わ","q":5}],
+"飽食": [{"r":["ほうしょく"],"g":["eating until one is full","having adequate food"],"p":"n vs vt vi","f":"ほう|しょく","q":5}],
+"飾り": [{"r":["かざり"],"g":["decoration"],"p":"n n-suf","q":3}],
+"飾り付け": [{"r":["かざりつけ"],"g":["decoration"],"p":"n","q":4}],
+"飾り気": [{"r":["かざりけ"],"g":["affectation"],"p":"n","q":4}],
+"飾る": [{"r":["かざる"],"g":["to decorate","to display","to mark (e.g. the day with a victory)"],"p":"v5r vt","q":4}],
+"餃子": [{"r":["ギョーザ","チャオズ"],"g":["gyoza"],"p":"n","f":"*","ls":["chi","jiǎozi"],"q":4}],
+"餅": [{"r":["もち"],"g":["mochi"],"p":"n","q":3}]
 }
 }

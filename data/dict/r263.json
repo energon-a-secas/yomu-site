@@ -700,7 +700,7 @@
 "石子": [{"r":["いしなご"],"g":["pebble throwing game played by young girls"],"p":"n","f":"*"},{"r":["いしこ"],"g":["small stone"],"p":"n","f":"いし|こ","t":1}],
 "石子詰め": [{"r":["いしこづめ"],"g":["burying alive beneath stones"],"p":"n","f":"いし|こ|づ"}],
 "石家荘": [{"r":["せっかそう"],"g":["Shijiazhuang (China)"],"p":"n","f":"せっ|か|そう"}],
-"石屋": [{"r":["いしや"],"g":["stone dealer"],"p":"n","f":"いし|や"},{"r":["いわや"],"g":["cave","dwelling made in a cave"],"p":"n","f":"いわ|や","t":1}],
+"石屋": [{"r":["いわや"],"g":["cave","dwelling made in a cave"],"p":"n","f":"いわ|や"},{"r":["いしや"],"g":["stone dealer"],"p":"n","f":"いし|や","t":1}],
 "石山": [{"r":["いしやま"],"g":["stony mountain"],"p":"n","f":"いし|やま"}],
 "石山合戦": [{"r":["いしやまがっせん"],"g":["Ishiyama Honganji War (1570-1580)"],"p":"n","f":"いし|やま|がっ|せん"}],
 "石山戦争": [{"r":["いしやませんそう"],"g":["Ishiyama Honganji War (1570-1580)"],"p":"n","f":"いし|やま|せん|そう"}],

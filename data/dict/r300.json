@@ -990,7 +990,7 @@
 "釬": [{"r":["ミル"],"g":["mil-réis (former monetary unit of Brazil)"],"p":"n","u":1}],
 "釵": [{"r":["さい"],"g":["sai (Okinawan weapon)"],"p":"n"},{"r":["かんざし"],"g":["ornamental hairpin"],"p":"n","u":1,"t":1}],
 "釿": [{"r":["ておの","ちょうな"],"g":["hatchet","adze"],"p":"n"}],
-"鈍": [{"r":["どん","のろ"],"g":["dull"],"p":"adj-na n"},{"r":["なまくら"],"g":["blunt (e.g. sword)","lazy"],"p":"adj-na","u":1,"t":1}],
+"鈍": [{"r":["なまくら"],"g":["blunt (e.g. sword)","lazy"],"p":"adj-na","u":1},{"r":["どん","のろ"],"g":["dull"],"p":"adj-na n","t":1}],
 "鈍い": [{"r":["おそい"],"g":["slow","late","too late"],"p":"adj-i"}],
 "鈍い音": [{"r":["にぶいおと"],"g":["dull sound"],"p":"exp n"}],
 "鈍くさい": [{"r":["どんくさい"],"g":["slow"],"p":"adj-i","u":1},{"r":["のろくさい"],"g":["frustratingly slow"],"p":"adj-i","t":1}],

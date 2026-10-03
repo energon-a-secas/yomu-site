@@ -1,14 +1,9 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-08-29"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict/1",
-"first": "解禁",
-"last": "遍歴",
+"first": "解釈",
+"last": "過半数",
 "entries": {
-"解禁": [{"r":["かいきん"],"g":["lifting a ban","publishing contents"],"p":"n vs vt","f":"かい|きん","q":4}],
-"解答": [{"r":["かいとう"],"g":["answer"],"p":"n vs vi","f":"かい|とう","q":3}],
-"解約": [{"r":["かいやく"],"g":["cancellation of a contract"],"p":"n vs vt","f":"かい|やく","q":4}],
-"解説": [{"r":["かいせつ"],"g":["explanation"],"p":"n vs vt","f":"かい|せつ","q":4}],
-"解読": [{"r":["かいどく"],"g":["deciphering"],"p":"n vs vt","f":"かい|どく","q":4}],
 "解釈": [{"r":["かいしゃく"],"g":["interpretation"],"p":"n vs vt","f":"かい|しゃく","q":3}],
 "解除": [{"r":["かいじょ"],"g":["termination (of a contract)","lifting (of a ban, sanctions, etc.)"],"p":"n vs vt","f":"かい|じょ","q":3}],
 "解雇": [{"r":["かいこ"],"g":["dismissal (of an employee)"],"p":"n vs vt","f":"かい|こ","q":2}],
@@ -1340,6 +1335,12 @@
 "運輸": [{"r":["うんゆ"],"g":["transportation"],"p":"n","f":"うん|ゆ","q":5}],
 "運輸省": [{"r":["うんゆしょう"],"g":["Ministry of Transport"],"p":"n","f":"うん|ゆ|しょう"}],
 "運送": [{"r":["うんそう"],"g":["transport"],"p":"n vs vt","f":"うん|そう","q":4}],
-"遍歴": [{"r":["へんれき"],"g":["travels","(accumulated) experiences"],"p":"n vs vi","f":"へん|れき"}]
+"遍歴": [{"r":["へんれき"],"g":["travels","(accumulated) experiences"],"p":"n vs vi","f":"へん|れき"}],
+"過ごす": [{"r":["すごす"],"g":["to spend (time)","to overdo (esp. alcohol consumption)","to take care of"],"p":"v5s vt suf","q":2}],
+"過ち": [{"r":["あやまち"],"g":["fault"],"p":"n","q":3}],
+"過信": [{"r":["かしん"],"g":["trusting too much"],"p":"n vs vt","f":"か|しん","q":4}],
+"過剰": [{"r":["かじょう"],"g":["excess"],"p":"n adj-na","f":"か|じょう","q":3}],
+"過労": [{"r":["かろう"],"g":["overwork"],"p":"n adj-no","f":"か|ろう","q":3}],
+"過半数": [{"r":["かはんすう"],"g":["majority"],"p":"n","f":"か|はん|すう","q":4}]
 }
 }

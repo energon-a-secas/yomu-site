@@ -446,7 +446,7 @@
 "羅北": [{"r":["らほく"],"g":["compass north"],"p":"n","f":"ら|ほく"}],
 "羅和": [{"r":["らわ"],"g":["Latin-Japanese (e.g. dictionary)"],"p":"n","f":"ら|わ"}],
 "羅国": [{"r":["らこく"],"g":["incense variety used in kōdō (orig. from Thailand)"],"p":"n","f":"ら|こく"}],
-"羅宇": [{"r":["ラウ","ラオ"],"g":["bamboo stem (of a Japanese pipe)"],"p":"n","f":"ら|う"},{"r":["ラオス"],"g":["Laos"],"p":"n","f":"*","u":1,"t":1}],
+"羅宇": [{"r":["ラオス"],"g":["Laos"],"p":"n","f":"*","u":1},{"r":["ラウ","ラオ"],"g":["bamboo stem (of a Japanese pipe)"],"p":"n","f":"ら|う","t":1}],
 "羅府": [{"r":["らふ","ロサンゼルス"],"g":["Los Angeles"],"p":"n","f":"ら|ふ"}],
 "羅患": [{"r":["りかん"],"g":["contraction of a disease"],"p":"n vs vi","f":"*"}],
 "羅方位": [{"r":["らほうい"],"g":["compass bearing"],"p":"n","f":"ら|ほう|い"}],

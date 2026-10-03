@@ -860,7 +860,7 @@
 "集まれ": [{"r":["あつまれ"],"g":["gather up!","gathering the remaining food together…"],"p":"exp int n vs vt"}],
 "集め": [{"r":["あつめ"],"g":["collecting"],"p":"n suf"}],
 "集め始める": [{"r":["あつめはじめる"],"g":["to begin to catch (attention, etc.)"],"p":"v1"}],
-"集り": [{"r":["たかり"],"g":["extortion","extortionist"],"p":"n","u":1},{"r":["あつまり"],"g":["gathering"],"p":"n","t":1}],
+"集り": [{"r":["あつまり"],"g":["gathering"],"p":"n"},{"r":["たかり"],"g":["extortion","extortionist"],"p":"n","u":1,"t":1}],
 "集り屋": [{"r":["たかりや"],"g":["freeloader"],"p":"n"}],
 "集スト": [{"r":["しゅうスト"],"g":["gang stalker"],"p":"n"}],
 "集中データ処理": [{"r":["しゅうちゅうデータしょり"],"g":["centralized data processing"],"p":"n","f":"しゅう|ちゅう;しょ|り"}],

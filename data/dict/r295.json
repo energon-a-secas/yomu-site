@@ -699,7 +699,7 @@
 "追慕": [{"r":["ついぼ"],"g":["cherishing the memory of"],"p":"n vs vt","f":"つい|ぼ"}],
 "追憶": [{"r":["ついおく"],"g":["recollection"],"p":"n vs vt adj-no","f":"つい|おく"}],
 "追懐": [{"r":["ついかい"],"g":["recollection"],"p":"n vs vt","f":"つい|かい"}],
-"追手": [{"r":["おいて"],"g":["pursuer","tailwind"],"p":"n","f":"おい|て"},{"r":["おって"],"g":["pursuer"],"p":"n","f":"*","t":1}],
+"追手": [{"r":["おって"],"g":["pursuer"],"p":"n","f":"*"},{"r":["おいて"],"g":["pursuer","tailwind"],"p":"n","f":"おい|て","t":1}],
 "追手門学院大学": [{"r":["おうてもんがくいんだいがく"],"g":["Otemon Gakuin University"],"p":"n","f":"*"}],
 "追打ち": [{"r":["おいうち"],"g":["attacking a fleeing enemy","additional blow to an already unfortunate situation"],"p":"n","f":"おい|う"}],
 "追払う": [{"r":["おいはらう"],"g":["to drive away"],"p":"v5u vt","f":"おい|はら"}],

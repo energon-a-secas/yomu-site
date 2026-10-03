@@ -381,7 +381,7 @@
 "霜焼": [{"r":["しもやけ"],"g":["frostbite"],"p":"n","f":"しも|やけ","u":1}],
 "霜焼け": [{"r":["しもやけ"],"g":["frostbite"],"p":"n","f":"しも|や","u":1}],
 "霜解け": [{"r":["しもどけ"],"g":["thaw"],"p":"n","f":"しも|ど"}],
-"霜降": [{"r":["そうこう"],"g":["\"frost descent\" solar term (approx. October 23)"],"p":"n","f":"そう|こう"},{"r":["しもふり"],"g":["speckled with white","marbling (of beef)","(of fish, chicken, shellfish, etc.) blanching by exposure…"],"p":"adj-no n","f":"しも|ふり","t":1}],
+"霜降": [{"r":["しもふり"],"g":["speckled with white","marbling (of beef)","(of fish, chicken, shellfish, etc.) blanching by exposure…"],"p":"adj-no n","f":"しも|ふり"},{"r":["そうこう"],"g":["\"frost descent\" solar term (approx. October 23)"],"p":"n","f":"そう|こう","t":1}],
 "霜降り作り": [{"r":["しもふりづくり"],"g":["fish, chicken, shellfish, etc. blanched by exposure to…"],"p":"n","f":"しも|ふ;づく"}],
 "霜降り月": [{"r":["しもふりづき"],"g":["eleventh lunar month"],"p":"n","f":"しも|ふ;づき"}],
 "霜降り肉": [{"r":["しもふりにく"],"g":["marbled meat (esp. beef)"],"p":"n","f":"しも|ふ;にく"}],

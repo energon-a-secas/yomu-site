@@ -458,7 +458,7 @@
 "蒙塵": [{"r":["もうじん"],"g":["royalty seeking refuge outside the palace or capital…"],"p":"n","f":"もう|じん"}],
 "蒙昧": [{"r":["もうまい"],"g":["ignorant"],"p":"adj-na n","f":"もう|まい"}],
 "蒙昧主義": [{"r":["もうまいしゅぎ"],"g":["obscurantism"],"p":"n adj-no","f":"もう|まい|しゅ|ぎ"}],
-"蒜": [{"r":["ひる"],"g":["strong-smelling edible plant…"],"p":"n"},{"r":["にんにく"],"g":["garlic (Allium sativum)"],"p":"n","u":1,"t":1}],
+"蒜": [{"r":["にんにく"],"g":["garlic (Allium sativum)"],"p":"n","u":1},{"r":["ひる"],"g":["strong-smelling edible plant…"],"p":"n","t":1}],
 "蒟蒻": [{"r":["こんにゃく"],"g":["konnyaku (Amorphophallus konjac)","konnyaku jelly"],"p":"n","f":"こん|にゃく","u":1}],
 "蒟蒻ゼリー": [{"r":["こんにゃくゼリー"],"g":["fruit jelly (gelled with konjac starch)"],"p":"n","f":"こん|にゃく","u":1}],
 "蒟蒻問答": [{"r":["こんにゃくもんどう"],"g":["irrelevant and incoherent dialogue"],"p":"n","f":"こん|にゃく|もん|どう"}],

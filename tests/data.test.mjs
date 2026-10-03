@@ -66,7 +66,9 @@ function runs(key) {
 test('the dictionary index counts what the core and the shards hold', () => {
   assert.equal(dictIndex.format, 'yomu-dict-index/2');
   assert.equal(dictIndex.keys, dict.size);
-  assert.equal(dictIndex.keys, 39359);
+  // 39,359 until 2026-10-03, when 上野 left the first tier: the corpus
+  // matched it for Ueno, not for the province (tools/lib/extra.mjs)
+  assert.equal(dictIndex.keys, 39358);
   assert.equal(dictIndex.maxKey, Math.max(...[...dict.keys()].map((k) => k.length)));
   assert.equal(dictIndex.core.keys, Object.keys(dictCore.entries).length);
   const ranged = dictShards.reduce((n, s) => n + Object.keys(s.doc.entries).length, 0);

@@ -696,7 +696,7 @@
 "弛みない": [{"r":["たゆみない"],"g":["unslacking"],"p":"adj-i","u":1}],
 "弛み無い": [{"r":["たゆみない"],"g":["unslacking"],"p":"adj-i","u":1}],
 "弛め": [{"r":["ゆるめ"],"g":["somewhat loose"],"p":"adj-no adv","u":1}],
-"弛める": [{"r":["たるめる"],"g":["to slacken"],"p":"v1 vt"},{"r":["ゆるめる"],"g":["to loosen","to relax (attention, efforts, etc.)","to relax (a rule)"],"p":"v1 vt","t":1}],
+"弛める": [{"r":["ゆるめる"],"g":["to loosen","to relax (attention, efforts, etc.)","to relax (a rule)"],"p":"v1 vt"},{"r":["たるめる"],"g":["to slacken"],"p":"v1 vt","t":1}],
 "弛張": [{"r":["しちょう","ちちょう"],"g":["looseness and tension","leniency and strictness"],"p":"n","f":"し|ちょう"}],
 "弛張振動": [{"r":["しちょうしんどう"],"g":["relaxation oscillation"],"p":"n","f":"し|ちょう|しん|どう"}],
 "弛緩": [{"r":["しかん","ちかん"],"g":["relaxation (e.g. of muscles)"],"p":"n vs vi","f":"し|かん"}],

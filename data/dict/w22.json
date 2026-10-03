@@ -1,12 +1,9 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-08-29"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict/1",
-"first": "漆",
-"last": "相続税",
+"first": "漆黒",
+"last": "相談所",
 "entries": {
-"漆": [{"r":["うるし"],"g":["East Asian lacquer","Chinese lacquer tree…"],"p":"n","q":5},{"r":["しち","なな"],"g":["seven"],"p":"num","q":5,"o":3}],
-"漆器": [{"r":["しっき"],"g":["lacquer ware"],"p":"n","f":"しっ|き"}],
-"漆塗り": [{"r":["うるしぬり"],"g":["lacquering"],"p":"n","f":"うるし|ぬ"}],
 "漆黒": [{"r":["しっこく"],"g":["pitch-black"],"p":"adj-no n","f":"しっ|こく","q":4}],
 "漏らす": [{"r":["もらす"],"g":["to let leak","to let out (a secret)","to give utterance to (e.g. one's dissatisfaction)"],"p":"v5s vt suf","q":4}],
 "漏る": [{"r":["もる"],"g":["to leak"],"p":"v5r vi","q":5}],
@@ -1328,6 +1325,9 @@
 "相次ぐ": [{"r":["あいつぐ"],"g":["to follow in succession"],"p":"v5g vi","f":"あい|つ","q":4}],
 "相殺": [{"r":["そうさい","そうさつ"],"g":["offset","set-off","killing each other"],"p":"n vs vt","f":"そう|さい"}],
 "相続": [{"r":["そうぞく"],"g":["succession","inheritance"],"p":"n vs vt","f":"そう|ぞく","q":3}],
-"相続税": [{"r":["そうぞくぜい"],"g":["inheritance tax"],"p":"n","f":"そう|ぞく|ぜい","q":5}]
+"相続税": [{"r":["そうぞくぜい"],"g":["inheritance tax"],"p":"n","f":"そう|ぞく|ぜい","q":5}],
+"相談": [{"r":["そうだん"],"g":["consultation"],"p":"n vs vt","f":"そう|だん","q":2}],
+"相談役": [{"r":["そうだんやく"],"g":["counselor"],"p":"n","f":"そう|だん|やく"}],
+"相談所": [{"r":["そうだんじょ","そうだんしょ"],"g":["consultation office"],"p":"n","f":"そう|だん|じょ"}]
 }
 }

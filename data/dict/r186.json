@@ -639,7 +639,7 @@
 "功労賞": [{"r":["こうろうしょう"],"g":["award for distinguished service"],"p":"n","f":"こう|ろう|しょう"}],
 "功労金": [{"r":["こうろうきん"],"g":["merit bonus"],"p":"n","f":"こう|ろう|きん"}],
 "功名心": [{"r":["こうみょうしん"],"g":["ambition"],"p":"n","f":"こう|みょう|しん"}],
-"功夫": [{"r":["カンフー","クンフー"],"g":["kung fu"],"p":"n","f":"*","u":1,"ls":["chi","gōngfu"]},{"r":["くふう"],"g":["devising (a way)","device","dedication to spiritual improvement…"],"p":"n vs vt","f":"く|ふう","t":1}],
+"功夫": [{"r":["くふう"],"g":["devising (a way)","device","dedication to spiritual improvement…"],"p":"n vs vt","f":"く|ふう"},{"r":["カンフー","クンフー"],"g":["kung fu"],"p":"n","f":"*","u":1,"ls":["chi","gōngfu"],"t":1}],
 "功徳": [{"r":["くどく"],"g":["merit","divine reward (for virtuous deeds)","merit"],"p":"n","f":"く|どく"}],
 "功徳を積む": [{"r":["くどくをつむ"],"g":["to accumulate merit"],"p":"exp v5m","f":"く|どく;つ"}],
 "功徳蔵": [{"r":["くどくぞう"],"g":["one's accumulated merit","Amithaba (Buddha)"],"p":"n","f":"く|どく|ぞう"}],

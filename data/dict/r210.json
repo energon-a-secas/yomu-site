@@ -447,7 +447,7 @@
 "小太刀": [{"r":["こだち"],"g":["short sword"],"p":"n","f":"こ|だ|ち"}],
 "小太鼓": [{"r":["こだいこ"],"g":["small drum"],"p":"n","f":"こ|だい|こ"}],
 "小奇麗": [{"r":["こぎれい"],"g":["neat"],"p":"adj-na","f":"こ|ぎ|れい"}],
-"小女": [{"r":["こおんな"],"g":["small woman","young woman","young maid"],"p":"n","f":"こ|おんな"},{"r":["こめ"],"g":["small girl"],"p":"n","f":"こ|め","t":1},{"r":["しょうじょ"],"g":["girl (usu. between 7 and 17)","female between 17 and 20 years old (ritsuryō period)"],"p":"n","f":"しょう|じょ","t":2}],
+"小女": [{"r":["しょうじょ"],"g":["girl (usu. between 7 and 17)","female between 17 and 20 years old (ritsuryō period)"],"p":"n","f":"しょう|じょ"},{"r":["こおんな"],"g":["small woman","young woman","young maid"],"p":"n","f":"こ|おんな","t":1},{"r":["こめ"],"g":["small girl"],"p":"n","f":"こ|め","t":2}],
 "小女子": [{"r":["こうなご"],"g":["young lancefish"],"p":"n","f":"こう|な|ご"}],
 "小妖精": [{"r":["しょうようせい"],"g":["elf"],"p":"n","f":"しょう|よう|せい"}],
 "小妹": [{"r":["しょうまい"],"g":["little sister","my younger sister","I"],"p":"n pn","f":"しょう|まい"}],

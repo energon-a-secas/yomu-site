@@ -114,9 +114,9 @@ function checkDictShard(rel, doc) {
 }
 
 const NAME_TYPES = new Set(['surname', 'given', 'masc', 'fem', 'place']);
-const NAME_FIELDS = new Set(['r', 'n', 'f', 's']);
+const NAME_FIELDS = new Set(['r', 'n', 'f', 's', 'S']);
 
-/** A names shard: sorted keys, one record each, `{ r?, n, f?, s? }`. */
+/** A names shard: sorted keys, one record each, `{ r?, n, f?, s?, S? }`. */
 function checkNamesShard(rel, doc) {
   const keys = Object.keys(doc.entries || {});
   if (!keys.length) { fail(rel, 'no entries'); return; }
@@ -134,6 +134,8 @@ function checkNamesShard(rel, doc) {
     }
     if (rec.f !== undefined && (typeof rec.f !== 'string' || !rec.r)) fail(rel, `${key}: f without a reading`);
     if (rec.s !== undefined && rec.s !== 1) fail(rel, `${key}: s is not 1`);
+    // S (sure) is a strong name built on often enough: never without s
+    if (rec.S !== undefined && (rec.S !== 1 || rec.s !== 1)) fail(rel, `${key}: S is not 1 on a strong name`);
   }
 }
 

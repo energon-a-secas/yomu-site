@@ -110,6 +110,20 @@ function sourceOf(sense) {
 }
 
 /**
+ * `k` for a kana key of an entry: up to MAX_KANJI of the kanji spellings
+ * that reading applies to, common ones first, none JMdict tags search-only,
+ * irregular or outdated. tools/lib/rare.mjs reads it without a record.
+ */
+export function spellingsOf(key, entry) {
+  const form = entry.kana.find((k) => k.text === key);
+  if (!form) return [];
+  const spellings = entry.kanji
+    .filter((k) => applies(form.appliesToKanji, k.text))
+    .filter((k) => !k.tags.some((t) => SKIP_KANJI.has(t)));
+  return commonFirst(spellings).slice(0, MAX_KANJI).map((s) => s.text);
+}
+
+/**
  * The record for one spelling of one entry. `table` is the reading table
  * tools/lib/split.mjs cuts `f` with.
  */
@@ -126,11 +140,7 @@ export function recordFor(key, { entry, kind }, table) {
   rec.p = posOf(entry);
   if (kind === 'kanji' && rec.r && needsSplit(key)) rec.f = splitReading(key, rec.r[0], table);
   if (kind === 'kana') {
-    const form = entry.kana.find((k) => k.text === key);
-    const spellings = entry.kanji
-      .filter((k) => applies(form.appliesToKanji, k.text))
-      .filter((k) => !k.tags.some((t) => SKIP_KANJI.has(t)));
-    const k = commonFirst(spellings).slice(0, MAX_KANJI).map((s) => s.text);
+    const k = spellingsOf(key, entry);
     if (k.length) rec.k = k;
   }
   if (senses[0].misc.includes('uk')) rec.u = 1;

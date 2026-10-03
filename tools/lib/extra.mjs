@@ -40,6 +40,9 @@
  *             gains 帰社 rather than 喜捨. Without it, きしゃしました has no
  *             verb to be. Only under the kana key.
  *
+ * A spelling the corpus has as a strong name read another way (上野 うえの,
+ * not the province こうずけ) is no evidence either: see `nameOf` below.
+ *
  * A spelling of a common entry is never a candidate, even when that spelling
  * is not itself common: 君達 is きみたち's, and shipping it as the key of
  * another entry read 君達 as きんだち, "court nobles". Kana-only and
@@ -175,10 +178,12 @@ function rarestKanji(s, freq) {
  * @param {string[]} sentences  the corpus, one sentence per string
  * @param {object} kanjidic     for each kanji's newspaper rank
  * @param {Set<string>} shipped the characters build-kanji.mjs ships
+ * @param {(s: string) => ({ r?: string[], s?: number } | null)} [nameOf]
+ *   the names-tier record a spelling would have (tools/lib/jmnedict.mjs)
  * @returns {{ extras: Map<number, Set<string>>, stats: object }} per entry
  *   index in `jmdict.words`, the keys it ships under
  */
-export function selectExtra(jmdict, sentences, kanjidic, shipped) {
+export function selectExtra(jmdict, sentences, kanjidic, shipped, nameOf = () => null) {
   const { words } = jmdict;
   const { pos, readings, owned, vs } = commonIndex(words);
   const freq = new Map(kanjidic.characters.filter((c) => c.misc.frequency != null)
@@ -188,7 +193,9 @@ export function selectExtra(jmdict, sentences, kanjidic, shipped) {
     if (!extras.has(index)) extras.set(index, new Set());
     extras.get(index).add(key);
   };
-  const stats = { candidates: 0, evidence: 0, suffix: 0, under: 0, kana: 0, suru: 0 };
+  const stats = {
+    candidates: 0, evidence: 0, suffix: 0, under: 0, kana: 0, suru: 0, named: [],
+  };
 
   // evidence and suffix
   const cand = new Map();
@@ -217,6 +224,19 @@ export function selectExtra(jmdict, sentences, kanjidic, shipped) {
   const counts = countKeys(sentences, new Set([...pos.keys(), ...cand.keys()]));
   for (const [s, list] of cand) {
     if ((counts.get(s) || 0) < MIN_MATCHES) continue;
+    // The corpus counts a spelling, not a word: 上野 is matched for Ueno, the
+    // place and surname, and shipped under its one dictionary entry it read
+    // every 上野 as Kōzuke, a former province (こうずけ). A spelling that is
+    // a name nearly every text means (`S` in tools/lib/jmnedict.mjs, the
+    // same bar js/rare.js sets for a name to beat a word read another way),
+    // read another way than every entry here, is not evidence for them; it
+    // stays out of the first tier, and the second phase reads it.
+    const name = nameOf(s);
+    if (name && name.S && name.r && !list.some(({ index }) => kanaOf(words[index])
+      .some((r) => applies(r.appliesToKanji, s) && toHira(r.text) === name.r[0]))) {
+      stats.named.push(`${s} ${name.r[0]}`);
+      continue;
+    }
     for (const { index, suffix } of list) {
       add(index, s);
       if (!suffix) { stats.evidence += 1; continue; }

@@ -93,7 +93,7 @@
 "把持": [{"r":["はじ"],"g":["grasp"],"p":"n vs vt","f":"は|じ"}],
 "把捉": [{"r":["はそく"],"g":["grasping (a meaning)"],"p":"n vs vt","f":"は|そく"}],
 "把握反射": [{"r":["はあくはんしゃ"],"g":["grasp reflex"],"p":"n","f":"は|あく|はん|しゃ"}],
-"抑": [{"r":["そも"],"g":["after all"],"p":"conj","u":1},{"r":["そもそも"],"g":["in the first place","after all","beginning"],"p":"adv n conj adj-no","u":1,"t":1}],
+"抑": [{"r":["そもそも"],"g":["in the first place","after all","beginning"],"p":"adv n conj adj-no","u":1},{"r":["そも"],"g":["after all"],"p":"conj","u":1,"t":1}],
 "抑々": [{"r":["そもそも"],"g":["in the first place","after all","beginning"],"p":"adv n conj adj-no","f":"*","u":1}],
 "抑々揚格": [{"r":["よくよくようかく"],"g":["anapest"],"p":"n","f":"よく|よく|よう|かく"}],
 "抑うつ": [{"r":["よくうつ"],"g":["dejection"],"p":"n"}],

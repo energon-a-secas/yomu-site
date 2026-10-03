@@ -1,9 +1,10 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-08-29"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "中棹",
-"last": "九分どおり",
+"first": "中核派",
+"last": "九分",
 "entries": {
+"中核派": [{"r":["ちゅうかくは"],"g":["Japan Revolutionary Communist League-National Committee"],"p":"n","f":"ちゅう|かく|は"}],
 "中棹": [{"r":["ちゅうざお"],"g":["shamisen with a medium-sized neck"],"p":"n","f":"ちゅう|ざお"}],
 "中次": [{"r":["なかつぎ"],"g":["joining","intermediation","relaying"],"p":"n vs adj-no","f":"なか|つぎ"}],
 "中欧ヨーロッパ": [{"r":["ちゅうおうヨーロッパ"],"g":["Central Europe"],"p":"n","f":"ちゅう|おう"}],
@@ -1206,7 +1207,6 @@
 "九仞": [{"r":["きゅうじん"],"g":["great height"],"p":"n","f":"きゅう|じん"}],
 "九仞の功を一簣に虧く": [{"r":["きゅうじんのこうをいっきにかく"],"g":["to fail one step short of great success"],"p":"exp v5k","f":"きゅう|じん;こう;いっ|き;か"}],
 "九六": [{"r":["くんろく"],"g":["ozeki ranked wrestler unable to live up to the…"],"p":"n","f":"*"}],
-"九分": [{"r":["くぶ"],"g":["nine parts","nine percent"],"p":"n adv","f":"く|ぶ"},{"r":["きゅうふん"],"g":["nine minutes"],"p":"n","f":"きゅう|ふん","t":1}],
-"九分どおり": [{"r":["くぶどおり"],"g":["(about) ninety percent (finished, complete, etc.)","almost certainly"],"p":"adv","f":"く|ぶ"}]
+"九分": [{"r":["くぶ"],"g":["nine parts","nine percent"],"p":"n adv","f":"く|ぶ"},{"r":["きゅうふん"],"g":["nine minutes"],"p":"n","f":"きゅう|ふん","t":1}]
 }
 }

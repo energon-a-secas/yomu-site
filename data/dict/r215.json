@@ -1042,7 +1042,7 @@
 "廻し飲み": [{"r":["まわしのみ"],"g":["drinking in turn from one vessel (cup, glass, etc.)"],"p":"n vs"}],
 "廻す": [{"r":["まわす"],"g":["to turn","to pass around","to move (someone or something to where its needed)"],"p":"v5s vt aux-v"}],
 "廻らす": [{"r":["めぐらす"],"g":["to enclose (with)","to turn (one's head, heel, etc.)","to think over"],"p":"v5s vt"}],
-"廻り": [{"r":["めぐり"],"g":["circumference","tour","circulation (e.g. of blood)"],"p":"n"},{"r":["まわり"],"g":["rotation","making the rounds","spreading"],"p":"n n-suf suf ctr","t":1}],
+"廻り": [{"r":["まわり"],"g":["rotation","making the rounds","spreading"],"p":"n n-suf suf ctr"},{"r":["めぐり"],"g":["circumference","tour","circulation (e.g. of blood)"],"p":"n","t":1}],
 "廻りあわせ": [{"r":["めぐりあわせ"],"g":["fortune"],"p":"n"}],
 "廻りくどい": [{"r":["まわりくどい"],"g":["circuitous"],"p":"adj-i"}],
 "廻り合い": [{"r":["めぐりあい"],"g":["chance meeting"],"p":"n","u":1}],
@@ -1271,6 +1271,6 @@
 "弓矢八幡": [{"r":["ゆみやはちまん"],"g":["Hachiman, god of war and archery"],"p":"n","f":"ゆみ|や|はち|まん"}],
 "弓矢神道": [{"r":["ゆみやしんとう"],"g":["Yumiya Shinto (Edo-period sect of Yoshida Shinto)"],"p":"n","f":"ゆみ|や|しん|とう"}],
 "弓筈": [{"r":["ゆはず","ゆみはず"],"g":["nock (of a bow)"],"p":"n","f":"ゆ|はず"}],
-"弓箭": [{"r":["きゅうせん"],"g":["bow and arrow","archer","fighting with bows and arrows"],"p":"n","f":"きゅう|せん"},{"r":["ゆみや"],"g":["bow and arrow","weapon"],"p":"n","f":"ゆみ|や","t":1}]
+"弓箭": [{"r":["ゆみや"],"g":["bow and arrow","weapon"],"p":"n","f":"ゆみ|や"},{"r":["きゅうせん"],"g":["bow and arrow","archer","fighting with bows and arrows"],"p":"n","f":"きゅう|せん","t":1}]
 }
 }

@@ -44,6 +44,9 @@ import { chooseCore, filterDoc } from './lib/layout.mjs';
 import { countKeys, bandsOf, bandScale, sentencesOf } from './lib/freq.mjs';
 import { selectExtra, isCommon, MIN_MATCHES } from './lib/extra.mjs';
 import { selection } from './lib/kanjidic.mjs';
+import {
+  candidates, surnames, countExtensions, recordOf,
+} from './lib/jmnedict.mjs';
 
 const TOOL = 'tools/build-dict.mjs';
 const OUT = path.join(SITE, 'data', 'dict');
@@ -210,6 +213,18 @@ function buildEntries(collected, kanjidic, bands, counts) {
   return { entries, keys, shipped, table };
 }
 
+/**
+ * The record the names tier would give a spelling (tools/build-names.mjs
+ * chooses it the same way), for the evidence rule in tools/lib/extra.mjs.
+ */
+function namesOf(kanjidic) {
+  const jmnedict = loadZippedJson('jmnedict');
+  const cands = candidates(jmnedict);
+  countExtensions(jmnedict, cands, surnames(jmnedict));
+  const table = readingTable(kanjidic);
+  return (s) => (cands.has(s) ? recordOf(s, cands.get(s), table).rec : null);
+}
+
 function main() {
   const t0 = Date.now();
   const jmdict = loadZippedJson('jmdictFull');
@@ -217,7 +232,7 @@ function main() {
   const sentences = sentencesOf(loadBz2Text('tatoebaJpn'));
   const shipped = new Set(selection(kanjidic).map((c) => c.literal));
 
-  const { extras, stats: extra } = selectExtra(jmdict, sentences, kanjidic, shipped);
+  const { extras, stats: extra } = selectExtra(jmdict, sentences, kanjidic, shipped, namesOf(kanjidic));
   const collected = collect(jmdict, extras);
   const keySet = collected.keys;
   // The common keys are counted and banded among themselves, as before the
@@ -300,6 +315,7 @@ function main() {
   const out = [
     `keys ${all.length}, records ${records}, maxKey ${maxKey} UTF-16 units`,
     `outside the common set (N ${MIN_MATCHES}): ${extras.size} entries; of ${extra.candidates} candidate spellings, evidence ${extra.evidence}, suffix ${extra.suffix} (${extra.under} readings under a common kana key); kana ${extra.kana}; suru ${extra.suru}`,
+    `matched spellings left out as strong names read another way: ${extra.named.length} (${extra.named.join(', ')})`,
     `core ${coreKeys.length} keys, ${fmtBytes(coreBytes)} (${coreBytes} B), chosen over ${sampled} sampled sentences`,
     `range shards ${docs.length}: min ${fmtBytes(Math.min(...sizes))} (${Math.min(...sizes)} B), max ${fmtBytes(Math.max(...sizes))} (${Math.max(...sizes)} B), total ${fmtBytes(total)} (${total} B); index ${fmtBytes(indexBytes)}`,
     `filter ${filter.n} keys, ${filter.m} bits, ${filter.k} hashes, ${fmtBytes(filterBytes)} (${filterBytes} B)`,
