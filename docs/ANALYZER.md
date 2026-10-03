@@ -39,7 +39,9 @@ text ──normalize──▶ lines ──runs──▶ [jp run | other]
 
 One call to `dict.need`, one path. What a key needs to know about another
 key is shipped on its record by the builder (`o`, `b`, `c` below), so the
-analyzer never fetches a second key to price the first. Until 2026-09-29 it
+analyzer never fetches a second key to price the first. (The second phase,
+below, may call it once more, only for the ichidan verb behind a kanji the
+first pass guessed alone.) Until 2026-09-29 it
 segmented each run twice, fetching the kanji spellings of the kana words on
 the first path and the readings of kanji keys with several records, and a
 kana sentence loaded up to 20 of the 27 shards.
@@ -50,11 +52,18 @@ stretches of consecutive guessed tokens, between the two tokens the first
 pass placed around them (connected exactly as the first pass connected
 them), and fetches the rest of JMdict and the names for those stretches
 alone, with one call each. The first pass's own candidates and prices
-apply inside a stretch, plus three kinds of node it never had: rare words,
-names, and a katakana guess priced by its length (so a run of known words
-splits). A token outside a stretch is the token the first pass built, with
-the first pass's neighbours, byte for byte: a particle after a word the
-second phase found keeps its gloss, and 何 keeps its なに or なん. A text
+apply inside a stretch, plus four kinds of node it never had: rare words,
+names, a katakana guess priced by its length (so a run of known words
+splits), and, for one kanji guessed alone, the stem of the ichidan verb it
+begins (見に行く is 見る's 見: the first pass asks for no verb behind every
+kanji of every text, because each such key is a chance for the filter to
+let a shard through for nothing). A token outside a stretch is the token the
+first pass built, with the first pass's neighbours, byte for byte: a
+particle after a word the second phase found keeps its gloss, and 何 keeps
+its なに or なん. Its grammar notes are the one exception, because
+`annotateGrammar` works them out after both passes from the token before
+it: in 億劫で, で is "and" (`de-and`) after the rare na-adjective 億劫, where
+after the guess it was `de`, and its gloss is still the first pass's. A text
 with no guess fetches no file of either tier. See "The second phase" below
 for the prices and the measurements.
 
@@ -130,7 +139,7 @@ runs them under plain node with the real shards read from disk.
 A token the second phase read is shaped the same, with these marks:
 
 - a **rare word** (a record from `data/dict/rNNN`) has `confidence: 'dict'` and `entry.tier === 2`, set by `dict.js` as the shard loads (the shards do not spend bytes on it), so the page can say "rare word"; its `alts` counts the other rare records of its key;
-- a **name** from the names tier has `kind: 'name'`, `confidence: 'dict'`, its JMnedict reading, and `entry = { r?, g, p: 'n-pr', nt, f?, s? }`: `nt` the JMnedict types (`surname`, `given`, `masc`, `fem`, `place`), `g` the same in English (`['surname', 'place name']`), the way a dictionary gloss is English, and `names.js` `NAME_TYPES` holds each in `{ en, es }` for the page. A name the first pass guessed keeps `entry: null` and `confidence: 'guess'`.
+- a **name** from the names tier has `kind: 'name'`, `confidence: 'dict'`, its JMnedict reading, and `entry = { r?, g, p: 'n-pr', nt, f?, s?, also? }`: `nt` the JMnedict types (`surname`, `given`, `masc`, `fem`, `place`), most evidenced first, `g` the same in English (`['surname', 'place name']`), the way a dictionary gloss is English, and `names.js` `NAME_TYPES` holds each in `{ en, es }` for the page. `also` is the rare word spelled the same, `{ r?, g }` (its reading and up to two glosses), where there is one: 清水 is the surname and also "spring water", and nothing in 清水を飲んだ tells the two apart, so the page can say both. A name the first pass guessed keeps `entry: null` and `confidence: 'guess'`.
 
 These fields appear only where they apply:
 
@@ -181,6 +190,13 @@ naming the keys it ships under (`tools/lib/extra.mjs` explains them):
   one outside entry that does, spelled with the most frequent kanji (帰社
   under きしゃ). A noun that takes no する pays `COST.suruNeedsVs` before one.
 
+The corpus counts a spelling, not a word: 上野 was matched for Ueno, the
+place and surname, and shipped under its one entry outside the common set
+it read every 上野 as こうずけ, Kōzuke, a former province. So a spelling that
+is a names-tier name most texts mean (`S` below) read another way than every
+entry it would ship for is no evidence for them (2026-10-03, one spelling:
+上野). It stays out of the first tier, and the second phase reads it.
+
 A record from outside the common set whose spelling the corpus never matched
 is priced as having no evidence (band 8), so it wins only where the context
 asks for it. Its key's band is set on the common keys' scale, which moves no
@@ -208,7 +224,7 @@ keys and 679 KB at 3, and even at 20 read はし as 愛し "lovely" and くじ a
 
 ```json
 { "_licence": {}, "format": "yomu-dict-index/2",
-  "keys": 39359, "maxKey": 22,
+  "keys": 39358, "maxKey": 22,
   "core": { "src": "data/dict/core.json", "keys": 1178 },
   "filter": { "src": "data/dict/filter.json" },
   "shards": [ { "src": "data/dict/w00.json", "first": "〇" } ] }
@@ -336,11 +352,15 @@ never makes keys and which people write.
 
 A key is found the way a first-tier key is: the last shard whose `first` is
 `<=` it. Records of one key are filed by evidence, strongest first: a
-spelling JMdict does not tag irregular, outdated, rarely used or
-search-only; a spelling that is its entry's headword (上気 is じょうき's
-own, a variant of 浮気 "infidelity", and with record order it read
-顔が上気した as an affair); `e`; how often the corpus matched the record's
-own spelling; JMdict's order. `t` is that place, and the second phase
+spelling the first tier itself gives a word it ships (its kana record lists
+it in `k`: うどん is written 饂飩, which JMdict tags rarely used there and
+leaves untagged under ワンタン, so 饂飩 read "wonton" until 2026-10-03; 218
+keys changed their first record, 面皰 にきび, 香魚 あゆ and 彼の あの
+among them); a spelling JMdict does not tag irregular, outdated, rarely used
+or search-only; a spelling that is its entry's headword (上気 is じょうき's
+own, a variant of 浮気 "infidelity" whose kana record does not list it, and
+with record order it read 顔が上気した as an affair); `e`; how often the
+corpus matched the record's own spelling; JMdict's order. `t` is that place, and the second phase
 prices it as a fraction of a step, so no reading depends on the order the
 array happens to have.
 
@@ -376,10 +396,11 @@ those as words, so nothing would ask), for one of two reasons:
 - **attested**: the Tatoeba corpus has it at least once; a kanji name as a
   substring, a katakana name only as a whole katakana run (アン is in every
   アンケート, パソ in every パソコン);
-- **strong**: at least 5 other JMnedict names are built on it. Of a list of
-  102 common surnames, 13 are first-tier keys and Tatoeba has 58 of the
-  rest; this rule brings in the other 31 (石井, 前田, 長谷川), and 8,980
-  names besides.
+- **evidence**: at least 5 other JMnedict names use it, counted as below
+  (built on it, ending with it after a surname, or a longer given name). Of
+  a list of 102 common surnames, 13 are first-tier keys and Tatoeba has 58
+  of the rest; this rule brings in the other 31 (石井, 前田, 長谷川), and
+  given names Tatoeba never has (恵子, 直樹, 浩之).
 
 One kanji alone is left out (森, 林, 東 are words as often as names), and so
 are JMnedict's `unclass` and `person` types: the 2,248 katakana names of
@@ -388,27 +409,59 @@ those types the corpus has as a substring include ケット, パソ and ディ, 
 
 JMnedict lists every reading a spelling was ever given, in kana order (田中
 is たなか, and たんか, だなか, でんちゅう and six more), so the reading is
-chosen by evidence the file holds: `ext`, how many longer JMnedict names
-start with this spelling and this reading (田中 たなか starts 463, たんか
-none; 清水 しみず 350, きよみず 14), each credited to the longest candidate
-reading it extends; then a reading the characters' KANJIDIC readings can
-spell (秀樹 ひでき, not ほつき); then more types; then JMnedict's order. Over
-the 102 surnames it chooses the textbook reading for each of the 89 the
-tier holds.
+chosen by evidence the file holds (`tools/lib/jmnedict.mjs`), each count
+credited to the longest candidate reading it extends:
+
+- `ext`, how many longer JMnedict names are built on this spelling and this
+  reading: a full name, a surname, a place or a station that starts with it
+  (田中 たなか starts 409, たんか none; 清水 しみず 289, きよみず 12).
+  Another given name does not count (美咲央 みさお is not 美咲 and 央; 26
+  of them read 美咲 as みさ), nor an unclassified one, nor a longer name
+  better cut inside the spelling, where a later part of it is itself a name
+  read the way the longer one ends (東大井 is 東 and 大井, and such places
+  read 東大 ひがしおお); a katakana name counts only as the first word of a
+  full name (ジョン・ウェイン, トムハンクス), because バグダッド is not built
+  on バグ, and that made バグ a strong name;
+- `suf`, how many full names end with it after a JMnedict surname read one
+  of its surname readings (宇佐美恵子 うさみけいこ is 宇佐美 and 恵子
+  けいこ). Given names are rarely built on, and this is their evidence: 恵子
+  けいこ, not えこ, which won the tie for having two types;
+- `gext`, longer given names that start with it, only to break a tie of the
+  two above (陽菜 ひな, from 陽菜子 ひなこ and the like).
+
+Then a reading the characters' KANJIDIC readings can spell (秀樹 ひでき, not
+ほつき); then more types; then JMnedict's order. Every reading of the
+spelling competes, kept type or not, and a spelling whose best reading is
+of a type that does not ship does not ship (相模 さがみ is typed only
+`person`, and さがみこ, a surname with 6 against its 42, read it). The
+types are listed most evidenced first: `place` by places and stations
+built on it, `surname` by full names and surnames, a given-name type by
+`suf` (函館 is a place first, 花子 a given name, 田中 a surname).
+
+Measured 2026-10-03, before and after these rules, each name read in a frame
+(`Xさんが来た。`, `Xに行った。`): of 142 common surnames (written down before
+running), the 128 the tier holds read right both times; of the analyzer
+verifier's 53 popular given names, 28 right before and 43 after (美咲,
+恵子, 優子, 七海, 智子, 和也, 直人, 明美 corrected; 直樹, 由美子, 雄太,
+里美, 沙織, 香織, 綾香, 愛子, 正樹, 浩之, 博之 newly in the tier; 美優 left
+it, a guess again); of its 59 places, 52 right before and 54 after (相模,
+上野). The ten still wrong are modern names JMnedict holds no evidence for
+(大翔, 陽翔, 颯太, 結菜), first-tier words (陽子 is "proton"), and guesses.
 
 - `data/names/index.json`, format `yomu-names-index/1`: `{ keys, maxKey,
   filter: { n, m, k, bits }, shards: [{ src, first }] }`, the filter inline
   (16 bits a key), so the second phase learns which name shard to fetch
   from the file it needs anyway
 - `data/names/nNN.json`, format `yomu-names/1`: `{ first, last, entries:
-  { "田中": { "r": ["たなか"], "n": "surname place", "f": "た|なか", "s": 1 } } }`
+  { "田中": { "r": ["たなか"], "n": "surname place", "f": "た|なか", "s": 1, "S": 1 } } }`
 
 | Field | Meaning |
 |---|---|
 | `r` | the reading, one; absent for a katakana name, which is read as written |
-| `n` | the types, space separated: `surname`, `given`, `masc`, `fem`, `place` |
+| `n` | the types, space separated, most evidenced first: `surname`, `given`, `masc`, `fem`, `place` |
 | `f` | the reading split over the kanji, cut like a dictionary `f`; `*` read as a whole |
 | `s` | 1 for a strong name (`ext` of 5 or more) |
+| `S` | 1 for a sure one: `ext` of 20 or more, at least 5 of them full names or surnames (never without `s`) |
 
 ### The second phase
 
@@ -428,9 +481,14 @@ pass's candidates (same prices) plus:
 | ...a kana spelling of a common word (`e`) | 10 less | リンゴ, カギ, ホント |
 | ...right before さん, 様, 君, ちゃん, 氏, 殿, 先生 | 40 more | before an honorific the guess wins: 悶着さん is a person |
 | name, strong, and a surname or katakana | 80 | under a rare word: 清水さん, ジョン (not "jeon", the dish) |
+| ...but not a katakana name where the same katakana spells a common word (`e`) | 112 + 32 | バグ, イヌ, バラ, ムリ, アリ read as names until 2026-10-03; ハナちゃん is still someone, since the word pays 40 before the honorific |
+| ...nor a kanji surname read another way than the rare word, unless sure (`S`) | 112 | 中吉 is ちゅうきち, "middling luck", not なかよし; 大安 たいあん; a sure one still wins: 金子 かねこ, not きんす "money" |
 | any other name | 112 | over a rare word, under a guess: 陸地 is "land", not the place かちじ; 天上 "the heavens", not a given name |
 | a family name, then a given name | -60 to connect | 鈴木一郎 is two names, not one guess; only in that order (types from JMnedict), because 小田原城 read 小田\|原城, two surnames, while any two names earned it |
+| a place in kanji, then a one-kanji noun | -65 to connect | 富山\|湾, 富山\|駅, 函館\|山, 軽井沢\|町, each one guess before (富山湾 とみやまいりえ); under -60 it does not beat a three-kanji guess with a q3 noun, over -68 it carves a weak whole name into a strong place and a noun (at -70, 176 of the 660 names-tier names that are a place and one kanji, 三田市 read みた\|いち) |
 | a name before する | 60 more | ハグしない is "hug", not the surname Hug |
+| a name after the polite お or ご | 40 more | お米屋さん is the rice shop, not the surname 米屋 |
+| one kanji guessed alone, as an ichidan verb's stem | the stem as a noun: the word's price, then 60 | 見に行く was 見 read けん, a guessed name; the verb (見る) is asked for, from the first tier, only here |
 | katakana guess | 150 + 30 a kana, at least 4 | a run that is known words splits (インフォーム\|ショップ, which the page then shows as one compound with these parts, below); 40 kana at most |
 
 A known name connects like a noun (a guessed one follows a noun for 0). In
@@ -506,7 +564,7 @@ the run reached the second phase as a name.
 |---|---:|---:|---:|---:|
 | first: core, range shards, filter, index | 39,359 | 43,317 | 31 | 4,070 KB (4,055 KB before `ls`/`ws`; the core holds 1,175 keys, 3 fewer) |
 | second: shards, filters, index | 432,897 | 455,073 | 348 | 44,551 KB |
-| names: shards, index with filter | 14,213 | 14,213 | 8 | 986 KB |
+| names: shards, index with filter | 14,213 | 14,213 | 8 | 986 KB (830 KB and 11,711 names after the second verification, below) |
 | kanji: listed, ranged, index | 10,384 characters | | 11 | 1,224 KB (372 KB and 2,600 characters before) |
 
 `data/` grew from 4.5 MB to 50.9 MB (46.4 MB more; the new and changed
@@ -537,6 +595,43 @@ files: the rare-word index, the names index, a name shard and a rare shard,
 and for the paragraph one rare-word filter part), and both were already
 above the median. 田中 is now a surname
 with its JMnedict reading and マリア a given name; neither is a guess.
+
+### After the second verification, 2026-10-03
+
+Two verifiers read the work above (the analyzer against 689 test texts, 40
+new inputs and the corpus; the page in three engines). What they found, and
+what changed, is in the sections above: the katakana names and the kanji
+surnames a rare word now beats, `also` on a name, the polite prefix, the
+place and the noun named after it, the ichidan stem of a kanji guessed
+alone, the names' evidence (`ext`, `suf`, `gext`, `S`, the type order), the
+spelling the first tier writes a word with (饂飩), and 上野 out of the first
+tier. Two first-pass fixes came with them: くる and いく straight after a
+te-form connect as verbs do after ください, at -30 (持ってきた was 持って and
+北 "north", and 出ていった's いった was いる's past, "was needed").
+
+Every 80th sentence of the same export from the 7th and the 47th (6,223),
+read with the code and data of 411bf4a and of these fixes: 75 sentences
+changed and the guesses fell from 394 to 383. きた "north" became くる's
+past in 32, 見 (a guessed name read けん) 見る's stem in 8, いった became
+"went" in 6, and 煮 and 干 are verbs; バグ, バラ (four), タレ, フキ and アリ
+are words, 米屋 in お米屋さん the rice shop, 小田原城 おだわら and しろ, and
+勝子, 友美 and 愛敬 read かつこ, ともみ, あいきょう; ten names list their
+types in a new order (青森, 箱根 a place first; 花子, ロバート a given name).
+Two changed from one wrong reading to another (キリ in キリがない is now
+"paulownia", where the word meant is 切り, "end"; アイ in アイ・ラブ・ルーシー
+"knotweed") and one got worse: メイ in メイの衣服 is the month May, where
+the sentence meant a woman named May, a name that is no longer strong
+because nothing in JMnedict is built on it.
+
+The nine sentences fetch what they did but for two, which a rebuilt key
+filter (one key fewer, 上野) let through one or two shards for absent keys:
+今日はいい天気ですね。 2 dictionary files (535 KB, was 1 and 395 KB, for
+いい天気ですぬ, a deinflection that is no key) and the paragraph 29 (was 27).
+The median stays 4, 7 files in all and 675 KB. Over every 160th corpus
+sentence from the 27th (1,556, each on a fresh dictionary) the first tier
+fetched a mean of 3.499 files, against 3.510 before, and the second phase
+0.745 against 0.746: which absent keys a filter lets through moves with any
+rebuild, and on average it did not grow.
 
 ## Katakana compounds and loanword rules (2026-10-03)
 

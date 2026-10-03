@@ -116,9 +116,16 @@ function plainToken(p) {
   };
 }
 
-/** Kanji a learner would look up. 々 and ヶ are marks, not characters to learn. */
+/**
+ * Marks that sit in kanji runs and are no characters to learn: 々 repeats,
+ * ヶ is a small ke, 〆 a closing mark (締め) KANJIDIC does not hold, which
+ * the table listed as a kanji to save.
+ */
+const MARKS = new Set(['々', 'ヶ', '〆']);
+
+/** Kanji a learner would look up. */
 function kanjiOf(surface) {
-  return [...surface].filter((ch) => isKanji(ch) && ch !== '々' && ch !== 'ヶ');
+  return [...surface].filter((ch) => isKanji(ch) && !MARKS.has(ch));
 }
 
 /**
@@ -222,7 +229,7 @@ function kanjiReadings(t, kanjiInfo) {
     const chars = [...f.text];
     if (!chars.every((ch) => isKanji(ch))) continue;
     if (f.whole) {
-      for (const ch of new Set(chars)) if (ch !== '々' && ch !== 'ヶ') out.push([ch, f.ruby, f.text]);
+      for (const ch of new Set(chars)) if (!MARKS.has(ch)) out.push([ch, f.ruby, f.text]);
       continue;
     }
     const split = chars.length === 1 ? [f.ruby] : splitByKanji(f.text, f.ruby, kanjiInfo);
@@ -283,10 +290,14 @@ async function secondPhase(parts, firsts, dict) {
   if (typeof dict.needRare !== 'function') return none;
   const spans = firsts.map((x, k) => (x ? weakSpans(parts[k].text, x.path) : []));
   if (!spans.some((list) => list.length)) return none;
-  const keys = { rare: new Set(), names: new Set() };
+  const keys = { rare: new Set(), names: new Set(), first: new Set() };
   spans.forEach((list, k) => spanKeys(parts[k].text, list, keys, firsts[k] && firsts[k].env.kanji));
   try {
-    await Promise.all([dict.needRare(keys.rare), dict.needNames(keys.names)]);
+    // The first tier is asked again only for the ichidan verb behind a kanji
+    // guessed alone (見 of 見る), which only this phase offers.
+    await Promise.all([
+      dict.needRare(keys.rare), dict.needNames(keys.names), keys.first.size ? dict.need(keys.first) : null,
+    ]);
   } catch {
     return none;
   }

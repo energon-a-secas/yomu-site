@@ -175,12 +175,19 @@ test('one kanji KANJIDIC reads with okurigana is no rare word: it is the stem th
   // Each was a confident rare word before the rule (見 けん "view (of life)",
   // 狭 せ "narrowness", 暑 しょ "heat", 仕 し "official"); each is a guess
   // again, which is what the first pass knew about it.
-  for (const [text, ch] of [['よく映画を見に行きますよ。', '見'], ['門はその車には狭過ぎる。', '狭'], ['私、すごい暑がりなのよ。', '暑'], ['悪い子にはお仕置きが必要だ。', '仕']]) {
+  for (const [text, ch] of [['門はその車には狭過ぎる。', '狭'], ['私、すごい暑がりなのよ。', '暑'], ['悪い子にはお仕置きが必要だ。', '仕']]) {
     const t = tok(await run(text), ch);
     assert.ok(t, `${ch} in ${text}`);
     assert.equal(t.confidence, 'guess', `${text}: ${ch} read as ${t.reading} "${t.entry && t.entry.g}"`);
     assert.equal(t.entry, null, text);
   }
+  // Since 2026-10-03 the first pass reads 見 itself, as 見る's stem (an
+  // ichidan stem is its kanji alone), so it is no guess and no rare word
+  const mi = tok(await run('よく映画を見に行きますよ。'), '見');
+  assert.equal(mi.confidence, 'dict');
+  assert.equal(mi.reading, 'み');
+  assert.equal(mi.base, '見る');
+  assert.equal(mi.entry.tier, undefined);
   // a kanji with no such reading still stands as a rare word before a particle
   assert.equal(tok(await run('政府はワインに新たに税を課した。'), '税').entry.tier, 2);
 });
@@ -201,6 +208,114 @@ test('a rare word loses to the name before an honorific: 清水さん is Shimizu
   const water = tok(await run('清水を飲んだ。'), '清水');
   assert.equal(water.confidence, 'dict');
   assert.ok(['word', 'name'].includes(water.kind));
+  // Nothing in the sentence tells the surname from the water, so where the
+  // name is read it says it is also the word (2026-10-03: the verifier read
+  // "surname" alone and called it wrong)
+  if (water.kind === 'name') {
+    assert.ok(water.entry.also, 'a name read over a rare word says it is also that word');
+    assert.equal(water.entry.also.g[0], 'spring water');
+    assert.equal(water.entry.also.r, 'しみず');
+  } else {
+    assert.equal(water.entry.g[0], 'spring water');
+  }
+});
+
+// ── What the verifiers found on 2026-10-03 ───────────────────────────────
+
+test('a katakana name never beats the word it spells: バグ is a bug, バラ a rose, イヌ a dog (all were names)', async () => {
+  for (const [text, word, gloss] of [
+    ['バグを直した。', 'バグ', '(software) bug'], ['赤いバラは咲いた？', 'バラ', 'rose'],
+    ['イヌが吠えている。', 'イヌ', 'dog (Canis (lupus) familiaris)'], ['それはバグじゃなくて', 'バグ', '(software) bug'],
+  ]) {
+    const t = tok(await run(text), word);
+    assert.ok(t, `${word} in ${text}`);
+    assert.notEqual(t.kind, 'name', `${text}: ${word} read as a name`);
+    assert.equal(t.entry.g[0], gloss, text);
+  }
+  // バグ was strong because JMnedict has バグダッド and バグラム, which are
+  // not built on it; it is no strong name now
+  const d = diskDict();
+  await analyze('バグを直した。', { dict: d });
+  assert.equal((d.name('バグ') || {}).s, undefined);
+});
+
+test('a strong katakana name still loses to the kana spelling of a common word (アリ is 蟻, an ant)', async () => {
+  const d = diskDict();
+  const t = tok(await analyze('アリを見た。', { dict: d }), 'アリ');
+  assert.equal(d.name('アリ').s, 1, 'アリ is a strong name (Muhammad Ali and others start with it)');
+  assert.equal(t.kind, 'katakana');
+  assert.equal(t.entry.g[0], 'ant');
+  assert.equal(t.entry.e, 1);
+  // and ジョン, which no common word spells, is still John
+  assert.equal(tok(await run('ジョンが来た。'), 'ジョン').kind, 'name');
+});
+
+test('a surname read another way than the rare word wins only when people carry it often (中吉, 大安 are the words)', async () => {
+  for (const [text, s, reading] of [['中吉が出た。', '中吉', 'ちゅうきち'], ['大安の日に', '大安', 'たいあん']]) {
+    const t = tok(await run(text), s);
+    assert.equal(t.kind, 'word', `${text}: read as ${t.kind} ${t.reading}`);
+    assert.equal(t.reading, reading, text);
+    assert.equal(t.entry.tier, 2, text);
+  }
+  // 金子 is かねこ, not きんす "money": built on by over a hundred full names
+  const kaneko = tok(await run('金子さんが来た。'), '金子');
+  assert.equal(kaneko.kind, 'name');
+  assert.equal(kaneko.reading, 'かねこ');
+  assert.equal(kaneko.entry.also.g[0], 'money');
+});
+
+test('a word the first tier writes with a kanji is that word in the second tier too (饂飩 is udon, not wonton)', async () => {
+  const t = tok(await run('饂飩を食べた。'), '饂飩');
+  assert.equal(t.reading, 'うどん');
+  assert.equal(t.entry.g[0], 'udon');
+  assert.equal(t.entry.tier, 2);
+});
+
+test('the polite お before a word keeps it a word: お米屋さん is the rice shop, not the surname 米屋', async () => {
+  const t = tok(await run('お米屋さんは、言わずと知れた斜陽産業。'), '米屋');
+  assert.equal(t.kind, 'word');
+  assert.equal(t.entry.g[0], 'rice shop');
+  // with no お it is still someone
+  assert.equal(tok(await run('米屋さんが来た。'), '米屋').kind, 'name');
+});
+
+test('a place and the bay, station or mountain named after it are two words (富山湾 was とみやまいりえ)', async () => {
+  for (const [text, place, noun, reading] of [
+    ['富山湾にはときどき蜃気楼が現われます。', '富山', '湾', 'とやまわん'], ['富山駅で会おう。', '富山', '駅', 'とやまえき'],
+    ['函館山に登った。', '函館', '山', 'はこだてやま'], ['軽井沢町に住む。', '軽井沢', '町', 'かるいざわまち'],
+  ]) {
+    const r = await run(text);
+    const a = tok(r, place);
+    const b = tok(r, noun);
+    assert.ok(a && b, `${place}|${noun} in ${cut(r)}`);
+    assert.equal(a.kind, 'name', text);
+    assert.ok(a.entry.nt.includes('place'), text);
+    assert.equal(a.reading + b.reading, reading, text);
+    assert.equal(r.unknown, 0, text);
+  }
+  // and a whole place name the names tier holds is not carved into a place
+  // and a noun: 小田原 stays おだわら, 三田市 is not みた|いち
+  for (const [text, whole] of [['小田原に行く。', '小田原'], ['三田市に行く。', '三田市']]) {
+    const r = await run(text);
+    assert.ok(tok(r, whole), `${whole} in ${cut(r)}`);
+  }
+});
+
+test('a token beside a stretch keeps its dictionary fields, and its pair notes follow the new neighbour (億劫で)', async () => {
+  const first = await analyze('億劫で', { dict: firstPassOnly() });
+  const after = await run('億劫で');
+  const de0 = tok(first, 'で');
+  const de1 = tok(after, 'で');
+  assert.equal(tok(first, '億劫').confidence, 'guess');
+  assert.equal(tok(after, '億劫').entry.tier, 2);
+  // the token the first pass built: its kind, reading, gloss, said line
+  for (const k of ['kind', 'surface', 'reading', 'confidence', 'start', 'end']) assert.deepEqual(de1[k], de0[k], k);
+  assert.deepEqual(de1.entry, de0.entry);
+  assert.deepEqual(de1.romaji, de0.romaji);
+  // its grammar note is worked out after both passes from the word before
+  // it, and after a na-adjective で is "and" (docs/ANALYZER.md)
+  assert.deepEqual(de1.grammar.map((g) => g.id), ['de-and']);
+  assert.deepEqual(de0.grammar.map((g) => g.id), ['de']);
 });
 
 // ── Names ────────────────────────────────────────────────────────────────

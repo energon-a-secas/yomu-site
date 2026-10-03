@@ -36,7 +36,7 @@
 // one; a name from the names tier is a `name` token with confidence 'dict'.
 
 import { isKanji, isKatakana, isKana, isHiragana, hasKanji } from './kana.js';
-import { deinflect, posMatches } from './deinflect.js';
+import { deinflect, deinflectStem, posMatches } from './deinflect.js';
 import { candidates, wordNode, NO_CHAIN } from './candidates.js';
 import { bestPath } from './lattice.js';
 import { COST, NOMINAL } from './costs.js';
@@ -208,16 +208,60 @@ function nameFits(j, sp) {
   return chars(next.s).length > 1 || AFTER_NAME.has(next.cls);
 }
 
+/** The rare words spelled `s` the second phase could place: no particle or copula. */
+function wordsSpelled(s, dict) {
+  return (dict.rare(s) || []).filter((r) => !/\b(prt|cop)\b/.test(String(r.p)));
+}
+
 /**
  * Whether a name is priced under a rare word spelled the same: a strong name
  * (`s`, one other names are built on) that is a surname or written in
  * katakana. JMnedict lists a great many ordinary compounds as given names
  * and places (天上, 無双, 陸地), and there the word is meant; a surname
  * (清水, 高木) or a foreign name (ジョン over "jeon", the dish) is the name.
+ *
+ * Two limits, both measured (docs/ANALYZER.md): a katakana name never beats
+ * the katakana spelling of a common word (`e`: キリ is 切り, イス 椅子, アリ
+ * 蟻), and a surname read another way than the word beats it only when
+ * most texts mean the name (`S`, built on by people at least twenty times:
+ * 金子 is かねこ, not きんす "money"; 山形 やまがた, not やまなり "curved").
+ * Below that the word is as often meant and the reading is what a learner
+ * copies: 中吉 is ちゅうきち, a fortune slip's "middling luck", not the
+ * surname なかよし, and 大安 is たいあん.
  */
-function outranks(s, rec) {
+function outranks(s, rec, words) {
   if (!rec.s) return false;
-  return isKatakana(s[0]) || String(rec.n).split(' ').includes('surname');
+  if (isKatakana(s[0])) return !words.some((w) => w.e);
+  if (!String(rec.n).split(' ').includes('surname')) return false;
+  if (rec.S || !words.length) return true;
+  // the reading the word would be shown with: 大安 is たいあん first, and
+  // only also だいあん, the surname's
+  return words.some((w) => (w.r ? w.r[0] : s) === (rec.r && rec.r[0]));
+}
+
+/**
+ * What a katakana name pays where the same katakana spells a common word
+ * (`e`): ムリ is 無理 written casually far more often than the place, and
+ * as an interjection-tagged word it connects dearer to だ than a name does,
+ * so ムリだよ read "place name". Before an honorific the word pays more
+ * again (COST.rareBeforeHonorific), so ハナちゃん is still someone.
+ */
+function kanaWordCost(s, words) {
+  return isKatakana(s[0]) && words.some((w) => w.e) ? COST.nameWeak : 0;
+}
+
+/**
+ * The word a name is also, for the page to say: 清水 is the surname and also
+ * "spring water", which a text about a well means, and nothing in the
+ * sentence tells the two apart. Its reading (for a kanji spelling) and up to
+ * two glosses of the first rare word spelled the same; undefined when none.
+ */
+function alsoWord(words) {
+  const w = words[0];
+  if (!w || !Array.isArray(w.g) || !w.g.length) return undefined;
+  const out = { g: w.g.slice(0, 2) };
+  if (w.r && w.r.length) out.r = w.r[0];
+  return out;
 }
 
 // ── Lookups ──────────────────────────────────────────────────────────────
@@ -261,11 +305,15 @@ function* nameLookups(run, sp, i) {
  * could be. Added to `into`, so one call per run builds the set for a text.
  * `kanji` is the run's env.kanji, the same the search reads.
  */
-export function spanKeys(run, spans, into = { rare: new Set(), names: new Set() }, kanji = undefined) {
+export function spanKeys(run, spans, into = { rare: new Set(), names: new Set(), first: new Set() }, kanji = undefined) {
+  if (!into.first) into.first = new Set();
   for (const sp of spans) {
     for (let i = sp.i; i < sp.j; i++) {
       for (const { key } of rareLookups(run, sp, i, kanji)) into.rare.add(key);
       for (const s of nameLookups(run, sp, i)) into.names.add(s);
+      // the first tier's ichidan verb behind a kanji guessed alone (見 of
+      // 見る), which candidates() offers here as its stem
+      if (sp.j - sp.i === 1 && isKanji(run[i])) for (const d of deinflectStem(run[i])) into.first.add(d.base);
     }
   }
   return into;
@@ -285,6 +333,7 @@ function phaseTwo(run, sp, dict, env) {
     },
   };
   const rareEnv = { ...env, dict: merged };
+  const stemEnv = { ...env, stems: true };
   const rareWord = (node, out) => {
     // A rare particle or copula would hide the closed classes the notes
     // explain (いっつも read っつ, "called"), and the first pass has those.
@@ -300,7 +349,7 @@ function phaseTwo(run, sp, dict, env) {
   return (r, i) => {
     const out = [];
     if (badStart(run, sp, i, false)) return out;
-    for (const node of candidates(run, i, dict, env)) {
+    for (const node of candidates(run, i, dict, stemEnv)) {
       if (node.j > sp.j || node.cls === 'kata') continue;
       if (node.rec && tooShort(sp, node.i, node.j, true)) continue;
       out.push(node);
@@ -327,9 +376,15 @@ function phaseTwo(run, sp, dict, env) {
       // names.js reads a few surnames as a whole on purpose (清水 しみず, not
       // し|みず); where the names tier agrees on the reading, so does this.
       if (entry.r && wholeName(s) === entry.r[0]) entry.f = '*';
+      // rareLookups asked the second tier for every spelling a name here can
+      // have (both use badStart and tooShort the same way), so this reads a
+      // key that was asked for.
+      const words = wordsSpelled(s, dict);
+      const also = alsoWord(words);
+      if (also) entry.also = also;
       out.push({
         i, j: i + s.length, s, cls: 'name', rec: entry, key: s, chain: NO_CHAIN, cuts: NO_CHAIN,
-        named: true, alts: 0, cost: COST.nameKnown + (outranks(s, rec) ? 0 : COST.nameWeak),
+        named: true, alts: 0, cost: COST.nameKnown + (outranks(s, rec, words) ? 0 : COST.nameWeak) + kanaWordCost(s, words),
       });
     }
     return out;

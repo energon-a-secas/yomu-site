@@ -153,10 +153,21 @@ export const COST = Object.freeze({
   rare: -15,
   rareCommon: 10,     // ...less this for a kana spelling of a common word (リンゴ is 林檎's)
   rareBeforeHonorific: 40, // a rare word straight before さん, 様, 君: it is a name
+  nameAfterPrefix: 40, // ...unless the polite お or ご comes first: お米屋さん is the
+                      // rice shop, ご主人様 a master; no surname takes お
   nameKnown: 80,      // a surname, or a katakana name, other names are built on (s)
   nameWeak: 32,       // ...plus this for any other name: 陸地 かちじ, a place, and
                       // 天上 てんじょう, a given name, lose to the words
   namePair: -60,      // a family name, then a given name: 鈴木|一郎
+  // A place the names tier knows, then one kanji noun (富山|駅, 函館|山,
+  // 軽井沢|町, 富山|湾), against the guess for the whole run, which read
+  // 富山湾 とみやまいりえ. It must beat a three-kanji guess (130) with a q3
+  // noun (a strong place 80 + 湾 90 + 20 to connect: under -60), and must not
+  // carve a weak whole name (112) into a strong place and a q1 noun (80 + 80
+  // + 20: over -68). Over the 660 names-tier names that are a place and one
+  // kanji, -65 splits none the guess did not; -70 splits 176 (三田市 read
+  // みた いち).
+  placeSuffix: -65,
   kataPerChar: 30,    // a katakana guess in the second phase, per kana: a run
                       // that is two known words (クリスマス|プレゼント) splits
 });
@@ -279,8 +290,27 @@ export const NOMINAL = new Set(['noun', 'kata', 'num', 'name', 'suf']);
  */
 const HONORIFICS = new Set(['さん', '様', 'さま', '君', 'くん', 'ちゃん', '氏', '殿', '先生']);
 
+/** The polite prefixes, which a word takes and a name does not (お米屋さん). */
+const POLITE = new Set(['お', 'ご', '御']);
+
 /** JMnedict's types for a given name, as names.js nameEntry keeps them in `nt`. */
 const GIVEN = new Set(['given', 'masc', 'fem']);
+
+/** Starts with a kanji. */
+const HAN = /^\p{Script=Han}/u;
+
+/**
+ * A place from the names tier, written in kanji, and then a one-kanji noun:
+ * the bay, station, mountain or town named after it. Only in the second
+ * phase, which is the only place a node is `named`. Not a katakana place:
+ * ウイグル語 is the language of the Uighur people, which the rare word
+ * says, not a language named after a place.
+ */
+function placeThenSuffix(prev, next) {
+  const a = (prev.rec && prev.rec.nt) || [];
+  return a.includes('place') && HAN.test(prev.s) && next.cls === 'noun' && !!next.rec && !next.named && !next.rare
+    && [...next.s].length === 1 && HAN.test(next.s);
+}
 
 function familyThenGiven(prev, next) {
   const a = (prev.rec && prev.rec.nt) || [];
@@ -292,6 +322,7 @@ function familyThenGiven(prev, next) {
 export function connect(prev, next) {
   let extra = prev && prev.countLike && next && isDuration(next) ? COST.durationKey : 0;
   if (prev && prev.rare && next && HONORIFICS.has(next.key || next.s)) extra += COST.rareBeforeHonorific;
+  if (prev && prev.cls === 'pref' && POLITE.has(prev.key || prev.s) && next && next.named) extra += COST.nameAfterPrefix;
   // A name takes no する, in any form: ハグしない is "won't you hug me?",
   // and しない ends like an adjective, so no rule below sees the する in it.
   if (prev && prev.named && next && (next.key === 'する' || next.key === '為る')) extra += COST.suruNeedsVs;
@@ -301,6 +332,9 @@ export function connect(prev, next) {
   // one longer place (小田原城 read 小田|原城, おだ はらじょう, when any two
   // names earned it).
   if (prev && prev.named && next && next.named && familyThenGiven(prev, next)) return extra + COST.namePair;
+  // A place and the bay or station named after it are two words, which a
+  // single guess over both used to undercut (富山湾 とみやまいりえ).
+  if (prev && prev.named && next && placeThenSuffix(prev, next)) extra += COST.placeSuffix;
   // A name the names tier knows is a noun, and pays what a noun pays to
   // follow another one; a guessed name follows a noun for nothing, which is
   // how the first pass lets it beat a split, and 本当に陸地 read the place
@@ -366,7 +400,12 @@ function pairCost(prev, next) {
   // compounds as one key (にほんご, あさごはん), which never pays this.
   if (n === 'noun' && NOMINAL.has(p)) return next.kanaSpelled ? 20 + COST.kanaCompound : 20;
   if (n === 'verb') {
-    if (p === 'verb') return (next.s === 'ください' || next.s === '下さい') ? -30 : 20;
+    if (p === 'verb') {
+      if (next.s === 'ください' || next.s === '下さい') return -30;
+      // A te-form, then くる or いく: 持ってきた is "brought", where a noun
+      // after a verb paid nothing and the verb 20, and きた read 北 "north".
+      return afterTe(prev, next) ? -30 : 20;
+    }
     // 勉強|します: a noun that takes する, followed by する.
     if (p === 'noun' && prev.rec && /\bvs\b/.test(prev.rec.p) && (next.key === 'する' || next.key === '為る')) return -30;
     if (p === 'prt' && prev.s === 'へ' && isMotion(next)) return -20;
@@ -395,6 +434,14 @@ function pairCost(prev, next) {
 }
 
 const isInterjection = (rec) => tagsOf(rec).every((t) => t === 'int');
+
+/** くる and いく, which follow a te-form as verbs of direction (持ってくる, 歩いていく). */
+const TE_MOTION = new Set(['くる', '来る', 'いく', '行く']);
+
+function afterTe(prev, next) {
+  const chain = prev.chain || [];
+  return chain.length > 0 && chain[0].rule === 'te' && TE_MOTION.has(next.key);
+}
 
 function isBareNoun(node) {
   // A suffix ends a noun (田中|さん, 学生|達), so it counts as one. A number

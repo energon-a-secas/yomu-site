@@ -139,6 +139,16 @@ export function candidates(run, i, dict, env) {
         }
       }
       if (hasKanji(s)) for (const node of stemNouns(s, i, j, dict, whole, env)) push(node);
+    } else if (len === 1 && env.stems && isKanji(last)) {
+      // An ichidan verb's stem is its kanji alone: 見に行く is 見る's 見, and
+      // without this node the only way through 見 was a guessed name read
+      // けん. Only in the second phase (rare.js sets `stems`), which asks
+      // for the verb behind a kanji the first pass guessed alone: asking for
+      // one behind every kanji of every text is a key per kanji, each a
+      // chance for the filter to let a shard through for nothing.
+      // It costs what any stem as a noun costs, so it wins only where nothing
+      // but a guess covers the kanji.
+      for (const node of stemNouns(s, i, j, dict, whole, env)) push(node);
     }
     if (PARTICLE.has(s)) out.push({ i, j, s, cls: 'prt', closed: true, cost: COST.particle });
     if (COPULA[s]) out.push({ i, j, s, cls: 'cop', closed: true, cost: COST.copula });

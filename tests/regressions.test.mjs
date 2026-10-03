@@ -531,3 +531,45 @@ test('an adverb that ends like a particle stays one word (was いつ|も, 実|�
   const r = await run('今日は雨です。');
   assert.ok(tok(r, '今日') && tok(r, 'は'), cut(r));
 });
+
+// ── What the verifiers found on 2026-10-03 ───────────────────────────────
+
+test('くる after a te-form is the verb: 持ってきた was 持って and 北 "north"', async () => {
+  for (const text of ['持ってきた。', '雨が降ってきた。', 'ドアが開いて、１人の男が出てきた。', '家にクレジットカードを忘れてきた。']) {
+    const r = await run(text);
+    const t = tok(r, 'きた');
+    assert.ok(t, `${text}: ${cut(r)}`);
+    assert.equal(t.base, 'くる', `${text}: きた read as ${gloss(t)}`);
+    assert.equal(t.chain[0].rule, 'ta', `${text}: the past of くる`);
+  }
+  // and いった after one is "went", not いる's past ("was needed")
+  const went = tok(await run('彼は何も言わず出ていった。'), 'いった');
+  assert.equal(went.base, 'いく');
+  // 北 is still the north where nothing conjugated comes before it
+  assert.equal(gloss(tok(await run('きたに行く。'), 'きた')), 'north');
+});
+
+test('one kanji the first pass guessed is read again as an ichidan stem: 見に行く is 見る\'s 見 (was a name read けん)', async () => {
+  for (const [text, ch, reading, base] of [
+    ['よく映画を見に行きますよ。', '見', 'み', '見る'], ['桜の花を見に来ました。', '見', 'み', '見る'],
+    ['水が足りなくて花が干からびちゃった。', '干', 'ひ', '干る'],
+  ]) {
+    const t = tok(await run(text), ch);
+    assert.ok(t, `${ch} in ${text}`);
+    assert.equal(t.confidence, 'dict', text);
+    assert.equal(t.reading, reading, text);
+    assert.equal(t.base, base, text);
+  }
+  // only where the first pass guessed: a kanji it read keeps its word
+  assert.equal(tok(await run('来年また来ます。'), '来年').reading, 'らいねん');
+});
+
+test('a spelling the corpus matched for a strong name is no first-tier word for another entry: 上野 is Ueno, not Kōzuke', async () => {
+  const d = diskDict();
+  const r = await analyze('上野で降りる。', { dict: d });
+  const t = tok(r, '上野');
+  assert.equal(d.get('上野'), undefined, '上野 is not a first-tier key');
+  assert.equal(t.reading, 'うえの');
+  assert.equal(t.kind, 'name');
+  assert.equal(t.confidence, 'dict');
+});
