@@ -110,6 +110,7 @@ export const STRINGS = Object.freeze({
   inTextNone: { en: 'No special sounds or grammar notes in this text.', es: 'No hay sonidos especiales ni notas de gramática en este texto.' },
   soundsHead: { en: 'Sounds', es: 'Sonidos' },
   grammarHead: { en: 'Grammar', es: 'Gramática' },
+  loanHead: { en: 'Loanword rules', es: 'Reglas de préstamos' },
   countSuffix: { en: 'in this text', es: 'en este texto' },
   sentencesOne: { en: 'in 1 sentence', es: 'en 1 oración' },
   sentencesMany: { en: 'in {n} sentences', es: 'en {n} oraciones' },
@@ -145,6 +146,29 @@ export const STRINGS = Object.freeze({
   altsOne: { en: 'One other entry is written the same way.', es: 'Otra entrada se escribe igual.' },
   altsMany: { en: '{n} other entries are written the same way.', es: 'Otras {n} entradas se escriben igual.' },
   noMeaning: { en: 'No meaning listed.', es: 'Sin significado registrado.' },
+  rareWord: { en: 'A rare word: outside the common words Yomu reads first.', es: 'Una palabra poco común: fuera de las palabras comunes que Yomu lee primero.' },
+  rareTag: { en: 'rare word', es: 'palabra poco común' },
+  noSplit: {
+    en: 'It cannot be split into dictionary words either.',
+    es: 'Tampoco se puede dividir en palabras del diccionario.',
+  },
+  madeOf: { en: 'Made of', es: 'Formada por' },
+  notInDict: { en: 'not in the dictionary', es: 'no está en el diccionario' },
+  compoundRule: {
+    en: 'Written as one word. The dictionary has its parts, not the whole.',
+    es: 'Se escribe como una sola palabra. El diccionario tiene sus partes, no el conjunto.',
+  },
+  compoundGuess: {
+    en: 'No split into dictionary words covers all of it, so the part that is not in the dictionary is read as written.',
+    es: 'Ninguna división en palabras del diccionario la cubre entera, así que la parte que no está en el diccionario se lee tal como se escribe.',
+  },
+  origin: { en: 'Where it comes from', es: 'De dónde viene' },
+  fromLang: { en: 'From {lang}', es: 'Del {lang}' },
+  fromLangWord: { en: 'From {lang}: {word}', es: 'Del {lang}: {word}' },
+  fromOther: { en: 'From another language ({code})', es: 'De otro idioma ({code})' },
+  wasei: { en: 'Made-in-Japan English', es: 'Inglés hecho en Japón' },
+  waseiWord: { en: 'Made-in-Japan English, from {word}', es: 'Inglés hecho en Japón, a partir de {word}' },
+  shortened: { en: 'Shortened from {words}', es: 'Acortada de {words}' },
 
   kanjiEmpty: { en: 'No kanji in this text.', es: 'No hay kanji en este texto.' },
   kanjiHint: {
@@ -405,6 +429,43 @@ export function posWords(token) {
     if (w && !seen.has(w)) { seen.add(w); out.push(w); }
   }
   return out;
+}
+
+/**
+ * The languages JMdict names as a borrowed word's source (`ls`, ISO 639-2
+ * codes), the ones the dictionary has more than a handful of. A code not
+ * listed is shown as a code (fromOther).
+ */
+const LANG_NAMES = Object.freeze({
+  eng: { en: 'English', es: 'inglés' }, fre: { en: 'French', es: 'francés' },
+  ger: { en: 'German', es: 'alemán' }, ita: { en: 'Italian', es: 'italiano' },
+  dut: { en: 'Dutch', es: 'neerlandés' }, por: { en: 'Portuguese', es: 'portugués' },
+  lat: { en: 'Latin', es: 'latín' }, chi: { en: 'Chinese', es: 'chino' },
+  spa: { en: 'Spanish', es: 'español' }, rus: { en: 'Russian', es: 'ruso' },
+  san: { en: 'Sanskrit', es: 'sánscrito' }, ara: { en: 'Arabic', es: 'árabe' },
+  ain: { en: 'Ainu', es: 'ainu' }, kor: { en: 'Korean', es: 'coreano' },
+  gre: { en: 'Greek', es: 'griego' }, grc: { en: 'Ancient Greek', es: 'griego antiguo' },
+  haw: { en: 'Hawaiian', es: 'hawaiano' }, hin: { en: 'Hindi', es: 'hindi' },
+  heb: { en: 'Hebrew', es: 'hebreo' }, tur: { en: 'Turkish', es: 'turco' },
+  tha: { en: 'Thai', es: 'tailandés' }, vie: { en: 'Vietnamese', es: 'vietnamita' },
+  swe: { en: 'Swedish', es: 'sueco' }, may: { en: 'Malay', es: 'malayo' },
+  per: { en: 'Persian', es: 'persa' }, ukr: { en: 'Ukrainian', es: 'ucraniano' },
+  hun: { en: 'Hungarian', es: 'húngaro' }, ind: { en: 'Indonesian', es: 'indonesio' },
+  fin: { en: 'Finnish', es: 'finés' }, dan: { en: 'Danish', es: 'danés' },
+  pol: { en: 'Polish', es: 'polaco' }, nor: { en: 'Norwegian', es: 'noruego' },
+});
+
+/**
+ * Where a borrowed word came from, in words, from its record's `ls` and `ws`
+ * (docs/ANALYZER.md), or '' when the record says nothing.
+ */
+export function originWords(entry) {
+  if (!entry || !Array.isArray(entry.ls) || !entry.ls[0]) return '';
+  const [code, word] = entry.ls;
+  if (entry.ws) return word ? ui('waseiWord', { word }) : ui('wasei');
+  if (!LANG_NAMES[code]) return ui('fromOther', { code });
+  const lang = t(LANG_NAMES[code]);
+  return word ? ui('fromLangWord', { lang, word }) : ui('fromLang', { lang });
 }
 
 const REGISTER = Object.freeze({

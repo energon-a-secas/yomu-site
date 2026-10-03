@@ -17,6 +17,16 @@ import { grammarIds, soundTypes } from './render-reading.js';
  */
 export const PER_SENTENCE = Object.freeze(new Set(['dakuten', 'handakuten']));
 
+/**
+ * A loanword rule (js/loanwords.js) is a sound entry whose type starts with
+ * `loan-`. It is told by the prefix, not by importing LOAN_TYPES, because the
+ * page loads no analyzer module until the first text (reader.js). Its line
+ * keeps data-kind "sound", so lighting it lights its kana like any sound.
+ */
+export function isLoanRule(type) {
+  return String(type || '').startsWith('loan-');
+}
+
 const SENTENCE_END = new Set(['。', '．', '.', '！', '!', '？', '?', '…']);
 
 function endsSentence(token) {
@@ -24,12 +34,14 @@ function endsSentence(token) {
 }
 
 /**
- * How often each sound and each grammar id occurs. A sound counts every span
- * the analyzer marked, except the PER_SENTENCE ones, which count the sentences
- * they occur in; a grammar id counts the tokens that carry it.
+ * How often each sound, loanword rule and grammar id occurs. A sound counts
+ * every entry the analyzer made, except the PER_SENTENCE ones, which count the
+ * sentences they occur in; a loanword rule counts the words that show it; a
+ * grammar id counts the tokens that carry it.
  */
 export function summarize(tokens) {
   const sounds = new Map();
+  const loan = new Map();
   const grammar = new Map();
   const seen = new Set();
   let sentence = 0;
@@ -41,12 +53,13 @@ export function summarize(tokens) {
         if (seen.has(key)) continue;
         seen.add(key);
       }
-      sounds.set(s.type, (sounds.get(s.type) || 0) + 1);
+      const into = isLoanRule(s.type) ? loan : sounds;
+      into.set(s.type, (into.get(s.type) || 0) + 1);
     }
     for (const id of new Set(grammarIds(token))) grammar.set(id, (grammar.get(id) || 0) + 1);
     if (endsSentence(token)) sentence += 1;
   }
-  return { sounds, grammar };
+  return { sounds, loan, grammar };
 }
 
 /** long-vowel -> "long vowel", when a note has no title of its own. */
@@ -104,6 +117,14 @@ export function inTextNode(summary, noteOf, open) {
     groups.push(h('div', { class: 'it-group' }, [
       h('h3', { class: 'it-head' }, ui('soundsHead')),
       h('ul', { class: 'it-list', role: 'list' }, [...summary.sounds].map(([id, n]) => line('sound', id, n, noteOf('sound', id), open))),
+    ]));
+  }
+  // Loanword rules are sounds to the page (they light kana), under a heading
+  // of their own, because they explain a word's spelling, not a kana.
+  if (summary.loan && summary.loan.size) {
+    groups.push(h('div', { class: 'it-group' }, [
+      h('h3', { class: 'it-head' }, ui('loanHead')),
+      h('ul', { class: 'it-list', role: 'list' }, [...summary.loan].map(([id, n]) => line('sound', id, n, noteOf('sound', id), open))),
     ]));
   }
   if (summary.grammar.size) {
@@ -192,10 +213,12 @@ export function noteNode(note, ref) {
   return out;
 }
 
-/** The sound and grammar notes one token carries, for the Word panel. */
+/** The sound, loanword and grammar notes one token carries, in that order, for the Word panel. */
 export function tokenNotes(token) {
+  const types = soundTypes(token);
   return [
-    ...soundTypes(token).map((id) => ({ kind: 'sound', id })),
+    ...types.filter((id) => !isLoanRule(id)).map((id) => ({ kind: 'sound', id })),
+    ...types.filter(isLoanRule).map((id) => ({ kind: 'sound', id })),
     ...[...new Set(grammarIds(token))].map((id) => ({ kind: 'grammar', id })),
   ];
 }

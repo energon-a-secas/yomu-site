@@ -7,7 +7,7 @@
 // because the difference between said and spelled is the lesson here.
 
 import { h, withJa } from './utils.js';
-import { ui, t, posWords, currentLang } from './strings.js';
+import { ui, t, posWords, currentLang, originWords } from './strings.js';
 import { beats as splitBeats, beatRomaji } from './kana.js';
 import { surfaceNode } from './render-reading.js';
 import { noteTitle, noteGist, tokenNotes, humanize } from './render-notes.js';
@@ -62,11 +62,59 @@ function meaningsPart(token) {
   } else if (token.entry) {
     lines.push(h('p', { class: 'quiet' }, ui('noMeaning')));
   }
-  if (token.kind === 'unknown' || token.confidence === 'guess') lines.push(h('p', { class: 'word-warn' }, ui('guess')));
+  if (token.entry && token.entry.tier === 2) lines.push(h('p', { class: 'quiet' }, ui('rareWord')));
+  // A compound says what it knows part by part (partsPart), guess or not.
+  if (!token.parts && (token.kind === 'unknown' || token.confidence === 'guess')) {
+    lines.push(h('p', { class: 'word-warn' }, ui('guess')));
+    if (token.kind === 'katakana') lines.push(h('p', { class: 'quiet' }, ui('noSplit')));
+  }
   const alts = Number(token.alts) || 0;
   if (alts === 1) lines.push(h('p', { class: 'quiet' }, ui('altsOne')));
   else if (alts > 1) lines.push(h('p', { class: 'quiet' }, ui('altsMany', { n: alts })));
   return lines.length ? section('meanings', lines) : null;
+}
+
+/**
+ * A katakana compound (compounds.js), part by part: "Made of: インフォーム
+ * not in the dictionary + ショップ shop". A part the dictionary does not
+ * have says so instead of a gloss; a rare part says it is one.
+ */
+function partsPart(token) {
+  const parts = Array.isArray(token.parts) ? token.parts : [];
+  if (!parts.length) return null;
+  const line = [];
+  parts.forEach((p, k) => {
+    if (k) line.push(' + ');
+    line.push(h('span', { lang: 'ja' }, p.surface), ' ');
+    line.push(p.gloss ? h('span', { lang: 'en' }, p.gloss) : h('span', { class: 'quiet' }, ui('notInDict')));
+    if (p.tier === 2) line.push(' ', h('span', { class: 'quiet' }, `(${ui('rareTag')})`));
+  });
+  const covered = parts.every((p) => p.entry);
+  return section('madeOf', [
+    h('p', { class: 'word-made' }, line),
+    h('p', { class: covered ? 'quiet' : 'word-warn' }, ui(covered ? 'compoundRule' : 'compoundGuess')),
+  ]);
+}
+
+/**
+ * Where the word came from: the record's `ls` and `ws` (a compound's, part by
+ * part), and a shortening the loanword rules found (loanwords.js).
+ */
+function originPart(token) {
+  const lines = [];
+  const parts = Array.isArray(token.parts) ? token.parts : null;
+  if (parts) {
+    for (const p of parts) {
+      const words = originWords(p.entry);
+      if (words) lines.push(h('p', null, [h('span', { lang: 'ja' }, p.surface), `: ${words}`]));
+    }
+  } else {
+    const words = originWords(token.entry);
+    if (words) lines.push(h('p', null, words));
+    const short = (token.sounds || []).find((s) => s && s.type === 'loan-short' && s.detail);
+    if (short) lines.push(h('p', null, [ui('shortened', { words: '' }).trim(), ' ', h('span', { lang: 'en' }, short.detail)]));
+  }
+  return lines.length ? section('origin', lines) : null;
 }
 
 /**
@@ -193,7 +241,9 @@ export function wordNode(token, { noteOf, kidOf, canSpeak, kanjiOf = null }) {
     ]),
     beatsPart(token, canSpeak),
     kinds.length ? section('partOfSpeech', h('p', null, withJa(kinds.join('; ')))) : null,
+    partsPart(token),
     meaningsPart(token),
+    originPart(token),
     kanjiPart(token, { kidOf, kanjiOf }),
     chainPart(token, noteOf),
     notesPart(token, noteOf),
