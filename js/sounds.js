@@ -11,6 +11,7 @@
 // at the end of a token), it says nothing.
 
 import { beats, vowelOf, beatRomaji, toHira, isKatakana, isHiragana, isKanji, devoiced, devoicedNotation } from './kana.js';
+import { loanRules } from './loanwords.js';
 
 /** Every type detectSounds can emit, in the order a lesson would meet them. */
 export const SOUND_TYPES = Object.freeze([
@@ -79,6 +80,9 @@ export function detectSounds(token, { final = false, cuts = null, finalWa = fals
     ...repeatMarks(token, ctx),
     ...specialReadings(token, ctx),
     ...counterChange(token, reading),
+    // Why a katakana word looks the way it does (loanwords.js): its own
+    // types, LOAN_TYPES, which the page groups under "Loanword rules".
+    ...loanRules(token),
   ];
   return out.sort((a, b) => a.at[0] - b.at[0] || a.at[1] - b.at[1]);
 }

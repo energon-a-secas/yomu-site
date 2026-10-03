@@ -16,6 +16,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
 import { SOUND_TYPES, detectSounds } from '../js/sounds.js';
+import { LOAN_TYPES } from '../js/loanwords.js';
 import { SOUND_NOTES, noteFor } from '../js/notes.js';
 import { said, spelled, devoiced, devoicedNotation } from '../js/kana.js';
 import { run, saidLine, cut } from './helpers/disk.mjs';
@@ -108,7 +109,8 @@ test('every span lies inside the reading, and the list is in order', async () =>
       }
       assert.ok(s.at[0] >= last, `${t.surface} sounds out of order`);
       last = s.at[0];
-      assert.ok(SOUND_TYPES.includes(s.type));
+      // a loanword rule is a sound entry too (loanwords.js), with its own types
+      assert.ok(SOUND_TYPES.includes(s.type) || LOAN_TYPES.includes(s.type), s.type);
     }
   }
 });
