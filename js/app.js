@@ -4,6 +4,7 @@ import { state, loadPrefs, loadText as savedText, takeFragmentText } from './sta
 import { paintAll } from './render.js';
 import { bindEvents, loadText, analyzeNow } from './events.js';
 import { enterEmbedLayout, startEmbed } from './embed.js';
+import { hostLoad } from './events-kanji.js';
 
 const VERSION = '1.0.0';
 
@@ -16,7 +17,7 @@ function init() {
   if (state.embed) {
     startEmbed({
       version: VERSION,
-      onLoad: (text) => loadText(text),
+      onLoad: hostLoad,
       onLang: (lang) => { state.prefs.lang = lang; paintAll(state); },
     });
     return;

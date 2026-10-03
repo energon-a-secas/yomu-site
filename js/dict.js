@@ -187,6 +187,9 @@ export function createDict({ fetchJson, base = 'data/' } = {}) {
     // The core is not needed to decide which range shards to fetch (the
     // filter holds only keys outside it), so it loads alongside them.
     const coreLoad = loadCore();
+    // Handled until it is awaited below: a core that fails while the filter
+    // loads was an unhandled rejection, though need() still rejects with it.
+    coreLoad.catch(() => {});
     await loadFilter();
     const wanted = new Set();
     for (const k of keys || []) {

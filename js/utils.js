@@ -46,7 +46,10 @@ export function append(el, children) {
   return el;
 }
 
-const JA_RUN = /[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}ー〜～々・]+/gu;
+// ー, 〜, 々, ・ and the spacing voicing marks ゛ ゜ are Script=Common, so
+// each is named; without ゛ and ゜ the notes "The two dots ゛" and "The small
+// circle ゜" had them outside lang="ja".
+const JA_RUN = /[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}ー〜～々・゛゜]+/gu;
 
 /**
  * English or Spanish with Japanese inside it ("は said wa", "〜ます: the

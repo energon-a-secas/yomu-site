@@ -101,14 +101,15 @@ text leaves the page.
 https://yomu.neorgon.com/#/kanji is a screen of the kanji a learner saved for
 review, with a review at #/kanji/review. In the reader, each kanji in the
 kanji table and in the Word panel has a save toggle, each row says how many
-texts the kanji was met in, and kanji not saved yet carry a small corner mark
-(Display: Unsaved kanji, Mark or Off). An embedded Yomu has a My kanji link
-in its one-line bar.
+texts the kanji was met in, and kanji not saved yet carry a small folded
+corner (Display: Unsaved kanji, Mark or Off). An embedded Yomu has a My kanji
+link in its one-line bar, and a text the host sends always opens the reader.
 
 - Times seen counts texts: a kanji counts once per reading session, and a
-  session begins when the box gets new content at once (a paste, an example,
-  a phrase, a #t= link, yomu:load) or after it is emptied. A reload counts
-  nothing.
+  session begins when the box gets a new text at once (an example, a phrase,
+  a #t= link, yomu:load, or a paste into an empty box or over all of it) or
+  after it is emptied. A paste added to the text already there, and a
+  reload, count nothing again.
 - Review: Show, then Again (box 1, due tomorrow, and again before the review
   ends) or Got it (next box, due in 1, 2, 4, 8 or 16 days). Keys: Space, 1, 2,
   Escape.

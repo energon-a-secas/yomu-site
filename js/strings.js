@@ -223,6 +223,7 @@ export const STRINGS = Object.freeze({
   removeKanji: { en: 'Remove {ch} from My kanji', es: 'Quitar {ch} de Mis kanji' },
   seenTimes: { en: 'seen {n} times', es: 'visto {n} veces' },
   seenFirst: { en: 'first time', es: 'primera vez' },
+  seenOnce: { en: 'seen once', es: 'visto una vez' },
   unsavedKanji: { en: 'Unsaved kanji', es: 'Kanji sin guardar' },
   mark: { en: 'Mark', es: 'Marcar' },
   wordKanji: { en: 'Kanji in this word', es: 'Kanji de esta palabra' },
@@ -337,9 +338,11 @@ export const STRINGS = Object.freeze({
   nextReview: { en: 'Next review: {day}, {n} kanji.', es: 'Próximo repaso: {day}, {n} kanji.' },
   backToMyKanji: { en: 'Back to My kanji', es: 'Volver a Mis kanji' },
   noInfo: { en: 'No details in the kanji dictionary.', es: 'Sin detalles en el diccionario de kanji.' },
+  // JMnedict is named here because a name from the names tier can be on
+  // screen at any time, and its licence asks for the acknowledgement there.
   footerNote: {
-    en: 'Dictionary: JMdict and KANJIDIC, EDRDG, CC BY-SA 4.0. Your text stays in this browser.',
-    es: 'Diccionario: JMdict y KANJIDIC, EDRDG, CC BY-SA 4.0. Tu texto se queda en este navegador.',
+    en: 'Dictionary: JMdict, JMnedict and KANJIDIC, EDRDG, CC BY-SA 4.0. Your text stays in this browser.',
+    es: 'Diccionario: JMdict, JMnedict y KANJIDIC, EDRDG, CC BY-SA 4.0. Tu texto se queda en este navegador.',
   },
 });
 

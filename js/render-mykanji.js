@@ -13,7 +13,7 @@
 // Until they arrive a row shows its kanji, its counts and its words.
 
 import { $, h, fill } from './utils.js';
-import { ui } from './strings.js';
+import { ui, currentLang } from './strings.js';
 import { toHira } from './kana.js';
 import { toHiragana } from './vendor/wanakana.js';
 import { myKanji, dayOf } from './kanji-store.js';
@@ -121,7 +121,7 @@ function savedItem(ch, ix, mine, now) {
   const rec = mine.savedOf(ch);
   const seen = mine.seenOf(ch);
   const meta = [
-    seen ? seenText(seen.n) : ui('notSeen'),
+    seen ? seenText(seen.n, true) : ui('notSeen'),
     ui('savedOn', { day: dayText(dayOf(rec.at), now) }),
     ui('dueOn', { day: dayText(rec.due <= now ? now : rec.due, now) }),
   ];
@@ -190,7 +190,7 @@ function oftenSection(mine) {
         h('span', { class: 'mk-char mk-char--sm', lang: 'ja' }, ch),
         h('div', { class: 'mk-main' }, [
           meaningText(info, 3) ? h('p', { class: 'mk-mean', lang: 'en' }, meaningText(info, 3)) : null,
-          h('p', { class: 'mk-meta' }, seenText(seen.n)),
+          h('p', { class: 'mk-meta' }, seenText(seen.n, true)),
           wordsLine(seen.words.slice(-3)),
         ]),
         saveToggle(ch, false, { 'data-act': 'mk-save', 'data-ix': ix }),
@@ -228,9 +228,15 @@ export function paintNote(mine = myKanji()) {
   el.hidden = !text;
 }
 
-/** The list screen: due, saved, seen often, backup. */
+/**
+ * The list screen: due, saved, seen often, backup. Read in Spanish, the
+ * meanings are still KANJIDIC's English, and the screen says so once, as the
+ * Word panel does.
+ */
 export function listNodes(mine = myKanji(), now = today()) {
-  return [dueSection(mine, now), savedSection(mine, now), oftenSection(mine), backupSection()];
+  const any = Object.keys(mine.data.saved).length || Object.keys(mine.data.seen).length;
+  const lang = any && currentLang() !== 'en' ? h('p', { class: 'quiet' }, ui('meaningsEnglish')) : null;
+  return [lang, dueSection(mine, now), savedSection(mine, now), oftenSection(mine), backupSection()].filter(Boolean);
 }
 
 /** Draw the list screen into #mk-body, keeping the filter's text and focus. */

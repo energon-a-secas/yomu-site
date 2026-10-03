@@ -28,7 +28,7 @@ import { paintSavedMarks, paintDueCount, today } from './render-save.js';
 import { paintSide, afterPaintAll } from './render.js';
 import { openDialog, bindDialog } from './dialogs.js';
 import { downloadText } from './neorgon-dom.js';
-import { describe } from './events-read.js';
+import { describe, loadText } from './events-read.js';
 
 const ROUTES = Object.freeze({ '#/kanji': 'list', '#/kanji/review': 'review' });
 const HASH = Object.freeze({ reader: '', list: '#/kanji', review: '#/kanji/review' });
@@ -70,7 +70,21 @@ function refocus(key, fallback) {
     else el = same[0] || null;
   }
   el = el || (typeof fallback === 'function' ? fallback() : fallback);
-  if (el) el.focus({ preventScroll: !!(key && key.act) });
+  if (!el) return;
+  if (key && key.act) focusInView(el);
+  else el.focus();
+}
+
+/**
+ * Focus a control a repaint put back, without the jump a plain focus()
+ * makes, then bring it into view if the repaint moved it out: a list that
+ * grew above it (Saved, after a save from Seen often) pushed the next Save
+ * button below a phone's screen, and Import's below a desktop's.
+ */
+function focusInView(el) {
+  el.focus({ preventScroll: true });
+  const r = el.getBoundingClientRect();
+  if (r.top < 0 || r.bottom > window.innerHeight) el.scrollIntoView({ block: 'nearest' });
 }
 
 /** Repaint the screen for the route it shows, keeping focus where it was. */
@@ -162,8 +176,11 @@ function stamp(next) {
   entries.set(ix, next);
 }
 
-/** Show the route the address names. Called on every hashchange, and once at boot. */
-export function applyRoute({ boot = false } = {}) {
+/**
+ * Show the route the address names. Called on every hashchange, and once at
+ * boot. `focus: false` leaves focus where it is (a text the host sent).
+ */
+export function applyRoute({ boot = false, focus = true } = {}) {
   const next = routeOf(location.hash);
   const prev = route;
   stamp(next);
@@ -176,6 +193,7 @@ export function applyRoute({ boot = false } = {}) {
 
   if (next === 'reader') {
     window.scrollTo({ top: readerScroll, behavior: 'instant' });
+    if (!focus) return;
     const link = [...document.querySelectorAll('a.mk-open')].find((a) => a.getClientRects().length);
     (link || $('main')).focus({ preventScroll: true });
     return;
@@ -193,6 +211,31 @@ export function applyRoute({ boot = false } = {}) {
   if (next === 'review') reviewFocus(review)?.focus({ preventScroll: true });
   else if (prev === 'review') ($('mk-body').querySelector('[data-act="mk-start"]') || $('mk-title')).focus({ preventScroll: true });
   else $('mk-title').focus({ preventScroll: true });
+}
+
+/**
+ * Back to the reader, whatever route shows, without a new history entry and
+ * without moving focus.
+ */
+function toReader() {
+  if (route === 'reader') return;
+  history.replaceState(history.state, '', `${location.pathname}${location.search}`);
+  applyRoute({ focus: false });
+}
+
+/**
+ * A text the host sent (yomu:load). A new one is read on the reader: a
+ * learner who had opened My kanji in the frame and closed the sheet on it
+ * saw their list again, with the next phrase loaded behind it. The text on
+ * screen sent again is not new: a host resends it when it thinks the frame
+ * reloaded, and WebKit fires the frame's load for a change of hash, so
+ * following the My kanji link brought the text back and, with it, the
+ * reader; it is the same reading session too, and counts nothing again.
+ */
+export function hostLoad(text) {
+  const again = text === state.text;
+  if (!again) toReader();
+  return loadText(text, { restore: again });
 }
 
 /** Go up one route: from a review to the list, from the list to the reader. */
@@ -354,7 +397,7 @@ export function bindKanji() {
       file.value = '';            // the same file chosen twice still fires change
       importFile(f).finally(() => {
         const b = document.querySelector('#mk-body [data-act="mk-import"]');
-        if (b) b.focus({ preventScroll: true });
+        if (b) focusInView(b);
       });
     });
   }
@@ -382,6 +425,18 @@ export function bindKanji() {
     if (route !== 'reader') { showRegions(route); repaint(); }
     paintDueCount();
   });
+  // What is due moves at midnight, and a page left open past it said
+  // "Nothing is due" about a kanji due that morning.
+  let shownDay = today();
+  const dayTurned = () => {
+    const now = today();
+    if (now === shownDay) return;
+    shownDay = now;
+    afterChange();
+  };
+  document.addEventListener('visibilitychange', dayTurned);
+  addEventListener('focus', dayTurned);
+  setInterval(dayTurned, 60 * 1000);
   paintDueCount();
   applyRoute({ boot: true });
 }

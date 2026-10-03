@@ -8,10 +8,13 @@
 // It is also where My kanji counts (kanji-store.js). A read that settles is
 // the newest one and finished, so counting there counts a typed kanji once,
 // after the debounce, and never per keystroke. A reading session begins where
-// the box gets new content at once (loadText, a paste or a drop) or after it
-// was emptied (Clear, or every character deleted, which leaves the page in
-// the same state as Clear); the reload that restores the saved text is not
-// one, which is how a reload counts nothing.
+// the box gets a new text at once (loadText; a paste or a drop into an empty
+// box, or a paste over all of it) or after it was emptied (Clear, or every
+// character deleted, which leaves the page in the same state as Clear); the
+// reload that restores the saved text is not one, which is how a reload
+// counts nothing. A paste added to the text already there is more of the
+// same text: a passage pasted line by line counted its first line's kanji
+// once per line.
 
 import { state, saveText, forgetText, setText } from './state.js';
 import { $, debounce } from './utils.js';
@@ -179,13 +182,18 @@ export function bindInput() {
   const ta = $('yomu-text');
   if (!ta) return;
   let pasted = false;
-  ta.addEventListener('paste', () => { pasted = true; });
+  let replacing = false;     // the paste covers all the box held: a new text
+  ta.addEventListener('paste', () => {
+    pasted = true;
+    replacing = ta.selectionStart === 0 && ta.selectionEnd >= ta.value.length;
+  });
   ta.addEventListener('input', (e) => {
     autosize(ta);
     const had = state.text.trim() !== '';
     if (e.inputType === 'insertFromDrop' || e.inputType === 'insertFromPaste') pasted = true;
     setText(state, ta.value);
-    if (pasted || (had && !state.text.trim())) myKanji().beginSession();
+    if ((pasted && (!had || replacing)) || (had && !state.text.trim())) myKanji().beginSession();
+    replacing = false;
     saveText(state, ta.value);
     paintStatus(state);
     paintEmpty(state);

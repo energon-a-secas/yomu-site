@@ -48,10 +48,13 @@ export function saveToggle(ch, saved, attrs) {
   ]);
 }
 
-/** "seen 3 times", "first time", or '' before the first count. */
-export function seenText(n) {
+/** "seen 3 times", "first time" (or "seen once" on the list), or '' before the first count. */
+export function seenText(n, onList = false) {
   if (!Number.isInteger(n) || n < 1) return '';
-  return n === 1 ? ui('seenFirst') : ui('seenTimes', { n });
+  // Beside the text it was just met in, once is the first time; on the My
+  // kanji list, which is about every text, it is once.
+  if (n === 1) return ui(onList ? 'seenOnce' : 'seenFirst');
+  return ui('seenTimes', { n });
 }
 
 /** A stored [written, reading] pair, with its furigana. */
