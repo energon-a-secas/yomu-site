@@ -19,6 +19,10 @@ romaji lines:
   particles は へ を read wa e o, n' before a vowel or y, never macrons
 - spelled: kana by kana with a hyphen between beats
 
+A number and its counter are one number token read by rule, with the sound
+changes between them: 三本 さんぼん, 一分 いっぷん, 十名 じゅうめい (名 counts
+people), 何人 なんにん. The counters are listed in docs/ANALYZER.md.
+
 Sound notes: particle-wa, particle-e, particle-o, fossil-wa (こんにちは),
 long-vowel, small-tsu, youon, dakuten, handakuten, n-assimilation, devoiced
 (written s(u)kides(u)), ji-zu, foreign-sound, bar, repeat-mark,
@@ -30,7 +34,13 @@ for -er, -or, -ar and long vowels), loan-f (フ, ファ), loan-lr (l written wit
 the r column), loan-v (v with the b column), loan-th (th with s or z),
 loan-si (シ, ティ, ディ), loan-wasei (made-in-Japan English), loan-short
 (パソコン from personal computer). A katakana compound with no record of its
-own is one token with parts (インフォームショップ: a guess + shop).
+own is one token with parts (インフォームショップ: a guess + shop). A part no
+record covers may carry soundsLike, the English word it sounds like
+(インフォーム: inform), found by running the loanword rules backwards over the
+English words JMdict glosses with, and offered only when clearly ahead: on
+held-out JMdict loanwords it answered 39 in 100 and was right on 90 in 100 of
+those. It is a guess from the sound, shown as one, and never a gloss: the
+part's gloss stays null.
 
 Grammar notes: every particle, the copula forms, polite and plain verb
 endings, te-forms (te-kudasai, te-iru, te-shimau, te-miru), desire, potential,
@@ -40,9 +50,10 @@ passive, causative, volitional, imperative, the conditionals ば, たら, なら
 Words outside JMdict's common set and names are read only where the common
 words leave a guess: a rare word is marked as one (entry.tier 2), and a name
 JMnedict knows is a name token with its reading; one it does not know is
-still a guess, read from its kanji. Records of borrowed words carry where
-they came from (ls, e.g. ["ger", "Arbeit"]) and whether they were made in
-Japan (ws).
+still a guess, read from its kanji. The Word panel labels a rare word as one
+("Rare word": not among the common words, read from the full dictionary).
+Records of borrowed words carry where they came from (ls, e.g. ["ger",
+"Arbeit"]) and whether they were made in Japan (ws).
 
 The full contract, including the token shape, is docs/ANALYZER.md in the
 repository: https://github.com/energon-a-secas/yomu-site

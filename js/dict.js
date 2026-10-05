@@ -27,6 +27,8 @@
 // `rare`) and the names (data/names/index.json, `needNames` and `name`).
 // js/range-store.js loads them; nothing here fetches either until the second
 // phase asks, so a text the first pass reads in full never touches them.
+// Behind those, the sound-alike words (data/like/, `needLike` and `like`),
+// read only for a katakana part no record covers (js/sounds-like.js).
 
 import { readFilter } from './bloom.js';
 import { createRangeStore, lastAtMost, loadError } from './range-store.js';
@@ -95,6 +97,13 @@ export function createDict({ fetchJson, base = 'data/' } = {}) {
   const names = createRangeStore({
     fetchJson, resolve, indexPath: `${dir}names/index.json`, what: 'The names index',
   });
+
+  // The sound-alike words: an index with the odds, and one file per English
+  // consonant group, each fetched the first time a part needs it.
+  let likeIndex = null;
+  let likeIndexing = null;
+  const likeGroups = new Map();  // group id -> [[word, count], ...]
+  const likePending = new Map();
 
   function loadIndex() {
     if (index) return Promise.resolve(index);
@@ -304,6 +313,60 @@ export function createDict({ fetchJson, base = 'data/' } = {}) {
     return out;
   }
 
+  // ── Sound-alike words ───────────────────────────────────────────────────
+
+  function loadLikeIndex() {
+    if (likeIndex) return Promise.resolve(likeIndex);
+    if (!likeIndexing) {
+      const path = `${dir}like/index.json`;
+      likeIndexing = Promise.resolve()
+        .then(() => fetchJson(path))
+        .then((doc) => {
+          if (!doc || !doc.groups || typeof doc.groups !== 'object' || !doc.pieces) throw new Error('it has no groups or pieces');
+          likeIndex = doc;
+          return doc;
+        })
+        .catch((e) => {
+          likeIndexing = null;
+          throw loadError('The sound-alike index', path, e);
+        });
+    }
+    return likeIndexing;
+  }
+
+  function loadLikeGroup(id) {
+    if (likeGroups.has(id)) return Promise.resolve();
+    if (likePending.has(id)) return likePending.get(id);
+    const path = resolve(likeIndex.groups[id].src);
+    const p = Promise.resolve()
+      .then(() => fetchJson(path))
+      .then((doc) => {
+        if (!doc || !doc.words || typeof doc.words !== 'object') throw new Error('it has no words');
+        likeGroups.set(id, Object.entries(doc.words));
+        likePending.delete(id);
+      })
+      .catch((e) => {
+        likePending.delete(id);
+        throw loadError('Sound-alike group', path, e);
+      });
+    likePending.set(id, p);
+    return p;
+  }
+
+  /** Load the index and the groups named (an unknown group is skipped). */
+  async function needLike(ids) {
+    await loadLikeIndex();
+    await Promise.all([...new Set(ids || [])].filter((id) => Object.hasOwn(likeIndex.groups, id)).map(loadLikeGroup));
+  }
+
+  /**
+   * What needLike loaded: the odds, and a group's [word, count] pairs (empty
+   * for a group not loaded), or null before the index is in.
+   */
+  function like() {
+    return likeIndex ? { pieces: likeIndex.pieces, words: (id) => likeGroups.get(id) || [] } : null;
+  }
+
   return Object.freeze({
     ready: loadIndex,
     need,
@@ -319,6 +382,12 @@ export function createDict({ fetchJson, base = 'data/' } = {}) {
     name: names.get,
     /** Files of the second phase's tiers loaded so far, for tests and the measurements. */
     get loadedRare() { return rare.loaded + names.loaded; },
+    /** Load the sound-alike index and these groups (js/sounds-like.js). */
+    needLike,
+    /** The sound-alike data loaded so far, or null. */
+    like,
+    /** Sound-alike files loaded so far, the index included, for tests. */
+    get loadedLike() { return likeGroups.size + (likeIndex ? 1 : 0); },
     /** Longest key in the dictionary; the lattice never looks further. */
     get maxKey() { return index && index.maxKey ? index.maxKey : 12; },
     /** How many dictionary files (the core and range shards) are loaded, for tests and the performance note. */

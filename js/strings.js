@@ -150,7 +150,8 @@ export const STRINGS = Object.freeze({
   altsOne: { en: 'One other entry is written the same way.', es: 'Otra entrada se escribe igual.' },
   altsMany: { en: '{n} other entries are written the same way.', es: 'Otras {n} entradas se escriben igual.' },
   noMeaning: { en: 'No meaning listed.', es: 'Sin significado registrado.' },
-  rareWord: { en: 'A rare word: outside the common words Yomu reads first.', es: 'Una palabra poco común: fuera de las palabras comunes que Yomu lee primero.' },
+  rareLabel: { en: 'Rare word', es: 'Palabra poco común' },
+  rareWord: { en: 'It is not among the common words, so it was read from the full dictionary.', es: 'No está entre las palabras comunes, así que se leyó del diccionario completo.' },
   rareTag: { en: 'rare word', es: 'palabra poco común' },
   noSplit: {
     en: 'It cannot be split into dictionary words either.',
@@ -158,6 +159,8 @@ export const STRINGS = Object.freeze({
   },
   madeOf: { en: 'Made of', es: 'Formada por' },
   notInDict: { en: 'not in the dictionary', es: 'no está en el diccionario' },
+  soundsLike: { en: 'Sounds like English', es: 'Suena como el inglés' },
+  soundsLikeNote: { en: '(a guess from the sound, not a dictionary entry)', es: '(una suposición por el sonido, no una entrada del diccionario)' },
   compoundRule: {
     en: 'Written as one word. The dictionary has its parts, not the whole.',
     es: 'Se escribe como una sola palabra. El diccionario tiene sus partes, no el conjunto.',

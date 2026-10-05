@@ -30,6 +30,10 @@ text ──normalize──▶ lines ──runs──▶ [jp run | other]
                            tokens ─▶ joinKatakana: katakana pieces that touch
                                      become one compound with parts
                                       │
+                           only for a part no record covers:
+                           dict.needLike(groups) ──like/index.json──▶ like/<g>.json
+                           soundsLike(part) ──the English it sounds like, or none
+                                      │
                                     enrich(token): reading, furigana, morae,
                                           romaji said/spelled, sounds[] (with
                                           the loanword rules), grammar[]
@@ -86,7 +90,7 @@ same text and the same data give the same tokens.
 |---|---|---|
 | `kana.js` | script tests, hiragana/katakana folding, morae, romaji (spelled and said) | nothing |
 | `deinflect.js` | the rule table and `deinflect(surface)` | nothing |
-| `dict.js` | the shard index, the core and the key filter, fetching, `need(keys)`, `get(key)`, kanji info (listed and ranged shards); the second phase's tiers as `needRare`/`rare` and `needNames`/`name` | `bloom.js`, `range-store.js` |
+| `dict.js` | the shard index, the core and the key filter, fetching, `need(keys)`, `get(key)`, kanji info (listed and ranged shards); the second phase's tiers as `needRare`/`rare` and `needNames`/`name`; the sound-alike words as `needLike`/`like` | `bloom.js`, `range-store.js` |
 | `range-store.js` | a tier loaded only when asked: an index, key filters (parts over a range, or one inline), range shards | `bloom.js` |
 | `bloom.js` | the key filter: its hash, reading it, and building it (the builder imports this file) | nothing |
 | `lattice.js` | the best path through a run (or through one stretch of it, between two fixed nodes), and the tokens built from it | `kana.js`, `deinflect.js`, `costs.js`, `names.js`, `candidates.js`, `spellings.js` |
@@ -98,6 +102,7 @@ same text and the same data give the same tokens.
 | `names.js` | which kanji runs are names, a per-kanji guess at their reading, and the entry a name from the names tier carries (`NAME_TYPES`, `nameEntry`) | `kana.js`, `deinflect.js`, `numbers.js` |
 | `numbers.js` | reading numbers, counters and 何 + counter, and the sound changes between them | nothing |
 | `compounds.js` | katakana pieces that touch, joined into one compound token with `parts` | `kana.js` |
+| `sounds-like.js` | for a compound part no record covers, the English word it sounds like (the loanword rules run backwards), offered only when clearly ahead | `loan-align.js` |
 | `loan-align.js` | an English word lined up against katakana beats, consonant by consonant | `kana.js` |
 | `loanwords.js` | the loanword rules per katakana token, as sound entries with spans (`LOAN_TYPES`) | `kana.js`, `loan-align.js` |
 | `sounds.js` | special-sound detection per token, with spans, and the loanword rules | `kana.js`, `loanwords.js` |
@@ -138,12 +143,12 @@ runs them under plain node with the real shards read from disk.
 
 A token the second phase read is shaped the same, with these marks:
 
-- a **rare word** (a record from `data/dict/rNNN`) has `confidence: 'dict'` and `entry.tier === 2`, set by `dict.js` as the shard loads (the shards do not spend bytes on it), so the page can say "rare word"; its `alts` counts the other rare records of its key;
+- a **rare word** (a record from `data/dict/rNNN`) has `confidence: 'dict'` and `entry.tier === 2`, set by `dict.js` as the shard loads (the shards do not spend bytes on it), so the page can say "rare word"; its `alts` counts the other rare records of its key. The Word panel opens its meanings with a "Rare word" label and one sentence: it is not among the common words, so it was read from the full dictionary;
 - a **name** from the names tier has `kind: 'name'`, `confidence: 'dict'`, its JMnedict reading, and `entry = { r?, g, p: 'n-pr', nt, f?, s?, also? }`: `nt` the JMnedict types (`surname`, `given`, `masc`, `fem`, `place`), most evidenced first, `g` the same in English (`['surname', 'place name']`), the way a dictionary gloss is English, and `names.js` `NAME_TYPES` holds each in `{ en, es }` for the page. `also` is the rare word spelled the same, `{ r?, g }` (its reading and up to two glosses), where there is one: 清水 is the surname and also "spring water", and nothing in 清水を飲んだ tells the two apart, so the page can say both. A name the first pass guessed keeps `entry: null` and `confidence: 'guess'`.
 
 These fields appear only where they apply:
 
-- a katakana **compound** (`compounds.js`, below) has `parts: [{ surface, reading, gloss, tier, entry }]`, one per dictionary word or guess the lattice placed in it (`tier` 1 or 2, null for a guess; `gloss` the record's first gloss, null for a guess), and `gloss`, the parts' glosses joined with ` + ` when every part has one (`'tennis + tournament'`), else null. Its own `entry` is null; its `confidence` is `rule` when every part is a dictionary word and `guess` otherwise;
+- a katakana **compound** (`compounds.js`, below) has `parts: [{ surface, reading, gloss, tier, entry, soundsLike? }]`, one per dictionary word or guess the lattice placed in it (`tier` 1 or 2, null for a guess; `gloss` the record's first gloss, null for a guess), and `gloss`, the parts' glosses joined with ` + ` when every part has one (`'tennis + tournament'`), else null. Its own `entry` is null; its `confidence` is `rule` when every part is a dictionary word and `guess` otherwise. A guessed part may carry `soundsLike`, the English word it sounds like (`'inform'` for インフォーム), a guess from the sound and never a gloss: its `gloss` stays null (see "Sounds like English");
 - a loanword rule (`loan-*` in `sounds`, below) is one entry per type per token, with every place it applies in `spans`, the way the voiced marks are;
 - a `furigana` entry carries `whole: true` when the dictionary says its run is read as a whole (`f` is `*`: 今日 きょう), so nothing shares the ruby out between the characters;
 - a `dakuten`, `handakuten` or `devoiced` sound is one entry per token, with every kana it covers in `spans` (`at` is the first), so a sentence with eight voiced kana lists the mark once per word, not eight times;
@@ -156,6 +161,25 @@ Rules the token obeys:
 - `reading` is always hiragana, even for a katakana surface; `romaji` is computed from it.
 - `sounds[].at` indexes into `reading` (not `surface`), because a special sound is a property of what is said.
 - A token never carries learner-facing prose. It carries ids; `notes.js` turns an id into `{ en, es }`.
+
+## Numbers and counters
+
+A number (digits, or kanji numerals) followed by a counter from the table in
+`numbers.js` is one `number` token, read by rule, and so is 何 before one
+(何本 なんぼん). The counters: 時, 時間, 時半, 分, 秒, 人, 本, 枚, 名, 円, 歳,
+月, 日, 年, 回, 個, 階, 杯, 匹, 冊, 台, 番, 度, 倍, つ, か月 and か所 in each
+way the small ka is written (か, ヶ, ケ, カ, ヵ, 箇), a length of time with 間
+(三年間, 十分間, 一か月間) and 週間. A dictionary key spelled the same way
+keeps the span only when it is among the commonest words (十分 じゅうぶん); 何名
+"how many people", band 4, is the counter's なんめい.
+
+名 counts people (a booking, a class list): いちめい, にめい, さんめい, よんめい,
+ごめい, ろくめい, ななめい, はちめい, きゅうめい, じゅうめい, and no number bends
+before it. Until 2026-10-05 it was no counter, and a number before it was a
+kanji run the dictionary did not cover: 十名 read as the surname とな, 三名 as
+the place さんみょう. A name is never read across a number and its counter
+(`names.js` asks `countedEnd`), so a surname that starts with a number and 名
+is read as the count.
 
 ## Romaji: two lines, on purpose
 
@@ -566,7 +590,8 @@ people) as the surname とな, アメ in アメ色 as "American", パタン (a d
 slam) as "pattern", アリさん (an ant in a story) as a given name, ロック in
 the name ブライアンロック as "lock", and 埒, a guess still, read れつ from its
 kanji. 十名 is the first pass's: 名 is not one of numbers.js's counters, so
-the run reached the second phase as a name.
+the run reached the second phase as a name. (It is one since 2026-10-05, and
+十名 is じゅうめい; see "Numbers and counters".)
 
 ### Sizes and fetches, 2026-10-03
 
@@ -642,6 +667,30 @@ sentence from the 27th (1,556, each on a fresh dictionary) the first tier
 fetched a mean of 3.499 files, against 3.510 before, and the second phase
 0.745 against 0.746: which absent keys a filter lets through moves with any
 rebuild, and on average it did not grow.
+
+### Open: 飴色 written あめ色 or アメ色 (2026-10-05)
+
+飴色 (あめいろ, amber, the colour of candy) is one JMdict entry outside the
+common set, spelled 飴色 and あめ色; JMdict has no アメ色. So the second tier
+holds 飴色, あめ色 and あめいろ, and the first tier none of them: the evidence
+rule (`tools/lib/extra.mjs`) leaves out a spelling whose parts are common keys
+read the way the entry is read, and 飴 あめ + 色 いろ, or あめ + 色, is that,
+whatever the corpus counts. That rule assumes the parts say what the word
+says; here they do not. 飴色 alone reads right (the first pass guesses it as a
+name and the second phase finds the rare word). あめ色 has no guess, so the
+second phase never runs, and the first pass reads あめ as 雨 "rain" (its first
+homograph) and 色. In アメ色 the first pass guesses アメ alone, and the second
+phase, which may not touch 色, finds the rare prefix アメ "American".
+
+Neither is a price to change: the first pass does not have the word, and the
+second phase may not read past the guess. The fix is a first-tier rule (ship
+a spelling that mixes kana and kanji when the first pass would read its kana
+as another word, and fold a katakana spelling such as アメ色 to its hiragana
+one), which needs a rebuild of data/dict from the pinned upstreams. The
+download cache is gone, and Tatoeba keeps one URL for an export it redoes
+every week (`tools/lib/sources.mjs`), so a rebuild today would count a later
+export than the committed bands were counted from and could move bands for
+keys this has nothing to do with. Left open, not half done.
 
 ## Katakana compounds and loanword rules (2026-10-03)
 
@@ -719,6 +768,107 @@ were rules the list missed (the v of コンビニ, convenience; the ui of
 smartphone, is not found to be shortened, and ビル, whose first gloss is
 "multi-floor building", lines up with nothing, so it shows neither the
 shortening nor its l.
+
+## Sounds like English (2026-10-05)
+
+A part of a katakana compound that no record covers (インフォーム in
+インフォームショップ) used to say only "not in the dictionary". JMdict has no
+インフォーム, but it glosses 断る and 取り次ぐ with "to inform", and the
+loanword rules say how English is written in katakana. `sounds-like.js` runs
+them backwards and offers the English the part most likely spells, on a line
+of its own in the Word panel: "Sounds like English 'inform' (a guess from the
+sound, not a dictionary entry)". It is never a gloss: the part keeps
+`gloss: null`, the compound keeps its null `gloss` and `guess` confidence.
+
+How a word is found:
+
+- **The candidates are JMdict's own words.** `tools/build-sounds-like.mjs`
+  reads the committed shards of both tiers (no upstream, no network) and
+  keeps every English word a record uses as a whole gloss, cut the way
+  `englishOf` cuts one (no parenthesis, nothing after a semicolon, no leading
+  "to" or article), with how many records use it: 35,930 words. The five
+  words the house style bans are left out. Nothing here makes a word up.
+- **The rules, backwards.** `loan-align.js`'s `MATCH` says which katakana
+  consonants an English one may be written with (l with the r column, v with
+  the b column, th with s). Reversed, the part's first consonant says which
+  English consonants it may stand for: ン is an m or an n, ル an l or an r.
+  The words are filed by the consonant a katakana word's first one would be
+  matched to (`groupsOfWord`), one file per group, so a part fetches only
+  the groups its first consonant names. Every candidate in them is lined up
+  with the part by the same `alignFull` the rules use; one that does not line
+  up is no candidate.
+- **The vowels decide.** Lining up says nothing about vowels: インフォーム
+  lines up with inform, informer and uniform alike. Each line-up is cut into
+  pieces (the letters after each matched consonant against the katakana
+  after it: the or of inform against オー, the end of the word against the u
+  of ム; and each consonant against the column it was written with), and
+  each piece is priced by how often JMdict's own loanwords wrote that
+  spelling that way: the `pieces` of `like/index.json`, counted over the
+  16,755 of the loanwords below whose one-word gloss lines up with their
+  katakana, smoothed toward a coarser class for a spelling never met. A candidate's
+  score is the sum, less 3 for a loose step, plus the log of how many
+  records gloss with it.
+- **Only when clearly ahead.** The best word is offered when the part has
+  four katakana or more, it leads the next word by 1 (by 4 under six
+  katakana, which more words line up with), and no piece of its line-up is
+  under -5 (a spelling the counts call a stretch). Otherwise the part says
+  only "not in the dictionary", as before. These are `LIKE` in
+  `sounds-like.js`, chosen on the development quarter below as the rule that
+  answered most while each length it answered was right 80 times in 100.
+
+`data/like/index.json` (`yomu-like-index/1`): `{ words, lined, groups: { G:
+{ src, words } }, pieces: { english: { katakana: count } } }`.
+`data/like/<g>.json` (`yomu-like/1`): `{ group, words: { word: count } }`.
+24 groups and the index, 632 KB in all, the largest 74 KB (s). Nothing
+fetches them unless a part needs them: a text with no such part fetches no
+new file (`tests/sounds-like.test.mjs`), and インフォームショップ fetches the
+index and the m and n groups, 115 KB.
+
+### Measured
+
+The loanwords are JMdict katakana records whose first record has no kanji
+spelling and is not usually written in kana, whose `ls` is absent or
+English, and whose first gloss is one English word: 20,913 of them. One
+filter more than the plain definition: a key whose hiragana is a key with a
+kanji spelling is left out (カメ is 亀, トラ 虎), because a Japanese word
+written in katakana has no English to find. They are split by a hash of the
+key: the odds are counted on half, the rule above was chosen on a quarter,
+and the last quarter was read once with that rule. Every held-out key is
+also taken out of the word list, so a held-out word can be found only the
+way a part no record has is found: because another record glosses with its
+English. A guess is right when it is the first gloss or the `ls` word, and
+nothing else: "attend" for アテンド, glossed "attendance", is wrong.
+`node tools/measure-sounds-like.mjs` prints this table (`--dev` for the
+development quarter, `--search` for the rules tried on it):
+
+| katakana | loanwords | gloss in the list and lined up | answered (coverage) | right | top-1 precision |
+|---|---:|---:|---:|---:|---:|
+| 2 to 3 | 558 | 271 | 0 (0.0%) | 0 | none |
+| 4 to 5 | 2155 | 1042 | 760 (35.3%) | 621 | 81.7% |
+| 6 to 7 | 1759 | 914 | 885 (50.3%) | 823 | 93.0% |
+| 8+ | 665 | 366 | 345 (51.9%) | 339 | 98.3% |
+| **all** | **5137** | **2593** | **1990 (38.7%)** | **1783** | **89.6%** |
+
+The held-out quarter, read once. On the development quarter the same rule
+answered 1,986 of 5,245 (37.9%) and was right on 89.2% (80.5% at four and
+five katakana). Without the native-word filter the held-out quarter is 5,349
+loanwords, 2,009 answered and 89.2% right.
+
+The guess is offered for fewer than two parts in five, and on those it is
+the gloss nine times in ten. A word whose English is in no other gloss
+cannot be found (the "in the list and lined up" column is the ceiling), and
+a short part rarely leads by enough. Of the 207 wrong answers, many are the
+right word in another form (insert for インサート "insertion", artist for
+アーティスツ "artists", reject for リジェクト "rejection"), names (surname
+for スリナム, bailout for ベイルート), and mimetic words in katakana with no
+English at all (petal for ペッタリ "closely", polypore for ポリポリ
+"munching"). Twelve parts no record covers, tried before the
+held-out quarter was read: インフォーム inform, リレート relate, エクスプロア
+explore, コンシダー consider, ディサイド decide, フォーギブ forgive,
+エクスクルード exclude, ディペンド depend and ワンダリング wandering get the
+right word; ビリーブ (believe), リクワイア (require) and シャイン (shine) get
+none. No guess is offered under four katakana: at two and three, more than
+half the dictionary's short loanwords line up with some other word first.
 
 ## Licences
 

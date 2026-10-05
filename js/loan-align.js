@@ -57,7 +57,7 @@ const VOWEL = /[aeiou]/;
 const isVowel = (ch) => !!ch && VOWEL.test(ch);
 
 /** Single letters, and the katakana onsets each may be written with (and at what cost). */
-const MATCH = Object.freeze({
+export const MATCH = Object.freeze({
   B: { B: 0 },
   K: { K: 0 },
   G: { G: 0 },

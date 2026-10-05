@@ -53,16 +53,25 @@ function beatsPart(token, canSpeak) {
   ]);
 }
 
+/**
+ * A rare word (entry.tier 2, docs/ANALYZER.md "The second phase") says so
+ * before its meanings, as a label and one sentence: it was read from the
+ * full dictionary because the common words left a guess here.
+ */
+function rareLine() {
+  return h('p', { class: 'word-rare' }, [h('span', { class: 'word-tag' }, ui('rareLabel')), ' ', ui('rareWord')]);
+}
+
 function meaningsPart(token) {
   const glosses = token.entry && Array.isArray(token.entry.g) ? token.entry.g.filter(Boolean) : [];
   const lines = [];
+  if (token.entry && token.entry.tier === 2) lines.push(rareLine());
   if (glosses.length) {
     lines.push(h('ol', { class: 'glosses', lang: 'en' }, glosses.map((g) => h('li', null, g))));
     if (currentLang() !== 'en') lines.push(h('p', { class: 'quiet' }, ui('meaningsEnglish')));
   } else if (token.entry) {
     lines.push(h('p', { class: 'quiet' }, ui('noMeaning')));
   }
-  if (token.entry && token.entry.tier === 2) lines.push(h('p', { class: 'quiet' }, ui('rareWord')));
   // A compound says what it knows part by part (partsPart), guess or not.
   if (!token.parts && (token.kind === 'unknown' || token.confidence === 'guess')) {
     lines.push(h('p', { class: 'word-warn' }, ui('guess')));
@@ -72,6 +81,18 @@ function meaningsPart(token) {
   if (alts === 1) lines.push(h('p', { class: 'quiet' }, ui('altsOne')));
   else if (alts > 1) lines.push(h('p', { class: 'quiet' }, ui('altsMany', { n: alts })));
   return lines.length ? section('meanings', lines) : null;
+}
+
+/**
+ * A part's sound-alike (sounds-like.js), on a line of its own and marked as
+ * a guess: "インフォーム: Sounds like English 'inform' (a guess from the
+ * sound, not a dictionary entry)". It is never drawn where a gloss goes.
+ */
+function likeLine(p) {
+  return h('p', { class: 'word-like' }, [
+    h('span', { lang: 'ja' }, p.surface), ': ', ui('soundsLike'), " '",
+    h('span', { lang: 'en' }, p.soundsLike), "' ", ui('soundsLikeNote'),
+  ]);
 }
 
 /**
@@ -92,6 +113,7 @@ function partsPart(token) {
   const covered = parts.every((p) => p.entry);
   return section('madeOf', [
     h('p', { class: 'word-made' }, line),
+    ...parts.filter((p) => !p.entry && typeof p.soundsLike === 'string' && p.soundsLike).map(likeLine),
     h('p', { class: covered ? 'quiet' : 'word-warn' }, ui(covered ? 'compoundRule' : 'compoundGuess')),
   ]);
 }

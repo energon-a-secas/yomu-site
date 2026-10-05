@@ -33,6 +33,10 @@
  *     KANJIDIC grades with the sizes of the 2010 list, that repeats a kanji,
  *     names one no kanji shard holds or one the shards file under another
  *     grade, or is not what tools/lib/joyo.mjs builds from the shards
+ *   - a sound-alike group (data/like/) holding anything but lowercase
+ *     English words with a count, a word the page would never look for in
+ *     that group, or one the house style bans; and an index that does not
+ *     list every group file, or miscounts one, or whose odds are not counts
  *
  * A new kind of data file gets its format id and a checker in FORMATS below,
  * in the same commit that adds the file.
@@ -45,6 +49,8 @@ import { readFilter } from '../js/bloom.js';
 import {
   joyoDoc, JOYO_FORMAT, JOYO_GRADES, JOYO_SIZES, JOYO_TOTAL,
 } from './lib/joyo.mjs';
+import { groupsOfWord } from '../js/sounds-like.js';
+import { BANNED_WORDS } from './lib/licence.mjs';
 
 const DATA = process.argv[2] ? path.resolve(process.argv[2]) : path.join(SITE, 'data');
 // Paths are reported, and index `src` values resolved, relative to the
@@ -179,6 +185,22 @@ function checkJoyoDoc(rel, doc) {
   if (doc.count !== JOYO_TOTAL || total !== JOYO_TOTAL) fail(rel, `count is ${doc.count} and the grades hold ${total}, not ${JOYO_TOTAL}`);
 }
 
+/**
+ * A sound-alike group: lowercase English words, each with how many records
+ * gloss with it, each filed where js/sounds-like.js looks for it (a word in
+ * the wrong group would never be offered), and none the house style bans.
+ */
+function checkLikeGroup(rel, doc) {
+  const words = doc.words && typeof doc.words === 'object' && !Array.isArray(doc.words) ? Object.entries(doc.words) : [];
+  if (!words.length) { fail(rel, 'no words'); return; }
+  for (const [w, n] of words) {
+    if (!/^[a-z]{2,}$/.test(w)) { fail(rel, `${JSON.stringify(w)} is not a lowercase English word`); continue; }
+    if (!Number.isInteger(n) || n < 1) fail(rel, `${w}: count is not a positive integer`);
+    if (!groupsOfWord(w).includes(doc.group)) fail(rel, `${w} is not filed under ${doc.group} by js/sounds-like.js`);
+    if (BANNED_WORDS.test(w)) fail(rel, `${w} is a word the house style bans`);
+  }
+}
+
 // A null checker means the generic rules above are the whole check here:
 // the indexes are checked against their shards below, and the phrase library
 // is authored by hand and has its own test (tests/library.test.mjs).
@@ -197,6 +219,8 @@ const FORMATS = {
   'yomu-kanji/1': checkKanjiShard,
   'yomu-library/1': null,
   [JOYO_FORMAT]: checkJoyoDoc,
+  'yomu-like-index/1': null,
+  'yomu-like/1': checkLikeGroup,
 };
 
 // ── Indexes against their shards ──────────────────────────────────────────
@@ -333,6 +357,36 @@ function checkJoyo(docs) {
   }
 }
 
+/**
+ * The sound-alike index: every group file listed under its own group, each
+ * count true, and the odds a map of English spellings to katakana counts.
+ */
+function checkLikeIndex(docs) {
+  const rel = 'data/like/index.json';
+  const index = docs.get(rel);
+  const files = shardFiles(docs, 'yomu-like/1');
+  if (!index) { if (files.length) fail(rel, 'missing, but sound-alike groups exist'); return; }
+  const listed = Object.entries(index.groups || {});
+  const srcs = listed.map(([, g]) => g.src);
+  for (const f of files) if (!srcs.includes(f)) fail(rel, `does not list ${f}`);
+  const all = new Set();
+  for (const [id, g] of listed) {
+    const doc = docs.get(g.src);
+    if (!doc) { fail(rel, `lists ${g.src}, which is not there`); continue; }
+    if (doc.format !== 'yomu-like/1' || doc.group !== id) { fail(rel, `lists ${g.src} as ${id}, which it is not`); continue; }
+    const words = Object.keys(doc.words || {});
+    if (g.words !== words.length) fail(rel, `says ${g.src} holds ${g.words} words, it holds ${words.length}`);
+    for (const w of words) all.add(w);
+  }
+  if (index.words !== all.size) fail(rel, `words is ${index.words}, the groups hold ${all.size}`);
+  const pieces = index.pieces && typeof index.pieces === 'object' ? Object.entries(index.pieces) : [];
+  if (!pieces.length) fail(rel, 'no pieces');
+  for (const [eng, row] of pieces) {
+    const counts = row && typeof row === 'object' ? Object.values(row) : [];
+    if (!counts.length || counts.some((n) => !Number.isInteger(n) || n < 1)) fail(rel, `pieces.${eng} is not a map of counts`);
+  }
+}
+
 /** The last entry of `list` whose `first` is <= key, or null. */
 function rangeOf(list, key) {
   let hit = null;
@@ -434,6 +488,7 @@ function main() {
   checkJoyo(docs);
   checkRangeIndex(docs, 'data/dict/rare.json', 'yomu-dict-rare/1');
   checkRangeIndex(docs, 'data/names/index.json', 'yomu-names/1');
+  checkLikeIndex(docs);
 
   if (failures.length) {
     for (const f of failures.slice(0, 50)) process.stderr.write(`FAIL ${f}\n`);
