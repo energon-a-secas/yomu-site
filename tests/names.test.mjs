@@ -198,6 +198,15 @@ test('トム is Tom and メアリー Mary: a katakana name carries its original 
   assert.equal(tom.entry.o, undefined, 'the original spelling is the token\'s, not a dictionary field');
 });
 
+test('the names a learner meets first are spelled as English writes them (were Jon, Keito, Malhia)', async () => {
+  for (const [name, o] of [['トム', 'Tom'], ['ジョン', 'John'], ['ケイト', 'Kate'], ['マリア', 'Maria'], ['メアリー', 'Mary'], ['クリス', 'Chris'], ['ジル', 'Jill']]) {
+    const t = tokOf(await run(`${name}さんが来た。`), name);
+    assert.ok(t, name);
+    assert.equal(t.kind, 'name', name);
+    assert.equal(t.name.o, o, name);
+  }
+});
+
 test('マイケル・ジャクソン shows Michael and Jackson on their own tokens', async () => {
   const r = await run('マイケル・ジャクソンが好きです。');
   assert.equal(tokOf(r, 'マイケル').name.o, 'Michael');

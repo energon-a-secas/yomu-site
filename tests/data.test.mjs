@@ -528,6 +528,9 @@ test('popular.json: the corpus\'s commonest katakana names with their original s
   });
   assert.deepEqual(doc.names[0].slice(0, 3), ['トム', 'Tom', 'given']);
   assert.deepEqual(doc.names[1].slice(0, 3), ['メアリー', 'Mary', 'given']);
+  // spelled as the corpus's English writes them, not JMnedict's first (Jon, Keito)
+  assert.deepEqual(doc.names[2].slice(0, 3), ['ジョン', 'John', 'given']);
+  assert.ok(doc.names.some(([text, o]) => text === 'ケイト' && o === 'Kate'));
   // バラ is a name in JMnedict and a rose in every sentence the corpus has
   // it in; the page reads the rose, so the game must not offer "Bara"
   assert.ok(!doc.names.some(([text]) => text === 'バラ'));
