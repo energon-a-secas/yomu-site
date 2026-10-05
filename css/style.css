@@ -519,6 +519,9 @@ rt .snd { border-bottom: 0; padding-bottom: 0; }
    panel's own greys and a rule, because the accent is kept for the four
    things the design tokens at the top of this file name. */
 .word-part .word-rare { margin-bottom: var(--space-2); color: var(--text-secondary); }
+/* A katakana name's original spelling (Name: Tom), before its glosses. */
+.word-part .word-name { margin-bottom: var(--space-2); }
+.word-name-o { font-weight: 600; }
 .word-part .word-like {
   margin-top: var(--space-2);
   padding-left: var(--space-2);

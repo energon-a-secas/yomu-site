@@ -282,6 +282,9 @@ function toToken(node, path, k, run, dict, env) {
     chain: node.chain ? [...node.chain] : [], confidence,
   };
   if (kind === 'number') token.counterChange = !!node.counterChange;
+  // A katakana name the names tier spells in Latin letters (js/rare.js):
+  // トム is { o: 'Tom', types: ['given'] }, so the page can say "Name: Tom".
+  if (kind === 'name' && node.original) token.name = { o: node.original, types: [...((rec && rec.nt) || [])] };
 
   // What analyze.js needs to build furigana and the said line, and nothing
   // the page should keep: analyze removes `aid` once it has used it.

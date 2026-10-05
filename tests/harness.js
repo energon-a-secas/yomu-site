@@ -21,7 +21,7 @@ import { state, loadPrefs, TEXT_KEY } from '../js/state.js';
 import { paintAll } from '../js/render.js';
 import { bindEvents, loadText } from '../js/events.js';
 import { h } from '../js/utils.js';
-import { ui } from '../js/strings.js';
+import { ui, useLang, currentLang } from '../js/strings.js';
 import { wordNode } from '../js/render-word.js';
 
 const PREFS_KEY = 'yomu-site:preferences';
@@ -227,6 +227,17 @@ async function run() {
   check('a part\'s sound-alike is a line of its own that says it is a guess', like && like.textContent === sentence && textOnly(like), like ? like.textContent : 'no line');
   const made = compound.querySelector('.word-made');
   check('and never a gloss: the part still says it is not in the dictionary', made && !made.textContent.includes('inform') && made.textContent.includes(ui('notInDict')) && !compound.querySelector('.glosses'), made ? made.textContent : '');
+  // A katakana name with its original spelling (name.o): a line of its own,
+  // its types in the reader's language, text nodes only.
+  const was = currentLang();
+  useLang('en');
+  const named = paint(panel.tokens[2]).querySelector('.word-name');
+  check('a katakana name says how it is written: "Name: Tom (given name)"', named && named.textContent === 'Name: Tom (given name)' && textOnly(named), named ? named.textContent : 'no line');
+  useLang('es');
+  const nombre = paint(panel.tokens[2]).querySelector('.word-name');
+  check('and in Spanish: "Nombre: Tom (nombre de pila)"', nombre && nombre.textContent === 'Nombre: Tom (nombre de pila)' && textOnly(nombre), nombre ? nombre.textContent : 'no line');
+  useLang(was);
+  check('a word with no original spelling has no such line', !paint(panel.tokens[0]).querySelector('.word-name'));
   for (const box of document.querySelectorAll('.hz-word')) box.remove();
 
   const failed = results.filter((r) => !r.ok).length;

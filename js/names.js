@@ -17,6 +17,7 @@
 import { isKanji, isKana, toHira } from './kana.js';
 import { deinflect, deinflectStem, posMatches } from './deinflect.js';
 import { countedEnd } from './numbers.js';
+import { NAME_TYPES } from './name-types.js';
 
 /**
  * Kanji a name never ends on, because after a name they are the suffix:
@@ -217,23 +218,15 @@ export function guessName(s, kanji) {
 
 // ── Names the names tier knows ────────────────────────────────────────────
 
-/**
- * JMnedict's name types, said in words. `g` on a name's entry is the English
- * side, because a dictionary gloss is English throughout (the page says so
- * beside it); `nt` keeps the ids, so the page can say them in Spanish.
- */
-export const NAME_TYPES = Object.freeze({
-  surname: Object.freeze({ en: 'surname', es: 'apellido' }),
-  given: Object.freeze({ en: 'given name', es: 'nombre de pila' }),
-  masc: Object.freeze({ en: 'given name (male)', es: 'nombre de pila (masculino)' }),
-  fem: Object.freeze({ en: 'given name (female)', es: 'nombre de pila (femenino)' }),
-  place: Object.freeze({ en: 'place name', es: 'nombre de lugar' }),
-});
+/** JMnedict's name types, said in words (js/name-types.js, which the page reads too). */
+export { NAME_TYPES };
 
 /**
- * The entry a name token carries, from a names-tier record `{ r?, n, f?, s? }`
+ * The entry a name token carries, from a names-tier record `{ r?, n, f?, s?, o? }`
  * (data/names/, docs/ANALYZER.md): its reading, its types as glosses, the
- * part of speech `n-pr` the page calls "name", and `nt`, the type ids.
+ * part of speech `n-pr` the page calls "name", and `nt`, the type ids. A
+ * katakana name's original spelling (`o`) is not an entry field: the token
+ * carries it as `name` (js/rare.js, js/lattice.js).
  */
 export function nameEntry(rec) {
   const nt = String((rec && rec.n) || '').split(' ').filter((t) => NAME_TYPES[t]);

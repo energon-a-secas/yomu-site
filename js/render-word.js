@@ -12,6 +12,7 @@ import { beats as splitBeats, beatRomaji } from './kana.js';
 import { surfaceNode } from './render-reading.js';
 import { noteTitle, noteGist, tokenNotes, humanize } from './render-notes.js';
 import { saveToggle, seenText } from './render-save.js';
+import { NAME_LINE_TYPES } from './name-types.js';
 
 /** A token's beats with the romaji each one is spelled with. */
 export function tokenBeats(token) {
@@ -62,10 +63,30 @@ function rareLine() {
   return h('p', { class: 'word-rare' }, [h('span', { class: 'word-tag' }, ui('rareLabel')), ' ', ui('rareWord')]);
 }
 
+/** The label of a name's own line; its types are said in the reader's language by js/name-types.js. */
+const NAME_LABEL = Object.freeze({ en: 'Name', es: 'Nombre' });
+
+/**
+ * A katakana name the names tier spells in Latin letters (token.name, from
+ * JMnedict), on a line of its own: "Name: Tom (given name)", "Nombre: Tom
+ * (nombre de pila)". Its types are said in the reader's language, where the
+ * glosses under it stay JMnedict's English.
+ */
+function nameLine(token) {
+  const name = token.name;
+  if (!name || typeof name.o !== 'string' || !name.o) return null;
+  const types = (Array.isArray(name.types) ? name.types : []).map((id) => t(NAME_LINE_TYPES[id])).filter(Boolean);
+  return h('p', { class: 'word-name' }, [
+    `${t(NAME_LABEL)}: `, h('span', { class: 'word-name-o' }, name.o), types.length ? ` (${types.join(', ')})` : '',
+  ]);
+}
+
 function meaningsPart(token) {
   const glosses = token.entry && Array.isArray(token.entry.g) ? token.entry.g.filter(Boolean) : [];
   const lines = [];
   if (token.entry && token.entry.tier === 2) lines.push(rareLine());
+  const named = nameLine(token);
+  if (named) lines.push(named);
   if (glosses.length) {
     lines.push(h('ol', { class: 'glosses', lang: 'en' }, glosses.map((g) => h('li', null, g))));
     if (currentLang() !== 'en') lines.push(h('p', { class: 'quiet' }, ui('meaningsEnglish')));
