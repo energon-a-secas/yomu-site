@@ -69,8 +69,11 @@ test('the dictionary index counts what the core and the shards hold', () => {
   assert.equal(dictIndex.format, 'yomu-dict-index/2');
   assert.equal(dictIndex.keys, dict.size);
   // 39,359 until 2026-10-03, when 上野 left the first tier: the corpus
-  // matched it for Ueno, not for the province (tools/lib/extra.mjs)
-  assert.equal(dictIndex.keys, 39358);
+  // matched it for Ueno, not for the province (tools/lib/extra.mjs). 39,358
+  // until 2026-10-05, when the mixed rule added 808 spellings like あめ色 and
+  // 704 katakana folds like アメ色, and 何 with a counter on evidence added
+  // 何個, 何番, 何ヶ月, 何階 and 何月 (tools/lib/extra.mjs, selectMixed)
+  assert.equal(dictIndex.keys, 40875);
   assert.equal(dictIndex.maxKey, Math.max(...[...dict.keys()].map((k) => k.length)));
   assert.equal(dictIndex.core.keys, Object.keys(dictCore.entries).length);
   const ranged = dictShards.reduce((n, s) => n + Object.keys(s.doc.entries).length, 0);
@@ -349,11 +352,13 @@ function linkTree(from, to, keep) {
  * index are both nothing to check), so ten checks do not each read 50 MB.
  */
 const SECOND = /[\\/](names|rare\.json|r\d{3}\.json|rf\d+\.json)$/;
+/** The rare words alone: a case about the names keeps the names (2.5 MB) and leaves out the 44 MB. */
+const RARE = /[\\/](rare\.json|r\d{3}\.json|rf\d+\.json)$/;
 
 /** Break a copy of data/ and run the checker over it; the caller runs the cases at once. */
-function brokenCopy(mutate, { full = false } = {}) {
+function brokenCopy(mutate, { full = false, names = false } = {}) {
   const dir = mkdtempSync(join(tmpdir(), 'yomu-check-'));
-  linkTree(join(SITE, 'data'), join(dir, 'data'), (p) => full || !SECOND.test(p));
+  linkTree(join(SITE, 'data'), join(dir, 'data'), (p) => full || (names ? !RARE.test(p) : !SECOND.test(p)));
   const rw = (rel, fn) => {
     const p = join(dir, rel);
     const doc = JSON.parse(readFileSync(p, 'utf8'));
@@ -490,6 +495,101 @@ test('check-data fails a broken sound-alike file and names it', async () => {
     }, /like\/index\.json: does not list data\/like\/zz\.json/],
   ];
   const runs = await Promise.all(cases.map(([, mutate]) => brokenCopy(mutate)));
+  cases.forEach(([name, , expect], k) => {
+    assert.equal(runs[k].status, 1, `${name}: exit ${runs[k].status}`);
+    assert.match(runs[k].stderr, expect, name);
+  });
+});
+
+// ── The popular names (data/names/popular.json) ──────────────────────────
+
+test('popular.json: the corpus\'s commonest katakana names with their original spellings, in its own format', async () => {
+  const { popularType } = await import('../tools/lib/popular.mjs');
+  const { LATIN_NAME } = await import('../tools/lib/jmnedict.mjs');
+  const doc = read('data/names/popular.json');
+  const index = read('data/names/index.json');
+  assert.equal(doc.format, 'yomu-names-popular/1');
+  assert.deepEqual(doc._licence, index._licence, 'the block the names shards carry');
+  assert.ok(statSync(join(SITE, 'data/names/popular.json')).size < CAP);
+  assert.ok(doc.names.length > 100 && doc.names.length <= 1000, `${doc.names.length} rows`);
+  const names = new Map();
+  for (const s of index.shards) for (const [k, v] of Object.entries(read(s.src).entries)) names.set(k, v);
+  doc.names.forEach(([text, o, type, n], k) => {
+    assert.match(text, /^[\u30a1-\u30faー・]+$/u, text);
+    assert.match(o, LATIN_NAME, o);
+    assert.ok(['given', 'surname', 'place'].includes(type), type);
+    assert.ok(Number.isInteger(n) && n >= 1, `${text} ${n}`);
+    assert.equal(names.get(text).o, o, text);
+    assert.equal(popularType(names.get(text).n), type, text);
+    if (k) {
+      const [prev, , , m] = doc.names[k - 1];
+      assert.ok(m > n || (m === n && prev < text), `${prev} before ${text}`);
+    }
+  });
+  assert.deepEqual(doc.names[0].slice(0, 3), ['トム', 'Tom', 'given']);
+  assert.deepEqual(doc.names[1].slice(0, 3), ['メアリー', 'Mary', 'given']);
+  // spelled as the corpus's English writes them, not JMnedict's first (Jon, Keito)
+  assert.deepEqual(doc.names[2].slice(0, 3), ['ジョン', 'John', 'given']);
+  assert.ok(doc.names.some(([text, o]) => text === 'ケイト' && o === 'Kate'));
+  // バラ is a name in JMnedict and a rose in every sentence the corpus has
+  // it in; the page reads the rose, so the game must not offer "Bara"
+  assert.ok(!doc.names.some(([text]) => text === 'バラ'));
+});
+
+test('a katakana name in the names tier carries its original spelling in Latin letters, and only a katakana name does', () => {
+  const index = read('data/names/index.json');
+  let katakana = 0;
+  let spelled = 0;
+  for (const s of index.shards) {
+    for (const [k, v] of Object.entries(read(s.src).entries)) {
+      if (v.r) { assert.equal(v.o, undefined, k); assert.ok(!v.n.split(' ').includes('person'), k); continue; }
+      katakana += 1;
+      if (v.o) spelled += 1;
+    }
+  }
+  assert.ok(katakana > 30000, `${katakana} katakana names`);
+  assert.ok(spelled / katakana > 0.99, `${spelled} of ${katakana} with an original spelling`);
+});
+
+test('check-data fails a broken popular-names file, and a name record out of its shape, and names the file', async () => {
+  const cases = [
+    ['two rows out of order', (rw) => rw('data/names/popular.json', (d) => {
+      [d.names[0], d.names[1]] = [d.names[1], d.names[0]];
+    }), /popular\.json: names\[1\]: out of order/],
+    ['an original spelling not in Latin letters', (rw) => rw('data/names/popular.json', (d) => {
+      d.names[2][1] = 'ジョン';
+    }), /popular\.json: names\[2\]: .* is not a name in Latin letters/],
+    ['a type that is no row type', (rw) => rw('data/names/popular.json', (d) => {
+      d.names[3][2] = 'person';
+    }), /popular\.json: names\[3\]: type "person"/],
+    ['a count of none', (rw) => rw('data/names/popular.json', (d) => {
+      d.names[d.names.length - 1][3] = 0;
+    }), /popular\.json: .* count 0 is not a whole number of at least 1/],
+    ['a row that is no name of the tier', (rw) => rw('data/names/popular.json', (d) => {
+      d.names[d.names.length - 1][0] = 'ヨムヨムヨム';
+    }), /popular\.json: .* ヨムヨムヨム is no name the names tier ships/],
+    ['an original spelling the tier does not give', (rw) => rw('data/names/popular.json', (d) => {
+      d.names[0][1] = 'Thom';
+    }), /popular\.json: names\[0\]: トム is "Tom" in the names tier/],
+    ['another licence block', (rw) => rw('data/names/popular.json', (d) => {
+      d._licence = { ...d._licence, generated_by: 'by hand' };
+    }), /popular\.json: _licence is not the block the names shards carry/],
+    ['more than a thousand rows', (rw) => rw('data/names/popular.json', (d) => {
+      while (d.names.length <= 1000) d.names.push(d.names[d.names.length - 1]);
+    }), /popular\.json: .* more than 1000/],
+    ['no popular file beside the names', (rw, dir) => {
+      rmSync(join(dir, 'data/names/popular.json'));
+    }, /popular\.json: missing, but the names tier exists/],
+    ['a katakana name spelled out in kana', (rw) => rw('data/names/n00.json', (d) => {
+      const k = Object.keys(d.entries).find((x) => d.entries[x].o);
+      d.entries[k].o = 'とむ';
+    }), /n00\.json: .* o is not a katakana name's spelling in Latin letters/],
+    ['person on a kanji name', (rw) => rw('data/names/n17.json', (d) => {
+      const k = Object.keys(d.entries).find((x) => d.entries[x].r);
+      d.entries[k].n = 'person';
+    }), /n17\.json: .* n is not a list of name types/],
+  ];
+  const runs = await Promise.all(cases.map(([, mutate]) => brokenCopy(mutate, { names: true })));
   cases.forEach(([name, , expect], k) => {
     assert.equal(runs[k].status, 1, `${name}: exit ${runs[k].status}`);
     assert.match(runs[k].stderr, expect, name);

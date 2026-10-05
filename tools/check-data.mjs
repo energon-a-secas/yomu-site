@@ -27,6 +27,10 @@
  *   - the second tier (data/dict/rare.json) or the names (data/names/) held
  *     to the same range rule, a key in a filter part that calls it absent,
  *     and a name record outside its shape
+ *   - a popular-names file (data/names/popular.json) whose rows are not
+ *     [katakana, Latin letters, given | surname | place, a count of at least
+ *     1], highest count first, at most 1,000, or disagree with the names
+ *     tier beside it, or that does not carry the tier's licence block
  *   - a kanji shard ranged by first and last character that holds a
  *     character outside its range, or one a listed shard holds too
  *   - a jōyō list (data/kanji/joyo.json) whose grades are not the seven
@@ -57,6 +61,8 @@ import {
 import { groupsOfWord } from '../js/sounds-like.js';
 import { BANNED_WORDS } from './lib/licence.mjs';
 import { LOOKALIKES_FORMAT, LOOKALIKES_SRC, lookalikesProblems } from './lib/lookalikes.mjs';
+import { KATAKANA_TYPES, LATIN_NAME } from './lib/jmnedict.mjs';
+import { popularProblems, POPULAR_FORMAT } from './lib/popular.mjs';
 
 const DATA = process.argv[2] ? path.resolve(process.argv[2]) : path.join(SITE, 'data');
 // Paths are reported, and index `src` values resolved, relative to the
@@ -133,9 +139,9 @@ function checkDictShard(rel, doc) {
 }
 
 const NAME_TYPES = new Set(['surname', 'given', 'masc', 'fem', 'place']);
-const NAME_FIELDS = new Set(['r', 'n', 'f', 's', 'S']);
+const NAME_FIELDS = new Set(['r', 'n', 'f', 's', 'S', 'o']);
 
-/** A names shard: sorted keys, one record each, `{ r?, n, f?, s?, S? }`. */
+/** A names shard: sorted keys, one record each, `{ r?, n, f?, s?, S?, o? }`. */
 function checkNamesShard(rel, doc) {
   const keys = Object.keys(doc.entries || {});
   if (!keys.length) { fail(rel, 'no entries'); return; }
@@ -147,7 +153,11 @@ function checkNamesShard(rel, doc) {
     if (!rec || typeof rec !== 'object' || Array.isArray(rec)) { fail(rel, `${key}: not a record`); continue; }
     for (const f of Object.keys(rec)) if (!NAME_FIELDS.has(f)) fail(rel, `${key}: unknown field ${f}`);
     const types = typeof rec.n === 'string' ? rec.n.split(' ') : [];
-    if (!types.length || types.some((t) => !NAME_TYPES.has(t))) fail(rel, `${key}: n is not a list of name types`);
+    // `person` ships for a katakana name only (tools/lib/jmnedict.mjs KATAKANA_TYPES)
+    const katakana = !rec.r;
+    if (!types.length || types.some((t) => !NAME_TYPES.has(t) && !(katakana && KATAKANA_TYPES[t]))) fail(rel, `${key}: n is not a list of name types`);
+    // `o`, the original spelling, is a katakana name's, in Latin letters
+    if (rec.o !== undefined && (!katakana || typeof rec.o !== 'string' || !LATIN_NAME.test(rec.o))) fail(rel, `${key}: o is not a katakana name's spelling in Latin letters`);
     if (rec.r !== undefined && (!Array.isArray(rec.r) || rec.r.length !== 1 || typeof rec.r[0] !== 'string' || !rec.r[0])) {
       fail(rel, `${key}: r is not one reading`);
     }
@@ -220,6 +230,7 @@ const FORMATS = {
   'yomu-dict-rare/1': checkDictShard,
   'yomu-names-index/1': null,
   'yomu-names/1': checkNamesShard,
+  [POPULAR_FORMAT]: null,
   'yomu-kanji-index/1': null,
   'yomu-kanji-index/2': null,
   'yomu-kanji/1': checkKanjiShard,
@@ -407,6 +418,26 @@ function checkLookalikes(docs) {
   for (const why of lookalikesProblems(doc, entries, chars)) fail(LOOKALIKES_SRC, why);
 }
 
+/**
+ * The popular names (data/names/popular.json, tools/lib/popular.mjs): the
+ * rows' format and order, and, where the names tier is beside it, that each
+ * row is a name the tier ships with the same original spelling and first
+ * type, and that the file carries the tier's licence block.
+ */
+function checkPopular(docs) {
+  const rel = 'data/names/popular.json';
+  const doc = docs.get(rel);
+  const index = docs.get('data/names/index.json');
+  if (!doc) { if (index) fail(rel, 'missing, but the names tier exists'); return; }
+  if (doc.format !== POPULAR_FORMAT) { fail(rel, `format is ${JSON.stringify(doc.format)}, not ${POPULAR_FORMAT}`); return; }
+  let names = null;
+  if (index) {
+    names = new Map();
+    for (const s of index.shards || []) for (const [k, v] of Object.entries((docs.get(s.src) || {}).entries || {})) names.set(k, v);
+  }
+  for (const reason of popularProblems(doc, { names, licence: index ? index._licence : null })) fail(rel, reason);
+}
+
 /** The last entry of `list` whose `first` is <= key, or null. */
 function rangeOf(list, key) {
   let hit = null;
@@ -508,6 +539,7 @@ function main() {
   checkJoyo(docs);
   checkRangeIndex(docs, 'data/dict/rare.json', 'yomu-dict-rare/1');
   checkRangeIndex(docs, 'data/names/index.json', 'yomu-names/1');
+  checkPopular(docs);
   checkLikeIndex(docs);
   checkLookalikes(docs);
 

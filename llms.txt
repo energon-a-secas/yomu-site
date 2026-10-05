@@ -21,7 +21,9 @@ romaji lines:
 
 A number and its counter are one number token read by rule, with the sound
 changes between them: 三本 さんぼん, 一分 いっぷん, 十名 じゅうめい (名 counts
-people), 何人 なんにん. The counters are listed in docs/ANALYZER.md.
+people), 何人 なんにん. The counters are listed in docs/ANALYZER.md. Where the
+whole number is also a dictionary word read the same way, the token keeps
+that word's gloss: 何名 "how many people", 何階 "what floor".
 
 Sound notes: particle-wa, particle-e, particle-o, fossil-wa (こんにちは),
 long-vowel, small-tsu, youon, dakuten, handakuten, n-assimilation, devoiced
@@ -50,8 +52,11 @@ passive, causative, volitional, imperative, the conditionals ば, たら, なら
 Words outside JMdict's common set and names are read only where the common
 words leave a guess: a rare word is marked as one (entry.tier 2), and a name
 JMnedict knows is a name token with its reading; one it does not know is
-still a guess, read from its kanji. The Word panel labels a rare word as one
-("Rare word": not among the common words, read from the full dictionary).
+still a guess, read from its kanji. A name written in katakana carries how it
+is spelled in Latin letters, from JMnedict: token.name is { o: "Tom", types:
+["given"] } for トム, and the Word panel says "Name: Tom (given name)". The
+Word panel labels a rare word as one ("Rare word": not among the common
+words, read from the full dictionary).
 Records of borrowed words carry where they came from (ls, e.g. ["ger",
 "Arbeit"]) and whether they were made in Japan (ws).
 
@@ -195,10 +200,16 @@ pair mixed up comes round more often. No text is kept.
 - JMdict and KANJIDIC, by the Electronic Dictionary Research and Development
   Group, CC BY-SA 4.0: the glosses, readings and kanji information
 - JMnedict, by the same Group, CC BY-SA 4.0: the readings and types of the
-  surnames, given names and place names a text may hold
+  surnames, given names and place names a text may hold, and the Latin
+  spelling of a name written in katakana. data/names/popular.json
+  (yomu-names-popular/1) lists the katakana names the corpus uses most, each
+  as [katakana, Latin spelling, given | surname | place, sentence count],
+  for a game; it carries the same licence block
 - KanjiVG, by Ulrich Apel, CC BY-SA 3.0: the parts of each kanji
-- Tatoeba, CC BY 2.0 FR: used only to rank how common each word is; no
-  sentence ships
+- Tatoeba, CC BY 2.0 FR: used only to rank how common each word is, to
+  choose and count names, and, through the English translations of its
+  Japanese sentences, to choose which JMnedict spelling of a katakana name
+  is shown (ジョン John, not Jon); no sentence ships
 - The phrase library, the notes, the deinflection rules, and Play's hints,
   example words and look-alike rules are written for Yomu and are public
   domain. Nothing is taken from Genki, the Japan

@@ -603,3 +603,85 @@ test('a spelling the corpus matched for a strong name is no first-tier word for 
   assert.equal(t.kind, 'name');
   assert.equal(t.confidence, 'dict');
 });
+
+// ── Found on 2026-10-05, with the rebuild ────────────────────────────────
+
+test('飴色 written あめ色 or アメ色 is one word, amber (was あめ "rain" and 色, and アメ "American" and 色)', async () => {
+  for (const [text, s] of [
+    ['あめ色のバッグ', 'あめ色'], ['アメ色の猫', 'アメ色'], ['玉ねぎはアメ色になるまで炒める。', 'アメ色'],
+  ]) {
+    const r = await run(text);
+    const t = tok(r, s);
+    assert.ok(t, `${s} in ${cut(r)}`);
+    assert.equal(t.kind, 'word', text);
+    assert.equal(t.confidence, 'dict', text);
+    assert.equal(t.reading, 'あめいろ', text);
+    assert.equal(gloss(t), 'amber', text);
+    assert.equal(t.romaji.said, 'ameiro', text);
+    assert.equal(t.entry.tier, undefined, `${text}: a first-tier word, read by the first pass`);
+    assert.equal(r.unknown, 0, text);
+  }
+  // the parts alone, and the traps the first tier is measured against, are
+  // what they were: 雨 alone is rain, 色 alone colour, あめ in kana still 雨
+  for (const [text, s, reading, g] of [
+    ['雨が降る。', '雨', 'あめ', 'rain'], ['あめが降る。', 'あめ', 'あめ', 'rain'], ['いい色ですね。', '色', 'いろ', 'colour'],
+    ['はしをわたる', 'はし', 'はし', 'bridge'], ['くじを引く。', 'くじ', 'くじ', 'lottery'],
+  ]) {
+    const t = tok(await run(text), s);
+    assert.ok(t, `${s} in ${cut(await run(text))}`);
+    assert.equal(t.reading, reading, text);
+    assert.equal(gloss(t), g, text);
+  }
+  const six = (await run('六百')).tokens[0];
+  assert.equal(six.kind, 'number');
+  assert.equal(six.reading, 'ろっぴゃく');
+  // 清水 is no first-tier word, so the surname is read where it is meant
+  const d = diskDict();
+  const shimizu = tok(await analyze('清水さんに会った。', { dict: d }), '清水');
+  assert.equal(d.get('清水'), undefined);
+  assert.equal(shimizu.kind, 'name');
+  assert.equal(shimizu.reading, 'しみず');
+});
+
+test('a mixed spelling whose kana start with a particle after a kanji stays out: 何がしたい, 友達がいなかった', async () => {
+  // 何がし "a certain amount" and 友達がい "true friendship" are JMdict
+  // spellings the mixed rule would ship; as keys they read が as part of them
+  assert.equal(cut(await run('何がしたい？')), '何|が|したい|?');
+  assert.equal(cut(await run('アンには遊び友達がいなかった。')).includes('友達|が|いなかった'), true);
+  const d = diskDict();
+  await d.need(new Set(['何がし', '友達がい']));
+  assert.equal(d.get('何がし'), undefined);
+  assert.equal(d.get('友達がい'), undefined);
+});
+
+/** The committed dictionary with one key taken away, everything else as shipped. */
+function without(key) {
+  const d = diskDict();
+  return { ...d, get: (k) => (k === key ? undefined : d.get(k)), get maxKey() { return d.maxKey; } };
+}
+
+test('a number and its counter that are a dictionary key keep its gloss: 何名, 何分, 何階 (were numbers with no gloss)', async () => {
+  for (const [text, s, reading, g] of [
+    ['何名様ですか。', '何名', 'なんめい', 'how many people'],
+    ['何分かかりますか。', '何分', 'なんぷん', 'what minute'],
+    ['何階ですか。', '何階', 'なんがい', 'what floor'],
+  ]) {
+    const t = tok(await run(text), s);
+    assert.ok(t, `${s} in ${cut(await run(text))}`);
+    assert.equal(t.kind, 'number', text);
+    assert.equal(t.confidence, 'rule', text);
+    assert.equal(t.reading, reading, text);
+    assert.equal(gloss(t), g, text);
+    // and nothing else moves: the same token as with the key taken away,
+    // its reading, furigana, sounds, notes and counter change, but the record
+    const bare = tok(await analyze(text, { dict: without(s) }), s);
+    assert.deepEqual({ ...t, entry: null }, bare, text);
+  }
+  // a number no key spells has no record, and a key read another way lends none
+  const three = tok(await run('三名です。'), '三名');
+  assert.equal(three.kind, 'number');
+  assert.equal(three.entry, null);
+  const ten = tok(await run('十分かかります。'), '十分');
+  assert.equal(ten.reading, 'じゅっぷん');
+  assert.equal(ten.entry, null, '十分 read じゅっぷん is not 十分 じゅうぶん, "enough"');
+});

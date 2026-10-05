@@ -385,6 +385,8 @@ function phaseTwo(run, sp, dict, env) {
       out.push({
         i, j: i + s.length, s, cls: 'name', rec: entry, key: s, chain: NO_CHAIN, cuts: NO_CHAIN,
         named: true, alts: 0, cost: COST.nameKnown + (outranks(s, rec, words) ? 0 : COST.nameWeak) + kanaWordCost(s, words),
+        // a katakana name's original spelling (トム is Tom), for the token
+        original: typeof rec.o === 'string' && rec.o ? rec.o : undefined,
       });
     }
     return out;

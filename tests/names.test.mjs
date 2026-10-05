@@ -120,7 +120,123 @@ test('a name\'s types are named most evidenced first: a place built on by places
   assert.equal(rec('田中').rec.n, 'surname place');
 });
 
+/** One JMnedict entry of a katakana name with its translations, in jmdict-simplified's shape. */
+function foreign(kana, groups) {
+  return {
+    kanji: [],
+    kana: [{ text: kana, appliesToKanji: ['*'] }],
+    translation: groups.map(([types, texts]) => ({ type: types, translation: texts.map((text) => ({ lang: 'eng', text })) })),
+  };
+}
+
+test('a katakana name carries its first translation in Latin letters, of a type that ships (2026-10-05)', () => {
+  const rec = build([
+    foreign('トム', [[['given'], ['Tom', 'Thom', 'Tomu']]]),
+    // a trailing parenthesis is cut, the way JMnedict glosses places
+    foreign('ハナ', [[['fem', 'place'], ['Hana (Hawaii)', 'Hanna (Canada)']]]),
+    // the unclassified half of an entry does not ship, so its spellings do not either
+    foreign('ジル', [[['unclass'], ['Gil', 'Gille']], [['fem'], ['Jill', 'Jiru']]]),
+    // nothing in Latin letters alone: no original spelling, the name still ships its types
+    foreign('イエメン', [[['place'], ['(Republic of) Yemen']]]),
+    // the name of one person ships for katakana
+    foreign('ナポレオン', [[['person'], ['Napoleon Bonaparte']]]),
+  ]);
+  assert.equal(rec('トム').rec.o, 'Tom');
+  assert.equal(rec('ハナ').rec.o, 'Hana');
+  assert.equal(rec('ジル').rec.o, 'Jill');
+  assert.equal(rec('イエメン').rec.o, undefined);
+  assert.equal(rec('イエメン').rec.n, 'place');
+  assert.deepEqual(rec('ナポレオン').rec, { n: 'person', o: 'Napoleon Bonaparte' });
+});
+
+test('a kanji spelling typed only person stays out, and carries no original spelling', () => {
+  const words = [
+    word('相模', ['さがみ'], ['person']),
+    { kanji: [{ text: '田中' }], kana: [{ text: 'たなか', appliesToKanji: ['*'] }], translation: [{ type: ['surname'], translation: [{ lang: 'eng', text: 'Tanaka' }] }] },
+  ];
+  assert.equal(candidates({ words }).has('相模'), false);
+  const tanaka = build(words)('田中').rec;
+  assert.deepEqual([tanaka.r, tanaka.n, tanaka.o], [['たなか'], 'surname', undefined]);
+});
+
+test('a katakana name is spelled the way the English translations of its sentences write it, not JMnedict\'s first (2026-10-05)', async () => {
+  const { chooseOriginal, englishFor } = await import('../tools/lib/original.mjs');
+  // JMnedict lists ケイト as Keito, Cate, Kate: the first was taught
+  assert.deepEqual(chooseOriginal(['Keito', 'Cate', 'Kate'], ['Kate is here.', 'I met Kate and Tom.', 'Cate Blanchett']), { o: 'Kate', by: 'evidence', seen: 2 });
+  // a whole word, case and all: Tomorrow and tom are not Tom; Tom's is
+  assert.equal(chooseOriginal(['Tomu', 'Tom'], ['Tomorrow is fine.', "Tom's bag.", 'tom']).o, 'Tom');
+  assert.equal(chooseOriginal(['Malhia', 'Maria'], ['Where is Maria?']).o, 'Maria');
+  // a tie keeps JMnedict's order, and no sentence or no spelling seen keeps the first
+  assert.equal(chooseOriginal(['Jon', 'John'], ['Jon met John.']).o, 'Jon');
+  assert.deepEqual(chooseOriginal(['Rinda', 'Linda'], ['Nobody here.']), { o: 'Rinda', by: 'first', seen: 0 });
+  assert.deepEqual(chooseOriginal(['Rinda', 'Linda'], []), { o: 'Rinda', by: 'first', seen: 0 });
+  // the English sentences are those linked to Japanese sentences holding the
+  // name as a whole katakana run: アン in アンケート is no アン
+  const japanese = [['1', 'ケイトが来た。'], ['2', 'アンケートに答えた。'], ['3', 'アンとケイトは友達だ。']];
+  const links = '1\t10\n2\t20\n3\t30\n3\t31\n';
+  const english = '10\teng\tKate came.\n20\teng\tI answered the survey.\n30\teng\tAnn and Kate are friends.\n31\teng\tAnne and Kate are friends.\n';
+  const got = englishFor(new Set(['ケイト', 'アン']), japanese, links, english);
+  assert.deepEqual(got.get('ケイト'), ['Kate came.', 'Ann and Kate are friends.', 'Anne and Kate are friends.']);
+  assert.deepEqual(got.get('アン'), ['Ann and Kate are friends.', 'Anne and Kate are friends.']);
+  assert.equal(chooseOriginal(['An', 'Ann', 'Anne'], got.get('アン')).o, 'Ann');
+});
+
 // ── The committed names tier ──────────────────────────────────────────────
+
+const tokOf = (r, surface) => r.tokens.find((t) => t.surface === surface);
+
+test('トム is Tom and メアリー Mary: a katakana name carries its original spelling (were "given name" alone)', async () => {
+  const r = await run('トムとメアリーは友達です。');
+  const tom = tokOf(r, 'トム');
+  assert.equal(tom.kind, 'name');
+  assert.equal(tom.confidence, 'dict');
+  assert.deepEqual(tom.name, { o: 'Tom', types: ['given'] });
+  assert.deepEqual(tokOf(r, 'メアリー').name, { o: 'Mary', types: ['fem'] });
+  // the entry is what it was: the types as glosses, the part of speech
+  assert.deepEqual(tom.entry.g, ['given name']);
+  assert.equal(tom.entry.p, 'n-pr');
+  assert.equal(tom.entry.o, undefined, 'the original spelling is the token\'s, not a dictionary field');
+});
+
+test('the names a learner meets first are spelled as English writes them (were Jon, Keito, Malhia)', async () => {
+  for (const [name, o] of [['トム', 'Tom'], ['ジョン', 'John'], ['ケイト', 'Kate'], ['マリア', 'Maria'], ['メアリー', 'Mary'], ['クリス', 'Chris'], ['ジル', 'Jill']]) {
+    const t = tokOf(await run(`${name}さんが来た。`), name);
+    assert.ok(t, name);
+    assert.equal(t.kind, 'name', name);
+    assert.equal(t.name.o, o, name);
+  }
+});
+
+test('マイケル・ジャクソン shows Michael and Jackson on their own tokens', async () => {
+  const r = await run('マイケル・ジャクソンが好きです。');
+  assert.equal(tokOf(r, 'マイケル').name.o, 'Michael');
+  assert.equal(tokOf(r, 'ジャクソン').name.o, 'Jackson');
+  assert.equal(tokOf(r, '・').kind, 'punct');
+});
+
+test('a foreign name the corpus never had is read too (アインシュタイン, アークレイリ), and a word stays a word', async () => {
+  for (const [text, s, o] of [['アインシュタインさんに会った。', 'アインシュタイン', 'Einstein'], ['アークレイリに行った。', 'アークレイリ', 'Akureyri']]) {
+    const t = tokOf(await run(text), s);
+    assert.ok(t, `${s} in ${text}`);
+    assert.equal(t.kind, 'name', text);
+    assert.equal(t.name.o, o, text);
+  }
+  // ロンドン is a first-tier word, London, and keeps its gloss; a katakana
+  // common word beats a name spelled the same (バラ is a rose, not "Bara")
+  const london = tokOf(await run('ロンドンに行った。'), 'ロンドン');
+  assert.equal(london.kind, 'katakana');
+  assert.equal(london.entry.g[0], 'London (UK)');
+  assert.equal(london.name, undefined);
+  const rose = tokOf(await run('バラが咲いた。'), 'バラ');
+  assert.notEqual(rose.kind, 'name');
+  assert.equal(rose.name, undefined);
+});
+
+test('a name with no original spelling carries no name field, and a kanji name none at all', async () => {
+  const tanaka = tokOf(await run('田中さんが来た。'), '田中');
+  assert.equal(tanaka.kind, 'name');
+  assert.equal(tanaka.name, undefined);
+});
 
 test('common given names are read the way a teacher writes them (were みさ, えこ, まさこ, なみ, さとこ, かずなり, ただひと, あみ)', async () => {
   for (const [name, reading] of [

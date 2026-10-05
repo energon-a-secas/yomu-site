@@ -16,6 +16,7 @@ make serve       # http://localhost:8895
 make validate    # node tools/check-data.mjs, then npm test
 make data        # rebuild data/dict, data/kanji, data/names, data/like and data/play from the pinned upstreams (manual)
 npm test         # node --test tests/*.test.mjs
+node tools/compare-readings.mjs <old data/> [data/]   # every token two builds read differently, over Tatoeba
 ```
 
 `npm test` is the definition of done for anything under `js/` that is not a
@@ -77,19 +78,32 @@ kanji in all): the data keeps them and `reader.js shownMeanings` leaves them
 out of every meaning the page draws, while another meaning is left.
 
 **Words outside JMdict's common set ship by rule, not by count alone.**
-`tools/lib/extra.mjs` names the three rules and `MIN_MATCHES` (5) is
+`tools/lib/extra.mjs` names the four rules and `MIN_MATCHES` (5) is
 measured (docs/ANALYZER.md). Lowering it is not free: at 3, 六百 became a
 word instead of a number, 清水 "spring water" instead of the surname, and six
 tests failed; filtering out only conjugations, the full release shipped
 verb stems and phrases (はし read 愛し, くじ read ９時). Rebuild with
-`node tools/build-dict.mjs` and diff the sentence suites before changing it.
+`node tools/build-dict.mjs`, then compare the old data/ with the new over the
+corpus (`node tools/compare-readings.mjs`, a copy of the old tree as its first
+argument) and diff the sentence suites before changing it. The fourth rule,
+mixed, ships a spelling like あめ色 (飴色, amber) whose hiragana the first
+tier reads as another word (あめ is 雨 first) and folds its katakana form
+(アメ色) onto it; its hiragana part needs two kana and may not start with a
+particle after a kanji (何がし read 何がしたい as 何がし|たい), and it is
+banded only on `MIN_MATCHES` matches, so the bands the common keys fill do not
+grow. `YOMU_RULES_OFF=mixed` (or `asked`) builds without a rule, for a
+measuring run only.
 
 **A number before 名 is a count of people, めい.** 名 is in the counter
 table (`numbers.js`), so 十名 is じゅうめい and 三名 さんめい, one number token;
 until 2026-10-05 the run reached the second phase as a kanji stretch and read
 as the surname とな and the place さんみょう. A counter added to that table
 wins over any name across it, because `names.js` never reads a name across a
-number and its counter.
+number and its counter. A number token whose whole surface is a first-tier
+key read the same way keeps that record as its `entry` (何名 "how many
+people", 何分 "what minute", `lattice.js countedRecord`), and stays a number:
+same kind, reading and notes, and the Word panel still calls it a number.
+十分 read じゅっぷん takes nothing from 十分 じゅうぶん "enough".
 
 **The rest of JMdict and the names are read only where the first pass
 guessed, and never change a token it read.** The second phase (`js/rare.js`,
@@ -119,6 +133,23 @@ rules to a JMnedict of a few entries. A strong katakana name never beats the
 kana spelling of a common word (`e`), and a kanji surname read another way
 than the rare word beats it only when sure (`S`), because the reading is
 what a learner copies (`js/rare.js` outranks).
+
+**A katakana name says how it is written: JMnedict's spellings, Tatoeba's
+choice.** Every katakana given name, surname, person and place JMnedict
+spells in Latin letters ships (`o`, about 31,000 names, corpus or not), and
+the token carries it as `name: { o, types }` (トム is Tom); the Word panel
+shows "Name: Tom (given name)" on a line of its own. JMnedict's order is no
+evidence (its first was Jon, Keito, Malhia), so `tools/lib/original.mjs`
+picks the spelling the English sentences linked to the name's sentences
+use most (John, Kate, Maria), and only a name the corpus never met keeps
+the first. Do not go back to JMnedict's order or to counting spellings
+over JMnedict (romanizations win: Keito 73, Kate 4). `person` ships for katakana only: a kanji spelling
+typed person (相模) stays out. `data/names/popular.json` is another stream's
+input (a game): its format (`yomu-names-popular/1`, rows `[katakana, Latin,
+given | surname | place, count]`) is fixed, it is emitted by
+`build-names.mjs` (each row read by the analyzer, kept only when the page
+reads it as that name: バラ is a rose) and `check-data.mjs` holds it to
+`tools/lib/popular.mjs`. Change the format only together with that game.
 
 **A katakana compound is one token, and the lattice already chose its
 parts.** `compounds.js` joins katakana pieces that touch (テニス|トーナメント,
@@ -424,7 +455,7 @@ ones and its note says it is rare.
 
 - `js/vendor/wanakana.js`: upstream 5.3.1, MIT, byte for byte.
 - `js/neorgon-*.js`, `css/neorgon-*.css`: vendored kits, refreshed by `packages/neorgon-ui/sync-*.sh`.
-- `data/dict/**`, `data/kanji/**`, `data/names/**`: emitted by `tools/build-*.mjs` from the pins in `tools/lib/sources.mjs` (`build-names.mjs` after `build-dict.mjs`, which it reads; `data/kanji/joyo.json` by `build-joyo.mjs` from the committed shards, or by `build-kanji.mjs`). Rebuild, do not hand-edit.
+- `data/dict/**`, `data/kanji/**`, `data/names/**`: emitted by `tools/build-*.mjs` from the pins in `tools/lib/sources.mjs` (`build-names.mjs` after `build-dict.mjs`, which it reads, and it writes `data/names/popular.json` too; `data/kanji/joyo.json` by `build-joyo.mjs` from the committed shards, or by `build-kanji.mjs`). Rebuild, do not hand-edit.
 - `data/like/**`: emitted by `tools/build-sounds-like.mjs` from the committed `data/dict/` (after `build-dict.mjs`). Rebuild, do not hand-edit.
 - `data/play/lookalikes.json`: emitted by `tools/build-lookalikes.mjs` from the committed `data/kanji/` (after `build-kanji.mjs` or `build-joyo.mjs`). Rebuild, do not hand-edit.
 - `favicon.*`, `apple-touch-icon.png`, `web-app-manifest-*.png`, `site.webmanifest`: generated by `packages/neorgon-ui/sync-favicon.sh` once the site has a hub card.

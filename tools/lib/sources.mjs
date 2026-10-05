@@ -12,7 +12,8 @@
  * The pins are the ones Runcible fetched on 2026-09-04
  * (projects/runcible-site/tools/lib/sources.mjs), copied rather than imported:
  * the two sites share no code, and a Yomu data step must not change because a
- * Runcible one did.
+ * Runcible one did. Every one was downloaded again on 2026-10-05 and matched
+ * its digest, but Tatoeba's, which records the export downloaded that day.
  *
  * Two host tools are required, and they are the reason this cannot run in a
  * browser: `unzip` (the release assets are zip archives) and `bunzip2`
@@ -103,17 +104,51 @@ export const SOURCES = {
     bytes: 12589510,
     licence: 'CC-BY-SA-3.0',
   },
-  // The pin is Runcible's. Tatoeba re-exports weekly and keeps one URL, so the
-  // committed `q` bands were counted from a later export than the pin records:
-  // 3,417,560 bytes, sha256 1a71f25043f9ecff3f1d1910bb677e99b5bb620b9ed9b22cde60d67790669b11,
-  // 248,917 sentences. The builder prints "Upstream moved" for it, on purpose.
+  // Tatoeba re-exports weekly and keeps one URL, so a pin here records the
+  // export a rebuild was cut from, and the next download prints "Upstream
+  // moved" for it, on purpose. This is the export the server dated Sat, 03
+  // Oct 2026 06:31:08 GMT (Last-Modified), downloaded 2026-10-05: 248,924
+  // sentences. The data rebuilt from it with the rules of that day was the
+  // committed data byte for byte. (Until then the pin was Runcible's export
+  // of 2026-08-29, 3,417,299 bytes, and the bands had been counted from a
+  // later one, 3,417,560 bytes and 248,917 sentences.)
   tatoebaJpn: {
     name: 'Tatoeba Japanese sentences',
-    release: 'export of 2026-08-29',
+    release: 'export of 2026-10-03',
     url: 'https://downloads.tatoeba.org/exports/per_language/jpn/jpn_sentences.tsv.bz2',
     file: 'jpn_sentences.tsv.bz2',
     bz2: true,
-    bytes: 3417299,
+    sha256: 'dd942845be225766229fa6391cbb7796c6b8bdcaea38809e65720cc406dace93',
+    bytes: 3417698,
+    licence: 'CC-BY-2.0-FR',
+  },
+  // Tatoeba's English sentences and its links from Japanese sentences to
+  // their English translations (each line: Japanese id, English id), from
+  // the same weekly export, downloaded 2026-10-05: 2,038,137 English
+  // sentences, 280,716 links, both dated 2026-10-03 by the server.
+  // tools/build-names.mjs reads them for one choice only: which of a
+  // katakana name's JMnedict spellings the English translations of the
+  // sentences that hold it use (トム is Tom, ケイト Kate). Nothing of either
+  // ships, no sentence, no fragment and no id, only that choice; the same
+  // CC BY 2.0 FR credit as the Japanese sentences applies.
+  tatoebaEng: {
+    name: 'Tatoeba English sentences',
+    release: 'export of 2026-10-03',
+    url: 'https://downloads.tatoeba.org/exports/per_language/eng/eng_sentences.tsv.bz2',
+    file: 'eng_sentences.tsv.bz2',
+    bz2: true,
+    sha256: '5f7ebf552bd3925dfd33236ccb6a210c5ba02b365e4a39964fb658e1209e87d9',
+    bytes: 24894467,
+    licence: 'CC-BY-2.0-FR',
+  },
+  tatoebaJpnEng: {
+    name: 'Tatoeba links, Japanese to English',
+    release: 'export of 2026-10-03',
+    url: 'https://downloads.tatoeba.org/exports/per_language/jpn/jpn-eng_links.tsv.bz2',
+    file: 'jpn-eng_links.tsv.bz2',
+    bz2: true,
+    sha256: 'b078aebb6b6b1e568fe0cb4683a4ae02e17d23b3a08f8a2b0bbb88e83ec697fa',
+    bytes: 1454991,
     licence: 'CC-BY-2.0-FR',
   },
 };
