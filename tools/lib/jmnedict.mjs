@@ -49,12 +49,57 @@
  * "money"; 中吉, with 8, is ちゅうきち, a fortune slip's "middling luck").
  */
 import { isKanji, isKatakana, toHira } from '../../js/kana.js';
+import { unshippable } from './licence.mjs';
 import { splitReading } from './split.mjs';
 
 /** The types that ship, and the gloss id each becomes (js/names.js NAME_TYPES). */
 export const KEEP_TYPES = Object.freeze({
   surname: 'surname', given: 'given', masc: 'masc', fem: 'fem', place: 'place',
 });
+
+/**
+ * A type that ships for a katakana spelling only: JMnedict's `person`, the
+ * name of one particular person (ナポレオン, アイスキュロス). A kanji spelling
+ * typed only `person` stays out, as before: 相模 さがみ is typed so, and a
+ * kanji compound JMnedict lists as someone is a word as often as not.
+ */
+export const KATAKANA_TYPES = Object.freeze({ person: 'person' });
+
+/**
+ * A name as it is written in Latin letters: letters of the Latin script
+ * (accented ones too: José, Zürich), single spaces, hyphens and apostrophes
+ * between them (Abu Dhabi, Jean-Paul, O'Brien). data/names/popular.json and
+ * tools/check-data.mjs hold the `o` of a name record to it.
+ */
+export const LATIN_NAME = /^\p{Script=Latin}+(?:(?: |-|'|’)\p{Script=Latin}+)*$/u;
+
+/**
+ * The original spelling of a katakana name: the first of its JMnedict
+ * translations, in order, that is a name in Latin letters once one trailing
+ * parenthesis is cut off (ハナ "Hana (Hawaii)" is Hana; JMnedict glosses most
+ * places so), read only from the translations of a type that ships (ジル is
+ * "Gil" unclassified and "Jill" a woman's name, and ships as the woman's).
+ * トム is Tom, Thom, Tomu, and shows Tom. A name whose translations are all
+ * something else (イエメン "(Republic of) Yemen") has none, and the page
+ * shows only its types, as before.
+ *
+ * The first, even where JMnedict lists the katakana's own romanization first
+ * (ケイト "Keito, Cate, Kate", リンダ "Rinda, Linda"): passing over a
+ * romanization while another translation was left changed 36 of the 676
+ * names in data/names/popular.json, and more of them for the worse (カレン
+ * Caren, シャロン Chalon, マリコ Malko, ロビンソン Eric) than for the better
+ * (ケイト Cate, リンダ Linda, メグ Meg), measured 2026-10-05.
+ */
+export function originalOf(word, kept) {
+  for (const t of word.translation) {
+    if (!(t.type || []).some(kept)) continue;
+    for (const x of t.translation || []) {
+      const s = String(x.text || '').replace(/\s*\([^()]*\)$/, '').trim();
+      if (LATIN_NAME.test(s) && !unshippable(s)) return s;
+    }
+  }
+  return null;
+}
 
 /** The fewest names built on a reading that make it a strong name. Measured: docs/ANALYZER.md. */
 export const STRONG_EXT = Number(process.env.YOMU_STRONG_EXT || 5);
@@ -123,7 +168,18 @@ export function candidates(jmnedict) {
           types: new Set(), order, ext: 0, suf: 0, gext: 0, by: { surname: 0, place: 0 },
         });
       }
-      for (const t of p.types) if (KEEP_TYPES[t]) byReading.get(reading).types.add(t);
+      const v = byReading.get(reading);
+      const katakana = isKatakana(p.text[0]);
+      let kept = false;
+      for (const t of p.types) {
+        if (KEEP_TYPES[t] || (katakana && KATAKANA_TYPES[t])) { v.types.add(t); kept = true; }
+      }
+      // The first entry, in JMnedict's order, that types the spelling as a
+      // name that ships and spells it in Latin letters gives its `o`.
+      if (katakana && kept && v.o === undefined) {
+        const o = originalOf(w, (t) => KEEP_TYPES[t] || KATAKANA_TYPES[t]);
+        if (o) v.o = o;
+      }
     }
   }
   for (const [text, byReading] of out) {
@@ -315,13 +371,14 @@ export function recordOf(text, byReading, table) {
   const best = score[0];
   const evidence = best.v.ext + best.v.suf + best.v.gext;
   if (!best.v.types.size) return { rec: null, evidence, readings: score.length };
-  const order = Object.keys(KEEP_TYPES);
+  const order = [...Object.keys(KEEP_TYPES), ...Object.keys(KATAKANA_TYPES)];
   const weight = (t) => (t === 'surname' ? best.v.by.surname : t === 'place' ? best.v.by.place : best.v.suf);
   // A katakana name is read as it is written, so like a kana dictionary key
-  // it carries no `r`.
+  // it carries no `r`; it carries `o`, how it is written in Latin letters.
   const rec = kanji ? { r: [best.reading] } : {};
   rec.n = [...best.v.types].sort((a, b) => weight(b) - weight(a) || order.indexOf(a) - order.indexOf(b)).join(' ');
   if (best.f) rec.f = best.f;
+  if (!kanji && best.v.o) rec.o = best.v.o;
   if (best.v.ext >= STRONG_EXT) rec.s = 1;
   // Sure: built on often, and by people, not only by places: 東大 starts 50
   // place names (東 + 大井 and the like that cutInside does not catch) and

@@ -10,7 +10,8 @@
  *   node tools/build-names.mjs        (or: make data)
  *
  * The source is JMnedict (tools/lib/sources.mjs), and tools/lib/jmnedict.mjs
- * says which names ship and with which reading. Two kinds ship:
+ * says which names ship and with which reading. Two kinds ship for any
+ * spelling:
  *
  *   attested  a surname, given name or place name the Tatoeba corpus contains
  *             at least once;
@@ -21,12 +22,27 @@
  *             of the hundred commonest surnames would be missing without
  *             this rule (docs/ANALYZER.md has the measurement).
  *
- * A record is `{ r, n, f, s, S }`: the reading (absent for a katakana name,
- * which is read as written), the types (most evidenced first), the per-kanji
- * split of the reading as the dictionary's `f` is cut, `s: 1` for a strong
- * name and `S: 1` for one at least SURE_EXT names are built on. The index
- * carries the key filter inline, so the second phase learns which name shards
- * to fetch from one file.
+ * and a third, for katakana alone:
+ *
+ *   decoded   a katakana given name, surname, person or place that JMnedict
+ *             spells in Latin letters (`o`: トム is Tom, アークレイリ
+ *             Akureyri), whether the corpus has it or not. Its record says
+ *             how a learner would write it, and the corpus has few of the
+ *             foreign names a learner pastes (2026-10-05: 1,126 katakana
+ *             names shipped before this rule, 30,962 with it). JMnedict's
+ *             `person` ships for katakana too (ナポレオン), never for kanji.
+ *
+ * A record is `{ r, n, f, s, S, o }`: the reading (absent for a katakana
+ * name, which is read as written), the types (most evidenced first), the
+ * per-kanji split of the reading as the dictionary's `f` is cut, `s: 1` for a
+ * strong name, `S: 1` for one at least SURE_EXT names are built on, and for a
+ * katakana name its original spelling in Latin letters. The index carries
+ * the key filter inline, so the second phase learns which name shards to
+ * fetch from one file.
+ *
+ * It also writes data/names/popular.json (tools/lib/popular.mjs): the
+ * katakana names the corpus uses most, with their original spellings, for a
+ * game that asks a learner to read them.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -41,6 +57,11 @@ import {
   candidates, surnames, countExtensions, attested, recordOf, STRONG_EXT, SURE_EXT,
 } from './lib/jmnedict.mjs';
 import { buildFilter } from '../js/bloom.js';
+import {
+  katakanaRunCounts, popularCandidates, popularProblems, POPULAR_FORMAT, POPULAR_MAX,
+} from './lib/popular.mjs';
+import { createDict } from '../js/dict.js';
+import { analyze } from '../js/analyze.js';
 
 const TOOL = 'tools/build-names.mjs';
 const OUT = path.join(SITE, 'data', 'names');
@@ -81,7 +102,7 @@ function pack(sorted, records, licence) {
   }));
 }
 
-function main() {
+async function main() {
   const t0 = Date.now();
   const jmnedict = loadZippedJson('jmnedict');
   const kanjidic = loadZippedJson('kanjidic');
@@ -95,16 +116,19 @@ function main() {
   const seen = attested(sentences, open);
   const records = new Map();
   const stats = {
-    attested: 0, strongOnly: 0, kanji: 0, katakana: 0, strong: 0, sure: 0, star: 0, untyped: 0,
+    attested: 0, strongOnly: 0, decoded: 0, kanji: 0, katakana: 0, original: 0, person: 0, strong: 0, sure: 0, star: 0, untyped: 0,
   };
   for (const text of [...open].sort()) {
     const { rec, evidence } = recordOf(text, cands.get(text), table);
     const inCorpus = seen.has(text);
     // The evidence reads it a way the tier cannot type (相模 さがみ): no name.
     if (!rec) { if (inCorpus) stats.untyped += 1; continue; }
-    if (!inCorpus && evidence < STRONG_EXT) continue;
+    const strong = evidence >= STRONG_EXT;
+    if (!inCorpus && !strong && !rec.o) continue;
     records.set(text, rec);
-    stats[inCorpus ? 'attested' : 'strongOnly'] += 1;
+    stats[inCorpus ? 'attested' : strong ? 'strongOnly' : 'decoded'] += 1;
+    if (rec.o) stats.original += 1;
+    if (String(rec.n).split(' ').includes('person')) stats.person += 1;
     stats[rec.r ? 'kanji' : 'katakana'] += 1;
     if (rec.s) stats.strong += 1;
     if (rec.S) stats.sure += 1;
@@ -115,7 +139,7 @@ function main() {
     upstream: [upstream('jmnedict'), upstream('kanjidic'), upstream('tatoebaJpn')],
     inputs: [
       ['edrdg', 'f, the split of a name\'s reading over its kanji, from KANJIDIC readings'],
-      ['tatoeba', 'which names ship: one the corpus contains at least once; no sentence ships'],
+      ['tatoeba', 'which names ship (one the corpus contains at least once) and, in popular.json, how many sentences hold each; no sentence ships'],
     ],
   });
   const sorted = [...records.keys()].sort();
@@ -141,10 +165,33 @@ function main() {
   written.push(path.join(OUT, 'index.json'));
   const gone = pruneStale(OUT, /^n\d+\.json$/, written);
 
+  // The popular names, for the game (tools/lib/popular.mjs): the corpus's
+  // commonest, each read on its own by the analyzer over the data just
+  // written, kept when the page reads it as that name. Held to the checker's
+  // own rules before it is written.
+  const dict = createDict({ fetchJson: async (p) => JSON.parse(fs.readFileSync(p, 'utf8')), base: `${path.join(SITE, 'data')}/` });
+  const rows = [];
+  let passed = 0;
+  for (const row of popularCandidates(records, katakanaRunCounts(sentences))) {
+    if (rows.length === POPULAR_MAX) break;
+    const r = await analyze(row[0], { dict });
+    const t = r.tokens.length === 1 ? r.tokens[0] : null;
+    if (t && t.kind === 'name' && t.name && t.name.o === row[1]) rows.push(row);
+    else passed += 1;
+  }
+  const popular = { _licence: licence, format: POPULAR_FORMAT, names: rows };
+  const problems = popularProblems(popular, { names: records, licence });
+  if (problems.length) {
+    process.stderr.write(`REFUSED data/names/popular.json: ${problems.slice(0, 5).join('; ')}\n`);
+    process.exit(1);
+  }
+  const popularBytes = writeJson(path.join(OUT, 'popular.json'), popular, 'names');
+
   const total = sizes.reduce((a, b) => a + b, 0);
   process.stdout.write(`${[
     `JMnedict spellings of two or more kanji or katakana, typed surname, given or place: ${cands.size}; not first-tier keys ${open.size}`,
-    `names ${records.size}: in the corpus ${stats.attested}, by evidence only (${STRONG_EXT} or more other names use it) ${stats.strongOnly}; kanji ${stats.kanji}, katakana ${stats.katakana}; strong ${stats.strong}, sure (ext >= ${SURE_EXT}) ${stats.sure}; read as a whole (*) ${stats.star}`,
+    `names ${records.size}: in the corpus ${stats.attested}, by evidence only (${STRONG_EXT} or more other names use it) ${stats.strongOnly}, katakana decoded only ${stats.decoded}; kanji ${stats.kanji}, katakana ${stats.katakana} (${stats.original} with an original spelling, ${stats.person} typed person); strong ${stats.strong}, sure (ext >= ${SURE_EXT}) ${stats.sure}; read as a whole (*) ${stats.star}`,
+    `popular.json: ${popular.names.length} names, ${fmtBytes(popularBytes)} (${popularBytes} B), passing over ${passed} the page does not read as that name; first ${popular.names.slice(0, 8).map((r) => `${r[0]} ${r[1]} ${r[3]}`).join(', ')}`,
     `left out, in the corpus but best read as a type that does not ship: ${stats.untyped}`,
     `shards ${docs.length}: total ${fmtBytes(total)} (${total} B); index with its filter ${fmtBytes(indexBytes)} (${indexBytes} B)`,
     gone.length ? `removed stale shards: ${gone.join(' ')}` : 'no stale shards',
@@ -152,4 +199,4 @@ function main() {
   ].join('\n')}\n`);
 }
 
-main();
+main().catch((err) => { process.stderr.write(`${err.stack || err}\n`); process.exit(1); });

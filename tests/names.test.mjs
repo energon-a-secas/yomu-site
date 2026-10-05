@@ -120,6 +120,45 @@ test('a name\'s types are named most evidenced first: a place built on by places
   assert.equal(rec('田中').rec.n, 'surname place');
 });
 
+/** One JMnedict entry of a katakana name with its translations, in jmdict-simplified's shape. */
+function foreign(kana, groups) {
+  return {
+    kanji: [],
+    kana: [{ text: kana, appliesToKanji: ['*'] }],
+    translation: groups.map(([types, texts]) => ({ type: types, translation: texts.map((text) => ({ lang: 'eng', text })) })),
+  };
+}
+
+test('a katakana name carries its first translation in Latin letters, of a type that ships (2026-10-05)', () => {
+  const rec = build([
+    foreign('トム', [[['given'], ['Tom', 'Thom', 'Tomu']]]),
+    // a trailing parenthesis is cut, the way JMnedict glosses places
+    foreign('ハナ', [[['fem', 'place'], ['Hana (Hawaii)', 'Hanna (Canada)']]]),
+    // the unclassified half of an entry does not ship, so its spellings do not either
+    foreign('ジル', [[['unclass'], ['Gil', 'Gille']], [['fem'], ['Jill', 'Jiru']]]),
+    // nothing in Latin letters alone: no original spelling, the name still ships its types
+    foreign('イエメン', [[['place'], ['(Republic of) Yemen']]]),
+    // the name of one person ships for katakana
+    foreign('ナポレオン', [[['person'], ['Napoleon Bonaparte']]]),
+  ]);
+  assert.equal(rec('トム').rec.o, 'Tom');
+  assert.equal(rec('ハナ').rec.o, 'Hana');
+  assert.equal(rec('ジル').rec.o, 'Jill');
+  assert.equal(rec('イエメン').rec.o, undefined);
+  assert.equal(rec('イエメン').rec.n, 'place');
+  assert.deepEqual(rec('ナポレオン').rec, { n: 'person', o: 'Napoleon Bonaparte' });
+});
+
+test('a kanji spelling typed only person stays out, and carries no original spelling', () => {
+  const words = [
+    word('相模', ['さがみ'], ['person']),
+    { kanji: [{ text: '田中' }], kana: [{ text: 'たなか', appliesToKanji: ['*'] }], translation: [{ type: ['surname'], translation: [{ lang: 'eng', text: 'Tanaka' }] }] },
+  ];
+  assert.equal(candidates({ words }).has('相模'), false);
+  const tanaka = build(words)('田中').rec;
+  assert.deepEqual([tanaka.r, tanaka.n, tanaka.o], [['たなか'], 'surname', undefined]);
+});
+
 // ── The committed names tier ──────────────────────────────────────────────
 
 test('common given names are read the way a teacher writes them (were みさ, えこ, まさこ, なみ, さとこ, かずなり, ただひと, あみ)', async () => {
