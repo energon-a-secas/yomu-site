@@ -140,12 +140,12 @@
  * a question, its options and its feedback, or a grid and its feedback,
  * fit in what a 390x844 sheet shows. WebKit lets no frame scroll its host
  * (events-play.js reveal), so this is the only thing that keeps them in
- * view there. Cells and options stay 44px or more. */
+ * view there. Cells and options stay 44px or more, and the four spellings
+ * stay two by two: one under another, a long name's feedback fell below. */
 @media (max-width: 600px) {
   .pl-q.mk-sec { margin-top: var(--space-4); }
   .pl-q { gap: var(--space-2); }
   .pl-opts { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2); }
-  .pl-opts--wide { grid-template-columns: minmax(0, 1fr); }
   .pl-opts--three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .pl-opt { min-height: 3.5rem; padding: var(--space-2); }
   .pl-opts--wide .pl-opt { min-height: 3rem; }
