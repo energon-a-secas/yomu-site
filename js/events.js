@@ -24,6 +24,7 @@ import { speechReason } from './render-chrome.js';
 import { analyzeNow, loadText, clearText, bindInput, describe, focusHome } from './events-read.js';
 import { KANJI_ACTIONS, bindKanji } from './events-kanji.js';
 import { COLLECT_ACTIONS, bindCollect } from './events-collect.js';
+import { PLAY_ACTIONS, bindPlay } from './events-play.js';
 
 export { analyzeNow, loadText };
 
@@ -365,6 +366,7 @@ const ACTIONS = {
   chunk: (b) => speechOk(b) && chunk(b),
   ...KANJI_ACTIONS,
   ...COLLECT_ACTIONS,
+  ...PLAY_ACTIONS,
 };
 
 export function bindEvents() {
@@ -387,7 +389,8 @@ export function bindEvents() {
     paintWord(state);
   });
   // Before bindKanji, which shows the route the page opened at: the
-  // Collection's hook has to be there to hear it.
+  // Collection's and Play's hooks have to be there to hear it.
   bindCollect();
+  bindPlay();
   bindKanji();
 }

@@ -1,5 +1,6 @@
 // The page's strings, as one table: strings.js merges the collection's and
-// History's strings (strings-collect.js) into what ui() reads. Every string
+// History's strings (strings-collect.js) and Play's (strings-play.js) into
+// what ui() reads. Every string
 // has both languages and the same placeholders in each, neither table hides
 // a key of the other, and every key the page names, in a module or in
 // index.html, is there: a missing key draws an empty string and a warning,
@@ -13,6 +14,7 @@ import { fileURLToPath } from 'node:url';
 
 import { STRINGS } from '../js/strings.js';
 import { COLLECT_STRINGS } from '../js/strings-collect.js';
+import { PLAY_STRINGS } from '../js/strings-play.js';
 
 const SITE = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const BANNED = /\b(powerful|seamless|leverages?|robust|utili[sz]e)\b/i;
@@ -24,8 +26,15 @@ test('the collection\'s strings are in the table, and none is overridden by a ke
   }
 });
 
+test('Play\'s strings are in the table, none overridden, and no key is in both merged tables', () => {
+  for (const [key, value] of Object.entries(PLAY_STRINGS)) {
+    assert.equal(STRINGS[key], value, key);
+    assert.ok(!Object.hasOwn(COLLECT_STRINGS, key), `${key} is in both strings-collect.js and strings-play.js`);
+  }
+});
+
 test('every new string has English and neutral Spanish, the same placeholders, and none of the banned words', () => {
-  for (const [key, value] of Object.entries(COLLECT_STRINGS)) {
+  for (const [key, value] of [...Object.entries(COLLECT_STRINGS), ...Object.entries(PLAY_STRINGS)]) {
     assert.equal(typeof value.en, 'string', `${key}.en`);
     assert.equal(typeof value.es, 'string', `${key}.es`);
     assert.ok(value.en.trim() && value.es.trim(), key);
@@ -43,7 +52,7 @@ test('every key the page names is in the table', () => {
   const js = join(SITE, 'js');
   for (const file of readdirSync(js).filter((f) => f.endsWith('.js') && !f.startsWith('neorgon-'))) {
     const src = readFileSync(join(js, file), 'utf8');
-    for (const m of src.matchAll(/\b(?:ui|withKanji)\('([A-Za-z][A-Za-z0-9]*)'/g)) named.add(m[1]);
+    for (const m of src.matchAll(/\b(?:ui|withKanji|uiNodes)\('([A-Za-z][A-Za-z0-9]*)'/g)) named.add(m[1]);
   }
   const html = readFileSync(join(SITE, 'index.html'), 'utf8');
   for (const m of html.matchAll(/data-ui(?:-label|-title)?="([A-Za-z][A-Za-z0-9]*)"/g)) named.add(m[1]);
