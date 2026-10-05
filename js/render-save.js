@@ -1,5 +1,6 @@
-// The small pieces every My kanji surface shares: the save toggle, "seen 3
-// times", a stored word with its furigana, and a due day in words.
+// The small pieces every My kanji surface shares: the save toggle (for a
+// kanji, and for a text on History's rows), "seen 3 times", a stored word
+// with its furigana, and a due day in words.
 //
 // The save toggle is a real button with aria-pressed, and its name says which
 // kanji it saves ("Save 天 to My kanji"). That name is built from text nodes,
@@ -45,6 +46,19 @@ export function saveToggle(ch, saved, attrs) {
   return h('button', { type: 'button', class: 'save-toggle', 'aria-pressed': saved ? 'true' : 'false', ...attrs }, [
     bookmark(),
     h('span', { class: 'sr-only' }, withKanji('saveKanji', ch)),
+  ]);
+}
+
+/**
+ * The save toggle for a text, on a History row: the same bookmark, named
+ * "Save this text" in text nodes and never by the text itself. `attrs` finds
+ * the row (data-ix) and points aria-describedby at the row's text, by id.
+ * The reader's own (#save-text) is in index.html.
+ */
+export function textToggle(saved, attrs) {
+  return h('button', { type: 'button', class: 'save-toggle', 'aria-pressed': saved ? 'true' : 'false', ...attrs }, [
+    bookmark(),
+    h('span', { class: 'sr-only' }, ui('saveText')),
   ]);
 }
 

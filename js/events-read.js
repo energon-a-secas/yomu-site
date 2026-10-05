@@ -22,7 +22,9 @@
 // pasted, and a box emptied by hand or by Clear is typed into. And when the
 // learner turned Remember on, the same settle point keeps the text in
 // History first (history-store.js) and points the session at its key, so the
-// kanji counted next point at the text they were met in.
+// kanji counted next point at the text they were met in. With Remember off
+// or not answered, only a text the learner saved on purpose is counted there
+// again, and pointed at; any other text is not kept.
 
 import { state, saveText, forgetText, setText } from './state.js';
 import { $, debounce } from './utils.js';
@@ -49,15 +51,21 @@ function counts(a) {
 }
 
 /**
- * Keep a read text in History, while remembering is on and the read found
- * Japanese. Sets state.seenBefore and returns the text's key, or null.
+ * Keep a read text in History, when the read found Japanese: every text
+ * while remembering is on, and otherwise only a text saved on purpose, which
+ * is counted again and nothing else is written. Sets state.seenBefore and
+ * returns the text's key when History keeps it, or null.
  */
 function rememberText(analysis, text) {
   state.seenBefore = null;
-  if (state.prefs.remember !== 'on' || !hasJapanese(analysis)) return null;
+  if (!hasJapanese(analysis)) return null;
+  const on = state.prefs.remember === 'on';
+  const kept = myHistory();
+  const key = textKey(text);
+  if (!on && !kept.isSaved(key)) return null;
   const mine = myKanji();
-  state.seenBefore = myHistory().record(text, mine.sessionId, mine.sessionSource, Date.now());
-  return textKey(text);
+  state.seenBefore = kept.record(text, mine.sessionId, mine.sessionSource, Date.now(), on);
+  return key;
 }
 
 /**
@@ -81,9 +89,18 @@ function noteKanji(analysis, text, restore) {
 export function rememberNow() {
   const a = state.analysis;
   if (!a || !a.order || typeof a.read !== 'string') return;
-  const h = rememberText(a, a.read);
-  if (a.order.length) myKanji().record(a.order, null, today(), { h });
+  pointKanji(rememberText(a, a.read));
   paintStatus(state);
+}
+
+/**
+ * Point the kanji of the reading on screen, and its session, at a History
+ * key (null for none): after Remember was said yes to, or the text was saved
+ * or unsaved. They were counted when the read settled; nothing is counted.
+ */
+export function pointKanji(h) {
+  const a = state.analysis;
+  if (a && Array.isArray(a.order) && a.order.length) myKanji().record(a.order, null, today(), { h });
 }
 
 /** A new reading session, of this kind of text: nothing History knew about the last one stays up. */

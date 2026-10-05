@@ -139,7 +139,13 @@
         <section class="input" aria-labelledby="text-label">
           <div class="input-head">
             <label class="input-label" id="text-label" for="yomu-text" data-ui="textLabel">Japanese text</label>
-            <button class="btn btn--ghost btn--sm" type="button" data-act="clear" data-ui="clear">Clear</button>
+            <div class="input-actions">
+              <!-- Saves the text as last read, whatever Remember says: shown after a
+                   read that found Japanese (js/render-remember.js), handled in
+                   js/events-collect.js. Its name is text nodes, never the text. -->
+              <button class="save-toggle" type="button" id="save-text" data-act="save-text" aria-pressed="false" hidden><svg class="save-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 3.5h10a1 1 0 0 1 1 1V20.5l-6-4.2-6 4.2V4.5a1 1 0 0 1 1-1Z"/></svg><span class="sr-only" data-ui="saveText">Save this text</span></button>
+              <button class="btn btn--ghost btn--sm" type="button" data-act="clear" data-ui="clear">Clear</button>
+            </div>
           </div>
           <textarea class="textarea yomu-text" id="yomu-text" lang="ja" rows="2" spellcheck="false" autocomplete="off" autocapitalize="off" aria-describedby="text-hint too-long"></textarea>
           <p class="field__hint" id="text-hint" data-ui="textHint">Paste a line you met: a sign, a lyric, a message, a sentence from a book.</p>
@@ -149,8 +155,9 @@
         <!-- Outside the input on purpose: an embed hides the input and still says
              what is loading and what failed. -->
         <p class="status" id="status" role="status" aria-live="polite"></p>
-        <!-- "You read this before" (js/render-remember.js): only while Remember is
-             on. A live region that stays in the page; only its text changes. -->
+        <!-- "You read this before" (js/render-remember.js): while Remember is on,
+             or for a saved text. A live region that stays in the page; only its
+             text changes. -->
         <p class="seen-before" id="seen-before" role="status" aria-live="polite"></p>
         <!-- An embed's toasts (js/render-remember.js notify): a frame as tall as
              its page put a fixed toast below what the host's sheet shows. -->
@@ -293,7 +300,9 @@
         <h2 id="hs-off-title"></h2>
       </div>
       <div class="dialog__body">
-        <p id="hs-off-body" data-ui="offBody">Every text in History is forgotten in this browser. Your kanji, their counts and your collection stay.</p>
+        <!-- Title and body are set when it opens (js/events-collect.js): they
+             count the texts, and say whether saved phrases stay. -->
+        <p id="hs-off-body"></p>
         <div class="mk-confirm">
           <button class="btn btn--secondary btn--sm" type="button" data-dialog-close data-ui="cancel">Cancel</button>
           <button class="btn btn--danger btn--sm" type="button" data-act="hs-off-yes" data-ui="offYes">Forget and turn off</button>
@@ -303,10 +312,10 @@
 
     <dialog class="dialog" id="hs-clear-dialog" aria-labelledby="hs-clear-title" aria-describedby="hs-clear-body">
       <div class="dialog__header">
-        <h2 id="hs-clear-title" data-ui="forgetAllTitle">Forget every text in History?</h2>
+        <h2 id="hs-clear-title"></h2>
       </div>
       <div class="dialog__body">
-        <p id="hs-clear-body" data-ui="forgetAllBody">Remembering stays on, so the texts you read from now on are kept. Your kanji, their counts and your collection stay.</p>
+        <p id="hs-clear-body"></p>
         <div class="mk-confirm">
           <button class="btn btn--secondary btn--sm" type="button" data-dialog-close data-ui="cancel">Cancel</button>
           <button class="btn btn--danger btn--sm" type="button" data-act="hs-clear-yes" data-ui="forgetAll">Forget all</button>
@@ -338,7 +347,7 @@
       <p><strong>Written here.</strong> The notes on sounds and grammar, the phrase library and the dialogues were written for Yomu and are in the public domain.</p>
       <p><strong>Your text.</strong> What you paste is read in this browser. It is kept in this browser's local storage so a reload does not lose it, and Clear forgets it. It is never put in the address bar or sent anywhere, unless you click DeepL, Google Translate or Jisho, which open that site in a new tab with the text or the word.</p>
       <p><strong>My kanji.</strong> The kanji you save, their review dates, how many texts you met each kanji in, what kind of text each was last met in, and up to eight dictionary words per kanji are kept in this browser's local storage too. The text itself is not. Export writes them to a file on your device; nothing is sent anywhere.</p>
-      <p><strong>History.</strong> Only if you turn on Remember, the texts you read are kept in this browser's local storage too, up to 300 of them, for History, for "You read this before" and for the sentence each kanji was last seen in. Turning it off forgets them. They are never sent anywhere.</p>
+      <p><strong>History.</strong> Only if you turn on Remember, the texts you read are kept in this browser's local storage too, up to 300 of them, for History, for "You read this before" and for the sentence each kanji was last seen in. Turning it off forgets them. A text you save with the bookmark is kept there whatever Remember says, up to 500 of them, until you unsave it, and Export in My kanji writes the saved ones to your backup file. They are never sent anywhere.</p>
     </template>
   </footer>
 

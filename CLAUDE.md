@@ -153,9 +153,11 @@ gloss (`loan-align.js`); a word `ls` says is from another language gets none
 is 鯖, and its slang sense "server" read as v written バ).
 
 **The text stays in the browser.** It persists under
-`localStorage['yomu-site:text']`, and, when and only when the learner turned
-Remember on, under `localStorage['yomu-site:history']` (see My kanji below);
-never in the URL, a data attribute, the title or the beacon target.
+`localStorage['yomu-site:text']`, and under
+`localStorage['yomu-site:history']` while the learner has Remember on, or
+when they saved that text on purpose with the bookmark (see My kanji below);
+never in the URL, an attribute, the title or the beacon target. A backup
+file carries the saved phrases and no other text.
 `#t=<text>` is read once (for links from other Neorgon sites, with their own
 authored text) and removed with `history.replaceState`. The DeepL and Google
 links are built at click time.
@@ -190,18 +192,21 @@ copyrighted.
 
 The kanji a learner saves for review, how many texts they met each kanji
 in, the collection those counts make, and, if the learner allowed it, the
-texts themselves. `js/kanji-store.js` (pure functions plus the store, no
-DOM), `js/kanji-backup.js` (Export and Import), `js/review.js` (one review's
-queue, no DOM), `js/collection.js` (the jōyō list and progress, no DOM),
-`js/history-store.js` (History, no DOM), `js/render-save.js` (the save
-toggle, the unsaved marks, the due count), `js/render-remember.js` (the
-reader's ask card, "You read this before", the new-kanji toast, the
-last-seen line), `js/render-mykanji.js`, `js/render-review.js`,
-`js/render-collection.js` and `js/render-history.js` (the screens),
-`js/events-kanji.js` (routes, the list's actions, keys, backup) and
-`js/events-collect.js` (the Collection's, History's and the ask card's
-actions). `npm test` runs `tests/kanji-store.test.mjs`,
-`tests/collection.test.mjs` and `tests/history-store.test.mjs`; the view
+texts themselves, and the phrases saved on purpose. `js/kanji-store.js`
+(pure functions plus the store, no DOM), `js/kanji-backup.js` (Export and
+Import), `js/review.js` (one review's queue, no DOM), `js/collection.js`
+(the jōyō list and progress, no DOM), `js/history-store.js` (History and
+saved phrases, no DOM) with `js/history-text.js` (the text key, the clip,
+the last-seen sentence; re-exported by the store), `js/render-save.js` (the
+save toggles, the unsaved marks, the due count), `js/render-remember.js`
+(the reader's ask card, the text's bookmark, "You read this before", the
+new-kanji toast, the last-seen line), `js/render-mykanji.js`,
+`js/render-review.js`, `js/render-collection.js` and
+`js/render-history.js` (the screens), `js/events-kanji.js` (routes, the
+list's actions, keys, backup) and `js/events-collect.js` (the
+Collection's, History's, the bookmark's and the ask card's actions).
+`npm test` runs `tests/kanji-store.test.mjs`, `tests/collection.test.mjs`,
+`tests/history-store.test.mjs` and `tests/phrases.test.mjs`; the view
 harness checks the toggles and marks.
 
 **One store, `localStorage['yomu-site:kanji']`, Persist kit version 1:**
@@ -241,10 +246,11 @@ kanji empties the collection; it never touches History.
 (the default), `on` or `off`, saved with the other preferences. The reader
 asks once, after the first read that found Japanese (`#remember-ask`, a card,
 not a modal); History's switch is the only control after that. While it is
-not `on`, `js/history-store.js` is never opened and nothing is written.
-`localStorage['yomu-site:history']`, Persist kit version 1:
-`{ entries: { key: { t, first, last, n, src, s } }, session: { id, key,
-before } }`. `key` is `textKey(text)`, cyrb53 of the NFKC,
+not `on`, `js/history-store.js` is opened only to read the saved phrases,
+and written only to save or unsave one or to count a saved one read again
+(below). `localStorage['yomu-site:history']`, Persist kit version 1:
+`{ entries: { key: { t, first, last, n, src, s, saved? } }, session: { id,
+key, before } }`. `key` is `textKey(text)`, cyrb53 of the NFKC,
 whitespace-folded text in base36; the kanji store keeps only that key, as
 `h`, never the text. A text is recorded where My kanji counts (`noteKanji`
 in `events-read.js`): History first, then the session's `h`, then the kanji,
@@ -253,9 +259,34 @@ nothing (a reload records nothing, and `before`, stored with the session,
 still answers "You read this before"); an edit within a session deletes the
 draft it leaves behind when this session created it. At most 300 texts and
 300,000 characters; the least recently read goes first. Turn off forgets
-every text (`erase`, the damaged copy included) after a confirm; the kanji
-store's `h` keys are left dangling, which is harmless, since the last-seen
-line falls back to the kind of text.
+every text not saved (`turnOff`: with none saved it is `erase`, the store
+and the damaged copy removed) after a confirm; the kanji store's `h` keys
+are left dangling, which is harmless, since the last-seen line falls back to
+the kind of text.
+
+**A saved phrase is a History entry with `saved` (a ms timestamp), and
+Remember does not decide whether it is kept.** The bookmark beside Clear
+(`#save-text`, shown on the same test as the ask card) and the one on each
+History row save the text as last read (`state.analysis.read`), never the
+box mid-edit. Saving never touches the Remember preference or the card.
+With Remember not `on`, saving creates the entry, read once in this
+session, and points the session at it, so a reload counts nothing; no
+other text is recorded then, and a later read of a saved text (same key)
+is counted with "You read this before". Saved entries count toward neither
+cap and are never evicted, never deleted as a draft, and survive Forget
+all and Turn off, whose dialogs count the texts not saved and say the saved
+ones stay. Unsaving with Remember on leaves an ordinary entry; otherwise
+the entry is deleted, since nothing else keeps it. At most 500 (`MAX_SAVED`):
+the 501st is refused with a note and nothing changes. A kanji whose `h` is
+a saved entry shows its sentence with Remember off too. History lists
+"Saved phrases" first (always, when any exist), then the switch, then "Texts
+you read" (the entries not saved, only while Remember is on), one filter for
+both. Export writes them as `phrases` (`history-store.js phrasesOf`, only
+when there is one) and Import validates and merges them (`cleanPhrases`,
+`mergePhrases`: higher count, earlier first, later last, earlier save).
+Export and Import live in `events-kanji.js`, so the kanji store is lent the
+two History calls (`myKanji().lendPhrases`, bound in `events-collect.js`)
+rather than opening History itself; the import note still counts only kanji.
 
 **"Times seen" counts texts, not keystrokes.** A session begins in
 `events-read.js`: `loadText()` (an example, a phrase or dialogue, `#t=`, an

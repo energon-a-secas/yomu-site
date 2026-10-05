@@ -1,6 +1,6 @@
 // The strings of the kanji collection, the sources a kanji was last seen in,
 // and History: the reader's ask card and "You read this before" banner, the
-// Collection and History screens, and the toasts.
+// save toggle for a text, the Collection and History screens, and the toasts.
 //
 // Kept apart from strings.js so both stay under the 500-line rule;
 // strings.js merges this table into the one ui() reads, and
@@ -116,8 +116,8 @@ export const COLLECT_STRINGS = Object.freeze({
     es: 'Activado. Yomu guarda en este navegador los textos que lees, hasta 300, y te avisa cuando ya leíste uno.',
   },
   rememberIsOff: {
-    en: 'Off. Yomu keeps no text you read, only which kanji you met and how often. Turn it on to keep a History, to hear when you read a text before, and to see the sentence each kanji was last seen in. The texts stay in this browser.',
-    es: 'Desactivado. Yomu no guarda ningún texto que lees, solo qué kanji viste y cuántas veces. Actívalo para llevar un historial, saber cuándo ya leíste un texto y ver la oración en la que viste cada kanji por última vez. Los textos se quedan en este navegador.',
+    en: 'Off. Yomu keeps no text you read unless you save it, only which kanji you met and how often. Turn it on to keep a History, to hear when you read a text before, and to see the sentence each kanji was last seen in. The texts stay in this browser.',
+    es: 'Desactivado. Yomu no guarda ningún texto que lees salvo los que guardes, solo qué kanji viste y cuántas veces. Actívalo para llevar un historial, saber cuándo ya leíste un texto y ver la oración en la que viste cada kanji por última vez. Los textos se quedan en este navegador.',
   },
   turnOn: { en: 'Turn on', es: 'Activar' },
   turnOff: { en: 'Turn off', es: 'Desactivar' },
@@ -173,5 +173,58 @@ export const COLLECT_STRINGS = Object.freeze({
   historyBlocked: {
     en: 'This browser is not keeping History, so it lasts until this page closes.',
     es: 'Este navegador no está guardando el historial, así que dura hasta que se cierre esta página.',
+  },
+
+  // Saving a text on purpose: the reader's bookmark and History's rows.
+  saveText: { en: 'Save this text', es: 'Guardar este texto' },
+  textSaved: { en: 'Saved. Your saved phrases are in History.', es: 'Guardado. Tus frases guardadas están en el historial.' },
+  textSavedOnly: {
+    en: 'Saved, in History. Until you turn on Remember, Yomu keeps only the texts you save.',
+    es: 'Guardado, en el historial. Hasta que actives Recordar, Yomu guarda solo los textos que guardes.',
+  },
+  textUnsaved: { en: 'Unsaved. It stays in History as a text you read.', es: 'Ya no está guardado. Sigue en el historial como un texto que leíste.' },
+  textUnsavedGone: {
+    en: 'Unsaved and forgotten: Remember is not on, so nothing else keeps it.',
+    es: 'Ya no está guardado y se olvidó: Recordar no está activado, así que nada más lo guarda.',
+  },
+  savedFull: {
+    en: 'You have {n} saved phrases, the most Yomu keeps, so this one was not saved. Unsave one in History first.',
+    es: 'Tienes {n} frases guardadas, el máximo que guarda Yomu, así que esta no se guardó. Primero quita una de las guardadas en el historial.',
+  },
+  rowSaved: { en: 'Saved. It is under Saved phrases now.', es: 'Guardado. Ahora está en Frases guardadas.' },
+  rowUnsaved: { en: 'Unsaved. It is back under Texts you read.', es: 'Ya no está guardado. Volvió a Textos que leíste.' },
+  savedPhrasesHead: { en: 'Saved phrases', es: 'Frases guardadas' },
+  savedPhrasesLead: {
+    en: 'Texts you saved with the bookmark. They stay until you unsave them, whether Remember is on or off, and Export in My kanji writes them to your backup.',
+    es: 'Textos que guardaste con el marcador. Se quedan hasta que los quites, con Recordar activado o no, y Exportar, en Mis kanji, los escribe en tu copia.',
+  },
+  savedFilterNone: { en: 'No saved phrase matches the filter.', es: 'Ninguna frase guardada coincide con el filtro.' },
+  phraseSavedOn: { en: 'Saved {day}', es: 'Guardada: {day}' },
+  phraseReadOnce: { en: 'read once', es: 'leída una vez' },
+  phraseReadTimes: { en: 'read {n} times', es: 'leída {n} veces' },
+  phraseLastOn: { en: 'last {day}', es: 'última: {day}' },
+  forgetUnsavedOne: { en: 'Forget the text you did not save?', es: '¿Olvidar el texto que no guardaste?' },
+  forgetUnsavedMany: { en: 'Forget the {n} texts you did not save?', es: '¿Olvidar los {n} textos que no guardaste?' },
+  keepSavedOne: { en: 'Your saved phrase stays.', es: 'Tu frase guardada se queda.' },
+  keepSavedMany: { en: 'Your {n} saved phrases stay.', es: 'Tus {n} frases guardadas se quedan.' },
+  offTitleUnsavedOne: {
+    en: 'Stop remembering and forget the text you did not save?',
+    es: '¿Dejar de recordar y olvidar el texto que no guardaste?',
+  },
+  offTitleUnsavedMany: {
+    en: 'Stop remembering and forget the {n} texts you did not save?',
+    es: '¿Dejar de recordar y olvidar los {n} textos que no guardaste?',
+  },
+  offBodyKept: {
+    en: 'Every text you did not save is forgotten in this browser. Your kanji, their counts and your collection stay.',
+    es: 'Se olvida en este navegador cada texto que no guardaste. Tus kanji, sus conteos y tu colección se quedan.',
+  },
+  turnedOffKept: {
+    en: 'Remembering is off. The texts you did not save were forgotten; your saved phrases stay.',
+    es: 'Recordar está desactivado. Se olvidaron los textos que no guardaste; tus frases guardadas se quedan.',
+  },
+  forgotUnsaved: {
+    en: 'The texts you did not save are forgotten. Your saved phrases stay.',
+    es: 'Se olvidaron los textos que no guardaste. Tus frases guardadas se quedan.',
   },
 });

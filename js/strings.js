@@ -295,8 +295,8 @@ export const STRINGS = Object.freeze({
 
   backupHead: { en: 'Backup', es: 'Copia de seguridad' },
   backupLead: {
-    en: 'Export saves a file with your kanji and their counts, never a text. Import adds a file to what is here.',
-    es: 'Exportar guarda un archivo con tus kanji y sus conteos, nunca un texto. Importar suma un archivo a lo que ya hay.',
+    en: 'Export saves a file with your kanji, their counts and the phrases you saved in History, and no other text. Import adds a file to what is here.',
+    es: 'Exportar guarda un archivo con tus kanji, sus conteos y las frases que guardaste en el historial, y ningún otro texto. Importar suma un archivo a lo que ya hay.',
   },
   exportFile: { en: 'Export', es: 'Exportar' },
   importFile: { en: 'Import', es: 'Importar' },

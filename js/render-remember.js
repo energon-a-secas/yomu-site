@@ -1,8 +1,8 @@
 // What the reader says about the collection and about History: the card
-// that asks once whether to remember texts, the "You read this before" line,
-// the toast after a read that collected a kanji, and the line that says where
-// a kanji was last seen (on the My kanji list and in the Collection's
-// dialog).
+// that asks once whether to remember texts, the bookmark that saves the text
+// on screen, the "You read this before" line, the toast after a read that
+// collected a kanji, and the line that says where a kanji was last seen (on
+// the My kanji list and in the Collection's dialog).
 //
 // The card and the line sit under the status line and are painted with it
 // (render-chrome.js paintStatus calls paintRemember), so they follow every
@@ -10,17 +10,18 @@
 // region that stays in the page with only its text changing, the same rule
 // the status line keeps, and it changes only when what it says changes.
 //
-// A last-seen sentence comes from History, so it is drawn only while
-// remembering is on; a kanji whose text was forgotten, or that was met while
-// it was off, says what kind of text it was met in instead. The sentence is
-// text nodes, the kanji in a <mark>, never an attribute.
+// A last-seen sentence comes from History, so it is drawn while remembering
+// is on, or, whatever Remember says, when the text was saved on purpose; a
+// kanji whose text was forgotten, or that was met in a text not kept, says
+// what kind of text it was met in instead. The sentence is text nodes, the
+// kanji in a <mark>, never an attribute.
 
 import { $, h, fill, showToast } from './utils.js';
 import { ui, currentLang } from './strings.js';
 import { state } from './state.js';
 import { isLexical } from './reader.js';
 import { myKanji, dayOf, addDays } from './kanji-store.js';
-import { myHistory, sentenceAround } from './history-store.js';
+import { myHistory, sentenceAround, textKey, isSaved } from './history-store.js';
 import { loadJoyo, progress, crossed } from './collection.js';
 import { dayText, today } from './render-save.js';
 
@@ -60,17 +61,38 @@ export function seenBeforeText(before) {
 
 let shown = '';
 
+/** The text a settled read read, when it found Japanese: what the bookmark saves. */
+export function readText(s = state) {
+  const a = s.analysis;
+  return s.text.trim() && hasJapanese(a) && typeof a.read === 'string' ? a.read : null;
+}
+
+// One key per reading, not one hash of up to 2,000 characters per paint.
+const keys = new WeakMap();
+function readKey(a) {
+  if (!keys.has(a)) keys.set(a, textKey(a.read));
+  return keys.get(a);
+}
+
 /**
  * The ask card: while the learner has not answered, after a read that found
- * Japanese. The banner: while remembering is on and History knew the text
- * on screen.
+ * Japanese. The bookmark: after the same read, whatever Remember says,
+ * pressed while that text is saved. The banner: while History knew the text
+ * on screen, which with Remember off is only ever a saved text.
  */
 export function paintRemember(s = state) {
   const card = $('remember-ask');
-  if (card) card.hidden = !(s.prefs.remember === 'ask' && s.text.trim() && hasJapanese(s.analysis));
+  const text = readText(s);
+  if (card) card.hidden = !(s.prefs.remember === 'ask' && text !== null);
+  const star = $('save-text');
+  if (star) {
+    star.hidden = text === null;
+    const pressed = text !== null && myHistory().isSaved(readKey(s.analysis));
+    if (star.getAttribute('aria-pressed') !== String(pressed)) star.setAttribute('aria-pressed', String(pressed));
+  }
   const line = $('seen-before');
   if (!line) return;
-  const msg = s.prefs.remember === 'on' && s.text.trim() ? seenBeforeText(s.seenBefore) : '';
+  const msg = s.text.trim() ? seenBeforeText(s.seenBefore) : '';
   if (msg === shown && (msg !== '') === !!line.firstChild) return;
   shown = msg;
   fill(line, msg ? [msg, ' ', h('a', { class: 'text-link', href: '#/kanji/history' }, ui('navHistory'))] : []);
@@ -136,11 +158,11 @@ const SOURCE_LINE = {
   history: 'lastSeenHistory',
 };
 
-/** The remembered text a kanji was last met in, while remembering is on, or null. */
+/** The text a kanji was last met in, while remembering is on or when that text is saved, or null. */
 function rememberedText(seen) {
-  if (!seen || !seen.h || state.prefs.remember !== 'on') return null;
+  if (!seen || !seen.h) return null;
   const entry = myHistory().entry(seen.h);
-  return entry ? entry.t : null;
+  return entry && (state.prefs.remember === 'on' || isSaved(entry)) ? entry.t : null;
 }
 
 /**

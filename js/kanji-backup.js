@@ -8,39 +8,54 @@
 //
 // What a backup carries: the saved kanji and their schedules, and every kanji
 // met with its counts, its dictionary words, and the kind of text (`src`) and
-// the History key (`h`) it was last met in. Never the session, and never a
-// text: a History key is a hash, and History itself is not exported.
+// the History key (`h`) it was last met in. Never the session. The one text
+// it carries is a phrase the learner saved on purpose (`phrases`, an additive
+// field: { t, first, last, n, src, saved }, history-store.js phrasesOf),
+// written only when there is one; the rest of History is not exported, and a
+// backup without the field imports as it always did.
 
 import {
   validate, addWords, minDay, maxDay, isObject, withPlace,
 } from './kanji-store.js';
+// A second cycle on purpose, as safe as the first (kanji-store.js imports
+// this module, and history-store.js imports kanji-store.js): no module of the
+// three uses another's bindings while it loads.
+import { cleanPhrases } from './history-store.js';
 
 export const EXPORT_FORMAT = 'yomu-kanji-export/1';
 
 /** The largest backup Import reads; a real one is a few hundred KB at most. */
 export const MAX_IMPORT_BYTES = 5 * 1024 * 1024;
 
-/** What Export writes: the saved and seen maps, never the session. */
-export function exportDoc(data, today) {
-  return { format: EXPORT_FORMAT, exported: today, site: 'https://yomu.neorgon.com/', saved: data.saved, seen: data.seen };
+/** What Export writes: the saved and seen maps and any saved phrases, never the session. */
+export function exportDoc(data, today, phrases) {
+  const doc = { format: EXPORT_FORMAT, exported: today, site: 'https://yomu.neorgon.com/', saved: data.saved, seen: data.seen };
+  if (Array.isArray(phrases) && phrases.length) doc.phrases = phrases;
+  return doc;
 }
 
 /**
  * Read a backup file's text. { ok: true, data, dropped } or
  * { ok: false, reason: 'json' | 'format' | 'empty' }. The entries go through
- * the same checks as the store itself.
+ * the same checks as the store itself, the saved phrases through History's
+ * (`data.phrases`, present only when one reads); a damaged phrase is left
+ * out and counted with the rest, and never stops the kanji importing.
  */
 export function parseImport(text) {
   let doc;
   try { doc = JSON.parse(String(text)); } catch { return { ok: false, reason: 'json' }; }
   if (!isObject(doc) || doc.format !== EXPORT_FORMAT) return { ok: false, reason: 'format' };
-  const { data, dropped } = validate({ saved: doc.saved, seen: doc.seen });
-  if (!Object.keys(data.saved).length && !Object.keys(data.seen).length) return { ok: false, reason: 'empty', dropped };
+  const { data, dropped: bad } = validate({ saved: doc.saved, seen: doc.seen });
+  const p = cleanPhrases(doc.phrases);
+  const dropped = bad + p.dropped;
+  if (p.phrases.length) data.phrases = p.phrases;
+  if (!Object.keys(data.saved).length && !Object.keys(data.seen).length && !p.phrases.length) return { ok: false, reason: 'empty', dropped };
   return { ok: true, data, dropped };
 }
 
 /**
- * Merge an imported backup into `data`. A count keeps the higher number and a
+ * Merge an imported backup's kanji into `data` (its phrases go to History,
+ * kanji-store.js merge). A count keeps the higher number and a
  * first-seen day the earlier, so importing the same file twice, or two
  * devices' files in either order, ends in the same place. Where a kanji was
  * last met goes with the later last day; on the same day this browser's own
