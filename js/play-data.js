@@ -6,8 +6,11 @@
 //
 // data/names/popular.json (yomu-names-popular/1, emitted by the dictionary
 // build): katakana names with their original spelling, most used first,
-//   [katakana, original, 'given' | 'surname' | 'place', count]
-// A row that is not that shape is left out and counted. Before the build
+//   [katakana, original, 'given' | 'surname' | 'person' | 'place', count]
+// A row that is not that shape is left out and counted, and so is a
+// spelling with no capital first, which the build refuses too (JMnedict
+// spells エイヴォン "avon"). `person` came with the game's two classes
+// (play-rounds.js nameClass); a page from before it drops such a row. Before the build
 // that emits it, the file is not there: a 404 reads as 'missing', which the
 // Play screen says in words, and is never thrown. Asking is the only way a
 // static page can learn a file is missing, so that one request is a 404 in
@@ -23,10 +26,10 @@ export const LOOKALIKES_SRC = 'data/play/lookalikes.json';
 export const LOOKALIKES_FORMAT = 'yomu-lookalikes/1';
 export const NAMES_SRC = 'data/names/popular.json';
 export const NAMES_FORMAT = 'yomu-names-popular/1';
-export const NAME_TYPES = Object.freeze(['given', 'surname', 'place']);
+export const NAME_TYPES = Object.freeze(['given', 'surname', 'person', 'place']);
 
 const KATAKANA_NAME = /^[ァ-ヺー・]+$/;
-const LATIN_NAME = /^[\p{Script=Latin}][\p{Script=Latin} '’-]*$/u;
+const LATIN_NAME = /^(?=\p{Lu})[\p{Script=Latin}][\p{Script=Latin} '’-]*$/u;
 
 function bad(file, detail) {
   return new Error(`${file}: ${detail}`);

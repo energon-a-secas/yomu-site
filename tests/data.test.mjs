@@ -517,10 +517,14 @@ test('popular.json: the corpus\'s commonest katakana names with their original s
   doc.names.forEach(([text, o, type, n], k) => {
     assert.match(text, /^[\u30a1-\u30faー・]+$/u, text);
     assert.match(o, LATIN_NAME, o);
-    assert.ok(['given', 'surname', 'place'].includes(type), type);
+    assert.match(o, /^\p{Lu}/u, `${text} ${o}: a spelling with a capital first`);
+    // person since 2026-10-05: the sense that spells the name says so
+    // (ガンジー Gandhi), or the corpus uses a place as a person (スミス)
+    assert.ok(['given', 'surname', 'person', 'place'].includes(type), type);
     assert.ok(Number.isInteger(n) && n >= 1, `${text} ${n}`);
     assert.equal(names.get(text).o, o, text);
-    assert.equal(popularType(names.get(text).n), type, text);
+    const tier = popularType(names.get(text).n);
+    assert.ok(tier === type || (type === 'person' && tier === 'place'), `${text}: ${type}, the tier says ${tier}`);
     if (k) {
       const [prev, , , m] = doc.names[k - 1];
       assert.ok(m > n || (m === n && prev < text), `${prev} before ${text}`);
@@ -534,6 +538,17 @@ test('popular.json: the corpus\'s commonest katakana names with their original s
   // バラ is a name in JMnedict and a rose in every sentence the corpus has
   // it in; the page reads the rose, so the game must not offer "Bara"
   assert.ok(!doc.names.some(([text]) => text === 'バラ'));
+  // the type is the sense's that spells the name, or the corpus's use of a
+  // place as a person; a spelling with no capital and a name used only as
+  // the stem of 語 or 人 are not in the game
+  const row = (text) => doc.names.find((r) => r[0] === text) || null;
+  assert.deepEqual(row('キャシー').slice(1, 3), ['Cathy', 'given'], 'Cathy is the woman\'s name; Casei the surname');
+  assert.deepEqual(row('リヨン').slice(1, 3), ['Lyon', 'place'], 'Lyon is the place; Riyon the woman\'s name');
+  assert.deepEqual(row('ガンジー').slice(1, 3), ['Gandhi', 'person'], 'Gandhi is the person; Ghanzi the place');
+  assert.equal(names.get('スミス').n, 'place', 'the names tier keeps JMnedict\'s type');
+  assert.deepEqual(row('スミス').slice(1, 3), ['Smith', 'person'], 'スミスさん, Mr. Smith');
+  assert.equal(row('エイヴォン'), null, 'avon');
+  assert.equal(row('ベルベル'), null, 'ベルベル語, ベルベル人');
 });
 
 test('a katakana name in the names tier carries its original spelling in Latin letters, and only a katakana name does', () => {
@@ -559,9 +574,16 @@ test('check-data fails a broken popular-names file, and a name record out of its
     ['an original spelling not in Latin letters', (rw) => rw('data/names/popular.json', (d) => {
       d.names[2][1] = 'ジョン';
     }), /popular\.json: names\[2\]: .* is not a name in Latin letters/],
+    // person was the invalid type here until it became a row type (2026-10-05)
     ['a type that is no row type', (rw) => rw('data/names/popular.json', (d) => {
+      d.names[3][2] = 'company';
+    }), /popular\.json: names\[3\]: type "company"/],
+    ['a given name typed person', (rw) => rw('data/names/popular.json', (d) => {
       d.names[3][2] = 'person';
-    }), /popular\.json: names\[3\]: type "person"/],
+    }), /popular\.json: names\[3\]: ジェーン is a given first in the names tier, not a person/],
+    ['a spelling with no capital', (rw) => rw('data/names/popular.json', (d) => {
+      d.names[2][1] = 'john';
+    }), /popular\.json: names\[2\]: "john" does not begin with a capital/],
     ['a count of none', (rw) => rw('data/names/popular.json', (d) => {
       d.names[d.names.length - 1][3] = 0;
     }), /popular\.json: .* count 0 is not a whole number of at least 1/],

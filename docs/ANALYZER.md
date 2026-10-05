@@ -206,6 +206,7 @@ is read as the count.
 - A kana-only word is one morpheme unless its kanji spelling says otherwise: そのうち is その内 and said `sonouchi`, ていれ is 手入れ and said `teire`. A word usually written in kana takes only the cuts before a kanji from its spelling, because its okurigana can be fused into it (ありがとう, 有り難う, stays `arigatoo`).
 - A は inside a dictionary expression that the expression's own pieces make a particle is said `wa`: ではまた `dewamata`, ということは `toiukotowa`.
 - Devoicing (`desu` said close to `dess`) is a note, never a change to the romaji line.
+- A kana and a small vowel are one beat and one syllable in both lines: the loanword digraphs are `kana.js GENKI_MAP` (ティ `ti`, ファ `fa`, ウィ `wi`, ヴァ `va`, and ツァ `tsa`, ツィ `tsi`, ツェ `tse`, ツォ `tso`, テュ `tyu`, デュ `dyu`, イェ `ye`, クァ `kwa`, グァ `gwa`, スィ `si`, ズィ `zi`), so フィレンツェ is `fi-re-n-tse`, never `tsue`. The said line keeps them after っ and ん too (ピッツァ `pittsa`, スパゲッティ `supagetti`, ゴールデンウィーク `goorudenwiiku`), where wanakana's own table used to win (`nettei`, `gooruden'uiiku`).
 
 ## Data formats (data/)
 
@@ -569,7 +570,7 @@ it, a guess again); of its 59 places, 52 right before and 54 after (相模,
 | Field | Meaning |
 |---|---|
 | `r` | the reading, one; absent for a katakana name, which is read as written |
-| `n` | the types, space separated, most evidenced first: `surname`, `given`, `masc`, `fem`, `place` |
+| `n` | the types, space separated, most evidenced first: `surname`, `given`, `masc`, `fem`, `place`; a katakana name's lead with the types of the sense its `o` came from (キャシー Cathy `fem surname`, Casei being the surname) |
 | `f` | the reading split over the kanji, cut like a dictionary `f`; `*` read as a whole |
 | `s` | 1 for a strong name (`ext` of 5 or more) |
 | `S` | 1 for a sure one: `ext` of 20 or more, at least 5 of them full names or surnames (never without `s`) |
@@ -589,17 +590,59 @@ analyzer: it is the input of a game that asks a learner to read a name.
 ```
 
 A row is the katakana spelling (letters of the katakana block, ー and ・
-only), the original spelling (the name record's `o`), one type (`given` for
-JMnedict's given, masc and fem, `surname`, `place`: the first of the record's
-types that is one) and how many Tatoeba sentences hold the name as a whole
-katakana run. Highest count first, then the spelling in plain JS string
-order; a count of at least 1; at most 1,000 rows; the names shards' licence
-block. `tools/build-names.mjs` emits it (`tools/lib/popular.mjs`) and keeps
-a name only when the analyzer, reading it alone over the data just built,
-returns it as one name token with that spelling: バラ is a name in JMnedict
-and a rose in all 126 sentences that have it, and the page reads the rose.
-676 names (27.9 KB) pass; 408 candidates did not. `tools/check-data.mjs`
-holds the rows to the format, the order and the names tier beside it.
+only), the original spelling (the name record's `o`, with a capital first:
+JMnedict spells エイヴォン "avon", and that row is left out), one type
+(`given` for JMnedict's given, masc and fem, `surname`, `person`, `place`:
+the first of the record's types that is one, which for a katakana name is
+the sense its spelling came from) and how many Tatoeba sentences hold the
+name as a whole katakana run. Highest count first, then the spelling in
+plain JS string order; a count of at least 1; at most 1,000 rows; the names
+shards' licence block. `tools/build-names.mjs` emits it
+(`tools/lib/popular.mjs`) and keeps a name only when the analyzer, reading
+it alone over the data just built, returns it as one name token with that
+spelling: バラ is a name in JMnedict and a rose in all 126 sentences that
+have it, and the page reads the rose. 522 names (22.6 KB) pass; 230
+candidates did not. `tools/check-data.mjs` holds the rows to the format, the
+order and the names tier beside it.
+
+The corpus corrects two things JMnedict's types get wrong for the game,
+each by a rule measured 2026-10-05 and printed by the build:
+
+- **A place used as a person is a person.** JMnedict types スミス, ロミオ,
+  フランツ and ゴッホ only `place`. A row typed `place` becomes `person`
+  when, in at least 2 of its sentences and a fifth of its count, a Japanese
+  sentence puts さん, 先生, 氏, 君, 様 or ちゃん after it, or an English
+  sentence linked to it puts Mr., Mrs., Ms. or Dr. before its spelling.
+  Eight move: スミス (155 of 179), パターソン (9 of 11), ウィルソン (6 of
+  7), クリントン (2 of 6), トマス (2 of 6), ロビンソン (2 of 5), トンプソン
+  (3 of 3), エリオット (2 of 2). ロミオ, フランツ and ゴッホ have no such
+  sentence and stay places; so do the six used so in one sentence only
+  (スペンサー, of 4, and アダムズ, ハリントン, マーリー, ミッチェル, モリス, of
+  1 each). Only the row moves: the names tier, and so the Word panel, keeps
+  JMnedict's types, and the checker accepts `person` over a tier `place`
+  because only the builder holds the corpus.
+- **A name met only as a word's stem is no name.** ベルベル is followed by
+  語 or 人 in all 15 of its sentences (Berber, a language and a people), and
+  so are タタール (3) and タガログ (2), of every katakana name with a
+  confirmed spelling; they are left out. The rule asks for every sentence:
+  the nearest after them are places (アラビア 29 of 36, ノルウェー 4 of 7,
+  グルジア 1 of 2).
+
+The type from the sense moved six rows (キャシー Cathy, トーニー Tony and
+バーナード Bernard are given names, not surnames; リヨン Lyon, アルマ Alma
+and カナ Cana places, not given names) and made ガンジー Gandhi a person
+(Ghanzi is the place); 66 katakana records list their types in a new order.
+A name JMnedict types only `person` (ナポレオン) is still no row. One case
+stays open: 22 rows come from a sense JMnedict types both a person and a
+place, and take the person (the types' fixed order). That is right for
+アリス, ジャクソン and リンカーン and wrong for ミラノ Milan (a given name
+here) and エベレスト Everest (a surname); the sense's own order would fix
+those two and mistype オリバー and アントン as places, so neither is used. The game
+names two classes, "a name" for given, surname and person and "a place"
+(`js/play-rounds.js nameClass`), and offers three spellings of the answer's
+class. サン (San, three sentences: アウン・サン・スー・チー, サン・ピエトロ
+and a brand of apple) is no name either, but no rule measured separates it
+from the names it sits among, so it stays.
 
 The decoded names, measured over all 248,924 Tatoeba sentences
 (`tools/compare-readings.mjs`, the names before and after, the same code
@@ -988,7 +1031,7 @@ How a word is found:
   of ム; and each consonant against the column it was written with), and
   each piece is priced by how often JMdict's own loanwords wrote that
   spelling that way: the `pieces` of `like/index.json`, counted over the
-  16,755 of the loanwords below whose one-word gloss lines up with their
+  16,759 of the loanwords below whose one-word gloss lines up with their
   katakana, smoothed toward a coarser class for a spelling never met. A candidate's
   score is the sum, less 3 for a loose step, plus the log of how many
   records gloss with it.
@@ -1027,15 +1070,18 @@ development quarter, `--search` for the rules tried on it):
 
 | katakana | loanwords | gloss in the list and lined up | answered (coverage) | right | top-1 precision |
 |---|---:|---:|---:|---:|---:|
-| 2 to 3 | 558 | 271 | 0 (0.0%) | 0 | none |
-| 4 to 5 | 2155 | 1042 | 760 (35.3%) | 621 | 81.7% |
-| 6 to 7 | 1759 | 914 | 885 (50.3%) | 823 | 93.0% |
+| 2 to 3 | 558 | 272 | 0 (0.0%) | 0 | none |
+| 4 to 5 | 2155 | 1045 | 760 (35.3%) | 621 | 81.7% |
+| 6 to 7 | 1759 | 913 | 884 (50.3%) | 822 | 93.0% |
 | 8+ | 665 | 366 | 345 (51.9%) | 339 | 98.3% |
-| **all** | **5137** | **2593** | **1990 (38.7%)** | **1783** | **89.6%** |
+| **all** | **5137** | **2596** | **1989 (38.7%)** | **1782** | **89.6%** |
 
 The held-out quarter, read once. On the development quarter the same rule
-answered 1,986 of 5,245 (37.9%) and was right on 89.2% (80.5% at four and
-five katakana). Without the native-word filter the held-out quarter is 5,349
+answered 1,984 of 5,245 (37.8%) and was right on 89.2% (80.6% at four and
+five katakana). Both were read again, rule unchanged, after ツェ and the
+other small-vowel digraphs became one syllable each (2026-10-05): a beat
+`loan-align.js` could not line up before now lines up, which moved the
+held-out quarter by one answer (1,990 and 1,783 right before). Without the native-word filter the held-out quarter is 5,349
 loanwords, 2,009 answered and 89.2% right.
 
 The guess is offered for fewer than two parts in five, and on those it is

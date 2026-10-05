@@ -43,7 +43,12 @@ split, the deinflection chain and the final kana of a v5u verb, so 思う stays
 omou and 小売 stays kouri. Particles (は, へ, を inside particle and copula
 tokens) are read wa, e, o; the fossil は of こんにちは rides on the record's `w`
 flag. Devoicing is a note in Genki's s(u)kides(u) notation, never a change to
-the romaji line.
+the romaji line. A kana and a small vowel are one beat and one syllable
+(フィレンツェ fi-re-n-tse, ピッツァ pittsa): the digraphs are `GENKI_MAP`, and
+`kana.js` repeats them after っ and ん, because wanakana's own table wins
+there and read スパゲッティ as supagettei. A new digraph goes in `GENKI_MAP`
+only, and `tools/build-sounds-like.mjs` is rerun, since `loan-align.js`
+lines up beats by their romaji.
 
 **A key is in the core or in one range shard, and a range shard is fetched
 only when the filter lets one of the text's keys through.** A key outside
@@ -144,12 +149,22 @@ picks the spelling the English sentences linked to the name's sentences
 use most (John, Kate, Maria), and only a name the corpus never met keeps
 the first. Do not go back to JMnedict's order or to counting spellings
 over JMnedict (romanizations win: Keito 73, Kate 4). `person` ships for katakana only: a kanji spelling
-typed person (相模) stays out. `data/names/popular.json` is another stream's
-input (a game): its format (`yomu-names-popular/1`, rows `[katakana, Latin,
-given | surname | place, count]`) is fixed, it is emitted by
-`build-names.mjs` (each row read by the analyzer, kept only when the page
-reads it as that name: バラ is a rose) and `check-data.mjs` holds it to
-`tools/lib/popular.mjs`. Change the format only together with that game.
+typed person (相模) stays out. A katakana record's types lead with those of
+the JMnedict sense its `o` came from (`jmnedict.mjs latinTypesOf`): キャシー
+is "Casei" a surname and "Cathy" a woman's name, so Cathy is `fem surname`,
+and リヨン Lyon `place fem`. `data/names/popular.json` is the Name decoder's
+input: its format (`yomu-names-popular/1`, rows `[katakana, Latin, given |
+surname | person | place, count]`) is emitted by `build-names.mjs` (each row
+read by the analyzer, kept only when the page reads it as that name: バラ is
+a rose) and `check-data.mjs` holds it to `tools/lib/popular.mjs`. Its type
+is the record's first, except that a `place` the corpus uses as a person (an
+honorific after it, or Mr., Mrs., Ms. or Dr. before its spelling in the
+linked English, in 2 sentences and a fifth of its count: スミス and 7 more)
+is a `person` there and only there; the Word panel keeps JMnedict's. A
+spelling with no capital (エイヴォン "avon") and a name met only as the
+stem of 語 or 人 (ベルベル, タタール, タガログ) are left out; a name typed
+only `person` stays out, as before. Change the format only together with
+that game.
 
 **A katakana compound is one token, and the lattice already chose its
 parts.** `compounds.js` joins katakana pieces that touch (テニス|トーナメント,
@@ -210,7 +225,18 @@ status, cleared when the next session begins; and `dialogs.js openDialog`
 places a dialog beside its opener inside the band of the frame the top page
 shows, which an IntersectionObserver with no root reports in the frame's own
 coordinates (measured the same in Chromium, WebKit and Firefox, cross-origin).
-A new floating element in an embed needs one of the two.
+A new floating element in an embed needs one of the two. Play's answers are
+the third case: `events-play.js reveal` calls `scrollIntoView({ block:
+'nearest' })` on the feedback, a new grid, a question or a result, now and
+again once the host has resized the frame. Measured 2026-10-05 from inside
+the cross-origin frame in Runcible's sheet at 390x844, it scrolls the sheet
+in Chromium and Firefox and does not in WebKit (`focus()` does not either),
+so in WebKit only the layout keeps them in view: `play.css` draws Next on the
+feedback's first row, a found grid's feedback takes the prompt's place above
+the grid, and under 600px wide (a phone, or any host's sheet) the options
+and grids are compact, cells 48 to 56px and never under 44 on a coarse
+pointer. A control that follows an answer goes inside the feedback block,
+never under it.
 
 **Nothing from Genki, the Japan Foundation apps, Tofugu, Yomitan, rikaichan
 or 10ten is in this repository.** The deinflection table was written for
@@ -317,7 +343,10 @@ when there is one) and Import validates and merges them (`cleanPhrases`,
 `mergePhrases`: higher count, earlier first, later last, earlier save).
 Export and Import live in `events-kanji.js`, so the kanji store is lent the
 two History calls (`myKanji().lendPhrases`, bound in `events-collect.js`)
-rather than opening History itself; the import note still counts only kanji.
+rather than opening History itself. The import note (`kanji-backup.js
+importNote`, pure, tested in `tests/phrases.test.mjs`) counts the saved
+kanji and kanji counts, then the saved phrases added or updated and any
+that did not fit, each phrase count in the singular when it is one.
 
 **"Times seen" counts texts, not keystrokes.** A session begins in
 `events-read.js`: `loadText()` (an example, a phrase or dialogue, `#t=`, an
@@ -383,8 +412,9 @@ actions), `js/events-odd.js` (Odd one out's grid and clock),
 `js/render-play.js` (the list, the result, the shared lines),
 `js/render-games.js` (the four question screens), and, with no DOM,
 `js/play-rounds.js`, `js/play-store.js`, `js/play-data.js`,
-`js/play-kana.js` and `js/play-twins.js` (the authored content, CC0), all
-run by `tests/play.test.mjs`. The section is `#play` in `index.html`; the
+`js/play-clock.js` (Odd one out's deadline), `js/play-kana.js` and
+`js/play-twins.js` (the authored content, CC0), all run by
+`tests/play.test.mjs`. The section is `#play` in `index.html`; the
 header's Play link moves into the kit's ⋯ menu on a phone (with it kept, the
 Spanish header ran 2px past 390), and the embed bar has one beside My kanji.
 
@@ -396,8 +426,19 @@ Focus goes to the prompt on a new question, to the feedback once answered,
 to the heading on the result; Back from a game focuses its Start. Entering a
 game begins a new round; leaving abandons it, and nothing of it is kept.
 Odd one out's clock starts only on Start the clock, is a deadline that
-stands still while the page is hidden, and loses 3 seconds per wrong tap;
-the untimed ten grids are the default under `prefers-reduced-motion`. A
+stands still while the game is not on screen, and loses 3 seconds per wrong
+tap; the untimed ten grids are the default under `prefers-reduced-motion`.
+Not on screen is the page hidden (`visibilitychange`), `#pl-body` out of
+what the top page shows (an IntersectionObserver with no root), or a frame
+its host no longer draws: when Runcible closes its sheet the frame's
+`visibilityState` stays visible, and a clock that heard only the first ran
+out behind the closed sheet and recorded a round of 0. Measured 2026-10-05:
+Chromium and WebKit report the closed sheet to the observer; Firefox
+reports nothing, stops drawing the frame and reads its viewport as 0 by 0,
+which every tick checks. A round that runs out ends only once an observer
+has just seen the game on screen (`events-odd.js confirmEnd`), and the
+arithmetic is `js/play-clock.js`, pure, in `performance.now()` (an observer
+entry's `time` says when it saw the game leave). A
 clock started before the grid's pairs are in waits for them: Firefox once
 moved focus from the first grid to the prompt when the load finished after
 the click.
@@ -438,7 +479,13 @@ says so once.
 
 **The Name decoder reads `data/names/popular.json`, which the dictionary
 build emits** (`yomu-names-popular/1`: `[katakana, original, given | surname
-| place, Tatoeba count]`, most used first). Before it ships the file is a 404,
+| person | place, Tatoeba count]`, most used first). The game names only two
+classes, "a name" or "a place" (`play-rounds.js nameClass`), and draws the
+three other spellings from the answer's class: JMnedict's finer types are
+wrong for many a famous foreign name, and options of one finer type gave the
+answer away (フランツ Franz among Fairmont, Lucca and Tampa). The corpus has
+no person evidence for ロミオ, フランツ or ゴッホ, so they are still places.
+Before it ships the file is a 404,
 which the list and the game say in words ("Not available yet") and never
 throw; Chromium and WebKit still log that one 404 as a console line, since a
 static page can only learn a file is missing by asking. Tests use the

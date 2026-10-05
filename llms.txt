@@ -17,7 +17,9 @@ romaji lines:
 
 - said: long vowels doubled only inside one morpheme (思う stays omou),
   particles は へ を read wa e o, n' before a vowel or y, never macrons
-- spelled: kana by kana with a hyphen between beats
+- spelled: kana by kana with a hyphen between beats; a kana and a small
+  vowel are one beat and one syllable in both lines (フィレンツェ
+  fi-re-n-tse, firentse)
 
 A number and its counter are one number token read by rule, with the sound
 changes between them: 三本 さんぼん, 一分 いっぷん, 十名 じゅうめい (名 counts
@@ -178,13 +180,17 @@ its save toggle:
   while that holds fewer than ten.
 - Odd one out (#/play/odd): a grid of one character hiding one look-alike,
   4x4 growing to 6x6; 60 seconds with a wrong tap costing 3, or ten grids
-  untimed (the default when the device asks for reduced motion).
+  untimed (the default when the device asks for reduced motion). The clock
+  stands still while the game is not on screen (the page hidden, scrolled
+  away, or a host's sheet closed over the frame), and a round never ends
+  while it is.
 - Twins across scripts (#/play/twins): へ/ヘ, カ/力, エ/工, ロ/口, ニ/二, タ/夕,
   ト/卜, ハ/八, オ/才, り/リ and ー/一, told apart by the word around them.
-- Name decoder (#/play/names): a katakana name and four original spellings;
-  the answer spells it kana by kana (ト-ム, to-mu: Tom). It reads
-  data/names/popular.json (yomu-names-popular/1) and says it is not
-  available until that file ships.
+- Name decoder (#/play/names): a katakana name, said to be a name or a
+  place, and four original spellings of that class; the answer spells it
+  kana by kana (ト-ム, to-mu: Tom). It reads data/names/popular.json
+  (yomu-names-popular/1) and says it is not available until that file
+  ships.
 
 The kanji look-alikes are data/play/lookalikes.json (yomu-lookalikes/1): for
 each jōyō kanji that has any, at most five, best first, chosen by rule from
@@ -203,8 +209,10 @@ pair mixed up comes round more often. No text is kept.
   surnames, given names and place names a text may hold, and the Latin
   spelling of a name written in katakana. data/names/popular.json
   (yomu-names-popular/1) lists the katakana names the corpus uses most, each
-  as [katakana, Latin spelling, given | surname | place, sentence count],
-  for a game; it carries the same licence block
+  as [katakana, Latin spelling, given | surname | person | place, sentence
+  count], for a game; the type is that of the JMnedict sense the spelling
+  comes from, or person for a place the corpus uses as one (Mr. Smith,
+  スミスさん); it carries the same licence block
 - KanjiVG, by Ulrich Apel, CC BY-SA 3.0: the parts of each kanji
 - Tatoeba, CC BY 2.0 FR: used only to rank how common each word is, to
   choose and count names, and, through the English translations of its

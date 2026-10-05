@@ -18,6 +18,7 @@ import {
   candidates, surnames, countExtensions, recordOf, STRONG_EXT,
 } from '../tools/lib/jmnedict.mjs';
 import { run } from './helpers/disk.mjs';
+import { toHira } from '../js/kana.js';
 
 // ── The rules, on a JMnedict of a few entries ─────────────────────────────
 
@@ -324,4 +325,66 @@ test('the game lists a name only when the English sentences chose its spelling',
   const rows = popularCandidates(records, counts, new Set(['トム']));
   assert.deepEqual(rows.map((r) => r[0]), ['トム']);
   assert.deepEqual(popularCandidates(records, counts, new Set()), []);
+});
+
+// ── The game's type: the sense that spells the name, and the corpus ──────
+
+test('a katakana name lists first the types of the sense its spelling came from (were Cathy a surname, Lyon a given name)', () => {
+  const rec = build([
+    foreign('キャシー', [[['surname'], ['Casei']], [['fem'], ['Cathy', 'Kathy', 'Cassie']]]),
+    foreign('リヨン', [[['place'], ['Lyon (France)', 'Riom (France)']], [['fem'], ['Riyon']]]),
+    foreign('ガンジー', [[['place'], ['Ghanzi (Botswana)']], [['person'], ['Gandhi (Mohandas Karamchand Gandhi)']]]),
+  ]);
+  // the corpus chose Cathy, Lyon and Gandhi (build-names.mjs sets `o`): set it here
+  const pick = (text, o, words) => {
+    const jmn = { words };
+    const cands = candidates(jmn);
+    countExtensions(jmn, cands, surnames(jmn));
+    cands.get(text).get(toHira(text)).o = o;
+    return recordOf(text, cands.get(text), new Map()).rec;
+  };
+  // JMnedict's first spelling: the type of the sense that holds it leads
+  assert.equal(rec('キャシー').rec.n, 'surname fem');
+  assert.equal(pick('キャシー', 'Cathy', [foreign('キャシー', [[['surname'], ['Casei']], [['fem'], ['Cathy', 'Kathy']]])]).n, 'fem surname');
+  assert.equal(pick('リヨン', 'Lyon', [foreign('リヨン', [[['place'], ['Lyon (France)']], [['fem'], ['Riyon']]])]).n, 'place fem');
+  assert.equal(pick('ガンジー', 'Gandhi', [foreign('ガンジー', [[['place'], ['Ghanzi (Botswana)']], [['person'], ['Gandhi (Mohandas Karamchand Gandhi)']]])]).n, 'person place');
+  assert.equal(rec('ガンジー').rec.n, 'place person', 'Ghanzi, the first spelling, is the place');
+});
+
+test('the game\'s type: the record\'s first, a place the corpus uses as a person, never a name used only as 語 or 人', async () => {
+  const {
+    rowType, usageOf, usedAsPerson, usedAsWord, popularCandidates, PERSON_MIN, PERSON_SHARE,
+  } = await import('../tools/lib/popular.mjs');
+  assert.equal(PERSON_MIN, 2);
+  assert.equal(PERSON_SHARE, 0.2);
+  // スミス is typed only place upstream; the corpus says Mr. Smith and スミスさん
+  const smith = usageOf('スミス', 'Smith', [
+    ['スミスさんは先生です。', []],
+    ['スミスが来た。', ['Mr. Smith came.']],
+    ['スミスは忙しい。', ['Smith is busy.']],
+    ['スミスミス', []],
+  ]);
+  assert.deepEqual(smith, { n: 4, person: 2, word: 0 });
+  assert.ok(usedAsPerson(smith, 4));
+  assert.ok(!usedAsPerson(smith, 11), 'two of eleven is under a fifth');
+  assert.ok(!usedAsPerson({ person: 1 }, 1), 'one sentence is not enough');
+  assert.deepEqual(rowType({ n: 'place', o: 'Smith' }, 4, smith), { type: 'person', by: 'corpus' });
+  // a title before another word, or an honorific that is not one, is no evidence
+  assert.equal(usageOf('スミス', 'Smith', [['スミスさん', []], ['スミス', ['Mrs. Smithers came.']], ['スミスたち', ['Dr Smith']]]).person, 2);
+  // a given name stays given, whatever the corpus says
+  assert.deepEqual(rowType({ n: 'given', o: 'Tom' }, 2, { n: 2, person: 2, word: 0 }), { type: 'given', by: 'jmnedict' });
+  // ベルベル is ベルベル語 and ベルベル人 in every sentence: no name
+  const berber = usageOf('ベルベル', 'Berber', [['ベルベル語を話す。', []], ['私はベルベル人です。', []]]);
+  assert.deepEqual(berber, { n: 2, person: 0, word: 2 });
+  assert.ok(usedAsWord(berber));
+  assert.deepEqual(rowType({ n: 'place', o: 'Berber' }, 2, berber), { type: null, by: 'word' });
+  // ノルウェー is a place, also met alone
+  assert.ok(!usedAsWord(usageOf('ノルウェー', 'Norway', [['ノルウェー語', []], ['ノルウェーに行く。', []]])));
+  // a name typed only person stays out; a person by its sense is a row
+  assert.deepEqual(rowType({ n: 'person', o: 'Napoleon' }, 3), { type: null, by: 'jmnedict' });
+  assert.deepEqual(rowType({ n: 'person place', o: 'Gandhi' }, 3), { type: 'person', by: 'jmnedict' });
+  // a spelling with no capital never reaches the game (JMnedict's エイヴォン "avon")
+  const records = new Map([['エイヴォン', { o: 'avon', n: 'place' }], ['スミス', { o: 'Smith', n: 'place' }], ['ベルベル', { o: 'Berber', n: 'place' }]]);
+  const rows = popularCandidates(records, new Map([['エイヴォン', 1], ['スミス', 4], ['ベルベル', 2]]), new Set(records.keys()), new Map([['スミス', smith], ['ベルベル', berber]]));
+  assert.deepEqual(rows, [['スミス', 'Smith', 'person', 4]]);
 });

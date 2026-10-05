@@ -97,7 +97,7 @@ yomu-site/
 │   ├── render*.js        # the reading, word panel, kanji table, notes, phrases
 │   ├── events.js         # input, selection, hover and tap, speech
 │   ├── speech.js         # speechSynthesis with a Japanese voice
-│   ├── play-*.js         # Play: the rounds, the store, the kana sets and twins (no DOM)
+│   ├── play-*.js         # Play: the rounds, the store, the clock, the kana sets and twins (no DOM)
 │   ├── events-play.js    # Play's routes, keys and actions (Odd one out's clock: events-odd.js)
 │   └── embed.js          # the yomu-embed/1 protocol
 ├── data/

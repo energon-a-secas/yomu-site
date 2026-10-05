@@ -60,9 +60,11 @@ import {
 } from './lib/jmnedict.mjs';
 import { buildFilter } from '../js/bloom.js';
 import {
-  katakanaRunCounts, popularCandidates, popularProblems, POPULAR_FORMAT, POPULAR_MAX,
+  katakanaRunCounts, popularCandidates, popularProblems, popularType, rowType, usageOf, POPULAR_FORMAT, POPULAR_MAX,
 } from './lib/popular.mjs';
-import { chooseOriginal, englishFor, sentenceRows } from './lib/original.mjs';
+import {
+  chooseOriginal, englishFor, linkedSentences, sentenceRows,
+} from './lib/original.mjs';
 import { isKatakana, toHira } from '../js/kana.js';
 import { createDict } from '../js/dict.js';
 import { analyze } from '../js/analyze.js';
@@ -128,7 +130,8 @@ async function main() {
   // A katakana name's spelling in Latin letters, chosen by the English
   // translations of the sentences that hold it (tools/lib/original.mjs).
   const spelled = [...open].filter((k) => isKatakana(k[0]) && (cands.get(k).get(toHira(k)) || {}).latin);
-  const english = englishFor(new Set(spelled), sentenceRows(japanese), loadBz2Text('tatoebaJpnEng'), loadBz2Text('tatoebaEng'));
+  const linked = linkedSentences(new Set(spelled), sentenceRows(japanese), loadBz2Text('tatoebaJpnEng'), loadBz2Text('tatoebaEng'));
+  const english = englishFor(new Set(spelled), null, null, null, linked);
   for (const k of spelled) {
     const v = cands.get(k).get(toHira(k));
     if (!v.latin.length) continue;
@@ -200,12 +203,31 @@ async function main() {
   const rows = [];
   let passed = 0;
   const confirmed = new Set([...picks].filter(([, p]) => p.by === 'evidence').map(([k]) => k));
-  for (const row of popularCandidates(records, katakanaRunCounts(sentences), confirmed)) {
+  // How the corpus uses each spelled name, sentence by sentence (a place
+  // used as a person, a name only ever the stem of 語 or 人).
+  const usage = new Map();
+  for (const [k, held] of linked.byName) {
+    const rec = records.get(k);
+    if (rec && rec.o) usage.set(k, usageOf(k, rec.o, held.map(([id, text]) => [text, (linked.english.get(id) || []).map(([, line]) => line)])));
+  }
+  const counts = katakanaRunCounts(sentences);
+  const moved = [];
+  for (const row of popularCandidates(records, counts, confirmed, usage)) {
     if (rows.length === POPULAR_MAX) break;
     const r = await analyze(row[0], { dict });
     const t = r.tokens.length === 1 ? r.tokens[0] : null;
-    if (t && t.kind === 'name' && t.name && t.name.o === row[1]) rows.push(row);
-    else passed += 1;
+    if (t && t.kind === 'name' && t.name && t.name.o === row[1]) {
+      rows.push(row);
+      if (popularType(records.get(row[0]).n) !== row[2]) moved.push(`${row[0]} ${row[1]} (${row[3]}, ${usage.get(row[0]).person} as a person)`);
+    } else passed += 1;
+  }
+  // What the rules left out of the game, for the log: a spelling with no
+  // capital (エイヴォン avon), and a name used only as a word's stem.
+  const refused = [];
+  for (const [text, rec] of records) {
+    if (!confirmed.has(text) || !rec.o || !popularType(rec.n) || !(counts.get(text) > 0)) continue;
+    if (!/^\p{Lu}/u.test(rec.o)) refused.push(`${text} ${rec.o} (no capital)`);
+    else if (rowType(rec, counts.get(text), usage.get(text) || null).by === 'word') refused.push(`${text} ${rec.o} (${usage.get(text).word} of ${counts.get(text)} sentences a word's stem)`);
   }
   const popular = { _licence: licence, format: POPULAR_FORMAT, names: rows };
   const problems = popularProblems(popular, { names: records, licence });
@@ -221,6 +243,8 @@ async function main() {
     `names ${records.size}: in the corpus ${stats.attested}, by evidence only (${STRONG_EXT} or more other names use it) ${stats.strongOnly}, katakana decoded only ${stats.decoded}; kanji ${stats.kanji}, katakana ${stats.katakana} (${stats.original} with an original spelling, ${stats.person} typed person); strong ${stats.strong}, sure (ext >= ${SURE_EXT}) ${stats.sure}; read as a whole (*) ${stats.star}`,
     `katakana names spelled by the English sentences linked to theirs: ${stats.byEvidence} of ${stats.original} (${stats.linked} have linked English sentences, ${stats.unseen} of those with no spelling seen); ${stats.changed} differ from JMnedict's first (${stats.changes.sort((a, b) => b[3] - a[3]).slice(0, 12).map(([k, a, b, n]) => `${k} ${a} to ${b} ${n}`).join(', ')})`,
     `popular.json: ${popular.names.length} names, ${fmtBytes(popularBytes)} (${popularBytes} B), passing over ${passed} the page does not read as that name; first ${popular.names.slice(0, 8).map((r) => `${r[0]} ${r[1]} ${r[3]}`).join(', ')}`,
+    `popular.json types: ${['given', 'surname', 'person', 'place'].map((ty) => `${ty} ${popular.names.filter((r) => r[2] === ty).length}`).join(', ')}; places the corpus uses as a person, now person: ${moved.length} (${moved.join(', ')})`,
+    `popular.json left out by rule: ${refused.length} (${refused.join(', ')})`,
     `left out, in the corpus but best read as a type that does not ship: ${stats.untyped}`,
     `shards ${docs.length}: total ${fmtBytes(total)} (${total} B); index with its filter ${fmtBytes(indexBytes)} (${indexBytes} B)`,
     gone.length ? `removed stale shards: ${gone.join(' ')}` : 'no stale shards',
