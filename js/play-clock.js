@@ -3,13 +3,15 @@
 // and an IntersectionObserver entry's `time` share that origin) and says
 // when the game is hidden or shown, so tests/play.test.mjs runs it under node.
 //
-// Two things hide the game, each with its own reason: the page itself
-// (visibilitychange, 'page') and the game leaving what the top page shows
-// ('view'). The second is the one an embed needs: when Runcible closes its
-// sheet the frame stays visible as far as visibilityState goes, and a clock
-// that only heard visibilitychange ran out behind the closed sheet and
-// recorded a round of 0. An IntersectionObserver with no root reports it in
-// Chromium, WebKit and Firefox, cross-origin included (events-odd.js).
+// Each thing that hides the game is a reason of its own: the page itself
+// (visibilitychange, 'page'), the game leaving what the top page shows
+// ('view', an IntersectionObserver with no root) and a frame its host no
+// longer draws ('frame'). The last two are what an embed needs: when
+// Runcible closes its sheet the frame stays visible as far as
+// visibilityState goes, and a clock that only heard visibilitychange ran
+// out behind the closed sheet and recorded a round of 0. Chromium and
+// WebKit tell the observer; Firefox does not, and its frame's viewport reads
+// 0 by 0 instead (events-odd.js checks both).
 //
 // The time a round has left is spent only while nothing hides it, and a
 // round ends only while nothing hides it (`over`): a deadline that passed

@@ -428,14 +428,17 @@ game begins a new round; leaving abandons it, and nothing of it is kept.
 Odd one out's clock starts only on Start the clock, is a deadline that
 stands still while the game is not on screen, and loses 3 seconds per wrong
 tap; the untimed ten grids are the default under `prefers-reduced-motion`.
-Not on screen is the page hidden (`visibilitychange`) or `#pl-body` out of
-what the top page shows (an IntersectionObserver with no root): when
-Runcible closes its sheet the frame's `visibilityState` stays visible, and a
-clock that heard only the first ran out behind the closed sheet and recorded
-a round of 0. A round that runs out ends only once an observer has just seen
-the game on screen (`events-odd.js confirmEnd`), and the arithmetic is
-`js/play-clock.js`, pure, in `performance.now()` (an observer entry's `time`
-says when it saw the game leave). A
+Not on screen is the page hidden (`visibilitychange`), `#pl-body` out of
+what the top page shows (an IntersectionObserver with no root), or a frame
+its host no longer draws: when Runcible closes its sheet the frame's
+`visibilityState` stays visible, and a clock that heard only the first ran
+out behind the closed sheet and recorded a round of 0. Measured 2026-10-05:
+Chromium and WebKit report the closed sheet to the observer; Firefox
+reports nothing, stops drawing the frame and reads its viewport as 0 by 0,
+which every tick checks. A round that runs out ends only once an observer
+has just seen the game on screen (`events-odd.js confirmEnd`), and the
+arithmetic is `js/play-clock.js`, pure, in `performance.now()` (an observer
+entry's `time` says when it saw the game leave). A
 clock started before the grid's pairs are in waits for them: Firefox once
 moved focus from the first grid to the prompt when the load finished after
 the click.

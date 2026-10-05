@@ -323,13 +323,25 @@ test('Odd one out\'s clock stands still while the game is hidden, by the page or
   assert.equal(tickClock(e, 41000).left, 59000);
   stopClock(e);
   assert.deepEqual(tickClock(e, 999999), { left: 59000, over: false }, 'stopped: nothing runs');
+  // Firefox: no observer report, the frame undrawn; seen at the last tick that drew it
+  const f = createClock(60000);
+  startClock(f, 0);
+  hide(f, 'frame', 10000);
+  hide(f, 'view', 10150);
+  assert.equal(tickClock(f, 70000).left, 50000);
+  show(f, 'frame', 80000);
+  assert.ok(isHidden(f), 'the view still hides it');
+  show(f, 'view', 80000);
+  assert.deepEqual(tickClock(f, 130000), { left: 0, over: true });
 });
 
-test('Odd one out\'s clock is bound to the view as well as the page (events-odd.js)', () => {
+test('Odd one out\'s clock is bound to the view and the frame as well as the page (events-odd.js)', () => {
   const src = readFileSync(join(SITE, 'js/events-odd.js'), 'utf8');
   assert.match(src, /new IntersectionObserver\(/, 'an observer on the game');
   assert.match(src, /hide\(clk, 'view'/);
   assert.match(src, /hide\(clk, 'page'/);
+  assert.match(src, /hide\(clk, 'frame'/, 'a frame its host stopped drawing (Firefox: a 0 by 0 viewport)');
+  assert.match(src, /window\.innerWidth > 0 && window\.innerHeight > 0/);
   assert.ok(!/Date\.now\(\)/.test(src), 'one timebase, performance.now(), the observer\'s');
   const play = readFileSync(join(SITE, 'js/events-play.js'), 'utf8');
   assert.match(play, /watchView\(\);/);

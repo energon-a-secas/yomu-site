@@ -8,10 +8,13 @@
 // default under prefers-reduced-motion): ten grids, each found one followed
 // by its reason and Next. The clock is a deadline, not a count of ticks
 // (play-clock.js), and it stands still while the game is not on screen: the
-// page hidden (visibilitychange), or #pl-body out of what the top page
-// shows (an IntersectionObserver with no root), which is how an embed hears
-// that its host closed the sheet. A round that runs out ends only once an
-// observer has just seen the game on screen.
+// page hidden (visibilitychange), #pl-body out of what the top page shows
+// (an IntersectionObserver with no root), or a frame its host no longer
+// draws. A host closing its sheet leaves visibilityState visible; measured
+// 2026-10-05 in Runcible's sheet, Chromium and WebKit report it to the
+// observer, and Firefox reports nothing there but reads the frame's
+// viewport as 0 by 0, which every tick checks. A round that runs out ends
+// only once an observer has just seen the game on screen.
 //
 // A cycle on purpose, and a safe one: events-play.js imports these functions
 // and this file imports its painting and data helpers from there; neither
@@ -38,8 +41,18 @@ const PENALTY_MS = 3 * 1000;
 let timer = null;
 let clk = createClock(TIMED_MS);
 let ending = null;          // the observer asked, at the deadline, whether the game is on screen
+let drawnAt = 0;            // the last tick that found the frame drawn
 let pairs = null;           // this sitting's pairs; null while they load
 const now = () => performance.now();
+/** Firefox draws no frame its host hides, and its viewport reads 0 by 0 then. */
+const drawn = () => window.innerWidth > 0 && window.innerHeight > 0;
+
+/** The frame drawn or not, at `t`: an undrawn one hides the game from the last tick that saw it. */
+function checkDrawn(t) {
+  if (drawn()) { unhide(clk, 'frame', t); drawnAt = t; return true; }
+  hide(clk, 'frame', drawnAt || t);
+  return false;
+}
 
 export function newOddSitting() {
   stopClock();
@@ -89,6 +102,7 @@ function paintLeft(left) {
 
 function tick() {
   if (!play.odd.running) return;
+  checkDrawn(now());
   const t = tickClock(clk, now());
   paintLeft(t.left);
   if (t.over) confirmEnd();
@@ -108,7 +122,7 @@ function confirmEnd() {
     const seen = entries[entries.length - 1];
     ending.disconnect();
     ending = null;
-    if (!play.odd.running || isHidden(clk) || document.visibilityState === 'hidden') return;
+    if (!play.odd.running || !checkDrawn(now()) || isHidden(clk) || document.visibilityState === 'hidden') return;
     if (seen && seen.isIntersecting && tickClock(clk, now()).over) endOdd();
   });
   ending.observe(target);
@@ -120,6 +134,7 @@ export function startClock() {
   if (!pairs) { o.wantClock = true; return; }
   o.wantClock = false;
   o.running = true;
+  checkDrawn(now());
   runClock(clk, now());
   timer = setInterval(tick, 200);
   nextGrid();
