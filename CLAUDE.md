@@ -43,7 +43,12 @@ split, the deinflection chain and the final kana of a v5u verb, so 思う stays
 omou and 小売 stays kouri. Particles (は, へ, を inside particle and copula
 tokens) are read wa, e, o; the fossil は of こんにちは rides on the record's `w`
 flag. Devoicing is a note in Genki's s(u)kides(u) notation, never a change to
-the romaji line.
+the romaji line. A kana and a small vowel are one beat and one syllable
+(フィレンツェ fi-re-n-tse, ピッツァ pittsa): the digraphs are `GENKI_MAP`, and
+`kana.js` repeats them after っ and ん, because wanakana's own table wins
+there and read スパゲッティ as supagettei. A new digraph goes in `GENKI_MAP`
+only, and `tools/build-sounds-like.mjs` is rerun, since `loan-align.js`
+lines up beats by their romaji.
 
 **A key is in the core or in one range shard, and a range shard is fetched
 only when the filter lets one of the text's keys through.** A key outside

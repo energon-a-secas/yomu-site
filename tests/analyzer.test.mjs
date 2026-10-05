@@ -261,6 +261,57 @@ test('one token is said as several words where a textbook writes several', async
   }
 });
 
+// ── A kana and a small vowel: one beat, one syllable ─────────────────────
+
+test('a kana with a small vowel is one beat and one syllable in both lines (was fi-re-n-tsue)', async () => {
+  const { said, spelled } = await import('../js/kana.js');
+  for (const [kana, s, sp] of [
+    ['フィレンツェ', 'firentse', 'fi-re-n-tse'],
+    ['モーツァルト', 'mootsaruto', 'mo-o-tsa-ru-to'],
+    ['ツィ', 'tsi', 'tsi'],
+    ['ツォ', 'tso', 'tso'],
+    ['テュ', 'tyu', 'tyu'],
+    ['デュエット', 'dyuetto', 'dyu-e-t-to'],
+    ['イェール', 'yeeru', 'ye-e-ru'],
+    ['クァルテット', 'kwarutetto', 'kwa-ru-te-t-to'],
+    ['グァ', 'gwa', 'gwa'],
+    ['スィーツ', 'siitsu', 'si-i-tsu'],
+    ['ズィ', 'zi', 'zi'],
+    // the forms already handled stay as they were
+    ['パーティー', 'paatii', 'pa-a-ti-i'],
+    ['ファイル', 'fairu', 'fa-i-ru'],
+    ['ウィンドウ', 'windou', 'wi-n-do-u'],
+    ['ヴァイオリン', 'vaiorin', 'va-i-o-ri-n'],
+  ]) {
+    assert.equal(said(kana), s, `${kana} said`);
+    assert.equal(spelled(kana), sp, `${kana} spelled`);
+  }
+});
+
+test('after っ and ん such a beat keeps its spelling in the said line too (was nettei, san\'uitchi)', async () => {
+  const { said, spelled } = await import('../js/kana.js');
+  for (const [kana, s, sp] of [
+    ['ピッツァ', 'pittsa', 'pi-t-tsa'],
+    ['ネッティ', 'netti', 'ne-t-ti'],
+    ['カッフェ', 'kaffe', 'ka-f-fe'],
+    ['サンウィッチ', 'sanwitchi', 'sa-n-wi-t-chi'],
+    ['コンイェ', "kon'ye", 'ko-n-ye'],
+    // n' before a vowel or y, and っ before ch, as before
+    ['きんえん', "kin'en", 'ki-n-e-n'],
+    ['マッチャ', 'matcha', 'ma-t-cha'],
+  ]) {
+    assert.equal(said(kana), s, `${kana} said`);
+    assert.equal(spelled(kana), sp, `${kana} spelled`);
+  }
+});
+
+test('フィレンツェ read in a text: one name, its romaji one syllable per beat', async () => {
+  const t = (await run('フィレンツェ')).tokens[0];
+  assert.equal(t.surface, 'フィレンツェ');
+  assert.equal(t.romaji.spelled, 'fi-re-n-tse');
+  assert.equal(t.romaji.said, 'firentse');
+});
+
 // ── Properties of every result ───────────────────────────────────────────
 
 const MIXED = 'ABCです。3,000円の本を2冊、\n  田中さんと読みました！「やさしい」は？ｺｰﾋｰ、ください。';

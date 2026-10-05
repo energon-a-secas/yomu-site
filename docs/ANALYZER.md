@@ -206,6 +206,7 @@ is read as the count.
 - A kana-only word is one morpheme unless its kanji spelling says otherwise: そのうち is その内 and said `sonouchi`, ていれ is 手入れ and said `teire`. A word usually written in kana takes only the cuts before a kanji from its spelling, because its okurigana can be fused into it (ありがとう, 有り難う, stays `arigatoo`).
 - A は inside a dictionary expression that the expression's own pieces make a particle is said `wa`: ではまた `dewamata`, ということは `toiukotowa`.
 - Devoicing (`desu` said close to `dess`) is a note, never a change to the romaji line.
+- A kana and a small vowel are one beat and one syllable in both lines: the loanword digraphs are `kana.js GENKI_MAP` (ティ `ti`, ファ `fa`, ウィ `wi`, ヴァ `va`, and ツァ `tsa`, ツィ `tsi`, ツェ `tse`, ツォ `tso`, テュ `tyu`, デュ `dyu`, イェ `ye`, クァ `kwa`, グァ `gwa`, スィ `si`, ズィ `zi`), so フィレンツェ is `fi-re-n-tse`, never `tsue`. The said line keeps them after っ and ん too (ピッツァ `pittsa`, スパゲッティ `supagetti`, ゴールデンウィーク `goorudenwiiku`), where wanakana's own table used to win (`nettei`, `gooruden'uiiku`).
 
 ## Data formats (data/)
 
@@ -988,7 +989,7 @@ How a word is found:
   of ム; and each consonant against the column it was written with), and
   each piece is priced by how often JMdict's own loanwords wrote that
   spelling that way: the `pieces` of `like/index.json`, counted over the
-  16,755 of the loanwords below whose one-word gloss lines up with their
+  16,759 of the loanwords below whose one-word gloss lines up with their
   katakana, smoothed toward a coarser class for a spelling never met. A candidate's
   score is the sum, less 3 for a loose step, plus the log of how many
   records gloss with it.
@@ -1027,15 +1028,18 @@ development quarter, `--search` for the rules tried on it):
 
 | katakana | loanwords | gloss in the list and lined up | answered (coverage) | right | top-1 precision |
 |---|---:|---:|---:|---:|---:|
-| 2 to 3 | 558 | 271 | 0 (0.0%) | 0 | none |
-| 4 to 5 | 2155 | 1042 | 760 (35.3%) | 621 | 81.7% |
-| 6 to 7 | 1759 | 914 | 885 (50.3%) | 823 | 93.0% |
+| 2 to 3 | 558 | 272 | 0 (0.0%) | 0 | none |
+| 4 to 5 | 2155 | 1045 | 760 (35.3%) | 621 | 81.7% |
+| 6 to 7 | 1759 | 913 | 884 (50.3%) | 822 | 93.0% |
 | 8+ | 665 | 366 | 345 (51.9%) | 339 | 98.3% |
-| **all** | **5137** | **2593** | **1990 (38.7%)** | **1783** | **89.6%** |
+| **all** | **5137** | **2596** | **1989 (38.7%)** | **1782** | **89.6%** |
 
 The held-out quarter, read once. On the development quarter the same rule
-answered 1,986 of 5,245 (37.9%) and was right on 89.2% (80.5% at four and
-five katakana). Without the native-word filter the held-out quarter is 5,349
+answered 1,984 of 5,245 (37.8%) and was right on 89.2% (80.6% at four and
+five katakana). Both were read again, rule unchanged, after ツェ and the
+other small-vowel digraphs became one syllable each (2026-10-05): a beat
+`loan-align.js` could not line up before now lines up, which moved the
+held-out quarter by one answer (1,990 and 1,783 right before). Without the native-word filter the held-out quarter is 5,349
 loanwords, 2,009 answered and 89.2% right.
 
 The guess is offered for fewer than two parts in five, and on those it is

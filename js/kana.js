@@ -20,6 +20,13 @@ import { toRomaji } from './vendor/wanakana.js';
 /**
  * Genki's spelling of the katakana digraphs that exist only for loanwords.
  * wanakana folds katakana to hiragana before it maps, so the keys are hiragana.
+ *
+ * A kana and a small vowel are one beat (beats() joins them), so each is one
+ * syllable here too. wanakana reads a small vowel it has no digraph for as a
+ * vowel of its own, which split one beat into two sounds: フィレンツェ came
+ * out fi-re-n-tsue. The second row is the rest of the loanword table (ツァ,
+ * ツィ, ツェ, ツォ, テュ, イェ, the k and g rows with a small vowel, スィ,
+ * ズィ), spelled the way the first row is.
  */
 export const GENKI_MAP = Object.freeze({
   'てぃ': 'ti', 'でぃ': 'di', 'でゅ': 'dyu', 'とぅ': 'tu', 'どぅ': 'du',
@@ -27,9 +34,27 @@ export const GENKI_MAP = Object.freeze({
   'ゔぁ': 'va', 'ゔぃ': 'vi', 'ゔぇ': 've', 'ゔぉ': 'vo', 'ゔ': 'vu',
   'うぃ': 'wi', 'うぇ': 'we', 'うぉ': 'wo',
   'ちぇ': 'che', 'しぇ': 'she', 'じぇ': 'je',
+  'つぁ': 'tsa', 'つぃ': 'tsi', 'つぇ': 'tse', 'つぉ': 'tso',
+  'てゅ': 'tyu', 'いぇ': 'ye',
+  'くぁ': 'kwa', 'くぃ': 'kwi', 'くぇ': 'kwe', 'くぉ': 'kwo',
+  'ぐぁ': 'gwa', 'ぐぃ': 'gwi', 'ぐぇ': 'gwe', 'ぐぉ': 'gwo',
+  'すぃ': 'si', 'ずぃ': 'zi',
 });
 
-const ROMAJI_OPTS = Object.freeze({ customRomajiMapping: GENKI_MAP });
+/**
+ * The same digraphs after っ and after ん, which wanakana reads with its own
+ * table before it looks at ours: without these the said line read ネッティ as
+ * nettei, ウォッツァ as wottsua and サンウィッチ as san'uitchi while the
+ * spelled line, which maps beat by beat, had ne-t-ti and sa-n-wi-t-chi. The
+ * doubled letter is the one beatRomaji gives っ (t before ch); ん takes n'
+ * before a vowel or y, as everywhere else in the said line.
+ */
+const SOKUON_MAP = Object.fromEntries(Object.entries(GENKI_MAP).map(([k, v]) => [`っ${k}`, `${v.startsWith('ch') ? 't' : v[0]}${v}`]));
+const NASAL_MAP = Object.fromEntries(Object.entries(GENKI_MAP)
+  .filter(([k]) => 'あいうえお'.includes(k[0]))
+  .map(([k, v]) => [`ん${k}`, `n${/^[aiueoy]/.test(v) ? "'" : ''}${v}`]));
+
+const ROMAJI_OPTS = Object.freeze({ customRomajiMapping: { ...GENKI_MAP, ...SOKUON_MAP, ...NASAL_MAP } });
 
 // ── Script tests ──────────────────────────────────────────────────────────
 

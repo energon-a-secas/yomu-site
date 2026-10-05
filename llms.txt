@@ -17,7 +17,9 @@ romaji lines:
 
 - said: long vowels doubled only inside one morpheme (思う stays omou),
   particles は へ を read wa e o, n' before a vowel or y, never macrons
-- spelled: kana by kana with a hyphen between beats
+- spelled: kana by kana with a hyphen between beats; a kana and a small
+  vowel are one beat and one syllable in both lines (フィレンツェ
+  fi-re-n-tse, firentse)
 
 A number and its counter are one number token read by rule, with the sound
 changes between them: 三本 さんぼん, 一分 いっぷん, 十名 じゅうめい (名 counts
