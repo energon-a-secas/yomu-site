@@ -42,7 +42,9 @@ import { isAllKana } from '../js/kana.js';
 import { byEvidence, kunTable, stampPlaces, stampShipped } from './lib/prices.mjs';
 import { chooseCore, filterDoc } from './lib/layout.mjs';
 import { countKeys, bandsOf, bandScale, sentencesOf } from './lib/freq.mjs';
-import { selectExtra, isCommon, MIN_MATCHES } from './lib/extra.mjs';
+import {
+  selectExtra, selectMixed, isCommon, MIN_MATCHES,
+} from './lib/extra.mjs';
 import { selection } from './lib/kanjidic.mjs';
 import {
   candidates, surnames, countExtensions, recordOf,
@@ -79,7 +81,7 @@ const WA_NOTE = /pronounced (as )?わ(?!\p{Script=Hiragana})/u;
  * an entry outside the common set only under the keys tools/lib/extra.mjs
  * chose for it, each of which is a key.
  */
-function collect(jmdict, extras) {
+function collect(jmdict, extras, folds = new Map()) {
   const forms = new Map();
   const keys = new Set();
   const push = (text, f) => {
@@ -100,6 +102,13 @@ function collect(jmdict, extras) {
       push(k.text, { entry, index, kind: 'kana', common: k.common, extra });
     }
   });
+  // A katakana fold of a mixed spelling (アメ色 for あめ色, tools/lib/extra.mjs
+  // selectMixed): the spelling's own record under a key JMdict does not list.
+  for (const [text, { index, spelling }] of folds) {
+    push(text, {
+      entry: jmdict.words[index], index, kind: 'kanji', common: false, extra: true, spelling,
+    });
+  }
   return { forms, keys };
 }
 
@@ -157,7 +166,7 @@ function buildEntries(collected, kanjidic, bands, counts) {
     const q = bands.get(key);
     const list = [];
     for (const f of [...forms.get(key)].sort((a, b) => byRank(rank(a, key), rank(b, key)))) {
-      const rec = recordFor(key, f, table);
+      const rec = recordFor(f.spelling || key, f, table);
       if (!rec.g.length) { stats.emptyG += 1; continue; }
       if (q) rec.q = q;
       // Carried to tools/lib/prices.mjs, which prices a record from outside
@@ -214,6 +223,34 @@ function buildEntries(collected, kanjidic, bands, counts) {
 }
 
 /**
+ * The first tier from the entries and keys chosen: every spelling collected,
+ * the keys counted and banded, the records built and priced.
+ *
+ * The common keys are counted and banded among themselves, as before the
+ * entries outside the common set were added, so adding one moves no other
+ * key's band. An added key is counted against every shipped key and put on
+ * the common keys' scale.
+ */
+function assemble(jmdict, extras, folds, sentences, kanjidic, mixedKeys = new Set()) {
+  const collected = collect(jmdict, extras, folds);
+  const keySet = collected.keys;
+  const commonKeys = new Set([...keySet].filter((k) => collected.forms.get(k).some((f) => f.common)));
+  const counts = countKeys(sentences, commonKeys);
+  const bands = bandsOf(counts);
+  const scale = bandScale(counts, bands);
+  const shippedCounts = countKeys(sentences, keySet);
+  for (const k of keySet) {
+    if (commonKeys.has(k) || !shippedCounts.get(k)) continue;
+    // A mixed spelling ships with no count asked of it (selectMixed), and is
+    // banded only on what the evidence rule calls evidence.
+    if (mixedKeys.has(k) && shippedCounts.get(k) < MIN_MATCHES) continue;
+    counts.set(k, shippedCounts.get(k));
+    bands.set(k, scale(shippedCounts.get(k)));
+  }
+  return { ...buildEntries(collected, kanjidic, bands, counts), bands, keySet };
+}
+
+/**
  * The record the names tier would give a spelling (tools/build-names.mjs
  * chooses it the same way), for the evidence rule in tools/lib/extra.mjs.
  */
@@ -233,23 +270,22 @@ function main() {
   const shipped = new Set(selection(kanjidic).map((c) => c.literal));
 
   const { extras, stats: extra } = selectExtra(jmdict, sentences, kanjidic, shipped, namesOf(kanjidic));
-  const collected = collect(jmdict, extras);
-  const keySet = collected.keys;
-  // The common keys are counted and banded among themselves, as before the
-  // entries outside the common set were added, so adding one moves no other
-  // key's band. An added key is counted against every shipped key and put
-  // on the common keys' scale.
-  const commonKeys = new Set([...keySet].filter((k) => collected.forms.get(k).some((f) => f.common)));
-  const counts = countKeys(sentences, commonKeys);
-  const bands = bandsOf(counts);
-  const scale = bandScale(counts, bands);
-  const shippedCounts = countKeys(sentences, keySet);
-  for (const k of keySet) {
-    if (commonKeys.has(k) || !shippedCounts.get(k)) continue;
-    counts.set(k, shippedCounts.get(k));
-    bands.set(k, scale(shippedCounts.get(k)));
+  // The fourth reason asks what the first tier, built for the first three,
+  // does with a word's kana (tools/lib/extra.mjs selectMixed), so the tier is
+  // built twice: the second time with the mixed spellings and their folds.
+  const zero = { ...stats };
+  const before = assemble(jmdict, extras, new Map(), sentences, kanjidic);
+  // the counters are the shipped build's, not the sum of both
+  Object.assign(stats, zero);
+  const mixed = selectMixed(jmdict, (kana) => (before.entries.get(kana) || [])[0], before.keySet);
+  for (const [index, keys] of mixed.extras) {
+    if (!extras.has(index)) extras.set(index, new Set());
+    for (const k of keys) extras.get(index).add(k);
   }
-  const { entries, shipped: shippedPairs, table } = buildEntries(collected, kanjidic, bands, counts);
+  const {
+    entries, shipped: shippedPairs, table, bands, keySet,
+  } = assemble(jmdict, extras, mixed.folds, sentences, kanjidic, new Set([...[...mixed.extras.values()].flatMap((k) => [...k]), ...mixed.folds.keys()]));
+  const added = [...keySet].filter((k) => !before.keySet.has(k));
 
   const all = [...entries.keys()].sort();
   const maxKey = all.reduce((m, k) => Math.max(m, k.length), 0);
@@ -316,6 +352,8 @@ function main() {
     `keys ${all.length}, records ${records}, maxKey ${maxKey} UTF-16 units`,
     `outside the common set (N ${MIN_MATCHES}): ${extras.size} entries; of ${extra.candidates} candidate spellings, evidence ${extra.evidence}, suffix ${extra.suffix} (${extra.under} readings under a common kana key); kana ${extra.kana}; suru ${extra.suru}`,
     `matched spellings left out as strong names read another way: ${extra.named.length} (${extra.named.join(', ')})`,
+    `of the evidence, 何 and a counter read as one number token, which lends it its gloss: ${extra.asked.length} (${extra.asked.join(', ')})`,
+    `mixed spellings whose kana the first tier read as another word: ${mixed.stats.mixed}, and ${mixed.stats.folded} katakana folds; keys added ${added.length}, ${added.reduce((n, k) => n + lineBytes(k), 0)} B (${mixed.stats.sample.join(', ')})`,
     `core ${coreKeys.length} keys, ${fmtBytes(coreBytes)} (${coreBytes} B), chosen over ${sampled} sampled sentences`,
     `range shards ${docs.length}: min ${fmtBytes(Math.min(...sizes))} (${Math.min(...sizes)} B), max ${fmtBytes(Math.max(...sizes))} (${Math.max(...sizes)} B), total ${fmtBytes(total)} (${total} B); index ${fmtBytes(indexBytes)}`,
     `filter ${filter.n} keys, ${filter.m} bits, ${filter.k} hashes, ${fmtBytes(filterBytes)} (${filterBytes} B)`,
