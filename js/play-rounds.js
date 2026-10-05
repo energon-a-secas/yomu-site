@@ -307,15 +307,27 @@ const firstLetter = (s) => String(s).normalize('NFD').charAt(0).toLowerCase();
 const same = (a, b) => String(a).toLowerCase() === String(b).toLowerCase();
 
 /**
+ * The two classes the game names a row by: a person's name (given, surname,
+ * person) or a place. JMnedict's finer types are too often wrong for a
+ * well-known foreign name (スミス, フランツ and ゴッホ are places upstream),
+ * and options of one finer type than the answer gave it away: フランツ Franz
+ * was offered with Fairmont, Lucca and Tampa.
+ */
+export function nameClass(type) {
+  return type === 'place' ? 'place' : 'person';
+}
+
+/**
  * Four spellings for one name: the right one and three others of the same
- * type (given, surname, place), the closest first: the same first letter,
- * then the nearest length. Another type fills in when one runs short.
+ * class (nameClass), the closest first: the same first letter, then the
+ * nearest length. The other class fills in only when one runs short.
  */
 export function nameOptions(rows, row, rand = Math.random, n = 4) {
   const [kata, orig, type] = row;
   const len = orig.length;
+  const cls = nameClass(type);
   const others = shuffle(rows.filter((r) => r[0] !== kata && !same(r[1], orig)), rand);
-  const near = (r) => (r[2] === type ? 0 : 10) + (firstLetter(r[1]) === firstLetter(orig) ? 0 : 3) + Math.min(Math.abs(r[1].length - len), 3);
+  const near = (r) => (nameClass(r[2]) === cls ? 0 : 10) + (firstLetter(r[1]) === firstLetter(orig) ? 0 : 3) + Math.min(Math.abs(r[1].length - len), 3);
   const out = [orig];
   for (const r of others.sort((a, b) => near(a) - near(b))) {
     if (out.length >= n) break;

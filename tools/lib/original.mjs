@@ -67,6 +67,51 @@ export function sentenceRows(tsv) {
 }
 
 /**
+ * For the katakana spellings asked about, the Japanese sentences that hold
+ * each as a whole katakana run, and the English sentences linked to each of
+ * those: `{ byName: Map<name, Array<[id, text]>>, english: Map<id, Array<[id,
+ * text]>> }`.
+ * tools/lib/popular.mjs reads a name's use sentence by sentence from it;
+ * englishFor below is its per-name view.
+ *
+ * @param {Set<string>} names     katakana spellings
+ * @param {Array<[string, string]>} japanese  [id, text]
+ * @param {string} links    jpn-eng_links.tsv: Japanese id \t English id
+ * @param {string} englishTsv  eng_sentences.tsv
+ */
+export function linkedSentences(names, japanese, links, englishTsv) {
+  const byName = new Map();
+  for (const [id, text] of japanese) {
+    for (const run of new Set(text.match(KATAKANA_RUN) || [])) {
+      if (!names.has(run)) continue;
+      if (!byName.has(run)) byName.set(run, []);
+      byName.get(run).push([id, text]);
+    }
+  }
+  const held = new Set();
+  for (const rows of byName.values()) for (const [id] of rows) held.add(id);
+  const linked = new Map();
+  for (const line of links.split('\n')) {
+    const tab = line.indexOf('\t');
+    if (tab < 0) continue;
+    const j = line.slice(0, tab);
+    if (!held.has(j)) continue;
+    if (!linked.has(j)) linked.set(j, []);
+    linked.get(j).push(line.slice(tab + 1).trim());
+  }
+  const wanted = new Set();
+  for (const ids of linked.values()) for (const e of ids) wanted.add(e);
+  const text = new Map();
+  for (const [id, t] of sentenceRows(englishTsv)) if (wanted.has(id)) text.set(id, t);
+  const english = new Map();
+  for (const [j, ids] of linked) {
+    const lines = [...new Set(ids)].filter((e) => text.has(e)).map((e) => [e, text.get(e)]);
+    if (lines.length) english.set(j, lines);
+  }
+  return { byName, english };
+}
+
+/**
  * For the katakana spellings asked about, the English sentences linked to
  * the Japanese sentences that hold each as a whole katakana run, each
  * English sentence once per name.
@@ -75,34 +120,17 @@ export function sentenceRows(tsv) {
  * @param {Array<[string, string]>} japanese  [id, text]
  * @param {string} links    jpn-eng_links.tsv: Japanese id \t English id
  * @param {string} englishTsv  eng_sentences.tsv
+ * @param {object} [linkedDoc]  linkedSentences' answer, when the caller has it
  * @returns {Map<string, string[]>}
  */
-export function englishFor(names, japanese, links, englishTsv) {
-  const byName = new Map();
-  for (const [id, text] of japanese) {
-    for (const run of new Set(text.match(KATAKANA_RUN) || [])) {
-      if (!names.has(run)) continue;
-      if (!byName.has(run)) byName.set(run, []);
-      byName.get(run).push(id);
-    }
-  }
-  const linked = new Map();
-  for (const line of links.split('\n')) {
-    const tab = line.indexOf('\t');
-    if (tab < 0) continue;
-    const j = line.slice(0, tab);
-    if (!linked.has(j)) linked.set(j, []);
-    linked.get(j).push(line.slice(tab + 1).trim());
-  }
-  const wanted = new Set();
-  for (const ids of byName.values()) for (const j of ids) for (const e of linked.get(j) || []) wanted.add(e);
-  const english = new Map();
-  for (const [id, text] of sentenceRows(englishTsv)) if (wanted.has(id)) english.set(id, text);
+export function englishFor(names, japanese, links, englishTsv, linkedDoc = null) {
+  const { byName, english } = linkedDoc || linkedSentences(names, japanese, links, englishTsv);
   const out = new Map();
-  for (const [name, ids] of byName) {
-    const seen = new Set();
-    for (const j of ids) for (const e of linked.get(j) || []) if (english.has(e)) seen.add(e);
-    out.set(name, [...seen].map((e) => english.get(e)));
+  for (const [name, rows] of byName) {
+    if (!names.has(name)) continue;
+    const seen = new Map();
+    for (const [id] of rows) for (const [e, line] of english.get(id) || []) seen.set(e, line);
+    out.set(name, [...seen.values()]);
   }
   return out;
 }

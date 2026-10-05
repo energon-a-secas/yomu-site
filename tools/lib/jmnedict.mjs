@@ -83,12 +83,27 @@ export const LATIN_NAME = /^\p{Script=Latin}+(?:(?: |-|'|’)\p{Script=Latin}+)*
  * Yemen") has none, and the page shows only its types.
  */
 export function latinOf(word, kept) {
-  const out = [];
+  return [...latinTypesOf(word, kept).keys()];
+}
+
+/**
+ * The same spellings, in the same order, each with the types of the
+ * translations (JMnedict's senses) that list it, kept types only: キャシー is
+ * "Casei" a surname and "Cathy, Kathy, Cassie" a woman's name, so Cathy is
+ * `fem` and not `surname`; リヨン is "Lyon" a place and "Riyon" a woman's
+ * name. A record's types lead with the ones of the sense its `o` came from
+ * (recordOf), which is what the Word panel names first and the game's type.
+ */
+export function latinTypesOf(word, kept) {
+  const out = new Map();
   for (const t of word.translation) {
-    if (!(t.type || []).some(kept)) continue;
+    const types = (t.type || []).filter(kept);
+    if (!types.length) continue;
     for (const x of t.translation || []) {
       const s = String(x.text || '').replace(/\s*\([^()]*\)$/, '').trim();
-      if (LATIN_NAME.test(s) && !unshippable(s) && !out.includes(s)) out.push(s);
+      if (!LATIN_NAME.test(s) || unshippable(s)) continue;
+      if (!out.has(s)) out.set(s, new Set());
+      for (const ty of types) out.get(s).add(ty);
     }
   }
   return out;
@@ -182,9 +197,14 @@ export function candidates(jmnedict) {
       // name that ships and spells it in Latin letters gives its `o`.
       // Every spelling in Latin letters, entry by entry in JMnedict's order
       // (`latin`); the first is `o` until the corpus chooses another.
+      // `latinTypes` keeps, for each spelling, the types of the senses that
+      // list it, over every entry of the spelling.
       if (katakana && kept) {
-        if (!v.latin) v.latin = [];
-        for (const o of latinOf(w, (t) => KEEP_TYPES[t] || KATAKANA_TYPES[t])) if (!v.latin.includes(o)) v.latin.push(o);
+        if (!v.latin) { v.latin = []; v.latinTypes = new Map(); }
+        for (const [o, types] of latinTypesOf(w, (t) => KEEP_TYPES[t] || KATAKANA_TYPES[t])) {
+          if (!v.latin.includes(o)) { v.latin.push(o); v.latinTypes.set(o, new Set()); }
+          for (const t of types) v.latinTypes.get(o).add(t);
+        }
         if (v.o === undefined && v.latin.length) v.o = v.latin[0];
       }
     }
@@ -383,7 +403,11 @@ export function recordOf(text, byReading, table) {
   // A katakana name is read as it is written, so like a kana dictionary key
   // it carries no `r`; it carries `o`, how it is written in Latin letters.
   const rec = kanji ? { r: [best.reading] } : {};
-  rec.n = [...best.v.types].sort((a, b) => weight(b) - weight(a) || order.indexOf(a) - order.indexOf(b)).join(' ');
+  // A katakana name's types lead with those of the sense its `o` came from:
+  // キャシー Cathy is a woman's name before a surname (Casei is the surname).
+  const lead = (!kanji && best.v.o && best.v.latinTypes && best.v.latinTypes.get(best.v.o)) || new Set();
+  rec.n = [...best.v.types].sort((a, b) => (lead.has(b) ? 1 : 0) - (lead.has(a) ? 1 : 0)
+    || weight(b) - weight(a) || order.indexOf(a) - order.indexOf(b)).join(' ');
   if (best.f) rec.f = best.f;
   if (!kanji && best.v.o) rec.o = best.v.o;
   if (best.v.ext >= STRONG_EXT) rec.s = 1;

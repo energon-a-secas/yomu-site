@@ -570,7 +570,7 @@ it, a guess again); of its 59 places, 52 right before and 54 after (相模,
 | Field | Meaning |
 |---|---|
 | `r` | the reading, one; absent for a katakana name, which is read as written |
-| `n` | the types, space separated, most evidenced first: `surname`, `given`, `masc`, `fem`, `place` |
+| `n` | the types, space separated, most evidenced first: `surname`, `given`, `masc`, `fem`, `place`; a katakana name's lead with the types of the sense its `o` came from (キャシー Cathy `fem surname`, Casei being the surname) |
 | `f` | the reading split over the kanji, cut like a dictionary `f`; `*` read as a whole |
 | `s` | 1 for a strong name (`ext` of 5 or more) |
 | `S` | 1 for a sure one: `ext` of 20 or more, at least 5 of them full names or surnames (never without `s`) |
@@ -590,17 +590,54 @@ analyzer: it is the input of a game that asks a learner to read a name.
 ```
 
 A row is the katakana spelling (letters of the katakana block, ー and ・
-only), the original spelling (the name record's `o`), one type (`given` for
-JMnedict's given, masc and fem, `surname`, `place`: the first of the record's
-types that is one) and how many Tatoeba sentences hold the name as a whole
-katakana run. Highest count first, then the spelling in plain JS string
-order; a count of at least 1; at most 1,000 rows; the names shards' licence
-block. `tools/build-names.mjs` emits it (`tools/lib/popular.mjs`) and keeps
-a name only when the analyzer, reading it alone over the data just built,
-returns it as one name token with that spelling: バラ is a name in JMnedict
-and a rose in all 126 sentences that have it, and the page reads the rose.
-676 names (27.9 KB) pass; 408 candidates did not. `tools/check-data.mjs`
-holds the rows to the format, the order and the names tier beside it.
+only), the original spelling (the name record's `o`, with a capital first:
+JMnedict spells エイヴォン "avon", and that row is left out), one type
+(`given` for JMnedict's given, masc and fem, `surname`, `person`, `place`:
+the first of the record's types that is one, which for a katakana name is
+the sense its spelling came from) and how many Tatoeba sentences hold the
+name as a whole katakana run. Highest count first, then the spelling in
+plain JS string order; a count of at least 1; at most 1,000 rows; the names
+shards' licence block. `tools/build-names.mjs` emits it
+(`tools/lib/popular.mjs`) and keeps a name only when the analyzer, reading
+it alone over the data just built, returns it as one name token with that
+spelling: バラ is a name in JMnedict and a rose in all 126 sentences that
+have it, and the page reads the rose. 522 names (22.6 KB) pass; 230
+candidates did not. `tools/check-data.mjs` holds the rows to the format, the
+order and the names tier beside it.
+
+The corpus corrects two things JMnedict's types get wrong for the game,
+each by a rule measured 2026-10-05 and printed by the build:
+
+- **A place used as a person is a person.** JMnedict types スミス, ロミオ,
+  フランツ and ゴッホ only `place`. A row typed `place` becomes `person`
+  when, in at least 2 of its sentences and a fifth of its count, a Japanese
+  sentence puts さん, 先生, 氏, 君, 様 or ちゃん after it, or an English
+  sentence linked to it puts Mr., Mrs., Ms. or Dr. before its spelling.
+  Eight move: スミス (155 of 179), パターソン (9 of 11), ウィルソン (6 of
+  7), クリントン (2 of 6), トマス (2 of 6), ロビンソン (2 of 5), トンプソン
+  (3 of 3), エリオット (2 of 2). ロミオ, フランツ and ゴッホ have no such
+  sentence and stay places; so do the six used so in one sentence only
+  (スペンサー, of 4, and アダムズ, ハリントン, マーリー, ミッチェル, モリス, of
+  1 each). Only the row moves: the names tier, and so the Word panel, keeps
+  JMnedict's types, and the checker accepts `person` over a tier `place`
+  because only the builder holds the corpus.
+- **A name met only as a word's stem is no name.** ベルベル is followed by
+  語 or 人 in all 15 of its sentences (Berber, a language and a people), and
+  so are タタール (3) and タガログ (2), of every katakana name with a
+  confirmed spelling; they are left out. The rule asks for every sentence:
+  the nearest after them are places (アラビア 29 of 36, ノルウェー 4 of 7,
+  グルジア 1 of 2).
+
+The type from the sense moved six rows (キャシー Cathy, トーニー Tony and
+バーナード Bernard are given names, not surnames; リヨン Lyon, アルマ Alma
+and カナ Cana places, not given names) and made ガンジー Gandhi a person
+(Ghanzi is the place); 66 katakana records list their types in a new order.
+A name JMnedict types only `person` (ナポレオン) is still no row. The game
+names two classes, "a name" for given, surname and person and "a place"
+(`js/play-rounds.js nameClass`), and offers three spellings of the answer's
+class. サン (San, three sentences: アウン・サン・スー・チー, サン・ピエトロ
+and a brand of apple) is no name either, but no rule measured separates it
+from the names it sits among, so it stays.
 
 The decoded names, measured over all 248,924 Tatoeba sentences
 (`tools/compare-readings.mjs`, the names before and after, the same code

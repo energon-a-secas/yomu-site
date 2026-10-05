@@ -127,8 +127,7 @@ export const PLAY_STRINGS = Object.freeze({
 
   // Name decoder.
   namesPrompt: { en: 'How is this name spelled where it comes from?', es: '¿Cómo se escribe este nombre en su idioma de origen?' },
-  nameGiven: { en: 'a given name', es: 'un nombre de pila' },
-  nameSurname: { en: 'a surname', es: 'un apellido' },
+  namePerson: { en: 'a name', es: 'un nombre' },
   namePlace: { en: 'a place', es: 'un lugar' },
   nameReads: { en: '{kana} reads {romaji}: {orig}', es: '{kana} se lee {romaji}: {orig}' },
 

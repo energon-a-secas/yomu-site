@@ -226,7 +226,7 @@
 "グールビチ": {"n":"surname","o":"Gurvich"},
 "ケアリー": {"n":"place","o":"Carey"},
 "ケアロ": {"n":"place","o":"Caro"},
-"ケアンズ": {"n":"surname place","o":"Cairns"},
+"ケアンズ": {"n":"place surname","o":"Cairns"},
 "ケイ": {"n":"fem","o":"Kei"},
 "ケイコ": {"n":"fem","o":"Keiko"},
 "ケイゼルベール": {"n":"place","o":"Kaysersberg"},

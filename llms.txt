@@ -183,10 +183,11 @@ its save toggle:
   untimed (the default when the device asks for reduced motion).
 - Twins across scripts (#/play/twins): へ/ヘ, カ/力, エ/工, ロ/口, ニ/二, タ/夕,
   ト/卜, ハ/八, オ/才, り/リ and ー/一, told apart by the word around them.
-- Name decoder (#/play/names): a katakana name and four original spellings;
-  the answer spells it kana by kana (ト-ム, to-mu: Tom). It reads
-  data/names/popular.json (yomu-names-popular/1) and says it is not
-  available until that file ships.
+- Name decoder (#/play/names): a katakana name, said to be a name or a
+  place, and four original spellings of that class; the answer spells it
+  kana by kana (ト-ム, to-mu: Tom). It reads data/names/popular.json
+  (yomu-names-popular/1) and says it is not available until that file
+  ships.
 
 The kanji look-alikes are data/play/lookalikes.json (yomu-lookalikes/1): for
 each jōyō kanji that has any, at most five, best first, chosen by rule from
@@ -205,8 +206,10 @@ pair mixed up comes round more often. No text is kept.
   surnames, given names and place names a text may hold, and the Latin
   spelling of a name written in katakana. data/names/popular.json
   (yomu-names-popular/1) lists the katakana names the corpus uses most, each
-  as [katakana, Latin spelling, given | surname | place, sentence count],
-  for a game; it carries the same licence block
+  as [katakana, Latin spelling, given | surname | person | place, sentence
+  count], for a game; the type is that of the JMnedict sense the spelling
+  comes from, or person for a place the corpus uses as one (Mr. Smith,
+  スミスさん); it carries the same licence block
 - KanjiVG, by Ulrich Apel, CC BY-SA 3.0: the parts of each kanji
 - Tatoeba, CC BY 2.0 FR: used only to rank how common each word is, to
   choose and count names, and, through the English translations of its

@@ -501,7 +501,7 @@
 "ソウザ": {"n":"surname","o":"Sousa"},
 "ソウブレッテ": {"n":"place","o":"Soublette"},
 "ソウリ": {"n":"place","o":"Souri"},
-"ソウル": {"n":"surname place","o":"Seoul"},
+"ソウル": {"n":"place surname","o":"Seoul"},
 "ソウルダッド": {"n":"given","o":"Soledad"},
 "ソエ": {"n":"fem","o":"Zoë"},
 "ソエト": {"n":"place","o":"Soweto"},

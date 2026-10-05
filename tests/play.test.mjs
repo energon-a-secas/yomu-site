@@ -20,7 +20,7 @@ import {
 import {
   ROUND, makeRand, shuffle, weightOf, drawWeighted, createRound, current, answer, answeredNow, next, finished, score,
   mixUps, kanaEntries, kanaOptions, kanaRound, kanjiOptions, kanjiRound, kanjiPool, gridSize, oddPairs, oddGrid,
-  nextOddPair, createOdd, tapOdd, oddScore, twinsRound, nameOptions, namesRound,
+  nextOddPair, createOdd, tapOdd, oddScore, twinsRound, nameOptions, namesRound, nameClass,
 } from '../js/play-rounds.js';
 import {
   parseLookalikes, parseNames, cleanNameRow, loadNames, loadLookalikes, resetPlayData, LOOKALIKES_SRC, NAMES_SRC,
@@ -305,7 +305,7 @@ test('Twins: ten words, both sides of every pair drawn, the answer the word\'s s
   }
 });
 
-test('Name decoder: four spellings, the right one among them, the same type and first letter first', () => {
+test('Name decoder: four spellings, the right one among them, the same class and first letter first', () => {
   const tom = NAMES.find((r) => r[0] === 'トム');
   const opts = nameOptions(NAMES, tom, makeRand(1));
   assert.equal(opts.length, 4);
@@ -313,13 +313,53 @@ test('Name decoder: four spellings, the right one among them, the same type and 
   assert.equal(new Set(opts.map((o) => o.toLowerCase())).size, 4);
   assert.ok(opts.includes('Tim'), 'Tim: a given name with the same first letter and length');
   const types = new Map(NAMES.map((r) => [r[1], r[2]]));
-  assert.ok(opts.every((o) => types.get(o) === 'given'), opts.join(' '));
+  // the same class, a person's name, since 2026-10-05 (was: the same type, given)
+  assert.ok(opts.every((o) => nameClass(types.get(o)) === 'person'), opts.join(' '));
   const qs = namesRound(NAMES, { rand: makeRand(4) });
   assert.equal(qs.length, ROUND);
   assert.equal(new Set(qs.map((q) => q.kata)).size, ROUND);
   const q = qs.find((x) => x.kata === 'トム') || namesRound([tom, ...NAMES], { rand: makeRand(4), top: 1 })[0];
   assert.equal(spelled('トム'), 'to-mu');
   assert.equal(q.spelled, spelled(q.kata));
+});
+
+test('Name decoder: a person is offered only with people, a place only with places, whatever finer type each has (was Franz with Fairmont, Lucca, Tampa)', () => {
+  assert.equal(nameClass('given'), 'person');
+  assert.equal(nameClass('surname'), 'person');
+  assert.equal(nameClass('person'), 'person');
+  assert.equal(nameClass('place'), 'place');
+  const rows = [
+    ['フランツ', 'Franz', 'person', 3], ['フェアモント', 'Fairmont', 'place', 3], ['ルッカ', 'Lucca', 'place', 3],
+    ['タンパ', 'Tampa', 'place', 3], ['フランク', 'Frank', 'given', 3], ['フォード', 'Ford', 'surname', 3],
+    ['トム', 'Tom', 'given', 3], ['パリ', 'Paris', 'place', 3], ['ローマ', 'Rome', 'place', 3],
+  ];
+  const cls = new Map(rows.map((r) => [r[1], nameClass(r[2])]));
+  for (let seed = 1; seed <= 40; seed += 1) {
+    const franz = nameOptions(rows, rows[0], makeRand(seed));
+    assert.deepEqual(new Set(franz), new Set(['Franz', 'Frank', 'Ford', 'Tom']), `seed ${seed}: ${franz}`);
+    const tampa = nameOptions(rows, rows[3], makeRand(seed));
+    assert.ok(tampa.every((o) => cls.get(o) === 'place'), `seed ${seed}: ${tampa}`);
+  }
+  // the other class fills in only when one runs short
+  const short = nameOptions(rows.filter((r) => r[2] !== 'place' || r[1] === 'Paris'), rows[7], makeRand(1));
+  assert.equal(short.length, 4);
+  assert.ok(short.includes('Paris'));
+});
+
+test('the Name decoder labels a name "a name" or "a place", in both languages, never the finer type', async () => {
+  const { STRINGS, useLang, ui } = await import('../js/strings.js');
+  assert.equal(STRINGS.nameGiven, undefined);
+  assert.equal(STRINGS.nameSurname, undefined);
+  try {
+    useLang('en');
+    assert.deepEqual([ui('namePerson'), ui('namePlace')], ['a name', 'a place']);
+    useLang('es');
+    assert.deepEqual([ui('namePerson'), ui('namePlace')], ['un nombre', 'un lugar']);
+  } finally {
+    useLang('en');
+  }
+  const src = readFileSync(join(SITE, 'js/render-games.js'), 'utf8');
+  assert.match(src, /CLASS_KEY\[nameClass\(q\.type\)\]/);
 });
 
 // ── The data files ────────────────────────────────────────────────────────
@@ -331,6 +371,10 @@ test('the names file parser keeps the rows of the promised shape and drops the r
     assert.equal(cleanNameRow(bad), null, JSON.stringify(bad));
   }
   assert.deepEqual(cleanNameRow(['ニューヨーク', 'New York', 'place', 2]), ['ニューヨーク', 'New York', 'place', 2]);
+  // person is a row type since 2026-10-05; a spelling with no capital is no row
+  assert.deepEqual(cleanNameRow(['スミス', 'Smith', 'person', 179]), ['スミス', 'Smith', 'person', 179]);
+  assert.equal(cleanNameRow(['エイヴォン', 'avon', 'place', 1]), null);
+  assert.deepEqual(cleanNameRow(['リオデジャネイロ', 'Rio de Janeiro', 'place', 4]), ['リオデジャネイロ', 'Rio de Janeiro', 'place', 4]);
   assert.deepEqual(cleanNameRow(["オブライエン", "O'Brien", 'surname', 1]), ["オブライエン", "O'Brien", 'surname', 1]);
   const doc = { format: 'yomu-names-popular/1', names: [['トム', 'Tom', 'given', 2], ['?', 'x', 'given', 1]] };
   assert.deepEqual(parseNames(doc), { rows: [['トム', 'Tom', 'given', 2]], dropped: 1 });

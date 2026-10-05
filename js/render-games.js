@@ -19,14 +19,14 @@ import {
   play, uiNodes, ja, kanjiLine, nameLine, wordLine, readingOf,
 } from './render-play.js';
 import {
-  current, answeredNow, ROUND,
+  current, answeredNow, nameClass, ROUND,
 } from './play-rounds.js';
 import { KANA_SETS } from './play-kana.js';
 import { TWINS } from './play-twins.js';
 import { withKanji } from './render-save.js';
 
 const SCRIPT_KEY = { hiragana: 'scriptHiragana', katakana: 'scriptKatakana', kanji: 'scriptKanji' };
-const TYPE_KEY = { given: 'nameGiven', surname: 'nameSurname', place: 'namePlace' };
+const CLASS_KEY = { person: 'namePerson', place: 'namePlace' };
 
 function seg(labelKey, act, values, pressed) {
   const id = `pl-seg-${act}`;
@@ -252,7 +252,7 @@ function namesNodes() {
     questionHead(r),
     prompt([
       h('p', { class: 'pl-ask' }, ui('namesPrompt')),
-      h('p', { class: 'pl-name' }, [ja(q.kata), ' ', h('span', { class: 'mk-meta' }, ui(TYPE_KEY[q.type]))]),
+      h('p', { class: 'pl-name' }, [ja(q.kata), ' ', h('span', { class: 'mk-meta' }, ui(CLASS_KEY[nameClass(q.type)]))]),
       hearButton(),
     ]),
     optionList(r, (s) => h('span', { class: 'pl-opt-text' }, s), { wide: true }),

@@ -149,12 +149,22 @@ picks the spelling the English sentences linked to the name's sentences
 use most (John, Kate, Maria), and only a name the corpus never met keeps
 the first. Do not go back to JMnedict's order or to counting spellings
 over JMnedict (romanizations win: Keito 73, Kate 4). `person` ships for katakana only: a kanji spelling
-typed person (相模) stays out. `data/names/popular.json` is another stream's
-input (a game): its format (`yomu-names-popular/1`, rows `[katakana, Latin,
-given | surname | place, count]`) is fixed, it is emitted by
-`build-names.mjs` (each row read by the analyzer, kept only when the page
-reads it as that name: バラ is a rose) and `check-data.mjs` holds it to
-`tools/lib/popular.mjs`. Change the format only together with that game.
+typed person (相模) stays out. A katakana record's types lead with those of
+the JMnedict sense its `o` came from (`jmnedict.mjs latinTypesOf`): キャシー
+is "Casei" a surname and "Cathy" a woman's name, so Cathy is `fem surname`,
+and リヨン Lyon `place fem`. `data/names/popular.json` is the Name decoder's
+input: its format (`yomu-names-popular/1`, rows `[katakana, Latin, given |
+surname | person | place, count]`) is emitted by `build-names.mjs` (each row
+read by the analyzer, kept only when the page reads it as that name: バラ is
+a rose) and `check-data.mjs` holds it to `tools/lib/popular.mjs`. Its type
+is the record's first, except that a `place` the corpus uses as a person (an
+honorific after it, or Mr., Mrs., Ms. or Dr. before its spelling in the
+linked English, in 2 sentences and a fifth of its count: スミス and 7 more)
+is a `person` there and only there; the Word panel keeps JMnedict's. A
+spelling with no capital (エイヴォン "avon") and a name met only as the
+stem of 語 or 人 (ベルベル, タタール, タガログ) are left out; a name typed
+only `person` stays out, as before. Change the format only together with
+that game.
 
 **A katakana compound is one token, and the lattice already chose its
 parts.** `compounds.js` joins katakana pieces that touch (テニス|トーナメント,
@@ -446,7 +456,13 @@ says so once.
 
 **The Name decoder reads `data/names/popular.json`, which the dictionary
 build emits** (`yomu-names-popular/1`: `[katakana, original, given | surname
-| place, Tatoeba count]`, most used first). Before it ships the file is a 404,
+| person | place, Tatoeba count]`, most used first). The game names only two
+classes, "a name" or "a place" (`play-rounds.js nameClass`), and draws the
+three other spellings from the answer's class: JMnedict's finer types are
+wrong for many a famous foreign name, and options of one finer type gave the
+answer away (フランツ Franz among Fairmont, Lucca and Tampa). The corpus has
+no person evidence for ロミオ, フランツ or ゴッホ, so they are still places.
+Before it ships the file is a 404,
 which the list and the game say in words ("Not available yet") and never
 throw; Chromium and WebKit still log that one 404 as a console line, since a
 static page can only learn a file is missing by asking. Tests use the
