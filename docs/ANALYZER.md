@@ -658,6 +658,30 @@ fetched a mean of 3.499 files, against 3.510 before, and the second phase
 0.745 against 0.746: which absent keys a filter lets through moves with any
 rebuild, and on average it did not grow.
 
+### Open: 飴色 written あめ色 or アメ色 (2026-10-05)
+
+飴色 (あめいろ, amber, the colour of candy) is one JMdict entry outside the
+common set, spelled 飴色 and あめ色; JMdict has no アメ色. So the second tier
+holds 飴色, あめ色 and あめいろ, and the first tier none of them: the evidence
+rule (`tools/lib/extra.mjs`) leaves out a spelling whose parts are common keys
+read the way the entry is read, and 飴 あめ + 色 いろ, or あめ + 色, is that,
+whatever the corpus counts. That rule assumes the parts say what the word
+says; here they do not. 飴色 alone reads right (the first pass guesses it as a
+name and the second phase finds the rare word). あめ色 has no guess, so the
+second phase never runs, and the first pass reads あめ as 雨 "rain" (its first
+homograph) and 色. In アメ色 the first pass guesses アメ alone, and the second
+phase, which may not touch 色, finds the rare prefix アメ "American".
+
+Neither is a price to change: the first pass does not have the word, and the
+second phase may not read past the guess. The fix is a first-tier rule (ship
+a spelling that mixes kana and kanji when the first pass would read its kana
+as another word, and fold a katakana spelling such as アメ色 to its hiragana
+one), which needs a rebuild of data/dict from the pinned upstreams. The
+download cache is gone, and Tatoeba keeps one URL for an export it redoes
+every week (`tools/lib/sources.mjs`), so a rebuild today would count a later
+export than the committed bands were counted from and could move bands for
+keys this has nothing to do with. Left open, not half done.
+
 ## Katakana compounds and loanword rules (2026-10-03)
 
 ### One word, made of parts
