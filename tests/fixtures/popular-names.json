@@ -1,0 +1,20 @@
+{
+"_licence": {"source":"A hand-written fixture for tests/play.test.mjs and the browser check, shaped like data/names/popular.json; the counts are made up","spdx":"CC0-1.0","screen":"none","generated_by":"written by hand","generated_at":"2026-10-05"},
+"format": "yomu-names-popular/1",
+"names": [
+["トム", "Tom", "given", 412],
+["メアリー", "Mary", "given", 377],
+["ジョン", "John", "given", 240],
+["ボストン", "Boston", "place", 180],
+["ケン", "Ken", "given", 150],
+["スミス", "Smith", "surname", 96],
+["パリ", "Paris", "place", 90],
+["ジャクソン", "Jackson", "surname", 75],
+["アリス", "Alice", "given", 64],
+["ロンドン", "London", "place", 60],
+["マイク", "Mike", "given", 55],
+["ブラウン", "Brown", "surname", 41],
+["ニューヨーク", "New York", "place", 40],
+["ティム", "Tim", "given", 33]
+]
+}

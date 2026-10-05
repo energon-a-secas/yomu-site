@@ -47,3 +47,6 @@ flowchart TB
     events --> mykanji["kanji-store.js + history-store.js\nMy kanji, collection, History"]
     mykanji <-->|"yomu-site:kanji\nyomu-site:history (only with Remember on)"| Storage
     mykanji -->|"collection.js fetches once"| Joyo[("data/kanji/joyo.json\njōyō by grade")]
+    events --> play["events-play.js + play-rounds.js\nPlay: four look-alike games"]
+    play <-->|"yomu-site:play\nbest scores, pairs mixed up"| Storage
+    play -->|"fetch on #/play"| PlayData[("data/play/lookalikes.json\ndata/names/popular.json")]

@@ -667,8 +667,8 @@ rt .snd { border-bottom: 0; padding-bottom: 0; }
   text-decoration: none;
 }
 .text-link .mk-due { margin-left: var(--space-1); }
-a.mk-open[aria-current="page"] { background: rgba(255, 255, 255, 0.12); border-color: rgba(255, 255, 255, 0.4); }
-.text-link.mk-open[aria-current="page"] { background: none; text-decoration-thickness: 2px; }
+a.mk-open[aria-current="page"], a.pl-open[aria-current="page"] { background: rgba(255, 255, 255, 0.12); border-color: rgba(255, 255, 255, 0.4); }
+.text-link.mk-open[aria-current="page"], .text-link.pl-open[aria-current="page"] { background: none; text-decoration-thickness: 2px; }
 
 .mk {
   width: 100%;
@@ -1023,7 +1023,7 @@ html[data-embed="1"] body:has(> .neo-footer) { min-height: 0; }
   .save-toggle { width: 44px; height: 44px; }
   .mk-back, .mk-filter-input, .mk-tab { min-height: 44px; }
   .col-tile { min-width: 44px; min-height: 44px; }
-  .text-link.mk-open { display: inline-flex; align-items: center; min-height: 44px; }
+  .text-link.mk-open, .text-link.pl-open { display: inline-flex; align-items: center; min-height: 44px; }
   .seen-before .text-link, .embed-bar .text-link { display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; }
   /* A touch screen has no keys to press, so the key hints go. */
   .rv-kbd, .rv-keys { display: none; }

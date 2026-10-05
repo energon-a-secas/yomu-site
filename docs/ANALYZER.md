@@ -111,6 +111,7 @@ same text and the same data give the same tokens.
 | `furigana.js` | aligning a reading to a surface, per kanji where the data allows | `kana.js` |
 | `analyze.js` | the pipeline above: the first pass, the second phase where it guessed, the tokens | all of the above |
 | `render*.js`, `events*.js`, `state.js` | the page | `analyze.js`, `notes.js`, `strings.js` |
+| `play-*.js`, `routes.js` | Play's rounds, store, data and authored content, and the page's routes, with no DOM (CLAUDE.md, "Play") | `kana.js`, `reader.js` (`fetchJson`), `neorgon-persist.js` |
 
 The analyzer modules (`kana` to `analyze`) never touch the DOM, so `npm test`
 runs them under plain node with the real shards read from disk.
@@ -365,6 +366,17 @@ with no rank last by code point. Sizes 80, 160, 200, 202, 193, 191 and
 `tools/build-kanji.mjs`, or from the committed shards with
 `tools/build-joyo.mjs`. `tools/check-data.mjs` rebuilds it from the shards
 and fails any difference.
+
+`data/play/lookalikes.json` (format `yomu-lookalikes/1`) is not read by the
+analyzer either: it is Play's kanji look-alikes,
+`{ _licence, format, count, kanji: { '待': '持侍特時', ... } }`, each key a
+jōyō kanji, its value at most five kanji that look like it, best first, a
+pair between two jōyō kanji listed both ways. `tools/lib/lookalikes.mjs`
+chooses them from the shards' `parts` (KanjiVG) and `s` (KANJIDIC) by the
+rules CLAUDE.md, "Play", measures, plus authored classic pairs;
+`tools/build-lookalikes.mjs` writes it from the committed shards, and
+`tools/check-data.mjs` rebuilds it and fails any difference, so it is
+rebuilt after the kanji shards are.
 
 ### The second tier: the rest of JMdict
 

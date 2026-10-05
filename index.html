@@ -40,6 +40,7 @@
   <!-- Fleet design tokens: canonical, do not redeclare locally (docs/references/new-project-context.md, Design) -->
   <link rel="stylesheet" href="https://cdn.neorgon.org/v1.0.0/styles/base.css">
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/play.css">
   <!-- Neorgon Header Kit (vendored; ?header=live swaps CSS to CDN). Keep after style.css, the kit owns the header. -->
   <script>(function(){var m=location.search.match(/[?&]theme=([\w-]+)/)||document.cookie.match(/(?:^|;\s*)neo_theme=([\w-]+)/);if(m&&m[1]!=='default')document.documentElement.dataset.theme=decodeURIComponent(m[1]);})();</script>
   <link rel="stylesheet" href="css/neorgon-header.css">
@@ -86,9 +87,10 @@
   <!-- Neorgon Header Kit contract (packages/neorgon-ui/header/README.md). App mode:
        Yomu is a tool someone uses with a sentence in hand, so the header stays slim
        and gets out of the way on scroll. Phrases and My kanji are the controls kept
-       on a phone; the language toggle moves into the kit's overflow menu there.
+       on a phone; Play and the language toggle move into the kit's overflow menu
+       there (with Play kept too, the Spanish header ran 2px past a 390px screen).
        My kanji is a link, because it is a place (#/kanji): it carries the number of
-       reviews due, drawn by js/render-save.js. -->
+       reviews due, drawn by js/render-save.js. Play (#/play) is a place too. -->
   <header class="header-bar" data-header-mode="app">
     <div class="header-logo">
       <a href="./" class="header-title-link">
@@ -104,6 +106,7 @@
       <div class="header-actions">
         <button class="btn btn--ghost btn--sm" type="button" id="phrases-open" data-act="phrases" aria-haspopup="dialog" data-keep-mobile data-ui="phrases">Phrases</button>
         <a class="btn btn--ghost btn--sm mk-open" href="#/kanji" id="mykanji-open" data-keep-mobile><span data-ui="myKanji">My kanji</span><span class="mk-due" data-due-count hidden></span></a>
+        <a class="btn btn--ghost btn--sm pl-open" href="#/play" id="play-open"><span data-ui="play">Play</span></a>
         <!-- The current language is the bold one; the accessible name says which
              is on and what a press switches to. render-chrome.js rewrites both. -->
         <button class="btn btn--ghost btn--sm" type="button" id="lang-toggle" data-act="lang" data-lang="en" aria-label="Language: English. Switch to Spanish" title="Language: English. Switch to Spanish"><span class="lang-code lang-code--on" data-lang-code="en">EN</span> / <span class="lang-code" data-lang-code="es">ES</span></button>
@@ -128,9 +131,10 @@
        nodes the modules build. -->
   <main id="main" tabindex="-1">
     <!-- ?embed=1 (docs/EMBED.md): the one line an embedded Yomu keeps, with the
-         way to My kanji, since the header that holds it is hidden in a frame. -->
+         ways to My kanji and Play, since the header that holds them is hidden in a frame. -->
     <p class="embed-bar" id="embed-bar" hidden>
       <a class="text-link mk-open" href="#/kanji" id="embed-mykanji"><span data-ui="myKanji">My kanji</span><span class="mk-due" data-due-count hidden></span></a>
+      <a class="text-link pl-open" href="#/play" id="embed-play"><span data-ui="play">Play</span></a>
       <a class="text-link" href="./" target="_blank" rel="noopener noreferrer"><span data-ui="openInYomu">Open in Yomu</span> ↗</a>
     </p>
 
@@ -272,6 +276,17 @@
       <input type="file" id="mk-file" accept=".json,application/json" tabindex="-1" hidden>
     </section>
 
+    <!-- Play (#/play, and #/play/which, /odd, /twins, /names for a game). Drawn
+         by js/render-play.js and js/render-games.js into #pl-body; the reader is
+         hidden, not emptied, while it shows, as it is for My kanji. -->
+    <section class="mk pl" id="play" aria-labelledby="pl-title" hidden>
+      <button class="text-link mk-back" type="button" id="pl-back" data-act="pl-back"><span aria-hidden="true">← </span><span id="pl-back-label">Back to the reader</span></button>
+      <h2 class="mk-title" id="pl-title" tabindex="-1">Play</h2>
+      <p class="quiet mk-lead" id="pl-lead" data-ui="playLead">Four short games with the characters that look alike. Your best scores stay in this browser.</p>
+      <p class="mk-note" id="pl-note" role="status" aria-live="polite"></p>
+      <div class="mk-body" id="pl-body"></div>
+    </section>
+
     <dialog class="dialog" id="mk-clear-dialog" aria-labelledby="mk-clear-title" aria-describedby="mk-clear-body">
       <div class="dialog__header">
         <h2 id="mk-clear-title" data-ui="clearTitle">Clear all of My kanji?</h2>
@@ -344,9 +359,10 @@
       <p><strong>JMnedict.</strong> This site uses the JMnedict/ENAMDICT dictionary file. This file is the property of the Electronic Dictionary Research and Development Group, and is used in conformance with the Group's licence. The readings and types of the names Yomu shows (surnames, given names, places) come from it, under <a href="https://www.edrdg.org/edrdg/licence.html" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a>; see the <a href="https://www.edrdg.org/enamdict/enamdict_doc.html" target="_blank" rel="noopener noreferrer">JMnedict</a> documentation.</p>
       <p><strong>KanjiVG.</strong> The parts listed for each kanji come from KanjiVG by Ulrich Apel, <a href="http://kanjivg.tagaini.net" target="_blank" rel="noopener noreferrer">http://kanjivg.tagaini.net</a>, used under <a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank" rel="noopener noreferrer">CC BY-SA 3.0</a>.</p>
       <p><strong>Tatoeba.</strong> Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included. <a href="https://tatoeba.org/en/downloads" target="_blank" rel="noopener noreferrer">tatoeba.org</a></p>
-      <p><strong>Written here.</strong> The notes on sounds and grammar, the phrase library and the dialogues were written for Yomu and are in the public domain.</p>
+      <p><strong>Written here.</strong> The notes on sounds and grammar, the phrase library and the dialogues, and Play's hints, example words and look-alike rules were written for Yomu and are in the public domain. Which kanji look alike is chosen from KanjiVG's parts and KANJIDIC's stroke counts.</p>
       <p><strong>Your text.</strong> What you paste is read in this browser. It is kept in this browser's local storage so a reload does not lose it, and Clear forgets it. It is never put in the address bar or sent anywhere, unless you click DeepL, Google Translate or Jisho, which open that site in a new tab with the text or the word.</p>
       <p><strong>My kanji.</strong> The kanji you save, their review dates, how many texts you met each kanji in, what kind of text each was last met in, and up to eight dictionary words per kanji are kept in this browser's local storage too. The text itself is not. Export writes them to a file on your device; nothing is sent anywhere.</p>
+      <p><strong>Play.</strong> Each game's best score, how many rounds you played, and how often you mixed up each pair of characters are kept in this browser's local storage. No text is.</p>
       <p><strong>History.</strong> Only if you turn on Remember, the texts you read are kept in this browser's local storage too, up to 300 of them, for History, for "You read this before" and for the sentence each kanji was last seen in. Turning it off forgets them. A text you save with the bookmark is kept there whatever Remember says, up to 500 of them, until you unsave it, and Export in My kanji writes the saved ones to your backup file. They are never sent anywhere.</p>
     </template>
   </footer>

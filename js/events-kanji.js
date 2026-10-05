@@ -1,11 +1,14 @@
-// My kanji: the route, its actions, the review's keys, and the backup.
+// My kanji: the routes, its actions, the review's keys, and the backup.
 //
-// #/kanji is a place, not a text. The page has five routes, the reader (no
-// hash), the list (#/kanji), a review (#/kanji/review), the collection
-// (#/kanji/collection) and History (#/kanji/history); takeFragmentText in
-// state.js reads only #t=, so a route is never read as Japanese. The list,
-// the collection and History are the three places the screen's nav moves
-// between, and the parent of each but the list is the list. The
+// #/kanji is a place, not a text. The routes are the reader (no hash), the
+// list (#/kanji), a review (#/kanji/review), the collection
+// (#/kanji/collection), History (#/kanji/history), and Play's (#/play and a
+// route per game), all named in routes.js; takeFragmentText in state.js reads
+// only #t=, so a route is never read as Japanese. The list, the collection
+// and History are the three places the screen's nav moves between, and the
+// parent of each but the list is the list. Play's screen is its own section,
+// drawn by events-play.js through onRoute(); this file shows and hides it,
+// keeps the history stamps for it and walks Back for it. The
 // reader is hidden while another route shows, never emptied, so Back finds
 // the text, its reading and the chosen word as they were, scrolled to where
 // they were. Back is history.back() when the history entry before this one
@@ -37,16 +40,12 @@ import { paintSide, afterPaintAll } from './render.js';
 import { openDialog, bindDialog } from './dialogs.js';
 import { downloadText } from './neorgon-dom.js';
 import { describe, loadText } from './events-read.js';
+import {
+  HASH, PARENT, PLAY_TITLE, routeOf, isPlay,
+} from './routes.js';
 
-const ROUTES = Object.freeze({
-  '#/kanji': 'list', '#/kanji/review': 'review', '#/kanji/collection': 'collection', '#/kanji/history': 'history',
-});
-const HASH = Object.freeze({
-  reader: '', list: '#/kanji', review: '#/kanji/review', collection: '#/kanji/collection', history: '#/kanji/history',
-});
-const PARENT = Object.freeze({
-  review: 'list', collection: 'list', history: 'list', list: 'reader', reader: 'reader',
-});
+export { routeOf };
+
 /** The places the nav moves between, and the string each is titled with. */
 const TABS = Object.freeze({ list: 'myKanji', collection: 'navCollection', history: 'navHistory' });
 const hooks = [];
@@ -58,10 +57,6 @@ let review = null;
 let readerScroll = 0;
 let infoSeq = 0;
 let clearedJustNow = false;
-
-export function routeOf(hash) {
-  return ROUTES[hash] || 'reader';
-}
 
 export function currentRoute() {
   return route;
@@ -171,11 +166,19 @@ async function loadInfo() {
 function showRegions(next) {
   const reader = document.querySelector('.yomu');
   const screen = $('mykanji');
+  const play = $('play');
   if (reader) reader.hidden = next !== 'reader';
-  if (screen) screen.hidden = next === 'reader';
-  for (const a of document.querySelectorAll('a.mk-open')) {
-    if (next === 'reader') a.removeAttribute('aria-current');
-    else a.setAttribute('aria-current', 'page');
+  if (screen) screen.hidden = next === 'reader' || isPlay(next);
+  if (play) play.hidden = !isPlay(next);
+  for (const [sel, on] of [['a.mk-open', next !== 'reader' && !isPlay(next)], ['a.pl-open', isPlay(next)]]) {
+    for (const a of document.querySelectorAll(sel)) {
+      if (on) a.setAttribute('aria-current', 'page');
+      else a.removeAttribute('aria-current');
+    }
+  }
+  if (isPlay(next)) {
+    document.title = `${ui(PLAY_TITLE[next])} | Yomu`;
+    return;
   }
   const back = $('mk-back-label');
   if (back) back.textContent = ui(PARENT[next] === 'list' ? 'backToMyKanji' : 'backToReader');
@@ -227,13 +230,19 @@ export function applyRoute({ boot = false, focus = true } = {}) {
   if (prev === 'reader') readerScroll = window.scrollY;
   view.note = '';
   showRegions(next);
-  if (next !== 'reader') seedInfo();
+  if (next !== 'reader' && !isPlay(next)) seedInfo();
 
   if (next === 'reader') {
+    for (const fn of hooks) fn(next, prev);
     window.scrollTo({ top: readerScroll, behavior: 'instant' });
     if (!focus) return;
-    const link = [...document.querySelectorAll('a.mk-open')].find((a) => a.getClientRects().length);
+    const link = [...document.querySelectorAll(isPlay(prev) ? 'a.pl-open' : 'a.mk-open')].find((a) => a.getClientRects().length);
     (link || $('main')).focus({ preventScroll: true });
+    return;
+  }
+  if (isPlay(next)) {
+    if (!boot && prev === 'reader') window.scrollTo({ top: 0, behavior: 'instant' });
+    for (const fn of hooks) fn(next, prev, { boot });
     return;
   }
   if (next === 'review') review = createReview(myKanji().due(today()));
@@ -282,8 +291,8 @@ export function hostLoad(text) {
   return loadText(text, { restore: again, source: 'host' });
 }
 
-/** Go up one route: from a review to the list, from the list to the reader. */
-function leave() {
+/** Go up one route: from a review to the list, from a game to Play, from either to the reader. */
+export function leave() {
   const target = PARENT[route];
   if (target === route) return;
   if (here !== null && entries.get(here - 1) === target) {
@@ -363,7 +372,7 @@ async function importFile(file) {
 
 /** Everything that shows the store, after it changed: the screen, the reader's marks and counts. */
 export function afterChange() {
-  if (route !== 'reader') {
+  if (route !== 'reader' && !isPlay(route)) {
     seedInfo();
     repaint();
     loadInfo();             // a kanji that moved up into Seen often may be new to the screen
@@ -466,7 +475,7 @@ export function bindKanji() {
     afterChange();
   });
   afterPaintAll(() => {
-    if (route !== 'reader') { showRegions(route); repaint(); }
+    if (route !== 'reader') { showRegions(route); if (!isPlay(route)) repaint(); }
     paintDueCount();
   });
   // What is due moves at midnight, and a page left open past it said
