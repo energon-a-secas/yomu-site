@@ -122,6 +122,35 @@ export const SOURCES = {
     bytes: 3417698,
     licence: 'CC-BY-2.0-FR',
   },
+  // Tatoeba's English sentences and its links from Japanese sentences to
+  // their English translations (each line: Japanese id, English id), from
+  // the same weekly export, downloaded 2026-10-05: 2,038,137 English
+  // sentences, 280,716 links, both dated 2026-10-03 by the server.
+  // tools/build-names.mjs reads them for one choice only: which of a
+  // katakana name's JMnedict spellings the English translations of the
+  // sentences that hold it use (トム is Tom, ケイト Kate). Nothing of either
+  // ships, no sentence, no fragment and no id, only that choice; the same
+  // CC BY 2.0 FR credit as the Japanese sentences applies.
+  tatoebaEng: {
+    name: 'Tatoeba English sentences',
+    release: 'export of 2026-10-03',
+    url: 'https://downloads.tatoeba.org/exports/per_language/eng/eng_sentences.tsv.bz2',
+    file: 'eng_sentences.tsv.bz2',
+    bz2: true,
+    sha256: '5f7ebf552bd3925dfd33236ccb6a210c5ba02b365e4a39964fb658e1209e87d9',
+    bytes: 24894467,
+    licence: 'CC-BY-2.0-FR',
+  },
+  tatoebaJpnEng: {
+    name: 'Tatoeba links, Japanese to English',
+    release: 'export of 2026-10-03',
+    url: 'https://downloads.tatoeba.org/exports/per_language/jpn/jpn-eng_links.tsv.bz2',
+    file: 'jpn-eng_links.tsv.bz2',
+    bz2: true,
+    sha256: 'b078aebb6b6b1e568fe0cb4683a4ae02e17d23b3a08f8a2b0bbb88e83ec697fa',
+    bytes: 1454991,
+    licence: 'CC-BY-2.0-FR',
+  },
 };
 
 function sh(cmd, args, opts = {}) {

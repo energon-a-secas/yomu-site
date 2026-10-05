@@ -26,7 +26,9 @@
  *
  *   decoded   a katakana given name, surname, person or place that JMnedict
  *             spells in Latin letters (`o`: トム is Tom, アークレイリ
- *             Akureyri), whether the corpus has it or not. Its record says
+ *             Akureyri, the spelling the English translations of its
+ *             sentences use, tools/lib/original.mjs), whether the corpus
+ *             has it or not. Its record says
  *             how a learner would write it, and the corpus has few of the
  *             foreign names a learner pastes (2026-10-05: 1,126 katakana
  *             names shipped before this rule, 30,962 with it). JMnedict's
@@ -60,6 +62,8 @@ import { buildFilter } from '../js/bloom.js';
 import {
   katakanaRunCounts, popularCandidates, popularProblems, POPULAR_FORMAT, POPULAR_MAX,
 } from './lib/popular.mjs';
+import { chooseOriginal, englishFor, sentenceRows } from './lib/original.mjs';
+import { isKatakana, toHira } from '../js/kana.js';
 import { createDict } from '../js/dict.js';
 import { analyze } from '../js/analyze.js';
 
@@ -106,7 +110,8 @@ async function main() {
   const t0 = Date.now();
   const jmnedict = loadZippedJson('jmnedict');
   const kanjidic = loadZippedJson('kanjidic');
-  const sentences = sentencesOf(loadBz2Text('tatoebaJpn'));
+  const japanese = loadBz2Text('tatoebaJpn');
+  const sentences = sentencesOf(japanese);
   const table = readingTable(kanjidic);
   const first = firstTierKeys();
 
@@ -114,10 +119,25 @@ async function main() {
   countExtensions(jmnedict, cands, surnames(jmnedict));
   const open = new Set([...cands.keys()].filter((k) => !first.has(k)));
   const seen = attested(sentences, open);
-  const records = new Map();
   const stats = {
     attested: 0, strongOnly: 0, decoded: 0, kanji: 0, katakana: 0, original: 0, person: 0, strong: 0, sure: 0, star: 0, untyped: 0,
+    byEvidence: 0, changed: 0, linked: 0, unseen: 0, changes: [],
   };
+  const picks = new Map();
+
+  // A katakana name's spelling in Latin letters, chosen by the English
+  // translations of the sentences that hold it (tools/lib/original.mjs).
+  const spelled = [...open].filter((k) => isKatakana(k[0]) && (cands.get(k).get(toHira(k)) || {}).latin);
+  const english = englishFor(new Set(spelled), sentenceRows(japanese), loadBz2Text('tatoebaJpnEng'), loadBz2Text('tatoebaEng'));
+  for (const k of spelled) {
+    const v = cands.get(k).get(toHira(k));
+    if (!v.latin.length) continue;
+    const lines = english.get(k) || [];
+    const pick = chooseOriginal(v.latin, lines);
+    picks.set(k, { ...pick, first: v.o, linked: lines.length > 0 });
+    v.o = pick.o;
+  }
+  const records = new Map();
   for (const text of [...open].sort()) {
     const { rec, evidence } = recordOf(text, cands.get(text), table);
     const inCorpus = seen.has(text);
@@ -126,6 +146,13 @@ async function main() {
     const strong = evidence >= STRONG_EXT;
     if (!inCorpus && !strong && !rec.o) continue;
     records.set(text, rec);
+    const pick = picks.get(text);
+    if (pick) {
+      if (pick.linked) stats.linked += 1;
+      if (pick.by === 'evidence') stats.byEvidence += 1;
+      else if (pick.linked) stats.unseen += 1;
+      if (pick.o !== pick.first) { stats.changed += 1; stats.changes.push([text, pick.first, pick.o, pick.seen]); }
+    }
     stats[inCorpus ? 'attested' : strong ? 'strongOnly' : 'decoded'] += 1;
     if (rec.o) stats.original += 1;
     if (String(rec.n).split(' ').includes('person')) stats.person += 1;
@@ -136,10 +163,10 @@ async function main() {
   }
 
   const licence = licenceBlock('jmnedict', TOOL, {
-    upstream: [upstream('jmnedict'), upstream('kanjidic'), upstream('tatoebaJpn')],
+    upstream: [upstream('jmnedict'), upstream('kanjidic'), upstream('tatoebaJpn'), upstream('tatoebaEng'), upstream('tatoebaJpnEng')],
     inputs: [
       ['edrdg', 'f, the split of a name\'s reading over its kanji, from KANJIDIC readings'],
-      ['tatoeba', 'which names ship (one the corpus contains at least once) and, in popular.json, how many sentences hold each; no sentence ships'],
+      ['tatoebaNames', 'which names ship (one the corpus contains at least once), in popular.json how many sentences hold each, and o, which of a katakana name\'s JMnedict spellings the linked English sentences use; no sentence ships'],
     ],
   });
   const sorted = [...records.keys()].sort();
@@ -191,6 +218,7 @@ async function main() {
   process.stdout.write(`${[
     `JMnedict spellings of two or more kanji or katakana, typed surname, given or place: ${cands.size}; not first-tier keys ${open.size}`,
     `names ${records.size}: in the corpus ${stats.attested}, by evidence only (${STRONG_EXT} or more other names use it) ${stats.strongOnly}, katakana decoded only ${stats.decoded}; kanji ${stats.kanji}, katakana ${stats.katakana} (${stats.original} with an original spelling, ${stats.person} typed person); strong ${stats.strong}, sure (ext >= ${SURE_EXT}) ${stats.sure}; read as a whole (*) ${stats.star}`,
+    `katakana names spelled by the English sentences linked to theirs: ${stats.byEvidence} of ${stats.original} (${stats.linked} have linked English sentences, ${stats.unseen} of those with no spelling seen); ${stats.changed} differ from JMnedict's first (${stats.changes.sort((a, b) => b[3] - a[3]).slice(0, 12).map(([k, a, b, n]) => `${k} ${a} to ${b} ${n}`).join(', ')})`,
     `popular.json: ${popular.names.length} names, ${fmtBytes(popularBytes)} (${popularBytes} B), passing over ${passed} the page does not read as that name; first ${popular.names.slice(0, 8).map((r) => `${r[0]} ${r[1]} ${r[3]}`).join(', ')}`,
     `left out, in the corpus but best read as a type that does not ship: ${stats.untyped}`,
     `shards ${docs.length}: total ${fmtBytes(total)} (${total} B); index with its filter ${fmtBytes(indexBytes)} (${indexBytes} B)`,

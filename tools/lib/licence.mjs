@@ -93,6 +93,24 @@ export const LICENCES = {
     ],
     screen: 'none',
   },
+  // The names read Tatoeba twice over: the Japanese sentences say which names
+  // ship and how often each is met, and their English translations say which
+  // of a katakana name's JMnedict spellings is shown (tools/lib/original.mjs).
+  // Still nothing of the corpus ships: no sentence, no fragment, no id.
+  tatoebaNames: {
+    source: 'Tatoeba Project, Japanese sentences and their English translations',
+    url: 'https://tatoeba.org/en/downloads',
+    spdx: 'CC-BY-2.0-FR',
+    derived: true,
+    id: 'tatoeba-names',
+    acknowledgement:
+      'Which names are included, how many sentences hold each, and which spelling of a name written in katakana is shown are counted over the Tatoeba Project\'s Japanese sentences and their English translations, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.',
+    links: [
+      'https://tatoeba.org/en/downloads',
+      'https://creativecommons.org/licenses/by/2.0/fr/',
+    ],
+    screen: 'none',
+  },
 };
 
 /**

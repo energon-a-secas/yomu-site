@@ -159,6 +159,28 @@ test('a kanji spelling typed only person stays out, and carries no original spel
   assert.deepEqual([tanaka.r, tanaka.n, tanaka.o], [['たなか'], 'surname', undefined]);
 });
 
+test('a katakana name is spelled the way the English translations of its sentences write it, not JMnedict\'s first (2026-10-05)', async () => {
+  const { chooseOriginal, englishFor } = await import('../tools/lib/original.mjs');
+  // JMnedict lists ケイト as Keito, Cate, Kate: the first was taught
+  assert.deepEqual(chooseOriginal(['Keito', 'Cate', 'Kate'], ['Kate is here.', 'I met Kate and Tom.', 'Cate Blanchett']), { o: 'Kate', by: 'evidence', seen: 2 });
+  // a whole word, case and all: Tomorrow and tom are not Tom; Tom's is
+  assert.equal(chooseOriginal(['Tomu', 'Tom'], ['Tomorrow is fine.', "Tom's bag.", 'tom']).o, 'Tom');
+  assert.equal(chooseOriginal(['Malhia', 'Maria'], ['Where is Maria?']).o, 'Maria');
+  // a tie keeps JMnedict's order, and no sentence or no spelling seen keeps the first
+  assert.equal(chooseOriginal(['Jon', 'John'], ['Jon met John.']).o, 'Jon');
+  assert.deepEqual(chooseOriginal(['Rinda', 'Linda'], ['Nobody here.']), { o: 'Rinda', by: 'first', seen: 0 });
+  assert.deepEqual(chooseOriginal(['Rinda', 'Linda'], []), { o: 'Rinda', by: 'first', seen: 0 });
+  // the English sentences are those linked to Japanese sentences holding the
+  // name as a whole katakana run: アン in アンケート is no アン
+  const japanese = [['1', 'ケイトが来た。'], ['2', 'アンケートに答えた。'], ['3', 'アンとケイトは友達だ。']];
+  const links = '1\t10\n2\t20\n3\t30\n3\t31\n';
+  const english = '10\teng\tKate came.\n20\teng\tI answered the survey.\n30\teng\tAnn and Kate are friends.\n31\teng\tAnne and Kate are friends.\n';
+  const got = englishFor(new Set(['ケイト', 'アン']), japanese, links, english);
+  assert.deepEqual(got.get('ケイト'), ['Kate came.', 'Ann and Kate are friends.', 'Anne and Kate are friends.']);
+  assert.deepEqual(got.get('アン'), ['Ann and Kate are friends.', 'Anne and Kate are friends.']);
+  assert.equal(chooseOriginal(['An', 'Ann', 'Anne'], got.get('アン')).o, 'Ann');
+});
+
 // ── The committed names tier ──────────────────────────────────────────────
 
 const tokOf = (r, surface) => r.tokens.find((t) => t.surface === surface);
