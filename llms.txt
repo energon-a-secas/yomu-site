@@ -165,8 +165,10 @@ the host sends always opens the reader.
   as [katakana, Latin spelling, given | surname | place, sentence count],
   for a game; it carries the same licence block
 - KanjiVG, by Ulrich Apel, CC BY-SA 3.0: the parts of each kanji
-- Tatoeba, CC BY 2.0 FR: used only to rank how common each word is; no
-  sentence ships
+- Tatoeba, CC BY 2.0 FR: used only to rank how common each word is, to
+  choose and count names, and, through the English translations of its
+  Japanese sentences, to choose which JMnedict spelling of a katakana name
+  is shown (ジョン John, not Jon); no sentence ships
 - The phrase library, the notes and the deinflection rules are written for
   Yomu and are public domain. Nothing is taken from Genki, the Japan
   Foundation apps, Tofugu, Yomitan, rikaichan or 10ten.

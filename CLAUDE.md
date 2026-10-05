@@ -134,15 +134,16 @@ kana spelling of a common word (`e`), and a kanji surname read another way
 than the rare word beats it only when sure (`S`), because the reading is
 what a learner copies (`js/rare.js` outranks).
 
-**A katakana name says how it is written, from JMnedict, and the first
-translation is the one.** Every katakana given name, surname, person and
-place JMnedict spells in Latin letters ships (`o`, about 31,000 names,
-corpus or not), and the token carries it as `name: { o, types }` (トム is
-Tom); the Word panel shows "Name: Tom (given name)" on a line of its own.
-`o` is the first translation of a type that ships, a trailing parenthesis
-cut (ハナ "Hana (Hawaii)"); that gives ケイト Keito and マリア Malhia, and
-passing over a romanization made more names worse than better (measured in
-`tools/lib/jmnedict.mjs`). `person` ships for katakana only: a kanji spelling
+**A katakana name says how it is written: JMnedict's spellings, Tatoeba's
+choice.** Every katakana given name, surname, person and place JMnedict
+spells in Latin letters ships (`o`, about 31,000 names, corpus or not), and
+the token carries it as `name: { o, types }` (トム is Tom); the Word panel
+shows "Name: Tom (given name)" on a line of its own. JMnedict's order is no
+evidence (its first was Jon, Keito, Malhia), so `tools/lib/original.mjs`
+picks the spelling the English sentences linked to the name's sentences
+use most (John, Kate, Maria), and only a name the corpus never met keeps
+the first. Do not go back to JMnedict's order or to counting spellings
+over JMnedict (romanizations win: Keito 73, Kate 4). `person` ships for katakana only: a kanji spelling
 typed person (相模) stays out. `data/names/popular.json` is another stream's
 input (a game): its format (`yomu-names-popular/1`, rows `[katakana, Latin,
 given | surname | place, count]`) is fixed, it is emitted by

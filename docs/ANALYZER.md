@@ -469,11 +469,11 @@ and, for katakana alone (2026-10-05):
 
 - **decoded**: a katakana given name, surname, person or place JMnedict
   spells in Latin letters, whether the corpus has it or not. It ships with
-  that spelling, `o` (トム Tom, アークレイリ Akureyri): the first of its
-  translations, in JMnedict's order and from a type that ships, that is
-  Latin letters, single spaces, hyphens and apostrophes once one trailing
-  parenthesis is cut (ハナ "Hana (Hawaii)" is Hana). 30,962 katakana names
-  ship (1,126 before), 30,955 of them with `o`.
+  that spelling, `o` (トム Tom, アークレイリ Akureyri), chosen among its
+  translations of a type that ships that are Latin letters, single spaces,
+  hyphens and apostrophes once one trailing parenthesis is cut (ハナ "Hana
+  (Hawaii)" is Hana), by the corpus (below). 30,962 katakana names ship
+  (1,126 before), 30,955 of them with `o`.
 
 One kanji alone is left out (森, 林, 東 are words as often as names), and so
 are JMnedict's `unclass` type and, for a kanji spelling, its `person` type:
@@ -482,12 +482,28 @@ include ケット, パソ and ディ, so スーザン, typed `unclass`, stays a 
 katakana `person` (ナポレオン, アインシュタイン) ships since 2026-10-05, with
 the decoded names.
 
-"The first" is the rule, even where JMnedict lists the katakana's own
-romanization first (ケイト Keito, Cate, Kate; リンダ Rinda, Linda; マリア
-Malhia, Maria): passing over a romanization while another translation was
-left changed 36 of the popular names below, more of them for the worse
-(カレン Caren, シャロン Chalon, マリコ Malko, ロビンソン Eric) than for the
-better (ケイト Cate, リンダ Linda, メグ Meg).
+JMnedict's translations of a katakana name are in no useful order (ケイト
+"Keito, Cate, Kate", マリア "Malhia, Maria, Mariya, Marya", ジョン "Jon,
+John"), and counting a spelling over every JMnedict entry favours the
+Japanese romanizations (Keito in 73 entries, Kate in 4; Tomu 15, Tom 1). So
+`o` is chosen by the corpus (`tools/lib/original.mjs`): over the English
+sentences Tatoeba links to the Japanese sentences that hold the name as a
+whole katakana run, each spelling counts the sentences it appears in as a
+whole word, case and all, capitalised (Tom's counts, Tomorrow does not); the
+most frequent wins, a tie goes to JMnedict's order, and a name no spelling of
+which is ever seen keeps the first. Measured 2026-10-05 with the export of
+2026-10-03 (2,038,137 English sentences, 280,716 links): 1,023 names have
+linked English sentences, the evidence decides 770 of them (253 see no
+spelling of theirs), and 86 differ from JMnedict's first: ジョン John (was
+Jon, seen in 607 sentences), ブラウン Brown (Braun), ケイト Kate (Keito),
+アン Ann (An), メグ Meg, リンダ Linda, ジョー Joe, マリア Maria (Malhia),
+キャシー Cathy (Casei). The other 29,932 have no linked English sentence and
+keep the first. Nothing of Tatoeba ships, only the choice; the names carry the
+`tatoeba-names` credit. Measured over all 248,924 sentences against the
+first-translation rule, the same code: only the `name.o` of name tokens
+changes (1,260 tokens in 1,241 sentences, 72 distinct, ジョン John 618 of
+them), no segmentation, reading or kind (see "Rebuilt from fresh
+upstreams").
 
 JMnedict lists every reading a spelling was ever given, in kana order (田中
 is たなか, and たんか, だなか, でんちゅう and six more), so the reading is
@@ -836,7 +852,8 @@ without it (the before and after are in the sections they belong to):
 | 何 and a counter on evidence (data) | 87 | 0 | 87 | 87 | unchanged |
 | a number keeps its key's record (code) | 3,089 | 0 | 3,242 | 3,242 | unchanged |
 | decoded katakana names | 20,534 | 46 | 23,307 | 0 | 14,579 to 14,542 |
-| all of it, against the committed code and data | 23,627 | 164 | 26,637 | 3,559 | 14,589 to 14,542 |
+| their spelling chosen by the English sentences, not JMnedict's first | 1,241 | 0 | 1,260 | 0 | unchanged |
+| all of it but the last row, against the committed code and data | 23,627 | 164 | 26,637 | 3,559 | 14,589 to 14,542 |
 
 The first-pass tokens of the second and third rows changed by their
 `entry` alone. Files per sentence, each of 1,556 sentences on a fresh
@@ -1030,5 +1047,5 @@ half the dictionary's short loanwords line up with some other word first.
 - JMdict (jmdict-simplified's jmdict-eng) and KANJIDIC: Electronic Dictionary Research and Development Group, CC BY-SA 4.0. The acknowledgement is shown on the page whenever a gloss or a kanji reading is.
 - JMnedict (jmdict-simplified's jmnedict-all), for `data/names/`: the same Group and licence. Its acknowledgement (`tools/lib/licence.mjs`, the EDRDG's sample text with the names file named) must be on the page whenever a name from the names tier is.
 - KanjiVG: Ulrich Apel, CC BY-SA 3.0, for `parts`.
-- Tatoeba: CC BY 2.0 FR, used only to rank keys; no sentence ships.
+- Tatoeba: CC BY 2.0 FR, used to rank keys, to choose and count names, and, through the English translations of its Japanese sentences, to choose which of a katakana name's JMnedict spellings is shown; no sentence ships.
 - The phrase library and every note are written here and are public domain.
