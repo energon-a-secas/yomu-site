@@ -13,15 +13,17 @@ http://localhost:8895/?embed=1&lang=en         when the host itself is on localh
 
 - `embed=1` drops the header and footer, keeps one line (the embed bar), and
   lays the reader out as one column: the side table moves under the text.
-- The embed bar holds two links. "My kanji" opens the learner's saved kanji
+- The embed bar holds three links. "My kanji" opens the learner's saved kanji
   inside the frame (`#/kanji`, and a review at `#/kanji/review`), with the
   number of reviews due beside it; Back on that screen returns to the reading,
-  and the host's own URL never changes. "Open in Yomu" opens Yomu on its own
-  in a new tab. My kanji lives in the frame's storage, so inside
+  and the host's own URL never changes. "Play" opens the four look-alike
+  games inside the frame (`#/play`); Escape in a game goes back to the list
+  of games and is not passed to the host, as in a review. "Open in Yomu"
+  opens Yomu on its own in a new tab. My kanji lives in the frame's storage, so inside
   `runcible.neorgon.com` it is the same list as on yomu.neorgon.com only where
   the browser does not partition a frame's storage by its parent.
 - A `yomu:load` of a new text always shows the reading: if the learner had
-  left the frame on My kanji or in a review, the frame returns to the reader
+  left the frame on My kanji, in a review or in Play, the frame returns to the reader
   (replacing the history entry, moving no focus) before it reads the text.
   The text already on screen, sent again, moves nothing and counts nothing
   in My kanji: a host resends after it sees the frame load, and WebKit fires

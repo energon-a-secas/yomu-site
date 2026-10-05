@@ -149,6 +149,38 @@ the host sends always opens the reader.
   seen }); Import validates one and merges it, keeping the higher counts and
   the earlier first day. History is not exported.
 
+## Play
+
+https://yomu.neorgon.com/#/play holds four short games with the characters
+that look alike, each a round of ten (keys 1 to 4 answer, Enter or Space goes
+on, Escape leaves), with the right answer marked and a one-line reason after
+each, and a result with the best score and the pairs mixed up, each kanji with
+its save toggle:
+
+- Which one? (#/play/which): the kana for a romaji among its look-alikes
+  (twenty sets of hiragana and katakana, each kana with a hint written for
+  Yomu), or the kanji for its meanings and a reading among the kanji that look
+  like it, drawn from the learner's collection, or the 1st and 2nd grade
+  while that holds fewer than ten.
+- Odd one out (#/play/odd): a grid of one character hiding one look-alike,
+  4x4 growing to 6x6; 60 seconds with a wrong tap costing 3, or ten grids
+  untimed (the default when the device asks for reduced motion).
+- Twins across scripts (#/play/twins): へ/ヘ, カ/力, エ/工, ロ/口, ニ/二, タ/夕,
+  ト/卜, ハ/八, オ/才, り/リ and ー/一, told apart by the word around them.
+- Name decoder (#/play/names): a katakana name and four original spellings;
+  the answer spells it kana by kana (ト-ム, to-mu: Tom). It reads
+  data/names/popular.json (yomu-names-popular/1) and says it is not
+  available until that file ships.
+
+The kanji look-alikes are data/play/lookalikes.json (yomu-lookalikes/1): for
+each jōyō kanji that has any, at most five, best first, chosen by rule from
+the KanjiVG parts and KANJIDIC stroke counts of the kanji shards, plus
+authored classic pairs (土 士, 己 已 巳, 日 曰, ...); on 60 pairs drawn at
+random, 58 were ones a learner would confuse at a glance. Kept in this
+browser's localStorage under yomu-site:play: each game's best score and
+number of rounds, and how often each pair of characters was mixed up, so a
+pair mixed up comes round more often. No text is kept.
+
 ## Data and licences
 
 - JMdict and KANJIDIC, by the Electronic Dictionary Research and Development
@@ -158,6 +190,7 @@ the host sends always opens the reader.
 - KanjiVG, by Ulrich Apel, CC BY-SA 3.0: the parts of each kanji
 - Tatoeba, CC BY 2.0 FR: used only to rank how common each word is; no
   sentence ships
-- The phrase library, the notes and the deinflection rules are written for
-  Yomu and are public domain. Nothing is taken from Genki, the Japan
+- The phrase library, the notes, the deinflection rules, and Play's hints,
+  example words and look-alike rules are written for Yomu and are public
+  domain. Nothing is taken from Genki, the Japan
   Foundation apps, Tofugu, Yomitan, rikaichan or 10ten.

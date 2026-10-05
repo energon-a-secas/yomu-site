@@ -50,6 +50,7 @@ dictionary; your text never leaves the page unless you press a translate link.
 - **Kanji table** -- every kanji in the text with its reading here, meaning, on and kun readings and parts; hover or tap a row to find it in the text, and the other way round
 - **My kanji** -- save kanji for a short daily review, and collect every kanji you read on shelves of the 2,136 jōyō kanji by school grade, each with where you last met it
 - **History, if you want it** -- turn on Remember and Yomu keeps the texts you read in this browser, tells you when you read one before, and shows the sentence each kanji was last seen in
+- **Play** -- four short games with the characters that look alike: pick the kana or kanji among its look-alikes, find the odd one in a grid (timed or not), tell カ from 力 by the word around it, and decode katakana names to Tom and Mary; the pairs you mix up come round more often
 - **Sound it out** -- a word's beats one at a time, then the whole word, spoken with the device's Japanese voice
 - **Phrases** -- 71 everyday phrases and 8 short dialogues written for Yomu, with set phrases to practise as chunks
 - **Embeddable** -- Runcible opens Yomu in a side sheet when a phrase in a chapter is tapped (`docs/EMBED.md`)
@@ -95,11 +96,14 @@ yomu-site/
 │   ├── render*.js        # the reading, word panel, kanji table, notes, phrases
 │   ├── events.js         # input, selection, hover and tap, speech
 │   ├── speech.js         # speechSynthesis with a Japanese voice
+│   ├── play-*.js         # Play: the rounds, the store, the kana sets and twins (no DOM)
+│   ├── events-play.js    # Play's routes, keys and actions (Odd one out's clock: events-odd.js)
 │   └── embed.js          # the yomu-embed/1 protocol
 ├── data/
 │   ├── dict/             # JMdict: a core, 28 range shards and a key filter, each under 140 KB
 │   ├── kanji/            # KANJIDIC and KanjiVG parts, and joyo.json (the jōyō list by grade)
 │   ├── like/             # English words JMdict glosses with, for the sound-alike guess
+│   ├── play/             # the kanji look-alikes, built from data/kanji by tools/build-lookalikes.mjs
 │   └── phrases/          # the phrase library (original, CC0)
 ├── tools/                # hand-run builders and the data checker
 ├── tests/                # node:test suites and a render harness

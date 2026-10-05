@@ -14,7 +14,7 @@ JSON; nothing is sent anywhere unless the learner clicks a translate link.
 ```bash
 make serve       # http://localhost:8895
 make validate    # node tools/check-data.mjs, then npm test
-make data        # rebuild data/dict, data/kanji, data/names and data/like from the pinned upstreams (manual)
+make data        # rebuild data/dict, data/kanji, data/names, data/like and data/play from the pinned upstreams (manual)
 npm test         # node --test tests/*.test.mjs
 ```
 
@@ -306,10 +306,94 @@ WebKit. The header link is 36px tall on a phone because the header kit sizes
 header controls; everything on the screen itself is 44px under
 `pointer: coarse`.
 
+## Play
+
+Four games with the characters that look alike, at `#/play`: Which one?
+(`#/play/which`, the kana for a romaji, or the kanji for its meanings and a
+reading, among its look-alikes), Odd one out (`#/play/odd`, a grid of one
+character hiding one look-alike), Twins across scripts (`#/play/twins`, カ or
+力 by the word around it) and Name decoder (`#/play/names`, a katakana name
+to its original spelling). `js/routes.js` names every route (moved out of
+`events-kanji.js`, which still applies them, with the same history stamps and
+Back for Play: a game's parent is `#/play`, `#/play`'s the reader).
+`js/events-play.js` (the hook that draws a route, the rounds, the keys, the
+actions), `js/events-odd.js` (Odd one out's grid and clock),
+`js/render-play.js` (the list, the result, the shared lines),
+`js/render-games.js` (the four question screens), and, with no DOM,
+`js/play-rounds.js`, `js/play-store.js`, `js/play-data.js`,
+`js/play-kana.js` and `js/play-twins.js` (the authored content, CC0), all
+run by `tests/play.test.mjs`. The section is `#play` in `index.html`; the
+header's Play link moves into the kit's ⋯ menu on a phone (with it kept, the
+Spanish header ran 2px past 390), and the embed bar has one beside My kanji.
+
+**A round is ten questions, and only the first answer counts.** Keys 1 to 4
+(1 to 3 in Twins) answer, Enter or Space goes on, Escape leaves (its default
+prevented, so an embedded Yomu does not close the host's sheet too), and no
+key acts in a field, mid-IME, with a modifier or while a dialog is open.
+Focus goes to the prompt on a new question, to the feedback once answered,
+to the heading on the result; Back from a game focuses its Start. Entering a
+game begins a new round; leaving abandons it, and nothing of it is kept.
+Odd one out's clock starts only on Start the clock, is a deadline that
+stands still while the page is hidden, and loses 3 seconds per wrong tap;
+the untimed ten grids are the default under `prefers-reduced-motion`. A
+clock started before the grid's pairs are in waits for them: Firefox once
+moved focus from the first grid to the prompt when the load finished after
+the click.
+
+**One store, `localStorage['yomu-site:play']`, Persist kit version 1:**
+`{ games: { which|odd|oddFree|twins|names: { best, rounds } }, mixed:
+{ 'シ|ツ': n } }`. `odd` is timed and `oddFree` untimed, since the scores do
+not compare. A `mixed` key is two of the games' own characters, sorted
+(`pairKey`), counted at each wrong answer; Which one? and Odd one out draw a
+pair mixed up `n` times `1 + 2 min(n, 5)` times as often. No text is kept.
+Read field by field like the kanji store; a damaged value is copied to
+`yomu-site:play:damaged` and the page starts empty with a note.
+
+**The kanji look-alikes are a rule over the shards, measured.**
+`data/play/lookalikes.json` (`yomu-lookalikes/1`, 378 jōyō kanji, 288 pairs,
+7.3 KB) is emitted by `node tools/build-lookalikes.mjs` from the committed
+kanji shards' KanjiVG `parts` and KANJIDIC strokes plus `CLASSIC`, the pairs
+parts cannot see (土 士, 己 已 巳, ...), all in `tools/lib/lookalikes.mjs`;
+`tools/check-data.mjs` rebuilds it in memory and fails a file that is not
+that output, a key outside the jōyō list, more than five, a self-listing or
+a pair one way only. **Rerun the builder after any rebuild of
+`data/kanji/`.** The rules: one kanji is the other plus a stroke (日 白), the
+same parts within a stroke (未 末 本), the same parts but a look-alike one
+(休 体), the same phonetic with two left or two top radicals (待 持, 帳 張),
+or the same top or enclosing part (雪 雲, 間 問). The criterion: would a
+learner who knows neither confuse them at a glance, the same layout and
+most of the ink shared. Sixty pairs drawn at random from the shipped file
+(`--sample 60 20261005`): 58 look alike. The first draft also took a shared
+left radical with small right parts (記 討, 打 払), which cost 6 of 60;
+dropped. What the rule still gets wrong: KanjiVG's parts say nothing of
+layout, so 員 唄 (口 over 貝, beside it) pass as the same parts; a part list
+that leaves out an unnamed middle reads 微 散 as one radical apart; and it
+misses pairs whose difference is not a whole part (思 恵, 賃 貸, 遣 遺 are in
+`CLASSIC` for that). 247 of the 378 have one look-alike, so Which one? fills
+its four options from look-alikes of look-alikes, then the pool's kanji
+nearest in strokes. Meanings are KANJIDIC's English; in Spanish the screen
+says so once.
+
+**The Name decoder reads `data/names/popular.json`, which the dictionary
+build emits** (`yomu-names-popular/1`: `[katakana, original, given | surname
+| place, Tatoeba count]`, most used first). Before it ships the file is a 404,
+which the list and the game say in words ("Not available yet") and never
+throw; Chromium and WebKit still log that one 404 as a console line, since a
+static page can only learn a file is missing by asking. Tests use the
+hand-written `tests/fixtures/popular-names.json`; never copy it into `data/`.
+
+**The hints and the twins' words are ours.** Which kana and kanji look alike
+is a fact; every hint, word and note in `js/play-kana.js` and
+`js/play-twins.js` was written for Yomu from the shapes, and none was taken
+from Tofugu, the Japan Foundation apps, Genki, WaniKani, an Anki deck or a
+published list. 卜 has no word a beginner meets; its two words are the real
+ones and its note says it is rare.
+
 ## Do not touch
 
 - `js/vendor/wanakana.js`: upstream 5.3.1, MIT, byte for byte.
 - `js/neorgon-*.js`, `css/neorgon-*.css`: vendored kits, refreshed by `packages/neorgon-ui/sync-*.sh`.
 - `data/dict/**`, `data/kanji/**`, `data/names/**`: emitted by `tools/build-*.mjs` from the pins in `tools/lib/sources.mjs` (`build-names.mjs` after `build-dict.mjs`, which it reads; `data/kanji/joyo.json` by `build-joyo.mjs` from the committed shards, or by `build-kanji.mjs`). Rebuild, do not hand-edit.
 - `data/like/**`: emitted by `tools/build-sounds-like.mjs` from the committed `data/dict/` (after `build-dict.mjs`). Rebuild, do not hand-edit.
+- `data/play/lookalikes.json`: emitted by `tools/build-lookalikes.mjs` from the committed `data/kanji/` (after `build-kanji.mjs` or `build-joyo.mjs`). Rebuild, do not hand-edit.
 - `favicon.*`, `apple-touch-icon.png`, `web-app-manifest-*.png`, `site.webmanifest`: generated by `packages/neorgon-ui/sync-favicon.sh` once the site has a hub card.
