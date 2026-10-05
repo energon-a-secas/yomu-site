@@ -227,4 +227,12 @@ export const COLLECT_STRINGS = Object.freeze({
     en: 'The texts you did not save are forgotten. Your saved phrases stay.',
     es: 'Se olvidaron los textos que no guardaste. Tus frases guardadas se quedan.',
   },
+  importedPhrases: {
+    en: '{n} saved phrases added or updated.',
+    es: '{n} frases guardadas nuevas o actualizadas.',
+  },
+  importPhrasesFull: {
+    en: '{n} more did not fit: 500 saved phrases is the most.',
+    es: 'Otras {n} no cupieron: 500 frases guardadas es el máximo.',
+  },
 });

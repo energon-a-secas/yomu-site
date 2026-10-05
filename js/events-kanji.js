@@ -365,8 +365,12 @@ async function importFile(file) {
     return;
   }
   const sum = myKanji().merge(r.data);
-  const msg = ui('imported', { saved: sum.savedAdded, seen: sum.seenAdded + sum.seenUpdated });
-  view.note = r.dropped ? `${msg} ${ui('importDropped', { n: r.dropped })}` : msg;
+  const p = sum.phrases;
+  const parts = [ui('imported', { saved: sum.savedAdded, seen: sum.seenAdded + sum.seenUpdated })];
+  if (p && p.added + p.updated) parts.push(ui('importedPhrases', { n: p.added + p.updated }));
+  if (p && p.full) parts.push(ui('importPhrasesFull', { n: p.full }));
+  if (r.dropped) parts.push(ui('importDropped', { n: r.dropped }));
+  view.note = parts.join(' ');
   afterChange();
 }
 
