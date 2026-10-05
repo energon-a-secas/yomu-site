@@ -29,6 +29,10 @@
  *     and a name record outside its shape
  *   - a kanji shard ranged by first and last character that holds a
  *     character outside its range, or one a listed shard holds too
+ *   - a jōyō list (data/kanji/joyo.json) whose grades are not the seven
+ *     KANJIDIC grades with the sizes of the 2010 list, that repeats a kanji,
+ *     names one no kanji shard holds or one the shards file under another
+ *     grade, or is not what tools/lib/joyo.mjs builds from the shards
  *
  * A new kind of data file gets its format id and a checker in FORMATS below,
  * in the same commit that adds the file.
@@ -38,6 +42,9 @@ import path from 'node:path';
 import { walkStrings, EM_DASH } from './lib/licence.mjs';
 import { MAX_BYTES, SITE, fmtBytes } from './lib/emit.mjs';
 import { readFilter } from '../js/bloom.js';
+import {
+  joyoDoc, JOYO_FORMAT, JOYO_GRADES, JOYO_SIZES, JOYO_TOTAL,
+} from './lib/joyo.mjs';
 
 const DATA = process.argv[2] ? path.resolve(process.argv[2]) : path.join(SITE, 'data');
 // Paths are reported, and index `src` values resolved, relative to the
@@ -150,6 +157,28 @@ function checkKanjiShard(rel, doc) {
   }
 }
 
+/** The list on its own: seven grades of the right sizes, 2,136 kanji, none twice. */
+function checkJoyoDoc(rel, doc) {
+  const grades = doc.grades;
+  if (!grades || typeof grades !== 'object' || Array.isArray(grades)) { fail(rel, 'grades is not an object'); return; }
+  const want = JOYO_GRADES.map(String);
+  const have = Object.keys(grades);
+  if (have.join() !== want.join()) fail(rel, `grades are ${JSON.stringify(have)}, not ${JSON.stringify(want)}`);
+  const all = new Set();
+  let total = 0;
+  for (const grade of want) {
+    if (typeof grades[grade] !== 'string') { fail(rel, `grade ${grade} is not a string`); continue; }
+    const chars = [...grades[grade]];
+    if (chars.length !== JOYO_SIZES[grade]) fail(rel, `grade ${grade} holds ${chars.length} kanji, not ${JOYO_SIZES[grade]}`);
+    for (const ch of chars) {
+      if (all.has(ch)) fail(rel, `${ch} is listed twice`);
+      all.add(ch);
+    }
+    total += chars.length;
+  }
+  if (doc.count !== JOYO_TOTAL || total !== JOYO_TOTAL) fail(rel, `count is ${doc.count} and the grades hold ${total}, not ${JOYO_TOTAL}`);
+}
+
 // A null checker means the generic rules above are the whole check here:
 // the indexes are checked against their shards below, and the phrase library
 // is authored by hand and has its own test (tests/library.test.mjs).
@@ -167,6 +196,7 @@ const FORMATS = {
   'yomu-kanji-index/2': null,
   'yomu-kanji/1': checkKanjiShard,
   'yomu-library/1': null,
+  [JOYO_FORMAT]: checkJoyoDoc,
 };
 
 // ── Indexes against their shards ──────────────────────────────────────────
@@ -274,6 +304,35 @@ function checkKanjiIndex(docs) {
   if (index.count !== undefined && index.count !== seen.size) fail(rel, `count is ${index.count}, the shards hold ${seen.size}`);
 }
 
+/**
+ * The jōyō list against the kanji shards: every kanji in it is in a shard,
+ * filed under the same grade, every shard kanji of a jōyō grade is in it,
+ * and the list is what tools/lib/joyo.mjs builds from the shards (its order
+ * included), so a hand edit cannot pass.
+ */
+function checkJoyo(docs) {
+  const rel = 'data/kanji/joyo.json';
+  const doc = docs.get(rel);
+  const shards = shardFiles(docs, 'yomu-kanji/1');
+  if (!doc) { if (shards.length) fail(rel, 'missing, but kanji shards exist'); return; }
+  if (doc.format !== JOYO_FORMAT || !doc.grades || typeof doc.grades !== 'object') return;
+  const entries = new Map();
+  for (const src of shards) for (const [ch, e] of Object.entries(docs.get(src).entries || {})) entries.set(ch, e);
+  for (const [grade, chars] of Object.entries(doc.grades)) {
+    for (const ch of [...String(chars)]) {
+      const e = entries.get(ch);
+      if (!e) fail(rel, `${ch} is in no kanji shard`);
+      else if (String(e.g) !== grade) fail(rel, `${ch} is listed in grade ${grade}, the shards file it under ${e.g === undefined ? 'no grade' : e.g}`);
+    }
+  }
+  const built = joyoDoc(entries, doc._licence);
+  for (const grade of JOYO_GRADES.map(String)) {
+    if (built.grades[grade] !== doc.grades[grade]) {
+      fail(rel, `grade ${grade} is not what the shards give; run node tools/build-joyo.mjs`);
+    }
+  }
+}
+
 /** The last entry of `list` whose `first` is <= key, or null. */
 function rangeOf(list, key) {
   let hit = null;
@@ -372,6 +431,7 @@ function main() {
   }
   checkDictIndex(docs);
   checkKanjiIndex(docs);
+  checkJoyo(docs);
   checkRangeIndex(docs, 'data/dict/rare.json', 'yomu-dict-rare/1');
   checkRangeIndex(docs, 'data/names/index.json', 'yomu-names/1');
 

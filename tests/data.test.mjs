@@ -282,6 +282,42 @@ test('kanji entries carry readings, meanings and KanjiVG parts', () => {
   assert.ok(kanji.get('食').kun.includes('た.べる'));
 });
 
+test('the jōyō list: seven grades of the 2010 sizes, each kanji in a shard under the same grade, in frequency order', () => {
+  const joyo = read('data/kanji/joyo.json');
+  assert.equal(joyo.format, 'yomu-joyo/1');
+  assert.deepEqual(joyo._licence, kanjiShards[0].doc._licence, 'the block the kanji shards carry');
+  assert.equal(joyo.count, 2136);
+  assert.deepEqual(Object.keys(joyo.grades), ['1', '2', '3', '4', '5', '6', '8']);
+  const sizes = Object.values(joyo.grades).map((chars) => [...chars].length);
+  assert.deepEqual(sizes, [80, 160, 200, 202, 193, 191, 1110]);
+  const all = Object.values(joyo.grades).flatMap((chars) => [...chars]);
+  assert.equal(new Set(all).size, 2136, 'no kanji twice');
+  for (const [grade, chars] of Object.entries(joyo.grades)) {
+    const list = [...chars];
+    for (const ch of list) {
+      assert.ok(kanji.has(ch), `${ch} is in no shard`);
+      assert.equal(String(kanji.get(ch).g), grade, `${ch}: grade`);
+    }
+    const rank = (ch) => (Number.isInteger(kanji.get(ch).f) ? kanji.get(ch).f : Infinity);
+    for (let i = 1; i < list.length; i += 1) {
+      const a = list[i - 1];
+      const b = list[i];
+      assert.ok(rank(a) < rank(b) || (rank(a) === rank(b) && a.codePointAt(0) < b.codePointAt(0)), `grade ${grade} at ${b}`);
+    }
+  }
+  // Every shard kanji of a jōyō grade is on the list: nothing left off it.
+  const listed = new Set(all);
+  for (const [ch, e] of kanji) if ([1, 2, 3, 4, 5, 6, 8].includes(e.g)) assert.ok(listed.has(ch), `${ch} (grade ${e.g}) is missing`);
+  assert.ok(statSync(join(SITE, 'data/kanji/joyo.json')).size <= CAP);
+});
+
+test('the jōyō list is what its builder makes from the shards, byte for byte', async () => {
+  const { joyoDoc } = await import('../tools/lib/joyo.mjs');
+  const { serialize } = await import('../tools/lib/emit.mjs');
+  const built = serialize(joyoDoc(kanji, kanjiShards[0].doc._licence), 'grades');
+  assert.equal(readFileSync(join(SITE, 'data/kanji/joyo.json'), 'utf8'), built);
+});
+
 // ── The checker catches what it says it catches ───────────────────────────
 
 /**
@@ -392,6 +428,40 @@ test('check-data fails each broken rule and names the file', async () => {
     ...second.map(([, mutate]) => brokenCopy(mutate, { full: true })),
   ]);
   [...cases, ...second].forEach(([name, , expect], k) => {
+    assert.equal(runs[k].status, 1, `${name}: exit ${runs[k].status}`);
+    assert.match(runs[k].stderr, expect, name);
+  });
+});
+
+test('check-data fails a jōyō list that is wrong, hand-edited or missing', async () => {
+  const swap = (s, a, b) => [...s].map((ch) => (ch === a ? b : ch === b ? a : ch)).join('');
+  const cases = [
+    ['two kanji swapped in their grade', (rw) => rw('data/kanji/joyo.json', (d) => {
+      d.grades['1'] = swap(d.grades['1'], '日', '一');
+    }), /joyo\.json: grade 1 is not what the shards give/],
+    ['a kanji filed under another grade', (rw) => rw('data/kanji/joyo.json', (d) => {
+      const ch = [...d.grades['2']][0];
+      d.grades['2'] = [...d.grades['2']].slice(1).join('');
+      d.grades['1'] += ch;
+    }), /joyo\.json: .* is listed in grade 1, the shards file it under 2/],
+    ['a grade of the wrong size', (rw) => rw('data/kanji/joyo.json', (d) => {
+      d.grades['3'] = [...d.grades['3']].slice(1).join('');
+      d.count = 2135;
+    }), /joyo\.json: grade 3 holds 199 kanji, not 200/],
+    ['a kanji no shard holds', (rw) => rw('data/kanji/joyo.json', (d) => {
+      d.grades['8'] = `${[...d.grades['8']].slice(1).join('')}\u{2A6D6}`;
+    }), /joyo\.json: .* is in no kanji shard/],
+    ['a kanji listed twice', (rw) => rw('data/kanji/joyo.json', (d) => {
+      const list = [...d.grades['4']];
+      list[1] = list[0];
+      d.grades['4'] = list.join('');
+    }), /joyo\.json: .* is listed twice/],
+    ['no list beside the kanji shards', (rw, dir) => {
+      rmSync(join(dir, 'data/kanji/joyo.json'));
+    }, /joyo\.json: missing, but kanji shards exist/],
+  ];
+  const runs = await Promise.all(cases.map(([, mutate]) => brokenCopy(mutate)));
+  cases.forEach(([name, , expect], k) => {
     assert.equal(runs[k].status, 1, `${name}: exit ${runs[k].status}`);
     assert.match(runs[k].stderr, expect, name);
   });

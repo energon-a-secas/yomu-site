@@ -332,6 +332,16 @@ shard:
   (9.1 KB before); listing every character would have made it 40 KB on
   every text with a kanji in it.
 
+`data/kanji/joyo.json` (format `yomu-joyo/1`) is not read by the analyzer:
+it is the jōyō list the My kanji collection is shelved by,
+`{ _licence, format, count: 2136, grades: { '1': '日一人...', ..., '8': '...' } }`,
+each grade one string of kanji in newspaper frequency order (`f`), the few
+with no rank last by code point. Sizes 80, 160, 200, 202, 193, 191 and
+1,110. `tools/lib/joyo.mjs` builds it from the kanji entries: at the end of
+`tools/build-kanji.mjs`, or from the committed shards with
+`tools/build-joyo.mjs`. `tools/check-data.mjs` rebuilds it from the shards
+and fails any difference.
+
 ### The second tier: the rest of JMdict
 
 Every JMdict entry and spelling the first tier does not ship is in the

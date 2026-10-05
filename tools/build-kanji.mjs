@@ -29,6 +29,11 @@
  * level under the character (語 is 言 and 吾), which is the level a learner
  * recognises. KANJIDIC's radical is one classification number; KanjiVG's
  * groups are how the character is drawn.
+ *
+ * It also writes data/kanji/joyo.json, the jōyō kanji by grade that the My
+ * kanji collection is shelved by, through tools/lib/joyo.mjs, so a rebuild
+ * regenerates it. tools/build-joyo.mjs writes the same file from the
+ * committed shards, for when the upstream cache is gone.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -40,6 +45,7 @@ import {
 import {
   JOYO_GRADES, readingsOfType, selection, theRest,
 } from './lib/kanjidic.mjs';
+import { joyoDoc } from './lib/joyo.mjs';
 
 const TOOL = 'tools/build-kanji.mjs';
 const OUT = path.join(SITE, 'data', 'kanji');
@@ -207,6 +213,7 @@ function main() {
     count: chosen.length + rest.length,
     shards,
   }, 'shards');
+  const joyoBytes = writeJson(path.join(OUT, 'joyo.json'), joyoDoc(entries, licence), 'grades');
   const gone = pruneStale(OUT, /^k\d+\.json$/, written);
 
   const joyo = chosen.filter((c) => JOYO_GRADES.has(c.misc.grade)).length;
@@ -215,7 +222,7 @@ function main() {
   const total = sizes.reduce((a, b) => a + b, 0);
   const out = [
     `kanji ${chosen.length + rest.length}: listed ${chosen.length} (joyo ${joyo}, frequency-ranked ${ranked}, both ${joyo + ranked - chosen.length}), ranged ${rest.length}`,
-    `shards ${listed.length} listed + ${ranged.length} ranged: ${sizes.map((b) => `${fmtBytes(b)} (${b} B)`).join(', ')}; total ${fmtBytes(total)}; index ${fmtBytes(indexBytes)}`,
+    `shards ${listed.length} listed + ${ranged.length} ranged: ${sizes.map((b) => `${fmtBytes(b)} (${b} B)`).join(', ')}; total ${fmtBytes(total)}; index ${fmtBytes(indexBytes)}; joyo ${fmtBytes(joyoBytes)}`,
     `with parts ${withParts}; no KanjiVG file ${stats.noSvg.length} (listed ${stats.noSvg.filter((ch) => !ranged.some((d) => Object.hasOwn(d.entries, ch))).length}); no root group ${stats.noRoot.length}`,
     `characters with a meaning passed over (dash or banned word) ${stats.passedOver}`,
     gone.length ? `removed stale shards: ${gone.join(' ')}` : 'no stale shards',
