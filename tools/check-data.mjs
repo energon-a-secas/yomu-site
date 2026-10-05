@@ -37,6 +37,11 @@
  *     English words with a count, a word the page would never look for in
  *     that group, or one the house style bans; and an index that does not
  *     list every group file, or miscounts one, or whose odds are not counts
+ *   - Play's kanji look-alikes (data/play/lookalikes.json) keyed by anything
+ *     but a jōyō kanji, listing a kanji the shards do not hold, more than
+ *     five, one twice or a kanji as its own, a pair between two jōyō kanji
+ *     one way only, or anything but what tools/lib/lookalikes.mjs builds
+ *     from the shards
  *
  * A new kind of data file gets its format id and a checker in FORMATS below,
  * in the same commit that adds the file.
@@ -51,6 +56,7 @@ import {
 } from './lib/joyo.mjs';
 import { groupsOfWord } from '../js/sounds-like.js';
 import { BANNED_WORDS } from './lib/licence.mjs';
+import { LOOKALIKES_FORMAT, LOOKALIKES_SRC, lookalikesProblems } from './lib/lookalikes.mjs';
 
 const DATA = process.argv[2] ? path.resolve(process.argv[2]) : path.join(SITE, 'data');
 // Paths are reported, and index `src` values resolved, relative to the
@@ -221,6 +227,7 @@ const FORMATS = {
   [JOYO_FORMAT]: checkJoyoDoc,
   'yomu-like-index/1': null,
   'yomu-like/1': checkLikeGroup,
+  [LOOKALIKES_FORMAT]: null,
 };
 
 // ── Indexes against their shards ──────────────────────────────────────────
@@ -387,6 +394,19 @@ function checkLikeIndex(docs) {
   }
 }
 
+/** Play's look-alikes against the kanji shards and the jōyō list (tools/lib/lookalikes.mjs). */
+function checkLookalikes(docs) {
+  const doc = docs.get(LOOKALIKES_SRC);
+  const shards = shardFiles(docs, 'yomu-kanji/1');
+  if (!doc) { if (shards.length) fail(LOOKALIKES_SRC, 'missing, but kanji shards exist'); return; }
+  const joyo = docs.get('data/kanji/joyo.json');
+  if (!joyo || !joyo.grades || typeof joyo.grades !== 'object') return;
+  const entries = new Map();
+  for (const src of shards) for (const [ch, e] of Object.entries(docs.get(src).entries || {})) entries.set(ch, e);
+  const chars = Object.values(joyo.grades).flatMap((g) => [...String(g)]).filter((ch) => entries.has(ch));
+  for (const why of lookalikesProblems(doc, entries, chars)) fail(LOOKALIKES_SRC, why);
+}
+
 /** The last entry of `list` whose `first` is <= key, or null. */
 function rangeOf(list, key) {
   let hit = null;
@@ -489,6 +509,7 @@ function main() {
   checkRangeIndex(docs, 'data/dict/rare.json', 'yomu-dict-rare/1');
   checkRangeIndex(docs, 'data/names/index.json', 'yomu-names/1');
   checkLikeIndex(docs);
+  checkLookalikes(docs);
 
   if (failures.length) {
     for (const f of failures.slice(0, 50)) process.stderr.write(`FAIL ${f}\n`);

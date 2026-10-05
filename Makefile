@@ -9,7 +9,7 @@ help:
 	@echo "  make serve    Start dev server → http://localhost:$(PORT)"
 	@echo "  make kill     Kill this project's HTTP server"
 	@echo "  make validate Check every file under data/, then run npm test"
-	@echo "  make data     Rebuild data/dict, data/kanji, data/names and data/like (manual)"
+	@echo "  make data     Rebuild data/dict, data/kanji, data/names, data/like and data/play (manual)"
 	@echo ""
 
 # ── Dev server ────────────────────────────────────────────────────────────────
@@ -45,4 +45,5 @@ data:
 	node tools/build-kanji.mjs
 	node tools/build-names.mjs
 	node tools/build-sounds-like.mjs
+	node tools/build-lookalikes.mjs
 	node tools/check-data.mjs
