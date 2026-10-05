@@ -632,7 +632,12 @@ The type from the sense moved six rows (キャシー Cathy, トーニー Tony an
 バーナード Bernard are given names, not surnames; リヨン Lyon, アルマ Alma
 and カナ Cana places, not given names) and made ガンジー Gandhi a person
 (Ghanzi is the place); 66 katakana records list their types in a new order.
-A name JMnedict types only `person` (ナポレオン) is still no row. The game
+A name JMnedict types only `person` (ナポレオン) is still no row. One case
+stays open: 22 rows come from a sense JMnedict types both a person and a
+place, and take the person (the types' fixed order). That is right for
+アリス, ジャクソン and リンカーン and wrong for ミラノ Milan (a given name
+here) and エベレスト Everest (a surname); the sense's own order would fix
+those two and mistype オリバー and アントン as places, so neither is used. The game
 names two classes, "a name" for given, surname and person and "a place"
 (`js/play-rounds.js nameClass`), and offers three spellings of the answer's
 class. サン (San, three sentences: アウン・サン・スー・チー, サン・ピエトロ
