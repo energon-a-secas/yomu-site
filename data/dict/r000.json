@@ -1,8 +1,8 @@
 {
-"_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-08-29"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
+"_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
 "first": "2.5次元",
-"last": "あきないもの",
+"last": "あきないや",
 "entries": {
 "2.5次元": [{"r":["にてんごじげん"],"g":["2.5D (projection)","half fictional (anime, manga, etc.) and half real-life"],"p":"n adj-no","f":"じ|げん"}],
 "Α": [{"r":["アルファ"],"g":["alpha"],"p":"n"}],
@@ -1293,7 +1293,6 @@
 "あがり性": [{"r":["あがりしょう"],"g":["social phobia"],"p":"n"}],
 "あがり框": [{"r":["あがりがまち","あがりかまち"],"g":["piece of wood at the front edge of an entranceway floor"],"p":"n"}],
 "あがり湯": [{"r":["あがりゆ"],"g":["clean hot bath water for rinsing"],"p":"n"}],
-"あがり牌": [{"r":["あがりハイ"],"g":["winning tile"],"p":"n"}],
 "あがり症": [{"r":["あがりしょう"],"g":["social phobia"],"p":"n"}],
 "あがり目": [{"r":["あがりめ"],"g":["eyes slanted upward","rising tendency"],"p":"n"}],
 "あがり花": [{"r":["あがりばな"],"g":["(freshly brewed) green tea"],"p":"n"}],
@@ -1385,6 +1384,7 @@
 "あきない": [{"g":["not getting tired (of something)","business"],"p":"exp","k":["春夏冬"]}],
 "あきないじょうず": [{"g":["being good at selling"],"p":"n adj-na","k":["商い上手"]}],
 "あきないはうしのよだれ": [{"g":["one should not rush to make a profit"],"p":"exp","k":["商いは牛のよだれ","商いは牛の涎"]}],
-"あきないもの": [{"g":["article of commerce"],"p":"n","k":["商い物"]}]
+"あきないもの": [{"g":["article of commerce"],"p":"n","k":["商い物"]}],
+"あきないや": [{"g":["shop"],"p":"n","k":["商屋","商い屋"]}]
 }
 }

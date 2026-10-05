@@ -1,10 +1,9 @@
 {
-"_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-08-29"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
+"_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "あきないや",
-"last": "あっす",
+"first": "あきなう",
+"last": "あっせつ",
 "entries": {
-"あきないや": [{"g":["shop"],"p":"n","k":["商屋","商い屋"]}],
 "あきなう": [{"g":["to trade in (commercial goods)"],"p":"v5u vt","k":["商う"]}],
 "あきなし": [{"g":["not getting tired (of something)","business"],"p":"exp","k":["春夏冬"]}],
 "あきなす": [{"g":["autumn eggplant"],"p":"n","k":["秋茄子","秋ナス"]}],
@@ -376,7 +375,6 @@
 "あけわたす": [{"g":["to vacate"],"p":"v5s vt","k":["明け渡す"]}],
 "あけわたる": [{"g":["to become daylight"],"p":"v5r vi","k":["明け渡る"]}],
 "あけ渡す": [{"r":["あけわたす"],"g":["to vacate"],"p":"v5s vt"}],
-"あけ烏": [{"r":["あけがらす"],"g":["daybreak sound of a crow","(name of) poetry anthology"],"p":"n"}],
 "あげ": [{"g":["cylindrical bamboo fishing basket"],"p":"n","k":["筌"]}],
 "あげあげ": [{"g":["feeling elated"],"p":"n"}],
 "あげあし": [{"g":["raised leg","upturn (in the market)","sitting cross-legged"],"p":"n","k":["揚げ足","挙げ足"]}],
@@ -895,10 +893,7 @@
 "あしをむける": [{"g":["to head towards"],"p":"exp v1","k":["足を向ける"]}],
 "あしテビチ": [{"g":["pig's feet"],"p":"n","k":["足テビチ"]}],
 "あしヒレ": [{"g":["swimfin"],"p":"n","k":["足ヒレ"]}],
-"あし毛": [{"r":["あしげ"],"g":["dapple-grey (gray) (horse coat colour)"],"p":"n adj-no"}],
 "あし笛": [{"r":["あしぶえ"],"g":["reed pipe"],"p":"n"}],
-"あし舟": [{"r":["あしぶね"],"g":["papyrus boat"],"p":"n"}],
-"あし船": [{"r":["あしぶね"],"g":["papyrus boat"],"p":"n"}],
 "あじ": [{"g":["first Sanskrit alphabet letter…"],"p":"n","k":["阿字"]},{"g":["chieftain (of the Ryukyu Kingdom)"],"p":"n","k":["按司"],"t":1}],
 "あじあい": [{"g":["flavour","meaning"],"p":"n","k":["味あい"]}],
 "あじあう": [{"g":["to taste"],"p":"v5u vt","k":["味あう","味合う"]}],
@@ -1096,7 +1091,6 @@
 "あそびゴコロ": [{"g":["playfulness","imaginativeness"],"p":"n","k":["遊びゴコロ"]}],
 "あそび人": [{"r":["あそびにん"],"g":["playboy","(professional) gambler","person without a steady job"],"p":"n"}],
 "あそび女": [{"r":["あそびめ"],"g":["prostitute"],"p":"n"}],
-"あそび心": [{"r":["あそびごころ"],"g":["playfulness","imaginativeness"],"p":"n"}],
 "あそび相手": [{"r":["あそびあいて"],"g":["playmate"],"p":"n","f":"あい|て"}],
 "あそぶいと": [{"g":["heat haze"],"p":"n","k":["遊糸"]}],
 "あそぶかねほしさ": [{"g":["desire for money for one's enjoyment…"],"p":"n","k":["遊ぶ金欲しさ"]}],
@@ -1416,6 +1410,11 @@
 "あっしゅつ": [{"g":["pressing out"],"p":"n vs","k":["圧出"]}],
 "あっしん": [{"g":["pressure sensation"],"p":"n","k":["圧神"]}],
 "あっしんき": [{"g":["compander"],"p":"n","k":["圧伸器"]}],
-"あっす": [{"g":["to press","to oppress"],"p":"vs-c vt","k":["圧す"]}]
+"あっす": [{"g":["to press","to oppress"],"p":"vs-c vt","k":["圧す"]}],
+"あっする": [{"g":["to press","to oppress"],"p":"vs-s","k":["圧する"]}],
+"あっせい": [{"g":["oppression"],"p":"n","k":["圧制"]},{"g":["oppressive rule"],"p":"n","k":["圧政"],"t":1}],
+"あっせいしゃ": [{"g":["oppressor"],"p":"n","k":["圧制者"]}],
+"あっせいてき": [{"g":["oppressive"],"p":"adj-na","k":["圧制的"]}],
+"あっせつ": [{"g":["pressure welding"],"p":"n","k":["圧接"]},{"g":["compacting snow"],"p":"n vs vt","k":["圧雪"],"t":1}]
 }
 }

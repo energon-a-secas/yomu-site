@@ -603,3 +603,53 @@ test('a spelling the corpus matched for a strong name is no first-tier word for 
   assert.equal(t.kind, 'name');
   assert.equal(t.confidence, 'dict');
 });
+
+// ── Found on 2026-10-05, with the rebuild ────────────────────────────────
+
+test('飴色 written あめ色 or アメ色 is one word, amber (was あめ "rain" and 色, and アメ "American" and 色)', async () => {
+  for (const [text, s] of [
+    ['あめ色のバッグ', 'あめ色'], ['アメ色の猫', 'アメ色'], ['玉ねぎはアメ色になるまで炒める。', 'アメ色'],
+  ]) {
+    const r = await run(text);
+    const t = tok(r, s);
+    assert.ok(t, `${s} in ${cut(r)}`);
+    assert.equal(t.kind, 'word', text);
+    assert.equal(t.confidence, 'dict', text);
+    assert.equal(t.reading, 'あめいろ', text);
+    assert.equal(gloss(t), 'amber', text);
+    assert.equal(t.romaji.said, 'ameiro', text);
+    assert.equal(t.entry.tier, undefined, `${text}: a first-tier word, read by the first pass`);
+    assert.equal(r.unknown, 0, text);
+  }
+  // the parts alone, and the traps the first tier is measured against, are
+  // what they were: 雨 alone is rain, 色 alone colour, あめ in kana still 雨
+  for (const [text, s, reading, g] of [
+    ['雨が降る。', '雨', 'あめ', 'rain'], ['あめが降る。', 'あめ', 'あめ', 'rain'], ['いい色ですね。', '色', 'いろ', 'colour'],
+    ['はしをわたる', 'はし', 'はし', 'bridge'], ['くじを引く。', 'くじ', 'くじ', 'lottery'],
+  ]) {
+    const t = tok(await run(text), s);
+    assert.ok(t, `${s} in ${cut(await run(text))}`);
+    assert.equal(t.reading, reading, text);
+    assert.equal(gloss(t), g, text);
+  }
+  const six = (await run('六百')).tokens[0];
+  assert.equal(six.kind, 'number');
+  assert.equal(six.reading, 'ろっぴゃく');
+  // 清水 is no first-tier word, so the surname is read where it is meant
+  const d = diskDict();
+  const shimizu = tok(await analyze('清水さんに会った。', { dict: d }), '清水');
+  assert.equal(d.get('清水'), undefined);
+  assert.equal(shimizu.kind, 'name');
+  assert.equal(shimizu.reading, 'しみず');
+});
+
+test('a mixed spelling whose kana start with a particle after a kanji stays out: 何がしたい, 友達がいなかった', async () => {
+  // 何がし "a certain amount" and 友達がい "true friendship" are JMdict
+  // spellings the mixed rule would ship; as keys they read が as part of them
+  assert.equal(cut(await run('何がしたい？')), '何|が|したい|?');
+  assert.equal(cut(await run('アンには遊び友達がいなかった。')).includes('友達|が|いなかった'), true);
+  const d = diskDict();
+  await d.need(new Set(['何がし', '友達がい']));
+  assert.equal(d.get('何がし'), undefined);
+  assert.equal(d.get('友達がい'), undefined);
+});

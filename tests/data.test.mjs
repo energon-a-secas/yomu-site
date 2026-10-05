@@ -69,8 +69,11 @@ test('the dictionary index counts what the core and the shards hold', () => {
   assert.equal(dictIndex.format, 'yomu-dict-index/2');
   assert.equal(dictIndex.keys, dict.size);
   // 39,359 until 2026-10-03, when 上野 left the first tier: the corpus
-  // matched it for Ueno, not for the province (tools/lib/extra.mjs)
-  assert.equal(dictIndex.keys, 39358);
+  // matched it for Ueno, not for the province (tools/lib/extra.mjs). 39,358
+  // until 2026-10-05, when the mixed rule added 813 spellings like あめ色 and
+  // 704 katakana folds like アメ色, and 何 with a counter on evidence added
+  // 何個, 何番, 何ヶ月, 何階 and 何月 (tools/lib/extra.mjs, selectMixed)
+  assert.equal(dictIndex.keys, 40875);
   assert.equal(dictIndex.maxKey, Math.max(...[...dict.keys()].map((k) => k.length)));
   assert.equal(dictIndex.core.keys, Object.keys(dictCore.entries).length);
   const ranged = dictShards.reduce((n, s) => n + Object.keys(s.doc.entries).length, 0);
