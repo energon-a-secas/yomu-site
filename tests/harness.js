@@ -69,8 +69,9 @@ const restore = [];
 
 async function run() {
   restore.push(keep(TEXT_KEY), keep(PREFS_KEY), keep(KANJI_KEY), keep(HISTORY_KEY));
-  // My kanji starts empty, so every kanji in the fixture is unsaved and new.
-  try { localStorage.removeItem(KANJI_KEY); } catch { /* storage blocked */ }
+  // My kanji starts empty, so every kanji in the fixture is unsaved and new,
+  // and History too, so the fixture's text is not saved yet.
+  try { localStorage.removeItem(KANJI_KEY); localStorage.removeItem(HISTORY_KEY); } catch { /* storage blocked */ }
   const fixture = await (await fetch('fixtures/analysis-sample.json')).json();
   let notes = {};
   try { notes = await import('../js/notes.js'); } catch { /* notes are optional here */ }
@@ -201,9 +202,18 @@ async function run() {
   await wait(30);
   check('choosing a note line opens its note', $('note-title') && !$('panel-notes').hasAttribute('data-empty'), $('note-title') ? $('note-title').textContent : '');
 
+  // The text's own bookmark, beside Clear: shown after a read with Japanese,
+  // named in text nodes and never by the text, pressed once the text is saved.
+  const star = $('save-text');
+  check('the text has a save toggle beside Clear, shown after the read', star && !star.hidden && star.tagName === 'BUTTON' && !!star.closest('.input-head') && star.getAttribute('aria-pressed') === 'false');
+  check('it is named in text, not by the text and not by an attribute', star && star.textContent === ui('saveText') && !star.hasAttribute('aria-label') && !star.hasAttribute('title'), star ? star.textContent : '');
+  star.click();
+  await wait(20);
+  check('saving the text presses it, in place', star.getAttribute('aria-pressed') === 'true' && star.isConnected && keepTok.isConnected);
+
   const leaksAfter = [...document.querySelectorAll('#hz-page *')].flatMap((el) => [...el.attributes]
     .filter((a) => a.name !== 'placeholder' && a.name !== 'href' && learner.test(a.value)).map((a) => `${el.tagName}.${a.name}`));
-  check('no attribute carries a kanji after saving either', leaksAfter.length === 0, leaksAfter.slice(0, 3).join(', '));
+  check('no attribute carries a kanji or the text after saving either', leaksAfter.length === 0, leaksAfter.slice(0, 3).join(', '));
 
   // The Word panel on two hand-written tokens (fixtures/word-panel.json): a
   // rare word says so with a label, and a part no record covers shows its

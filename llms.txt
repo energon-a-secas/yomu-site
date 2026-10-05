@@ -102,12 +102,13 @@ phrase), never for text a person typed.
 ## Privacy
 
 The pasted text is kept in this browser's localStorage under
-yomu-site:text so a reload keeps it, with a visible Clear. Only if the
-learner turns on Remember (asked once, after the first read; off until they
-say yes) are the texts they read kept as well, under yomu-site:history, up
-to 300 of them, for History and "You read this before"; turning it off
-forgets them. No text is ever put in the URL, the page title or an
-attribute. The DeepL and Google Translate links are built at the moment
+yomu-site:text so a reload keeps it, with a visible Clear. A text is kept
+under yomu-site:history only while the learner has Remember on (asked once,
+after the first read; off until they say yes), up to 300 of them, for
+History and "You read this before", or when the learner saved it on purpose
+with the bookmark beside Clear, up to 500, whatever Remember says; turning
+Remember off forgets every text not saved. No text is ever put in the URL,
+an attribute, the page title or the beacon. The DeepL and Google Translate links are built at the moment
 they are clicked, which is the only way the text leaves the page.
 
 ## My kanji
@@ -136,18 +137,26 @@ the host sends always opens the reader.
   jōyō count and any milestone (a grade complete, 100 jōyō kanji).
 - Where each kanji was last met: the kind of text (pasted, typed, an
   example, a phrase, a link, a text Runcible sent, History), and, with
-  Remember on, the sentence it was in.
+  Remember on or when that text is saved, the sentence it was in.
 - History (opt-in): with Remember on, each text read, how often, first and
   last, with Read again and Forget, and "You read this before" (or "This is
   part of a text you read") in the reader.
+- Saved phrases: the bookmark beside Clear, or on a History row, saves the
+  text on purpose, whatever Remember says (with it off, that text and no
+  other is kept). A saved text is listed first in History ("Saved phrases"),
+  is counted again when read again with "You read this before", is never
+  evicted by the 300-text cap, survives Forget all and Turn off, and is
+  forgotten only when unsaved with Remember off. At most 500.
 - Kept in this browser's localStorage under yomu-site:kanji: each saved
   kanji's schedule, and for each kanji met, how often, the first and last day,
   up to eight dictionary words with their readings, the kind of text it was
-  last met in, and with Remember on a key (a hash) of that text. Never the
-  text: that is only in yomu-site:history, and only with Remember on.
+  last met in, and with Remember on or a saved text a key (a hash) of that
+  text. Never the text: that is only in yomu-site:history.
 - Export writes a yomu-kanji-export/1 JSON file ({ format, exported, saved,
-  seen }); Import validates one and merges it, keeping the higher counts and
-  the earlier first day. History is not exported.
+  seen, phrases? }); Import validates one and merges it, keeping the higher
+  counts and the earlier first day. `phrases` is the saved phrases only
+  ([{ t, first, last, n, src, saved }]), written when there is one; a file
+  without it imports as before. The rest of History is not exported.
 
 ## Data and licences
 

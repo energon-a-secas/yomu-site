@@ -215,6 +215,8 @@ dialog.dialog--wide { width: min(760px, calc(100% - 16px)); }
 /* ── Input ─────────────────────────────────────────────────── */
 .input { display: flex; flex-direction: column; gap: var(--space-2); }
 .input-head { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-4); }
+/* The bookmark that saves the text sits beside Clear, the same toggle a kanji has. */
+.input-actions { display: flex; align-items: center; gap: var(--space-1); }
 .input-label { font-size: var(--text-sm); font-weight: 600; color: var(--text-secondary); }
 .yomu-text {
   font-family: var(--ja);
@@ -836,7 +838,9 @@ a.mk-open[aria-current="page"] { background: rgba(255, 255, 255, 0.12); border-c
   display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3;
   overflow: hidden;
 }
-.hs-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-1); }
+.hs-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); margin-top: var(--space-1); }
+/* A row's bookmark sits at its end, where a kanji row keeps its own. */
+.hs-actions > .save-toggle { margin-left: auto; }
 
 /* ── The review ──────────────────────────────────────────────── */
 .rv-title { display: flex; flex-wrap: wrap; gap: 0 var(--space-2); }

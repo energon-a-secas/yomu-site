@@ -10,16 +10,25 @@
 //
 // Remembering is a preference with three values (state.js REMEMBER). Asked
 // once on the reader; after that, History's switch is the only control.
-// Turning it off forgets every text (history-store.js erase), after a confirm
-// when there is anything to forget. The kanji store's history keys are left
-// as they are: a key with no text behind it reads as the kind of text it was.
+// Turning it off forgets every text not saved (history-store.js turnOff),
+// after a confirm when there is anything to forget. The kanji store's
+// history keys are left as they are: a key with no text behind it reads as
+// the kind of text it was.
+//
+// Saving a text on purpose (the reader's bookmark, History's rows) works
+// whatever Remember says, and never changes it or answers the reader's card.
+// With Remember off it keeps that one text and nothing else; unsaving it
+// then forgets it, since nothing else keeps it. The saved phrases also ride
+// in My kanji's backup: bindCollect lends the kanji store the two calls.
 
 import { state, savePrefs } from './state.js';
 import { $, attrSel } from './utils.js';
 import { ui } from './strings.js';
 import { kanjiInfo } from './reader.js';
 import { myKanji } from './kanji-store.js';
-import { myHistory, KEY as HISTORY_KEY } from './history-store.js';
+import {
+  myHistory, textKey, MAX_SAVED, KEY as HISTORY_KEY,
+} from './history-store.js';
 import { loadJoyo } from './collection.js';
 import { view } from './render-mykanji.js';
 import { paintStatus, afterPaintAll } from './render.js';
@@ -27,9 +36,11 @@ import {
   collect, paintKanjiDialog, shelfTiles, shelfChars, tileChar, FILTERS,
 } from './render-collection.js';
 import { hist, paintHistoryList } from './render-history.js';
-import { notify } from './render-remember.js';
+import { notify, readText } from './render-remember.js';
 import { openDialog, bindDialog } from './dialogs.js';
-import { describe, loadText, focusHome, rememberNow } from './events-read.js';
+import {
+  describe, loadText, focusHome, rememberNow, pointKanji,
+} from './events-read.js';
 import {
   onRoute, currentRoute, repaint, afterChange, openReader,
 } from './events-kanji.js';
@@ -105,16 +116,68 @@ function setRemember(value) {
   savePrefs(state);
 }
 
+/** What History knows of the text on screen from before this session, after the store changed. */
+function seenAgain() {
+  const text = readText();
+  state.seenBefore = text === null ? null : myHistory().beforeOf(myKanji().sessionId, textKey(text));
+}
+
 function turnOff() {
-  myHistory().erase();
+  myHistory().turnOff();
   setRemember('off');
-  state.seenBefore = null;
+  seenAgain();               // a saved text on screen was still read before
   paintStatus(state);
 }
 
 function say(msg) {
   view.note = msg;
   repaint();
+}
+
+// ── Saving a text ─────────────────────────────────────────────────────────
+
+const remembering = () => state.prefs.remember === 'on';
+
+/** Save `text`, read in the session on screen. The message, or the one that says the list is full. */
+function saveOne(text) {
+  const mine = myKanji();
+  const r = myHistory().save(text, mine.sessionId, mine.sessionSource, Date.now());
+  if (!r.ok) return { ok: false, msg: ui('savedFull', { n: MAX_SAVED }) };
+  if (text === readText()) pointKanji(r.key);
+  return { ok: true };
+}
+
+/** Unsave by key. With Remember off the text is forgotten, and the reading on screen points at nothing. */
+function unsaveOne(key) {
+  myHistory().unsave(key, remembering());
+  const text = readText();
+  if (!remembering() && text !== null && textKey(text) === key) pointKanji(null);
+  seenAgain();
+}
+
+/** The reader's bookmark: the text on screen, as last read. */
+function toggleReaderText() {
+  const text = readText();
+  if (text === null) return;
+  const key = textKey(text);
+  if (myHistory().isSaved(key)) {
+    unsaveOne(key);
+    notify(ui(remembering() ? 'textUnsaved' : 'textUnsavedGone'), 5000);
+  } else {
+    const r = saveOne(text);
+    notify(r.ok ? ui(remembering() ? 'textSaved' : 'textSavedOnly') : r.msg, r.ok ? 4000 : 6000);
+  }
+  paintStatus(state);
+}
+
+/** A History row's bookmark, then the screen again, focus handed on by the repaint. */
+function afterRow(msg, gone) {
+  paintStatus(state);
+  say(msg);
+  if (!document.querySelector(`#mk-body [data-act="${gone}"]`)) {
+    const head = $('hs-saved-h') || $('hs-list-h') || $('hs-switch-h');
+    if (head) head.focus({ preventScroll: true });
+  }
 }
 
 // The tile a dialog opened from. Saving in the dialog repaints the shelves
@@ -124,6 +187,15 @@ let tileAt = null;
 function tileNow() {
   if (!tileAt) return null;
   return document.querySelector(`#mk-body [data-act="col-tile"]${attrSel('data-shelf', tileAt.shelf)}${attrSel('data-ix', tileAt.ix)}`);
+}
+
+/** History's Read again, from either list: the reader, with a new history entry. */
+function readAgain(e) {
+  if (!e) return;
+  openReader();
+  loadText(e.t, { source: 'history' }).catch(() => {});
+  window.scrollTo({ top: 0, behavior: 'instant' });
+  focusHome();
 }
 
 // ── Actions ───────────────────────────────────────────────────────────────
@@ -176,7 +248,9 @@ export const COLLECT_ACTIONS = {
     paintStatus(state);
   },
   'hs-off': (b) => {
-    const n = myHistory().size;
+    const store = myHistory();
+    const m = store.savedCount;
+    const n = store.size - m;
     if (!n) {
       turnOff();
       say(ui('turnedOff'));
@@ -185,25 +259,40 @@ export const COLLECT_ACTIONS = {
       return;
     }
     const title = $('hs-off-title');
-    if (title) title.textContent = ui(n === 1 ? 'offTitleOne' : 'offTitleMany', { n });
+    const body = $('hs-off-body');
+    if (m) {
+      if (title) title.textContent = ui(n === 1 ? 'offTitleUnsavedOne' : 'offTitleUnsavedMany', { n });
+      if (body) body.textContent = `${ui(m === 1 ? 'keepSavedOne' : 'keepSavedMany', { n: m })} ${ui('offBodyKept')}`;
+    } else {
+      if (title) title.textContent = ui(n === 1 ? 'offTitleOne' : 'offTitleMany', { n });
+      if (body) body.textContent = ui('offBody');
+    }
     openDialog($('hs-off-dialog'), b);
   },
   'hs-off-yes': () => {
+    const kept = myHistory().savedCount;
     turnOff();
-    view.note = ui('turnedOffForgot');
+    view.note = ui(kept ? 'turnedOffKept' : 'turnedOffForgot');
     const dialog = $('hs-off-dialog');
     if (dialog && dialog.open) dialog.close();
     repaint();
     const sw = $('hs-switch');
     if (sw) sw.focus({ preventScroll: true });
   },
-  'hs-read': (b) => {
+  'hs-read': (b) => readAgain(hist.shown[Number(b.dataset.ix)]),
+  'hs-saved-read': (b) => readAgain(hist.saved[Number(b.dataset.ix)]),
+  'save-text': toggleReaderText,
+  'hs-save': (b) => {
     const e = hist.shown[Number(b.dataset.ix)];
     if (!e) return;
-    openReader();
-    loadText(e.t, { source: 'history' }).catch(() => {});
-    window.scrollTo({ top: 0, behavior: 'instant' });
-    focusHome();
+    const r = saveOne(e.t);
+    afterRow(r.ok ? ui('rowSaved') : r.msg, 'hs-save');
+  },
+  'hs-unsave': (b) => {
+    const e = hist.saved[Number(b.dataset.ix)];
+    if (!e) return;
+    unsaveOne(e.key);
+    afterRow(ui(remembering() ? 'rowUnsaved' : 'textUnsavedGone'), 'hs-unsave');
   },
   'hs-forget': (b) => {
     const e = hist.shown[Number(b.dataset.ix)];
@@ -214,14 +303,24 @@ export const COLLECT_ACTIONS = {
     say(ui('forgotOne'));
     if (!document.querySelector('#mk-body [data-act="hs-forget"]')) $('hs-list-h').focus();
   },
-  'hs-clear': (b) => openDialog($('hs-clear-dialog'), b),
+  'hs-clear': (b) => {
+    const store = myHistory();
+    const m = store.savedCount;
+    const n = store.size - m;
+    const title = $('hs-clear-title');
+    const body = $('hs-clear-body');
+    if (title) title.textContent = m ? ui(n === 1 ? 'forgetUnsavedOne' : 'forgetUnsavedMany', { n }) : ui('forgetAllTitle');
+    if (body) body.textContent = m ? `${ui(m === 1 ? 'keepSavedOne' : 'keepSavedMany', { n: m })} ${ui('forgetAllBody')}` : ui('forgetAllBody');
+    openDialog($('hs-clear-dialog'), b);
+  },
   'hs-clear-yes': () => {
+    const kept = myHistory().savedCount;
     myHistory().forgetAll();
-    state.seenBefore = null;
+    seenAgain();
     paintStatus(state);
     const dialog = $('hs-clear-dialog');
     if (dialog && dialog.open) dialog.close();
-    say(ui('forgotAll'));
+    say(ui(kept ? 'forgotUnsaved' : 'forgotAll'));
     const head = $('hs-list-h');
     if (head) head.focus({ preventScroll: true });
   },
@@ -252,11 +351,22 @@ export function bindCollect() {
   }
   const tileDialog = $('col-dialog');
   if (tileDialog) tileDialog.addEventListener('close', () => { collect.dialog = null; });
-  // Another tab remembered or forgot a text: read the store again.
+  // Another tab remembered, saved or forgot a text: read the store again.
   addEventListener('storage', (e) => {
     if (e.key !== HISTORY_KEY && e.key !== null) return;
-    if (state.prefs.remember === 'on') myHistory().load();
+    myHistory().load();
+    paintStatus(state);
     if (currentRoute() === 'history') repaint();
+  });
+  // Export writes the saved phrases and Import merges them (kanji-backup.js);
+  // the kanji store is lent the History calls, and never the store itself.
+  myKanji().lendPhrases({
+    out: () => myHistory().phrases(),
+    merge: (phrases) => {
+      const sum = myHistory().mergePhrases(phrases);
+      paintStatus(state);
+      return sum;
+    },
   });
   afterPaintAll(() => {
     const dialog = $('col-dialog');

@@ -11,8 +11,9 @@
 // `src` says what kind of text a kanji was last met in (SOURCES: pasted,
 // typed, an example, a phrase, a link, a text the host sent, History), and
 // `h` is the key of that text in the History store (history-store.js), kept
-// only while the learner has Remember on. A key is a hash, not the text, and
-// a key whose text was forgotten is harmless: the page falls back to `src`.
+// while the learner has Remember on, or saved that text. A key is a hash, not
+// the text, and a key whose text was forgotten is harmless: the page falls
+// back to `src`.
 //
 // "Times seen" counts texts, not keystrokes. A reading session begins when
 // the box gets new content all at once (a paste, an example, a phrase or a
@@ -384,6 +385,10 @@ export function openKanji({ store = createStore({ key: KEY, version: VERSION }),
   let dropped = 0;
   let writable = true;
   const listeners = new Set();
+  // History's saved phrases go in the same backup. History is another store,
+  // so the page lends this one the two calls (events-collect.js); a store lent
+  // none, as in most tests, exports none and leaves them out of a merge.
+  let phrases = null;
 
   function load() {
     const raw = readRaw();
@@ -451,8 +456,14 @@ export function openKanji({ store = createStore({ key: KEY, version: VERSION }),
     due: (today) => dueList(data, today),
     nextDue: (today) => nextDue(data, today),
     often: (limit) => oftenUnsaved(data, limit),
-    exportDoc: (today) => exportDoc(data, today),
-    merge(incoming) { const sum = mergeInto(data, incoming); commit(); return sum; },
+    lendPhrases(calls) { phrases = calls; },
+    exportDoc: (today) => exportDoc(data, today, phrases ? phrases.out() : undefined),
+    merge(incoming) {
+      const sum = mergeInto(data, incoming);
+      commit();
+      if (phrases && incoming && incoming.phrases) sum.phrases = phrases.merge(incoming.phrases);
+      return sum;
+    },
     clearAll() {
       data = { saved: {}, seen: {}, session: { id: data.session.id + 1, counted: [] } };
       note = null;
