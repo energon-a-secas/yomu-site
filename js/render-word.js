@@ -53,16 +53,25 @@ function beatsPart(token, canSpeak) {
   ]);
 }
 
+/**
+ * A rare word (entry.tier 2, docs/ANALYZER.md "The second phase") says so
+ * before its meanings, as a label and one sentence: it was read from the
+ * full dictionary because the common words left a guess here.
+ */
+function rareLine() {
+  return h('p', { class: 'word-rare' }, [h('span', { class: 'word-tag' }, ui('rareLabel')), ' ', ui('rareWord')]);
+}
+
 function meaningsPart(token) {
   const glosses = token.entry && Array.isArray(token.entry.g) ? token.entry.g.filter(Boolean) : [];
   const lines = [];
+  if (token.entry && token.entry.tier === 2) lines.push(rareLine());
   if (glosses.length) {
     lines.push(h('ol', { class: 'glosses', lang: 'en' }, glosses.map((g) => h('li', null, g))));
     if (currentLang() !== 'en') lines.push(h('p', { class: 'quiet' }, ui('meaningsEnglish')));
   } else if (token.entry) {
     lines.push(h('p', { class: 'quiet' }, ui('noMeaning')));
   }
-  if (token.entry && token.entry.tier === 2) lines.push(h('p', { class: 'quiet' }, ui('rareWord')));
   // A compound says what it knows part by part (partsPart), guess or not.
   if (!token.parts && (token.kind === 'unknown' || token.confidence === 'guess')) {
     lines.push(h('p', { class: 'word-warn' }, ui('guess')));

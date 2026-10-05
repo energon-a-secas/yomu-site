@@ -101,9 +101,10 @@ file of either. Letting the rare words into the first pass is what read はし
 as 愛し: do not. A rare word carries `entry.tier === 2`; a name the names
 tier knows is `kind: 'name'` with `confidence: 'dict'` and its JMnedict
 reading, and one it does not know is still a guess read kun by kun
-(`names.js`). The footer line names JMnedict and the Sources dialog quotes
-its acknowledgement (`tools/lib/licence.mjs`); both stay while any name can
-show.
+(`names.js`). The Word panel labels a rare word ("Rare word", and one
+sentence: not among the common words, read from the full dictionary). The
+footer line names JMnedict and the Sources dialog quotes its acknowledgement
+(`tools/lib/licence.mjs`); both stay while any name can show.
 
 **A name's reading and strength are evidence JMnedict holds, and each count
 has a trap.** `tools/lib/jmnedict.mjs` counts the names built on a spelling

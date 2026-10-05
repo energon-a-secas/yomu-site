@@ -499,6 +499,19 @@ rt .snd { border-bottom: 0; padding-bottom: 0; }
 .word-part p + p { margin-top: var(--space-1); }
 .word-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-3); }
 .word-warn { color: var(--text-secondary); }
+/* A rare word's label: the panel's own greys and a rule, because the accent
+   is kept for the four things the design tokens at the top of this file
+   name. */
+.word-part .word-rare { margin-bottom: var(--space-2); color: var(--text-secondary); }
+.word-tag {
+  display: inline-block;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs); font-weight: 600; line-height: 1.6;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
 .word-out { margin-top: var(--space-6); font-size: var(--text-sm); }
 
 .beats { list-style: none; display: flex; flex-wrap: wrap; gap: 6px; border-radius: var(--radius-sm); }

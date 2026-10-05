@@ -138,7 +138,7 @@ runs them under plain node with the real shards read from disk.
 
 A token the second phase read is shaped the same, with these marks:
 
-- a **rare word** (a record from `data/dict/rNNN`) has `confidence: 'dict'` and `entry.tier === 2`, set by `dict.js` as the shard loads (the shards do not spend bytes on it), so the page can say "rare word"; its `alts` counts the other rare records of its key;
+- a **rare word** (a record from `data/dict/rNNN`) has `confidence: 'dict'` and `entry.tier === 2`, set by `dict.js` as the shard loads (the shards do not spend bytes on it), so the page can say "rare word"; its `alts` counts the other rare records of its key. The Word panel opens its meanings with a "Rare word" label and one sentence: it is not among the common words, so it was read from the full dictionary;
 - a **name** from the names tier has `kind: 'name'`, `confidence: 'dict'`, its JMnedict reading, and `entry = { r?, g, p: 'n-pr', nt, f?, s?, also? }`: `nt` the JMnedict types (`surname`, `given`, `masc`, `fem`, `place`), most evidenced first, `g` the same in English (`['surname', 'place name']`), the way a dictionary gloss is English, and `names.js` `NAME_TYPES` holds each in `{ en, es }` for the page. `also` is the rare word spelled the same, `{ r?, g }` (its reading and up to two glosses), where there is one: 清水 is the surname and also "spring water", and nothing in 清水を飲んだ tells the two apart, so the page can say both. A name the first pass guessed keeps `entry: null` and `confidence: 'guess'`.
 
 These fields appear only where they apply:

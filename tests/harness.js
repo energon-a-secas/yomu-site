@@ -22,6 +22,7 @@ import { paintAll } from '../js/render.js';
 import { bindEvents, loadText } from '../js/events.js';
 import { h } from '../js/utils.js';
 import { ui } from '../js/strings.js';
+import { wordNode } from '../js/render-word.js';
 
 const PREFS_KEY = 'yomu-site:preferences';
 const KANJI_KEY = 'yomu-site:kanji';
@@ -202,6 +203,23 @@ async function run() {
   const leaksAfter = [...document.querySelectorAll('#hz-page *')].flatMap((el) => [...el.attributes]
     .filter((a) => a.name !== 'placeholder' && a.name !== 'href' && learner.test(a.value)).map((a) => `${el.tagName}.${a.name}`));
   check('no attribute carries a kanji after saving either', leaksAfter.length === 0, leaksAfter.slice(0, 3).join(', '));
+
+  // The Word panel on a hand-written token (fixtures/word-panel.json): a
+  // rare word says so with a label.
+  const panel = await (await fetch('fixtures/word-panel.json')).json();
+  const ctx = { noteOf: () => null, kidOf: () => -1, canSpeak: false };
+  const paint = (token) => {
+    const box = h('div', { class: 'hz-word' }, wordNode(token, ctx));
+    $('hz-page').append(box);
+    return box;
+  };
+  const textOnly = (el) => [...el.childNodes].every((n) => n.nodeType === 3 || (n.nodeType === 1 && n.tagName === 'SPAN' && n.children.length === 0));
+  const rare = paint(panel.tokens[0]).querySelector('.word-rare');
+  const tag = rare && rare.querySelector('.word-tag');
+  check('a rare word carries a visible label', tag && tag.textContent === ui('rareLabel') && getComputedStyle(tag).display !== 'none' && tag.getBoundingClientRect().width > 0, tag ? tag.textContent : 'no label');
+  check('and one sentence: not a common word, read from the full dictionary', rare && rare.textContent.includes(ui('rareWord')) && textOnly(rare), rare ? rare.textContent : '');
+  check('a word of the first tier has no such label', !paint(fixture.tokens[0]).querySelector('.word-rare'));
+  for (const box of document.querySelectorAll('.hz-word')) box.remove();
 
   const failed = results.filter((r) => !r.ok).length;
   $('hz-summary').textContent = failed ? `${failed} of ${results.length} checks failed` : `All ${results.length} checks passed`;

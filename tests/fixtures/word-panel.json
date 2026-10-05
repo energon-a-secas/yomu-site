@@ -1,0 +1,20 @@
+{
+  "_licence": {
+    "text": "A token written by hand for Yomu's view harness, in the token shape docs/ANALYZER.md gives, copied from what analyze() returned for 飴色 on 2026-10-05. Public domain.",
+    "screen": "Dictionary: JMdict, EDRDG, CC BY-SA 4.0."
+  },
+  "format": "yomu-word-panel-sample/1",
+  "note": "A rare word (entry.tier 2), which the Word panel labels as one.",
+  "tokens": [
+    {
+      "i": 0, "kind": "word", "surface": "飴色", "start": 0, "end": 2, "base": "飴色",
+      "reading": "あめいろ",
+      "furigana": [{ "text": "飴", "ruby": "あめ" }, { "text": "色", "ruby": "いろ" }],
+      "morae": ["あ", "め", "い", "ろ"],
+      "romaji": { "said": "ameiro", "spelled": "a-me-i-ro" },
+      "entry": { "r": ["あめいろ"], "g": ["amber"], "p": "n adj-no", "f": "あめ|いろ", "tier": 2 },
+      "alts": 0, "chain": [], "sounds": [], "grammar": [],
+      "kanji": ["飴", "色"], "confidence": "dict"
+    }
+  ]
+}

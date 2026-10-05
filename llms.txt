@@ -44,9 +44,10 @@ passive, causative, volitional, imperative, the conditionals ば, たら, なら
 Words outside JMdict's common set and names are read only where the common
 words leave a guess: a rare word is marked as one (entry.tier 2), and a name
 JMnedict knows is a name token with its reading; one it does not know is
-still a guess, read from its kanji. Records of borrowed words carry where
-they came from (ls, e.g. ["ger", "Arbeit"]) and whether they were made in
-Japan (ws).
+still a guess, read from its kanji. The Word panel labels a rare word as one
+("Rare word": not among the common words, read from the full dictionary).
+Records of borrowed words carry where they came from (ls, e.g. ["ger",
+"Arbeit"]) and whether they were made in Japan (ws).
 
 The full contract, including the token shape, is docs/ANALYZER.md in the
 repository: https://github.com/energon-a-secas/yomu-site
