@@ -653,3 +653,35 @@ test('a mixed spelling whose kana start with a particle after a kanji stays out:
   assert.equal(d.get('何がし'), undefined);
   assert.equal(d.get('友達がい'), undefined);
 });
+
+/** The committed dictionary with one key taken away, everything else as shipped. */
+function without(key) {
+  const d = diskDict();
+  return { ...d, get: (k) => (k === key ? undefined : d.get(k)), get maxKey() { return d.maxKey; } };
+}
+
+test('a number and its counter that are a dictionary key keep its gloss: 何名, 何分, 何階 (were numbers with no gloss)', async () => {
+  for (const [text, s, reading, g] of [
+    ['何名様ですか。', '何名', 'なんめい', 'how many people'],
+    ['何分かかりますか。', '何分', 'なんぷん', 'what minute'],
+    ['何階ですか。', '何階', 'なんがい', 'what floor'],
+  ]) {
+    const t = tok(await run(text), s);
+    assert.ok(t, `${s} in ${cut(await run(text))}`);
+    assert.equal(t.kind, 'number', text);
+    assert.equal(t.confidence, 'rule', text);
+    assert.equal(t.reading, reading, text);
+    assert.equal(gloss(t), g, text);
+    // and nothing else moves: the same token as with the key taken away,
+    // its reading, furigana, sounds, notes and counter change, but the record
+    const bare = tok(await analyze(text, { dict: without(s) }), s);
+    assert.deepEqual({ ...t, entry: null }, bare, text);
+  }
+  // a number no key spells has no record, and a key read another way lends none
+  const three = tok(await run('三名です。'), '三名');
+  assert.equal(three.kind, 'number');
+  assert.equal(three.entry, null);
+  const ten = tok(await run('十分かかります。'), '十分');
+  assert.equal(ten.reading, 'じゅっぷん');
+  assert.equal(ten.entry, null, '十分 read じゅっぷん is not 十分 じゅうぶん, "enough"');
+});

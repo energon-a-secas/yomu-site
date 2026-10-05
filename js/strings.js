@@ -428,9 +428,9 @@ export function posWord(tag) {
   return String(tag || '');
 }
 
-/** A token's part of speech in words, from its entry, or from its kind. */
+/** A token's part of speech in words, from its entry, or from its kind (a number with a record is still a number). */
 export function posWords(token) {
-  const tags = token && token.entry && token.entry.p ? String(token.entry.p).split(/\s+/).filter(Boolean) : [];
+  const tags = token && token.kind !== 'number' && token.entry && token.entry.p ? String(token.entry.p).split(/\s+/).filter(Boolean) : [];
   if (!tags.length && token && KIND_POS[token.kind]) tags.push(KIND_POS[token.kind]);
   const seen = new Set();
   const out = [];

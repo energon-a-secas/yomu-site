@@ -215,6 +215,19 @@ function joinWords(node, reading, dict) {
   return [0, ...cuts].map((c, n, all) => [c, n + 1 < all.length ? all[n + 1] : reading.length]);
 }
 
+/**
+ * The record of a number and its counter that is a dictionary key too (何名
+ * "how many people", 何分 "what minute"), read the way the number is read,
+ * so the page can say what the dictionary says. The token stays a number
+ * read by rule, with its own reading and notes; 十分 read じゅっぷん takes
+ * nothing from 十分 じゅうぶん, "enough". The key is a substring of the run,
+ * so the first pass already asked for it.
+ */
+function countedRecord(s, reading, dict) {
+  const recs = (dict.get(s) || []).filter((r) => Array.isArray(r.r));
+  return recs.find((r) => r.r[0] === reading) || recs.find((r) => r.r.includes(reading)) || null;
+}
+
 function toToken(node, path, k, run, dict, env) {
   const next = path[k + 1];
   const reading = readingOf(node, next);
@@ -247,6 +260,7 @@ function toToken(node, path, k, run, dict, env) {
   } else if (node.cls === 'num') {
     kind = 'number';
     confidence = 'rule';
+    entry = countedRecord(node.s, reading, dict);
   } else if (node.cls === 'kata') {
     kind = 'katakana';
     confidence = 'guess';
