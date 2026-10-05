@@ -44,3 +44,6 @@ flowchart TB
     dict -->|"fetch"| Data[("data/dict: 27 JMdict shards\ndata/kanji: 3 KANJIDIC shards")]
     state["state.js\nPreferences, text"] <-->|"yomu-site:preferences\nyomu-site:text"| Storage[("localStorage")]
     events --> state
+    events --> mykanji["kanji-store.js + history-store.js\nMy kanji, collection, History"]
+    mykanji <-->|"yomu-site:kanji\nyomu-site:history (only with Remember on)"| Storage
+    mykanji -->|"collection.js fetches once"| Joyo[("data/kanji/joyo.json\njōyō by grade")]

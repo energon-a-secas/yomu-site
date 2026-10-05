@@ -149,6 +149,19 @@
         <!-- Outside the input on purpose: an embed hides the input and still says
              what is loading and what failed. -->
         <p class="status" id="status" role="status" aria-live="polite"></p>
+        <!-- "You read this before" (js/render-remember.js): only while Remember is
+             on. A live region that stays in the page; only its text changes. -->
+        <p class="seen-before" id="seen-before" role="status" aria-live="polite"></p>
+        <!-- Asked once, after the first read; History (#/kanji/history) has the
+             switch after that. Not a modal: the reading stays usable under it. -->
+        <section class="remember-ask" id="remember-ask" aria-labelledby="remember-ask-title" hidden>
+          <h2 class="remember-ask-title" id="remember-ask-title" data-ui="rememberAskTitle">Remember what you read?</h2>
+          <p class="remember-ask-body" data-ui="rememberAskBody">Yomu can keep the texts you read in this browser, tell you when you read one before, keep a History, and show the sentence each kanji was last seen in. Nothing is sent anywhere.</p>
+          <p class="remember-ask-actions">
+            <button class="btn btn--primary btn--sm" type="button" data-act="remember-yes" data-ui="rememberYes">Remember</button>
+            <button class="btn btn--ghost btn--sm" type="button" data-act="remember-no" data-ui="rememberNo">No thanks</button>
+          </p>
+        </section>
         <div class="read-error" id="read-error" role="alert" hidden></div>
 
         <div class="empty" id="empty" hidden></div>
@@ -229,14 +242,21 @@
       </aside>
     </div>
 
-    <!-- My kanji (#/kanji, and #/kanji/review for a review). The reader above is
-         hidden, not emptied, while this is shown, so Back finds the text, the
-         reading and the chosen word where they were. js/render-mykanji.js and
-         js/render-review.js draw #mk-body; nothing here holds a learner's text. -->
+    <!-- My kanji (#/kanji, #/kanji/review for a review, #/kanji/collection and
+         #/kanji/history). The reader above is hidden, not emptied, while this is
+         shown, so Back finds the text, the reading and the chosen word where they
+         were. js/render-mykanji.js, js/render-review.js, js/render-collection.js
+         and js/render-history.js draw #mk-body; nothing in this markup holds a
+         learner's text. -->
     <section class="mk" id="mykanji" aria-labelledby="mk-title" hidden>
       <button class="text-link mk-back" type="button" id="mk-back" data-act="kanji-back"><span aria-hidden="true">← </span><span id="mk-back-label">Back to the reader</span></button>
       <h2 class="mk-title" id="mk-title" tabindex="-1" data-ui="myKanji">My kanji</h2>
       <p class="quiet mk-lead" id="mk-lead" data-ui="myKanjiLead">Kanji you save, and every kanji you have read here. They stay in this browser.</p>
+      <nav class="mk-nav" id="mk-nav" aria-label="My kanji sections" data-ui-label="navLabel">
+        <a class="mk-tab" href="#/kanji" data-tab="list" data-ui="navReview">Review</a>
+        <a class="mk-tab" href="#/kanji/collection" data-tab="collection" data-ui="navCollection">Collection</a>
+        <a class="mk-tab" href="#/kanji/history" data-tab="history" data-ui="navHistory">History</a>
+      </nav>
       <p class="mk-note" id="mk-note" role="status" aria-live="polite"></p>
       <div class="mk-body" id="mk-body"></div>
       <input type="file" id="mk-file" accept=".json,application/json" tabindex="-1" hidden>
@@ -247,10 +267,46 @@
         <h2 id="mk-clear-title" data-ui="clearTitle">Clear all of My kanji?</h2>
       </div>
       <div class="dialog__body">
-        <p id="mk-clear-body" data-ui="clearBody">This forgets every saved kanji, its review schedule and every count of the kanji you met, in this browser. Export first to keep a copy.</p>
+        <p id="mk-clear-body" data-ui="clearBody">This forgets every saved kanji, its review schedule and every count of the kanji you met, in this browser, so your collection is emptied too. History is not touched. Export first to keep a copy.</p>
         <div class="mk-confirm">
           <button class="btn btn--secondary btn--sm" type="button" data-dialog-close data-ui="cancel">Cancel</button>
           <button class="btn btn--danger btn--sm" type="button" data-act="mk-clear-yes" data-ui="clearAll">Clear all</button>
+        </div>
+      </div>
+    </dialog>
+
+    <!-- One kanji of the Collection: js/render-collection.js fills the title and
+         the body each time a tile opens it. -->
+    <dialog class="dialog" id="col-dialog" aria-labelledby="col-dialog-title">
+      <div class="dialog__header">
+        <h2 id="col-dialog-title"></h2>
+        <button class="btn btn--ghost btn--sm" type="button" data-dialog-close data-ui="close">Close</button>
+      </div>
+      <div class="dialog__body" id="col-dialog-body"></div>
+    </dialog>
+
+    <dialog class="dialog" id="hs-off-dialog" aria-labelledby="hs-off-title" aria-describedby="hs-off-body">
+      <div class="dialog__header">
+        <h2 id="hs-off-title"></h2>
+      </div>
+      <div class="dialog__body">
+        <p id="hs-off-body" data-ui="offBody">Every text in History is forgotten in this browser. Your kanji, their counts and your collection stay.</p>
+        <div class="mk-confirm">
+          <button class="btn btn--secondary btn--sm" type="button" data-dialog-close data-ui="cancel">Cancel</button>
+          <button class="btn btn--danger btn--sm" type="button" data-act="hs-off-yes" data-ui="offYes">Forget and turn off</button>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog class="dialog" id="hs-clear-dialog" aria-labelledby="hs-clear-title" aria-describedby="hs-clear-body">
+      <div class="dialog__header">
+        <h2 id="hs-clear-title" data-ui="forgetAllTitle">Forget every text in History?</h2>
+      </div>
+      <div class="dialog__body">
+        <p id="hs-clear-body" data-ui="forgetAllBody">Remembering stays on, so the texts you read from now on are kept. Your kanji, their counts and your collection stay.</p>
+        <div class="mk-confirm">
+          <button class="btn btn--secondary btn--sm" type="button" data-dialog-close data-ui="cancel">Cancel</button>
+          <button class="btn btn--danger btn--sm" type="button" data-act="hs-clear-yes" data-ui="forgetAll">Forget all</button>
         </div>
       </div>
     </dialog>
@@ -278,7 +334,8 @@
       <p><strong>Tatoeba.</strong> Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included. <a href="https://tatoeba.org/en/downloads" target="_blank" rel="noopener noreferrer">tatoeba.org</a></p>
       <p><strong>Written here.</strong> The notes on sounds and grammar, the phrase library and the dialogues were written for Yomu and are in the public domain.</p>
       <p><strong>Your text.</strong> What you paste is read in this browser. It is kept in this browser's local storage so a reload does not lose it, and Clear forgets it. It is never put in the address bar or sent anywhere, unless you click DeepL, Google Translate or Jisho, which open that site in a new tab with the text or the word.</p>
-      <p><strong>My kanji.</strong> The kanji you save, their review dates, how many texts you met each kanji in, and up to eight dictionary words per kanji are kept in this browser's local storage too. The text itself is not. Export writes them to a file on your device; nothing is sent anywhere.</p>
+      <p><strong>My kanji.</strong> The kanji you save, their review dates, how many texts you met each kanji in, what kind of text each was last met in, and up to eight dictionary words per kanji are kept in this browser's local storage too. The text itself is not. Export writes them to a file on your device; nothing is sent anywhere.</p>
+      <p><strong>History.</strong> Only if you turn on Remember, the texts you read are kept in this browser's local storage too, up to 300 of them, for History, for "You read this before" and for the sentence each kanji was last seen in. Turning it off forgets them. They are never sent anywhere.</p>
     </template>
   </footer>
 

@@ -23,6 +23,7 @@ import { phrasesNode, chunkNodes } from './render-phrases.js';
 import { speechReason } from './render-chrome.js';
 import { analyzeNow, loadText, clearText, bindInput, describe, focusHome } from './events-read.js';
 import { KANJI_ACTIONS, bindKanji } from './events-kanji.js';
+import { COLLECT_ACTIONS, bindCollect } from './events-collect.js';
 
 export { analyzeNow, loadText };
 
@@ -268,7 +269,7 @@ function readFromLibrary(text) {
   const dialog = $('phrases-dialog');
   cancel();
   if (dialog && dialog.open) dialog.close();
-  loadText(text).catch(() => {});
+  loadText(text, { source: 'phrase' }).catch(() => {});
 }
 
 // ── Translators ───────────────────────────────────────────────────────────
@@ -340,7 +341,7 @@ const ACTIONS = {
   'speak-all': (b) => speechOk(b) && speakAll(),
   clear: clearText,
   // Both buttons are removed by what they start, so focus moves first.
-  example: (b) => { focusHome(); loadText(EXAMPLES[Number(b.dataset.ex)].ja).catch(() => {}); },
+  example: (b) => { focusHome(); loadText(EXAMPLES[Number(b.dataset.ex)].ja, { source: 'example' }).catch(() => {}); },
   retry: () => { focusHome(); resetDictionary(); analyzeNow().catch(() => {}); },
   'close-sheet': closeSheet,
   tab: (b) => { state.tab = b.dataset.tab; paintSide(state); },
@@ -363,6 +364,7 @@ const ACTIONS = {
   'read-dialogue': (b) => { const d = library && library.dialogueById.get(b.dataset.id); if (d) readFromLibrary(dialogueText(d)); },
   chunk: (b) => speechOk(b) && chunk(b),
   ...KANJI_ACTIONS,
+  ...COLLECT_ACTIONS,
 };
 
 export function bindEvents() {
@@ -384,5 +386,8 @@ export function bindEvents() {
     paintSpeech(state);
     paintWord(state);
   });
+  // Before bindKanji, which shows the route the page opened at: the
+  // Collection's hook has to be there to hear it.
+  bindCollect();
   bindKanji();
 }

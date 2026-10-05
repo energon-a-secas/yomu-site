@@ -128,11 +128,13 @@ gloss (`loan-align.js`); a word `ls` says is from another language gets none
 (ビール is Dutch), and a later gloss is ignored for a word marked `u` (サバ
 is 鯖, and its slang sense "server" read as v written バ).
 
-**The text stays in the browser.** It persists only under
-`localStorage['yomu-site:text']`, never in the URL, a data attribute, the
-title or the beacon target. `#t=<text>` is read once (for links from other
-Neorgon sites, with their own authored text) and removed with
-`history.replaceState`. The DeepL and Google links are built at click time.
+**The text stays in the browser.** It persists under
+`localStorage['yomu-site:text']`, and, when and only when the learner turned
+Remember on, under `localStorage['yomu-site:history']` (see My kanji below);
+never in the URL, a data attribute, the title or the beacon target.
+`#t=<text>` is read once (for links from other Neorgon sites, with their own
+authored text) and removed with `history.replaceState`. The DeepL and Google
+links are built at click time.
 
 **The embed answers only listed origins.** `js/embed.js` accepts messages from
 `https://runcible.neorgon.com` and Runcible's dev server on 8878, checks
@@ -149,22 +151,74 @@ copyrighted.
 
 ## My kanji
 
-The kanji a learner saves for review, and how many texts they met each kanji
-in. `js/kanji-store.js` (pure functions plus the store, no DOM),
-`js/review.js` (one review's queue, no DOM), `js/render-save.js` (the save
-toggle, the unsaved marks, the due count), `js/render-mykanji.js` and
-`js/render-review.js` (the screen), `js/events-kanji.js` (routes, actions,
-keys, backup). `npm test` runs `tests/kanji-store.test.mjs`; the view harness
-checks the toggles and marks.
+The kanji a learner saves for review, how many texts they met each kanji
+in, the collection those counts make, and, if the learner allowed it, the
+texts themselves. `js/kanji-store.js` (pure functions plus the store, no
+DOM), `js/kanji-backup.js` (Export and Import), `js/review.js` (one review's
+queue, no DOM), `js/collection.js` (the jōyō list and progress, no DOM),
+`js/history-store.js` (History, no DOM), `js/render-save.js` (the save
+toggle, the unsaved marks, the due count), `js/render-remember.js` (the
+reader's ask card, "You read this before", the new-kanji toast, the
+last-seen line), `js/render-mykanji.js`, `js/render-review.js`,
+`js/render-collection.js` and `js/render-history.js` (the screens),
+`js/events-kanji.js` (routes, the list's actions, keys, backup) and
+`js/events-collect.js` (the Collection's, History's and the ask card's
+actions). `npm test` runs `tests/kanji-store.test.mjs`,
+`tests/collection.test.mjs` and `tests/history-store.test.mjs`; the view
+harness checks the toggles and marks.
 
 **One store, `localStorage['yomu-site:kanji']`, Persist kit version 1:**
 `{ saved: { char: { at, box, due, reviews, lapses } }, seen: { char: { n,
-first, last, words } }, session: { id, counted } }`. `words` is at most eight
-`[written, reading]` dictionary forms per kanji (`dictionaryWord` turns
-降っています into 降る ふる); no sentence and no pasted text is ever stored,
-and the test reads the raw store to prove it. Every field is validated on
-load; a store that does not read degrades to empty with a note on the screen,
-and its raw value is copied to `yomu-site:kanji:damaged` first.
+first, last, words, src?, h? } }, session: { id, counted, src?, h? } }`.
+`words` is at most eight `[written, reading]` dictionary forms per kanji
+(`dictionaryWord` turns 降っています into 降る ふる); no sentence and no
+pasted text is ever stored, and the test reads the raw store to prove it,
+with `h` set too. Every field is validated on load; a store that does not
+read degrades to empty with a note on the screen, and its raw value is
+copied to `yomu-site:kanji:damaged` first. A bad `src` or `h` is dropped
+and its record kept.
+
+**Each session has a source, and each kanji remembers where it was last
+met.** `SOURCES` is paste, typed, example, phrase, link, host, history.
+`loadText(text, { source })` names it (examples, the phrases dialog, `#t=`,
+the host's `yomu:load`, History's Read again); a paste or drop that begins a
+session is paste; the box emptied by hand, and Clear, are typed. A session
+kept by a page from before sources (no `src`) reads as typed. A kanji's
+`src` and `h` follow the session: a fresh count sets them, and a kanji
+already counted in this session takes the current ones without being counted
+again, because the history key moves while a learner edits the text.
+
+**The collection is derived, never stored.** Collected means `seen[ch].n >=
+1`. The shelves are `data/kanji/joyo.json` (`yomu-joyo/1`: the 2,136 jōyō
+kanji by KANJIDIC grade 1 to 6 and 8, newspaper frequency order),
+emitted by `node tools/build-joyo.mjs` from the committed kanji shards
+(`tools/build-kanji.mjs` writes it too, through the same
+`tools/lib/joyo.mjs`); `tools/check-data.mjs` rebuilds it in memory and
+fails a hand edit. It is fetched on the first settled read that is not a
+restore and holds kanji, or when the Collection opens; never on boot. A
+shelf's tiles are drawn only while its `<details>` is open (the `toggle`
+event, which does not bubble, is heard by a capturing listener). Clearing My
+kanji empties the collection; it never touches History.
+
+**History is opt-in, and a separate store.** `state.prefs.remember` is `ask`
+(the default), `on` or `off`, saved with the other preferences. The reader
+asks once, after the first read that found Japanese (`#remember-ask`, a card,
+not a modal); History's switch is the only control after that. While it is
+not `on`, `js/history-store.js` is never opened and nothing is written.
+`localStorage['yomu-site:history']`, Persist kit version 1:
+`{ entries: { key: { t, first, last, n, src, s } }, session: { id, key,
+before } }`. `key` is `textKey(text)`, cyrb53 of the NFKC,
+whitespace-folded text in base36; the kanji store keeps only that key, as
+`h`, never the text. A text is recorded where My kanji counts (`noteKanji`
+in `events-read.js`): History first, then the session's `h`, then the kanji,
+so the counted kanji point at it. The same text in the same session changes
+nothing (a reload records nothing, and `before`, stored with the session,
+still answers "You read this before"); an edit within a session deletes the
+draft it leaves behind when this session created it. At most 300 texts and
+300,000 characters; the least recently read goes first. Turn off forgets
+every text (`erase`, the damaged copy included) after a confirm; the kanji
+store's `h` keys are left dangling, which is harmless, since the last-seen
+line falls back to the kind of text.
 
 **"Times seen" counts texts, not keystrokes.** A session begins in
 `events-read.js`: `loadText()` (an example, a phrase or dialogue, `#t=`, an
@@ -178,8 +232,11 @@ and never per keystroke. The boot restore is `loadText(text, { restore: true
 counts nothing. A new caller of `loadText` that is not new content must pass
 `restore` too.
 
-**`#/kanji` and `#/kanji/review` are routes, never text.** `takeFragmentText`
-reads only `#t=`. The reader is hidden, not emptied, while a route shows. A
+**`#/kanji` and its sub-routes are routes, never text.** `takeFragmentText`
+reads only `#t=`. `#/kanji` (the list), `#/kanji/collection` and
+`#/kanji/history` are the three places of the screen's nav; the parent of
+the review, the Collection and History is the list. The reader is hidden,
+not emptied, while a route shows. A
 new text the host sends (`yomu:load`, `hostLoad()`) goes back to the reader
 first, by a replaceState that moves no focus: in Runcible a learner who
 closed the sheet on My kanji saw their list again behind the next phrase.
@@ -193,8 +250,10 @@ Start review applies the route at once, because a Space pressed before
 
 **No kanji is written into an attribute here either.** Toggles find their
 kanji by `data-kid` (the analysis' kanji list) or `data-ix` (the list the
-screen drew), and a toggle's name ("Save 天 to My kanji") is a visually hidden
-label in text nodes. Meanings and readings come from `reader.js kanjiInfo()`
+screen drew; a Collection tile adds `data-shelf`), and a toggle's name ("Save
+天 to My kanji") is a visually hidden label in text nodes, as is a tile's ("雨,
+seen in 3 texts"). History's rows are found the same way, and their buttons
+are described by the row's text through `aria-describedby`, an id. Meanings and readings come from `reader.js kanjiInfo()`
 (the dictionary's kanji shards), never from the store.
 
 **Review schedule:** saved is box 0, due that day; Got it moves up one box,
@@ -212,5 +271,5 @@ header controls; everything on the screen itself is 44px under
 
 - `js/vendor/wanakana.js`: upstream 5.3.1, MIT, byte for byte.
 - `js/neorgon-*.js`, `css/neorgon-*.css`: vendored kits, refreshed by `packages/neorgon-ui/sync-*.sh`.
-- `data/dict/**`, `data/kanji/**`, `data/names/**`: emitted by `tools/build-*.mjs` from the pins in `tools/lib/sources.mjs` (`build-names.mjs` after `build-dict.mjs`, which it reads). Rebuild, do not hand-edit.
+- `data/dict/**`, `data/kanji/**`, `data/names/**`: emitted by `tools/build-*.mjs` from the pins in `tools/lib/sources.mjs` (`build-names.mjs` after `build-dict.mjs`, which it reads; `data/kanji/joyo.json` by `build-joyo.mjs` from the committed shards, or by `build-kanji.mjs`). Rebuild, do not hand-edit.
 - `favicon.*`, `apple-touch-icon.png`, `web-app-manifest-*.png`, `site.webmanifest`: generated by `packages/neorgon-ui/sync-favicon.sh` once the site has a hub card.

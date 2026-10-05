@@ -15,6 +15,14 @@
 // counts nothing. A paste added to the text already there is more of the
 // same text: a passage pasted line by line counted its first line's kanji
 // once per line.
+//
+// Each session also knows the kind of text it reads (kanji-store.js SOURCES):
+// loadText's caller says it (an example, a phrase, a #t= link, the host, a
+// text read again from History), a paste or a drop that begins a session is
+// pasted, and a box emptied by hand or by Clear is typed into. And when the
+// learner turned Remember on, the same settle point keeps the text in
+// History first (history-store.js) and points the session at its key, so the
+// kanji counted next point at the text they were met in.
 
 import { state, saveText, forgetText, setText } from './state.js';
 import { $, debounce } from './utils.js';
@@ -24,7 +32,9 @@ import { paintReading, paintStatus, paintSpeech, paintEmpty } from './render.js'
 import { kanjiOrder } from './render-kanji.js';
 import { cancel } from './speech.js';
 import { myKanji, wordsByKanji } from './kanji-store.js';
+import { myHistory, textKey } from './history-store.js';
 import { today } from './render-save.js';
+import { hasJapanese, announceCollected } from './render-remember.js';
 
 let seq = 0;
 
@@ -38,10 +48,48 @@ function counts(a) {
   return { tokens: lex.length, unknown: lex.filter(isUnknown).length };
 }
 
-/** Count this read's kanji once per session, and keep the words they were met in. */
-function noteKanji(analysis) {
+/**
+ * Keep a read text in History, while remembering is on and the read found
+ * Japanese. Sets state.seenBefore and returns the text's key, or null.
+ */
+function rememberText(analysis, text) {
+  state.seenBefore = null;
+  if (state.prefs.remember !== 'on' || !hasJapanese(analysis)) return null;
+  const mine = myKanji();
+  state.seenBefore = myHistory().record(text, mine.sessionId, mine.sessionSource, Date.now());
+  return textKey(text);
+}
+
+/**
+ * Count this read's kanji once per session, and keep the words they were met
+ * in and where. History first, so the kanji point at this text. A restore is
+ * the session it was: nothing to announce.
+ */
+function noteKanji(analysis, text, restore) {
   analysis.order = kanjiOrder(analysis.tokens);
-  if (analysis.order.length) myKanji().record(analysis.order, wordsByKanji(analysis.tokens), today());
+  analysis.read = text;
+  const h = rememberText(analysis, text);
+  if (!analysis.order.length) return;
+  const fresh = myKanji().record(analysis.order, wordsByKanji(analysis.tokens), today(), { h });
+  if (!restore) announceCollected(fresh);
+}
+
+/**
+ * The learner said yes to Remember with a reading on screen: keep that text
+ * now, in its own session, and point its kanji at it. Nothing is counted.
+ */
+export function rememberNow() {
+  const a = state.analysis;
+  if (!a || !a.order || typeof a.read !== 'string') return;
+  const h = rememberText(a, a.read);
+  if (a.order.length) myKanji().record(a.order, null, today(), { h });
+  paintStatus(state);
+}
+
+/** A new reading session, of this kind of text: nothing History knew about the last one stays up. */
+function beginSession(source) {
+  myKanji().beginSession(source);
+  state.seenBefore = null;
 }
 
 /** Whether a note still has something to point at in this analysis. */
@@ -54,13 +102,16 @@ function stillIn(analysis, note) {
 /**
  * Read state.text and paint it. Resolves to { tokens, unknown } for the embed,
  * or null when a newer read replaced this one; rejects when the read failed,
- * after the page has already said so.
+ * after the page has already said so. `restore` is the reload's read of the
+ * kept text: counted already, so nothing is announced.
  */
-export async function analyzeNow() {
+export async function analyzeNow({ restore = false } = {}) {
   const mine = ++seq;
-  if (!state.text.trim()) {
+  const text = state.text;
+  if (!text.trim()) {
     state.analysis = null;
     state.note = null;
+    state.seenBefore = null;
     state.status = { kind: 'idle', done: 0, total: 0, error: null };
     paintStatus(state);
     paintReading(state);
@@ -80,7 +131,7 @@ export async function analyzeNow() {
     if (mine === seq && !settled) paintStatus(state);
   }, 150);
   try {
-    const analysis = await read(state.text, {
+    const analysis = await read(text, {
       lang: currentLang(),
       onProgress: ({ done, total }) => {
         if (mine !== seq || settled) return;
@@ -99,7 +150,7 @@ export async function analyzeNow() {
     if (state.note && !stillIn(analysis, state.note)) state.note = null;
     state.analysis = analysis;
     state.pinnedKanji = null;
-    noteKanji(analysis);
+    noteKanji(analysis, text, restore);
     const n = counts(analysis);
     // The status line says the read is done, in words, because a screen
     // reader hears nothing else change; and it says so when there was no
@@ -146,12 +197,14 @@ export function focusHome() {
 }
 
 /**
- * Put text in the box and read it now: an example, a phrase, #t=, the embed.
- * Each of those is a new reading session. `restore` is the one exception: the
- * saved text coming back on a reload is the session it was, already counted.
+ * Put text in the box and read it now: an example, a phrase, #t=, the embed,
+ * History's Read again. Each of those is a new reading session, of the kind
+ * `source` names (kanji-store.js SOURCES). `restore` is the one exception:
+ * the saved text coming back on a reload is the session it was, already
+ * counted.
  */
-export function loadText(text, { restore = false } = {}) {
-  if (!restore) myKanji().beginSession();
+export function loadText(text, { restore = false, source = 'typed' } = {}) {
+  if (!restore) beginSession(source);
   const ta = $('yomu-text');
   if (ta) { ta.value = text; autosize(ta); }
   setText(state, text);
@@ -160,7 +213,7 @@ export function loadText(text, { restore = false } = {}) {
   state.note = null;
   paintStatus(state);
   paintEmpty(state);
-  return analyzeNow();
+  return analyzeNow({ restore });
 }
 
 export function clearText() {
@@ -169,7 +222,7 @@ export function clearText() {
   if (ta) { ta.value = ''; autosize(ta); }
   setText(state, '');
   forgetText();
-  myKanji().beginSession();
+  beginSession('typed');
   state.selected = null;
   state.note = null;
   state.speaking = false;
@@ -192,7 +245,8 @@ export function bindInput() {
     const had = state.text.trim() !== '';
     if (e.inputType === 'insertFromDrop' || e.inputType === 'insertFromPaste') pasted = true;
     setText(state, ta.value);
-    if ((pasted && (!had || replacing)) || (had && !state.text.trim())) myKanji().beginSession();
+    if (pasted && (!had || replacing)) beginSession('paste');
+    else if (had && !state.text.trim()) beginSession('typed');
     replacing = false;
     saveText(state, ta.value);
     paintStatus(state);

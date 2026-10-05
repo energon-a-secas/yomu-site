@@ -10,11 +10,13 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
 import {
-  KEY, DAMAGED_KEY, EXPORT_FORMAT, MAX_WORDS, INTERVALS,
+  KEY, DAMAGED_KEY, MAX_WORDS, INTERVALS, SOURCES,
   emptyData, validate, beginSession, recordReading, saveKanji, unsaveKanji, schedule,
-  dueList, nextDue, oftenUnsaved, addDays, dayOf, parseImport, mergeInto, exportDoc,
+  dueList, nextDue, oftenUnsaved, addDays, dayOf, sessionSource, setSessionText,
   dictionaryWord, wordsByKanji, openKanji,
 } from '../js/kanji-store.js';
+import { EXPORT_FORMAT, parseImport, mergeInto, exportDoc } from '../js/kanji-backup.js';
+import { textKey } from '../js/history-store.js';
 import { createReview, current, show, answer, finished, isRepeat, position, summary } from '../js/review.js';
 
 const FIXTURE = JSON.parse(await readFile(new URL('./fixtures/analysis-sample.json', import.meta.url), 'utf8'));
@@ -414,4 +416,141 @@ test('clear all forgets saved and seen, and starts a new session', () => {
   assert.deepEqual(again.data.saved, {});
   assert.deepEqual(again.data.seen, {});
   assert.deepEqual(again.data.session, { id: id + 1, counted: [] });
+});
+
+// ── Where a kanji was last met: sources and History keys ──────────────────
+
+test('the kinds of text a session can read', () => {
+  assert.deepEqual([...SOURCES], ['paste', 'typed', 'example', 'phrase', 'link', 'host', 'history']);
+});
+
+test('a session knows its kind of text; one from an older store, or of no known kind, is typed', () => {
+  const d = emptyData();
+  beginSession(d, 'paste');
+  assert.deepEqual(d.session, { id: 1, counted: [], src: 'paste' }, 'no history key until the text is remembered');
+  beginSession(d, 'mail');
+  assert.equal(d.session.src, 'typed');
+  const old = validate({ session: { id: 7, counted: ['天'] } }).data;
+  assert.equal(sessionSource(old), 'typed');
+  recordReading(old, ['雨'], null, '2026-10-01');
+  assert.equal(old.seen['雨'].src, 'typed');
+});
+
+test('a fresh count takes the session\'s kind and history key; without a key it has none', () => {
+  const d = emptyData();
+  beginSession(d, 'example');
+  recordReading(d, ['天'], null, '2026-10-01');
+  assert.deepEqual(d.seen['天'], { n: 1, first: '2026-10-01', last: '2026-10-01', words: [], src: 'example' });
+  beginSession(d, 'history');
+  setSessionText(d, 'k1');
+  recordReading(d, ['天', '気'], null, '2026-10-02');
+  assert.equal(d.seen['天'].n, 2);
+  assert.deepEqual([d.seen['天'].src, d.seen['天'].h], ['history', 'k1']);
+  assert.deepEqual([d.seen['気'].src, d.seen['気'].h], ['history', 'k1']);
+  // The next text is not remembered: the kanji met in it point at no text.
+  beginSession(d, 'paste');
+  recordReading(d, ['天'], null, '2026-10-03');
+  assert.equal(d.seen['天'].src, 'paste');
+  assert.equal('h' in d.seen['天'], false);
+  assert.equal(d.seen['気'].h, 'k1', 'a kanji not met again keeps its text');
+});
+
+test('a kanji already counted follows the text as it is edited, without being counted again', () => {
+  const d = emptyData();
+  beginSession(d, 'typed');
+  setSessionText(d, 'aaa');
+  recordReading(d, ['今', '日'], null, '2026-10-01');
+  assert.equal(setSessionText(d, 'bbb'), true);
+  const r = recordReading(d, ['今', '日', '雨'], null, '2026-10-01');
+  assert.deepEqual(r.counted, ['雨']);
+  assert.deepEqual(['今', '日', '雨'].map((ch) => [d.seen[ch].n, d.seen[ch].h]), [[1, 'bbb'], [1, 'bbb'], [1, 'bbb']]);
+  assert.equal(recordReading(d, ['今', '日', '雨'], null, '2026-10-01').changed, false, 'nothing differs, nothing to write');
+  assert.equal(setSessionText(d, 'bbb'), false);
+  setSessionText(d, null);
+  assert.equal(recordReading(d, ['今'], null, '2026-10-01').changed, true, 'the key went: that is a change');
+  assert.equal('h' in d.seen['今'], false);
+  assert.equal(d.seen['今'].n, 1);
+});
+
+test('a bad kind or key is left out on load, and the record kept', () => {
+  disk.set(KEY, JSON.stringify({
+    __v: 1,
+    data: {
+      seen: {
+        天: { n: 2, first: '2026-10-01', last: '2026-10-02', words: [], src: 'mail', h: 'abc' },
+        気: { n: 1, first: '2026-10-01', last: '2026-10-01', words: [], src: 'link', h: '今日は雨' },
+        雨: { n: 1, first: '2026-10-01', last: '2026-10-01', words: [], src: 'host', h: 'k9' },
+      },
+      session: { id: 3, counted: ['天'], src: 'nowhere', h: 'Not A Key' },
+    },
+  }));
+  const page = pageLoad();
+  assert.equal(page.note, null, 'a field is not an entry: nothing was left out');
+  assert.deepEqual(page.seenOf('天'), { n: 2, first: '2026-10-01', last: '2026-10-02', words: [], h: 'abc' });
+  assert.deepEqual(page.seenOf('気'), { n: 1, first: '2026-10-01', last: '2026-10-01', words: [], src: 'link' });
+  assert.deepEqual(page.seenOf('雨'), { n: 1, first: '2026-10-01', last: '2026-10-01', words: [], src: 'host', h: 'k9' });
+  assert.deepEqual(page.data.session, { id: 3, counted: ['天'] });
+  assert.equal(page.sessionSource, 'typed');
+});
+
+test('the store still never holds the text when its kanji point at a remembered one', () => {
+  const page = pageLoad();
+  page.beginSession('paste');
+  const h = textKey(FIXTURE.text);
+  page.record(['私', '学', '校', '行', '先', '生', '飲'], wordsByKanji(FIXTURE.tokens), '2026-10-01', { h });
+  const raw = disk.get(KEY);
+  assert.ok(raw.includes(h), 'the key is there');
+  assert.ok(!raw.includes('。'), 'no sentence punctuation');
+  assert.ok(!raw.includes(FIXTURE.text.split('\n')[0]), 'not the first line');
+  assert.ok(!raw.includes('学校へ'), 'not a run across words');
+  const strings = [];
+  JSON.parse(raw, (k, v) => { if (typeof v === 'string') strings.push(v); return v; });
+  assert.ok(strings.every((x) => [...x].length <= 24), strings.filter((x) => x.length > 24).join(', '));
+  assert.equal(pageLoad().seenOf('学').h, h);
+});
+
+test('record with a key moves the session and counts in one write', () => {
+  let saves = 0;
+  const page = openKanji({ store: { load: () => null, save: () => { saves += 1; return true; } }, readRaw: () => null, keepRaw: () => {} }).load();
+  page.beginSession('link');
+  saves = 0;
+  page.record(['天'], null, '2026-10-01', { h: 'k1' });
+  assert.equal(saves, 1);
+  page.record(['天'], null, '2026-10-01', { h: 'k1' });
+  assert.equal(saves, 1, 'the same read again writes nothing');
+  page.record(['天'], null, '2026-10-01', { h: 'k2' });
+  assert.equal(saves, 2);
+  assert.equal(page.data.session.h, 'k2');
+  assert.equal(page.seenOf('天').h, 'k2');
+});
+
+test('New is a kanji counted for the first time in this session, and stays so on a reload', () => {
+  let page = pageLoad();
+  page.beginSession('paste');
+  page.record(['天'], null, '2026-10-01');
+  page.beginSession('paste');
+  page.record(['天', '雨'], null, '2026-10-02');
+  assert.equal(page.isNew('雨'), true);
+  assert.equal(page.isNew('天'), false, 'met in an earlier session');
+  page = pageLoad();
+  assert.equal(page.isNew('雨'), true);
+  page.beginSession('typed');
+  assert.equal(page.isNew('雨'), false, 'not counted in this session');
+});
+
+test('export and import carry the kind and the key; a merge takes them from the later day', () => {
+  const a = pageLoad();
+  a.beginSession('phrase');
+  a.record(['天'], null, '2026-10-01', { h: 'k1' });
+  const file = JSON.stringify(a.exportDoc('2026-10-01'));
+  const r = parseImport(file);
+  assert.deepEqual(r.data.seen['天'], { n: 1, first: '2026-10-01', last: '2026-10-01', words: [], src: 'phrase', h: 'k1' });
+
+  const d = emptyData();
+  d.seen = { 天: { n: 3, first: '2026-09-01', last: '2026-09-20', words: [], src: 'paste', h: 'mine' } };
+  mergeInto(d, { seen: { 天: { n: 2, first: '2026-09-05', last: '2026-09-30', words: [], src: 'host' } }, saved: {} });
+  assert.deepEqual(d.seen['天'], { n: 3, first: '2026-09-01', last: '2026-09-30', words: [], src: 'host' });
+  const sum = mergeInto(d, { seen: { 天: { n: 1, first: '2026-09-30', last: '2026-09-30', words: [], src: 'link', h: 'k2' } }, saved: {} });
+  assert.equal(d.seen['天'].src, 'host', 'on the same day this browser\'s own record stands');
+  assert.equal(sum.seenUpdated, 0);
 });
