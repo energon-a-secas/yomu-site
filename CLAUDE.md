@@ -208,6 +208,20 @@ file carries the saved phrases and no other text.
 authored text) and removed with `history.replaceState`. The DeepL and Google
 links are built at click time.
 
+**The Translation is the browser's, on the device, and only after a click.**
+`js/translate.js` wraps the Translator API (Chrome 138+, Edge 148+, desktop
+only; Firefox, Safari and phones have none) and `js/render-translate.js`
+draws the section under the reading. Creating a translator whose model must
+still be downloaded needs the learner's activation, so the first one is made
+inside the Translate here click, before anything is awaited; after that
+`prefs.translate` is `on` and every settled read is translated on the device
+with nothing to click, until Hide. The translation lives in memory only (20
+at most), as a text node, and is not a live region. A cross-origin frame gets
+the API only through its host's `allow="translator"`; without it
+`availability()` rejects, which reads as unavailable, never as an error.
+Headless Playwright browsers ship no model, so the section is tested with a
+fake API (`tests/translate.test.mjs`) and by hand in a real Chrome.
+
 **The embed answers only listed origins.** `js/embed.js` accepts messages from
 `https://runcible.neorgon.com` and Runcible's dev server on 8878, checks
 `event.source === window.parent`, and posts only to the origin of the last

@@ -23,6 +23,7 @@ import { phrasesNode, chunkNodes } from './render-phrases.js';
 import { speechReason } from './render-chrome.js';
 import { analyzeNow, loadText, clearText, bindInput, describe, focusHome } from './events-read.js';
 import { KANJI_ACTIONS, bindKanji } from './events-kanji.js';
+import { startTranslation, stopTranslation } from './render-translate.js';
 import { COLLECT_ACTIONS, bindCollect } from './events-collect.js';
 import { PLAY_ACTIONS, bindPlay } from './events-play.js';
 
@@ -364,6 +365,8 @@ const ACTIONS = {
   'read-phrase': (b) => { const p = library && library.byId.get(b.dataset.id); if (p) readFromLibrary(p.ja); },
   'read-dialogue': (b) => { const d = library && library.dialogueById.get(b.dataset.id); if (d) readFromLibrary(dialogueText(d)); },
   chunk: (b) => speechOk(b) && chunk(b),
+  'translate-on': () => startTranslation(state),
+  'translate-off': () => stopTranslation(state),
   ...KANJI_ACTIONS,
   ...COLLECT_ACTIONS,
   ...PLAY_ACTIONS,

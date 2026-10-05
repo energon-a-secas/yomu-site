@@ -15,6 +15,7 @@ import { paintChrome, paintStatus, paintSpeech } from './render-chrome.js';
 import { noteOf } from './reader.js';
 import { myKanji } from './kanji-store.js';
 import { paintSavedMarks } from './render-save.js';
+import { syncTranslation } from './render-translate.js';
 
 export { paintChrome, paintStatus, paintSpeech, paintSavedMarks };
 
@@ -86,6 +87,7 @@ export function paintReading(state) {
   paintSelection(state);
   paintSide(state);
   paintSavedMarks(state);
+  syncTranslation(state);
 }
 
 /** Which token is chosen, and the one tab stop that follows it. */

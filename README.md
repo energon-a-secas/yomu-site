@@ -52,6 +52,7 @@ dictionary; your text never leaves the page unless you press a translate link.
 - **History, if you want it** -- turn on Remember and Yomu keeps the texts you read in this browser, tells you when you read one before, and shows the sentence each kanji was last seen in
 - **Saved phrases** -- the bookmark beside Clear keeps a text on purpose, whatever Remember says: it stays in History until you unsave it, still counts when you read it again, and goes into My kanji's backup
 - **Play** -- four short games with the characters that look alike: pick the kana or kanji among its look-alikes, find the odd one in a grid (timed or not), tell カ from 力 by the word around it, and decode katakana names to Tom and Mary; the pairs you mix up come round more often
+- **Translation on the page** -- in Chrome or Edge on a computer, the browser's own on-device translator writes the translation under the reading, after one click; the text never leaves the device. Elsewhere, DeepL and Google Translate open in a new tab
 - **Sound it out** -- a word's beats one at a time, then the whole word, spoken with the device's Japanese voice
 - **Phrases** -- 71 everyday phrases and 8 short dialogues written for Yomu, with set phrases to practise as chunks
 - **Embeddable** -- Runcible opens Yomu in a side sheet when a phrase in a chapter is tapped (`docs/EMBED.md`)
