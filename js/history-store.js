@@ -29,16 +29,23 @@
 // The functions below are pure over a plain data object and take the time as
 // an argument, so tests/history-store.test.mjs runs them with no clock and no
 // DOM. openHistory() wraps them around the store; myHistory() is the page's.
+// What makes two texts the same text, and the sentence a kanji was last seen
+// in, are history-text.js.
 
 import { createStore, safeGet, safeSet, safeRemove } from './neorgon-persist.js';
 import { SOURCES, HISTORY_KEY } from './kanji-store.js';
+import { MAX_TEXT, normalizeText, textKey, clipText } from './history-text.js';
+
+// The text helpers live in history-text.js; every module and test that
+// imports them from here still does.
+export {
+  MAX_TEXT, MAX_AROUND, normalizeText, cyrb53, textKey, clipText, sentenceAround,
+} from './history-text.js';
 
 export const KEY = 'yomu-site:history';
 export const VERSION = 1;
 /** A store this page could not read is copied here, as My kanji does. Forget all removes it too. */
 export const DAMAGED_KEY = `${KEY}:damaged`;
-/** The embed contract's cap on a text, applied to what is kept. */
-export const MAX_TEXT = 2000;
 export const MAX_ENTRIES = 300;
 export const MAX_CHARS = 300000;
 /** The shortest text a partial match is looked for in, or with: shorter is a word, not a text. */
@@ -46,46 +53,6 @@ export const MIN_PARTIAL = 6;
 
 export function emptyHistory() {
   return { entries: {}, session: null };
-}
-
-// ── Keys ──────────────────────────────────────────────────────────────────
-
-/** NFKC, every run of whitespace one space, trimmed: what makes two texts the same text. */
-export function normalizeText(text) {
-  return String(text ?? '').normalize('NFKC').replace(/\s+/gu, ' ').trim();
-}
-
-/**
- * cyrb53, by bryc (github.com/bryc/code, public domain): a fast 53-bit hash
- * with good spread. Not a cryptographic hash and not meant as one; a key
- * only has to tell a learner's few hundred texts apart.
- */
-export function cyrb53(str, seed = 0) {
-  let h1 = 0xdeadbeef ^ seed;
-  let h2 = 0x41c6ce57 ^ seed;
-  for (let i = 0; i < str.length; i += 1) {
-    const ch = str.charCodeAt(i);
-    h1 = Math.imul(h1 ^ ch, 2654435761);
-    h2 = Math.imul(h2 ^ ch, 1597334677);
-  }
-  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507);
-  h1 ^= Math.imul(h2 ^ (h2 >>> 13), 3266489909);
-  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507);
-  h2 ^= Math.imul(h1 ^ (h1 >>> 13), 3266489909);
-  return 4294967296 * (2097151 & h2) + (h1 >>> 0);
-}
-
-/** The key a text is kept under. The same text, however it is spaced, has the same key. */
-export function textKey(text) {
-  return cyrb53(normalizeText(text)).toString(36);
-}
-
-/** At most MAX_TEXT UTF-16 units, never cutting a character in two. */
-export function clipText(text) {
-  const s = String(text ?? '');
-  if (s.length <= MAX_TEXT) return s;
-  const cut = s.charCodeAt(MAX_TEXT - 1);
-  return s.slice(0, cut >= 0xd800 && cut <= 0xdbff ? MAX_TEXT - 1 : MAX_TEXT);
 }
 
 const chars = (s) => [...s].length;
@@ -240,45 +207,6 @@ export function list(data) {
   return Object.entries(data.entries)
     .map(([key, e]) => ({ key, ...e }))
     .sort((a, b) => b.last - a.last || (a.key < b.key ? -1 : a.key > b.key ? 1 : 0));
-}
-
-/** The longest last-seen sentence, kanji and ellipses included. */
-export const MAX_AROUND = 60;
-
-/**
- * The sentence `ch` was last met in, inside `text`: the sentence holding its
- * last occurrence (sentences end after 。！？!? and at a line break), trimmed,
- * then clipped to MAX_AROUND characters around the kanji with an ellipsis on
- * each side that was cut. Returns { before, ch, after }, so the page can draw
- * the kanji in a <mark>, or null when the text does not hold it.
- */
-export function sentenceAround(text, ch) {
-  const all = [...String(text ?? '')];
-  const at = all.lastIndexOf(ch);
-  if (!ch || at < 0) return null;
-  const end = (c) => '。！？!?'.includes(c);
-  const brk = (c) => c === '\n' || c === '\r';
-  let from = at;
-  while (from > 0 && !end(all[from - 1]) && !brk(all[from - 1])) from -= 1;
-  let to = at + 1;
-  while (to < all.length && !brk(all[to]) && !end(all[to - 1])) to += 1;
-  let left = all.slice(from, at);
-  let right = all.slice(at + 1, to);
-  while (left.length && /\s/u.test(left[0])) left.shift();
-  while (right.length && /\s/u.test(right[right.length - 1])) right.pop();
-  const room = MAX_AROUND - 1;
-  if (left.length + right.length > room) {
-    let keepLeft = Math.min(left.length, Math.floor(room / 2));
-    const keepRight = Math.min(right.length, room - keepLeft);
-    keepLeft = Math.min(left.length, room - keepRight);
-    const cutLeft = keepLeft < left.length;
-    const cutRight = keepRight < right.length;
-    left = left.slice(left.length - keepLeft);
-    right = right.slice(0, keepRight);
-    if (cutLeft) left = ['…', ...left.slice(1)];
-    if (cutRight) right = [...right.slice(0, -1), '…'];
-  }
-  return { before: left.join(''), ch, after: right.join('') };
 }
 
 // ── The store ─────────────────────────────────────────────────────────────
