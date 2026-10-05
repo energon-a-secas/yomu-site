@@ -11,6 +11,11 @@ https://yomu.neorgon.com/?embed=1&lang=en      production
 http://localhost:8895/?embed=1&lang=en         when the host itself is on localhost
 ```
 
+- `allow="translator"` on the iframe lends the frame the browser's on-device
+  Translator API (Chrome and Edge on a computer), which a cross-origin frame
+  does not get by default. Without it the Translation section says this
+  browser cannot translate there and points at the DeepL and Google links;
+  nothing else changes. Runcible sets it in `js/yomu-host.js`.
 - `embed=1` drops the header and footer, keeps one line (the embed bar), and
   lays the reader out as one column: the side table moves under the text.
 - The embed bar holds three links. "My kanji" opens the learner's saved kanji

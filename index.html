@@ -226,6 +226,13 @@
           <div class="reading-body" id="reading-body" lang="ja"></div>
         </section>
 
+        <!-- On-device translation (js/render-translate.js, js/translate.js): the
+             browser's Translator API, so the text never leaves the device. -->
+        <section class="translation" id="translation" aria-labelledby="translation-title" hidden>
+          <h2 class="region-title" id="translation-title" tabindex="-1" data-ui="translation">Translation</h2>
+          <div id="translation-body"></div>
+        </section>
+
         <section class="in-text" id="in-text" aria-labelledby="in-text-title" hidden>
           <h2 class="region-title" id="in-text-title" data-ui="inText">In this text</h2>
           <div id="in-text-body"></div>

@@ -70,6 +70,9 @@ page with ?embed=1 shows the normal site, because a frame with no host would
 have nothing to read.
 
 Text never travels in the frame URL. Every message is { v: 1, type, ... }.
+A host that wants the on-device Translation inside the frame adds
+allow="translator" to its iframe; without it the frame says the browser
+cannot translate there.
 
 Host to Yomu:
 
@@ -115,6 +118,12 @@ with the bookmark beside Clear, up to 500, whatever Remember says; turning
 Remember off forgets every text not saved. No text is ever put in the URL,
 an attribute, the page title or the beacon. The DeepL and Google Translate links are built at the moment
 they are clicked, which is the only way the text leaves the page.
+
+The Translation under the reading uses the browser's own on-device
+Translator API (Chrome 138+ and Edge on a computer): after the learner clicks
+Translate here once, the browser downloads a Japanese model and translates on
+the device, so the text is not sent anywhere; the translation is held in
+memory only. Other browsers say so and keep the two links.
 
 ## My kanji
 

@@ -433,6 +433,13 @@ rt .snd { border-bottom: 0; padding-bottom: 0; }
   margin-bottom: var(--space-3);
 }
 .in-text { padding-top: var(--space-4); border-top: 1px solid var(--border-subtle); }
+
+/* The on-device translation, between the reading and In this text. */
+.translation { padding-top: var(--space-4); border-top: 1px solid var(--border-subtle); }
+#translation-body { display: flex; flex-direction: column; gap: var(--space-2); }
+.tr-text { font-size: var(--text-lg); line-height: 1.6; color: var(--text-primary); overflow-wrap: anywhere; white-space: pre-line; }
+.tr-foot { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); font-size: var(--text-sm); }
+.tr-status { font-size: var(--text-sm); color: var(--text-secondary); }
 .it-group + .it-group { margin-top: var(--space-4); }
 .it-head { font-size: var(--text-xs); font-weight: 600; color: var(--text-muted); margin-bottom: var(--space-1); }
 .it-list {

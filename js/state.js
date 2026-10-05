@@ -32,9 +32,11 @@ export const UNSAVED = Object.freeze(['mark', 'off']);
  * (asked once, after the first read), yes, or no. Off until the learner says.
  */
 export const REMEMBER = Object.freeze(['ask', 'on', 'off']);
+/** The on-device translation under the reading (translate.js): off until the learner asks for it. */
+export const TRANSLATE = Object.freeze(['on', 'off']);
 
 export const state = {
-  prefs: { lang: 'en', furigana: true, romaji: 'said', highlights: true, unsaved: 'mark', slow: false, remember: 'ask' },
+  prefs: { lang: 'en', furigana: true, romaji: 'said', highlights: true, unsaved: 'mark', slow: false, remember: 'ask', translate: 'off' },
   embed: false,
   text: '',
   truncated: false,
@@ -89,6 +91,7 @@ export function loadPrefs(s, loc = globalThis.location, nav = globalThis.navigat
   if (UNSAVED.includes(p.unsaved)) s.prefs.unsaved = p.unsaved;
   if (typeof p.slow === 'boolean') s.prefs.slow = p.slow;
   if (REMEMBER.includes(p.remember)) s.prefs.remember = p.remember;
+  if (TRANSLATE.includes(p.translate)) s.prefs.translate = p.translate;
   return s.prefs;
 }
 
