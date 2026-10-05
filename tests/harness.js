@@ -13,8 +13,8 @@
 // parsed by DOMParser, whose documents run no scripts, and it is moved in with
 // importNode; no string of markup is ever assigned to innerHTML.
 //
-// Preferences, the saved text and My kanji share this origin with the real
-// page, so all three are put back as they were when the checks finish.
+// Preferences, the saved text, My kanji and History share this origin with
+// the real page, so all four are put back as they were when the checks finish.
 
 import { useFixture } from '../js/reader.js';
 import { state, loadPrefs, TEXT_KEY } from '../js/state.js';
@@ -25,6 +25,7 @@ import { ui } from '../js/strings.js';
 
 const PREFS_KEY = 'yomu-site:preferences';
 const KANJI_KEY = 'yomu-site:kanji';
+const HISTORY_KEY = 'yomu-site:history';
 const results = [];
 const $ = (id) => document.getElementById(id);
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -66,7 +67,7 @@ function fire(el, type, init = {}) {
 const restore = [];
 
 async function run() {
-  restore.push(keep(TEXT_KEY), keep(PREFS_KEY), keep(KANJI_KEY));
+  restore.push(keep(TEXT_KEY), keep(PREFS_KEY), keep(KANJI_KEY), keep(HISTORY_KEY));
   // My kanji starts empty, so every kanji in the fixture is unsaved and new.
   try { localStorage.removeItem(KANJI_KEY); } catch { /* storage blocked */ }
   const fixture = await (await fetch('fixtures/analysis-sample.json')).json();

@@ -26,11 +26,11 @@ function init() {
   // kept text is restored, not loaded anew: My kanji already counted it.
   const linked = takeFragmentText();
   const kept = linked === null ? savedText(state) : '';
-  if (linked) loadText(linked).catch(() => {});
+  if (linked) loadText(linked, { source: 'link' }).catch(() => {});
   else if (kept) loadText(kept, { restore: true }).catch(() => {});
   else analyzeNow().catch(() => {});
   // A #t= link followed from the page itself changes only the fragment.
-  addEventListener('hashchange', () => { const t = takeFragmentText(); if (t) loadText(t).catch(() => {}); });
+  addEventListener('hashchange', () => { const t = takeFragmentText(); if (t) loadText(t, { source: 'link' }).catch(() => {}); });
 }
 
 init();

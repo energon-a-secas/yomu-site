@@ -8,6 +8,7 @@
 import { $, fill, h } from './utils.js';
 import { ui, useLang, currentLang, PLACEHOLDER } from './strings.js';
 import { MAX_CHARS } from './state.js';
+import { paintRemember } from './render-remember.js';
 
 const SPEECH_REASON = { checking: 'speechChecking', none: 'speechNone', 'no-api': 'speechNoApi' };
 
@@ -101,7 +102,11 @@ function readMessage(words, unknown) {
   return unknown ? `${read} ${ui(unknown === 1 ? 'guessOne' : 'guessMany', { n: unknown })}` : read;
 }
 
-/** The quiet status line, the inline error, and the too-long note. */
+/**
+ * The quiet status line, the inline error, the too-long note, and what sits
+ * under them about remembering (render-remember.js): the ask card and "You
+ * read this before" follow every change of status.
+ */
 export function paintStatus(state) {
   const line = $('status');
   const error = $('read-error');
@@ -137,4 +142,5 @@ export function paintStatus(state) {
     long.textContent = state.truncated ? ui('tooLong', { n: MAX_CHARS.toLocaleString(currentLang()) }) : '';
     long.hidden = !state.truncated;
   }
+  paintRemember(state);
 }

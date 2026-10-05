@@ -90,20 +90,25 @@ phrase), never for text a person typed.
 
 ## Privacy
 
-The pasted text is kept only in this browser's localStorage under
-yomu-site:text so a reload keeps it, with a visible Clear. It is never put in
-the URL, the page title or an attribute. The DeepL and Google Translate
-links are built at the moment they are clicked, which is the only way the
-text leaves the page.
+The pasted text is kept in this browser's localStorage under
+yomu-site:text so a reload keeps it, with a visible Clear. Only if the
+learner turns on Remember (asked once, after the first read; off until they
+say yes) are the texts they read kept as well, under yomu-site:history, up
+to 300 of them, for History and "You read this before"; turning it off
+forgets them. No text is ever put in the URL, the page title or an
+attribute. The DeepL and Google Translate links are built at the moment
+they are clicked, which is the only way the text leaves the page.
 
 ## My kanji
 
 https://yomu.neorgon.com/#/kanji is a screen of the kanji a learner saved for
-review, with a review at #/kanji/review. In the reader, each kanji in the
-kanji table and in the Word panel has a save toggle, each row says how many
-texts the kanji was met in, and kanji not saved yet carry a small folded
-corner (Display: Unsaved kanji, Mark or Off). An embedded Yomu has a My kanji
-link in its one-line bar, and a text the host sends always opens the reader.
+review, with a review at #/kanji/review, the collection at
+#/kanji/collection and History at #/kanji/history. In the reader, each kanji
+in the kanji table and in the Word panel has a save toggle, each row says how
+many texts the kanji was met in (with a New chip the first time), and kanji
+not saved yet carry a small folded corner (Display: Unsaved kanji, Mark or
+Off). An embedded Yomu has a My kanji link in its one-line bar, and a text
+the host sends always opens the reader.
 
 - Times seen counts texts: a kanji counts once per reading session, and a
   session begins when the box gets a new text at once (an example, a phrase,
@@ -113,12 +118,25 @@ link in its one-line bar, and a text the host sends always opens the reader.
 - Review: Show, then Again (box 1, due tomorrow, and again before the review
   ends) or Got it (next box, due in 1, 2, 4, 8 or 16 days). Keys: Space, 1, 2,
   Escape.
+- Collection: every kanji read is collected. The shelves are the 2,136 jōyō
+  kanji by school grade (1 to 6, then secondary school), from
+  data/kanji/joyo.json (yomu-joyo/1), plus an Extra shelf for the rest. A
+  read that collects a kanji for the first time says so in a toast, with the
+  jōyō count and any milestone (a grade complete, 100 jōyō kanji).
+- Where each kanji was last met: the kind of text (pasted, typed, an
+  example, a phrase, a link, a text Runcible sent, History), and, with
+  Remember on, the sentence it was in.
+- History (opt-in): with Remember on, each text read, how often, first and
+  last, with Read again and Forget, and "You read this before" (or "This is
+  part of a text you read") in the reader.
 - Kept in this browser's localStorage under yomu-site:kanji: each saved
   kanji's schedule, and for each kanji met, how often, the first and last day,
-  and up to eight dictionary words with their readings. Never the text.
+  up to eight dictionary words with their readings, the kind of text it was
+  last met in, and with Remember on a key (a hash) of that text. Never the
+  text: that is only in yomu-site:history, and only with Remember on.
 - Export writes a yomu-kanji-export/1 JSON file ({ format, exported, saved,
   seen }); Import validates one and merges it, keeping the higher counts and
-  the earlier first day.
+  the earlier first day. History is not exported.
 
 ## Data and licences
 

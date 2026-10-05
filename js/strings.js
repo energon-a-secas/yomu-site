@@ -7,7 +7,10 @@
 // Notes about sounds and grammar do not live here. They belong to notes.js,
 // which the analyzer's ids point into; this file is the page's own copy: the
 // controls, the empty state, the errors, and the words for parts of speech.
-// Spanish is neutral: no vosotros, no regional words.
+// Spanish is neutral: no vosotros, no regional words. The collection's and
+// History's strings are in strings-collect.js, merged into the same table.
+
+import { COLLECT_STRINGS } from './strings-collect.js';
 
 export const LANGS = Object.freeze(['en', 'es']);
 
@@ -44,6 +47,7 @@ export function ui(key, vars) {
 }
 
 export const STRINGS = Object.freeze({
+  ...COLLECT_STRINGS,
   pageTitle: { en: 'Yomu | Read Japanese word by word', es: 'Yomu | Lee japonés palabra por palabra' },
   subtitle: { en: 'Read Japanese word by word', es: 'Lee japonés palabra por palabra' },
   skip: { en: 'Skip to content', es: 'Saltar al contenido' },
@@ -297,8 +301,8 @@ export const STRINGS = Object.freeze({
   cancel: { en: 'Cancel', es: 'Cancelar' },
   clearTitle: { en: 'Clear all of My kanji?', es: '¿Borrar todo Mis kanji?' },
   clearBody: {
-    en: 'This forgets every saved kanji, its review schedule and every count of the kanji you met, in this browser. Export first to keep a copy.',
-    es: 'Esto olvida en este navegador cada kanji guardado, su calendario de repaso y cada conteo de los kanji que viste. Exporta antes para guardar una copia.',
+    en: 'This forgets every saved kanji, its review schedule and every count of the kanji you met, in this browser, so your collection is emptied too. History is not touched. Export first to keep a copy.',
+    es: 'Esto olvida en este navegador cada kanji guardado, su calendario de repaso y cada conteo de los kanji que viste, así que tu colección también queda vacía. El historial no se toca. Exporta antes para guardar una copia.',
   },
   cleared: { en: 'My kanji is empty now.', es: 'Mis kanji quedó vacío.' },
   exported: { en: 'Saved {file}.', es: 'Se guardó {file}.' },

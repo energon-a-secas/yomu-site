@@ -1,10 +1,12 @@
 // The page's state, and the two places any of it is kept.
 //
-// Preferences (language, the four display toggles, slow speech) go through
-// the Persist kit under 'yomu-site:preferences', version 1. The pasted text is
-// kept apart, raw, under 'yomu-site:text', for one reason: a reload should not
-// lose a sentence someone just pasted, and a Clear should be able to forget it
-// without touching anything else.
+// Preferences (language, the four display toggles, slow speech, and whether
+// to remember what was read) go through the Persist kit under
+// 'yomu-site:preferences', version 1. The pasted text is kept apart, raw,
+// under 'yomu-site:text', for one reason: a reload should not lose a sentence
+// someone just pasted, and a Clear should be able to forget it without
+// touching anything else. The texts a learner read are kept a third way, in
+// History (history-store.js), and only once they said yes to `remember`.
 //
 // Where the text is never written: the URL, a data attribute, the page title,
 // or anything the beacon reads. #t= is read once on load and removed at once,
@@ -25,9 +27,14 @@ export const RATE = Object.freeze({ normal: 1, slow: 0.6 });
 const ROMAJI = ['said', 'spelled', 'off'];
 /** The unsaved-kanji mark in the reading (My kanji): drawn, or not. */
 export const UNSAVED = Object.freeze(['mark', 'off']);
+/**
+ * Keep the texts read, for History and "You read this before": not asked yet
+ * (asked once, after the first read), yes, or no. Off until the learner says.
+ */
+export const REMEMBER = Object.freeze(['ask', 'on', 'off']);
 
 export const state = {
-  prefs: { lang: 'en', furigana: true, romaji: 'said', highlights: true, unsaved: 'mark', slow: false },
+  prefs: { lang: 'en', furigana: true, romaji: 'said', highlights: true, unsaved: 'mark', slow: false, remember: 'ask' },
   embed: false,
   text: '',
   truncated: false,
@@ -41,6 +48,10 @@ export const state = {
   pinnedKanji: null,     // a kanji tapped on a touch screen
   speech: 'checking',    // checking | ok | none | no-api
   speaking: false,
+  // What History knew about the text on screen before this session read it
+  // (history-store.js recordText), for "You read this before". Null when
+  // remembering is off or nothing was known.
+  seenBefore: null,
 };
 
 /** The interface language a browser asks for, reduced to en or es. */
@@ -77,6 +88,7 @@ export function loadPrefs(s, loc = globalThis.location, nav = globalThis.navigat
   if (typeof p.highlights === 'boolean') s.prefs.highlights = p.highlights;
   if (UNSAVED.includes(p.unsaved)) s.prefs.unsaved = p.unsaved;
   if (typeof p.slow === 'boolean') s.prefs.slow = p.slow;
+  if (REMEMBER.includes(p.remember)) s.prefs.remember = p.remember;
   return s.prefs;
 }
 

@@ -11,7 +11,10 @@
 //
 // Each row also says how many texts the kanji was met in (My kanji counts it,
 // kanji-store.js) and carries a save toggle. The toggle is a sibling of the
-// row's button, not inside it: a button inside a button is not a button.
+// row's button, not inside it: a button inside a button is not a button. A
+// kanji this reading session collected for the first time carries a "New"
+// chip, which a reload of the same session keeps, since the session is
+// stored with the counts.
 
 import { h } from './utils.js';
 import { ui } from './strings.js';
@@ -91,7 +94,10 @@ function row(ch, kid, info, here, pinned, mine) {
         parts.length ? list(ui('parts'), parts, 'ja') : null,
         strokes ? h('span', { class: 'kj-read' }, strokes) : null,
       ]) : null,
-      seen ? h('span', { class: 'kj-line kj-line--quiet kj-seen' }, seen) : null,
+      seen ? h('span', { class: 'kj-line kj-line--quiet' }, [
+        h('span', { class: 'kj-seen' }, seen),
+        typeof mine.isNew === 'function' && mine.isNew(ch) ? h('span', { class: 'kj-new' }, ui('newChip')) : null,
+      ]) : null,
     ]),
   ]), saveToggle(ch, mine.isSaved(ch), { 'data-act': 'save-kanji', 'data-kid': kid })]);
 }
@@ -100,7 +106,7 @@ function row(ch, kid, info, here, pinned, mine) {
  * @param {object} a       the normalized analysis
  * @param {string[]} order kanjiOrder(a.tokens)
  * @param {number|null} pinned  data-kid of a pinned row
- * @param {{ isSaved: Function, seenOf: Function }} mine  the My kanji store
+ * @param {{ isSaved: Function, seenOf: Function, isNew?: Function }} mine  the My kanji store
  */
 export function kanjiNode(a, order, pinned, mine) {
   if (!order.length) return h('p', { class: 'side-empty' }, ui('kanjiEmpty'));

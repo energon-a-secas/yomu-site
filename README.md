@@ -48,6 +48,8 @@ dictionary; your text never leaves the page unless you press a translate link.
 - **Special sounds, explained** -- particle は/へ/を, long vowels, small っ, youon, voicing marks, ん before m/b/p, whispered vowels, each with one rule, examples and a minimal pair
 - **Grammar in the text** -- particles, です and ます forms, te-forms, conditionals (ば, たら, なら, と), each named where it occurs
 - **Kanji table** -- every kanji in the text with its reading here, meaning, on and kun readings and parts; hover or tap a row to find it in the text, and the other way round
+- **My kanji** -- save kanji for a short daily review, and collect every kanji you read on shelves of the 2,136 jōyō kanji by school grade, each with where you last met it
+- **History, if you want it** -- turn on Remember and Yomu keeps the texts you read in this browser, tells you when you read one before, and shows the sentence each kanji was last seen in
 - **Sound it out** -- a word's beats one at a time, then the whole word, spoken with the device's Japanese voice
 - **Phrases** -- 71 everyday phrases and 8 short dialogues written for Yomu, with set phrases to practise as chunks
 - **Embeddable** -- Runcible opens Yomu in a side sheet when a phrase in a chapter is tapped (`docs/EMBED.md`)
@@ -95,7 +97,7 @@ yomu-site/
 │   └── embed.js          # the yomu-embed/1 protocol
 ├── data/
 │   ├── dict/             # JMdict: a core, 28 range shards and a key filter, each under 140 KB
-│   ├── kanji/            # KANJIDIC and KanjiVG parts, 3 shards
+│   ├── kanji/            # KANJIDIC and KanjiVG parts, and joyo.json (the jōyō list by grade)
 │   └── phrases/          # the phrase library (original, CC0)
 ├── tools/                # hand-run builders and the data checker
 ├── tests/                # node:test suites and a render harness

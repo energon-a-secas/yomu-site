@@ -3,8 +3,16 @@
 // One Persist kit store, 'yomu-site:kanji' version 1, holding three things:
 //
 //   saved    { char: { at, box, due, reviews, lapses } }   kept for review
-//   seen     { char: { n, first, last, words } }           met in a text
-//   session  { id, counted: [char] }                       the text being read
+//   seen     { char: { n, first, last, words, src?, h? } } met in a text
+//   session  { id, counted: [char], src?, h? }             the text being read
+//
+// Every kanji met is also a kanji collected: the collection (collection.js)
+// is these counts read against the jōyō list, with nothing stored of its own.
+// `src` says what kind of text a kanji was last met in (SOURCES: pasted,
+// typed, an example, a phrase, a link, a text the host sent, History), and
+// `h` is the key of that text in the History store (history-store.js), kept
+// only while the learner has Remember on. A key is a hash, not the text, and
+// a key whose text was forgotten is harmless: the page falls back to `src`.
 //
 // "Times seen" counts texts, not keystrokes. A reading session begins when
 // the box gets new content all at once (a paste, an example, a phrase or a
@@ -15,7 +23,7 @@
 // counted and counts nothing.
 //
 // What is never kept here: the text, a sentence, or anything longer than a
-// dictionary word. `words` holds up to MAX_WORDS [written, reading] pairs per
+// dictionary word or a history key. `words` holds up to MAX_WORDS [written, reading] pairs per
 // kanji, each one a dictionary form the analyzer found, so the review can show
 // where a kanji was met without this store ever holding what was pasted.
 //
@@ -25,13 +33,22 @@
 
 import { createStore, safeGet, safeSet } from './neorgon-persist.js';
 import { isKanji, hasKanji, toHira } from './kana.js';
+// A cycle on purpose, and a safe one: kanji-backup.js uses this module's
+// functions only when it is called, never while it loads.
+import { exportDoc, mergeInto } from './kanji-backup.js';
 
 export const KEY = 'yomu-site:kanji';
 export const VERSION = 1;
 /** A store this page could not read is copied here once, never thrown away. */
 export const DAMAGED_KEY = `${KEY}:damaged`;
-export const EXPORT_FORMAT = 'yomu-kanji-export/1';
 export const MAX_WORDS = 8;
+/**
+ * Where a reading session's text came from. Version 1 still: a store from
+ * before these fields reads as it did, and a session with no `src` is typed.
+ */
+export const SOURCES = Object.freeze(['paste', 'typed', 'example', 'phrase', 'link', 'host', 'history']);
+/** A History key (history-store.js textKey): base36, never the text. */
+export const HISTORY_KEY = /^[0-9a-z]{1,16}$/;
 export const TOP_BOX = 5;
 /**
  * Days to the next review, by the box a kanji lands in after an answer.
@@ -70,8 +87,8 @@ export function addDays(day, n) {
   return dayOf(new Date(y, m - 1, d + n));
 }
 
-const minDay = (a, b) => (a <= b ? a : b);
-const maxDay = (a, b) => (a >= b ? a : b);
+export const minDay = (a, b) => (a <= b ? a : b);
+export const maxDay = (a, b) => (a >= b ? a : b);
 
 // ── Reading what was kept ─────────────────────────────────────────────────
 //
@@ -79,8 +96,27 @@ const maxDay = (a, b) => (a >= b ? a : b);
 // a half-written one is read field by field, and whatever does not fit is
 // left out and counted, never assigned onto the page's data.
 
-const isObject = (v) => !!v && typeof v === 'object' && !Array.isArray(v);
+export const isObject = (v) => !!v && typeof v === 'object' && !Array.isArray(v);
 const isCount = (n) => Number.isInteger(n) && n >= 0;
+const isSource = (v) => SOURCES.includes(v);
+const isHistoryKey = (v) => typeof v === 'string' && HISTORY_KEY.test(v);
+
+/**
+ * `rec` with `src` and `h` taken from `from`, each set only when valid and
+ * left out otherwise, so a record with neither keeps exactly the fields it
+ * had before these two existed. Returns `rec` itself when nothing moves.
+ */
+export function withPlace(rec, from) {
+  const src = from && isSource(from.src) ? from.src : undefined;
+  const h = from && isHistoryKey(from.h) ? from.h : undefined;
+  if (rec.src === src && rec.h === h) return rec;
+  const out = { ...rec };
+  delete out.src;
+  delete out.h;
+  if (src !== undefined) out.src = src;
+  if (h !== undefined) out.h = h;
+  return out;
+}
 
 export function oneKanji(ch) {
   return typeof ch === 'string' && [...ch].length === 1 && isKanji(ch);
@@ -105,10 +141,11 @@ export function addWords(list, more) {
   return out.slice(-MAX_WORDS);
 }
 
+/** A bad `src` or `h` is left out and the record kept: neither is worth a count. */
 function cleanSeen(v) {
   if (!isObject(v) || !Number.isInteger(v.n) || v.n < 1) return null;
   if (!DAY.test(v.first) || !DAY.test(v.last)) return null;
-  return { n: v.n, first: minDay(v.first, v.last), last: maxDay(v.first, v.last), words: addWords([], Array.isArray(v.words) ? v.words : []) };
+  return withPlace({ n: v.n, first: minDay(v.first, v.last), last: maxDay(v.first, v.last), words: addWords([], Array.isArray(v.words) ? v.words : []) }, v);
 }
 
 function cleanSaved(v) {
@@ -145,7 +182,7 @@ export function validate(raw) {
   let dropped = saved.dropped + seen.dropped;
   const s = raw.session;
   if (isObject(s) && isCount(s.id) && Array.isArray(s.counted)) {
-    data.session = { id: s.id, counted: [...new Set(s.counted.filter(oneKanji))].slice(0, MAX_COUNTED) };
+    data.session = withPlace({ id: s.id, counted: [...new Set(s.counted.filter(oneKanji))].slice(0, MAX_COUNTED) }, s);
   } else if (s !== undefined) {
     dropped += 1;
   }
@@ -154,10 +191,30 @@ export function validate(raw) {
 
 // ── Sessions and counting ─────────────────────────────────────────────────
 
-/** A new reading session: nothing counted in it yet. */
-export function beginSession(data) {
-  data.session = { id: data.session.id + 1, counted: [] };
+/**
+ * A new reading session: nothing counted in it yet, and the kind of text it
+ * reads (SOURCES; typed when not given). No history key until the session's
+ * text is remembered.
+ */
+export function beginSession(data, src) {
+  data.session = { id: data.session.id + 1, counted: [], src: isSource(src) ? src : 'typed' };
   return data.session.id;
+}
+
+/** The session's kind of text. A session kept by a page from before sources were kept is typed. */
+export function sessionSource(data) {
+  return isSource(data.session.src) ? data.session.src : 'typed';
+}
+
+/**
+ * Point the session at a History key, or at none (null). The key moves while
+ * a learner edits the text within one session. Returns whether it changed.
+ */
+export function setSessionText(data, h) {
+  const next = withPlace(data.session, { src: data.session.src, h: h || undefined });
+  if (next === data.session) return false;
+  data.session = next;
+  return true;
 }
 
 /**
@@ -165,10 +222,15 @@ export function beginSession(data) {
  * kanji to the dictionary words it was met in. A kanji not yet counted in
  * this session is counted now; one already counted only learns new words,
  * which is idempotent, so reading the same text twice changes nothing.
- * Returns the kanji counted by this call, and whether anything changed.
+ * Either way the kanji takes the session's `src` and `h`, since it was last
+ * met in this text, as it now stands: a learner editing the text in one
+ * session moves its history key, and the kanji follow it without being
+ * counted again. Returns the kanji counted by this call, and whether
+ * anything changed.
  */
 export function recordReading(data, chars, words, today) {
   const counted = new Set(data.session.counted);
+  const place = { src: sessionSource(data), h: data.session.h };
   const fresh = [];
   let learned = 0;
   const wordsOf = (ch) => (words && typeof words.get === 'function' ? words.get(ch) : null) || [];
@@ -183,11 +245,12 @@ export function recordReading(data, chars, words, today) {
         : { n: 1, first: today, last: today, words: [] };
     }
     if (!s) continue;           // counted in this session, then cleared away
+    const placed = withPlace(s, place);
     const list = addWords(s.words, wordsOf(ch));
-    if (list.length !== s.words.length || list.some((p, k) => p !== s.words[k])) learned += 1;
-    data.seen[ch] = { ...s, words: list };
+    if (placed !== s || list.length !== s.words.length || list.some((p, k) => p !== s.words[k])) learned += 1;
+    data.seen[ch] = { ...placed, words: list };
   }
-  data.session = { id: data.session.id, counted: [...counted].slice(0, MAX_COUNTED) };
+  data.session = { ...data.session, counted: [...counted].slice(0, MAX_COUNTED) };
   return { counted: fresh, changed: fresh.length > 0 || learned > 0 };
 }
 
@@ -304,57 +367,6 @@ export function oftenUnsaved(data, limit = 20) {
     .map(([ch]) => ch);
 }
 
-// ── Backup ────────────────────────────────────────────────────────────────
-
-/** What Export writes: the saved and seen maps, never the session. */
-export function exportDoc(data, today) {
-  return { format: EXPORT_FORMAT, exported: today, site: 'https://yomu.neorgon.com/', saved: data.saved, seen: data.seen };
-}
-
-/** The largest backup Import reads; a real one is a few hundred KB at most. */
-export const MAX_IMPORT_BYTES = 5 * 1024 * 1024;
-
-/**
- * Read a backup file's text. { ok: true, data, dropped } or
- * { ok: false, reason: 'json' | 'format' | 'empty' }. The entries go through
- * the same checks as the store itself.
- */
-export function parseImport(text) {
-  let doc;
-  try { doc = JSON.parse(String(text)); } catch { return { ok: false, reason: 'json' }; }
-  if (!isObject(doc) || doc.format !== EXPORT_FORMAT) return { ok: false, reason: 'format' };
-  const { data, dropped } = validate({ saved: doc.saved, seen: doc.seen });
-  if (!Object.keys(data.saved).length && !Object.keys(data.seen).length) return { ok: false, reason: 'empty', dropped };
-  return { ok: true, data, dropped };
-}
-
-/**
- * Merge an imported backup into `data`. A count keeps the higher number and a
- * first-seen day the earlier, so importing the same file twice, or two
- * devices' files in either order, ends in the same place. Of two schedules
- * for one saved kanji, the one with more reviews behind it wins; the earlier
- * save date is kept.
- */
-export function mergeInto(data, incoming) {
-  const sum = { savedAdded: 0, savedUpdated: 0, seenAdded: 0, seenUpdated: 0 };
-  for (const [ch, b] of Object.entries(incoming.seen || {})) {
-    const a = data.seen[ch];
-    if (!a) { data.seen[ch] = { ...b, words: b.words.slice() }; sum.seenAdded += 1; continue; }
-    const next = { n: Math.max(a.n, b.n), first: minDay(a.first, b.first), last: maxDay(a.last, b.last), words: addWords(a.words, b.words) };
-    if (JSON.stringify(next) !== JSON.stringify(a)) sum.seenUpdated += 1;
-    data.seen[ch] = next;
-  }
-  for (const [ch, b] of Object.entries(incoming.saved || {})) {
-    const a = data.saved[ch];
-    if (!a) { data.saved[ch] = { ...b }; sum.savedAdded += 1; continue; }
-    const lead = b.reviews > a.reviews ? b : a;
-    const next = { at: Math.min(a.at, b.at), box: lead.box, due: lead.due, reviews: Math.max(a.reviews, b.reviews), lapses: Math.max(a.lapses, b.lapses) };
-    if (JSON.stringify(next) !== JSON.stringify(a)) sum.savedUpdated += 1;
-    data.saved[ch] = next;
-  }
-  return sum;
-}
-
 // ── The store ─────────────────────────────────────────────────────────────
 
 /**
@@ -411,10 +423,20 @@ export function openKanji({ store = createStore({ key: KEY, version: VERSION }),
     isSaved: (ch) => !!data.saved[ch],
     seenOf: (ch) => data.seen[ch] || null,
     savedOf: (ch) => data.saved[ch] || null,
-    beginSession() { beginSession(data); return commit(); },
-    record(chars, words, today) {
+    get sessionId() { return data.session.id; },
+    get sessionSource() { return sessionSource(data); },
+    /** Counted for the first time ever in this session: the reader's "New" chip. */
+    isNew: (ch) => !!data.seen[ch] && data.seen[ch].n === 1 && data.session.counted.includes(ch),
+    beginSession(src) { beginSession(data, src); return commit(); },
+    /**
+     * `opts.h`, when given, points the session at that History key first (null
+     * for none), so the kanji this read counts point at the text they were met
+     * in. One write for both.
+     */
+    record(chars, words, today, opts) {
+      const moved = opts && 'h' in opts ? setSessionText(data, opts.h) : false;
       const r = recordReading(data, chars, words, today);
-      commit(r.changed);
+      commit(r.changed || moved);
       return r.counted;
     },
     save: (ch, now) => commit(saveKanji(data, ch, now)),

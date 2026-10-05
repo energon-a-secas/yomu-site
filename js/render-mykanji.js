@@ -18,6 +18,7 @@ import { toHira } from './kana.js';
 import { toHiragana } from './vendor/wanakana.js';
 import { myKanji, dayOf } from './kanji-store.js';
 import { saveToggle, seenText, wordRuby, dayText, today, withKanji } from './render-save.js';
+import { lastSeenLine } from './render-remember.js';
 
 export const SORTS = Object.freeze(['recent', 'seen', 'due']);
 const SORT_LABEL = { recent: 'sortRecent', seen: 'sortSeen', due: 'sortDue' };
@@ -131,6 +132,7 @@ function savedItem(ch, ix, mine, now) {
       meaningText(info) ? h('p', { class: 'mk-mean', lang: 'en' }, meaningText(info)) : null,
       readingsLine(info),
       h('p', { class: 'mk-meta' }, meta.join(' · ')),
+      lastSeenLine(ch, seen, now),
       wordsLine(seen && seen.words),
     ]),
     h('button', { type: 'button', class: 'btn btn--ghost btn--sm mk-remove', 'data-act': 'mk-remove', 'data-ix': ix }, [

@@ -1,8 +1,11 @@
 // My kanji: the route, its actions, the review's keys, and the backup.
 //
-// #/kanji is a place, not a text. The page has three routes, the reader (no
-// hash), the list (#/kanji) and a review (#/kanji/review); takeFragmentText
-// in state.js reads only #t=, so a route is never read as Japanese. The
+// #/kanji is a place, not a text. The page has five routes, the reader (no
+// hash), the list (#/kanji), a review (#/kanji/review), the collection
+// (#/kanji/collection) and History (#/kanji/history); takeFragmentText in
+// state.js reads only #t=, so a route is never read as Japanese. The list,
+// the collection and History are the three places the screen's nav moves
+// between, and the parent of each but the list is the list. The
 // reader is hidden while another route shows, never emptied, so Back finds
 // the text, its reading and the chosen word as they were, scrolled to where
 // they were. Back is history.back() when the history entry before this one
@@ -14,25 +17,39 @@
 //
 // The save toggles in the reader act in place (render-save.js). The list and
 // the review are repainted whole, with focus handed to whatever now stands
-// where the pressed control stood.
+// where the pressed control stood. The collection's and History's actions
+// live in events-collect.js, which hooks in through onRoute() and the
+// exports below.
 
 import { state } from './state.js';
 import { $ } from './utils.js';
 import { ui } from './strings.js';
 import { kanjiInfo } from './reader.js';
-import { myKanji, KEY, MAX_IMPORT_BYTES, parseImport } from './kanji-store.js';
+import { myKanji, KEY } from './kanji-store.js';
+import { MAX_IMPORT_BYTES, parseImport } from './kanji-backup.js';
 import { createReview, show, answer, finished } from './review.js';
 import { view, paintList, paintSavedList, paintNote, OFTEN_LIMIT } from './render-mykanji.js';
 import { paintReview, reviewFocus } from './render-review.js';
+import { paintCollection } from './render-collection.js';
+import { paintHistory } from './render-history.js';
 import { paintSavedMarks, paintDueCount, today } from './render-save.js';
 import { paintSide, afterPaintAll } from './render.js';
 import { openDialog, bindDialog } from './dialogs.js';
 import { downloadText } from './neorgon-dom.js';
 import { describe, loadText } from './events-read.js';
 
-const ROUTES = Object.freeze({ '#/kanji': 'list', '#/kanji/review': 'review' });
-const HASH = Object.freeze({ reader: '', list: '#/kanji', review: '#/kanji/review' });
-const PARENT = Object.freeze({ review: 'list', list: 'reader', reader: 'reader' });
+const ROUTES = Object.freeze({
+  '#/kanji': 'list', '#/kanji/review': 'review', '#/kanji/collection': 'collection', '#/kanji/history': 'history',
+});
+const HASH = Object.freeze({
+  reader: '', list: '#/kanji', review: '#/kanji/review', collection: '#/kanji/collection', history: '#/kanji/history',
+});
+const PARENT = Object.freeze({
+  review: 'list', collection: 'list', history: 'list', list: 'reader', reader: 'reader',
+});
+/** The places the nav moves between, and the string each is titled with. */
+const TABS = Object.freeze({ list: 'myKanji', collection: 'navCollection', history: 'navHistory' });
+const hooks = [];
 
 let route = 'reader';
 const entries = new Map();   // yomuIx -> the route that history entry showed
@@ -50,6 +67,11 @@ export function currentRoute() {
   return route;
 }
 
+/** Run `fn(next, prev)` each time a route is shown, after it is painted. */
+export function onRoute(fn) {
+  hooks.push(fn);
+}
+
 // ── Focus that survives a repaint ─────────────────────────────────────────
 
 /** What is focused inside the screen, described well enough to find it again. */
@@ -57,14 +79,16 @@ function focusKey() {
   const a = document.activeElement;
   const body = $('mykanji');
   if (!a || !body || !body.contains(a)) return null;
-  return { id: a.id || null, act: a.dataset ? a.dataset.act : null, ix: a.dataset ? a.dataset.ix : null, sort: a.dataset ? a.dataset.sort : null };
+  const d = a.dataset || {};
+  return { id: a.id || null, act: d.act || null, ix: d.ix ?? null, sort: d.sort || null, shelf: d.shelf || null };
 }
 
 function refocus(key, fallback) {
   let el = null;
   if (key && key.id) el = $(key.id);
   if (!el && key && key.act) {
-    const same = [...document.querySelectorAll(`#mk-body [data-act="${key.act}"]`)];
+    let same = [...document.querySelectorAll(`#mk-body [data-act="${key.act}"]`)];
+    if (key.shelf) same = same.filter((b) => b.dataset.shelf === key.shelf);
     if (key.sort) el = same.find((b) => b.dataset.sort === key.sort) || null;
     else if (key.ix !== null && key.ix !== undefined && same.length) el = same[Math.min(Number(key.ix), same.length - 1)];
     else el = same[0] || null;
@@ -87,17 +111,20 @@ function focusInView(el) {
   if (r.top < 0 || r.bottom > window.innerHeight) el.scrollIntoView({ block: 'nearest' });
 }
 
-/** Repaint the screen for the route it shows, keeping focus where it was. */
-function repaint() {
+/** Repaint the screen for the route it shows, keeping focus, and a filter's caret, where they were. */
+export function repaint() {
   const key = focusKey();
-  const filter = $('mk-filter');
-  const caret = filter && document.activeElement === filter ? [filter.selectionStart, filter.selectionEnd] : null;
+  const field = document.activeElement;
+  const caret = field && field.id && field.tagName === 'INPUT' && $('mykanji').contains(field)
+    ? [field.id, field.selectionStart, field.selectionEnd] : null;
   if (route === 'review') paintReview(review);
   else if (route === 'list') paintList();
+  else if (route === 'collection') paintCollection();
+  else if (route === 'history') paintHistory();
   paintNote();
   if (key) refocus(key, null);
-  const again = $('mk-filter');
-  if (caret && again) again.setSelectionRange(caret[0], caret[1]);
+  const again = caret && $(caret[0]);
+  if (again) again.setSelectionRange(caret[1], caret[2]);
 }
 
 // ── Kanji information ─────────────────────────────────────────────────────
@@ -151,10 +178,18 @@ function showRegions(next) {
     else a.setAttribute('aria-current', 'page');
   }
   const back = $('mk-back-label');
-  if (back) back.textContent = ui(next === 'review' ? 'backToMyKanji' : 'backToReader');
+  if (back) back.textContent = ui(PARENT[next] === 'list' ? 'backToMyKanji' : 'backToReader');
   const lead = $('mk-lead');
   if (lead) lead.hidden = next === 'review';
-  document.title = next === 'reader' ? ui('pageTitle') : `${ui(next === 'review' ? 'review' : 'myKanji')} | Yomu`;
+  const nav = $('mk-nav');
+  if (nav) {
+    nav.hidden = next === 'review';
+    for (const a of nav.querySelectorAll('a[data-tab]')) {
+      if (a.dataset.tab === next) a.setAttribute('aria-current', 'page');
+      else a.removeAttribute('aria-current');
+    }
+  }
+  document.title = next === 'reader' ? ui('pageTitle') : `${ui(TABS[next] || 'review')} | Yomu`;
 }
 
 /**
@@ -198,19 +233,18 @@ export function applyRoute({ boot = false, focus = true } = {}) {
     (link || $('main')).focus({ preventScroll: true });
     return;
   }
-  if (next === 'review') {
-    review = createReview(myKanji().due(today()));
-    view.mode = 'review';
-  } else {
-    view.mode = 'list';
-  }
+  if (next === 'review') review = createReview(myKanji().due(today()));
+  view.mode = next;
+  // The nav's link keeps focus when it moved between the three places.
+  const fromNav = !!(document.activeElement && document.activeElement.closest && document.activeElement.closest('#mk-nav'));
   repaint();
-  loadInfo();
+  if (next === 'list' || next === 'review') loadInfo();
+  for (const fn of hooks) fn(next, prev);
   if (boot) return;
   if (prev === 'reader') window.scrollTo({ top: 0, behavior: 'instant' });
   if (next === 'review') reviewFocus(review)?.focus({ preventScroll: true });
   else if (prev === 'review') ($('mk-body').querySelector('[data-act="mk-start"]') || $('mk-title')).focus({ preventScroll: true });
-  else $('mk-title').focus({ preventScroll: true });
+  else if (!(fromNav && TABS[prev])) $('mk-title').focus({ preventScroll: true });
 }
 
 /**
@@ -220,6 +254,13 @@ export function applyRoute({ boot = false, focus = true } = {}) {
 function toReader() {
   if (route === 'reader') return;
   history.replaceState(history.state, '', `${location.pathname}${location.search}`);
+  applyRoute({ focus: false });
+}
+
+/** The reader, from History's Read again: a new history entry, so Back returns to History. */
+export function openReader() {
+  if (route === 'reader') return;
+  history.pushState(null, '', `${location.pathname}${location.search}`);
   applyRoute({ focus: false });
 }
 
@@ -235,7 +276,7 @@ function toReader() {
 export function hostLoad(text) {
   const again = text === state.text;
   if (!again) toReader();
-  return loadText(text, { restore: again });
+  return loadText(text, { restore: again, source: 'host' });
 }
 
 /** Go up one route: from a review to the list, from the list to the reader. */
@@ -318,7 +359,7 @@ async function importFile(file) {
 }
 
 /** Everything that shows the store, after it changed: the screen, the reader's marks and counts. */
-function afterChange() {
+export function afterChange() {
   if (route !== 'reader') {
     seedInfo();
     repaint();
