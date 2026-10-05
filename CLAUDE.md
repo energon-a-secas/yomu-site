@@ -322,7 +322,10 @@ when there is one) and Import validates and merges them (`cleanPhrases`,
 `mergePhrases`: higher count, earlier first, later last, earlier save).
 Export and Import live in `events-kanji.js`, so the kanji store is lent the
 two History calls (`myKanji().lendPhrases`, bound in `events-collect.js`)
-rather than opening History itself; the import note still counts only kanji.
+rather than opening History itself. The import note (`kanji-backup.js
+importNote`, pure, tested in `tests/phrases.test.mjs`) counts the saved
+kanji and kanji counts, then the saved phrases added or updated and any
+that did not fit, each phrase count in the singular when it is one.
 
 **"Times seen" counts texts, not keystrokes.** A session begins in
 `events-read.js`: `loadText()` (an example, a phrase or dialogue, `#t=`, an

@@ -29,7 +29,7 @@ import { $ } from './utils.js';
 import { ui } from './strings.js';
 import { kanjiInfo } from './reader.js';
 import { myKanji, KEY } from './kanji-store.js';
-import { MAX_IMPORT_BYTES, parseImport } from './kanji-backup.js';
+import { MAX_IMPORT_BYTES, parseImport, importNote } from './kanji-backup.js';
 import { createReview, show, answer, finished } from './review.js';
 import { view, paintList, paintSavedList, paintNote, OFTEN_LIMIT } from './render-mykanji.js';
 import { paintReview, reviewFocus } from './render-review.js';
@@ -364,13 +364,7 @@ async function importFile(file) {
     say(ui({ json: 'importJson', format: 'importFormat', empty: 'importEmpty' }[r.reason] || 'importFormat'));
     return;
   }
-  const sum = myKanji().merge(r.data);
-  const p = sum.phrases;
-  const parts = [ui('imported', { saved: sum.savedAdded, seen: sum.seenAdded + sum.seenUpdated })];
-  if (p && p.added + p.updated) parts.push(ui('importedPhrases', { n: p.added + p.updated }));
-  if (p && p.full) parts.push(ui('importPhrasesFull', { n: p.full }));
-  if (r.dropped) parts.push(ui('importDropped', { n: r.dropped }));
-  view.note = parts.join(' ');
+  view.note = importNote(myKanji().merge(r.data), r.dropped);
   afterChange();
 }
 

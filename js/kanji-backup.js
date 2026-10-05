@@ -21,6 +21,7 @@ import {
 // this module, and history-store.js imports kanji-store.js): no module of the
 // three uses another's bindings while it loads.
 import { cleanPhrases } from './history-store.js';
+import { ui } from './strings.js';
 
 export const EXPORT_FORMAT = 'yomu-kanji-export/1';
 
@@ -81,4 +82,19 @@ export function mergeInto(data, incoming) {
     data.saved[ch] = next;
   }
   return sum;
+}
+
+/**
+ * The note Import leaves on the screen, from what `merge` says it did (`sum`)
+ * and how many damaged entries `parseImport` left out. A count of one says so
+ * in the singular: it read "1 saved phrases added or updated".
+ */
+export function importNote(sum, dropped = 0) {
+  const p = sum.phrases;
+  const count = (n, one, many) => (n === 1 ? ui(one) : ui(many, { n }));
+  const parts = [ui('imported', { saved: sum.savedAdded, seen: sum.seenAdded + sum.seenUpdated })];
+  if (p && p.added + p.updated) parts.push(count(p.added + p.updated, 'importedPhrasesOne', 'importedPhrasesMany'));
+  if (p && p.full) parts.push(count(p.full, 'importPhrasesFullOne', 'importPhrasesFullMany'));
+  if (dropped) parts.push(ui('importDropped', { n: dropped }));
+  return parts.join(' ');
 }

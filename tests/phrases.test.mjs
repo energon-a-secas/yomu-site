@@ -371,3 +371,26 @@ test('Export then Import into a fresh browser restores the phrases and the kanji
   assert.ok(!('phrases' in k3.exportDoc('2026-10-05')));
   assert.equal(disk.has(KEY), false);
 });
+
+test('the Import note counts one saved phrase in the singular, in both languages (was "1 saved phrases")', async () => {
+  const { importNote } = await import('../js/kanji-backup.js');
+  const { useLang } = await import('../js/strings.js');
+  const sum = (added, updated, full) => ({ savedAdded: 1, seenAdded: 18, seenUpdated: 0, phrases: { added, updated, full } });
+  try {
+    useLang('en');
+    assert.equal(importNote(sum(1, 0, 0)), 'Imported: 1 saved kanji added, 18 kanji counts added or raised. 1 saved phrase added or updated.');
+    assert.equal(importNote(sum(0, 1, 0)).split('. ').pop(), '1 saved phrase added or updated.');
+    assert.equal(importNote(sum(2, 1, 0)).split('. ').pop(), '3 saved phrases added or updated.');
+    assert.match(importNote(sum(1, 0, 1)), /1 saved phrase added or updated\. 1 more did not fit: 500 saved phrases is the most\.$/);
+    assert.match(importNote(sum(1, 0, 2)), /2 more did not fit/);
+    assert.equal(importNote({ savedAdded: 0, seenAdded: 2, seenUpdated: 0 }), 'Imported: 0 saved kanji added, 2 kanji counts added or raised.');
+    assert.match(importNote(sum(0, 0, 0), 3), /3 damaged entries were left out\.$/);
+    useLang('es');
+    assert.match(importNote(sum(1, 0, 0)), / 1 frase guardada nueva o actualizada\.$/);
+    assert.match(importNote(sum(4, 0, 0)), / 4 frases guardadas nuevas o actualizadas\.$/);
+    assert.match(importNote(sum(1, 0, 1)), / Otra no cupo: 500 frases guardadas es el máximo\.$/);
+    assert.match(importNote(sum(1, 0, 3)), / Otras 3 no cupieron: /);
+  } finally {
+    useLang('en');
+  }
+});
