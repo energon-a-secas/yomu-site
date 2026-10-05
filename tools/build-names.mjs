@@ -199,7 +199,8 @@ async function main() {
   const dict = createDict({ fetchJson: async (p) => JSON.parse(fs.readFileSync(p, 'utf8')), base: `${path.join(SITE, 'data')}/` });
   const rows = [];
   let passed = 0;
-  for (const row of popularCandidates(records, katakanaRunCounts(sentences))) {
+  const confirmed = new Set([...picks].filter(([, p]) => p.by === 'evidence').map(([k]) => k));
+  for (const row of popularCandidates(records, katakanaRunCounts(sentences), confirmed)) {
     if (rows.length === POPULAR_MAX) break;
     const r = await analyze(row[0], { dict });
     const t = r.tokens.length === 1 ? r.tokens[0] : null;

@@ -64,12 +64,16 @@ const byCount = (a, b) => b[3] - a[3] || (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0
  * Every row a name of the tier could make, in the file's order, before the
  * builder keeps the first POPULAR_MAX that the page reads as names: from the
  * names tier's records (spelling -> record) and the corpus counts of
- * katakana runs.
+ * katakana runs. `confirmed` is the set of names whose spelling the linked
+ * English sentences chose (tools/lib/original.mjs, `by: 'evidence'`): the
+ * game asks for the spelling, so a name whose spelling is only JMnedict's
+ * first (レイラ Reira, ヨハネ Ioannes, バレ Bale, the slang verb's stem) is
+ * left out of it while the Word panel still shows it.
  */
-export function popularCandidates(records, counts) {
+export function popularCandidates(records, counts, confirmed) {
   const rows = [];
   for (const [text, rec] of records) {
-    if (!rec || !rec.o || rec.r) continue;
+    if (!rec || !rec.o || rec.r || !confirmed.has(text)) continue;
     const type = popularType(rec.n);
     const n = counts.get(text) || 0;
     if (!type || n < 1 || !KATAKANA_ROW.test(text)) continue;

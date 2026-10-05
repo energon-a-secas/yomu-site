@@ -313,3 +313,15 @@ test('a spelling the first tier gives a word it ships is that word first: 饂飩
   // and 上気 stays じょうき's: the mark is the first tier's k, not commonness
   assert.deepEqual(entries.get('上気').map((r) => r.g[0]), ['flushing (of one\'s cheeks)', 'extramarital sex']);
 });
+
+test('the game lists a name only when the English sentences chose its spelling', async () => {
+  const { popularCandidates } = await import('../tools/lib/popular.mjs');
+  const records = new Map([
+    ['トム', { o: 'Tom', n: 'given' }],
+    ['レイラ', { o: 'Reira', n: 'given' }],
+  ]);
+  const counts = new Map([['トム', 9], ['レイラ', 4]]);
+  const rows = popularCandidates(records, counts, new Set(['トム']));
+  assert.deepEqual(rows.map((r) => r[0]), ['トム']);
+  assert.deepEqual(popularCandidates(records, counts, new Set()), []);
+});
