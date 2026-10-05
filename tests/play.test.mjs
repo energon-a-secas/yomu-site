@@ -275,6 +275,66 @@ test('Odd one out: 4x4, then 5x5, then 6x6; one odd cell; the free round ends at
   assert.ok(!timed.over, 'the clock, not the count, ends a timed sitting');
 });
 
+test('Odd one out\'s clock stands still while the game is hidden, by the page or out of view, and never ends then', async () => {
+  const {
+    createClock, startClock, stopClock, hide, show, penalize, tickClock, leftAt, isHidden,
+  } = await import('../js/play-clock.js');
+  const c = createClock(60000);
+  assert.deepEqual(tickClock(c, 5), { left: 60000, over: false }, 'not started: nothing runs');
+  startClock(c, 1000);
+  assert.deepEqual(tickClock(c, 11000), { left: 50000, over: false });
+  // Runcible closes its sheet at 12,000; the observer reports it at 12,040
+  hide(c, 'view', 12000);
+  assert.ok(isHidden(c));
+  assert.equal(c.left, 49000);
+  // a minute behind a closed sheet spends nothing and ends nothing (was a round of 0)
+  for (let t = 12040; t <= 80000; t += 200) assert.deepEqual(tickClock(c, t), { left: 49000, over: false }, `t ${t}`);
+  // the page hidden too, then shown: the sheet still hides it
+  hide(c, 'page', 80100);
+  show(c, 'page', 80200);
+  assert.equal(leftAt(c, 90000), 49000);
+  // the sheet opens again: the clock runs from where it stood
+  show(c, 'view', 100000);
+  assert.deepEqual(tickClock(c, 101000), { left: 48000, over: false });
+  // a wrong tap costs three seconds, shown or hidden
+  penalize(c, 3000, 101000);
+  assert.equal(tickClock(c, 101000).left, 45000);
+  hide(c, 'view', 102000);
+  penalize(c, 3000, 102500);
+  assert.equal(c.left, 41000);
+  show(c, 'view', 200000);
+  // it runs out only while shown, and then it is over
+  assert.deepEqual(tickClock(c, 241000), { left: 0, over: true });
+  // a deadline that passed after the game was hidden is not one the learner missed:
+  // hidden at 300 with 700 left, the report arriving at 1,500
+  const d = createClock(1000);
+  startClock(d, 0);
+  hide(d, 'view', 300);
+  assert.deepEqual(tickClock(d, 1500), { left: 700, over: false });
+  show(d, 'view', 5000);
+  assert.deepEqual(tickClock(d, 5699), { left: 1, over: false });
+  assert.deepEqual(tickClock(d, 5700), { left: 0, over: true });
+  // started while hidden: the minute begins when it is shown
+  const e = createClock(60000);
+  hide(e, 'view', 0);
+  startClock(e, 10);
+  assert.equal(tickClock(e, 30000).left, 60000);
+  show(e, 'view', 40000);
+  assert.equal(tickClock(e, 41000).left, 59000);
+  stopClock(e);
+  assert.deepEqual(tickClock(e, 999999), { left: 59000, over: false }, 'stopped: nothing runs');
+});
+
+test('Odd one out\'s clock is bound to the view as well as the page (events-odd.js)', () => {
+  const src = readFileSync(join(SITE, 'js/events-odd.js'), 'utf8');
+  assert.match(src, /new IntersectionObserver\(/, 'an observer on the game');
+  assert.match(src, /hide\(clk, 'view'/);
+  assert.match(src, /hide\(clk, 'page'/);
+  assert.ok(!/Date\.now\(\)/.test(src), 'one timebase, performance.now(), the observer\'s');
+  const play = readFileSync(join(SITE, 'js/events-play.js'), 'utf8');
+  assert.match(play, /watchView\(\);/);
+});
+
 test('Odd one out draws a mixed-up pair more often', () => {
   const pairs = oddPairs(KANA_SETS, new Map(), []);
   const target = pairs.find((p) => pairKey(p.a, p.b) === pairKey('ソ', 'ン'));

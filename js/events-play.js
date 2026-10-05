@@ -37,7 +37,7 @@ import {
 } from './play-rounds.js';
 import { play, paintPlay, playFocus, resultOf } from './render-play.js';
 import {
-  startOdd, newOddSitting, startClock, stopClock, tapCell, moveInGrid, oddGoOn, onVisibility,
+  startOdd, newOddSitting, startClock, stopClock, tapCell, moveInGrid, oddGoOn, onVisibility, watchView,
 } from './events-odd.js';
 
 let epoch = 0;              // a new round or a new route makes older async work stale
@@ -333,6 +333,7 @@ export function bindPlay() {
   });
   document.addEventListener('keydown', onKey);
   document.addEventListener('visibilitychange', onVisibility);
+  watchView();
   // Another tab finished a round: read the store again rather than letting
   // this tab's next write put the old copy back.
   addEventListener('storage', (e) => {

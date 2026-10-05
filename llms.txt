@@ -180,7 +180,10 @@ its save toggle:
   while that holds fewer than ten.
 - Odd one out (#/play/odd): a grid of one character hiding one look-alike,
   4x4 growing to 6x6; 60 seconds with a wrong tap costing 3, or ten grids
-  untimed (the default when the device asks for reduced motion).
+  untimed (the default when the device asks for reduced motion). The clock
+  stands still while the game is not on screen (the page hidden, scrolled
+  away, or a host's sheet closed over the frame), and a round never ends
+  while it is.
 - Twins across scripts (#/play/twins): へ/ヘ, カ/力, エ/工, ロ/口, ニ/二, タ/夕,
   ト/卜, ハ/八, オ/才, り/リ and ー/一, told apart by the word around them.
 - Name decoder (#/play/names): a katakana name, said to be a name or a

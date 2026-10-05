@@ -6,8 +6,12 @@
 // Start the clock (never on arrival), a wrong tap costs 3 seconds, and the
 // next grid comes at once after one is found. Untimed (WCAG 2.2.1, chosen by
 // default under prefers-reduced-motion): ten grids, each found one followed
-// by its reason and Next. The clock is a deadline, not a count of ticks, and
-// it stands still while the page is hidden.
+// by its reason and Next. The clock is a deadline, not a count of ticks
+// (play-clock.js), and it stands still while the game is not on screen: the
+// page hidden (visibilitychange), or #pl-body out of what the top page
+// shows (an IntersectionObserver with no root), which is how an embed hears
+// that its host closed the sheet. A round that runs out ends only once an
+// observer has just seen the game on screen.
 //
 // A cycle on purpose, and a safe one: events-play.js imports these functions
 // and this file imports its painting and data helpers from there; neither
@@ -24,17 +28,24 @@ import { play, resultOf } from './render-play.js';
 import {
   show, repaint, ensureInfo, lookalikes, kanjiPoolNow, mixed, onPlay,
 } from './events-play.js';
+import {
+  createClock, startClock as runClock, stopClock as haltClock, hide, show as unhide, penalize, tickClock, isHidden,
+} from './play-clock.js';
 
 const TIMED_MS = 60 * 1000;
 const PENALTY_MS = 3 * 1000;
 
-let clock = null;
-let deadline = 0;
-let paused = false;
+let timer = null;
+let clk = createClock(TIMED_MS);
+let ending = null;          // the observer asked, at the deadline, whether the game is on screen
 let pairs = null;           // this sitting's pairs; null while they load
+const now = () => performance.now();
 
 export function newOddSitting() {
   stopClock();
+  const hidden = clk.hidden;
+  clk = createClock(TIMED_MS);
+  clk.hidden = hidden;      // what hides the game is the page's, not the sitting's
   Object.assign(play.odd, {
     sit: createOdd(play.odd.mode), left: TIMED_MS, running: false, line: '', last: null, cursor: 0, wantClock: false,
   });
@@ -67,15 +78,40 @@ function nextGrid() {
   ensureInfo([s.grid.base, s.grid.odd]);
 }
 
-function tick() {
+/** The timer's words, when the whole seconds changed. */
+function paintLeft(left) {
   const o = play.odd;
-  if (!o.running || paused) return;
-  const left = Math.max(0, deadline - Date.now());
   const was = Math.ceil(o.left / 1000);
   o.left = left;
   const el = $('pl-timer');
   if (el && Math.ceil(left / 1000) !== was) el.textContent = ui('timeLeft', { n: Math.ceil(left / 1000) });
-  if (left <= 0) endOdd();
+}
+
+function tick() {
+  if (!play.odd.running) return;
+  const t = tickClock(clk, now());
+  paintLeft(t.left);
+  if (t.over) confirmEnd();
+}
+
+/**
+ * The deadline passed with nothing known to hide the game: end the round
+ * once an observer has just seen it on screen. Its first report is now; a
+ * sheet closed a moment ago has hidden the clock (watchView) before this
+ * report arrives, since both observers report in the order they were made.
+ */
+function confirmEnd() {
+  if (ending) return;
+  const target = $('pl-body');
+  if (typeof IntersectionObserver !== 'function' || !target) { endOdd(); return; }
+  ending = new IntersectionObserver((entries) => {
+    const seen = entries[entries.length - 1];
+    ending.disconnect();
+    ending = null;
+    if (!play.odd.running || isHidden(clk) || document.visibilityState === 'hidden') return;
+    if (seen && seen.isIntersecting && tickClock(clk, now()).over) endOdd();
+  });
+  ending.observe(target);
 }
 
 export function startClock() {
@@ -84,9 +120,8 @@ export function startClock() {
   if (!pairs) { o.wantClock = true; return; }
   o.wantClock = false;
   o.running = true;
-  paused = false;
-  deadline = Date.now() + o.left;
-  clock = setInterval(tick, 200);
+  runClock(clk, now());
+  timer = setInterval(tick, 200);
   nextGrid();
   show();
   const cell = document.querySelector('#pl-body .pl-cell[tabindex="0"]');
@@ -94,8 +129,10 @@ export function startClock() {
 }
 
 export function stopClock() {
-  if (clock) clearInterval(clock);
-  clock = null;
+  if (timer) clearInterval(timer);
+  timer = null;
+  if (ending) { ending.disconnect(); ending = null; }
+  haltClock(clk);
   play.odd.running = false;
 }
 
@@ -122,7 +159,7 @@ export function tapCell(ix) {
   if (got === 'miss') {
     g.missed.add(ix);
     if (g.misses === 1) myPlay().mixed(g.odd, g.base);
-    if (o.mode === 'timed') { deadline -= PENALTY_MS; tick(); }
+    if (o.mode === 'timed') { penalize(clk, PENALTY_MS, now()); tick(); }
     o.line = ui(o.mode === 'timed' ? 'oddMissTimed' : 'oddMissFree');
     if (s.grid !== g || !onPlay() || play.result) return;
     repaint();
@@ -176,13 +213,24 @@ export function moveInGrid(e) {
 
 /** The page left open in another tab is not a minute lost. */
 export function onVisibility() {
-  const o = play.odd;
-  if (!o.running) return;
-  if (document.visibilityState === 'hidden') {
-    o.left = Math.max(0, deadline - Date.now());
-    paused = true;
-  } else if (paused) {
-    deadline = Date.now() + o.left;
-    paused = false;
-  }
+  if (document.visibilityState === 'hidden') hide(clk, 'page', now());
+  else unhide(clk, 'page', now());
+  if (play.odd.running) paintLeft(tickClock(clk, now()).left);
+}
+
+/**
+ * Nor is a game out of what the top page shows: scrolled away, or a host's
+ * sheet closed over its frame (visibilityState stays visible then). Bound
+ * once, on #pl-body, which every Play screen draws into.
+ */
+export function watchView() {
+  const target = $('pl-body');
+  if (typeof IntersectionObserver !== 'function' || !target) return;
+  new IntersectionObserver((entries) => {
+    const e = entries[entries.length - 1];
+    if (!e) return;
+    if (e.isIntersecting) unhide(clk, 'view', now());
+    else hide(clk, 'view', Math.min(e.time, now()));
+    if (play.odd.running) paintLeft(tickClock(clk, now()).left);
+  }).observe(target);
 }

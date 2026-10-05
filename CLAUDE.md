@@ -401,8 +401,9 @@ actions), `js/events-odd.js` (Odd one out's grid and clock),
 `js/render-play.js` (the list, the result, the shared lines),
 `js/render-games.js` (the four question screens), and, with no DOM,
 `js/play-rounds.js`, `js/play-store.js`, `js/play-data.js`,
-`js/play-kana.js` and `js/play-twins.js` (the authored content, CC0), all
-run by `tests/play.test.mjs`. The section is `#play` in `index.html`; the
+`js/play-clock.js` (Odd one out's deadline), `js/play-kana.js` and
+`js/play-twins.js` (the authored content, CC0), all run by
+`tests/play.test.mjs`. The section is `#play` in `index.html`; the
 header's Play link moves into the kit's ⋯ menu on a phone (with it kept, the
 Spanish header ran 2px past 390), and the embed bar has one beside My kanji.
 
@@ -414,8 +415,16 @@ Focus goes to the prompt on a new question, to the feedback once answered,
 to the heading on the result; Back from a game focuses its Start. Entering a
 game begins a new round; leaving abandons it, and nothing of it is kept.
 Odd one out's clock starts only on Start the clock, is a deadline that
-stands still while the page is hidden, and loses 3 seconds per wrong tap;
-the untimed ten grids are the default under `prefers-reduced-motion`. A
+stands still while the game is not on screen, and loses 3 seconds per wrong
+tap; the untimed ten grids are the default under `prefers-reduced-motion`.
+Not on screen is the page hidden (`visibilitychange`) or `#pl-body` out of
+what the top page shows (an IntersectionObserver with no root): when
+Runcible closes its sheet the frame's `visibilityState` stays visible, and a
+clock that heard only the first ran out behind the closed sheet and recorded
+a round of 0. A round that runs out ends only once an observer has just seen
+the game on screen (`events-odd.js confirmEnd`), and the arithmetic is
+`js/play-clock.js`, pure, in `performance.now()` (an observer entry's `time`
+says when it saw the game leave). A
 clock started before the grid's pairs are in waits for them: Firefox once
 moved focus from the first grid to the prompt when the load finished after
 the click.
