@@ -225,7 +225,18 @@ status, cleared when the next session begins; and `dialogs.js openDialog`
 places a dialog beside its opener inside the band of the frame the top page
 shows, which an IntersectionObserver with no root reports in the frame's own
 coordinates (measured the same in Chromium, WebKit and Firefox, cross-origin).
-A new floating element in an embed needs one of the two.
+A new floating element in an embed needs one of the two. Play's answers are
+the third case: `events-play.js reveal` calls `scrollIntoView({ block:
+'nearest' })` on the feedback, a new grid, a question or a result, now and
+again once the host has resized the frame. Measured 2026-10-05 from inside
+the cross-origin frame in Runcible's sheet at 390x844, it scrolls the sheet
+in Chromium and Firefox and does not in WebKit (`focus()` does not either),
+so in WebKit only the layout keeps them in view: `play.css` draws Next on the
+feedback's first row, a found grid's feedback takes the prompt's place above
+the grid, and under 600px wide (a phone, or any host's sheet) the options
+and grids are compact, cells 48 to 56px and never under 44 on a coarse
+pointer. A control that follows an answer goes inside the feedback block,
+never under it.
 
 **Nothing from Genki, the Japan Foundation apps, Tofugu, Yomitan, rikaichan
 or 10ten is in this repository.** The deinflection table was written for

@@ -67,13 +67,54 @@ function refocus(key) {
   if (el) el.focus({ preventScroll: true });
 }
 
+/**
+ * Bring `el` into what shows, with the least scroll: the feedback after an
+ * answer (the reason and Next), a new grid, a question, a result's heading.
+ *
+ * In an embed this is the host's sheet that has to move. Measured
+ * 2026-10-05 in Runcible's sheet at 390x844, from inside the cross-origin
+ * frame: scrollIntoView({ block: 'nearest' }) scrolls the sheet in Chromium
+ * and Firefox, and in WebKit it does not (neither does focus()), which is
+ * why play.css keeps Next on the feedback's first row and a found grid's
+ * feedback above the grid. The frame is as tall as its page only once the
+ * host has read yomu:height, so in an embed it runs again on the frame's
+ * next resize: below the frame's old height the element could not be
+ * reached, and a frame that shrank (a result after a grid) lets the sheet
+ * clamp its scroll and tuck the heading under its header.
+ */
+export function reveal(el) {
+  if (!el || !el.isConnected) return;
+  const go = () => { if (el.isConnected) el.scrollIntoView({ block: 'nearest' }); };
+  const embedded = document.documentElement.dataset.embed === '1';
+  if (!embedded || el.getBoundingClientRect().bottom <= window.innerHeight + 1) go();
+  if (!embedded) return;
+  let done = false;
+  const again = () => {
+    if (done) return;
+    done = true;
+    window.removeEventListener('resize', again);
+    go();
+  };
+  window.addEventListener('resize', again);
+  setTimeout(again, 600);
+}
+
+/** What a paint shows the learner next: the feedback, the result, a grid to search, a question. */
+function nextUp(el) {
+  if ($('pl-feedback')) return $('pl-feedback');
+  if ($('pl-done')) return $('pl-done');
+  return document.querySelector('#pl-body .pl-grid') || document.querySelector('#pl-body .pl-q') || el;
+}
+
 /** Repaint, keeping focus where it was when that control is still there. */
-export function repaint() {
+export function repaint({ again = false } = {}) {
   if (!onPlay()) return;
   const key = focusKey();
   play.speech = canSpeak();
   paintPlay();
   refocus(key);
+  // Meanings that arrived after an answer can make its feedback taller.
+  if (again && $('pl-feedback')) reveal($('pl-feedback'));
 }
 
 /** Repaint and put focus where the screen says it belongs now. */
@@ -83,7 +124,7 @@ export function show() {
   paintPlay();
   const el = playFocus();
   if (el) el.focus({ preventScroll: true });
-  if (el && el.getBoundingClientRect().top < 0) el.scrollIntoView({ block: 'nearest' });
+  reveal(nextUp(el));
 }
 
 // ── Data the games need ───────────────────────────────────────────────────
@@ -99,7 +140,7 @@ export async function ensureInfo(chars) {
     console.error('[yomu]', err);
     return;
   }
-  repaint();
+  repaint({ again: true });
 }
 
 export async function lookalikes() {

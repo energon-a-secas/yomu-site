@@ -24,6 +24,8 @@
 .pl-prompt:focus-visible { outline: 2px solid var(--accent-bright); outline-offset: 4px; }
 .pl-prompt > * { flex: 0 1 auto; }
 .pl-ask { font-size: var(--text-lg); line-height: 1.4; width: 100%; }
+/* Hear it beside a short question, not on a line of its own. */
+.pl-ask:has(+ .pl-hear) { width: auto; }
 .pl-romaji-big { font-size: 1.75rem; font-weight: 700; letter-spacing: 0.02em; }
 .pl-meaning { font-size: var(--text-lg); line-height: 1.4; overflow-wrap: anywhere; }
 .pl-meaning [lang="ja"], .pl-name [lang="ja"] { font-size: 1.5rem; }
@@ -64,12 +66,22 @@
 .pl-opt.is-wrong, .pl-cell.is-wrong { border-style: dashed; border-color: var(--danger-text); }
 .pl-tag { position: absolute; right: 6px; top: 4px; font-size: var(--text-sm); font-weight: 700; color: var(--text-primary); }
 
+/* The feedback: the mark and Next on one row, the reasons under them. Next
+ * comes last in the markup (the reading and tab order) and is drawn on the
+ * mark's row, so the way on is never the line that falls below what a
+ * host's sheet shows (CLAUDE.md, "An embedded frame is as tall as its page"). */
 .pl-feedback {
-  display: flex; flex-direction: column; gap: var(--space-1);
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center;
+  gap: var(--space-1) var(--space-3);
   padding-top: var(--space-3);
   border-top: 1px solid var(--border-subtle);
   font-size: var(--text-sm); line-height: 1.55;
 }
+.pl-feedback > .pl-mark { grid-column: 1; grid-row: 1; }
+.pl-feedback > .mk-actions { grid-column: 2; grid-row: 1; margin-top: 0; }
+.pl-feedback > .pl-why { grid-column: 1 / -1; }
+/* A found grid's feedback stands where its prompt stood, above the grid. */
+.pl-feedback--top { padding-top: 0; padding-bottom: var(--space-3); border-top: 0; border-bottom: 1px solid var(--border-subtle); }
 .pl-feedback:focus { outline: none; }
 .pl-feedback:focus-visible { outline: 2px solid var(--accent-bright); outline-offset: 4px; }
 .pl-mark { font-size: var(--text-base); font-weight: 600; }
@@ -124,13 +136,24 @@
   .pl-start { min-height: 44px; }
 }
 
+/* A phone, or a host's sheet (a frame some 400px wide at any screen size):
+ * a question, its options and its feedback, or a grid and its feedback,
+ * fit in what a 390x844 sheet shows. WebKit lets no frame scroll its host
+ * (events-play.js reveal), so this is the only thing that keeps them in
+ * view there. Cells and options stay 44px or more. */
 @media (max-width: 600px) {
-  .pl-opts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pl-q.mk-sec { margin-top: var(--space-4); }
+  .pl-q { gap: var(--space-2); }
+  .pl-opts { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2); }
   .pl-opts--wide { grid-template-columns: minmax(0, 1fr); }
   .pl-opts--three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .pl-opt { min-height: 4.5rem; }
+  .pl-opt { min-height: 3.5rem; padding: var(--space-2); }
+  .pl-opts--wide .pl-opt { min-height: 3rem; }
+  .pl-ch { font-size: 2.25rem; }
   .pl-grid { gap: 6px; }
-  .pl-grid[data-size="6"] { gap: 4px; }
+  .pl-grid[data-size="4"] { max-width: calc(4 * 3.5rem + 3 * 6px); }
+  .pl-grid[data-size="5"] { max-width: calc(5 * 3.25rem + 4 * 6px); }
+  .pl-grid[data-size="6"] { gap: 4px; max-width: calc(6 * 3rem + 5 * 4px); }
   .pl-word, .pl-name [lang="ja"] { font-size: 2rem; }
 }
 

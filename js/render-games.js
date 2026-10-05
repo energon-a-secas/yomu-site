@@ -80,17 +80,28 @@ function optionList(r, label, { wide = false } = {}) {
   }));
 }
 
-/** After an answer: right or not, why, and the way on. */
-function feedback(r, why) {
-  const p = r.picks[r.at];
-  const last = r.at >= r.questions.length - 1;
-  return h('div', { class: `pl-feedback${p.right ? ' is-right' : ''}`, id: 'pl-feedback', tabindex: '-1' }, [
-    h('p', { class: 'pl-mark' }, ui(p.right ? 'rightMark' : 'wrongMark')),
+/**
+ * The feedback block: the mark, the reason lines and Next, in that order for
+ * a screen reader and the keyboard. play.css draws Next on the mark's row, so
+ * the way on takes no line of its own: in a host's sheet at 390x844 it sat
+ * below what the sheet shows, and WebKit lets no frame scroll its host.
+ */
+function feedbackBlock({ right, mark, why, last, cls = '' }) {
+  return h('div', { class: `pl-feedback${right ? ' is-right' : ''}${cls}`, id: 'pl-feedback', tabindex: '-1' }, [
+    h('p', { class: 'pl-mark' }, mark),
     ...why.filter(Boolean).map((line) => h('p', { class: 'pl-why' }, line)),
     h('p', { class: 'mk-actions' }, h('button', {
       type: 'button', class: 'btn btn--secondary btn--sm', 'data-act': 'pl-next', 'aria-keyshortcuts': 'Enter Space',
     }, ui(last ? 'seeScore' : 'next'))),
   ]);
+}
+
+/** After an answer: right or not, why, and the way on. */
+function feedback(r, why) {
+  const p = r.picks[r.at];
+  return feedbackBlock({
+    right: p.right, mark: ui(p.right ? 'rightMark' : 'wrongMark'), why, last: r.at >= r.questions.length - 1,
+  });
 }
 
 function prompt(children, cls = '') {
@@ -176,7 +187,7 @@ function gridNodes(g, focusIx) {
     }, ja(ch)));
   }
   return h('div', {
-    class: 'pl-grid', role: 'group', 'data-size': g.size, 'aria-label': ui('gridLabel', { n }), 'aria-describedby': 'pl-prompt',
+    class: 'pl-grid', role: 'group', 'data-size': g.size, 'aria-label': ui('gridLabel', { n }), 'aria-describedby': g.solved && play.odd.mode === 'free' ? 'pl-feedback' : 'pl-prompt',
   }, cells);
 }
 
@@ -194,22 +205,21 @@ function oddNodes() {
   }
   if (!s || !s.grid) return out;
   const g = s.grid;
+  const found = o.mode === 'free' && g.solved;
   const status = o.mode === 'timed'
     ? [h('span', { id: 'pl-timer', role: 'timer' }, ui('timeLeft', { n: Math.ceil(o.left / 1000) })), ' · ', ui('foundSoFar', { n: s.found })]
     : [ui('gridOf', { at: Math.min(s.found + (g.solved ? 0 : 1), ROUND), of: ROUND })];
+  // A found grid's feedback takes the prompt's place, above the grid: below
+  // it, the reason and Next fell under what a host's sheet shows, at 390 and
+  // at 1440, and a grid is too tall to keep them in view any other way.
   out.push(h('section', { class: 'mk-sec pl-q', 'aria-labelledby': 'pl-title' }, [
     h('p', { class: 'pl-status mk-count' }, status),
     o.mode === 'free' && !s.found && !g.solved ? h('p', { class: 'quiet' }, ui('freeIntro')) : null,
-    prompt(h('p', { class: 'pl-ask' }, withKanji('oddPrompt', g.base)), 'pl-prompt--odd'),
-    h('p', { class: 'pl-live', id: 'pl-live', 'aria-live': 'polite' }, o.line || ''),
+    found
+      ? feedbackBlock({ right: true, mark: ui('oddFound'), why: [oddWhy(g)], last: s.over, cls: ' pl-feedback--top' })
+      : prompt(h('p', { class: 'pl-ask' }, withKanji('oddPrompt', g.base)), 'pl-prompt--odd'),
+    found ? null : h('p', { class: 'pl-live', id: 'pl-live', 'aria-live': 'polite' }, o.line || ''),
     gridNodes(g, Number.isInteger(o.cursor) ? o.cursor : 0),
-    o.mode === 'free' && g.solved ? h('div', { class: 'pl-feedback is-right', id: 'pl-feedback', tabindex: '-1' }, [
-      h('p', { class: 'pl-mark' }, ui('oddFound')),
-      h('p', { class: 'pl-why' }, oddWhy(g)),
-      h('p', { class: 'mk-actions' }, h('button', {
-        type: 'button', class: 'btn btn--secondary btn--sm', 'data-act': 'pl-next', 'aria-keyshortcuts': 'Enter Space',
-      }, ui(s.over ? 'seeScore' : 'next'))),
-    ]) : null,
     o.mode === 'timed' && o.last ? h('p', { class: 'pl-why pl-last' }, [h('span', { class: 'kj-key' }, ui('oddLast')), ' ', ...oddWhy(o.last)]) : null,
     keysLine('keysGrid'),
   ]));
