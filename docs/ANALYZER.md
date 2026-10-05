@@ -99,7 +99,8 @@ same text and the same data give the same tokens.
 | `spellings.js` | what a kana word learns from its kanji spelling, read off the record: the rank of kana homographs (すき is 好き before 隙, `b`, ties by `t`) and the morpheme cuts of a kana compound (そのうち is その\|内, `c`) | `kana.js`, `costs.js` |
 | `costs.js` | the closed classes (particles, copula), every cost, connection costs, homograph ranking | `kana.js` |
 | `key-rules.js` | dictionary keys the lattice refuses (ですか, ませんか, 雨が降る, になると) | `kana.js`, `costs.js` |
-| `names.js` | which kanji runs are names, a per-kanji guess at their reading, and the entry a name from the names tier carries (`NAME_TYPES`, `nameEntry`) | `kana.js`, `deinflect.js`, `numbers.js` |
+| `names.js` | which kanji runs are names, a per-kanji guess at their reading, and the entry a name from the names tier carries (`nameEntry`) | `kana.js`, `deinflect.js`, `numbers.js`, `name-types.js` |
+| `name-types.js` | JMnedict's name types in words, `{ en, es }` (`NAME_TYPES`, and `NAME_LINE_TYPES` for the Word panel's name line), a leaf the page reads without loading the analyzer | nothing |
 | `numbers.js` | reading numbers, counters and 何 + counter, and the sound changes between them | nothing |
 | `compounds.js` | katakana pieces that touch, joined into one compound token with `parts` | `kana.js` |
 | `sounds-like.js` | for a compound part no record covers, the English word it sounds like (the loanword rules run backwards), offered only when clearly ahead | `loan-align.js` |
@@ -144,7 +145,7 @@ runs them under plain node with the real shards read from disk.
 A token the second phase read is shaped the same, with these marks:
 
 - a **rare word** (a record from `data/dict/rNNN`) has `confidence: 'dict'` and `entry.tier === 2`, set by `dict.js` as the shard loads (the shards do not spend bytes on it), so the page can say "rare word"; its `alts` counts the other rare records of its key. The Word panel opens its meanings with a "Rare word" label and one sentence: it is not among the common words, so it was read from the full dictionary;
-- a **name** from the names tier has `kind: 'name'`, `confidence: 'dict'`, its JMnedict reading, and `entry = { r?, g, p: 'n-pr', nt, f?, s?, also? }`: `nt` the JMnedict types (`surname`, `given`, `masc`, `fem`, `place`), most evidenced first, `g` the same in English (`['surname', 'place name']`), the way a dictionary gloss is English, and `names.js` `NAME_TYPES` holds each in `{ en, es }` for the page. `also` is the rare word spelled the same, `{ r?, g }` (its reading and up to two glosses), where there is one: 清水 is the surname and also "spring water", and nothing in 清水を飲んだ tells the two apart, so the page can say both. A name the first pass guessed keeps `entry: null` and `confidence: 'guess'`.
+- a **name** from the names tier has `kind: 'name'`, `confidence: 'dict'`, its JMnedict reading, and `entry = { r?, g, p: 'n-pr', nt, f?, s?, also? }`: `nt` the JMnedict types (`surname`, `given`, `masc`, `fem`, `place`, and `person` for a katakana name only), most evidenced first, `g` the same in English (`['surname', 'place name']`), the way a dictionary gloss is English, and `name-types.js` `NAME_TYPES` holds each in `{ en, es }` for the page. `also` is the rare word spelled the same, `{ r?, g }` (its reading and up to two glosses), where there is one: 清水 is the surname and also "spring water", and nothing in 清水を飲んだ tells the two apart, so the page can say both. A name the first pass guessed keeps `entry: null` and `confidence: 'guess'`.
 
 These fields appear only where they apply:
 
@@ -153,7 +154,9 @@ These fields appear only where they apply:
 - a `furigana` entry carries `whole: true` when the dictionary says its run is read as a whole (`f` is `*`: 今日 きょう), so nothing shares the ruby out between the characters;
 - a `dakuten`, `handakuten` or `devoiced` sound is one entry per token, with every kana it covers in `spans` (`at` is the first), so a sentence with eight voiced kana lists the mark once per word, not eight times;
 - a `furigana` entry of a `number` token carries `whole: true` when the number and its counter are read as one word (八日 ようか, 二十歳 はたち, 一人 ひとり), exactly as a dictionary `*` does;
-- a `number` token carries `counterChange`, true when a number and its counter bent each other (いっぽん) or the number bent inside itself (ろっぴゃく).
+- a `number` token carries `counterChange`, true when a number and its counter bent each other (いっぽん) or the number bent inside itself (ろっぴゃく);
+- a `number` token whose whole surface is a first-tier key read the way the number is read carries that record as its `entry` (何名 "how many people"), and is otherwise the token it was (see "Numbers and counters");
+- a katakana **name** the names tier spells in Latin letters carries `name: { o, types }`: `o` its original spelling (トム `{ o: 'Tom', types: ['given'] }`), `types` the ids of `entry.nt`. The Word panel shows it on a line of its own, "Name: Tom (given name)", "Nombre: Tom (nombre de pila)". It is the token's and not the entry's, because on a dictionary record `o` is something else (the place of a spelling, below).
 
 Rules the token obeys:
 
@@ -172,6 +175,19 @@ way the small ka is written (か, ヶ, ケ, カ, ヵ, 箇), a length of time wit
 (三年間, 十分間, 一か月間) and 週間. A dictionary key spelled the same way
 keeps the span only when it is among the commonest words (十分 じゅうぶん); 何名
 "how many people", band 4, is the counter's なんめい.
+
+Such a key still says what the number means (2026-10-05): a number token
+whose whole surface is a first-tier key keeps the record of that key whose
+reading is the token's, as its `entry` (`lattice.js countedRecord`): 何名 is
+"how many people", 何分 なんぷん "what minute" (not なにぶん "anyway"), 三人
+"three people". Its kind, reading, furigana, sounds and notes are the ones it
+had, and the Word panel still calls it a number; 三名 has no key and no
+record, and 十分 read じゅっぷん none either, since its key is じゅうぶん,
+"enough". Only first-tier keys: the key is a substring of the run, so the
+first pass already asked for it, and a text with no guess fetches no second
+tier. 何 and a counter ships in the first tier on corpus evidence even where
+its parts read the same way (`tools/lib/extra.mjs`, "asked"): 何階 "what
+floor", 何個, 何番, 何ヶ月 and 何月 joined 何名.
 
 名 counts people (a booking, a class list): いちめい, にめい, さんめい, よんめい,
 ごめい, ろくめい, ななめい, はちめい, きゅうめい, じゅうめい, and no number bends
@@ -198,7 +214,7 @@ under 140 KB.
 
 The dictionary is cut from jmdict-eng, pinned in `tools/lib/sources.mjs`.
 Its entries with a common spelling (jmdict-eng-common, 22,637 of 218,672)
-all ship. An entry outside that set ships only for one of three reasons, each
+all ship. An entry outside that set ships only for one of four reasons, each
 naming the keys it ships under (`tools/lib/extra.mjs` explains them):
 
 - **evidence**: a kanji spelling of two or more characters the corpus matches
@@ -207,12 +223,25 @@ naming the keys it ships under (`tools/lib/extra.mjs` explains them):
   key with a particle or an honorific prefix, or a run of common keys read the
   same way (殺人犯, 犬小屋 いぬごや, 七面鳥, 学園祭 がくえんさい); a suffix
   (`suf`, `ctr`) also ships under its hiragana reading when that is a common
-  key (置き under おき, for 十分おきに);
+  key (置き under おき, for 十分おきに). 何 and a counter (何階, 何個) needs
+  no test of its parts, because the analyzer reads it as one number token
+  whatever the key says and the key only lends it a gloss;
 - **kana**: a word usually written in kana, spelled with one shipped kanji,
   whose hiragana is no key yet (すもも); only the kana ships;
 - **suru**: under a common hiragana key none of whose records takes する, the
   one outside entry that does, spelled with the most frequent kanji (帰社
-  under きしゃ). A noun that takes no する pays `COST.suruNeedsVs` before one.
+  under きしゃ). A noun that takes no する pays `COST.suruNeedsVs` before one;
+- **mixed** (2026-10-05): a spelling of kanji and one run of two or more
+  hiragana, from an entry that is no expression, that writes in hiragana what
+  an all-kanji spelling of the entry writes in kanji (あめ色 for 飴色), where
+  the first tier, built for the three reasons above, files another word first
+  under that hiragana (あめ is 雨 first): the first pass would read the kana
+  as that word. It passes every test of the evidence rule but the count and
+  the parts, and its hiragana may not start with a particle after a kanji.
+  Its katakana form (アメ色) ships with the same records, unless JMdict spells
+  something that way. It is banded only on `MIN_MATCHES` matches, so the
+  bands the common keys fill do not grow ("飴色 written あめ色 or アメ色",
+  below).
 
 The corpus counts a spelling, not a word: 上野 was matched for Ueno, the
 place and surname, and shipped under its one entry outside the common set
@@ -436,10 +465,29 @@ those as words, so nothing would ask), for one of two reasons:
   of the rest; this rule brings in the other 31 (石井, 前田, 長谷川), and
   given names Tatoeba never has (恵子, 直樹, 浩之).
 
+and, for katakana alone (2026-10-05):
+
+- **decoded**: a katakana given name, surname, person or place JMnedict
+  spells in Latin letters, whether the corpus has it or not. It ships with
+  that spelling, `o` (トム Tom, アークレイリ Akureyri): the first of its
+  translations, in JMnedict's order and from a type that ships, that is
+  Latin letters, single spaces, hyphens and apostrophes once one trailing
+  parenthesis is cut (ハナ "Hana (Hawaii)" is Hana). 30,962 katakana names
+  ship (1,126 before), 30,955 of them with `o`.
+
 One kanji alone is left out (森, 林, 東 are words as often as names), and so
-are JMnedict's `unclass` and `person` types: the 2,248 katakana names of
-those types the corpus has as a substring include ケット, パソ and ディ, so
-スーザン, typed `unclass`, stays a guess.
+are JMnedict's `unclass` type and, for a kanji spelling, its `person` type:
+the 2,248 katakana names of those types the corpus has as a substring
+include ケット, パソ and ディ, so スーザン, typed `unclass`, stays a guess. A
+katakana `person` (ナポレオン, アインシュタイン) ships since 2026-10-05, with
+the decoded names.
+
+"The first" is the rule, even where JMnedict lists the katakana's own
+romanization first (ケイト Keito, Cate, Kate; リンダ Rinda, Linda; マリア
+Malhia, Maria): passing over a romanization while another translation was
+left changed 36 of the popular names below, more of them for the worse
+(カレン Caren, シャロン Chalon, マリコ Malko, ロビンソン Eric) than for the
+better (ケイト Cate, リンダ Linda, メグ Meg).
 
 JMnedict lists every reading a spelling was ever given, in kana order (田中
 is たなか, and たんか, だなか, でんちゅう and six more), so the reading is
@@ -487,7 +535,8 @@ it, a guess again); of its 59 places, 52 right before and 54 after (相模,
   (16 bits a key), so the second phase learns which name shard to fetch
   from the file it needs anyway
 - `data/names/nNN.json`, format `yomu-names/1`: `{ first, last, entries:
-  { "田中": { "r": ["たなか"], "n": "surname place", "f": "た|なか", "s": 1, "S": 1 } } }`
+  { "田中": { "r": ["たなか"], "n": "surname place", "f": "た|なか", "s": 1, "S": 1 },
+  "トム": { "n": "given", "s": 1, "o": "Tom" } } }`
 
 | Field | Meaning |
 |---|---|
@@ -496,6 +545,54 @@ it, a guess again); of its 59 places, 52 right before and 54 after (相模,
 | `f` | the reading split over the kanji, cut like a dictionary `f`; `*` read as a whole |
 | `s` | 1 for a strong name (`ext` of 5 or more) |
 | `S` | 1 for a sure one: `ext` of 20 or more, at least 5 of them full names or surnames (never without `s`) |
+| `o` | a katakana name only: how it is written in Latin letters (`Tom`), see "decoded" above; the token carries it as `name.o` |
+
+`n` holds `person` on a katakana name only. The index's inline filter is 16
+bits a key, as before: with 41,547 keys (11,711 before) it is 113.7 KB, 85.4
+KB at gzip -9 (33.3 KB, 24.8 KB), and a text whose first pass guessed loads
+it once, which is what the names cost that text (below).
+
+`data/names/popular.json`, format `yomu-names-popular/1`, is not read by the
+analyzer: it is the input of a game that asks a learner to read a name.
+
+```json
+{ "_licence": {}, "format": "yomu-names-popular/1",
+  "names": [ ["トム", "Tom", "given", 15594], ["メアリー", "Mary", "given", 3158] ] }
+```
+
+A row is the katakana spelling (letters of the katakana block, ー and ・
+only), the original spelling (the name record's `o`), one type (`given` for
+JMnedict's given, masc and fem, `surname`, `place`: the first of the record's
+types that is one) and how many Tatoeba sentences hold the name as a whole
+katakana run. Highest count first, then the spelling in plain JS string
+order; a count of at least 1; at most 1,000 rows; the names shards' licence
+block. `tools/build-names.mjs` emits it (`tools/lib/popular.mjs`) and keeps
+a name only when the analyzer, reading it alone over the data just built,
+returns it as one name token with that spelling: バラ is a name in JMnedict
+and a rose in all 126 sentences that have it, and the page reads the rose.
+676 names (27.9 KB) pass; 408 candidates did not. `tools/check-data.mjs`
+holds the rows to the format, the order and the names tier beside it.
+
+The decoded names, measured over all 248,924 Tatoeba sentences
+(`tools/compare-readings.mjs`, the names before and after, the same code
+and dictionary, 2026-10-05): 20,534 sentences change, 23,307 tokens only
+by the original spelling a name now carries (トム Tom and メアリー Mary most
+of them), 46 by segmentation, reading or kind, and no first-pass token;
+guesses fall from 14,579 to 14,542 (katakana guesses 2,996 to 2,959). Of
+the 34 distinct reading changes, 25 read better (ホメロス Homer,
+ピュタゴラス, ドヴォルザーク, ニーチェ, ロビンフッド, シェラトン Sheraton and
+ホテル, ソー in マイティ・ソー Thor where it read "saw", クリストファーコロンブス
+and ジョージワシントン one person each), 4 better in part (イザドラ and
+ダンカン, ジョヴァンニ and a guess, a guess and カートライト), and 5 worse,
+each a name carved out of a katakana run whose rest is a word: ポートサイドホテル
+is Port Said and "hotel", プリンスマイルズ "pudding" and Smiles,
+ストラットフォード Strutt and "ford", ウェストハンプトン "waist" and Hampton,
+ハンプトンコート Hampton and "coat". Letting a name that is not strong
+(`s`) stand only as a whole katakana run was measured and is not the rule:
+over the same sentences it changed 23 readings, undoing those 5 and the 4
+partial ones, and turning 14 that were right into guesses or words
+(ジョージブッシュ's ブッシュ "bush", ロバートブラウン's ブラウン "brown",
+リンカーンセンター, ジャスティンビーバー, コーエン).
 
 ### The second phase
 
@@ -668,29 +765,87 @@ fetched a mean of 3.499 files, against 3.510 before, and the second phase
 0.745 against 0.746: which absent keys a filter lets through moves with any
 rebuild, and on average it did not grow.
 
-### Open: 飴色 written あめ色 or アメ色 (2026-10-05)
+### 飴色 written あめ色 or アメ色 (2026-10-05)
 
 飴色 (あめいろ, amber, the colour of candy) is one JMdict entry outside the
 common set, spelled 飴色 and あめ色; JMdict has no アメ色. So the second tier
-holds 飴色, あめ色 and あめいろ, and the first tier none of them: the evidence
+held 飴色, あめ色 and あめいろ, and the first tier none of them: the evidence
 rule (`tools/lib/extra.mjs`) leaves out a spelling whose parts are common keys
 read the way the entry is read, and 飴 あめ + 色 いろ, or あめ + 色, is that,
 whatever the corpus counts. That rule assumes the parts say what the word
 says; here they do not. 飴色 alone reads right (the first pass guesses it as a
-name and the second phase finds the rare word). あめ色 has no guess, so the
-second phase never runs, and the first pass reads あめ as 雨 "rain" (its first
-homograph) and 色. In アメ色 the first pass guesses アメ alone, and the second
-phase, which may not touch 色, finds the rare prefix アメ "American".
+name and the second phase finds the rare word). あめ色 had no guess, so the
+second phase never ran, and the first pass read あめ as 雨 "rain" (its first
+homograph) and 色. In アメ色 the first pass guessed アメ alone, and the second
+phase, which may not touch 色, found the rare prefix アメ "American".
 
-Neither is a price to change: the first pass does not have the word, and the
-second phase may not read past the guess. The fix is a first-tier rule (ship
-a spelling that mixes kana and kanji when the first pass would read its kana
-as another word, and fold a katakana spelling such as アメ色 to its hiragana
-one), which needs a rebuild of data/dict from the pinned upstreams. The
-download cache is gone, and Tatoeba keeps one URL for an export it redoes
-every week (`tools/lib/sources.mjs`), so a rebuild today would count a later
-export than the committed bands were counted from and could move bands for
-keys this has nothing to do with. Left open, not half done.
+Neither was a price to change: the first pass did not have the word, and the
+second phase may not read past the guess. The fix is the first tier's fourth
+rule, **mixed** (`selectMixed`, "Data formats" above): a spelling of kanji
+and one run of hiragana ships when the first tier, built without it, files
+another word first under that hiragana, and its katakana form ships folded
+onto it. The first tier is built twice for it, once to learn what its kana
+keys file first. あめ色 and アメ色 are now one first-tier word each, あめいろ
+"amber", read by the first pass; 雨, 色 and あめ alone are what they were.
+
+Measured over all 248,924 Tatoeba sentences of the export of 2026-10-03
+(`tools/compare-readings.mjs`, the data before the rule against the data
+with it, the same code):
+
+| | before | after |
+|---|---:|---:|
+| first-tier keys | 39,358 | 40,870: 808 mixed spellings (5 of them for two entries) and 704 katakana folds, 134,790 bytes of records |
+| first tier, bytes | 4,069,850 | 4,210,221 (the core unchanged, 1,175 keys; 29 range shards, 28 before; filter 107.2 KB, 103.1 KB) |
+| second tier, bytes | 44,550,810 | 44,477,226 (the spellings moved up) |
+| sentences whose tokens change | | 117 |
+| changes of segmentation, reading or kind | | 118 (82 distinct) |
+| first-pass tokens that change, of 2,356,219 | | 230 |
+| guesses | 14,589 | 14,579 |
+| dictionary files per sentence, 1,556 sentences on a fresh dictionary | median 3, mean 3.729 | median 3, mean 3.774 |
+
+Of the 82 distinct changes 80 read better: まつ毛 eyelashes (was 松 "to
+wait" and 毛), 耳あか earwax (耳 and "red"), 水ぼうそう chickenpox (水 and
+"acting rashly"), 国じゅう, 心配ごと, つり橋, てんとう虫, 牛ひき肉, ひと雨,
+ひと昔前 (ひと and a guessed name), 止めど in 止めどなく, アメ色, アメ玉 and
+モモ肉. One reads worse: 毎秋りんご園 is 毎|秋りん|ご|園 (秋りん, the long
+autumn rains, took the first kana of りんご). One trades a wrong word for
+another: 疲労がつき物 is 憑き物 "evil spirit" where 付き物 is meant (it was
+つき "Moon" and 物). Two guards were measured before they were kept: a
+hiragana part that starts with a particle right after a kanji is left out
+(with it, 何がしたい read 何がし|たい "a certain amount", and 友達がいなかった
+友達がい|なかった "true friendship"), and a mixed spelling is banded only on
+`MIN_MATCHES` matches, as the evidence rule counts evidence (banded on any
+match, 77 of them went to q4 and pushed it past the 6% the common keys'
+bands may grow by; the readings were the same either way).
+
+### Rebuilt from fresh upstreams, 2026-10-05
+
+Every upstream was downloaded again. The jmdict-simplified assets and
+KanjiVG matched their pinned digests; Tatoeba re-exports weekly under one
+URL, and its pin now records the export the server dates 2026-10-03
+(248,924 sentences). Built with that export and the rules of the day,
+every file under data/ came out byte for byte the committed one, and
+`tools/compare-readings.mjs` found 0 of the 58,573 first-pass tokens it
+compares over the two sets above (6,223 sentences) changed. Then three
+changes, each measured over all 248,924 sentences against the build
+without it (the before and after are in the sections they belong to):
+
+| change | sentences | segmentation, reading or kind | gloss or name only | first-pass tokens | guesses |
+|---|---:|---:|---:|---:|---:|
+| mixed spellings (あめ色) | 117 | 118 | 1 | 230 | 14,589 to 14,579 |
+| 何 and a counter on evidence (data) | 87 | 0 | 87 | 87 | unchanged |
+| a number keeps its key's record (code) | 3,089 | 0 | 3,242 | 3,242 | unchanged |
+| decoded katakana names | 20,534 | 46 | 23,307 | 0 | 14,579 to 14,542 |
+| all of it, against the committed code and data | 23,627 | 164 | 26,637 | 3,559 | 14,589 to 14,542 |
+
+The first-pass tokens of the second and third rows changed by their
+`entry` alone. Files per sentence, each of 1,556 sentences on a fresh
+dictionary: median 3 dictionary files and 8 in all, before and after
+(means 3.729 and 8.573 before, 3.744 and 8.588 after; KB mean 832 before,
+851 after, the larger names index). The nine sentences of the layout
+measurement: median 4 dictionary files, 7 in all, 675 KB before and 679
+KB after; 田中 loads 1,655 KB (1,571), the paragraph 27 dictionary files
+(29).
 
 ## Katakana compounds and loanword rules (2026-10-03)
 
