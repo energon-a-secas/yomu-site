@@ -77,6 +77,27 @@ export function paintRemember(s = state) {
 }
 
 /**
+ * Say something that would be a toast. In an embed it is a line under the
+ * status instead: the frame is as tall as its page, so a toast fixed to the
+ * bottom of the frame sat below what the host's sheet shows, and nobody saw
+ * it. The line stays until the next reading session begins (clearNote).
+ */
+export function notify(msg, duration = 5000) {
+  const line = $('embed-note');
+  if (state.embed && line) {
+    fill(line, msg);
+    line.hidden = false;
+    return;
+  }
+  showToast(msg, { duration });
+}
+
+export function clearNote() {
+  const line = $('embed-note');
+  if (line && !line.hidden) { fill(line, []); line.hidden = true; }
+}
+
+/**
  * After a read that was not a restore: name the kanji it collected for the
  * first time, and once the jōyō list is in, how far along the list the
  * learner is and any milestone the read crossed. The list is fetched here
@@ -98,7 +119,7 @@ export function announceCollected(fresh, mine = myKanji()) {
     if (step.counts.length) parts.push(ui('toastCount', { n: count(step.counts[step.counts.length - 1]) }));
     return parts.join(' ');
   }, () => head).then((msg) => {
-    showToast(msg, { duration: 5000 });
+    notify(msg, 5000);
     return msg;
   });
 }

@@ -15,7 +15,7 @@
 // as they are: a key with no text behind it reads as the kind of text it was.
 
 import { state, savePrefs } from './state.js';
-import { $, showToast, attrSel } from './utils.js';
+import { $, attrSel } from './utils.js';
 import { ui } from './strings.js';
 import { kanjiInfo } from './reader.js';
 import { myKanji } from './kanji-store.js';
@@ -27,6 +27,7 @@ import {
   collect, paintKanjiDialog, shelfTiles, shelfChars, tileChar, FILTERS,
 } from './render-collection.js';
 import { hist, paintHistoryList } from './render-history.js';
+import { notify } from './render-remember.js';
 import { openDialog, bindDialog } from './dialogs.js';
 import { describe, loadText, focusHome, rememberNow } from './events-read.js';
 import {
@@ -133,7 +134,7 @@ export const COLLECT_ACTIONS = {
     setRemember('on');
     rememberNow();
     focusHome();
-    showToast(ui('rememberOnToast'), { duration: 4000 });
+    notify(ui('rememberOnToast'), 4000);
   },
   'remember-no': () => {
     setRemember('off');

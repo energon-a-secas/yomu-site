@@ -34,7 +34,7 @@ import { cancel } from './speech.js';
 import { myKanji, wordsByKanji } from './kanji-store.js';
 import { myHistory, textKey } from './history-store.js';
 import { today } from './render-save.js';
-import { hasJapanese, announceCollected } from './render-remember.js';
+import { hasJapanese, announceCollected, clearNote } from './render-remember.js';
 
 let seq = 0;
 
@@ -90,6 +90,7 @@ export function rememberNow() {
 function beginSession(source) {
   myKanji().beginSession(source);
   state.seenBefore = null;
+  clearNote();
 }
 
 /** Whether a note still has something to point at in this analysis. */

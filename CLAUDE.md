@@ -7,7 +7,7 @@ the grammar, and lists the kanji with their readings in this text. Runcible
 embeds it (`docs/EMBED.md`). Everything runs in the browser from committed
 JSON; nothing is sent anywhere unless the learner clicks a translate link.
 
-**Live:** yomu.neorgon.com (not published yet) · **Port:** 8895
+**Live:** yomu.neorgon.com · **Port:** 8895
 
 ## Run
 
@@ -71,7 +71,10 @@ signal for those is open work, not a reason to reorder the data.
 **The dictionary glosses are upstream data, not our copy.** Seven JMdict
 glosses contain a word the fleet's copy rules ban (パワフル is "powerful"); the
 builder drops a banned word only when the sense has another gloss. Do not
-"fix" them in `data/`: rebuild, never hand-edit a shard.
+"fix" them in `data/`: rebuild, never hand-edit a shard. The same goes for
+KANJIDIC's radical numbers ("one radical (no.1)" beside "one" for 一, 99
+kanji in all): the data keeps them and `reader.js shownMeanings` leaves them
+out of every meaning the page draws, while another meaning is left.
 
 **Words outside JMdict's common set ship by rule, not by count alone.**
 `tools/lib/extra.mjs` names the three rules and `MIN_MATCHES` (5) is
@@ -162,6 +165,19 @@ links are built at click time.
 `event.source === window.parent`, and posts only to the origin of the last
 accepted `yomu:hello`. A new host goes into that list and into `docs/EMBED.md`
 in the same commit.
+
+**An embedded frame is as tall as its page, so nothing may be fixed to the
+frame's viewport and expected on screen.** The host sizes the iframe from
+`yomu:height`, so the frame's viewport is the whole page and the host's sheet
+shows only a window of it. The first cross-browser check found the
+new-kanji toast drawn below that window in all six runs, and a kanji's
+dialog centred a screen away from it. So in an embed `render-remember.js
+notify()` writes the toast's text into `#embed-note`, a line under the
+status, cleared when the next session begins; and `dialogs.js openDialog`
+places a dialog beside its opener inside the band of the frame the top page
+shows, which an IntersectionObserver with no root reports in the frame's own
+coordinates (measured the same in Chromium, WebKit and Firefox, cross-origin).
+A new floating element in an embed needs one of the two.
 
 **Nothing from Genki, the Japan Foundation apps, Tofugu, Yomitan, rikaichan
 or 10ten is in this repository.** The deinflection table was written for
@@ -267,7 +283,9 @@ Back is `history.back()` only when the history entry before this one (each
 entry is stamped `state.yomuIx`) is the parent route; otherwise it is a
 replaceState, so Back never leaves the site and never steps into a review.
 Start review applies the route at once, because a Space pressed before
-`hashchange` fired landed on the list.
+`hashchange` fired landed on the list. A route change closes any open dialog
+first: browser Back with a tile's dialog open drew History under a dialog
+that stayed up.
 
 **No kanji is written into an attribute here either.** Toggles find their
 kanji by `data-kid` (the analysis' kanji list) or `data-ix` (the list the

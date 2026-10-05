@@ -236,6 +236,7 @@ dialog.dialog--wide { width: min(760px, calc(100% - 16px)); }
    once. The card is a quiet panel, not an alert; its one primary button is
    the reader's only accent outside the reading. */
 .seen-before { font-size: var(--text-sm); line-height: 1.5; color: var(--text-secondary); }
+.embed-note { font-size: var(--text-sm); line-height: 1.5; color: var(--text-secondary); }
 .seen-before:empty { display: none; }
 .remember-ask {
   display: flex; flex-direction: column; gap: var(--space-2);
@@ -747,20 +748,22 @@ a.mk-open[aria-current="page"] { background: rgba(255, 255, 255, 0.12); border-c
 .mk-sentence mark { background: var(--surface-2); color: inherit; box-shadow: inset 0 -2px 0 var(--text-secondary); padding: 0 1px; }
 
 /* ── The Collection ──────────────────────────────────────────────
- * The shelves are hairline rows that open; tiles are squares in ink. A kanji
- * not collected yet is dashed and muted, still readable, since it is the one
- * a learner is looking out for. */
+ * The shelves are hairline rows that open. A collected tile is lit with the
+ * same indigo wash the reading lights a kanji with, so a shelf reads as
+ * filled at a glance; a kanji not collected yet is dashed and muted, still
+ * readable, since it is the one a learner is looking out for. The bars fill
+ * in the bright accent for the same reason. */
 .col-total { margin-top: var(--space-3); font-size: var(--text-lg); font-weight: 600; font-variant-numeric: tabular-nums; }
 .col-bar {
   -webkit-appearance: none; appearance: none;
   display: block; width: 100%; height: 6px;
   border: 0; border-radius: 999px;
-  background: var(--surface-2); color: var(--text-secondary);
+  background: var(--surface-2); color: var(--accent-bright);
   overflow: hidden;
 }
 .col-bar::-webkit-progress-bar { background: var(--surface-2); border-radius: 999px; }
-.col-bar::-webkit-progress-value { background: var(--text-secondary); border-radius: 999px; }
-.col-bar::-moz-progress-bar { background: var(--text-secondary); border-radius: 999px; }
+.col-bar::-webkit-progress-value { background: var(--accent-bright); border-radius: 999px; }
+.col-bar::-moz-progress-bar { background: var(--accent-bright); border-radius: 999px; }
 .col-bar--big { height: 8px; margin: var(--space-2) 0 var(--space-1); }
 
 .col-next { list-style: none; display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-3); }
@@ -808,11 +811,15 @@ a.mk-open[aria-current="page"] { background: rgba(255, 255, 255, 0.12); border-c
   transition: background-color var(--dur);
 }
 .col-tile:active { transform: none; }
-@media (hover: hover) { .col-tile:hover { background: var(--surface-2); } }
+.col-tile:not(.is-missing) { background: var(--accent-wash); border-color: color-mix(in srgb, var(--accent-bright) 55%, transparent); }
+@media (hover: hover) {
+  .col-tile:not(.is-missing):hover { background: var(--accent-lit); }
+  .col-tile.is-missing:hover { background: var(--surface-2); }
+}
 .col-tile.is-missing { background: transparent; border-style: dashed; border-color: var(--border-strong); color: var(--text-muted); }
 .col-face { display: grid; place-items: center; }
 .col-ch { font-size: 1.5rem; line-height: 1; }
-.col-n { position: absolute; right: 4px; bottom: 2px; font-size: 0.625rem; line-height: 1; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.col-n { position: absolute; right: 4px; bottom: 2px; font-size: 0.625rem; line-height: 1; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
 
 /* One kanji, in the dialog a tile opens. */
 .cd-char { font-size: 3rem; line-height: 1.1; font-weight: 400; }
@@ -1006,13 +1013,14 @@ html[data-embed="1"] body:has(> .neo-footer) { min-height: 0; }
 /* ── Touch ─────────────────────────────────────────────────── */
 @media (pointer: coarse) {
   :root { --control-height-sm: 44px; }
-  .seg-btn { min-height: 44px; }
+  .seg-btn { min-height: 44px; min-width: 44px; }
   .tok { min-width: 44px; min-height: 44px; }
   .it-line, .kj-row { min-height: 44px; }
   .save-toggle { width: 44px; height: 44px; }
   .mk-back, .mk-filter-input, .mk-tab { min-height: 44px; }
   .col-tile { min-width: 44px; min-height: 44px; }
   .text-link.mk-open { display: inline-flex; align-items: center; min-height: 44px; }
+  .seen-before .text-link, .embed-bar .text-link { display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; }
   /* A touch screen has no keys to press, so the key hints go. */
   .rv-kbd, .rv-keys { display: none; }
   .word-notes .text-link, .word-out .text-link { display: inline-flex; align-items: center; min-height: 44px; }

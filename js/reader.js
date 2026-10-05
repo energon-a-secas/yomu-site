@@ -23,6 +23,25 @@ let dict = null;
 let fixture = null;
 let run = { done: 0, total: 0, onProgress: null, failed: null };
 
+/**
+ * KANJIDIC lists a radical's number among its meanings: 一 is "one" and "one
+ * radical (no.1)", 二 "two" and "two radical (no. 7)". That is an index, not
+ * a meaning, so the page leaves it out wherever another meaning is left to
+ * show. The data keeps it; this is what is drawn.
+ */
+const RADICAL_NO = /\bradical \(no\.\s*\d+\)/i;
+
+export function shownMeanings(m) {
+  if (!Array.isArray(m)) return m;
+  const kept = m.filter((x) => !RADICAL_NO.test(String(x)));
+  return kept.length ? kept : m;
+}
+
+/** A kanji record as the page draws it. */
+function shownInfo(v, ch) {
+  return { ...v, ch, ...(Array.isArray(v.m) ? { m: shownMeanings(v.m) } : {}) };
+}
+
 /** A file that could not be fetched, named, so the page can name it too. */
 export class LoadError extends Error {
   constructor(file, detail) {
@@ -99,7 +118,7 @@ export async function kanjiInfo(chars) {
   if (!dict || typeof dict.kanji !== 'function') return new Map();
   const got = await dict.kanji([...new Set(chars || [])]);
   const out = new Map();
-  if (got && typeof got.forEach === 'function') got.forEach((v, ch) => { if (v) out.set(ch, { ...v, ch }); });
+  if (got && typeof got.forEach === 'function') got.forEach((v, ch) => { if (v) out.set(ch, shownInfo(v, ch)); });
   return out;
 }
 
@@ -157,7 +176,7 @@ async function normalize(result, text, m) {
     // analyze.js wraps the dictionary record as { char, info, readings };
     // a fixture may give the record itself. A wrapper whose info is null
     // describes nothing, and must not be mistaken for a record with no meaning.
-    if ('info' in k) { if (k.info && typeof k.info === 'object') info.set(ch, { ...k.info, ch }); }
+    if ('info' in k) { if (k.info && typeof k.info === 'object') info.set(ch, shownInfo(k.info, ch)); }
     else info.set(ch, k);
   }
   // Kanji the analyzer did not describe are asked of the dictionary, which
@@ -165,7 +184,7 @@ async function normalize(result, text, m) {
   const missing = [...new Set(tokens.flatMap((t) => t.kanji || []))].filter((ch) => !info.has(ch));
   if (missing.length && dict && typeof dict.kanji === 'function') {
     const got = await dict.kanji(missing);
-    if (got && typeof got.forEach === 'function') got.forEach((v, ch) => { if (v) info.set(ch, { ...v, ch }); });
+    if (got && typeof got.forEach === 'function') got.forEach((v, ch) => { if (v) info.set(ch, shownInfo(v, ch)); });
   }
   // Token offsets refer to the analyzer's normalized text (NFKC), so that is
   // the text the analysis keeps when the analyzer returns it.

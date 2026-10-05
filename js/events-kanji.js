@@ -220,6 +220,9 @@ export function applyRoute({ boot = false, focus = true } = {}) {
   const prev = route;
   stamp(next);
   if (next === prev) return;
+  // A dialog belongs to the screen that opened it: browser Back with a tile's
+  // dialog open drew History under it and left the dialog standing.
+  for (const d of document.querySelectorAll('dialog[open]')) d.close();
   route = next;
   if (prev === 'reader') readerScroll = window.scrollY;
   view.note = '';

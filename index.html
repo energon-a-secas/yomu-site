@@ -152,6 +152,9 @@
         <!-- "You read this before" (js/render-remember.js): only while Remember is
              on. A live region that stays in the page; only its text changes. -->
         <p class="seen-before" id="seen-before" role="status" aria-live="polite"></p>
+        <!-- An embed's toasts (js/render-remember.js notify): a frame as tall as
+             its page put a fixed toast below what the host's sheet shows. -->
+        <p class="embed-note" id="embed-note" role="status" aria-live="polite" hidden></p>
         <!-- Asked once, after the first read; History (#/kanji/history) has the
              switch after that. Not a modal: the reading stays usable under it. -->
         <section class="remember-ask" id="remember-ask" aria-labelledby="remember-ask-title" hidden>
