@@ -1,0 +1,16 @@
+{
+"_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","generated_by":"tools/build-sounds-like.mjs, from the committed data/dict/ shards","generated_at":"2026-10-05","note":"English words taken whole from JMdict glosses, and counts of how loanword spellings line up with them; no gloss is shown as one."},
+"format": "yomu-like/1",
+"group": "TI",
+"words": {
+"artiodactyla": 4,
+"artiodactyls": 2,
+"etiolation": 2,
+"etiology": 4,
+"tiangong": 3,
+"tianjin": 4,
+"tianwen": 2,
+"tiara": 1,
+"youtiao": 3
+}
+}

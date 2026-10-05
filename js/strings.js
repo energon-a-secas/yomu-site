@@ -155,6 +155,8 @@ export const STRINGS = Object.freeze({
   },
   madeOf: { en: 'Made of', es: 'Formada por' },
   notInDict: { en: 'not in the dictionary', es: 'no está en el diccionario' },
+  soundsLike: { en: 'Sounds like English', es: 'Suena como el inglés' },
+  soundsLikeNote: { en: '(a guess from the sound, not a dictionary entry)', es: '(una suposición por el sonido, no una entrada del diccionario)' },
   compoundRule: {
     en: 'Written as one word. The dictionary has its parts, not the whole.',
     es: 'Se escribe como una sola palabra. El diccionario tiene sus partes, no el conjunto.',

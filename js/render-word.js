@@ -84,6 +84,18 @@ function meaningsPart(token) {
 }
 
 /**
+ * A part's sound-alike (sounds-like.js), on a line of its own and marked as
+ * a guess: "インフォーム: Sounds like English 'inform' (a guess from the
+ * sound, not a dictionary entry)". It is never drawn where a gloss goes.
+ */
+function likeLine(p) {
+  return h('p', { class: 'word-like' }, [
+    h('span', { lang: 'ja' }, p.surface), ': ', ui('soundsLike'), " '",
+    h('span', { lang: 'en' }, p.soundsLike), "' ", ui('soundsLikeNote'),
+  ]);
+}
+
+/**
  * A katakana compound (compounds.js), part by part: "Made of: インフォーム
  * not in the dictionary + ショップ shop". A part the dictionary does not
  * have says so instead of a gloss; a rare part says it is one.
@@ -101,6 +113,7 @@ function partsPart(token) {
   const covered = parts.every((p) => p.entry);
   return section('madeOf', [
     h('p', { class: 'word-made' }, line),
+    ...parts.filter((p) => !p.entry && typeof p.soundsLike === 'string' && p.soundsLike).map(likeLine),
     h('p', { class: covered ? 'quiet' : 'word-warn' }, ui(covered ? 'compoundRule' : 'compoundGuess')),
   ]);
 }

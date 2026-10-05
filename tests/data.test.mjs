@@ -22,6 +22,8 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { isKana, isKanji, toHira } from '../js/kana.js';
+import { groupsOfWord } from '../js/sounds-like.js';
+import { BANNED_WORDS } from '../tools/lib/licence.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const SITE = resolve(HERE, '..');
@@ -392,6 +394,33 @@ test('check-data fails each broken rule and names the file', async () => {
     ...second.map(([, mutate]) => brokenCopy(mutate, { full: true })),
   ]);
   [...cases, ...second].forEach(([name, , expect], k) => {
+    assert.equal(runs[k].status, 1, `${name}: exit ${runs[k].status}`);
+    assert.match(runs[k].stderr, expect, name);
+  });
+});
+
+test('check-data fails a broken sound-alike file and names it', async () => {
+  // A banned word, spelled from the rule itself so this file does not spell it.
+  const banned = BANNED_WORDS.source.match(/\(([^)]*)\)/)[1].split('|').find((w) => groupsOfWord(w).includes('R'));
+  const cases = [
+    ['a word filed where the page would never look for it', (rw) => rw('data/like/s.json', (d) => {
+      d.words = { ...d.words, inform: 3 };
+    }), /like\/s\.json: inform is not filed under S/],
+    ['a word the house style bans', (rw) => rw('data/like/r.json', (d) => {
+      d.words = { ...d.words, [banned]: 1 };
+    }), /like\/r\.json: .* the house style bans/],
+    ['a count that is not one', (rw) => rw('data/like/m.json', (d) => {
+      d.words = { ...d.words, [Object.keys(d.words)[0]]: 0 };
+    }), /like\/m\.json: .* count is not a positive integer/],
+    ['an index that miscounts a group', (rw) => rw('data/like/index.json', (d) => {
+      d.groups.N.words += 1;
+    }), /like\/index\.json: says data\/like\/n\.json holds/],
+    ['an unlisted group file', (rw, dir) => {
+      cpSync(join(dir, 'data/like/z.json'), join(dir, 'data/like/zz.json'));
+    }, /like\/index\.json: does not list data\/like\/zz\.json/],
+  ];
+  const runs = await Promise.all(cases.map(([, mutate]) => brokenCopy(mutate)));
+  cases.forEach(([name, , expect], k) => {
     assert.equal(runs[k].status, 1, `${name}: exit ${runs[k].status}`);
     assert.match(runs[k].stderr, expect, name);
   });

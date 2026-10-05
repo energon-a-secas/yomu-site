@@ -83,6 +83,7 @@ yomu-site/
 │   ├── costs.js          # word and connection costs for the lattice
 │   ├── numbers.js        # numerals and counters with their sound changes
 │   ├── names.js          # a reading guess for kanji runs the dictionary lacks
+│   ├── sounds-like.js    # the English a katakana part no record covers sounds like, as a guess
 │   ├── furigana.js       # which part of a reading belongs to which kanji
 │   ├── analyze.js        # text in, tokens and kanji list out
 │   ├── sounds.js         # special-sound detection
@@ -96,6 +97,7 @@ yomu-site/
 ├── data/
 │   ├── dict/             # JMdict: a core, 28 range shards and a key filter, each under 140 KB
 │   ├── kanji/            # KANJIDIC and KanjiVG parts, 3 shards
+│   ├── like/             # English words JMdict glosses with, for the sound-alike guess
 │   └── phrases/          # the phrase library (original, CC0)
 ├── tools/                # hand-run builders and the data checker
 ├── tests/                # node:test suites and a render harness

@@ -1,10 +1,10 @@
 {
   "_licence": {
-    "text": "A token written by hand for Yomu's view harness, in the token shape docs/ANALYZER.md gives, copied from what analyze() returned for 飴色 on 2026-10-05. Public domain.",
+    "text": "Two tokens written by hand for Yomu's view harness, in the token shape docs/ANALYZER.md gives, copied from what analyze() returned for 飴色 and インフォームショップ on 2026-10-05. Public domain.",
     "screen": "Dictionary: JMdict, EDRDG, CC BY-SA 4.0."
   },
   "format": "yomu-word-panel-sample/1",
-  "note": "A rare word (entry.tier 2), which the Word panel labels as one.",
+  "note": "A rare word (entry.tier 2), which the Word panel labels as one, and a katakana compound with a part no record covers and a sound-alike guess for it, which the panel shows on a line of its own and never as a gloss.",
   "tokens": [
     {
       "i": 0, "kind": "word", "surface": "飴色", "start": 0, "end": 2, "base": "飴色",
@@ -15,6 +15,20 @@
       "entry": { "r": ["あめいろ"], "g": ["amber"], "p": "n adj-no", "f": "あめ|いろ", "tier": 2 },
       "alts": 0, "chain": [], "sounds": [], "grammar": [],
       "kanji": ["飴", "色"], "confidence": "dict"
+    },
+    {
+      "i": 0, "kind": "katakana", "surface": "インフォームショップ", "start": 0, "end": 10, "base": "インフォームショップ",
+      "reading": "いんふぉーむしょっぷ",
+      "furigana": [{ "text": "インフォームショップ" }],
+      "morae": ["い", "ん", "ふぉ", "ー", "む", "しょ", "っ", "ぷ"],
+      "romaji": { "said": "infoomushoppu", "spelled": "i-n-fo-o-mu-sho-p-pu" },
+      "entry": null, "alts": 0, "chain": [], "sounds": [], "grammar": [],
+      "parts": [
+        { "surface": "インフォーム", "reading": "いんふぉーむ", "gloss": null, "tier": null, "entry": null, "soundsLike": "inform" },
+        { "surface": "ショップ", "reading": "しょっぷ", "gloss": "shop", "tier": 1, "entry": { "g": ["shop"], "p": "n", "q": 3 } }
+      ],
+      "gloss": null,
+      "kanji": [], "confidence": "guess"
     }
   ]
 }

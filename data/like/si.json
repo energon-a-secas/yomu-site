@@ -1,0 +1,20 @@
+{
+"_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","generated_by":"tools/build-sounds-like.mjs, from the committed data/dict/ shards","generated_at":"2026-10-05","note":"English words taken whole from JMdict glosses, and counts of how loanword spellings line up with them; no gloss is shown as one."},
+"format": "yomu-like/1",
+"group": "SI",
+"words": {
+"asia": 8,
+"asian": 6,
+"assure": 6,
+"ousia": 2,
+"sialidase": 1,
+"sialon": 1,
+"siam": 4,
+"siamang": 3,
+"siamese": 2,
+"sioux": 1,
+"sure": 13,
+"surely": 26,
+"usurer": 3
+}
+}

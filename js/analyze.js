@@ -7,6 +7,8 @@
 //                (rare.js: rare words and names, fetched for those stretches)
 //             ─▶ tokens, katakana pieces that touch joined into one
 //                compound with parts (compounds.js)
+//             ─▶ a part no record covers: the English it sounds like,
+//                where one is clearly ahead (sounds-like.js), as a guess
 //             ─▶ enrich each token ─▶ sounds and loanword rules, grammar
 //
 // It is async only because shards load on demand, and it loads them once:
@@ -29,6 +31,7 @@ import { detectSounds } from './sounds.js';
 import { annotateGrammar } from './grammar.js';
 import { NAME_VARIANTS } from './names.js';
 import { joinKatakana } from './compounds.js';
+import { guessParts } from './sounds-like.js';
 
 /** The kinds that are Japanese words, as opposed to what sits between them. */
 export const JAPANESE_KINDS = Object.freeze(new Set([
@@ -368,6 +371,10 @@ export async function analyzeCore(input, { dict } = {}) {
     }
   });
   tokens.forEach((t, i) => { t.i = i; });
+  // A katakana part no record covers may sound like an English word the
+  // dictionary glosses with (sounds-like.js): offered as a guess, never as
+  // its gloss, and fetched only for such a part.
+  await guessParts(tokens, dict);
 
   const unknown = tokens.filter((t) => t.confidence === 'guess' || t.kind === 'unknown').length;
   return { text, tokens, kanji: kanjiList(tokens, kanjiInfo), unknown };

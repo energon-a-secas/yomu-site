@@ -34,7 +34,13 @@ for -er, -or, -ar and long vowels), loan-f (フ, ファ), loan-lr (l written wit
 the r column), loan-v (v with the b column), loan-th (th with s or z),
 loan-si (シ, ティ, ディ), loan-wasei (made-in-Japan English), loan-short
 (パソコン from personal computer). A katakana compound with no record of its
-own is one token with parts (インフォームショップ: a guess + shop).
+own is one token with parts (インフォームショップ: a guess + shop). A part no
+record covers may carry soundsLike, the English word it sounds like
+(インフォーム: inform), found by running the loanword rules backwards over the
+English words JMdict glosses with, and offered only when clearly ahead: on
+held-out JMdict loanwords it answered 39 in 100 and was right on 90 in 100 of
+those. It is a guess from the sound, shown as one, and never a gloss: the
+part's gloss stays null.
 
 Grammar notes: every particle, the copula forms, polite and plain verb
 endings, te-forms (te-kudasai, te-iru, te-shimau, te-miru), desire, potential,

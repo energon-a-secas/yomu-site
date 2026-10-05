@@ -204,8 +204,9 @@ async function run() {
     .filter((a) => a.name !== 'placeholder' && a.name !== 'href' && learner.test(a.value)).map((a) => `${el.tagName}.${a.name}`));
   check('no attribute carries a kanji after saving either', leaksAfter.length === 0, leaksAfter.slice(0, 3).join(', '));
 
-  // The Word panel on a hand-written token (fixtures/word-panel.json): a
-  // rare word says so with a label.
+  // The Word panel on two hand-written tokens (fixtures/word-panel.json): a
+  // rare word says so with a label, and a part no record covers shows its
+  // sound-alike on a line of its own, never where a gloss goes.
   const panel = await (await fetch('fixtures/word-panel.json')).json();
   const ctx = { noteOf: () => null, kidOf: () => -1, canSpeak: false };
   const paint = (token) => {
@@ -219,6 +220,12 @@ async function run() {
   check('a rare word carries a visible label', tag && tag.textContent === ui('rareLabel') && getComputedStyle(tag).display !== 'none' && tag.getBoundingClientRect().width > 0, tag ? tag.textContent : 'no label');
   check('and one sentence: not a common word, read from the full dictionary', rare && rare.textContent.includes(ui('rareWord')) && textOnly(rare), rare ? rare.textContent : '');
   check('a word of the first tier has no such label', !paint(fixture.tokens[0]).querySelector('.word-rare'));
+  const compound = paint(panel.tokens[1]);
+  const like = compound.querySelector('.word-like');
+  const sentence = `インフォーム: ${ui('soundsLike')} 'inform' ${ui('soundsLikeNote')}`;
+  check('a part\'s sound-alike is a line of its own that says it is a guess', like && like.textContent === sentence && textOnly(like), like ? like.textContent : 'no line');
+  const made = compound.querySelector('.word-made');
+  check('and never a gloss: the part still says it is not in the dictionary', made && !made.textContent.includes('inform') && made.textContent.includes(ui('notInDict')) && !compound.querySelector('.glosses'), made ? made.textContent : '');
   for (const box of document.querySelectorAll('.hz-word')) box.remove();
 
   const failed = results.filter((r) => !r.ok).length;
