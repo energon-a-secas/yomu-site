@@ -161,6 +161,52 @@ test('a kanji spelling typed only person stays out, and carries no original spel
 
 // ── The committed names tier ──────────────────────────────────────────────
 
+const tokOf = (r, surface) => r.tokens.find((t) => t.surface === surface);
+
+test('トム is Tom and メアリー Mary: a katakana name carries its original spelling (were "given name" alone)', async () => {
+  const r = await run('トムとメアリーは友達です。');
+  const tom = tokOf(r, 'トム');
+  assert.equal(tom.kind, 'name');
+  assert.equal(tom.confidence, 'dict');
+  assert.deepEqual(tom.name, { o: 'Tom', types: ['given'] });
+  assert.deepEqual(tokOf(r, 'メアリー').name, { o: 'Mary', types: ['fem'] });
+  // the entry is what it was: the types as glosses, the part of speech
+  assert.deepEqual(tom.entry.g, ['given name']);
+  assert.equal(tom.entry.p, 'n-pr');
+  assert.equal(tom.entry.o, undefined, 'the original spelling is the token\'s, not a dictionary field');
+});
+
+test('マイケル・ジャクソン shows Michael and Jackson on their own tokens', async () => {
+  const r = await run('マイケル・ジャクソンが好きです。');
+  assert.equal(tokOf(r, 'マイケル').name.o, 'Michael');
+  assert.equal(tokOf(r, 'ジャクソン').name.o, 'Jackson');
+  assert.equal(tokOf(r, '・').kind, 'punct');
+});
+
+test('a foreign name the corpus never had is read too (アインシュタイン, アークレイリ), and a word stays a word', async () => {
+  for (const [text, s, o] of [['アインシュタインさんに会った。', 'アインシュタイン', 'Einstein'], ['アークレイリに行った。', 'アークレイリ', 'Akureyri']]) {
+    const t = tokOf(await run(text), s);
+    assert.ok(t, `${s} in ${text}`);
+    assert.equal(t.kind, 'name', text);
+    assert.equal(t.name.o, o, text);
+  }
+  // ロンドン is a first-tier word, London, and keeps its gloss; a katakana
+  // common word beats a name spelled the same (バラ is a rose, not "Bara")
+  const london = tokOf(await run('ロンドンに行った。'), 'ロンドン');
+  assert.equal(london.kind, 'katakana');
+  assert.equal(london.entry.g[0], 'London (UK)');
+  assert.equal(london.name, undefined);
+  const rose = tokOf(await run('バラが咲いた。'), 'バラ');
+  assert.notEqual(rose.kind, 'name');
+  assert.equal(rose.name, undefined);
+});
+
+test('a name with no original spelling carries no name field, and a kanji name none at all', async () => {
+  const tanaka = tokOf(await run('田中さんが来た。'), '田中');
+  assert.equal(tanaka.kind, 'name');
+  assert.equal(tanaka.name, undefined);
+});
+
 test('common given names are read the way a teacher writes them (were みさ, えこ, まさこ, なみ, さとこ, かずなり, ただひと, あみ)', async () => {
   for (const [name, reading] of [
     ['美咲', 'みさき'], ['恵子', 'けいこ'], ['優子', 'ゆうこ'], ['七海', 'ななみ'], ['智子', 'ともこ'],
