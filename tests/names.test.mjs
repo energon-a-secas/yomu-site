@@ -136,6 +136,21 @@ test('common given names are read the way a teacher writes them (were みさ, �
   }
 });
 
+test('勝子 is かつこ, 友美 ともみ, and 愛敬 the word あいきょう (were かちこ, ゆみ and あいぎょう before 8942e59)', async () => {
+  for (const text of ['勝子さんが来た。', '勝子は学生です。', '私は勝子です。']) {
+    const t = (await run(text)).tokens.find((x) => x.surface === '勝子');
+    assert.ok(t, text);
+    assert.equal(t.kind, 'name', text);
+    assert.equal(t.confidence, 'dict', text);
+    assert.equal(t.reading, 'かつこ', text);
+    assert.equal(t.furigana.map((f) => f.ruby).filter(Boolean).join(''), 'かつこ', text);
+  }
+  const yumi = (await run('友美さんが来た。')).tokens.find((x) => x.surface === '友美');
+  assert.equal(yumi.reading, 'ともみ');
+  const aikyou = (await run('愛敬がある人だ。')).tokens.find((x) => x.surface === '愛敬');
+  assert.equal(aikyou.reading, 'あいきょう');
+});
+
 test('相模 is no names-tier surname read さがみこ; it is Sagami', async () => {
   const t = (await run('相模に行った。')).tokens.find((x) => x.surface === '相模');
   assert.equal(t.reading, 'さがみ');

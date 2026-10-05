@@ -157,6 +157,25 @@ Rules the token obeys:
 - `sounds[].at` indexes into `reading` (not `surface`), because a special sound is a property of what is said.
 - A token never carries learner-facing prose. It carries ids; `notes.js` turns an id into `{ en, es }`.
 
+## Numbers and counters
+
+A number (digits, or kanji numerals) followed by a counter from the table in
+`numbers.js` is one `number` token, read by rule, and so is 何 before one
+(何本 なんぼん). The counters: 時, 時間, 時半, 分, 秒, 人, 本, 枚, 名, 円, 歳,
+月, 日, 年, 回, 個, 階, 杯, 匹, 冊, 台, 番, 度, 倍, つ, か月 and か所 in each
+way the small ka is written (か, ヶ, ケ, カ, ヵ, 箇), a length of time with 間
+(三年間, 十分間, 一か月間) and 週間. A dictionary key spelled the same way
+keeps the span only when it is among the commonest words (十分 じゅうぶん); 何名
+"how many people", band 4, is the counter's なんめい.
+
+名 counts people (a booking, a class list): いちめい, にめい, さんめい, よんめい,
+ごめい, ろくめい, ななめい, はちめい, きゅうめい, じゅうめい, and no number bends
+before it. Until 2026-10-05 it was no counter, and a number before it was a
+kanji run the dictionary did not cover: 十名 read as the surname とな, 三名 as
+the place さんみょう. A name is never read across a number and its counter
+(`names.js` asks `countedEnd`), so a surname that starts with a number and 名
+is read as the count.
+
 ## Romaji: two lines, on purpose
 
 - **said** follows Genki: long vowels doubled (`sayoonara`, `sensee`, `koohii`), particles written as pronounced (`wa`, `e`, `o`), っ doubles the next consonant (`kitte`, `matcha`), ん is `n`, and `n'` before a vowel or y (`kin'en`, `kon'ya`). Never macrons.
@@ -556,7 +575,8 @@ people) as the surname とな, アメ in アメ色 as "American", パタン (a d
 slam) as "pattern", アリさん (an ant in a story) as a given name, ロック in
 the name ブライアンロック as "lock", and 埒, a guess still, read れつ from its
 kanji. 十名 is the first pass's: 名 is not one of numbers.js's counters, so
-the run reached the second phase as a name.
+the run reached the second phase as a name. (It is one since 2026-10-05, and
+十名 is じゅうめい; see "Numbers and counters".)
 
 ### Sizes and fetches, 2026-10-03
 

@@ -19,6 +19,10 @@ romaji lines:
   particles は へ を read wa e o, n' before a vowel or y, never macrons
 - spelled: kana by kana with a hyphen between beats
 
+A number and its counter are one number token read by rule, with the sound
+changes between them: 三本 さんぼん, 一分 いっぷん, 十名 じゅうめい (名 counts
+people), 何人 なんにん. The counters are listed in docs/ANALYZER.md.
+
 Sound notes: particle-wa, particle-e, particle-o, fossil-wa (こんにちは),
 long-vowel, small-tsu, youon, dakuten, handakuten, n-assimilation, devoiced
 (written s(u)kides(u)), ji-zu, foreign-sound, bar, repeat-mark,

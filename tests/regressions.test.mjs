@@ -86,6 +86,36 @@ test('度, 秒 and 倍 are counters (was ご|たび, and 二秒 a surname)', asy
   }
 });
 
+test('名 after a number counts people, めい (was 十名 the surname とな, 三名 the place さんみょう)', async () => {
+  for (const [text, reading] of [
+    ['一名', 'いちめい'], ['二名', 'にめい'], ['三名', 'さんめい'], ['四名', 'よんめい'], ['五名', 'ごめい'],
+    ['六名', 'ろくめい'], ['七名', 'ななめい'], ['八名', 'はちめい'], ['九名', 'きゅうめい'], ['十名', 'じゅうめい'],
+    ['二十名', 'にじゅうめい'], ['3名', 'さんめい'], ['何名', 'なんめい'],
+  ]) {
+    const r = await run(text);
+    assert.equal(cut(r), text, text);
+    assert.equal(r.tokens[0].kind, 'number', text);
+    assert.equal(r.tokens[0].reading, reading, text);
+    assert.equal(r.tokens[0].counterChange, false, `${text}: no number bends before めい`);
+  }
+  for (const [text, s] of [['十名が来ました。', '十名'], ['三名で行きます。', '三名'], ['2名で予約しました。', '2名']]) {
+    const t = tok(await run(text), s);
+    assert.ok(t, `${s} in ${cut(await run(text))}`);
+    assert.equal(t.kind, 'number', text);
+    assert.equal(t.confidence, 'rule', text);
+  }
+  // 名 that no number starts is what it was: a word, or part of one or of a name
+  for (const [text, s, reading, kind] of [
+    ['名前は何ですか。', '名前', 'なまえ', 'word'], ['有名な人です。', '有名', 'ゆうめい', 'word'], ['名', '名', 'な', 'word'],
+    ['名古屋に行きます。', '名古屋', 'なごや', 'word'], ['椎名さんです。', '椎名', 'しいな', 'name'], ['名取さんが来た。', '名取', 'なとり', 'name'],
+  ]) {
+    const t = tok(await run(text), s);
+    assert.ok(t, `${s} in ${cut(await run(text))}`);
+    assert.equal(t.reading, reading, text);
+    assert.equal(t.kind, kind, text);
+  }
+});
+
 test('a day, an age or a count read as one word is one ruby, read whole (was 八[ようか]日)', async () => {
   for (const [text, reading, chars] of [
     ['四月八日', 'ようか', ['八', '日']], ['二十歳', 'はたち', ['二', '十', '歳']], ['二十日', 'はつか', ['二', '十', '日']],

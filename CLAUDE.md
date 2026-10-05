@@ -81,6 +81,13 @@ tests failed; filtering out only conjugations, the full release shipped
 verb stems and phrases (はし read 愛し, くじ read ９時). Rebuild with
 `node tools/build-dict.mjs` and diff the sentence suites before changing it.
 
+**A number before 名 is a count of people, めい.** 名 is in the counter
+table (`numbers.js`), so 十名 is じゅうめい and 三名 さんめい, one number token;
+until 2026-10-05 the run reached the second phase as a kanji stretch and read
+as the surname とな and the place さんみょう. A counter added to that table
+wins over any name across it, because `names.js` never reads a name across a
+number and its counter.
+
 **The rest of JMdict and the names are read only where the first pass
 guessed, and never change a token it read.** The second phase (`js/rare.js`,
 docs/ANALYZER.md "The second phase") reads a stretch of guessed tokens again

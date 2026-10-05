@@ -197,6 +197,10 @@ const BASE = {
   },
   '本': { plain: 'ほん', bend: hRow('ほん', 'ぼん', 'ぽん') },
   '枚': { plain: 'まい', bend: (last, kana) => [kana, 'まい'] },
+  // People, formally (a booking, a class list): 三名 is さんめい, and no
+  // number bends before it. 名 alone is な, "name", and 十名 and 三名 were
+  // read as the surnames とな and さんみょう until 名 joined this table.
+  '名': { plain: 'めい', bend: (last, kana) => [kana, 'めい'] },
   '円': { plain: 'えん', bend: fourSevenNine('えん', 'よ', 'なな', 'きゅう') },
   '歳': { plain: 'さい', whole: (n) => (n === 20 ? 'はたち' : undefined), bend: ksRow('さい', { places: S_PLACES }) },
   '月': {
