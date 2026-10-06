@@ -219,8 +219,27 @@ with nothing to click, until Hide. The translation lives in memory only (20
 at most), as a text node, and is not a live region. A cross-origin frame gets
 the API only through its host's `allow="translator"`; without it
 `availability()` rejects, which reads as unavailable, never as an error.
+Every request ends in something the learner can act on, the translation or a
+failure line with Try again: in a real Chrome 154 run a create() never
+settled and "Translating on this device." stayed until a reload. So
+`translate.js` gives a request up after `QUIET_MS` (20 s) with neither a
+`downloadprogress` event nor a result; each event starts the wait again, so a
+slow download is never cut off. Progress reaches every request waiting on a
+translator, and only while it waits: a download heard after the failure must
+not put "Downloading" back on screen with nothing left to end it. A
+translator whose create() or translate() failed or hung is forgotten, so Try
+again makes a fresh one; a result that arrives after its request gave up only
+fills the cache. `failureKind` names what the page says in plain words:
+NotAllowedError needs a click; QuotaExceededError, or NotSupportedError, is
+the browser busy (Chrome refuses a translator over its per-profile service
+count with NotSupportedError "Unable to create translator", and writes "The
+translation service count exceeded the limitation." to the console only, so
+the name is the only signal; `check()` has already ruled out an unsupported
+pair); anything else shows its own text. Chrome's `inputQuota` is Infinity,
+so a QuotaExceededError there is not a long text.
 Headless Playwright browsers ship no model, so the section is tested with a
-fake API (`tests/translate.test.mjs`) and by hand in a real Chrome.
+fake API (`tests/translate.test.mjs`, the quiet period injected as
+`quietMs`) and by hand in a real Chrome.
 
 **The embed answers only listed origins.** `js/embed.js` accepts messages from
 `https://runcible.neorgon.com` and Runcible's dev server on 8878, checks

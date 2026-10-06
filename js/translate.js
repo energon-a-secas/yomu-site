@@ -25,6 +25,14 @@ export const CACHE = 20;
  * blank; Chrome answers at once.
  */
 export const CHECK_MS = 5000;
+/**
+ * How long a translation may go with neither download progress nor a result
+ * before it counts as stuck. Every progress event starts the wait again, so a
+ * download on a slow line takes as long as it needs; what ends is a create()
+ * or translate() that never settles. In a real Chrome 154 run one never did,
+ * and the section said "Translating on this device." until a reload.
+ */
+export const QUIET_MS = 20000;
 const PHASES = ['unavailable', 'downloadable', 'downloading', 'available'];
 
 /** The Translator interface this browser has, or null. */
@@ -34,17 +42,47 @@ export function translatorApi(g = globalThis) {
 }
 
 /**
+ * What a failed translation means for the learner, so the page can say it in
+ * plain words: 'click' (NotAllowedError: the browser wants a click before it
+ * downloads), 'busy' (QuotaExceededError, or the browser refusing a translator
+ * because too many are running: Chrome rejects create() with a
+ * NotSupportedError, "Unable to create translator", and puts "The translation
+ * service count exceeded the limitation." on the console only, so the name is
+ * the signal; check() has already ruled out an unsupported pair), 'quiet'
+ * (TimeoutError: nothing came back within QUIET_MS), or 'other', whose own
+ * text the page shows.
+ */
+export function failureKind(err) {
+  const name = err && typeof err === 'object' ? String(err.name || '') : '';
+  const message = err && typeof err === 'object' ? String(err.message || '') : '';
+  if (name === 'NotAllowedError') return 'click';
+  if (name === 'TimeoutError') return 'quiet';
+  if (name === 'QuotaExceededError' || name === 'NotSupportedError') return 'busy';
+  if (/service count|too many/i.test(message)) return 'busy';
+  return 'other';
+}
+
+function quietError(ms) {
+  const err = new Error(`no translation and no download progress in ${ms} ms`);
+  err.name = 'TimeoutError';
+  return err;
+}
+
+/**
  * One page's translation. `check(target)` says what the browser can do for
  * Japanese to `target`: 'unsupported' (no API), 'unavailable', 'downloadable'
  * (a click may download the model), 'downloading' or 'available'.
  * `translate(text, target, onProgress)` creates the translator on first use
  * (so its first call must come from a click while the model is only
  * downloadable: creating one that downloads needs the learner's gesture) and
- * resolves to the translation. A translator that failed to be created is
- * forgotten, so the next attempt tries again.
+ * resolves to the translation, reporting the download to `onProgress` while
+ * it waits. It rejects after `quietMs` with neither progress nor a result
+ * (failureKind 'quiet'). A translator that failed, or hung, is forgotten, so
+ * the next attempt creates a fresh one; a result that arrives after its
+ * request gave up is kept in the cache and reaches no caller.
  */
-export function createTranslation({ api = translatorApi(), checkMs = CHECK_MS } = {}) {
-  const made = new Map();       // target -> Promise of a translator
+export function createTranslation({ api = translatorApi(), checkMs = CHECK_MS, quietMs = QUIET_MS } = {}) {
+  const made = new Map();       // target -> { translator: Promise, heard: Set of progress listeners }
   const cache = new Map();      // `${target}\n${text}` -> translation
 
   async function check(target) {
@@ -61,32 +99,85 @@ export function createTranslation({ api = translatorApi(), checkMs = CHECK_MS } 
     }
   }
 
-  function open(target, onProgress) {
-    if (!api) return Promise.reject(new Error('no Translator API'));
-    if (!made.has(target)) {
-      const p = Promise.resolve().then(() => api.create({
-        sourceLanguage: SOURCE,
-        targetLanguage: target,
-        monitor(m) {
-          if (m && typeof m.addEventListener === 'function') {
-            m.addEventListener('downloadprogress', (e) => { if (onProgress) onProgress(Number(e.loaded) || 0); });
-          }
-        },
-      }));
-      made.set(target, p);
-      p.catch(() => made.delete(target));
-    }
-    return made.get(target);
+  /** Drop a translator that failed or hung, unless a newer one already took its place. */
+  function forget(target, it) {
+    if (made.get(target) === it) made.delete(target);
   }
 
-  async function translate(text, target, onProgress) {
-    const key = `${target}\n${text}`;
-    if (cache.has(key)) return cache.get(key);
-    const translator = await open(target, onProgress);
-    const out = String(await translator.translate(text));
+  /**
+   * The target's translator, created on first use. Its download progress goes
+   * to every request waiting on it, whichever of them created it.
+   */
+  function entry(target) {
+    if (made.has(target)) return made.get(target);
+    const heard = new Set();
+    const translator = Promise.resolve().then(() => api.create({
+      sourceLanguage: SOURCE,
+      targetLanguage: target,
+      monitor(m) {
+        if (m && typeof m.addEventListener === 'function') {
+          m.addEventListener('downloadprogress', (e) => {
+            const loaded = Number(e.loaded) || 0;
+            for (const fn of [...heard]) fn(loaded);
+          });
+        }
+      },
+    }));
+    const it = { translator, heard };
+    made.set(target, it);
+    translator.catch(() => forget(target, it));
+    return it;
+  }
+
+  function open(target) {
+    if (!api) return Promise.reject(new Error('no Translator API'));
+    return entry(target).translator;
+  }
+
+  function keep(key, out) {
+    cache.delete(key);
     cache.set(key, out);
     while (cache.size > CACHE) cache.delete(cache.keys().next().value);
-    return out;
+  }
+
+  function translate(text, target, onProgress) {
+    const key = `${target}\n${text}`;
+    if (cache.has(key)) return Promise.resolve(cache.get(key));
+    if (!api) return Promise.reject(new Error('no Translator API'));
+    const it = entry(target);
+    return new Promise((resolve, reject) => {
+      let timer = null;
+      let done = false;
+      const end = () => { done = true; clearTimeout(timer); it.heard.delete(heard); };
+      const wait = () => {
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+          if (done) return;
+          end();
+          forget(target, it);
+          reject(quietError(quietMs));
+        }, quietMs);
+      };
+      function heard(loaded) {
+        if (done) return;
+        wait();
+        if (onProgress) onProgress(loaded);
+      }
+      it.heard.add(heard);
+      wait();
+      it.translator.then((t) => t.translate(text)).then((out) => {
+        const s = String(out);
+        keep(key, s);
+        if (done) return;
+        end();
+        resolve(s);
+      }, (err) => {
+        forget(target, it);
+        if (done) return;
+        end();
+        reject(err);
+      });
+    });
   }
 
   return { check, open, translate, get supported() { return !!api; } };
