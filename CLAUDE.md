@@ -235,8 +235,13 @@ the browser busy (Chrome refuses a translator over its per-profile service
 count with NotSupportedError "Unable to create translator", and writes "The
 translation service count exceeded the limitation." to the console only, so
 the name is the only signal; `check()` has already ruled out an unsupported
-pair); anything else shows its own text. Chrome's `inputQuota` is Infinity,
-so a QuotaExceededError there is not a long text.
+pair); anything else shows its own text. The same NotSupportedError also
+carries Chrome's permanent refusals (policy, a broken or crashed service),
+which "try again in a moment" will not cure; the busy line names DeepL and
+Google for that reason. A translate() fires no progress, so one that takes
+longer than the quiet period on a slow machine is reported as stalled; its
+late result still fills the cache, and Try again answers from it. Chrome's
+`inputQuota` is Infinity, so a QuotaExceededError there is not a long text.
 Headless Playwright browsers ship no model, so the section is tested with a
 fake API (`tests/translate.test.mjs`, the quiet period injected as
 `quietMs`) and by hand in a real Chrome.
