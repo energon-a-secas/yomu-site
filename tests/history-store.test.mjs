@@ -14,7 +14,7 @@ import {
   emptyHistory, normalizeText, textKey, clipText, validate, recordText, partialMatch, evict,
   forget, forgetAll, list, sentenceAround, openHistory,
 } from '../js/history-store.js';
-import { HISTORY_KEY } from '../js/kanji-store.js';
+import { HISTORY_KEY, KEY as KANJI_KEY, openKanji } from '../js/kanji-store.js';
 
 let disk;
 let writes;
@@ -32,6 +32,7 @@ beforeEach(() => {
 const pageLoad = () => openHistory().load();
 const A = '今日は雨が降っています。';
 const B = '明日は晴れるでしょう。';
+const C = '駅の前で友だちに会いました。';
 
 // ── Keys ──────────────────────────────────────────────────────────────────
 
@@ -98,10 +99,11 @@ test('a new session reading a text again counts it, takes its kind, and says how
 });
 
 test('an edit within a session leaves no draft behind', () => {
+  // Session 5 began at 90: a draft is deleted only by a session whose start is known.
   const d = emptyHistory();
-  recordText(d, '今日', 5, 'typed', 100);
-  recordText(d, '今日は', 5, 'typed', 110);
-  recordText(d, '今日は雨', 5, 'typed', 120);
+  recordText(d, '今日', 5, 'typed', 100, true, 90);
+  recordText(d, '今日は', 5, 'typed', 110, true, 90);
+  recordText(d, '今日は雨', 5, 'typed', 120, true, 90);
   assert.deepEqual(Object.keys(d.entries), [textKey('今日は雨')]);
   assert.equal(d.entries[textKey('今日は雨')].n, 1);
 });
@@ -109,18 +111,63 @@ test('an edit within a session leaves no draft behind', () => {
 test('an edit away from a text read in an earlier session keeps that text', () => {
   const d = emptyHistory();
   recordText(d, A, 1, 'paste', 100);
-  recordText(d, A, 2, 'paste', 200);           // read again: n 2
-  recordText(d, `${A}そして`, 2, 'paste', 210);  // then edited in the same session
+  recordText(d, A, 2, 'paste', 200, true, 150);           // session 2 began at 150; read again: n 2
+  recordText(d, `${A}そして`, 2, 'paste', 210, true, 150);  // then edited in the same session
   assert.equal(d.entries[textKey(A)].n, 2, 'not a draft: it was read before this session');
   assert.ok(d.entries[textKey(`${A}そして`)]);
   // A text read once in another session is not this session's draft either.
   const e = emptyHistory();
   recordText(e, B, 1, 'paste', 100);
-  recordText(e, A, 2, 'paste', 200);
-  recordText(e, B, 2, 'paste', 210);
-  recordText(e, `${B}か`, 2, 'paste', 220);
+  recordText(e, A, 2, 'paste', 200, true, 150);
+  recordText(e, B, 2, 'paste', 210, true, 150);
+  recordText(e, `${B}か`, 2, 'paste', 220, true, 150);
   assert.ok(e.entries[textKey(B)], 'B came from session 1');
   assert.equal(e.entries[textKey(A)], undefined, 'A was session 2\'s draft');
+});
+
+test('a session deletes only the drafts it made: a kanji store reset by damage reuses an old session\'s id', () => {
+  // Session 1 began at 90 and read A once. Then the kanji store was damaged
+  // and started empty, so its sessions counted from 0 again, and a new
+  // session 1 began at 5000. A is no draft of it, whatever its id says.
+  const d = emptyHistory();
+  recordText(d, A, 1, 'paste', 100, true, 90);
+  recordText(d, B, 1, 'typed', 5010, true, 5000);
+  assert.ok(d.entries[textKey(A)], 'A was read before this session began');
+  recordText(d, `${B}か`, 1, 'typed', 5020, true, 5000);
+  assert.equal(d.entries[textKey(B)], undefined, 'B was typed in this session: a draft');
+  assert.deepEqual(Object.keys(d.entries).sort(), [textKey(A), textKey(`${B}か`)].sort());
+});
+
+test('a session whose start is unknown (a kanji store from before `at`) deletes nothing', () => {
+  for (const at of [undefined, null, 0, -5, NaN, '90']) {
+    const d = emptyHistory();
+    recordText(d, '今日', 5, 'typed', 100, true, at);
+    recordText(d, '今日は', 5, 'typed', 110, true, at);
+    assert.deepEqual(Object.keys(d.entries).sort(), [textKey('今日'), textKey('今日は')].sort(), String(at));
+  }
+});
+
+test('the two stores together: a fresh store\'s first session leaves no drafts, and a damaged one takes no old text for one', () => {
+  // A first visit: nothing is stored, so session 0 starts when the page
+  // loads, and an edit in it deletes the draft it leaves.
+  let kanji = openKanji().load(1000);
+  let history = pageLoad();
+  const read = (text, now) => history.record(text, kanji.sessionId, kanji.sessionSource, now, true, kanji.sessionAt);
+  read('今日は', 1100);
+  read(A, 1200);
+  assert.deepEqual(history.list().map((e) => e.t), [A]);
+  // The kanji store is damaged: the next page starts it empty, its sessions
+  // count from 0 again, and session 0 is the one that read A.
+  disk.set(KANJI_KEY, '{"__v":1,"data":{"se');
+  kanji = openKanji().load(5000);
+  history = pageLoad();
+  assert.deepEqual([kanji.note, kanji.sessionId, history.data.session.id], ['damaged', 0, 0]);
+  read(B, 5100);
+  assert.deepEqual(history.list().map((e) => e.t), [B, A], 'A was read before this session 0 began');
+  kanji.beginSession('paste', 6000);
+  read(C, 6100);
+  read(`${C}よ`, 6200);
+  assert.deepEqual(pageLoad().list().map((e) => e.t), [`${C}よ`, B, A], 'a draft of this session still goes');
 });
 
 test('"before" is kept with the session, so a reload of the same session still knows it', () => {
@@ -168,6 +215,15 @@ test('a partial match needs six characters on the shorter side, and ignores this
   recordText(f, '今日は雨が降って', 7, 'typed', 100);
   assert.equal(partialMatch(f, normalizeText('今日は雨が降っています'), 7), null, 'typed a moment ago in this session');
   assert.ok(partialMatch(f, normalizeText('今日は雨が降っています'), 8));
+});
+
+test('with the session\'s start known, an older session that had the same id is a partial match again', () => {
+  const f = emptyHistory();
+  recordText(f, '今日は雨が降って', 7, 'typed', 100, true, 90);
+  const norm = normalizeText('今日は雨が降っています');
+  assert.equal(partialMatch(f, norm, 7, 90), null, 'typed in this session, begun at 90');
+  assert.deepEqual(partialMatch(f, norm, 7, 500), { partial: { kind: 'holds', last: 100, n: 1 } },
+    'read before this session 7 began at 500: an old session of the same id, after a damaged kanji store');
 });
 
 // ── The caps ──────────────────────────────────────────────────────────────

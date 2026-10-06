@@ -301,14 +301,20 @@ harness checks the toggles and marks.
 
 **One store, `localStorage['yomu-site:kanji']`, Persist kit version 1:**
 `{ saved: { char: { at, box, due, reviews, lapses } }, seen: { char: { n,
-first, last, words, src?, h? } }, session: { id, counted, src?, h? } }`.
+first, last, words, src?, h? } }, session: { id, counted, src?, h?, at? } }`.
 `words` is at most eight `[written, reading]` dictionary forms per kanji
 (`dictionaryWord` turns 降っています into 降る ふる); no sentence and no
 pasted text is ever stored, and the test reads the raw store to prove it,
 with `h` set too. Every field is validated on load; a store that does not
 read degrades to empty with a note on the screen, and its raw value is
-copied to `yomu-site:kanji:damaged` first. A bad `src` or `h` is dropped
-and its record kept.
+copied to `yomu-site:kanji:damaged` first. A bad `src`, `h` or `at` is
+dropped and its record kept. `at` is when the session began (ms): set by
+`beginSession(src, now)` and `clearAll(now)`, and by `load(now)` when there
+is no session to read (nothing stored, or a damaged store, whose ids then
+count from 0 again), which writes the store at once: kept in memory only,
+a reload before the first count (a text with no kanji makes none) stamped a
+later `at`, and History kept drafts it should have deleted (the review of
+2026-10-05 reproduced it). A session kept by a page from before it has none.
 
 **Each session has a source, and each kanji remembers where it was last
 met.** `SOURCES` is paste, typed, example, phrase, link, host, history.
@@ -347,7 +353,13 @@ in `events-read.js`): History first, then the session's `h`, then the kanji,
 so the counted kanji point at it. The same text in the same session changes
 nothing (a reload records nothing, and `before`, stored with the session,
 still answers "You read this before"); an edit within a session deletes the
-draft it leaves behind when this session created it. At most 300 texts and
+draft it leaves behind when this session created it: the same session id,
+and first read no earlier than the session's `at`. An id alone is not enough,
+because a kanji store that starts empty reuses ids, and an old text read once
+under the same id was taken for a draft and deleted (measured in the browser
+on 2026-10-05). A session with no `at` (from a page before it) deletes no
+draft; `partialMatch` uses the same test to skip this session's own texts,
+so an old text with a reused id is a partial match again. At most 300 texts and
 300,000 characters; the least recently read goes first. Turn off forgets
 every text not saved (`turnOff`: with none saved it is `erase`, the store
 and the damaged copy removed) after a confirm; the kanji store's `h` keys

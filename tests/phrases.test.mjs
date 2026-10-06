@@ -126,12 +126,12 @@ test('Remember off: a reload counts nothing again and writes nothing; an unsaved
 
 test('a saved text is never a draft: an edit away from it in the same session keeps it', () => {
   const d = emptyHistory();
-  recordText(d, '今日は', 5, 'typed', 100, true);
+  recordText(d, '今日は', 5, 'typed', 100, true, 90);   // session 5 began at 90
   saveText(d, '今日は', 5, 'typed', 105);
-  recordText(d, '今日は雨', 5, 'typed', 110, true);
+  recordText(d, '今日は雨', 5, 'typed', 110, true, 90);
   assert.ok(isSaved(d.entries[textKey('今日は')]), 'saved on purpose, so not a draft');
   assert.ok(d.entries[textKey('今日は雨')]);
-  recordText(d, '今日は雨です', 5, 'typed', 120, true);
+  recordText(d, '今日は雨です', 5, 'typed', 120, true, 90);
   assert.equal(d.entries[textKey('今日は雨')], undefined, 'the unsaved draft still goes');
 });
 
