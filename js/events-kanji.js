@@ -419,7 +419,7 @@ export const KANJI_ACTIONS = {
   'mk-import': () => { const input = $('mk-file'); if (input) input.click(); },
   'mk-clear': (b) => openDialog($('mk-clear-dialog'), b),
   'mk-clear-yes': () => {
-    myKanji().clearAll();
+    myKanji().clearAll(Date.now());
     view.note = ui('cleared');
     clearedJustNow = true;
     afterChange();
@@ -469,7 +469,7 @@ export function bindKanji() {
   // this tab's next write put the old copy back.
   addEventListener('storage', (e) => {
     if (e.key !== KEY && e.key !== null) return;
-    myKanji().load();
+    myKanji().load(Date.now());
     afterChange();
   });
   afterPaintAll(() => {

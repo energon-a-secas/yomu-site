@@ -29,11 +29,13 @@
 // kanji keeps. Within a session the text may be edited, so each settled read
 // may bring a new key: the entry the edit left behind is deleted when this
 // session created it and nobody read it in any other (a draft), and kept
-// otherwise. `before` is what the store knew about this text before this
-// session read it: the entry as it was, or, for a text never read whole, the
-// most recent remembered text it is part of or that is part of it. It is
-// kept with the session, so the reader's "You read this before" survives a
-// reload of the same session.
+// otherwise. Created in this session takes the id and the start (the kanji
+// store's `at`), since a kanji store that starts empty counts its ids from 0
+// again; a session whose start is unknown deletes nothing. `before` is what
+// the store knew about this text before this session read it: the entry as
+// it was, or, for a text never read whole, the most recent remembered text it
+// is part of or that is part of it. It is kept with the session, so the
+// reader's "You read this before" survives a reload of the same session.
 //
 // The functions below are pure over a plain data object and take the time as
 // an argument, so tests/history-store.test.mjs runs them with no clock and no
@@ -151,15 +153,22 @@ function normOf(t) {
 }
 
 /**
+ * Whether `e` may have been created in session `id`, begun at `at` (ms): the
+ * same id, and not first read before `at` when that is known. An id alone can
+ * be an older session's, after a kanji store that started empty.
+ */
+const madeIn = (e, id, at) => e.s === id && !(isTime(at) && e.first < at);
+
+/**
  * The remembered text this one is part of (`inside`), or that is part of it
  * (`holds`), read most recently. This session's own drafts do not count: a
  * text is not "part of a text you read" because it was typed a moment ago.
  */
-export function partialMatch(data, norm, sessionId) {
+export function partialMatch(data, norm, sessionId, sessionAt) {
   const long = chars(norm) >= MIN_PARTIAL;
   let best = null;
   for (const e of Object.values(data.entries)) {
-    if (e.s === sessionId) continue;
+    if (madeIn(e, sessionId, sessionAt)) continue;
     const other = normOf(e.t);
     if (!other || other === norm) continue;
     let kind = null;
@@ -195,13 +204,14 @@ export function evict(data, keep) {
 }
 
 /**
- * One settled read of `text` in reading session `sessionId`, of kind `src`,
- * at `now` (ms). Returns `before`: null, the entry's { n, first, last, src }
- * as it was before this session read it, or { partial: { kind, last, n } }.
+ * One settled read of `text` in reading session `sessionId`, begun at
+ * `sessionAt` (ms, or null when unknown), of kind `src`, at `now` (ms).
+ * Returns `before`: null, the entry's { n, first, last, src } as it was
+ * before this session read it, or { partial: { kind, last, n } }.
  * With `remembering` false (Remember off, or not answered yet) only a saved
  * text is counted; any other read changes nothing and returns null.
  */
-export function recordText(data, text, sessionId, src, now, remembering = true) {
+export function recordText(data, text, sessionId, src, now, remembering = true, sessionAt = null) {
   const key = textKey(text);
   const s = data.session;
   if (s && s.id === sessionId && s.key === key) return s.before;
@@ -210,12 +220,12 @@ export function recordText(data, text, sessionId, src, now, remembering = true) 
   if (s && s.id === sessionId) {
     // The draft an edit leaves behind goes, unless it was saved on purpose.
     const left = data.entries[s.key];
-    if (left && left.s === sessionId && left.n === 1 && !isSaved(left)) delete data.entries[s.key];
+    if (left && isTime(sessionAt) && madeIn(left, sessionId, sessionAt) && left.n === 1 && !isSaved(left)) delete data.entries[s.key];
   }
   const kind = SOURCES.includes(src) ? src : 'typed';
   const before = had
     ? { n: had.n, first: had.first, last: had.last, src: had.src }
-    : partialMatch(data, normalizeText(text), sessionId);
+    : partialMatch(data, normalizeText(text), sessionId, sessionAt);
   data.entries[key] = had
     ? { ...had, t: clipText(text), last: now, n: had.n + 1, src: kind }
     : { t: clipText(text), first: now, last: now, n: 1, src: kind, s: sessionId };
@@ -433,12 +443,12 @@ export function openHistory({
       return s && s.id === sessionId && s.key === key ? s.before : null;
     },
     /** A read; `remembering` false counts a saved text only, and writes nothing otherwise. */
-    record(text, sessionId, src, now, remembering = true) {
+    record(text, sessionId, src, now, remembering = true, sessionAt = null) {
       const s = data.session;
       const key = textKey(text);
       if (s && s.id === sessionId && s.key === key) return s.before;
       if (!remembering && !isSaved(data.entries[key])) return null;
-      const before = recordText(data, text, sessionId, src, now, remembering);
+      const before = recordText(data, text, sessionId, src, now, remembering, sessionAt);
       commit();
       return before;
     },

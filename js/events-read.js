@@ -64,7 +64,7 @@ function rememberText(analysis, text) {
   const key = textKey(text);
   if (!on && !kept.isSaved(key)) return null;
   const mine = myKanji();
-  state.seenBefore = kept.record(text, mine.sessionId, mine.sessionSource, Date.now(), on);
+  state.seenBefore = kept.record(text, mine.sessionId, mine.sessionSource, Date.now(), on, mine.sessionAt);
   return key;
 }
 
@@ -105,7 +105,7 @@ export function pointKanji(h) {
 
 /** A new reading session, of this kind of text: nothing History knew about the last one stays up. */
 function beginSession(source) {
-  myKanji().beginSession(source);
+  myKanji().beginSession(source, Date.now());
   state.seenBefore = null;
   clearNote();
 }

@@ -167,7 +167,8 @@ the host sends always opens the reader.
   kanji's schedule, and for each kanji met, how often, the first and last day,
   up to eight dictionary words with their readings, the kind of text it was
   last met in, and with Remember on or a saved text a key (a hash) of that
-  text. Never the text: that is only in yomu-site:history.
+  text; and the reading session in progress (the kanji counted in it, and
+  when it began). Never the text: that is only in yomu-site:history.
 - Export writes a yomu-kanji-export/1 JSON file ({ format, exported, saved,
   seen, phrases? }); Import validates one and merges it, keeping the higher
   counts and the earlier first day. `phrases` is the saved phrases only

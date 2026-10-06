@@ -4,7 +4,7 @@
 //
 //   saved    { char: { at, box, due, reviews, lapses } }   kept for review
 //   seen     { char: { n, first, last, words, src?, h? } } met in a text
-//   session  { id, counted: [char], src?, h? }             the text being read
+//   session  { id, counted: [char], src?, h?, at? }        the text being read
 //
 // Every kanji met is also a kanji collected: the collection (collection.js)
 // is these counts read against the jōyō list, with nothing stored of its own.
@@ -21,7 +21,10 @@
 // session each kanji counts once, whenever its read settles, including a
 // kanji typed in later. The session's counted set is kept here, beside the
 // counts, so a reload that restores the saved text finds those kanji already
-// counted and counts nothing.
+// counted and counts nothing. `at` is when the session began (ms), which
+// History needs to tell this session's drafts from an older session's texts:
+// a store that starts empty counts its ids from 0 again. A session kept by
+// a page from before `at` has none, and History then deletes no draft.
 //
 // What is never kept here: the text, a sentence, or anything longer than a
 // dictionary word or a history key. `words` holds up to MAX_WORDS [written, reading] pairs per
@@ -65,8 +68,9 @@ const MAX_FIELD = 24;
 const MAX_COUNTED = 2000;
 const DAY = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
 
-export function emptyData() {
-  return { saved: {}, seen: {}, session: { id: 0, counted: [] } };
+/** Nothing kept. With `at` (ms) the session starts then: one the page could not read starts when it loads. */
+export function emptyData(at) {
+  return { saved: {}, seen: {}, session: startedAt({ id: 0, counted: [] }, at) };
 }
 
 // ── Days ──────────────────────────────────────────────────────────────────
@@ -99,6 +103,9 @@ export const maxDay = (a, b) => (a >= b ? a : b);
 
 export const isObject = (v) => !!v && typeof v === 'object' && !Array.isArray(v);
 const isCount = (n) => Number.isInteger(n) && n >= 0;
+const isTime = (v) => Number.isFinite(v) && v > 0;
+/** `session` with its start `at` (ms), or as it is when `at` is not a time. */
+function startedAt(session, at) { return isTime(at) ? { ...session, at } : session; }
 const isSource = (v) => SOURCES.includes(v);
 const isHistoryKey = (v) => typeof v === 'string' && HISTORY_KEY.test(v);
 
@@ -171,10 +178,12 @@ function cleanMap(raw, clean) {
 
 /**
  * A plain data object from whatever was stored. `dropped` counts what was
- * left out; `damaged` says the whole thing was not a store at all.
+ * left out; `damaged` says the whole thing was not a store at all. A session
+ * that is not read from it starts at `now` (ms), when given; a bad `at` is
+ * left out and the session kept.
  */
-export function validate(raw) {
-  const data = emptyData();
+export function validate(raw, now) {
+  const data = emptyData(now);
   if (!isObject(raw)) return { data, dropped: 0, damaged: raw !== null && raw !== undefined };
   const saved = cleanMap(raw.saved, cleanSaved);
   const seen = cleanMap(raw.seen, cleanSeen);
@@ -183,7 +192,7 @@ export function validate(raw) {
   let dropped = saved.dropped + seen.dropped;
   const s = raw.session;
   if (isObject(s) && isCount(s.id) && Array.isArray(s.counted)) {
-    data.session = withPlace({ id: s.id, counted: [...new Set(s.counted.filter(oneKanji))].slice(0, MAX_COUNTED) }, s);
+    data.session = withPlace(startedAt({ id: s.id, counted: [...new Set(s.counted.filter(oneKanji))].slice(0, MAX_COUNTED) }, s.at), s);
   } else if (s !== undefined) {
     dropped += 1;
   }
@@ -193,12 +202,12 @@ export function validate(raw) {
 // ── Sessions and counting ─────────────────────────────────────────────────
 
 /**
- * A new reading session: nothing counted in it yet, and the kind of text it
- * reads (SOURCES; typed when not given). No history key until the session's
- * text is remembered.
+ * A new reading session, begun at `now` (ms): nothing counted in it yet, and
+ * the kind of text it reads (SOURCES; typed when not given). No history key
+ * until the session's text is remembered.
  */
-export function beginSession(data, src) {
-  data.session = { id: data.session.id + 1, counted: [], src: isSource(src) ? src : 'typed' };
+export function beginSession(data, src, now) {
+  data.session = startedAt({ id: data.session.id + 1, counted: [], src: isSource(src) ? src : 'typed' }, now);
   return data.session.id;
 }
 
@@ -390,18 +399,19 @@ export function openKanji({ store = createStore({ key: KEY, version: VERSION }),
   // none, as in most tests, exports none and leaves them out of a merge.
   let phrases = null;
 
-  function load() {
+  /** `now` (ms) is when a session the store does not hold starts. */
+  function load(now) {
     const raw = readRaw();
     const loaded = store.load(null);
     note = null;
     dropped = 0;
     if (raw !== null && raw !== undefined && loaded === null) {
       keepRaw(raw);
-      data = emptyData();
+      data = emptyData(now);
       note = 'damaged';
       return api;
     }
-    const v = validate(loaded);
+    const v = validate(loaded, now);
     data = v.data;
     dropped = v.dropped;
     if (v.damaged || v.dropped) {
@@ -430,9 +440,11 @@ export function openKanji({ store = createStore({ key: KEY, version: VERSION }),
     savedOf: (ch) => data.saved[ch] || null,
     get sessionId() { return data.session.id; },
     get sessionSource() { return sessionSource(data); },
+    /** When this session began (ms), or null for one an older page began. */
+    get sessionAt() { return isTime(data.session.at) ? data.session.at : null; },
     /** Counted for the first time ever in this session: the reader's "New" chip. */
     isNew: (ch) => !!data.seen[ch] && data.seen[ch].n === 1 && data.session.counted.includes(ch),
-    beginSession(src) { beginSession(data, src); return commit(); },
+    beginSession(src, now) { beginSession(data, src, now); return commit(); },
     /**
      * `opts.h`, when given, points the session at that History key first (null
      * for none), so the kanji this read counts point at the text they were met
@@ -464,8 +476,8 @@ export function openKanji({ store = createStore({ key: KEY, version: VERSION }),
       if (phrases && incoming && incoming.phrases) sum.phrases = phrases.merge(incoming.phrases);
       return sum;
     },
-    clearAll() {
-      data = { saved: {}, seen: {}, session: { id: data.session.id + 1, counted: [] } };
+    clearAll(now) {
+      data = { saved: {}, seen: {}, session: startedAt({ id: data.session.id + 1, counted: [] }, now) };
       note = null;
       return commit();
     },
@@ -477,6 +489,6 @@ let page = null;
 
 /** The page's store, opened on first use. */
 export function myKanji() {
-  if (!page) page = openKanji().load();
+  if (!page) page = openKanji().load(Date.now());
   return page;
 }

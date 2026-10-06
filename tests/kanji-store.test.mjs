@@ -418,6 +418,43 @@ test('clear all forgets saved and seen, and starts a new session', () => {
   assert.deepEqual(again.data.session, { id: id + 1, counted: [] });
 });
 
+// ── When a session began ──────────────────────────────────────────────────
+
+test('a session knows when it began; one from an older store does not, and a bad start is left out', () => {
+  const d = emptyData();
+  beginSession(d, 'paste', 5000);
+  assert.deepEqual(d.session, { id: 1, counted: [], src: 'paste', at: 5000 });
+  setSessionText(d, 'k1');
+  recordReading(d, ['天'], null, '2026-10-01');
+  assert.deepEqual([d.session.at, d.session.h], [5000, 'k1'], 'the start stays while the session moves');
+  assert.equal(validate({ session: { id: 3, counted: [], at: 5000 } }).data.session.at, 5000);
+  for (const at of [0, -1, 'x', NaN, null, Infinity, [5000]]) {
+    const v = validate({ session: { id: 3, counted: ['天'], at } });
+    assert.deepEqual([v.data.session, v.dropped], [{ id: 3, counted: ['天'] }, 0], `${at}: the start goes, the session stays`);
+  }
+  assert.equal('at' in validate({ session: { id: 7, counted: [] } }).data.session, false, 'a session kept by an older page');
+});
+
+test('a session the page could not read starts when the page loads; clear all starts one too; the store stays version 1', () => {
+  let page = openKanji().load(1000);
+  assert.deepEqual([page.sessionId, page.sessionAt], [0, 1000], 'nothing stored: session 0 starts now');
+  page.beginSession('paste', 2000);
+  page = openKanji().load(3000);
+  assert.deepEqual([page.sessionId, page.sessionAt], [1, 2000], 'a reload is the session it was');
+  assert.equal(JSON.parse(disk.get(KEY)).__v, 1);
+  disk.set(KEY, '{"__v":1,"data":{"sa');
+  page = openKanji().load(4000);
+  assert.equal(page.note, 'damaged');
+  assert.deepEqual([page.sessionId, page.sessionAt], [0, 4000], 'the ids count from 0 again, and the start says when');
+  page.clearAll(5000);
+  page = openKanji().load(6000);
+  assert.deepEqual(page.data.session, { id: 1, counted: [], at: 5000 });
+  disk.set(KEY, JSON.stringify({ __v: 1, data: { saved: {}, seen: {}, session: { id: 7, counted: [] } } }));
+  assert.equal(openKanji().load(7000).sessionAt, null, 'an older store\'s session: its start is unknown');
+  disk.set(KEY, JSON.stringify({ __v: 1, data: { saved: {}, seen: {}, session: 'x' } }));
+  assert.deepEqual([openKanji().load(8000).sessionAt, openKanji().load(8000).note], [8000, 'partial'], 'a session that did not read starts now');
+});
+
 // ── Where a kanji was last met: sources and History keys ──────────────────
 
 test('the kinds of text a session can read', () => {
