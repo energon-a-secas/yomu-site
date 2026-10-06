@@ -452,7 +452,11 @@ test('a session the page could not read starts when the page loads; clear all st
   disk.set(KEY, JSON.stringify({ __v: 1, data: { saved: {}, seen: {}, session: { id: 7, counted: [] } } }));
   assert.equal(openKanji().load(7000).sessionAt, null, 'an older store\'s session: its start is unknown');
   disk.set(KEY, JSON.stringify({ __v: 1, data: { saved: {}, seen: {}, session: 'x' } }));
-  assert.deepEqual([openKanji().load(8000).sessionAt, openKanji().load(8000).note], [8000, 'partial'], 'a session that did not read starts now');
+  // One load: the repaired store is written at once (keepStart), so a second
+  // load reads a whole store and has no note to give.
+  const partial = openKanji().load(8000);
+  assert.deepEqual([partial.sessionAt, partial.note], [8000, 'partial'], 'a session that did not read starts now');
+  assert.equal(openKanji().load(9000).sessionAt, 8000, 'and the repaired store keeps that start');
 });
 
 // ── Where a kanji was last met: sources and History keys ──────────────────
@@ -590,4 +594,22 @@ test('export and import carry the kind and the key; a merge takes them from the 
   const sum = mergeInto(d, { seen: { 天: { n: 1, first: '2026-09-30', last: '2026-09-30', words: [], src: 'link', h: 'k2' } }, saved: {} });
   assert.equal(d.seen['天'].src, 'host', 'on the same day this browser\'s own record stands');
   assert.equal(sum.seenUpdated, 0);
+});
+
+test('a session the store had to start is written at once, so a reload keeps its start', () => {
+  let kept = null;
+  const store = { load: () => (kept === null ? null : JSON.parse(kept)), save: (d) => { kept = JSON.stringify(d); return true; } };
+  const first = openKanji({ store, readRaw: () => kept, keepRaw: () => {} }).load(1000);
+  assert.equal(first.sessionAt, 1000);
+  assert.equal(JSON.parse(kept).session.at, 1000, 'written before any kanji is counted');
+  const again = openKanji({ store, readRaw: () => kept, keepRaw: () => {} }).load(5000);
+  assert.equal(again.sessionAt, 1000, 'a reload is the same session, begun when it began');
+});
+
+test('a session read from the store is not written again on load', () => {
+  let saves = 0;
+  const stored = { saved: {}, seen: {}, session: { id: 4, counted: [], at: 1000 } };
+  const store = { load: () => stored, save: () => { saves += 1; return true; } };
+  openKanji({ store, readRaw: () => JSON.stringify(stored), keepRaw: () => {} }).load(9000);
+  assert.equal(saves, 0);
 });

@@ -21,10 +21,9 @@
 // session each kanji counts once, whenever its read settles, including a
 // kanji typed in later. The session's counted set is kept here, beside the
 // counts, so a reload that restores the saved text finds those kanji already
-// counted and counts nothing. `at` is when the session began (ms), which
-// History needs to tell this session's drafts from an older session's texts:
-// a store that starts empty counts its ids from 0 again. A session kept by
-// a page from before `at` has none, and History then deletes no draft.
+// counted and counts nothing. `at` (ms) is when the session began, which
+// History needs to tell this session's drafts from older texts once a store
+// that starts empty counts its ids from 0 again; an older session has none.
 //
 // What is never kept here: the text, a sentence, or anything longer than a
 // dictionary word or a history key. `words` holds up to MAX_WORDS [written, reading] pairs per
@@ -104,8 +103,7 @@ export const maxDay = (a, b) => (a >= b ? a : b);
 export const isObject = (v) => !!v && typeof v === 'object' && !Array.isArray(v);
 const isCount = (n) => Number.isInteger(n) && n >= 0;
 const isTime = (v) => Number.isFinite(v) && v > 0;
-/** `session` with its start `at` (ms), or as it is when `at` is not a time. */
-function startedAt(session, at) { return isTime(at) ? { ...session, at } : session; }
+const startedAt = (session, at) => (isTime(at) ? { ...session, at } : session);  // with its start, when a time
 const isSource = (v) => SOURCES.includes(v);
 const isHistoryKey = (v) => typeof v === 'string' && HISTORY_KEY.test(v);
 
@@ -409,7 +407,7 @@ export function openKanji({ store = createStore({ key: KEY, version: VERSION }),
       keepRaw(raw);
       data = emptyData(now);
       note = 'damaged';
-      return api;
+      return keepStart(loaded, now);
     }
     const v = validate(loaded, now);
     data = v.data;
@@ -418,6 +416,14 @@ export function openKanji({ store = createStore({ key: KEY, version: VERSION }),
       if (raw !== null && raw !== undefined) keepRaw(raw);
       note = v.damaged ? 'damaged' : 'partial';
     }
+    return keepStart(loaded, now);
+  }
+
+  // A session this load started is written at once: kept in memory only, a
+  // reload stamped a later `at` and History kept the drafts typed before it.
+  function keepStart(loaded, now) {
+    const stored = isObject(loaded) && isObject(loaded.session) ? loaded.session.at : undefined;
+    if (isTime(now) && data.session.at === now && stored !== now) writable = store.save(data);
     return api;
   }
 

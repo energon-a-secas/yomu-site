@@ -292,7 +292,10 @@ copied to `yomu-site:kanji:damaged` first. A bad `src`, `h` or `at` is
 dropped and its record kept. `at` is when the session began (ms): set by
 `beginSession(src, now)` and `clearAll(now)`, and by `load(now)` when there
 is no session to read (nothing stored, or a damaged store, whose ids then
-count from 0 again). A session kept by a page from before it has none.
+count from 0 again), which writes the store at once: kept in memory only,
+a reload before the first count (a text with no kanji makes none) stamped a
+later `at`, and History kept drafts it should have deleted (the review of
+2026-10-05 reproduced it). A session kept by a page from before it has none.
 
 **Each session has a source, and each kanji remembers where it was last
 met.** `SOURCES` is paste, typed, example, phrase, link, host, history.
