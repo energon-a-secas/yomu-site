@@ -64,7 +64,7 @@ function rememberText(analysis, text) {
   const key = textKey(text);
   if (!on && !kept.isSaved(key)) return null;
   const mine = myKanji();
-  state.seenBefore = kept.record(text, mine.sessionId, mine.sessionSource, Date.now(), on, mine.sessionAt);
+  state.seenBefore = kept.record(text, mine.sessionId, mine.sessionSource, Date.now(), on, mine.startAt());
   return key;
 }
 

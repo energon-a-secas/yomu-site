@@ -288,8 +288,9 @@ copyrighted.
 The kanji a learner saves for review, how many texts they met each kanji
 in, the collection those counts make, and, if the learner allowed it, the
 texts themselves, and the phrases saved on purpose. `js/kanji-store.js`
-(pure functions plus the store, no DOM), `js/kanji-backup.js` (Export and
-Import), `js/review.js` (one review's queue, no DOM), `js/collection.js`
+(pure functions plus the store, no DOM), `js/kanji-words.js` (the
+dictionary word a token was met as, re-exported by the store),
+`js/kanji-backup.js` (Export and Import), `js/review.js` (one review's queue, no DOM), `js/collection.js`
 (the jōyō list and progress, no DOM), `js/history-store.js` (History and
 saved phrases, no DOM) with `js/history-text.js` (the text key, the clip,
 the last-seen sentence; re-exported by the store), `js/render-save.js` (the
@@ -316,10 +317,14 @@ copied to `yomu-site:kanji:damaged` first. A bad `src`, `h` or `at` is
 dropped and its record kept. `at` is when the session began (ms): set by
 `beginSession(src, now)` and `clearAll(now)`, and by `load(now)` when there
 is no session to read (nothing stored, or a damaged store, whose ids then
-count from 0 again), which writes the store at once: kept in memory only,
-a reload before the first count (a text with no kanji makes none) stamped a
-later `at`, and History kept drafts it should have deleted (the review of
-2026-10-05 reproduced it). A session kept by a page from before it has none.
+count from 0 again). Such a start must be written before History relies on
+it: kept in memory only, a reload before the first count (a text with no
+kanji makes none) stamped a later `at`, and History kept drafts it should
+have deleted (the review of 2026-10-05 reproduced it). A damaged store is
+rewritten with it at once; a first visit writes nothing until History
+records, which reads the start through `startAt()`, so a visitor who never
+reads anything stores nothing. A session kept by a page from before it has
+none.
 
 **Each session has a source, and each kanji remembers where it was last
 met.** `SOURCES` is paste, typed, example, phrase, link, host, history.

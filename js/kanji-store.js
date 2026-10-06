@@ -35,7 +35,10 @@
 // DOM. openKanji() wraps them around the store; myKanji() is the page's one.
 
 import { createStore, safeGet, safeSet } from './neorgon-persist.js';
-import { isKanji, hasKanji, toHira } from './kana.js';
+import { isKanji } from './kana.js';
+import { cleanPair } from './kanji-words.js';
+
+export { dictionaryWord, wordsByKanji } from './kanji-words.js';
 // A cycle on purpose, and a safe one: kanji-backup.js uses this module's
 // functions only when it is called, never while it loads.
 import { exportDoc, mergeInto } from './kanji-backup.js';
@@ -61,8 +64,6 @@ export const TOP_BOX = 5;
  */
 export const INTERVALS = Object.freeze([0, 1, 2, 4, 8, 16]);
 
-/** A word or a reading longer than this is not a dictionary word. */
-const MAX_FIELD = 24;
 /** The embed contract caps a text at 2,000 characters, so a session cannot count more kanji. */
 const MAX_COUNTED = 2000;
 const DAY = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
@@ -126,15 +127,6 @@ export function withPlace(rec, from) {
 
 export function oneKanji(ch) {
   return typeof ch === 'string' && [...ch].length === 1 && isKanji(ch);
-}
-
-function cleanPair(p) {
-  if (!Array.isArray(p) || p.length !== 2) return null;
-  const [w, r] = p;
-  if (typeof w !== 'string' || typeof r !== 'string') return null;
-  if (!w || !r || [...w].length > MAX_FIELD || [...r].length > MAX_FIELD) return null;
-  if (!hasKanji(w)) return null;
-  return [w, r];
 }
 
 /** Append the pairs `more` adds to `list`, oldest dropped past MAX_WORDS. */
@@ -262,60 +254,6 @@ export function recordReading(data, chars, words, today) {
   return { counted: fresh, changed: fresh.length > 0 || learned > 0 };
 }
 
-/**
- * The dictionary word a token is, as [written, reading], or null. An
- * inflected token is stored as its dictionary form: 降っています was met as
- * 降る, read ふる. That reading is the stem's furigana plus the base's own
- * kana, unless the record's readings say the stem changed (来ました is 来る,
- * くる, not きる). A token with no dictionary record (a name, a number read
- * by rule, a guess) is not a dictionary word, and is left out.
- */
-export function dictionaryWord(token) {
-  if (!token || !token.entry || token.confidence === 'guess') return null;
-  const surface = String(token.surface || '');
-  const reading = String(token.reading || '');
-  if (!hasKanji(surface) || !reading) return null;
-  const base = String(token.base || '');
-  if (token.kind !== 'inflected' || !base || base === surface) return cleanPair([surface, reading]);
-
-  const s = [...surface];
-  const b = [...base];
-  let i = 0;
-  while (i < s.length && i < b.length && s[i] === b[i]) i += 1;
-  const tail = b.slice(i).join('');
-  if (!i || hasKanji(tail)) return null;
-  let stem = '';
-  let at = 0;
-  for (const p of Array.isArray(token.furigana) && token.furigana.length ? token.furigana : [{ text: surface }]) {
-    if (at >= i) break;
-    const chars = [...String(p.text || '')];
-    if (at + chars.length <= i) stem += p.ruby || toHira(p.text);
-    else if (p.ruby) return null;      // a ruby cannot be cut in two
-    else stem += toHira(chars.slice(0, i - at).join(''));
-    at += chars.length;
-  }
-  let read = stem + toHira(tail);
-  const listed = Array.isArray(token.entry.r) ? token.entry.r.filter((x) => typeof x === 'string') : [];
-  const fits = listed.filter((x) => x.endsWith(toHira(tail)) && x.length > tail.length);
-  if (fits.length === 1 && !listed.includes(read)) read = fits[0];
-  return cleanPair([base, read]);
-}
-
-/** kanji -> the dictionary words of these tokens it appears in, in text order. */
-export function wordsByKanji(tokens) {
-  const out = new Map();
-  for (const token of tokens || []) {
-    const pair = dictionaryWord(token);
-    if (!pair) continue;
-    for (const ch of new Set([...pair[0]].filter(isKanji))) {
-      const list = out.get(ch) || [];
-      if (!list.some(([w, r]) => w === pair[0] && r === pair[1])) list.push(pair);
-      out.set(ch, list);
-    }
-  }
-  return out;
-}
-
 // ── Saving and the review schedule ────────────────────────────────────────
 
 /** Saved today, in box 0, due today: a kanji saved is one to review now. */
@@ -391,6 +329,7 @@ export function openKanji({ store = createStore({ key: KEY, version: VERSION }),
   let note = null;
   let dropped = 0;
   let writable = true;
+  let unsaved = false;   // a session start only this page knows, not written yet
   const listeners = new Set();
   // History's saved phrases go in the same backup. History is another store,
   // so the page lends this one the two calls (events-collect.js); a store lent
@@ -407,7 +346,7 @@ export function openKanji({ store = createStore({ key: KEY, version: VERSION }),
       keepRaw(raw);
       data = emptyData(now);
       note = 'damaged';
-      return keepStart(loaded, now);
+      return keepStart(loaded, raw, now);
     }
     const v = validate(loaded, now);
     data = v.data;
@@ -416,20 +355,25 @@ export function openKanji({ store = createStore({ key: KEY, version: VERSION }),
       if (raw !== null && raw !== undefined) keepRaw(raw);
       note = v.damaged ? 'damaged' : 'partial';
     }
-    return keepStart(loaded, now);
+    return keepStart(loaded, raw, now);
   }
 
-  // A session this load started is written at once: kept in memory only, a
-  // reload stamped a later `at` and History kept the drafts typed before it.
-  function keepStart(loaded, now) {
+  // A session this load started must be written before History relies on it:
+  // kept in memory only, a reload stamped a later `at` and History kept the
+  // drafts typed before it. A store being repaired is written now; a first
+  // visit writes nothing until History records (startAt), so it stores nothing.
+  function keepStart(loaded, raw, now) {
     const stored = isObject(loaded) && isObject(loaded.session) ? loaded.session.at : undefined;
-    if (isTime(now) && data.session.at === now && stored !== now) writable = store.save(data);
+    if (!isTime(now) || data.session.at !== now || stored === now) return api;
+    if (raw !== null && raw !== undefined) writable = store.save(data);
+    else unsaved = true;
     return api;
   }
 
   function commit(changed = true) {
     if (!changed) return false;
     writable = store.save(data);
+    unsaved = false;
     for (const fn of listeners) fn();
     return true;
   }
@@ -448,6 +392,8 @@ export function openKanji({ store = createStore({ key: KEY, version: VERSION }),
     get sessionSource() { return sessionSource(data); },
     /** When this session began (ms), or null for one an older page began. */
     get sessionAt() { return isTime(data.session.at) ? data.session.at : null; },
+    /** The session's start for History, written first when only this page knew it. */
+    startAt() { if (unsaved) { unsaved = false; writable = store.save(data); } return api.sessionAt; },
     /** Counted for the first time ever in this session: the reader's "New" chip. */
     isNew: (ch) => !!data.seen[ch] && data.seen[ch].n === 1 && data.session.counted.includes(ch),
     beginSession(src, now) { beginSession(data, src, now); return commit(); },

@@ -596,14 +596,24 @@ test('export and import carry the kind and the key; a merge takes them from the 
   assert.equal(sum.seenUpdated, 0);
 });
 
-test('a session the store had to start is written at once, so a reload keeps its start', () => {
+test('a first visit writes nothing, and its session start is written when History first asks for it', () => {
   let kept = null;
   const store = { load: () => (kept === null ? null : JSON.parse(kept)), save: (d) => { kept = JSON.stringify(d); return true; } };
   const first = openKanji({ store, readRaw: () => kept, keepRaw: () => {} }).load(1000);
   assert.equal(first.sessionAt, 1000);
-  assert.equal(JSON.parse(kept).session.at, 1000, 'written before any kanji is counted');
+  assert.equal(kept, null, 'a visit that records nothing stores nothing');
+  assert.equal(first.startAt(), 1000);
+  assert.equal(JSON.parse(kept).session.at, 1000, 'written before History relies on it, though no kanji is counted');
   const again = openKanji({ store, readRaw: () => kept, keepRaw: () => {} }).load(5000);
   assert.equal(again.sessionAt, 1000, 'a reload is the same session, begun when it began');
+});
+
+test('a damaged store is repaired with its new session start written at once', () => {
+  let kept = '{"__v":1,"data":{"sa';
+  const store = { load: () => { try { return JSON.parse(kept).data; } catch { return null; } }, save: (d) => { kept = JSON.stringify({ __v: 1, data: d }); return true; } };
+  const page = openKanji({ store, readRaw: () => kept, keepRaw: () => {} }).load(2000);
+  assert.equal(page.note, 'damaged');
+  assert.equal(JSON.parse(kept).data.session.at, 2000);
 });
 
 test('a session read from the store is not written again on load', () => {
