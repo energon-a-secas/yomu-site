@@ -33,4 +33,16 @@ export const READER_STRINGS = Object.freeze({
   translateHide: { en: 'Hide', es: 'Ocultar' },
   translateFailed: { en: 'The translation failed: {detail}', es: 'La traducción falló: {detail}' },
   translateRetry: { en: 'Try again', es: 'Intentar de nuevo' },
+  translateNeedsClick: {
+    en: 'Your browser asks for a click before it starts translating. Press Try again.',
+    es: 'Tu navegador pide un clic antes de empezar a traducir. Haz clic en Intentar de nuevo.',
+  },
+  translateBusy: {
+    en: 'Your browser could not translate just now; it may be busy translating in other tabs. Try again in a moment, or use DeepL or Google Translate above.',
+    es: 'Tu navegador no pudo traducir en este momento; quizá está ocupado traduciendo en otras pestañas. Vuelve a intentarlo en un momento, o usa DeepL o Google Traductor, arriba.',
+  },
+  translateStalled: {
+    en: 'Your browser\'s translator stopped answering: no translation and no download progress for {s} seconds.',
+    es: 'El traductor de tu navegador dejó de responder: ni traducción ni avance de la descarga en {s} segundos.',
+  },
 });

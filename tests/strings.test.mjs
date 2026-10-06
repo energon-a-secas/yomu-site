@@ -15,6 +15,7 @@ import { fileURLToPath } from 'node:url';
 import { STRINGS } from '../js/strings.js';
 import { COLLECT_STRINGS } from '../js/strings-collect.js';
 import { PLAY_STRINGS } from '../js/strings-play.js';
+import { READER_STRINGS } from '../js/strings-reader.js';
 
 const SITE = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const BANNED = /\b(powerful|seamless|leverages?|robust|utili[sz]e)\b/i;
@@ -34,7 +35,7 @@ test('Play\'s strings are in the table, none overridden, and no key is in both m
 });
 
 test('every new string has English and neutral Spanish, the same placeholders, and none of the banned words', () => {
-  for (const [key, value] of [...Object.entries(COLLECT_STRINGS), ...Object.entries(PLAY_STRINGS)]) {
+  for (const [key, value] of [...Object.entries(COLLECT_STRINGS), ...Object.entries(PLAY_STRINGS), ...Object.entries(READER_STRINGS)]) {
     assert.equal(typeof value.en, 'string', `${key}.en`);
     assert.equal(typeof value.es, 'string', `${key}.es`);
     assert.ok(value.en.trim() && value.es.trim(), key);

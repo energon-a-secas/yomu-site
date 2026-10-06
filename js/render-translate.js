@@ -13,24 +13,23 @@
 // only in memory. It is not a live region: the status line already says when
 // a read is done, and a translation read aloud on every keystroke's read
 // would talk over the learner. The download and failure lines are.
+//
+// Every request ends in something the learner can act on: the translation,
+// or a failure line with Try again. translate.js gives up on a request after
+// QUIET_MS with neither download progress nor a result, and names the
+// failures it recognises (failureKind), which are said here in plain words.
 
 import { $, h, fill } from './utils.js';
 import { ui, currentLang } from './strings.js';
 import { savePrefs } from './state.js';
-import { createTranslation } from './translate.js';
+import { createTranslation, failureKind, QUIET_MS } from './translate.js';
 
 const tr = createTranslation();
 
 /** What the section knows: the text and language it last worked on, and how far it got. */
-const view = { phase: 'idle', text: '', target: '', out: '', progress: 0, error: '', seq: 0 };
+const view = { phase: 'idle', text: '', target: '', out: '', progress: 0, error: '', why: '', seq: 0 };
 
 const shown = (s) => !!(s.analysis && s.analysis.tokens.length && s.text.trim());
-
-// A translator is created once per language and reports its download to
-// whoever created it, so progress goes through one sink the newest request
-// points at, whether the click or a later read made the translator.
-let sink = null;
-const report = (p) => { if (sink) sink(p); };
 
 function quiet(key, vars) {
   return h('p', { class: 'quiet tr-note' }, ui(key, vars));
@@ -62,10 +61,20 @@ function nodes(s) {
       ];
     case 'error':
       return [
-        h('p', { class: 'tr-status', role: 'status' }, ui('translateFailed', { detail: view.error })),
+        h('p', { class: 'tr-status', role: 'status' }, failureLine()),
         h('p', { class: 'tr-actions' }, h('button', { type: 'button', class: 'btn btn--secondary btn--sm', 'data-act': 'translate-on' }, ui('translateRetry'))),
       ];
     default: return [];
+  }
+}
+
+/** The failure in plain words where translate.js recognised it, else its own text. */
+function failureLine() {
+  switch (view.why) {
+    case 'click': return ui('translateNeedsClick');
+    case 'busy': return ui('translateBusy');
+    case 'quiet': return ui('translateStalled', { s: Math.round(QUIET_MS / 1000) });
+    default: return ui('translateFailed', { detail: view.error });
   }
 }
 
@@ -86,21 +95,24 @@ async function run(s) {
   const mine = ++view.seq;
   const { text, target } = view;
   view.phase = 'translating';
-  sink = (p) => {
+  paint(s);
+  // translate.js reports progress only while this request waits, so a
+  // download heard after a failure cannot bring "Downloading" back.
+  const progress = (p) => {
     if (mine !== view.seq) return;
     view.phase = 'downloading';
     view.progress = p;
     paint(s);
   };
-  paint(s);
   try {
-    const out = await tr.translate(text, target, report);
+    const out = await tr.translate(text, target, progress);
     if (mine !== view.seq) return;
     view.out = out;
     view.phase = 'ready';
   } catch (err) {
     if (mine !== view.seq) return;
     view.phase = 'error';
+    view.why = failureKind(err);
     view.error = failed(err);
   }
   paint(s);
@@ -129,16 +141,18 @@ export function syncTranslation(s) {
 }
 
 /**
- * The learner's click on Translate here (or Retry). Creating a translator
- * whose model still has to be downloaded needs this click's activation, so
- * the work starts inside the handler, before anything is awaited.
+ * The learner's click on Translate here (or Try again). Creating a
+ * translator whose model still has to be downloaded needs this click's
+ * activation, so the work starts inside the handler, before anything is
+ * awaited. After a failure translate.js has forgotten the translator, so
+ * this creates a fresh one.
  */
 export function startTranslation(s) {
   if (!shown(s)) return;
   view.text = s.text;
   view.target = currentLang();
   if (s.prefs.translate !== 'on') { s.prefs.translate = 'on'; savePrefs(s); }
-  tr.open(view.target, report).catch(() => {});
+  tr.open(view.target).catch(() => {});
   run(s);
   // The button is gone once the section repaints; the heading keeps focus.
   const title = $('translation-title');

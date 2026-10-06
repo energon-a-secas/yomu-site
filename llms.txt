@@ -125,7 +125,9 @@ The Translation under the reading uses the browser's own on-device
 Translator API (Chrome 138+ and Edge on a computer): after the learner clicks
 Translate here once, the browser downloads a Japanese model and translates on
 the device, so the text is not sent anywhere; the translation is held in
-memory only. Other browsers say so and keep the two links.
+memory only. Other browsers say so and keep the two links. A translation
+that gets no answer and no download progress for 20 seconds, or that the
+browser refuses, ends in a line saying why and a Try again button.
 
 ## My kanji
 
