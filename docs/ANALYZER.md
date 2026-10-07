@@ -1322,34 +1322,70 @@ One reason per edge, the first that holds: `particle` and `copula` (the
 token on either side is one: a closed class, so the surest edge), `name` (a
 name the names tier knows, with its Latin spelling when it has one), `script`
 (the last script of the word before, read past ー, against the first of the
-word after), `loan` (katakana on both sides and the word before ends in ド,
+word after; a word that is only ー has no script of its own, and an edge
+before a kana no word starts with is `guess`, never `script`: す|ご|ー|いね
+was "hiragana to katakana" before the bar that lengthens ご), `loan` (katakana on both sides and the word before ends in ド,
 ト, ス, ク, グ or ル after ン, ッ, a u-column kana, ト or ド: ゴールド|カード,
 クレアディルド|オナニー), `nostart` (the word before ends in a kana no word
-starts with: ン, ッ, ー, a small kana; ラーメン|ショップ), `guess` (the word
-before has no dictionary support), `compound` (two plain parts), `word` (a
+starts with: katakana ン, ッ, ー, a small kana; ラーメン|ショップ. Not
+hiragana ん, which the analyzer reads as a word of its own, the explanatory
+ん of 登る|ん|です), `guess` (the word before has no dictionary support, or
+the word after starts with a kana no word starts with; `k` names that kana),
+`compound` (two plain parts), `word` (a
 dictionary word ends here; `f` says a form of one, with `base`, a number and
 its counter, or a prefix, a record whose first part of speech is `pref`).
 The order puts what a reader can see on the page before what only the
 dictionary knows, and a guess below every cue: クレアディルド is a guess, and
-its ド after ル is still what shows where it ends. The strings are
-`strings-gaps.js`'s; a gap, like a token, carries ids.
+its ド after ル is still what shows where it ends, and the gap's `guess`
+flag puts that in words after whatever reason won ("; the reading here is a
+guess"). The strings are `strings-gaps.js`'s; a gap, like a token, carries
+ids. Where a word has no gap, `besideOf(tokens, i, side)` says what stands
+there instead (`start`, `end`, `punct`, `space`, `latin`, `other`), for the
+Word panel.
 
 "Where are the spaces?" asks for the same edges in lines from the phrase
 library: `data/play/spaces.json` (`yomu-spaces/1`, `{ format, count, tiers,
 lines: [{ id, src, of?, tier, ja, en?, es?, gaps: [{ at, why, ...vars,
 part? }] }] }`, `at` in code points), emitted by `tools/build-spaces.mjs`
 through `tools/lib/spaces.mjs`, which says what is kept and what is left out
-and why. Measured on 2026-10-07: the library's 71 phrases and 61 dialogue
-turns are 151 sentences; 90 are kept as written and 57 more in hiragana (the
-library's own kana, punctuation put back, kept only where that spelling
-reads with the written line's edges). Left out: the 31 set phrases
-(`chunk`; no dialogue sentence holds one the analysis cuts inside), 12 with
-a prefix standing alone (お|元気, ご|利用, where the dictionary has お名前 as
-one word, and six kana spellings the analyzer reads with one, ごひゃくえん), 7
-kana spellings that part where the kanji do not (おとないちまい for
-大人一枚), 21 with no edge to find, 1 whose reading the library's kana does not
-confirm (空いて, the one tests/library-reading.test.mjs allows), 1 too long
-for a phone's board, 1 twice. No line holds a guess. Not one library line
+and why. A key must never dock a learner for a split the language makes, so
+a line is kept only where the analysis settles where its words part;
+`unsettled` reads the dictionary (both tiers, through `dictWords`, over a
+dictionary of its own so nothing it loads reaches the analysis) and no list
+of lines. Measured on 2026-10-07, after the review of the first build (159
+lines, which kept 卵|焼き, 何|と言います and いって read as 要る): the
+library's 71 phrases and 61 dialogue turns are 151 sentences; 67 are kept as
+written and 42 more in hiragana (the library's own kana, punctuation put
+back, kept only where that spelling reads with the written line's edges and
+its words), with the twelve compound lines 121, tiers 48, 61 and 12. Left
+out:
+
+| reason | lines | what |
+|---|---:|---|
+| set | 31 | the set phrases (`chunk`); no dialogue sentence holds one the analysis cuts inside |
+| none | 20 | no edge to find |
+| two | 15 | one token that is two words: a te-form and its verb (しています, 見ている, 持っていきます, 作ってみます), and an expression that is a word and a form of する or ございます: お願い\|します (eleven, where the same file splits 連絡\|します), ありがとう\|ございました |
+| prefix | 12 | a prefix standing alone (お\|元気, ご\|利用, where the dictionary has お名前 as one word), six written and six kana spellings (ごひゃくえん) |
+| tail | 5 | a word that ends in a particle: 何\|と (と quotes), 一緒\|に twice, 何\|か, and だ\|っけ, the copula and a particle |
+| kana | 3 | kana spellings that part where the kanji do not (であいます, 出会う, for で\|会います) |
+| joined | 2 | two tokens that spell one word: 卵\|焼き (rare tier, rolled omelette), 作り\|方 (recipe) |
+| counter | 2 | the counter runs on: 何番\|線, 五番\|線 (番線, track number) |
+| base | 2 | a kana spelling read as another word: いって as 要る for 行って, さとう as 砂糖 for 佐藤 |
+| reading | 1 | 空いて, the one disagreement tests/library-reading.test.mjs allows |
+| long | 1 | too long for a phone's board |
+| twice | 1 | the same text again |
+
+A written line left out takes its kana spelling with it, so 53 spellings
+were tried, not 70. What the checks do not count: an expression JMdict lists
+as `exp` is several words, so もう\|少し and 気\|を\|つけて stay split; a
+particle never joins a word (と\|山 is not 外山); and the dictionary's
+one-kana particles (て, つ, い) end too many words to count after one, so
+they count only after the copula. Read by hand, the keys that stand though a
+grammar could argue them: a prefix joined to its word (お名前, お会計, お弁当:
+a prefix never stands alone, and no writing puts a space after it), どういう
+(one adnominal in JMdict), 二つ目 and 何時 (a number and its counter),
+はじめまして, and a te-form before もらえます or ください, which the analysis
+already splits. No line holds a guess. Not one library line
 holds a katakana compound the analyzer splits, so the hard tier is twelve
 lines written for Yomu (`tools/lib/compound-lines.mjs`), checked the same
 way. `tests/spaces.test.mjs` builds the file again and fails when the

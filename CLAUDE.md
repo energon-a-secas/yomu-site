@@ -231,19 +231,33 @@ the one-line hint, `#gaps-hint`, was shown once) sets `#reading[data-gaps]`,
 and CSS does the rest: `render-reading.js` always builds an empty `span.gap`
 between two word tokens that touch and a `span.gap--part` inside a katakana
 compound's surface at each edge between its parts, so the toggle repaints
-nothing. A gap holds no text node, so copying the reading copies nothing it
-adds (measured in Chromium, WebKit and Firefox: the pasted text with Gaps on
-is the text with Gaps off). `js/gaps.js` decides each edge's one reason from
-the tokens alone (docs/ANALYZER.md, "Gaps"), in the order particle, copula,
-name, script, loan, nostart, guess, compound, word; the strings are
-`strings-gaps.js`'s and `render-gaps.js` draws them. A reason reaches a
-pointer by hover (`#gap-tip`, inside the reading, never fixed to the
-viewport), a tap on a gap pins it, and the Word panel lists the gaps before,
-inside and after the chosen word as text, which is the way for a keyboard
-and a screen reader: a gap takes no focus and no tab stop. WebKit gives the
-click of a tap on a 12px gap to the word beside it (the pointerdown was on
-the gap), so `events-gaps.js` reads a tap from `touchend` and cancels its
-click; do not move that back to `click` alone.
+nothing. A word's gap goes in one `.tok-group` with the word it follows: as
+its own flex item it wrapped away, leaving a row that started on a bar (the
+review of 2026-10-07 saw it at 390 in all three browsers), so do not put it
+back between the two buttons. A gap holds no text node, so copying the reading
+copies nothing it adds (measured in Chromium, WebKit and Firefox: the pasted
+text with Gaps on is the text with Gaps off). `js/gaps.js` decides each edge's
+one reason from the tokens alone (docs/ANALYZER.md, "Gaps"), in the order
+particle, copula, name, script, loan, nostart, guess, compound, word; the
+strings are `strings-gaps.js`'s and `render-gaps.js` draws them. Hiragana ん is
+not in `NOSTART`: the analyzer reads the explanatory ん as a word of its own
+(登る|ん|です), and a game that said no word starts with ん had keys that started
+one with it; `tests/spaces.test.mjs` holds every key to every reason the game
+can show. An edge before a kana in `NOSTART` is a guess, never a change of
+script (す|ご|ー|いね: the bar lengthens ご). A guess touching a gap is said in
+words whatever reason won ("...; the reading here is a guess"), in the tip and
+the Word panel, not only by the dashed line. A reason reaches a pointer by
+hover (`#gap-tip`, inside the reading, never fixed to the viewport, so a
+scroll carries it with its gap), a tap on a gap pins it, and every repaint of
+the reading (`render.js paintReading`) puts it away, or a pinned reason stayed
+over a new text naming a word that was gone. The Word panel lists the gaps
+before, inside and after the chosen word as text, which is the way for a
+keyboard and a screen reader: a gap takes no focus and no tab stop. Where
+there is no gap it names what stands there (`gaps.js besideOf`: the line's
+start or end, punctuation, a space, Latin letters). WebKit gives the click of
+a tap on a 12px gap to the word beside it (the pointerdown was on the gap), so
+`events-gaps.js` reads a tap from `touchend` and cancels its click; do not
+move that back to `click` alone.
 
 **The text stays in the browser.** It persists under
 `localStorage['yomu-site:text']`, and under
@@ -625,12 +639,28 @@ with the character before it, opening with the one after. The lines are
 library and `tools/lib/compound-lines.mjs`; `tests/spaces.test.mjs` builds it
 again with the analyzer and fails when they differ, so **rerun the builder
 after any change to the analyzer, the dictionary or the library**, and
-`tools/check-data.mjs` holds its shape. Measured 2026-10-07: 159 lines, 90
-of the library's 151 sentences as written, 57 in hiragana from the library's
-own kana, and the twelve compound lines (docs/ANALYZER.md, "Gaps", has what
-is left out and why). The library holds no katakana compound the analyzer
-splits; the compound lines were written for Yomu, each with its kana, and are
-held to the same rules as the library's.
+`tools/check-data.mjs` holds its shape. **A key must never dock a learner
+for a split the language makes**, so a line is kept only where the analysis
+settles where its words part: `tools/lib/spaces-settled.mjs` leaves out a
+line with two neighbouring tokens that spell one dictionary word of either
+tier, read as the line reads them (卵|焼き, 作り|方; an expression, JMdict's
+`exp`, is several words and does not count), a number whose counter runs on
+into the next word (何番|線), a word that ends in a particle after a word
+(何と in 何と言いますか, 一緒に, だっけ), or one token the grammar writes as
+two words (a te-form and its verb, 待っています; お願いします where the same
+file splits 連絡|します; ありがとう|ございました), and a kana spelling whose
+analysis reads a word of the written line as another (いって as 要る). Each
+check reads the dictionary through `dictWords`, over a dictionary of its own;
+none is a list of lines. Measured 2026-10-07: 121 lines (tiers 48, 61, 12),
+67 of the library's 151 sentences as written, 42 in hiragana from the
+library's own kana, and the twelve compound lines (docs/ANALYZER.md, "Gaps",
+has what is left out and why). The library holds no katakana compound the
+analyzer splits; the compound lines were written for Yomu, each with its
+kana, and are held to the same rules as the library's (hotel-lobby says
+待ちます, since 待っています is a te-form and its verb). The hint over a line
+names its scripts (`play-spaces.js tierHint`), so a line with no kanji is
+never told it has some, and the result's "Lines to look at again" holds the
+word "space" for a screen reader in each gap, visually hidden.
 
 **The hints and the twins' words are ours.** Which kana and kanji look alike
 is a fact; every hint, word and note in `js/play-kana.js` and
