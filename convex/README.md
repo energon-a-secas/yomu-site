@@ -56,14 +56,20 @@ deployment; no real Clerk user has those subjects.
 
 ## Production
 
-Not deployed. To ship:
+The production deployment of project `yomu` already exists, and is empty:
+`wandering-ox-429` (`https://wandering-ox-429.convex.cloud`). Convex made it
+with the project; `npx convex function-spec --prod` lists no functions
+(checked 2026-10-07), so nothing is deployed to it and the page still points
+at the dev deployment. To ship, from the main checkout and never from a
+worktree:
 
 ```bash
-npx convex deploy                       # creates the production deployment of project yomu
+npx convex deploy                       # pushes schema and functions to wandering-ox-429
 ```
 
-then put its URL in `js/account.js` (`CONVEX_URL`) and in `index.html`'s
-CSP `connect-src`, in one commit (`tests/sync-account.test.mjs` fails when
-they disagree), and run `packages/neorgon-ui/sync-auth.sh` from the root so
-every site's "Your Neorgon sites" lists Yomu. The production deployment
-needs no environment variable: there is no admin role.
+then put `https://wandering-ox-429.convex.cloud` in `js/account.js`
+(`CONVEX_URL`) and in `index.html`'s CSP `connect-src`, in one commit
+(`tests/sync-account.test.mjs` fails when they disagree), and run
+`packages/neorgon-ui/sync-auth.sh` from the root so every site's "Your
+Neorgon sites" lists Yomu. The production deployment needs no environment
+variable: there is no admin role.

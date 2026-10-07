@@ -581,17 +581,19 @@ rows, and one sync's plan: what to push, what to change here, what the
 server holds after), `js/sync.js` (pull, merge, push; imported on sign-in
 only), `js/sync-book.js` (`localStorage['yomu-site:sync']`: the account this
 browser last synced with, when it joined, the last Clear all it applied,
-removals not yet carried, when each preference changed), `js/sync-watch.js`
-(the stores as sync changes them, and the listeners that turn an unsave or
-Clear all into a tombstone), `js/account.js` (the guard, the kit, the
-timers; every dependency passed in), `js/events-sync.js` (the page's
+removals not yet carried, save stamps not yet carried, when each preference
+changed), `js/sync-watch.js` (the stores as sync changes them, and the
+listeners that stamp an unsave, a Clear all, a save and an Import),
+`js/account.js` (the guard, the kit, the timers, the step a retry runs;
+every dependency passed in), `js/events-sync.js` (the page's
 dependencies), `js/render-sync.js` (the My kanji line `#mk-sync`, the
 `#sync-dialog` question) and `js/strings-sync.js`. `npm test` runs
 `tests/sync-rules.test.mjs`, `tests/sync-server.test.mjs` (the real handlers
 over an in-memory database, `tests/helpers/fake-convex.mjs`, which refuses
 what Convex refuses), `tests/sync-client.test.mjs` (devices made of the real
-stores, three of them in random order, converging) and
-`tests/sync-account.test.mjs`.
+stores, `tests/helpers/sync-device.mjs`, three of them in random order,
+converging), `tests/sync-stamps.test.mjs` (Import, and clocks that disagree)
+and `tests/sync-account.test.mjs`.
 
 **An anonymous visit fetches nothing from Clerk, Convex or esm.sh.**
 `app.js` imports `events-sync.js` only with a key on the page and only
@@ -599,7 +601,9 @@ after an embed has returned, so a frame starts no kit. The kit loads
 clerk-js only with a Neorgon session or on Sign in; the Convex client
 (`https://esm.sh/convex@1.46.0/browser`, the version in package.json, and
 the CSP allows that one path) and `sync.js` are imported on sign-in. A
-static import of any of them fails `tests/sync-account.test.mjs`, which also
+static import of any of them (`import ... from`, a side-effect `import '...'`,
+an `export ... from`, in either quote) fails `tests/sync-account.test.mjs`,
+which also
 fails when the CSP's connect-src lacks `CONVEX_URL` or script-src lacks the
 pinned path: a new deployment changes both in one commit. The client is
 `ConvexHttpClient`, so there is no websocket and no `wss:` in the CSP.
@@ -616,8 +620,9 @@ are ASCII (`mixed` travels as `[{ k, n }]`).
 one.** A row carries `removed`; a saved kanji or phrase carries `s`, the
 latest time it was saved (`at` and `saved` stay the earliest, as Import
 keeps them). The stores never hold `s`: `sync-local.js` rebuilds it as the
-save's own time, the book's `joined` if later, or the server's `s` when the
-server's save is the same save (the same `at`, or `saved`). Borrowing the
+save's own time, the book's `joined` if later, the book's stamp for that
+save (`saves`, below) if later, or the server's `s` when the server's save
+is the same save (the same `at`, or `saved`). Borrowing the
 server's `s` for a different save brought a save made before a Clear all
 back to life inside the newer one (its regression test is in
 `tests/sync-client.test.mjs`). A removal is written to the book only by
@@ -631,10 +636,42 @@ time.** The owner's `clear` kills every save not newer than it and every
 seen record counted under an older clear (`e`, the clear its device knew).
 So a device that counted kanji after the clear, before it heard of it,
 loses those counts at its next sync; a push answers with the server's
-clear, and a newer one makes the client pull at once. A browser joining an
-account (a first sign-in, or Add) takes the account's clear as its own and
-counts its saves as made when it joined, so an old clear or removal in the
-account never empties it.
+clear, and a newer one makes the client pull at once.
+
+**A browser that never synced brings all of its own data when it first
+joins, on purpose.** On a first sign-in, or Add, the browser takes the
+account's clear as its own and every save it holds counts as made when it
+joined (the book's `joined`). So a save older than a removal or a Clear all
+the account made before this browser joined comes back, on every device.
+That is intended: those saves were never in the account, so the account's
+removal or clear was never about them. The learner made them in a browser
+the account had not seen, and taking them away the moment it signs in
+would empty that browser with nothing on screen to say why. It also
+happens with no Sign in pressed on Yomu: the fleet's Clerk session covers
+every `*.neorgon.com` site, so the first visit by someone already signed in
+on another Neorgon site is a first sign-in. `tests/sync-client.test.mjs`
+pins it ("a browser joining an account keeps its own data even when the
+account was cleared before it joined").
+
+**Import is a choice made now.** A kanji or phrase that Import brings back
+keeps its backup's schedule and counts, but is stamped in the book
+(`saves`) as saved now and one past any removal or Clear all this browser
+knows, so Export, Clear all, Import is not undone by the next sync. The
+stamp outranks a clear made elsewhere that this browser had not heard of
+too, since by the clocks the Import came after it; the counts do not,
+because a count has no time (above). A removal made after the Import still
+wins. Stamps are forgotten once a push carried them: the account then holds
+that save's `s`, which `sync-local.js` borrows.
+
+**Clocks disagree, and the learner's last action wins anyway.** Every time
+is the device's own clock. A removal or a Clear all made here is stamped at
+least one past the newest save this browser knows for that row (the
+store's own, a stamp in the book, the account's copy as the page last saw
+it, `sync.js known()`): `max(now, known s + 1)`. A save made here is
+stamped one past the newest removal it knows when its own time is not
+later. Without the first, a device an hour behind unsaved a kanji and saw
+it come straight back; without the second, the same device could not save
+again what it had just removed. Both are in `tests/sync-stamps.test.mjs`.
 
 **The eight words per kanji are the eight met last.** A word travels with
 the day it was last met (`[written, reading, day]`, the server's day or the
@@ -654,26 +691,49 @@ another one opens `#sync-dialog` with what each side holds. Add is `adopt`
 (the book starts again for that account, `joined` now); Use is `replace`
 (this browser takes the account's data, `joined` 1 ms, so nothing of its
 own joins; its pending removals are dropped with the old account); Not now
-pauses sync and the line offers Choose. The old account keeps its copy.
+pauses sync and the line offers Choose. The old account keeps what it
+already had and nothing more: what changed here since its last sync with
+it is never sent to it, and with Use it is gone from this browser too. The
+dialog says exactly that, and when that last sync was; do not promise the
+old account more. A sign-out closes an open question (`ui.dismiss`), and
+an answer given after it applies to nobody.
 
-**A failure changes nothing and is said once.** A pull that fails applies
-nothing, and on a first sign-in remembers no account; a push that fails
-keeps the merge and the remembered account and is retried whole on the
-next change, on `online`, or when the page shows again (a pull at most
-once a minute). The line says offline, or the server's error, until a sync
-finishes.
+**A failure changes nothing, is said once, and the retry runs the step that
+failed.** A pull that fails applies nothing, and on a first sign-in
+remembers no account; a push that fails keeps the merge and the remembered
+account. `account.js` keeps the step a sign-in is at: `connect` (whoami,
+and the pull behind the account question), `ask`, the chosen `adopt` or
+`replace`, then `same` once a sync wrote the book. The next change, the
+`online` event and the page shown again (a pull at most once a minute when
+nothing failed) all run that step, one at a time. A retry used to be an
+ordinary sync, which `sync.js` refuses with no book (`account-changed`), so
+a first sign-in that failed once never recovered without a reload. The
+line says the failure's kind in a plain sentence (offline, the sign-in not
+accepted, another tab switched accounts, refused, a server error), never a
+code or a Convex request id; those go to the console.
 
-**The one order that differs.** Two saves of one kanji made apart, joined
-before an older removal from a third device reaches them, stay saved in
-every order, but which schedule wins depends on the order the server saw
-(`tests/sync-rules.test.mjs`, "the one grouping that differs"). Everything
-else the joins keep is the same in any grouping.
+**Two joins depend on the grouping, and it does not matter which.**
+`joinKanji` and `joinPhrase` are commutative and idempotent but not
+associative. A copy that a removal kills can still have lent its values to
+a live copy it met before the removal reached them: for a saved kanji, the
+schedule, `at` and `lapses` (`tests/sync-rules.test.mjs`, "the one grouping
+that differs"); for a phrase, its read count `n`, its last read (`last`,
+`src`, and `t`, the spelling read then, which may differ from another
+copy's in spaces or width and still have the same key) and the earliest
+`saved`. It is harmless because whether a kanji or a phrase is saved, and
+a phrase's key, are the same in any grouping (the newest save against the
+newest removal, both maxima, which the random test asserts), seen counts,
+words, Play and preferences are fully associative, and every device takes
+the account's row at its next sync, so the devices still agree with each
+other. What the order decides is a review schedule, a read count, the
+last-read time and spelling, or the date History sorts a saved phrase by.
 
 **Sign-in cannot be tried on localhost.** The production key refuses it and
 the kit's dialog says so (expected). The functions are checked with
 `npx convex run sync:<fn> --identity '{"subject":"user_a","issuer":"https://clerk.neorgon.com"}'`
 (`convex/README.md`); a real Clerk session against the deployment, and the
-production deployment, are untested.
+production deployment (`wandering-ox-429`, which exists and holds no
+functions yet), are untested.
 
 ## Do not touch
 
