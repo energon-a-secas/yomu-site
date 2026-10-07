@@ -685,7 +685,8 @@ The book's `joined` is when the join was settled (begin() decided it, or
 the learner answered), or one past the account's Clear all when that is
 later; each save the browser brings is stamped in the book (`brought`) at
 `joined`, or one past the account's removal of that row when that is
-later (`sync.js joinStamps`): another device's clock may run ahead, and
+later (`sync.js joinStamps`; the next paragraph says which later ones
+count): another device's clock may run ahead, and
 joining at this clock's now lost a whole browser's saves to a clear stamped
 an hour in the future (`tests/sync-stamps.test.mjs`). So with Add a save
 older than a removal or a Clear all the account made before this browser
@@ -793,29 +794,31 @@ there if it is still pending (`tests/sync-tabs.test.mjs`).
 
 **A failure changes nothing, is said once, and the retry runs the step that
 failed.** A pull that fails applies nothing; a push that fails keeps the
-merge and the remembered account. A first sign-in's join is in the book
-from the moment it is decided (`pending: 'adopt'`, as an answered Add), so
-the retry continues it, and an unsave, a save or a preference change made
-in between counts. It used to write nothing until a sync finished: the
-unsave was recorded nowhere and the retry brought the account's copy back
-(`tests/sync-join.test.mjs`, `tests/sync-account.test.mjs`).
-`account.js` keeps the step a sign-in is at: `connect` (whoami,
-and the pull behind the account question), `ask`, the chosen `adopt` or
-`replace`, then `same` once the book names the account (a sync wrote it,
-or it holds the pending join). The next change, the
-`online` event and the page shown again (a pull at most once a minute when
-nothing failed) all run that step, one at a time. A retry used to be an
-ordinary sync, which `sync.js` refuses with no book (`account-changed`), so
-a first sign-in that failed once never recovered without a reload. A
-book that already names the signed-in account is joined, or holds the
-answer that will join it, so `sync.js` runs an `adopt` or a `replace` on it
-as `same`, or as its pending answer: another tab may have written it since
-begin() or the answer, and a second join would drop that tab's removals not
-yet pushed and count what it received from the account as its own
-(`tests/sync-tabs.test.mjs`). The
-line says the failure's kind in a plain sentence (offline, the sign-in not
-accepted, another tab switched accounts, refused, a server error), never a
-code or a Convex request id; those go to the console.
+merge and the remembered account. A first sign-in's join is in the book from
+the moment it is decided (`pending: 'first'`, then `'adopt'` once settled,
+as an answered Add), so the retry continues it, and an unsave, a save or a
+preference change made in between counts. It used to write nothing until a
+sync finished: the unsave was recorded nowhere and the retry brought the
+account's copy back (`tests/sync-join.test.mjs`,
+`tests/sync-account.test.mjs`). `account.js` keeps the step a sign-in is at:
+`connect` (whoami, and the pull behind the account question or a first
+sign-in's), `ask`, the chosen `adopt` or `replace`, then `same` once the
+book names the account (a sync wrote it, or it holds the pending join). The
+next change, the `online` event and the page shown again (a pull at most
+once a minute when nothing failed) all run that step, one at a time. A retry
+used to be an ordinary sync, which `sync.js` refuses with no book
+(`account-changed`), so a first sign-in that failed once never recovered
+without a reload. A book that already names the signed-in account is joined,
+or holds the answer that will join it, so `sync.js` runs an `adopt` or a
+`replace` on it as `same`, or as its pending answer: another tab may have
+written it since begin() or the answer, and a second join would drop that
+tab's removals not yet pushed and count what it received from the account as
+its own (`tests/sync-tabs.test.mjs`). A first sign-in still `first` is never
+run as `same`: `run()` refuses it, and the step goes back to `connect`,
+where begin() settles it or asks. The line says the failure's kind in a
+plain sentence (offline, the sign-in not accepted, another tab switched
+accounts, refused, a server error), never a code or a Convex request id;
+those go to the console.
 
 **Two joins depend on the grouping, and it does not matter which.**
 `joinKanji` and `joinPhrase` are commutative and idempotent but not

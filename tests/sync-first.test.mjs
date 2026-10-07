@@ -186,3 +186,12 @@ test('no question: a browser that holds only phrases is asked too, and one with 
   const z = device(server, 'user_a', { at: 6 });
   assert.equal((await z.sync.begin()).mode, 'adopt');
 });
+
+test('a first sign-in not settled is never run as an ordinary sync: it is decided again', async () => {
+  const { x } = await removedInAccount();
+  await x.signIn({ answer: null });                  // asked, and Not now
+  await assert.rejects(x.sync.sync('same'), (err) => err.code === 'account-changed');
+  assert.equal(x.mutations().length, 0, 'nothing was sent');
+  assert.equal(x.books.read().pending, FIRST);
+  assert.equal((await x.signIn({ answer: null })).first, true, 'begin() asks again');
+});
