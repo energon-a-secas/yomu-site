@@ -118,23 +118,29 @@ export function counts(server, snap) {
 }
 
 /**
- * When a joining browser's data counts as saved: now, and one past the
- * account's Clear all and past its removal of anything this browser brings.
- * Another device's clock may run ahead, so "now" here can be earlier than a
- * removal the account already holds; joining at now would then lose the
- * browser's own saves to a clear it never saw (tests/sync-stamps.test.mjs).
+ * When a joining browser's data counts as saved, row by row. `joined` is
+ * `at`, or one past the account's Clear all when another device's clock ran
+ * ahead of this one. Each save the browser brings (the stores before the
+ * account's rows are applied) counts as saved at `joined`, a phrase at
+ * `at`, or one past the account's removal of that row when that is later:
+ * the browser keeps its own data even then, and a removal stamped by a
+ * clock ahead moves only the row it removed. What the join receives from
+ * the account is not brought and keeps the account's own stamp, so a
+ * removal another device has not pushed yet still wins over it
+ * (tests/sync-join.test.mjs).
  */
-export function joinedAt(server, snap, at) {
-  let after = server.clear;
+export function joinStamps(server, snap, at) {
+  const joined = Math.max(at, server.clear + 1);
+  const brought = { kanji: {}, phrases: {} };
   for (const ch of Object.keys(snap.kanji.saved)) {
     const row = server.kanji.get(ch);
-    if (row) after = Math.max(after, row.removed);
+    brought.kanji[ch] = row ? Math.max(joined, row.removed + 1, (row.seen ? row.seen.e : 0) + 1) : joined;
   }
   for (const entry of snap.phrases) {
     const row = server.phrases.get(entry.key);
-    if (row) after = Math.max(after, row.removed);
+    brought.phrases[entry.key] = row ? Math.max(at, row.removed + 1) : at;
   }
-  return Math.max(at, after + 1);
+  return { joined, brought };
 }
 
 /**
@@ -163,6 +169,20 @@ export function createSync({ client, local, book: books, now = Date.now }) {
     return { subject, mode, counts: counts(await pullAll(client), local.snapshot()) };
   }
 
+  /**
+   * The book a join writes, taking the account's Clear all as its own. Add
+   * brings every save the stores hold now, before anything of the account's
+   * is applied (`brought`, joinStamps); Use brings none of its own.
+   */
+  function joinBook(who, as, server, snap) {
+    const book = newBook(who, now(), snap.prefs, server.clear);
+    if (as === 'replace') return book;
+    const { joined, brought } = joinStamps(server, snap, book.joined);
+    book.joined = joined;
+    book.brought = brought;
+    return book;
+  }
+
   async function run(mode) {
     const who = subject;
     if (!who) throw new SyncError('not-authenticated');
@@ -174,14 +194,11 @@ export function createSync({ client, local, book: books, now = Date.now }) {
     if (mode === 'same' && (!had || had.account !== who)) throw new SyncError('account-changed');
     // A book that already names this account was joined (here, or in another
     // tab since begin() or the answer): the join is never made twice, since a
-    // new book would drop that tab's removals not yet pushed, and move
-    // `joined` past every removal the account received in between.
+    // new book would drop that tab's removals not yet pushed, and count what
+    // it received from the account as its own.
     const as = had && had.account === who ? 'same' : mode;
     const snap = local.snapshot();
-    // A browser joining the account brings what it holds in as saved when it
-    // joined (joinedAt); one taking the account's data instead brings nothing
-    // in (joined at 1 ms).
-    const book = as === 'same' ? had : newBook(who, as === 'replace' ? 1 : joinedAt(server, snap, now()), snap.prefs, server.clear);
+    const book = as === 'same' ? had : joinBook(who, as, server, snap);
     const merge = planSync(server, snap, book, { replace: as === 'replace' });
     local.apply(merge.apply);
     if (as === 'replace') { book.removed = { kanji: {}, phrases: {} }; book.saves = { kanji: {}, phrases: {} }; }

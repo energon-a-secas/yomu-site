@@ -580,10 +580,11 @@ because a browser cannot strip types), `js/sync-local.js` (the stores as
 rows, and one sync's plan: what to push, what to change here, what the
 server holds after), `js/sync.js` (pull, merge, push; imported on sign-in
 only), `js/sync-book.js` (`localStorage['yomu-site:sync']`: the account this
-browser last synced with, when it joined, the last Clear all it applied,
-removals not yet carried, save stamps not yet carried, when each preference
-changed), `js/sync-watch.js` (the stores as sync changes them, and the
-listeners that stamp an unsave, a Clear all, a save and an Import),
+browser last synced with, when it joined and what it brought, the last Clear
+all it applied, removals not yet carried, save stamps not yet carried, when
+each preference changed), `js/sync-watch.js` (the stores as sync changes
+them, and the listeners that stamp an unsave, a Clear all, a save and an
+Import),
 `js/account.js` (the guard, the kit, the timers, the step a retry runs;
 every dependency passed in), `js/events-sync.js` (the page's
 dependencies), `js/render-sync.js` (the My kanji line `#mk-sync`, the
@@ -593,6 +594,7 @@ over an in-memory database, `tests/helpers/fake-convex.mjs`, which refuses
 what Convex refuses), `tests/sync-client.test.mjs` (devices made of the real
 stores, `tests/helpers/sync-device.mjs`, three of them in random order,
 converging), `tests/sync-stamps.test.mjs` (Import, and clocks that disagree),
+`tests/sync-join.test.mjs` (what a join stamps),
 `tests/sync-account.test.mjs` and `tests/sync-tabs.test.mjs` (two tabs of
 one browser over the same storage).
 
@@ -621,8 +623,8 @@ are ASCII (`mixed` travels as `[{ k, n }]`).
 one.** A row carries `removed`; a saved kanji or phrase carries `s`, the
 latest time it was saved (`at` and `saved` stay the earliest, as Import
 keeps them). The stores never hold `s`: `sync-local.js` rebuilds it as the
-save's own time, the book's `joined` if later, the book's stamp for that
-save (`saves`, below) if later, or the server's `s` when the server's save
+save's own time, the book's stamp for that save if later (its join stamp in
+`brought`, or `saves`, both below), or the server's `s` when the server's save
 is the same save (the same `at`, or `saved`). Borrowing the
 server's `s` for a different save brought a save made before a Clear all
 back to life inside the newer one (its regression test is in
@@ -642,13 +644,14 @@ clear, and a newer one makes the client pull at once.
 **A browser that never synced brings all of its own data when it first
 joins, on purpose.** On a first sign-in, or Add, the browser takes the
 account's clear as its own and every save it holds counts as made when it
-joined (the book's `joined`). `joined` is now, or one past the account's
-Clear all and past its removal of any row the browser brings, whichever is
-latest (`sync.js joinedAt`): another device's clock may run ahead, and
-joining at this clock's now lost a whole browser's saves to a clear stamped
-an hour in the future (`tests/sync-stamps.test.mjs`). So a save older than
-a removal or a Clear all the account made before this browser joined comes
-back, on every device.
+joined. The book's `joined` is now, or one past the account's Clear all
+when that is later; each save the browser brings is stamped in the book
+(`brought`) at `joined`, or one past the account's removal of that row when
+that is later (`sync.js joinStamps`): another device's clock may run ahead,
+and joining at this clock's now lost a whole browser's saves to a clear
+stamped an hour in the future (`tests/sync-stamps.test.mjs`). So a save
+older than a removal or a Clear all the account made before this browser
+joined comes back, on every device.
 That is intended: those saves were never in the account, so the account's
 removal or clear was never about them. The learner made them in a browser
 the account had not seen, and taking them away the moment it signs in
@@ -658,6 +661,17 @@ every `*.neorgon.com` site, so the first visit by someone already signed in
 on another Neorgon site is a first sign-in. `tests/sync-client.test.mjs`
 pins it ("a browser joining an account keeps its own data even when the
 account was cleared before it joined").
+
+**Only what the browser brings is stamped, each row on its own.**
+`brought` is taken from the stores before anything of the account's is
+applied, and written with the merge, so a retry after a failed push, or a
+reload, stamps the same rows and no others. What the join received from the
+account keeps the account's own stamp. Stamping every save the stores held
+after the merge sent the received ones back stamped `joined`: a removal or
+a Clear all another device made offline before the join, pushed after it,
+then lost to them, and with a clock an hour ahead somewhere the received
+rows landed an hour in the future (`tests/sync-join.test.mjs`). A stamp is
+dropped by the learner's own unsave, new save or Clear all of that row.
 
 **Import is a choice made now.** A kanji or phrase that Import brings back
 keeps its backup's schedule and counts, but is stamped in the book
@@ -694,9 +708,10 @@ it saves again, and pushing the first plan left the account a sync behind.
 **Another account is asked about, never merged.** `decide()`: no book is a
 first sign-in and merges (`adopt`); the book's account merges (`same`);
 another one opens `#sync-dialog` with what each side holds. Add is `adopt`
-(the book starts again for that account, `joined` as above); Use is `replace`
-(this browser takes the account's data, `joined` 1 ms, so nothing of its
-own joins; its pending removals are dropped with the old account); Not now
+(the book starts again for that account, `joined` and `brought` as above);
+Use is `replace` (this browser takes the account's data and brings nothing
+of its own, `brought` empty; its pending removals are dropped with the old
+account); Not now
 pauses sync and the line offers Choose. The old account keeps what it
 already had and nothing more: what changed here since its last sync with
 it is never sent to it, and with Use it is gone from this browser too. The
@@ -717,8 +732,8 @@ a first sign-in that failed once never recovered without a reload. A
 book that already names the signed-in account is joined, so `sync.js` runs
 an `adopt` or a `replace` on it as `same`: another tab may have written it
 since begin() or the answer, and a second join would drop that tab's
-removals not yet pushed and move `joined` past every removal the account
-received in between (`tests/sync-tabs.test.mjs`). The
+removals not yet pushed and count what it received from the account as its
+own (`tests/sync-tabs.test.mjs`). The
 line says the failure's kind in a plain sentence (offline, the sign-in not
 accepted, another tab switched accounts, refused, a server error), never a
 code or a Convex request id; those go to the console.

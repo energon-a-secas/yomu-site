@@ -62,8 +62,11 @@ const NOTHING = Object.freeze({ s: 0, removed: 0 });
  */
 export function watchStores({ kanji, history, play, onPrefsSaved, books, local, now = Date.now, changed = () => {}, known = () => NOTHING }) {
   const mine = () => !local.applying;
-  /** The newest save of one row: `own` is the store's save time, which sync-local.js raises to `joined`. */
-  const newestSave = (b, kind, id, own) => Math.max(own ? Math.max(own, b.joined) : 0, b.saves[kind][id] || 0, known(kind, id).s);
+  /**
+   * The newest save of one row: `own` is the store's save time, which
+   * sync-local.js raises to the row's join stamp when this browser brought it.
+   */
+  const newestSave = (b, kind, id, own) => Math.max(own ? Math.max(own, b.brought[kind][id] || 0) : 0, b.saves[kind][id] || 0, known(kind, id).s);
   /** The newest removal of one row: a removal made here, a Clear all (kanji only), the account's copy. */
   const newestRemoval = (b, kind, id) => Math.max(b.removed[kind][id] || 0, kind === 'kanji' ? b.epoch : 0, known(kind, id).removed);
 
@@ -71,23 +74,29 @@ export function watchStores({ kanji, history, play, onPrefsSaved, books, local, 
     books.update((b) => {
       noteRemoval(b, kind, id, Math.max(now(), newestSave(b, kind, id, own) + 1));
       delete b.saves[kind][id];
+      delete b.brought[kind][id];
     });
   }
   function cleared(at, saved) {
     books.update((b) => {
       let newest = known('kanji', null).s;
-      for (const rec of Object.values(saved || {})) newest = Math.max(newest, rec.at, b.joined);
+      for (const [ch, rec] of Object.entries(saved || {})) newest = Math.max(newest, rec.at, b.brought.kanji[ch] || 0);
       for (const t of Object.values(b.saves.kanji)) newest = Math.max(newest, t);
       noteClear(b, Math.max(at, newest + 1));
       b.saves.kanji = {};
+      b.brought.kanji = {};
     });
   }
-  /** A save made here: its own time stands unless a removal this browser knows is as late. */
+  /**
+   * A save made here: its own time stands unless a removal this browser
+   * knows is as late. It is a new save, so it was not brought to a join.
+   */
   function saved(kind, id, at) {
     books.update((b) => {
       const removal = newestRemoval(b, kind, id);
-      if (removal >= Math.max(at, b.joined)) b.saves[kind][id] = removal + 1;
+      if (removal >= at) b.saves[kind][id] = removal + 1;
       else delete b.saves[kind][id];
+      delete b.brought[kind][id];
     });
   }
   /**

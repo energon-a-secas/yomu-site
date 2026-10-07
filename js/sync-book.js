@@ -4,12 +4,16 @@
 //
 //   account   the Clerk subject this browser last synced with (the server's
 //             whoami, never the browser's own say)
-//   joined    when this browser's data joined that account (ms): what it
-//             held then counts as saved then, so a removal made in the
-//             account before the browser joined does not take it back out
-//             (now, or one past such a removal stamped by a clock ahead of
-//             this one: sync.js joinedAt); 1 when the browser took the
-//             account's data instead, since then nothing of its own joined
+//   joined    when this browser joined that account (ms): now, or one past
+//             the account's Clear all when a clock ahead of this one made it
+//   brought   { kanji: { 天: ms }, phrases: { key: ms } }: each save this
+//             browser held when it joined, and when it counts as saved: no
+//             earlier than `joined`, and one past the account's removal of
+//             that row then (sync.js joinStamps), so a removal or a Clear
+//             all the account made before the join does not take it back
+//             out. What the join received from the account is not here: it
+//             keeps the account's own stamp. An unsave, a new save or a
+//             Clear all of the row here drops it (sync-watch.js)
 //   epoch     the latest Clear all of My kanji this browser has applied (ms)
 //   at        the last sync that finished (ms), for the My kanji line
 //   removed   { kanji: { 天: ms }, phrases: { key: ms } }: removals made here
@@ -43,9 +47,13 @@ export function syncedPrefs(prefs) {
   return out;
 }
 
-/** A book for `account`, joined at `now`, with no preference changed yet. */
+/** A book for `account`, joined at `now`: nothing brought, no preference changed. */
 export function newBook(account, now, prefs, epoch = 0) {
-  return { account, joined: now, epoch, at: 0, removed: { kanji: {}, phrases: {} }, saves: { kanji: {}, phrases: {} }, prefsAt: {}, prefsVal: syncedPrefs(prefs) };
+  return {
+    account, joined: now, epoch, at: 0,
+    brought: { kanji: {}, phrases: {} }, removed: { kanji: {}, phrases: {} }, saves: { kanji: {}, phrases: {} },
+    prefsAt: {}, prefsVal: syncedPrefs(prefs),
+  };
 }
 
 function cleanMap(raw, keyOk) {
@@ -56,6 +64,7 @@ function cleanMap(raw, keyOk) {
 
 export function cleanBook(raw) {
   if (!isObject(raw) || typeof raw.account !== 'string' || !raw.account || raw.account.length > 200 || !isTime(raw.joined)) return null;
+  const brought = isObject(raw.brought) ? raw.brought : {};
   const removed = isObject(raw.removed) ? raw.removed : {};
   const saves = isObject(raw.saves) ? raw.saves : {};
   const prefsAt = {};
@@ -65,6 +74,7 @@ export function cleanBook(raw) {
     joined: raw.joined,
     epoch: isStamp(raw.epoch) ? raw.epoch : 0,
     at: isStamp(raw.at) ? raw.at : 0,
+    brought: { kanji: cleanMap(brought.kanji, oneKanji), phrases: cleanMap(brought.phrases, (k) => HISTORY_KEY.test(k)) },
     removed: { kanji: cleanMap(removed.kanji, oneKanji), phrases: cleanMap(removed.phrases, (k) => HISTORY_KEY.test(k)) },
     saves: { kanji: cleanMap(saves.kanji, oneKanji), phrases: cleanMap(saves.phrases, (k) => HISTORY_KEY.test(k)) },
     prefsAt,
