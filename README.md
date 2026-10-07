@@ -36,6 +36,9 @@ writes how each word is said and how it is spelled, and explains the sounds
 that are not read the way they are written: は as wa, さようなら as sayoonara,
 small っ, whispered vowels. Everything runs in the browser from a committed
 dictionary; your text never leaves the page unless you press a translate link.
+Signing in is optional: with a Neorgon account, your kanji, saved phrases,
+scores and display choices follow you to every device; without one, they stay
+in this browser.
 
 **Live:** yomu.neorgon.com
 
@@ -56,6 +59,7 @@ dictionary; your text never leaves the page unless you press a translate link.
 - **Sound it out** -- a word's beats one at a time, then the whole word, spoken with the device's Japanese voice
 - **Phrases** -- 71 everyday phrases and 8 short dialogues written for Yomu, with set phrases to practise as chunks
 - **Embeddable** -- Runcible opens Yomu in a side sheet when a phrase in a chapter is tapped (`docs/EMBED.md`)
+- **On every device, if you sign in** -- one Neorgon account syncs My kanji, saved phrases, Play's scores and the display choices through Convex; an unsave or Clear all reaches the other devices too, and the text in the box and History's unsaved texts never leave this browser
 
 ---
 
@@ -67,7 +71,13 @@ ES modules require an HTTP server (not `file://`):
 make serve       # http://localhost:8895
 make validate    # tools/check-data.mjs, then npm test
 make data        # rebuild data/dict and data/kanji from the pinned upstreams (manual step)
+npx convex dev --once   # push convex/ to the dev deployment (convex/README.md)
 ```
+
+Sign-in uses the fleet's production Clerk key, which refuses localhost: the
+dialog says so. The sync logic is tested under node against the real server
+functions (`npm test`), and the functions against the dev deployment with
+`npx convex run --identity`.
 
 ---
 
@@ -100,6 +110,8 @@ yomu-site/
 │   ├── speech.js         # speechSynthesis with a Japanese voice
 │   ├── play-*.js         # Play: the rounds, the store, the clock, the kana sets and twins (no DOM)
 │   ├── events-play.js    # Play's routes, keys and actions (Odd one out's clock: events-odd.js)
+│   ├── account.js        # sign-in (Neorgon Auth Kit) and when to sync; loaded only with a Clerk key, never in an embed
+│   ├── sync*.js          # sync: the merge rules (shared with convex/), the plan, the client, the book
 │   └── embed.js          # the yomu-embed/1 protocol
 ├── data/
 │   ├── dict/             # JMdict: a core, 28 range shards and a key filter, each under 140 KB
@@ -107,6 +119,7 @@ yomu-site/
 │   ├── like/             # English words JMdict glosses with, for the sound-alike guess
 │   ├── play/             # the kanji look-alikes, built from data/kanji by tools/build-lookalikes.mjs
 │   └── phrases/          # the phrase library (original, CC0)
+├── convex/               # the Convex backend: schema, auth config, sync functions (only signed-in data)
 ├── tools/                # hand-run builders and the data checker
 ├── tests/                # node:test suites and a render harness
 └── docs/                 # ANALYZER.md (the contract), EMBED.md (the protocol)

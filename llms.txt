@@ -119,7 +119,23 @@ History and "You read this before", or when the learner saved it on purpose
 with the bookmark beside Clear, up to 500, whatever Remember says; turning
 Remember off forgets every text not saved. No text is ever put in the URL,
 an attribute, the page title or the beacon. The DeepL and Google Translate links are built at the moment
-they are clicked, which is the only way the text leaves the page.
+they are clicked, which is the only way the text in the box leaves the page.
+
+Signing in is optional (one Neorgon account, the Neorgon Auth Kit; the
+header's Sign in). Without it, everything below stays in this browser and
+the page makes no request to Clerk, Convex or esm.sh. Signed in, Yomu keeps
+a copy in that account, on Convex, so every device signed in has it: My
+kanji (the saved kanji with their review schedules, and for every kanji met
+its count, first and last day, up to eight dictionary words, the kind of
+text and the History key it was last met in), the saved phrases (each one's
+text, counts and times), Play's best scores, rounds and mixed-up pairs, and
+the display choices language, furigana, romaji, highlights, the
+unsaved-kanji mark and slow speech. Never sent: the text in the box, the
+History texts not saved, the Remember and translation choices, and the
+reading session. Unsaving a kanji or a phrase, and Clear all of My kanji,
+reach the other devices; the account keeps the removal (a time and a key),
+never the text of an unsaved phrase. Signing out stops syncing and keeps
+everything in the browser. An embedded Yomu never starts sign-in.
 
 The Translation under the reading uses the browser's own on-device
 Translator API (Chrome 138+ and Edge on a computer): after the learner clicks
@@ -170,7 +186,8 @@ the host sends always opens the reader.
   up to eight dictionary words with their readings, the kind of text it was
   last met in, and with Remember on or a saved text a key (a hash) of that
   text; and the reading session in progress (the kanji counted in it, and
-  when it began). Never the text: that is only in yomu-site:history.
+  when it began). Never the text: that is only in yomu-site:history. Signed
+  in, the same fields (not the session) also sync to the account (Privacy).
 - Export writes a yomu-kanji-export/1 JSON file ({ format, exported, saved,
   seen, phrases? }); Import validates one and merges it, keeping the higher
   counts and the earlier first day. `phrases` is the saved phrases only
@@ -211,7 +228,8 @@ authored classic pairs (土 士, 己 已 巳, 日 曰, ...); on 60 pairs drawn a
 random, 58 were ones a learner would confuse at a glance. Kept in this
 browser's localStorage under yomu-site:play: each game's best score and
 number of rounds, and how often each pair of characters was mixed up, so a
-pair mixed up comes round more often. No text is kept.
+pair mixed up comes round more often. No text is kept. Signed in, the scores
+and pairs also sync to the account (Privacy).
 
 ## Data and licences
 

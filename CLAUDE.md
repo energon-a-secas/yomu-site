@@ -5,7 +5,9 @@ over the kanji, writes two romaji lines (how it is said, in Genki's
 convention, and how it is spelled, kana by kana), names the special sounds and
 the grammar, and lists the kanji with their readings in this text. Runcible
 embeds it (`docs/EMBED.md`). Everything runs in the browser from committed
-JSON; nothing is sent anywhere unless the learner clicks a translate link.
+JSON; nothing is sent anywhere unless the learner clicks a translate link,
+or signs in, which is optional and syncs My kanji, saved phrases, Play and
+the display preferences to their account (Accounts and sync, below).
 
 **Live:** yomu.neorgon.com · **Port:** 8895
 
@@ -17,6 +19,7 @@ make validate    # node tools/check-data.mjs, then npm test
 make data        # rebuild data/dict, data/kanji, data/names, data/like and data/play from the pinned upstreams (manual)
 npm test         # node --test tests/*.test.mjs
 node tools/compare-readings.mjs <old data/> [data/]   # every token two builds read differently, over Tatoeba
+npx convex dev --once   # push convex/ to the dev deployment (convex/README.md); never `npx convex deploy` from a worktree
 ```
 
 `npm test` is the definition of done for anything under `js/` that is not a
@@ -198,12 +201,20 @@ gloss (`loan-align.js`); a word `ls` says is from another language gets none
 (ビール is Dutch), and a later gloss is ignored for a word marked `u` (サバ
 is 鯖, and its slang sense "server" read as v written バ).
 
-**The text stays in the browser.** It persists under
+**The text stays in the browser; a saved phrase also goes to the account
+of a learner who signs in.** The text persists under
 `localStorage['yomu-site:text']`, and under
 `localStorage['yomu-site:history']` while the learner has Remember on, or
 when they saved that text on purpose with the bookmark (see My kanji below);
 never in the URL, an attribute, the title or the beacon target. A backup
-file carries the saved phrases and no other text.
+file carries the saved phrases and no other text. Signed in (Accounts and
+sync, below), what leaves the device is the saved phrases (their text, the
+counts and the times), My kanji (schedules, counts, the eight words per
+kanji, `src` and the history key `h`, never a sentence), Play's store, and
+lang, furigana, romaji, highlights, unsaved and slow; never the text in the
+box, a History text not saved, the remember and translate choices, or the
+session. An unsaved phrase leaves its key and the time of the removal on
+the server, never its text. Signed out, nothing leaves.
 `#t=<text>` is read once (for links from other Neorgon sites, with their own
 authored text) and removed with `history.replaceState`. The DeepL and Google
 links are built at click time.
@@ -553,10 +564,122 @@ from Tofugu, the Japan Foundation apps, Genki, WaniKani, an Anki deck or a
 published list. 卜 has no word a beginner meets; its two words are the real
 ones and its note says it is rare.
 
+## Accounts and sync
+
+Optional, through the Neorgon Auth Kit (`packages/neorgon-ui/auth/README.md`,
+vendored as `js/neorgon-auth.js`, `js/neorgon-auth-sites.js`,
+`css/neorgon-auth.css`; the slot is `div.neo-auth` before `.header-home`,
+the key is the fleet's production `pk_live_`). Signed in, My kanji, the
+saved phrases, Play's store and the six display preferences sync to Convex
+project `yomu` (team lucio; dev deployment `jovial-mouse-131`, its URL in
+`js/account.js CONVEX_URL`; `convex/README.md`). Signed out, or never signed
+in, every store stays in this browser exactly as before. The modules:
+`js/sync-rules.js` (the rows and how two copies join, pure; the page,
+`convex/model/sync.ts` and the tests import this one file, which is `.js`
+because a browser cannot strip types), `js/sync-local.js` (the stores as
+rows, and one sync's plan: what to push, what to change here, what the
+server holds after), `js/sync.js` (pull, merge, push; imported on sign-in
+only), `js/sync-book.js` (`localStorage['yomu-site:sync']`: the account this
+browser last synced with, when it joined, the last Clear all it applied,
+removals not yet carried, when each preference changed), `js/sync-watch.js`
+(the stores as sync changes them, and the listeners that turn an unsave or
+Clear all into a tombstone), `js/account.js` (the guard, the kit, the
+timers; every dependency passed in), `js/events-sync.js` (the page's
+dependencies), `js/render-sync.js` (the My kanji line `#mk-sync`, the
+`#sync-dialog` question) and `js/strings-sync.js`. `npm test` runs
+`tests/sync-rules.test.mjs`, `tests/sync-server.test.mjs` (the real handlers
+over an in-memory database, `tests/helpers/fake-convex.mjs`, which refuses
+what Convex refuses), `tests/sync-client.test.mjs` (devices made of the real
+stores, three of them in random order, converging) and
+`tests/sync-account.test.mjs`.
+
+**An anonymous visit fetches nothing from Clerk, Convex or esm.sh.**
+`app.js` imports `events-sync.js` only with a key on the page and only
+after an embed has returned, so a frame starts no kit. The kit loads
+clerk-js only with a Neorgon session or on Sign in; the Convex client
+(`https://esm.sh/convex@1.46.0/browser`, the version in package.json, and
+the CSP allows that one path) and `sync.js` are imported on sign-in. A
+static import of any of them fails `tests/sync-account.test.mjs`, which also
+fails when the CSP's connect-src lacks `CONVEX_URL` or script-src lacks the
+pinned path: a new deployment changes both in one commit. The client is
+`ConvexHttpClient`, so there is no websocket and no `wss:` in the CSP.
+
+**Every join is commutative and idempotent, and rows are cleaned before they
+are compared.** Convex hands objects back with their keys sorted, so
+`same()` (canonical JSON) only works on rows rebuilt by a `clean*` function.
+A push joins each row with the stored one and writes only a change; a sync
+with nothing new writes nothing, which the three-device test asserts. A
+kanji, a kana pair or a text is a value, never an object key: Convex keys
+are ASCII (`mixed` travels as `[{ k, n }]`).
+
+**A removal is a tombstone that wins over an older save and loses to a newer
+one.** A row carries `removed`; a saved kanji or phrase carries `s`, the
+latest time it was saved (`at` and `saved` stay the earliest, as Import
+keeps them). The stores never hold `s`: `sync-local.js` rebuilds it as the
+save's own time, the book's `joined` if later, or the server's `s` when the
+server's save is the same save (the same `at`, or `saved`). Borrowing the
+server's `s` for a different save brought a save made before a Clear all
+back to life inside the newer one (its regression test is in
+`tests/sync-client.test.mjs`). A removal is written to the book only by
+the learner's own unsave: `sync-watch.js` ignores what sync writes
+(`applying`), since a removal stamped "now" while applying another device's
+would outrank a save made after it. The book is read from storage on every
+sync, never cached, because another tab may have written a removal.
+
+**Clear all is one tombstone for the whole of My kanji, and a count has no
+time.** The owner's `clear` kills every save not newer than it and every
+seen record counted under an older clear (`e`, the clear its device knew).
+So a device that counted kanji after the clear, before it heard of it,
+loses those counts at its next sync; a push answers with the server's
+clear, and a newer one makes the client pull at once. A browser joining an
+account (a first sign-in, or Add) takes the account's clear as its own and
+counts its saves as made when it joined, so an old clear or removal in the
+account never empties it.
+
+**The eight words per kanji are the eight met last.** A word travels with
+the day it was last met (`[written, reading, day]`, the server's day or the
+kanji's last day here), and the join keeps the eight latest; the store
+keeps `[written, reading]` in that order.
+
+**One sync plans twice.** It plans against the pull, applies the changes
+here through the stores' own calls (My kanji `adopt()` and Play `adopt()`
+through their `validate()`, History's `unsave()` and `mergePhrases()`, the
+preference setter), then plans again from the stores as they now are and
+pushes that: History's merge folds an ordinary entry's reads into a phrase
+it saves again, and pushing the first plan left the account a sync behind.
+
+**Another account is asked about, never merged.** `decide()`: no book is a
+first sign-in and merges (`adopt`); the book's account merges (`same`);
+another one opens `#sync-dialog` with what each side holds. Add is `adopt`
+(the book starts again for that account, `joined` now); Use is `replace`
+(this browser takes the account's data, `joined` 1 ms, so nothing of its
+own joins; its pending removals are dropped with the old account); Not now
+pauses sync and the line offers Choose. The old account keeps its copy.
+
+**A failure changes nothing and is said once.** A pull that fails applies
+nothing, and on a first sign-in remembers no account; a push that fails
+keeps the merge and the remembered account and is retried whole on the
+next change, on `online`, or when the page shows again (a pull at most
+once a minute). The line says offline, or the server's error, until a sync
+finishes.
+
+**The one order that differs.** Two saves of one kanji made apart, joined
+before an older removal from a third device reaches them, stay saved in
+every order, but which schedule wins depends on the order the server saw
+(`tests/sync-rules.test.mjs`, "the one grouping that differs"). Everything
+else the joins keep is the same in any grouping.
+
+**Sign-in cannot be tried on localhost.** The production key refuses it and
+the kit's dialog says so (expected). The functions are checked with
+`npx convex run sync:<fn> --identity '{"subject":"user_a","issuer":"https://clerk.neorgon.com"}'`
+(`convex/README.md`); a real Clerk session against the deployment, and the
+production deployment, are untested.
+
 ## Do not touch
 
 - `js/vendor/wanakana.js`: upstream 5.3.1, MIT, byte for byte.
-- `js/neorgon-*.js`, `css/neorgon-*.css`: vendored kits, refreshed by `packages/neorgon-ui/sync-*.sh`.
+- `js/neorgon-*.js`, `css/neorgon-*.css`: vendored kits, refreshed by `packages/neorgon-ui/sync-*.sh` (the Auth Kit by `sync-auth.sh`).
+- `convex/_generated/`: written by `npx convex dev`, and gitignored.
 - `data/dict/**`, `data/kanji/**`, `data/names/**`: emitted by `tools/build-*.mjs` from the pins in `tools/lib/sources.mjs` (`build-names.mjs` after `build-dict.mjs`, which it reads, and it writes `data/names/popular.json` too; `data/kanji/joyo.json` by `build-joyo.mjs` from the committed shards, or by `build-kanji.mjs`). Rebuild, do not hand-edit.
 - `data/like/**`: emitted by `tools/build-sounds-like.mjs` from the committed `data/dict/` (after `build-dict.mjs`). Rebuild, do not hand-edit.
 - `data/play/lookalikes.json`: emitted by `tools/build-lookalikes.mjs` from the committed `data/kanji/` (after `build-kanji.mjs` or `build-joyo.mjs`). Rebuild, do not hand-edit.

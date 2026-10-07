@@ -50,3 +50,17 @@ flowchart TB
     events --> play["events-play.js + play-rounds.js\nPlay: four look-alike games"]
     play <-->|"yomu-site:play\nbest scores, pairs mixed up"| Storage
     play -->|"fetch on #/play"| PlayData[("data/play/lookalikes.json\ndata/names/popular.json")]
+
+    subgraph Accounts["Accounts (a Clerk key, no embed)"]
+        account["account.js + events-sync.js\nSign-in, when to sync"]
+        kit["neorgon-auth.js\nNeorgon Auth Kit"]
+        sync["sync.js + sync-local.js + sync-rules.js\nPull, merge here, push what the account lacks"]
+        account --> kit
+        account -->|"import() on sign-in"| sync
+    end
+    app -.->|"import() with a key"| account
+    kit -->|"only on Sign in or a Neorgon session"| Clerk(["clerk.neorgon.com"])
+    sync -->|"through each store's own merge"| mykanji
+    sync --> play
+    account <-->|"yomu-site:sync (once synced)"| Storage
+    sync <-->|"signed in: My kanji, saved phrases,\nPlay, display preferences"| Convex[("Convex project yomu\nrows per owner, tombstones kept")]
