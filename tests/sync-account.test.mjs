@@ -212,15 +212,50 @@ test('a failure is said on the line once, as offline or as the server\'s error, 
   assert.equal(JSON.stringify(p.kanji.data), before);
 });
 
+/**
+ * Every static import and re-export in a module's source, as specifiers:
+ * `import x from '...'`, `import { a } from "..."` across lines, the
+ * side-effect `import '...';`, and `export ... from '...'`, in either quote.
+ * A dynamic import('...') is not one: that is the guard.
+ */
+const STATIC_IMPORT = /^[ \t]*(?:import|export)[ \t]*(?:[^'"`;()]*?\sfrom[ \t]*)?(['"])([^'"\n]+)\1/gm;
+const staticSpecifiers = (src) => [...src.matchAll(STATIC_IMPORT)].map((m) => m[2]);
+/** What only a signed-in page may load: the kit, the sync client, the page's sign-in, esm.sh, the Convex package. */
+const SIGNED_IN_ONLY = /neorgon-auth\.js$|(^|\/)sync\.js$|events-sync\.js$|esm\.sh|^convex(\/|$)/;
+
+test('the import guard finds every kind of static import, in either quote, and no dynamic one', () => {
+  const planted = [
+    "import './sync.js';",
+    'import "./sync.js";',
+    "import { createSync } from './sync.js';",
+    'import { createSync } from "./sync.js";',
+    "import {\n  NeoAuth,\n} from './neorgon-auth.js';",
+    "import * as kit from './neorgon-auth.js'",
+    "export { startAccounts } from './events-sync.js';",
+    'export * from "https://esm.sh/convex@1.46.0/browser";',
+    "import { ConvexHttpClient } from 'convex/browser';",
+  ];
+  for (const line of planted) {
+    const found = staticSpecifiers(`// a module\n${line}\nconst x = 1;\n`);
+    assert.equal(found.length, 1, line);
+    assert.ok(SIGNED_IN_ONLY.test(found[0]), `${line} -> ${found[0]}`);
+  }
+  for (const fine of ["const m = await import('./sync.js');", "  import('./events-sync.js').then((m) => m.startAccounts());", "import { h } from './utils.js';", "import './sync-watch.js';"]) {
+    assert.ok(staticSpecifiers(fine).every((s) => !SIGNED_IN_ONLY.test(s)), fine);
+  }
+});
+
 test('no module imports the kit, the sync client or esm.sh at its top: only inside the guard', () => {
   const js = join(SITE, 'js');
-  const staticImport = /^\s*import\s[^;]*?from\s*'([^']+)'/gm;
-  for (const file of readdirSync(js).filter((f) => f.endsWith('.js'))) {
-    const src = readFileSync(join(js, file), 'utf8');
-    for (const m of src.matchAll(staticImport)) {
-      assert.ok(!/neorgon-auth\.js$|\/sync\.js$|^\.\/sync\.js$|events-sync\.js$|esm\.sh/.test(m[1]), `${file} imports ${m[1]} at its top`);
+  const files = (dir) => readdirSync(dir, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? files(join(dir, e.name)) : e.name.endsWith('.js') ? [join(dir, e.name)] : []));
+  let seen = 0;
+  for (const file of files(js)) {
+    for (const spec of staticSpecifiers(readFileSync(file, 'utf8'))) {
+      seen += 1;
+      assert.ok(!SIGNED_IN_ONLY.test(spec), `${file.slice(js.length + 1)} imports ${spec} at its top`);
     }
   }
+  assert.ok(seen > 100, `only ${seen} static imports found: the pattern is not reading the modules`);
   const app = readFileSync(join(js, 'app.js'), 'utf8');
   assert.match(app, /import\('\.\/events-sync\.js'\)/, 'app.js imports sign-in dynamically');
   assert.ok(app.indexOf("import('./events-sync.js')") > app.indexOf('if (state.embed)'), 'and only after an embed has returned');
