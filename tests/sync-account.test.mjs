@@ -222,13 +222,19 @@ test('a failure is said on the line once, as offline or as the server\'s error, 
  * `import x from '...'`, `import { a } from "..."` across lines, the
  * side-effect `import '...';`, and `export ... from '...'`, in either quote,
  * with or without spaces (`import{a}from'...'`), and with comments between
- * the braces. A comment is taken whole (a line comment to its end, a block
- * comment to its first close), so an apostrophe in one does not end the
- * clause and a `from '...'` written in one is never read as the import.
- * A dynamic import('...') is not one: that is the guard.
+ * the braces, before the specifier (`import /* c *\/ '...'`, `from // c`
+ * then the specifier on the next line) or before the `import` on its line.
+ * A comment is taken whole (a line comment to its end, a block comment to
+ * its first close), so an apostrophe in one does not end the clause and a
+ * `from '...'` written in one is never read as the import. A dynamic
+ * import('...') is not one, with a comment before it or not: that is the
+ * guard.
  */
 const COMMENT = String.raw`\/\/[^\n]*$|\/\*[^*]*\*+(?:[^/*][^*]*\*+)*\/`;
-const STATIC_IMPORT = new RegExp(String.raw`^[ \t]*(?:import|export)[ \t]*(?:(?:[^'"\x60;()/]|${COMMENT})*?\bfrom[ \t]*)?(['"])([^'"\n]+)\1`, 'gm');
+const BLOCK = String.raw`\/\*[^*]*\*+(?:[^/*][^*]*\*+)*\/`;
+/** Between two parts of the statement: spaces, line breaks and comments. */
+const GAP = String.raw`(?:\s|${COMMENT})*`;
+const STATIC_IMPORT = new RegExp(String.raw`^[ \t]*(?:${BLOCK}[ \t]*)*(?:import|export)${GAP}(?:(?:[^'"\x60;()/]|${COMMENT})*?\bfrom${GAP})?(['"])([^'"\n]+)\1`, 'gm');
 const staticSpecifiers = (src) => [...src.matchAll(STATIC_IMPORT)].map((m) => m[2]);
 /** What only a signed-in page may load: the kit, the sync client, the page's sign-in, esm.sh, the Convex package. */
 const SIGNED_IN_ONLY = /neorgon-auth\.js$|(^|\/)sync\.js$|events-sync\.js$|esm\.sh|^convex(\/|$)/;
@@ -253,6 +259,13 @@ test('the import guard finds every kind of static import, in either quote, and n
     "import { /* it's */ NeoAuth } from './neorgon-auth.js';",
     "import { createSync } from './sync.js?v=1';",
     "import './neorgon-auth.js#kit';",
+    // Found by the next review: a comment before the specifier or the import.
+    "import /* the client */ './sync.js';",
+    "import { createSync } from /* here */ './sync.js';",
+    "import { createSync } from // the client\n  './sync.js';",
+    "/* sign-in only */ import './neorgon-auth.js';",
+    "export * from /* the kit */ './neorgon-auth.js';",
+    "import\n  './sync.js';",
   ];
   for (const line of planted) {
     const found = staticSpecifiers(`// a module\n${line}\nconst x = 1;\n`);
@@ -269,6 +282,8 @@ test('the import guard finds every kind of static import, in either quote, and n
     "import { h } from './utils.js'; // like './sync.js'",
     "export function from() { return import('./sync.js'); }",
     "export const a = 1; // from './sync.js'",
+    "const m = await import(/* the client */ './sync.js');",
+    "import /* dynamic */ ('./sync.js').then(() => {});",
   ];
   for (const line of fine) {
     assert.ok(staticSpecifiers(line).every((s) => !signedInOnly(s)), line);
