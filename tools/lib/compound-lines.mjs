@@ -18,6 +18,10 @@
  * The compounds cover the three reasons a part's edge can show: a loanword
  * ending (ゴールド|カード, ダンス|レッスン), a kana no word starts with
  * (ギター|ケース, ラーメン|ショップ) and two plain parts (テニス|トーナメント).
+ *
+ * The rest of each line is held to the same checks as the library's: on
+ * 2026-10-07 hotel-lobby read 待っています, a te-form and いる that the
+ * build now leaves out (`auxiliary`), so it says 待ちます instead.
  */
 
 export const COMPOUND_LINES = Object.freeze([
@@ -38,8 +42,8 @@ export const COMPOUND_LINES = Object.freeze([
     en: 'I bought a pink shirt.', es: 'Compré una camisa rosada.',
   },
   {
-    id: 'hotel-lobby', ja: 'ホテルロビーで待っています。', kana: 'ホテルロビーでまっています',
-    en: 'I am waiting in the hotel lobby.', es: 'Estoy esperando en el vestíbulo del hotel.',
+    id: 'hotel-lobby', ja: 'ホテルロビーで待ちます。', kana: 'ホテルロビーでまちます',
+    en: 'I will wait in the hotel lobby.', es: 'Esperaré en el vestíbulo del hotel.',
   },
   {
     id: 'guitar-case', ja: 'ギターケースは重いです。', kana: 'ギターケースはおもいです',

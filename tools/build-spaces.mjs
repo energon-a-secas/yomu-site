@@ -19,7 +19,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { writeJson, SITE, fmtBytes } from './lib/emit.mjs';
-import { spacesDoc, spacesLicence, SPACES_SRC } from './lib/spaces.mjs';
+import {
+  spacesDoc, spacesLicence, dictWords, SPACES_SRC,
+} from './lib/spaces.mjs';
 import { COMPOUND_LINES } from './lib/compound-lines.mjs';
 import { createDict } from '../js/dict.js';
 import { analyze } from '../js/analyze.js';
@@ -27,11 +29,14 @@ import { analyze } from '../js/analyze.js';
 const read = (rel) => JSON.parse(fs.readFileSync(path.join(SITE, rel), 'utf8'));
 
 async function main() {
-  const dict = createDict({ fetchJson: async (p) => JSON.parse(fs.readFileSync(p, 'utf8')), base: `${path.join(SITE, 'data')}/` });
+  const open = () => createDict({ fetchJson: async (p) => JSON.parse(fs.readFileSync(p, 'utf8')), base: `${path.join(SITE, 'data')}/` });
+  const dict = open();
   const { doc, report } = await spacesDoc({
     library: read('data/phrases/library.json'),
     compounds: COMPOUND_LINES,
     analyze: (text) => analyze(text, { dict }),
+    // A dictionary of its own, so the words the checks read never reach the analysis.
+    words: dictWords(open()),
     licence: spacesLicence(read('data/dict/index.json')._licence, read('data/names/index.json')._licence),
   });
   const bytes = writeJson(path.join(SITE, SPACES_SRC), doc, 'lines');
@@ -42,7 +47,7 @@ async function main() {
   process.stdout.write(`  by source: ${Object.entries(report.sources).map(([k, n]) => `${k} ${n}`).join(', ')}\n`);
   process.stdout.write(`  left out: ${left}\n  reasons: ${why}\n`);
   if (process.argv.includes('--why')) {
-    for (const l of report.leftOut) process.stdout.write(`  ${l.why.padEnd(8)} ${l.id.padEnd(32)} ${l.text}\n`);
+    for (const l of report.leftOut) process.stdout.write(`  ${l.why.padEnd(9)} ${l.id.padEnd(32)} ${l.text}${l.at ? `  (${l.at})` : ''}\n`);
   }
 }
 

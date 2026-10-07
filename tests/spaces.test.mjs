@@ -11,9 +11,9 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { SITE, run } from './helpers/disk.mjs';
+import { SITE, run, diskDict } from './helpers/disk.mjs';
 import {
-  spacesDoc, spacesLicence, spacesProblems, sentencesOf, MAX_SLOTS, SPACES_SRC,
+  spacesDoc, spacesLicence, spacesProblems, sentencesOf, dictWords, unsettled, otherWord, MAX_SLOTS, SPACES_SRC,
 } from '../tools/lib/spaces.mjs';
 import { COMPOUND_LINES } from '../tools/lib/compound-lines.mjs';
 import {
@@ -38,6 +38,7 @@ async function build() {
       library,
       compounds: COMPOUND_LINES,
       analyze: run,
+      words: dictWords(diskDict()),
       licence: spacesLicence(read('data/dict/index.json')._licence, read('data/names/index.json')._licence),
     });
   }
@@ -56,12 +57,94 @@ test('which lines qualify, measured: 2026-10-07, 163 sentences of the library an
   const { report, doc } = await build();
   // 71 phrases and 61 dialogue turns cut into 151 sentences, and 12 compound lines
   assert.equal(report.sentences, 163);
-  assert.deepEqual(report.left, { reading: 1, set: 31, prefix: 12, kana: 7, guess: 0, none: 21, long: 1, twice: 1 });
-  assert.deepEqual(report.kept, { 1: 63, 2: 84, 3: 12 });
-  assert.deepEqual(report.sources, { phrase: 34, kana: 57, dialogue: 56, compound: 12 });
-  assert.equal(doc.count, 159);
-  // Of the 151 sentences of the library, 90 are kept as written; 57 more come in kana.
-  assert.equal(report.sources.phrase + report.sources.dialogue, 90);
+  // Changed on 2026-10-07 after the review of the answer keys: five checks
+  // of the dictionary now leave out the lines whose words the analysis does
+  // not settle (joined, counter, tail, two; base for a kana spelling), so 38
+  // fewer lines are kept than the 159 of the first build. A written line left
+  // out takes its kana spelling with it, which is why fewer are spelled and
+  // `kana` and `none` fell: those lines no longer reach that test.
+  assert.deepEqual(report.left, {
+    reading: 1, set: 31, prefix: 12, joined: 2, counter: 2, tail: 5, two: 15, kana: 3, base: 2, guess: 0, none: 20, long: 1, twice: 1,
+  });
+  assert.deepEqual(report.kept, { 1: 48, 2: 61, 3: 12 });
+  assert.deepEqual(report.sources, { phrase: 28, kana: 42, dialogue: 39, compound: 12 });
+  assert.equal(report.spelled, 53);
+  assert.equal(doc.count, 121);
+  // Of the 151 sentences of the library, 67 are kept as written; 42 more come in kana.
+  assert.equal(report.sources.phrase + report.sources.dialogue, 67);
+});
+
+test('the keys the review found wrong are left out, each for the check that finds it, and the kana spelling with it', async () => {
+  const { report } = await build();
+  const why = new Map(report.leftOut.map((l) => [l.id, `${l.why} ${l.at || ''}`.trim()]));
+  const want = {
+    // two tokens that are one dictionary word: rolled omelette, recipe
+    'host-family-goodbye#2': 'joined 卵|焼き',
+    'host-family-goodbye#3': 'joined 作り|方',
+    // と quotes: 何|と言いますか
+    'nihongo-de-nanto': 'tail 何|と',
+    'asking-the-time#5': 'tail 一緒|に',
+    'weekend-plans#0': 'tail 何|か',
+    'asking-the-time#2/1': 'tail だ|っけ',
+    // 番線 is the counter
+    'train-ticket#4': 'counter 何番|線',
+    'train-ticket#5/0': 'counter 五番|線',
+    // a te-form and its verb, and noun plus する where the file splits 連絡|します
+    'weekend-plans#5/1': 'two 持っていきます',
+    'host-family-goodbye#4/1': 'two 作ってみます',
+    'nihongo-benkyou': 'two しています',
+    'miteiru-dake': 'two 見ている',
+    menyuu: 'two お願い|します',
+    'host-family-goodbye#0': 'two ありがとう|ございました',
+    // いって read as 要る where the line says 行って
+    'massugu~kana': 'base 行って/いって',
+  };
+  for (const [id, reason] of Object.entries(want)) assert.equal(why.get(id), reason, id);
+  const kept = new Set(FILE.lines.map((l) => l.id));
+  for (const id of Object.keys(want)) {
+    assert.ok(!kept.has(id), `${id} is still a question`);
+    if (!id.endsWith('~kana')) assert.ok(!kept.has(`${id}~kana`), `${id}~kana is still a question`);
+  }
+});
+
+test('each check of the dictionary, one sentence at a time', async () => {
+  const words = dictWords(diskDict());
+  const open = async (text) => unsettled(await run(text), words);
+  assert.deepEqual(await open('お母さんの卵焼き、忘れません。'), { why: 'joined', at: '卵|焼き' });
+  assert.deepEqual(await open('何番線から出ますか。'), { why: 'counter', at: '何番|線' });
+  assert.deepEqual(await open('これは日本語で何と言いますか'), { why: 'tail', at: '何|と' });
+  assert.deepEqual(await open('終電、何時だっけ。'), { why: 'tail', at: 'だ|っけ' });
+  assert.deepEqual(await open('ホテルロビーで待っています。'), { why: 'two', at: '待っています' });
+  assert.deepEqual(await open('メニューをお願いします'), { why: 'two', at: 'お願い|します' });
+  // What stays: the splits the file keeps, an expression the dictionary lists
+  // as several words (もう少し, 気をつけて), a particle beside a noun (と|山),
+  // and the dictionary's one-kana particles inside a word (初め|て, 重|い)
+  for (const text of ['雨だったら、また連絡しますね。', 'もう少しゆっくり話してください', '気をつけてね。', 'ともだちとやまにのぼるんです。', 'このクラスは初めてですか。', 'ギターケースは重いです。', '駅はどこですか']) {
+    assert.equal(await open(text), null, text);
+  }
+  assert.equal(otherWord(await run('まっすぐ行ってください'), await run('まっすぐいってください')), '行って/いって');
+  assert.equal(otherWord(await run('駅はどこですか'), await run('えきはどこですか')), null);
+});
+
+test('no answer key contradicts a reason the game shows', async () => {
+  const { NOSTART, wordsOf, extraReason } = await import('../js/gaps.js');
+  for (const l of FILE.lines) {
+    const key = l.gaps.map((g) => g.at);
+    const chars = [...l.ja];
+    // "No word starts with X": no word of any key does
+    for (const w of wordsOf(l.ja, key)) assert.ok(!NOSTART.has([...w.text][0]), `${l.id}: ${w.text} starts with a kana the game says starts no word`);
+    for (const g of l.gaps) {
+      if (g.why === 'nostart') assert.ok(NOSTART.has(g.k) && chars[g.at - 1] === g.k, `${l.id} at ${g.at}`);
+      if (g.why === 'script') assert.ok(!NOSTART.has(chars[g.at]), `${l.id} at ${g.at}: a script change before ${chars[g.at]}`);
+    }
+    // and an extra space before such a kana is only ever said to be one where the key has none
+    for (const at of slotsOf(l.ja)) {
+      if (extraReason(l.ja, key, at).why === 'nostart-extra') assert.ok(!key.includes(at), `${l.id} at ${at}`);
+    }
+  }
+  // the explanatory ん is a word of its own in a key (のぼる|ん|です), so it is no such kana
+  assert.ok(FILE.lines.some((l) => wordsOf(l.ja, l.gaps.map((g) => g.at)).some((w) => w.text === 'ん')));
+  assert.ok(!NOSTART.has('ん'));
 });
 
 test('a line left out is left out for one of the stated reasons, and the one disagreement is the one allowed', async () => {

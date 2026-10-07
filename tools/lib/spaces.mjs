@@ -31,25 +31,60 @@
  *   prefix    a prefix stands as a word of its own (お|元気, ご|注文): the
  *             dictionary writes お名前 as one word and お元気 as two, so
  *             whether a prefix is its own word is not settled either
+ *   joined    two or more neighbouring tokens, none a particle or a copula
+ *             form, spell one dictionary word of either tier read the way
+ *             the line reads them (卵|焼き is 卵焼き, 作り|方 is 作り方): a
+ *             learner who writes the word whole is right too
+ *   counter   a number's counter and the word after it spell one dictionary
+ *             word (何番|線, where 番線 is the counter)
+ *   tail      a word ends in a particle after a dictionary word read the
+ *             same (何と in 何と言いますか, where と quotes; 一緒に, 何か), or
+ *             after a form of the copula (だっけ, だ and the particle っけ):
+ *             the language splits it as readily as the analysis joins it.
+ *             Only where what comes before the particle holds a kanji or is
+ *             the copula: in kana every short stretch is some word (こ|の,
+ *             しご|と)
+ *   two       one token the grammar writes as two words: a te-form and the
+ *             verb it lends (持って|いきます, 作って|みます, して|います), a
+ *             copula form said in two (じゃ|ありません), or an expression
+ *             the dictionary lists whole that is a word and a conjugated form
+ *             (お願い|します, where the same file splits 連絡|します;
+ *             ありがとう|ございました)
  *   kana      its kana spelling reads with edges the written line does not
  *             have: the kanji settled where the words part, the kana alone
  *             do not
+ *   base      its kana spelling reads a word of the written line as another
+ *             word (いって as 要る where the line says 行って, さとう as 砂糖
+ *             where it says 佐藤): the reason would name the wrong word
  *   guess     a token, or a part of a compound, has no dictionary support
  *   none      it has no edge to find (ありがとうございます。, はい、どうぞ。)
  *   long      it has more than MAX_SLOTS positions, more than a phone's
  *             board holds in a few rows
  *   twice     the same text came already
+ *
+ * A written line left out takes its kana spelling with it: the two are the
+ * same words, so what is not settled in one is not settled in the other.
+ * The checks of the dictionary (joined, counter, tail, two, base) are
+ * tools/lib/spaces-settled.mjs; each reads the analysis and both tiers of
+ * the dictionary, and none is a list of lines.
  */
 import {
   gapsOf, slotsOf, codePointAt, isWordToken, isWordChar, isGuess, isPrefix, REASONS,
 } from '../../js/gaps.js';
-import { isKana, isKatakana, isHiragana, toHira } from '../../js/kana.js';
+import {
+  isKana, isKatakana, isHiragana, toHira,
+} from '../../js/kana.js';
+import { unsettled, otherWord } from './spaces-settled.mjs';
+
+export { dictWords, unsettled, otherWord } from './spaces-settled.mjs';
 
 export const SPACES_FORMAT = 'yomu-spaces/1';
 export const SPACES_SRC = 'data/play/spaces.json';
 /** Positions between characters a line may offer: three rows of a 390px board. */
 export const MAX_SLOTS = 18;
-export const LEFT_OUT = Object.freeze(['reading', 'set', 'prefix', 'kana', 'guess', 'none', 'long', 'twice']);
+export const LEFT_OUT = Object.freeze([
+  'reading', 'set', 'prefix', 'joined', 'counter', 'tail', 'two', 'kana', 'base', 'guess', 'none', 'long', 'twice',
+]);
 /** The fields a gap may carry besides `at` and `why`. */
 export const GAP_VARS = Object.freeze(['w', 'k', 'from', 'to', 'o', 'a', 'b', 'f', 'base', 'part']);
 
@@ -154,12 +189,20 @@ function isAllHiragana(text) {
 
 /**
  * Build the file. `analyze(text)` is the analyzer (analyze.js with a
- * dictionary over the committed shards); `library` the parsed phrase
- * library; `compounds` the authored compound lines; `licence` the block the
- * file carries. Returns `{ doc, report }`: the report counts the sentences,
- * what was kept by tier and source, and lists what was left out with why.
+ * dictionary over the committed shards); `words` what the checks read of
+ * the dictionary (`dictWords`, over a dictionary of its own); `library` the
+ * parsed phrase library;
+ * `compounds` the authored compound lines; `licence` the block the file
+ * carries. Returns `{ doc, report }`: the report counts the sentences, what
+ * was kept by tier and source, and lists what was left out with why (`at`,
+ * for the checks of the dictionary, names the words that showed it).
  */
-export async function spacesDoc({ library, compounds = [], analyze, licence = null }) {
+export async function spacesDoc({
+  library, compounds = [], analyze: analyzeLine, words, licence = null,
+}) {
+  if (!words || typeof words.lookup !== 'function' || typeof words.read !== 'function') {
+    throw new TypeError('spacesDoc needs the words the checks read (dictWords)');
+  }
   const report = {
     sentences: 0, spelled: 0, kept: { 1: 0, 2: 0, 3: 0 }, sources: {}, left: Object.fromEntries(LEFT_OUT.map((k) => [k, 0])), leftOut: [],
   };
@@ -175,7 +218,10 @@ export async function spacesDoc({ library, compounds = [], analyze, licence = nu
   ];
   const lines = [];
   const seen = new Set();
-  const leave = (why, id, text) => { report.left[why] += 1; report.leftOut.push({ id, why, text }); };
+  const leave = (why, id, text, at = null) => {
+    report.left[why] += 1;
+    report.leftOut.push(at ? { id, why, text, at } : { id, why, text });
+  };
 
   const keep = (line, r, edges, tier) => {
     if (!edges.length) return leave('none', line.id, r.text);
@@ -192,7 +238,7 @@ export async function spacesDoc({ library, compounds = [], analyze, licence = nu
     const parts = sentencesOf(it.ja);
     report.sentences += parts.length;
     const results = [];
-    for (const x of parts) results.push(await analyze(x));
+    for (const x of parts) results.push(await analyzeLine(x));
     const ids = parts.map((_, n) => (parts.length > 1 ? `${it.id}/${n}` : it.id));
     // The reading of the whole turn against the kana written for it.
     const read = fold(results.map((r) => r.tokens.map((t) => t.reading || '').join('')).join(''));
@@ -208,6 +254,8 @@ export async function spacesDoc({ library, compounds = [], analyze, licence = nu
       if (hasGuess(r)) { leave('guess', id, r.text); continue; }
       if (cutsASet(r, sets)) { leave('set', id, r.text); continue; }
       if (r.tokens.some(isPrefix)) { leave('prefix', id, r.text); continue; }
+      const open = await unsettled(r, words);
+      if (open) { leave(open.why, id, r.text, open.at); continue; }
       const edges = edgesOf(r);
       const tier = hasCompound(r) ? 3 : isAllHiragana(r.text) ? 1 : 2;
       if (keep({ id, src: it.src, ...meaning }, r, edges, tier) !== true || tier === 1) continue;
@@ -216,12 +264,16 @@ export async function spacesDoc({ library, compounds = [], analyze, licence = nu
       const kana = kanaSpelling(r);
       if (!isAllHiragana(kana)) continue;
       report.spelled += 1;
-      const k = await analyze(kana);
+      const k = await analyzeLine(kana);
       const kid = `${id}~kana`;
       if (hasGuess(k)) { leave('guess', kid, k.text); continue; }
       if (k.tokens.some(isPrefix)) { leave('prefix', kid, k.text); continue; }
       const got = edgesOf(k);
       if (got.map((g) => g.at).join() !== edgesInKana(r).join()) { leave('kana', kid, k.text); continue; }
+      const other = otherWord(r, k);
+      if (other) { leave('base', kid, k.text, other); continue; }
+      const openK = await unsettled(k, words);
+      if (openK) { leave(openK.why, kid, k.text, openK.at); continue; }
       keep({ id: kid, src: 'kana', of: id, ...meaning }, k, got, 1);
     }
   }

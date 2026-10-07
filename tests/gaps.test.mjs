@@ -62,6 +62,16 @@ test('inside katakana: a loanword ending, then a kana no word starts with, then 
   for (const k of 'ンッーャュョァィゥェォっゃゅょ') assert.ok(NOSTART.has(k), k);
 });
 
+test('hiragana ん is no kana that starts no word: the analyzer reads the explanatory ん as a word', async () => {
+  assert.ok(!NOSTART.has('ん'));
+  const r = await run('友達と山に登るんです。');
+  assert.ok(r.tokens.some((t) => t.surface === 'ん' && t.kind === 'particle'), r.tokens.map((t) => t.surface).join('|'));
+  // a space placed inside 登る|ん is said to cut a word, never that no word starts with ん
+  assert.deepEqual(extraReason('のぼるんです', [3, 4], 2), { why: 'inside', w: 'のぼる' });
+  assert.deepEqual(reasonOf(w('のぼる'), { kind: 'particle', surface: 'ん' }), { why: 'particle', w: 'ん' });
+  assert.equal(reasonOf(w('ほん'), w('や')).why, 'word', 'a word that ends in ん ends where a word does');
+});
+
 test('an edge before a kana no word starts with is the reading guessing, never a change of script', async () => {
   assert.deepEqual(reasonOf(w('ご'), { kind: 'katakana', surface: 'ー', confidence: 'guess' }), { why: 'guess', k: 'ー' });
   const r = await run('すごーいね');
