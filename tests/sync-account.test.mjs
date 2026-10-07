@@ -215,13 +215,20 @@ test('a failure is said on the line once, as offline or as the server\'s error, 
 /**
  * Every static import and re-export in a module's source, as specifiers:
  * `import x from '...'`, `import { a } from "..."` across lines, the
- * side-effect `import '...';`, and `export ... from '...'`, in either quote.
+ * side-effect `import '...';`, and `export ... from '...'`, in either quote,
+ * with or without spaces (`import{a}from'...'`), and with comments between
+ * the braces. A comment is taken whole (a line comment to its end, a block
+ * comment to its first close), so an apostrophe in one does not end the
+ * clause and a `from '...'` written in one is never read as the import.
  * A dynamic import('...') is not one: that is the guard.
  */
-const STATIC_IMPORT = /^[ \t]*(?:import|export)[ \t]*(?:[^'"`;()]*?\sfrom[ \t]*)?(['"])([^'"\n]+)\1/gm;
+const COMMENT = String.raw`\/\/[^\n]*$|\/\*[^*]*\*+(?:[^/*][^*]*\*+)*\/`;
+const STATIC_IMPORT = new RegExp(String.raw`^[ \t]*(?:import|export)[ \t]*(?:(?:[^'"\x60;()/]|${COMMENT})*?\bfrom[ \t]*)?(['"])([^'"\n]+)\1`, 'gm');
 const staticSpecifiers = (src) => [...src.matchAll(STATIC_IMPORT)].map((m) => m[2]);
 /** What only a signed-in page may load: the kit, the sync client, the page's sign-in, esm.sh, the Convex package. */
 const SIGNED_IN_ONLY = /neorgon-auth\.js$|(^|\/)sync\.js$|events-sync\.js$|esm\.sh|^convex(\/|$)/;
+/** A specifier names the module before any query or fragment: `./sync.js?v=1` is ./sync.js. */
+const signedInOnly = (spec) => SIGNED_IN_ONLY.test(spec.replace(/[?#].*$/, ''));
 
 test('the import guard finds every kind of static import, in either quote, and no dynamic one', () => {
   const planted = [
@@ -234,14 +241,32 @@ test('the import guard finds every kind of static import, in either quote, and n
     "export { startAccounts } from './events-sync.js';",
     'export * from "https://esm.sh/convex@1.46.0/browser";',
     "import { ConvexHttpClient } from 'convex/browser';",
+    // Found by a review: no spaces, a comment with an apostrophe inside the braces, a query on the specifier.
+    "import{createSync}from'./sync.js';",
+    'export{startAccounts}from"./events-sync.js"',
+    "import {\n  // the client's half\n  createSync,\n} from './sync.js';",
+    "import { /* it's */ NeoAuth } from './neorgon-auth.js';",
+    "import { createSync } from './sync.js?v=1';",
+    "import './neorgon-auth.js#kit';",
   ];
   for (const line of planted) {
     const found = staticSpecifiers(`// a module\n${line}\nconst x = 1;\n`);
     assert.equal(found.length, 1, line);
-    assert.ok(SIGNED_IN_ONLY.test(found[0]), `${line} -> ${found[0]}`);
+    assert.ok(signedInOnly(found[0]), `${line} -> ${found[0]}`);
   }
-  for (const fine of ["const m = await import('./sync.js');", "  import('./events-sync.js').then((m) => m.startAccounts());", "import { h } from './utils.js';", "import './sync-watch.js';"]) {
-    assert.ok(staticSpecifiers(fine).every((s) => !SIGNED_IN_ONLY.test(s)), fine);
+  const fine = [
+    "const m = await import('./sync.js');",
+    "  import('./events-sync.js').then((m) => m.startAccounts());",
+    "import { h } from './utils.js';",
+    "import './sync-watch.js';",
+    "import {\n  // not from './sync.js'\n  h,\n} from './utils.js';",
+    "import { /* from './sync.js' */ h } from './utils.js';",
+    "import { h } from './utils.js'; // like './sync.js'",
+    "export function from() { return import('./sync.js'); }",
+    "export const a = 1; // from './sync.js'",
+  ];
+  for (const line of fine) {
+    assert.ok(staticSpecifiers(line).every((s) => !signedInOnly(s)), line);
   }
 });
 
@@ -252,7 +277,7 @@ test('no module imports the kit, the sync client or esm.sh at its top: only insi
   for (const file of files(js)) {
     for (const spec of staticSpecifiers(readFileSync(file, 'utf8'))) {
       seen += 1;
-      assert.ok(!SIGNED_IN_ONLY.test(spec), `${file.slice(js.length + 1)} imports ${spec} at its top`);
+      assert.ok(!signedInOnly(spec), `${file.slice(js.length + 1)} imports ${spec} at its top`);
     }
   }
   assert.ok(seen > 100, `only ${seen} static imports found: the pattern is not reading the modules`);
