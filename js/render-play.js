@@ -1,4 +1,4 @@
-// Play (#/play): the four games as a list, and what every game screen
+// Play (#/play): the five games as a list, and what every game screen
 // shares: the title, the note, the answer marks, the reason lines and the
 // result. The question screens are render-games.js; events-play.js keeps the
 // rounds and the clock and calls paintPlay() after every change.
@@ -20,6 +20,7 @@ import { myPlay, TOP } from './play-store.js';
 import { mixUps, ROUND } from './play-rounds.js';
 import { gameOf, GAMES } from './routes.js';
 import { gameNodes } from './render-games.js';
+import { missedNodes } from './render-spaces.js';
 
 /** The screen's own state; events-play.js changes it and repaints. */
 export const play = {
@@ -31,13 +32,17 @@ export const play = {
   odd: { mode: null, sit: null, left: 60000, running: false, line: '', last: null },
   twins: { round: null },
   name: { round: null },
+  // Where are the spaces?: the lines (play-spaces.js), the round, and the place the keys are on.
+  spaces: { state: 'idle', lines: null, error: '', round: null, cursor: 0 },
   result: null,
   saveList: [],
   speech: false,
 };
 
-const GAME_KEY = { which: 'gameWhich', odd: 'gameOdd', twins: 'gameTwins', names: 'gameNames' };
-const LEAD_KEY = { which: 'gameWhichLead', odd: 'gameOddLead', twins: 'gameTwinsLead', names: 'gameNamesLead' };
+const GAME_KEY = { which: 'gameWhich', odd: 'gameOdd', twins: 'gameTwins', names: 'gameNames', spaces: 'gameSpaces' };
+const LEAD_KEY = {
+  which: 'gameWhichLead', odd: 'gameOddLead', twins: 'gameTwinsLead', names: 'gameNamesLead', spaces: 'gameSpacesLead',
+};
 
 /** A ui string with {name} placeholders filled by nodes (a character in its lang="ja" span). */
 export function uiNodes(key, nodes) {
@@ -101,6 +106,9 @@ function bestLine(game) {
     if (store.rounds('odd')) parts.push(ui('bestTimed', { n: store.best('odd') }));
     if (store.rounds('oddFree')) parts.push(ui('bestFree', { n: store.best('oddFree'), of: TOP.oddFree }));
     best = parts.length ? parts.join(', ') : ui('bestNone');
+  } else if (game === 'spaces') {
+    const n = store.best(game);
+    best = store.rounds(game) ? (n === 1 ? ui('bestPointOne') : ui('bestPoints', { n })) : ui('bestNone');
   } else {
     best = store.rounds(game) ? ui('bestOf', { n: store.best(game), of: ROUND }) : ui('bestNone');
   }
@@ -134,6 +142,7 @@ function hubNodes() {
 // ── The result ────────────────────────────────────────────────────────────
 
 function mixedNodes(r) {
+  if (r.game === 'spaces') return missedNodes(r.mixups);
   if (r.game === 'names') {
     if (!r.mixups.length) return h('p', { class: 'mk-empty' }, ui('mixedNone'));
     return h('ul', { class: 'mk-list', role: 'list' }, r.mixups.map(([kata, orig]) => h('li', { class: 'pl-mix' }, [
@@ -155,15 +164,27 @@ function mixedNodes(r) {
   ];
 }
 
+/** The score line: n of ten, n found in 60 seconds, or the points of the spaces. */
+function scoreNodes(r) {
+  if (r.game === 'spaces') {
+    return [
+      h('p', { class: 'pl-score' }, r.score === 1 ? ui('resultPointOne') : ui('resultPoints', { n: r.score })),
+      h('p', { class: 'mk-line' }, ui('resultSpaces', { right: r.counts.right, of: r.counts.of, extra: r.counts.extra })),
+    ];
+  }
+  return h('p', { class: 'pl-score' }, r.timed ? ui('resultTimed', { n: r.score }) : ui('resultOf', { n: r.score, of: r.of || ROUND }));
+}
+
+const MIXED_HEAD = { names: 'namesMissedHead', spaces: 'spacesMissedHead' };
+
 function resultNodes(r) {
-  const of = r.timed ? null : (r.of || ROUND);
   return [h('section', { class: 'mk-sec pl-result', 'aria-labelledby': 'pl-done' }, [
     h('h3', { class: 'mk-sec-title', id: 'pl-done', tabindex: '-1' }, ui('resultHead')),
-    h('p', { class: 'pl-score' }, r.timed ? ui('resultTimed', { n: r.score }) : ui('resultOf', { n: r.score, of })),
+    scoreNodes(r),
     h('p', { class: 'mk-line' }, [ui('resultBest', { n: r.best }), r.isBest ? h('strong', { class: 'pl-new' }, ` ${ui('newBest')}`) : null]),
     h('p', { class: 'mk-actions' }, h('button', { type: 'button', class: 'btn btn--primary', 'data-act': 'pl-again' }, ui('playAgain'))),
   ]), h('section', { class: 'mk-sec', 'aria-labelledby': 'pl-mixed-h' }, [
-    h('h3', { class: 'mk-sec-title', id: 'pl-mixed-h', tabindex: '-1' }, ui(r.game === 'names' ? 'namesMissedHead' : 'mixedHead')),
+    h('h3', { class: 'mk-sec-title', id: 'pl-mixed-h', tabindex: '-1' }, ui(MIXED_HEAD[r.game] || 'mixedHead')),
     mixedNodes(r),
   ])];
 }
@@ -171,7 +192,14 @@ function resultNodes(r) {
 /** The result of a round, from the round and the store's answer. */
 export function resultOf(game, round, rec, extra = {}) {
   return {
-    game, score: extra.score ?? 0, of: extra.of, timed: !!extra.timed, best: rec ? rec.best : 0, isBest: !!(rec && rec.isBest), mixups: extra.mixups || (round ? mixUps(round) : []),
+    game,
+    score: extra.score ?? 0,
+    of: extra.of,
+    timed: !!extra.timed,
+    counts: extra.counts || null,
+    best: rec ? rec.best : 0,
+    isBest: !!(rec && rec.isBest),
+    mixups: extra.mixups || (round ? mixUps(round) : []),
   };
 }
 

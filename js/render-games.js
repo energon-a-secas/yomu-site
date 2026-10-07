@@ -1,4 +1,4 @@
-// The four games' question screens, drawn into #pl-body by render-play.js:
+// The games' question screens, drawn into #pl-body by render-play.js:
 // a mode switch where a game has one, the question, the options as buttons,
 // and, once answered, the right option marked, a one-line reason and Next.
 //
@@ -9,7 +9,8 @@
 //
 // A cycle on purpose, and a safe one: render-play.js imports gameNodes from
 // here and this file imports its helpers from there; neither touches the
-// other while it loads.
+// other while it loads. "Where are the spaces?" is drawn by render-spaces.js
+// with the pieces exported below, the same way.
 
 import { h, withJa } from './utils.js';
 import { ui, t } from './strings.js';
@@ -24,6 +25,7 @@ import {
 import { KANA_SETS } from './play-kana.js';
 import { TWINS } from './play-twins.js';
 import { withKanji } from './render-save.js';
+import { spacesNodes } from './render-spaces.js';
 
 const SCRIPT_KEY = { hiragana: 'scriptHiragana', katakana: 'scriptKatakana', kanji: 'scriptKanji' };
 const CLASS_KEY = { person: 'namePerson', place: 'namePlace' };
@@ -38,11 +40,11 @@ function seg(labelKey, act, values, pressed) {
   ]));
 }
 
-function keysLine(key) {
+export function keysLine(key) {
   return h('p', { class: 'rv-keys' }, ui(key));
 }
 
-function questionHead(r) {
+export function questionHead(r) {
   return h('h3', { class: 'mk-sec-title rv-title' }, h('span', { class: 'mk-count' }, ui('questionOf', { at: Math.min(r.at + 1, r.questions.length), of: r.questions.length })));
 }
 
@@ -86,7 +88,7 @@ function optionList(r, label, { wide = false } = {}) {
  * the way on takes no line of its own: in a host's sheet at 390x844 it sat
  * below what the sheet shows, and WebKit lets no frame scroll its host.
  */
-function feedbackBlock({ right, mark, why, last, cls = '' }) {
+export function feedbackBlock({ right, mark, why, last, cls = '' }) {
   return h('div', { class: `pl-feedback${right ? ' is-right' : ''}${cls}`, id: 'pl-feedback', tabindex: '-1' }, [
     h('p', { class: 'pl-mark' }, mark),
     ...why.filter(Boolean).map((line) => h('p', { class: 'pl-why' }, line)),
@@ -104,11 +106,11 @@ function feedback(r, why) {
   });
 }
 
-function prompt(children, cls = '') {
+export function prompt(children, cls = '') {
   return h('div', { class: `pl-prompt ${cls}`.trim(), id: 'pl-prompt', tabindex: '-1' }, children);
 }
 
-function loading(state, error, keys) {
+export function loading(state, error, keys) {
   if (state === 'error') return h('p', { class: 'read-error', role: 'alert' }, [h('span', null, ui(keys.failed, { detail: error })), ' ', h('button', { type: 'button', class: 'btn btn--secondary btn--sm', 'data-act': 'pl-retry' }, ui('retry'))]);
   return h('p', { class: 'mk-empty' }, ui(keys.loading));
 }
@@ -277,6 +279,7 @@ export function gameNodes(game) {
   if (game === 'odd') return oddNodes();
   if (game === 'twins') return twinsNodes();
   if (game === 'names') return namesNodes();
+  if (game === 'spaces') return spacesNodes();
   return [];
 }
 

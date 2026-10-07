@@ -707,3 +707,25 @@ test('check-data fails a broken popular-names file, and a name record out of its
     assert.match(runs[k].stderr, expect, name);
   });
 });
+
+test('check-data fails the lines of "Where are the spaces?" out of shape, or missing beside the library', async () => {
+  const cases = [
+    ['a space at no place between two characters', (rw) => rw('data/play/spaces.json', (d) => {
+      d.lines[0].gaps[0].at = 0;
+    }), /spaces\.json: lines\[0\]: a gap at 0, which is no position between two characters/],
+    ['a reason js/gaps.js does not give', (rw) => rw('data/play/spaces.json', (d) => {
+      d.lines[3].gaps[0].why = 'looks right';
+    }), /spaces\.json: lines\[3\]: the reason looks right/],
+    ['a hard line before an easy one', (rw) => rw('data/play/spaces.json', (d) => {
+      d.lines.unshift(d.lines.pop());
+    }), /spaces\.json: lines\[1\]: tier 1 after tier 3/],
+    ['no spaces file beside the library', (rw, dir) => {
+      rmSync(join(dir, 'data/play/spaces.json'));
+    }, /spaces\.json: missing, but the phrase library exists/],
+  ];
+  const runs = await Promise.all(cases.map(([, mutate]) => brokenCopy(mutate)));
+  cases.forEach(([name, , expect], k) => {
+    assert.equal(runs[k].status, 1, `${name}: exit ${runs[k].status}`);
+    assert.match(runs[k].stderr, expect, name);
+  });
+});

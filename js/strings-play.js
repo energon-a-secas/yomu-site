@@ -1,5 +1,6 @@
-// The strings of Play (#/play): the four games' screen, their questions,
-// their answers and the result.
+// The strings of Play (#/play): the five games' screen, their questions,
+// their answers and the result. The reasons "Where are the spaces?" gives
+// for each space are the Gaps option's, in strings-gaps.js.
 //
 // Kept apart from strings.js so both stay under the 500-line rule;
 // strings.js merges this table into the one ui() reads, and
@@ -12,8 +13,8 @@
 export const PLAY_STRINGS = Object.freeze({
   play: { en: 'Play', es: 'Jugar' },
   playLead: {
-    en: 'Four short games with the characters that look alike. Your best scores stay in this browser.',
-    es: 'Cuatro juegos cortos con los caracteres que se parecen. Tus mejores puntajes se quedan en este navegador.',
+    en: 'Five short games: the characters that look alike, and where one word ends and the next begins. Your best scores stay in this browser.',
+    es: 'Cinco juegos cortos: los caracteres que se parecen, y dónde termina una palabra y empieza la siguiente. Tus mejores puntajes se quedan en este navegador.',
   },
   backToPlay: { en: 'Back to Play', es: 'Volver a Jugar' },
 
@@ -38,7 +39,14 @@ export const PLAY_STRINGS = Object.freeze({
     en: 'Read a name written in katakana and pick how it is spelled where it comes from.',
     es: 'Lee un nombre escrito en katakana y elige cómo se escribe en su idioma de origen.',
   },
+  gameSpaces: { en: 'Where are the spaces?', es: '¿Dónde van los espacios?' },
+  gameSpacesLead: {
+    en: 'Japanese is written with no spaces. Mark where each word ends, and see what gives it away.',
+    es: 'El japonés se escribe sin espacios. Marca dónde termina cada palabra y mira qué lo delata.',
+  },
   bestOf: { en: 'Best: {n} of {of}', es: 'Mejor: {n} de {of}' },
+  bestPoints: { en: 'Best: {n} points', es: 'Mejor: {n} puntos' },
+  bestPointOne: { en: 'Best: 1 point', es: 'Mejor: 1 punto' },
   bestTimed: { en: 'Best: {n} in 60 seconds', es: 'Mejor: {n} en 60 segundos' },
   bestFree: { en: 'untimed: {n} of {of}', es: 'sin tiempo: {n} de {of}' },
   bestNone: { en: 'Not played yet', es: 'Todavía sin jugar' },
@@ -130,6 +138,42 @@ export const PLAY_STRINGS = Object.freeze({
   namePerson: { en: 'a name', es: 'un nombre' },
   namePlace: { en: 'a place', es: 'un lugar' },
   nameReads: { en: '{kana} reads {romaji}: {orig}', es: '{kana} se lee {romaji}: {orig}' },
+
+  // Where are the spaces?
+  spacesLoading: { en: 'Loading the lines', es: 'Cargando las líneas' },
+  spacesFailed: { en: 'Could not load the lines ({detail}).', es: 'No se pudieron cargar las líneas ({detail}).' },
+  spacesFew: { en: 'There are too few lines to play.', es: 'Hay muy pocas líneas para jugar.' },
+  spacesPrompt: {
+    en: 'Where does one word end and the next begin? Mark each place, then check.',
+    es: '¿Dónde termina una palabra y empieza la siguiente? Marca cada lugar y luego comprueba.',
+  },
+  spacesTier1: { en: 'All hiragana: look for the particles.', es: 'Todo en hiragana: busca las partículas.' },
+  spacesTier2: { en: 'Kanji and kana: the script changes too.', es: 'Kanji y kana: la escritura también cambia.' },
+  spacesTier3: { en: 'A katakana compound: two words written as one.', es: 'Un compuesto en katakana: dos palabras escritas como una.' },
+  spacesBoard: { en: 'The places between the characters', es: 'Los lugares entre los caracteres' },
+  spacesBetween: { en: 'between {a} and {b}', es: 'entre {a} y {b}' },
+  spacesCheck: { en: 'Check', es: 'Comprobar' },
+  spacesAllRight: { en: 'Right: every space, and none extra.', es: '¡Correcto! Todos los espacios, y ninguno de más.' },
+  spacesNotQuite: { en: 'Not quite. The marks show what was missed and what is extra.', es: 'Casi. Las marcas muestran lo que faltó y lo que sobra.' },
+  spacesTally: {
+    en: 'Spaces found: {right} of {of}. Extra: {extra}. Points: {score}.',
+    es: 'Espacios encontrados: {right} de {of}. De más: {extra}. Puntos: {score}.',
+  },
+  spacesFound: { en: 'found', es: 'encontrado' },
+  spacesMissed: { en: 'missed', es: 'faltó' },
+  spacesExtra: { en: 'extra', es: 'de más' },
+  spacesMarkFound: { en: 'a space, found', es: 'un espacio, encontrado' },
+  spacesMarkMissed: { en: 'a space, missed', es: 'un espacio que faltó' },
+  spacesMarkExtra: { en: 'no space goes here', es: 'aquí no va un espacio' },
+  keysSpaces: {
+    en: 'Keys: the arrows move between the places, Space marks one or clears it, Enter checks, then Enter or Space goes on, Escape leaves.',
+    es: 'Teclas: las flechas se mueven entre los lugares, Espacio marca uno o lo quita, Enter comprueba; después, Enter o Espacio siguen, Escape sale.',
+  },
+  resultPoints: { en: '{n} points', es: '{n} puntos' },
+  resultPointOne: { en: '1 point', es: '1 punto' },
+  resultSpaces: { en: 'Spaces found: {right} of {of}, with {extra} extra.', es: 'Espacios encontrados: {right} de {of}, con {extra} de más.' },
+  spacesMissedHead: { en: 'Lines to look at again', es: 'Líneas para mirar otra vez' },
+  spacesNoneMissed: { en: 'Every line was right.', es: 'Todas las líneas estuvieron bien.' },
 
   // The result.
   resultHead: { en: 'Round over', es: 'Fin de la ronda' },

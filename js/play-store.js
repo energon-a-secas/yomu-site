@@ -1,12 +1,14 @@
 // Play's scores and its mix-ups: one Persist kit store, 'yomu-site:play'
 // version 1. No DOM.
 //
-//   games  { which|odd|oddFree|twins|names: { best, rounds } }
+//   games  { which|odd|oddFree|twins|names|spaces: { best, rounds } }
 //   mixed  { 'シ|ツ': 3 }   how often each pair was mixed up, characters sorted
 //
 // `odd` is Odd one out against the clock (grids found in 60 seconds) and
 // `oddFree` the untimed ten, kept apart because the two scores do not
-// compare. Every key of `mixed` is two characters from the games' own content
+// compare. `spaces` is "Where are the spaces?", whose score is the spaces
+// placed right minus the extras over ten lines (play-spaces.js), so its top
+// is no fixed ten either. Every key of `mixed` is two characters from the games' own content
 // (kana from play-kana.js and play-twins.js, kanji from the look-alikes);
 // no text a learner wrote or read is ever kept here, and the test reads the
 // raw store to prove it.
@@ -23,9 +25,9 @@ import { isKana, isKanji } from './kana.js';
 export const KEY = 'yomu-site:play';
 export const VERSION = 1;
 export const DAMAGED_KEY = `${KEY}:damaged`;
-export const GAME_IDS = Object.freeze(['which', 'odd', 'oddFree', 'twins', 'names']);
-/** The highest score a round can give, per game; the timed round has no fixed top. */
-export const TOP = Object.freeze({ which: 10, odd: 999, oddFree: 10, twins: 10, names: 10 });
+export const GAME_IDS = Object.freeze(['which', 'odd', 'oddFree', 'twins', 'names', 'spaces']);
+/** The highest score a round can give, per game; the timed round and the spaces have no fixed top. */
+export const TOP = Object.freeze({ which: 10, odd: 999, oddFree: 10, twins: 10, names: 10, spaces: 999 });
 /** Pairs kept at most; the least mixed go first. */
 export const MAX_MIXED = 400;
 const MAX_COUNT = 9999;
