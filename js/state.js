@@ -24,7 +24,7 @@ export const MAX_CHARS = 2000;
 /** Speech rates. Slow is slow enough to hear a long vowel as long. */
 export const RATE = Object.freeze({ normal: 1, slow: 0.6 });
 
-const ROMAJI = ['said', 'spelled', 'off'];
+export const ROMAJI = Object.freeze(['said', 'spelled', 'off']);
 /** The unsaved-kanji mark in the reading (My kanji): drawn, or not. */
 export const UNSAVED = Object.freeze(['mark', 'off']);
 /**
