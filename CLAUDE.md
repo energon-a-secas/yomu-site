@@ -694,7 +694,7 @@ it saves again, and pushing the first plan left the account a sync behind.
 **Another account is asked about, never merged.** `decide()`: no book is a
 first sign-in and merges (`adopt`); the book's account merges (`same`);
 another one opens `#sync-dialog` with what each side holds. Add is `adopt`
-(the book starts again for that account, `joined` now); Use is `replace`
+(the book starts again for that account, `joined` as above); Use is `replace`
 (this browser takes the account's data, `joined` 1 ms, so nothing of its
 own joins; its pending removals are dropped with the old account); Not now
 pauses sync and the line offers Choose. The old account keeps what it
