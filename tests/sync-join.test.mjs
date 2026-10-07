@@ -183,3 +183,51 @@ test('an unsave made signed out, with no pull since, outranks the join stamp of 
   assert.equal(z.kanji.isSaved('天'), false);
   assert.deepEqual(savedOn(server), [], 'the unsave reached the account');
 });
+
+// A first sign-in keeps its join in the book from the moment it is decided,
+// pending, the way an answer to the account question is kept. A review found
+// that a first pull that failed wrote nothing, so an unsave made while the
+// line said Yomu would try again was recorded nowhere, and the retry brought
+// the account's copy back.
+
+test('a first sign-in whose pull fails: an unsave made before the retry stands, here and in the account', async () => {
+  const server = fakeDb();
+  const w = device(server, 'user_a', { at: 0 });
+  w.kanji.save('天', w.now());
+  await w.signIn();
+  const z = device(server, 'user_a', { at: 10 });
+  z.kanji.save('天', z.now());
+  z.kanji.save('地', z.now());
+  z.failing.on = (name) => name === 'sync:pullMeta';
+  await assert.rejects(z.signIn());
+  z.tick(5);
+  z.kanji.unsave('天');                              // T15, signed in, before the retry
+  assert.ok(z.books.read().removed.kanji['天'], 'the removal is in the pending join');
+  z.failing.on = online;
+  z.tick(1);
+  await z.sync.sync('adopt');                       // the retry continues the join
+  assert.equal(z.kanji.isSaved('天'), false, 'the unsave stands here');
+  assert.deepEqual(savedOn(server), ['地'], 'and in the account');
+  assert.equal(z.books.read().pending, undefined, 'the join is finished');
+});
+
+test('a first sign-in whose pull fails: a save another device made in between does not undo a later unsave here', async () => {
+  const server = fakeDb();
+  const z = device(server, 'user_a', { at: 10 });
+  z.kanji.save('天', z.now());
+  z.kanji.save('地', z.now());
+  z.failing.on = (name) => name === 'sync:pullPhrases';
+  await assert.rejects(z.signIn());
+  const w = device(server, 'user_a', { at: 12 });
+  w.kanji.save('天', w.now());                       // T12, in the account before the retry
+  await w.signIn();
+  z.tick(5);
+  z.kanji.unsave('天');                              // T15
+  z.failing.on = online;
+  z.tick(1);
+  await z.sync.sync('same');                        // account.js retries the step that failed
+  assert.equal(z.kanji.isSaved('天'), false);
+  assert.deepEqual(savedOn(server), ['地']);
+  await w.sync.sync('same');
+  assert.equal(w.kanji.isSaved('天'), false, 'the unsave at T15 is the last action');
+});

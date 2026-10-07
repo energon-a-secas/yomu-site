@@ -753,12 +753,17 @@ runs as an ordinary sync on it: the first answer stands, and is finished
 there if it is still pending (`tests/sync-tabs.test.mjs`).
 
 **A failure changes nothing, is said once, and the retry runs the step that
-failed.** A pull that fails applies nothing, and on a first sign-in
-remembers no account; a push that fails keeps the merge and the remembered
-account. `account.js` keeps the step a sign-in is at: `connect` (whoami,
+failed.** A pull that fails applies nothing; a push that fails keeps the
+merge and the remembered account. A first sign-in's join is in the book
+from the moment it is decided (`pending: 'adopt'`, as an answered Add), so
+the retry continues it, and an unsave, a save or a preference change made
+in between counts. It used to write nothing until a sync finished: the
+unsave was recorded nowhere and the retry brought the account's copy back
+(`tests/sync-join.test.mjs`, `tests/sync-account.test.mjs`).
+`account.js` keeps the step a sign-in is at: `connect` (whoami,
 and the pull behind the account question), `ask`, the chosen `adopt` or
 `replace`, then `same` once the book names the account (a sync wrote it,
-or it holds the answer). The next change, the
+or it holds the pending join). The next change, the
 `online` event and the page shown again (a pull at most once a minute when
 nothing failed) all run that step, one at a time. A retry used to be an
 ordinary sync, which `sync.js` refuses with no book (`account-changed`), so

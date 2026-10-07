@@ -108,7 +108,11 @@ async function firstSignInOneFails() {
   await t2.account.ready;
   t2.signIn();
   await until(() => t2.last().phase === 'error', 'tab 2\'s failure');
-  assert.equal(b.book.raw, null, 'tab 2 remembered no account');
+  // Tab 2 keeps the join it decided, pending (this said "remembered no
+  // account" until the join was kept in the book from the moment it is
+  // decided), and tab 1 finishes it.
+  assert.equal(bookOf(b).account, 'user_a');
+  assert.ok(bookOf(b).pending, 'tab 2\'s join waits in the book');
   t1.signIn();
   await until(() => t1.last().phase === 'synced', 'tab 1\'s first sync');
   assert.deepEqual(savedOn(server, 'user_a'), ['地', '天']);

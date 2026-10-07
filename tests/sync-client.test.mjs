@@ -283,7 +283,7 @@ test('display preferences: the later change wins per preference; remember and tr
   assert.ok(!JSON.stringify(server.rowsOf('user_a').prefs).match(/remember|translate/));
 });
 
-test('a failed pull changes nothing here and remembers no account; a failed push leaves the merge, and the retry finishes it', async () => {
+test('a failed pull changes nothing here and keeps the join pending; a failed push leaves the merge, and the retry finishes it', async () => {
   const server = fakeDb();
   const a = device(server, 'user_a');
   a.kanji.save('天', a.now());
@@ -294,7 +294,13 @@ test('a failed pull changes nothing here and remembers no account; a failed push
   const before = JSON.stringify([b.kanji.data, b.history.data, b.play.data, b.state.prefs]);
   await assert.rejects(b.signIn(), (err) => err instanceof TypeError || err instanceof SyncError);
   assert.equal(JSON.stringify([b.kanji.data, b.history.data, b.play.data, b.state.prefs]), before, 'untouched');
-  assert.equal(b.bookStore.raw, null, 'no account is remembered after a failed first sync');
+  // This said no account was remembered after a failed first sync, until a
+  // review found an unsave made before the retry recorded nowhere. The join
+  // waits in the book, pending, holding nothing yet.
+  const kept = b.books.read();
+  assert.equal(kept.account, 'user_a');
+  assert.ok(kept.pending);
+  assert.deepEqual([kept.brought, kept.removed], [{ kanji: {}, phrases: {} }, { kanji: {}, phrases: {} }]);
 
   b.failing.on = (name) => name === 'sync:push';
   await assert.rejects(b.signIn());

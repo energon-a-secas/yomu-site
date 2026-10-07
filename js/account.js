@@ -85,9 +85,10 @@ export function startAccount(deps) {
   // learner decides; then the sync that was chosen, 'adopt' (a first
   // sign-in, or Add) or 'replace' (Use); and 'same' once this account is in
   // the book. Never 'same' before that: there is no book for it to run on,
-  // and js/sync.js refuses it. An answer is written into the book as it is
-  // given (engine.choose), so after Add or Use the book names the new
-  // account, and a sync there finishes the answer it holds.
+  // and js/sync.js refuses it. A join is written into the book as it is
+  // decided (a first sign-in's in engine.begin, an answer in engine.choose),
+  // so the book names the account from then on, and a sync there finishes
+  // the join it holds.
   let step = 'connect';
   let gen = 0;           // a sign-out or another account: what was under way stops touching the page
   let running = null;    // { gen, done }: the one resume under way
@@ -116,8 +117,9 @@ export function startAccount(deps) {
    * The step to retry after a failed sync. A book that names this account
    * leaves an ordinary sync to finish what is in it: the push, when a sync
    * got as far as writing the book (the pull went through, the push did
-   * not), or the learner's answer, when the pull after it failed. Another
-   * tab's account in the book means deciding again.
+   * not), or the pending join (a first sign-in's, or the learner's answer),
+   * when the pull after it failed. Another tab's account in the book means
+   * deciding again.
    */
   function failedAt(err) {
     if (err && err.code === 'account-changed') { step = 'connect'; return; }

@@ -335,7 +335,12 @@ test('a first sign-in whose pull fails once completes on the online event, with 
   await p.account.ready;
   p.kit.become(signedIn('user_a'));
   await until(() => p.last().phase === 'error', 'the failure');
-  assert.equal(p.bookStore.raw, null, 'a first sign-in that failed remembers no account');
+  // This said a first sign-in that failed remembered no account, until a
+  // review found an unsave made before the retry recorded nowhere: the join
+  // is kept in the book from the moment it is decided, pending.
+  const kept = JSON.parse(p.bookStore.raw);
+  assert.equal(kept.account, 'user_a', 'the join waits in the book');
+  assert.ok(kept.pending, 'pending until a sync finishes it');
   p.failing.on = () => false;
   p.win.fire('online');
   await until(() => p.last().phase === 'synced', 'the retry');
@@ -517,6 +522,30 @@ test('after Add fails at its pull, a Clear all made before the retry clears the 
   other.kit.become(signedIn('user_b', 'Ben'));
   await until(() => other.last().phase === 'synced', 'another device\'s sync');
   assert.deepEqual(Object.keys(other.kanji.data.saved), [], 'another device of the account sees it cleared');
+});
+
+test('a first sign-in whose pull fails: an unsave and a preference made before the retry count', async () => {
+  // A review found that a first pull that failed wrote no book, so what the
+  // learner did while the line said Yomu would try again was recorded
+  // nowhere: the account's copy of an unsaved kanji came back, and the
+  // account's display won over a change made here.
+  const p = page({ fail: offline('sync:pullKanji') });
+  p.kanji.save('天', p.clock.t - 60_000);
+  await p.account.ready;
+  p.kit.become(signedIn('user_a'));
+  await until(() => p.last().phase === 'error', 'the failure');
+  // Another device puts 天 and English in the account meanwhile.
+  await fakeClient(p.server, 'user_a').mutation('sync:push', {
+    kanji: [kanjiRow('天', p.clock.t)], prefs: { values: { lang: { v: 'en', at: p.clock.t } } },
+  });
+  p.clock.t += 60_000;
+  p.kanji.unsave('天');
+  p.setPref('lang', 'es');
+  await retried(p);
+  assert.equal(p.kanji.isSaved('天'), false, 'the unsave stands here');
+  assert.deepEqual(savedIn(p.server, 'user_a'), [], 'and removed the account\'s copy');
+  assert.equal(p.prefs.lang, 'es', 'the preference changed here stands');
+  assert.equal(p.server.rowsOf('user_a').prefs[0].values.lang.v, 'es');
 });
 
 test('a push that fails after the pull wrote the book is finished by an ordinary sync', async () => {

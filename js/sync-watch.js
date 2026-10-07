@@ -2,8 +2,8 @@
 // changes sync must carry. Loaded by js/account.js whenever the page carries
 // a Clerk key, signed in or not: a browser that synced before keeps its
 // removals in its book while signed out, so signing in again cannot bring
-// back a kanji or a phrase unsaved meanwhile. A browser that never synced
-// has no book, and nothing here writes anything for it.
+// back a kanji or a phrase unsaved meanwhile. A browser that never signed
+// in has no book, and nothing here writes anything for it.
 
 import { noteRemoval, noteClear, notePrefs } from './sync-book.js';
 import { textKey } from './history-text.js';

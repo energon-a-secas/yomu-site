@@ -166,6 +166,13 @@ export function createSync({ client, local, book: books, now = Date.now }) {
     cache = null;
     if (!subject) throw new SyncError('not-authenticated');
     const mode = decide(books.read(), subject);
+    if (mode === 'adopt') {
+      // A first sign-in: the join goes into the book now, pending until a
+      // sync finishes it, as an answer to the account question does. A
+      // retry after a failed pull continues it, and what the learner
+      // removes, saves or changes in between goes to this account.
+      books.write(answeredBook(subject, 'adopt', now(), local.snapshot().prefs));
+    }
     if (mode !== 'ask') return { subject, mode };
     return { subject, mode, counts: counts(await pullAll(client), local.snapshot()) };
   }

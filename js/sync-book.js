@@ -1,12 +1,14 @@
 // What this browser knows about its account: one Persist kit store,
-// 'yomu-site:sync' version 1, written once the browser has synced with an
-// account, or once the learner has answered which way to sync with one. A
-// visitor who never signs in never has one.
+// 'yomu-site:sync' version 1, written once a sign-in has decided to join an
+// account (a first sign-in, or the learner's answer to the account
+// question), and kept from then on. A visitor who never signs in never has
+// one.
 //
 //   account   the Clerk subject this browser syncs with (the server's
 //             whoami, never the browser's own say)
-//   pending   'adopt' (Add) or 'replace' (Use) while that answer waits for
-//             its first sync; absent once a sync has joined the account
+//   pending   'adopt' (a first sign-in, or Add) or 'replace' (Use) while
+//             that join waits for its first sync; absent once a sync has
+//             joined the account
 //   joined    when this browser joined that account (ms): now, or one past
 //             the account's Clear all when a clock ahead of this one made
 //             it; while an answer is pending, when the learner gave it
@@ -68,10 +70,11 @@ export function newBook(account, now, prefs, epoch = 0) {
 }
 
 /**
- * The learner's answer to the account question, kept from the moment it is
- * given: a book for the new account, the answer pending until a sync
- * finishes it. What the learner removes, clears or changes before then goes
- * into this book, so the retry carries it to the new account.
+ * A join kept from the moment it is decided: a first sign-in's, or the
+ * learner's answer to the account question. A book for the account, the
+ * join pending until a sync finishes it. What the learner removes, clears
+ * or changes before then goes into this book, so the retry carries it to
+ * that account.
  */
 export function answeredBook(account, mode, now, prefs) {
   return { ...newBook(account, now, prefs), pending: mode };
