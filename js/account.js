@@ -96,10 +96,11 @@ export function startAccount(deps) {
   /**
    * Whether what the learner changes here reaches an account (`synced`,
    * which words the Clear all dialog and Play's lead): a book that joined
-   * one, or a join that will carry it. A first sign-in that has not settled
-   * its way carries nothing yet.
+   * one, or a join that will carry it (Add). A first sign-in that has not
+   * settled its way carries nothing yet, and under Use a Clear all made
+   * before the account's data arrives applies here only.
    */
-  const carries = () => { const b = books.read(); return !!b && b.pending !== 'first'; };
+  const carries = () => { const b = books.read(); return !!b && b.pending !== 'first' && b.pending !== 'replace'; };
   const paint = () => {
     status.synced = carries();
     try { ui.paint({ ...status }); } catch (err) { console.error('[yomu] sync line', err); }

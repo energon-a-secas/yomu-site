@@ -747,12 +747,19 @@ sync. It used to live only in the page: after Use a save made before the
 retry was wiped by it, and after Add an unsave, a Clear all or a
 preference change went into the old account's book and was dropped
 (`tests/sync-account.test.mjs`). Add joins as above, from the time of the
-answer (`joined`, `brought`). Use takes the account's data and, of this
-browser's own, only what the learner did after answering: a save counted
-after `joined` (the time of the answer), a preference changed since, and
-every removal and Clear all since (`sync-local.js sinceAnswer`). What it
-held at the answer stays behind, with its counts and Play's scores, and
-the old account's removals not yet pushed are dropped with that account.
+answer (`joined`, `brought`), and carries every removal and Clear all made
+since. Use takes the account's data and, of this browser's own, only what
+the learner did after answering: a save counted after `joined` (the time
+of the answer) and a preference changed since (`sync-local.js
+sinceAnswer`). A removal or a Clear all made under a pending Use before
+the account's data has arrived here applies here only, never to the
+account (`sync.js joinBook`): the learner could not have seen the
+account's rows, and carrying it cleared kanji of the account's this
+browser never showed. Once the data has arrived (the sync that finishes
+the answer applied it), removals go to the account as usual; the Clear all
+dialog says this browser only until then. What it held at the answer stays
+behind, with its counts and Play's scores, and the old account's removals
+not yet pushed are dropped with that account.
 The old account keeps what it already had and nothing more: what changed
 here since its last sync with it is never sent to it, and with Use it is
 gone from this browser too. The dialog says exactly that, and when that

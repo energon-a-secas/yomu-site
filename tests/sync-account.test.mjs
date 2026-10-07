@@ -593,6 +593,70 @@ test('after Add fails at its pull, a Clear all made before the retry clears the 
   assert.deepEqual(Object.keys(other.kanji.data.saved), [], 'another device of the account sees it cleared');
 });
 
+// Under Use, the learner could not have seen the account's rows before
+// they arrived here: a removal or a Clear all made until then is of this
+// browser's own data, which Use leaves behind, so it never reaches the
+// account. Under Add it does, as the two tests above hold. A review found
+// Use carrying it, which could clear kanji of the account's that this
+// browser never showed.
+
+const savedHere = (p) => Object.keys(p.kanji.data.saved).sort();
+
+test('after Use fails at its pull, an unsave made before the account\'s data arrived applies here only', async () => {
+  const p = await answeredThenFailed('use', ['火'], ['月', '火']);
+  p.kanji.unsave('火');
+  await retried(p);
+  assert.deepEqual(savedIn(p.server, 'user_b'), ['火'], 'the account keeps its own 火');
+  assert.deepEqual(savedHere(p), ['火'], 'and this browser takes the account\'s data');
+});
+
+test('after Use fails at its pull, a Clear all made before the account\'s data arrived applies here only', async () => {
+  const p = await answeredThenFailed('use', ['雪'], ['月']);
+  p.kanji.clearAll(p.clock.t);
+  await retried(p);
+  assert.deepEqual(p.server.rowsOf('user_b').clears, [], 'the account was not cleared');
+  assert.deepEqual(savedIn(p.server, 'user_b'), ['雪']);
+  assert.deepEqual(savedHere(p), ['雪']);
+});
+
+test('once Use has brought the account\'s data here, an unsave and a Clear all reach the account as usual', async () => {
+  const p = await answeredThenFailed('use', ['雪', '火'], ['月']);
+  await retried(p);
+  assert.deepEqual(savedHere(p), ['火', '雪']);
+  p.clock.t += 60_000;
+  p.kanji.unsave('火');
+  await until(() => savedIn(p.server, 'user_b').length === 1, 'the unsave reaching the account');
+  assert.deepEqual(savedIn(p.server, 'user_b'), ['雪']);
+  p.clock.t += 60_000;
+  p.kanji.clearAll(p.clock.t);
+  await until(() => p.server.rowsOf('user_b').clears.length === 1, 'the Clear all reaching the account');
+});
+
+test('Use after a first sign-in\'s pull failed: an unsave made before the account\'s data arrived applies here only', async () => {
+  const server = fakeDb();
+  await fakeClient(server, 'user_a').mutation('sync:push', { kanji: [kanjiRow('火', 5)] });
+  const p = page({ server, fail: offline('sync:pullKanji') });
+  p.kanji.save('火', 2);
+  p.kanji.save('月', 2);
+  await p.account.ready;
+  p.kit.become(signedIn('user_a'));
+  await until(() => p.last().phase === 'error', 'the first pull failing');
+  p.failing.on = () => false;
+  p.win.fire('online');
+  await until(() => p.asked.length === 1 && p.last().phase === 'paused', 'the question');
+  p.failing.on = offline('sync:pullMeta');
+  p.answers.push('use');
+  await p.account.choose(null);
+  await until(() => p.last().phase === 'error', 'Use, failed at its pull');
+  assert.equal(p.last().synced, false, 'the Clear all dialog says this browser only');
+  p.clock.t += 60_000;
+  p.kanji.unsave('火');
+  await retried(p);
+  assert.deepEqual(savedIn(server, 'user_a'), ['火']);
+  assert.deepEqual(savedHere(p), ['火']);
+  assert.equal(p.last().synced, true);
+});
+
 test('a first sign-in whose pull fails: an unsave and a preference made before the retry count', async () => {
   // A review found that a first pull that failed wrote no book, so what the
   // learner did while the line said Yomu would try again was recorded

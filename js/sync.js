@@ -213,14 +213,22 @@ export function createSync({ client, local, book: books, now = Date.now }) {
    * The book a join writes: the answer's own (`had`, pending) or a new one,
    * taking the account's Clear all as its own. Add brings every save the
    * stores hold now, before anything of the account's is applied (`brought`,
-   * joinStamps); Use brings none of its own, and planSync keeps only what
-   * the learner did after answering.
+   * joinStamps), and carries the removals and the Clear all made since the
+   * answer. Use brings none of its own, and planSync keeps only what the
+   * learner did after answering; a removal or a Clear all made before the
+   * account's data arrived (which is now) applies here only, since the
+   * learner could not have seen the account's rows.
    */
   function joinBook(had, who, as, server, snap) {
     const book = had || newBook(who, now(), snap.prefs);
     delete book.pending;
+    if (as === 'replace') {
+      book.epoch = server.clear;
+      book.removed = { kanji: {}, phrases: {} };
+      book.brought = { kanji: {}, phrases: {} };
+      return book;
+    }
     book.epoch = Math.max(book.epoch, server.clear);
-    if (as === 'replace') { book.brought = { kanji: {}, phrases: {} }; return book; }
     const { joined, brought } = joinStamps(server, snap, book.joined);
     book.joined = joined;
     book.brought = brought;

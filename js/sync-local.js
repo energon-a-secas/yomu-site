@@ -103,7 +103,9 @@ const samePhrase = (e, p) => PHRASE_FIELDS.every((f) => e[f] === p[f]);
  * given). A save counted after it, by its own time or the book's stamp,
  * joins, and so does a preference changed since; whatever was saved before
  * stays behind, with every count and Play's scores. A removal or a Clear
- * all made since is in the book, and planSync carries it as always.
+ * all made before the account's data arrived is not carried: sync.js
+ * joinBook drops it from the book, as the learner never saw the rows it
+ * would remove from the account.
  */
 function sinceAnswer(local, book) {
   const after = (own, stamp) => Math.max(own, stamp || 0) > book.joined;
