@@ -248,7 +248,8 @@ naming the keys it ships under (`tools/lib/extra.mjs` explains them):
   above or not: つき物 is 付き物 (matched twice), whose one all-kanji
   spelling 付物 is search-only and so never reached the test, not 憑き物
   (never matched). Where none is matched, every entry the test chose keeps
-  it, as before ("秋りん and つき物", below).
+  it, as before ("秋りん and つき物", below). Every record of a mixed
+  spelling carries `m` (below); its katakana fold carries none.
 
 The corpus counts a spelling, not a word: 上野 was matched for Ueno, the
 place and surname, and shipped under its one entry outside the common set
@@ -348,6 +349,7 @@ build reads 3, 3.46, 6 on the same sentences.
 | `ls` | where a borrowed word came from, from the record's first sense: `[language, source word or null]`, JMdict's ISO 639-2 code (`eng`, `ger`, `fre`, `por`...) and its source text: アルバイト `['ger', 'Arbeit']`, パン `['por', 'pão']`, an English loan JMdict names no source word for `['eng', null]`. A word built from two sources keeps the first. Absent means JMdict did not say, never that the word is native: JMdict marks a source on 6,219 of its 218,672 entries, so most katakana words carry none |
 | `ws` | 1 when that source is wasei, a word made in Japan from foreign parts: ナイター `ls: ['eng', 'nighter'], ws: 1` (a game under lights). Never without `ls` |
 | `e` | second tier only: 1 when the key is a kana spelling of a common word (リンゴ is 林檎's, カギ 鍵's), which the second phase trusts more than a rare word |
+| `m` | first tier only: 1 on every record of a key the first tier holds for the mixed rule alone (あめ色, 秋りん, つき物: kanji and one run of two or more hiragana; 808 keys), never on its katakana fold (アメ色). `tools/check-data.mjs` fails an `m` that is not 1, one in the second tier, one on some of a key's records and not the others, and one on a key of another shape |
 
 `ls` and `ws` are for the loanword rules (`loanwords.js`) and the Word
 panel's "Where it comes from" line; nothing in the lattice reads them.

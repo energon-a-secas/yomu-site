@@ -154,7 +154,7 @@ function saidWa(key, f) {
   return f.entry.sense.some((s) => s.info.some((i) => WA_NOTE.test(i)));
 }
 
-function buildEntries(collected, kanjidic, bands, counts) {
+function buildEntries(collected, kanjidic, bands, counts, marked) {
   const table = readingTable(kanjidic);
   const kanjiInfo = kunTable(kanjidic);
   const { forms, keys } = collected;
@@ -206,6 +206,7 @@ function buildEntries(collected, kanjidic, bands, counts) {
       if (x) out.x = 1;
       if (q) out.q = q;
       if (w) out.w = w;
+      if (marked.has(key)) out.m = 1;
       return out;
     }));
     const f0 = recs[0].f;
@@ -230,8 +231,14 @@ function buildEntries(collected, kanjidic, bands, counts) {
  * entries outside the common set were added, so adding one moves no other
  * key's band. An added key is counted against every shipped key and put on
  * the common keys' scale.
+ *
+ * `mixedKeys` are the mixed spellings and their katakana folds, banded only
+ * on evidence; `marked`, the mixed spellings alone, whose every record
+ * carries `m` (docs/ANALYZER.md): the lattice prices such a key apart where
+ * its closing hiragana start a longer word (js/candidates.js). A fold ends
+ * in no hiragana, so nothing would read its mark.
  */
-function assemble(jmdict, extras, folds, sentences, kanjidic, mixedKeys = new Set()) {
+function assemble(jmdict, extras, folds, sentences, kanjidic, mixedKeys = new Set(), marked = new Set()) {
   const collected = collect(jmdict, extras, folds);
   const keySet = collected.keys;
   const commonKeys = new Set([...keySet].filter((k) => collected.forms.get(k).some((f) => f.common)));
@@ -247,7 +254,7 @@ function assemble(jmdict, extras, folds, sentences, kanjidic, mixedKeys = new Se
     counts.set(k, shippedCounts.get(k));
     bands.set(k, scale(shippedCounts.get(k)));
   }
-  return { ...buildEntries(collected, kanjidic, bands, counts), bands, keySet };
+  return { ...buildEntries(collected, kanjidic, bands, counts, marked), bands, keySet };
 }
 
 /**
@@ -282,9 +289,10 @@ function main() {
     if (!extras.has(index)) extras.set(index, new Set());
     for (const k of keys) extras.get(index).add(k);
   }
+  const spellings = new Set([...mixed.extras.values()].flatMap((k) => [...k]));
   const {
     entries, shipped: shippedPairs, table, bands, keySet,
-  } = assemble(jmdict, extras, mixed.folds, sentences, kanjidic, new Set([...[...mixed.extras.values()].flatMap((k) => [...k]), ...mixed.folds.keys()]));
+  } = assemble(jmdict, extras, mixed.folds, sentences, kanjidic, new Set([...spellings, ...mixed.folds.keys()]), spellings);
   const added = [...keySet].filter((k) => !before.keySet.has(k));
 
   const all = [...entries.keys()].sort();
@@ -359,7 +367,7 @@ function main() {
     `range shards ${docs.length}: min ${fmtBytes(Math.min(...sizes))} (${Math.min(...sizes)} B), max ${fmtBytes(Math.max(...sizes))} (${Math.max(...sizes)} B), total ${fmtBytes(total)} (${total} B); index ${fmtBytes(indexBytes)}`,
     `filter ${filter.n} keys, ${filter.m} bits, ${filter.k} hashes, ${fmtBytes(filterBytes)} (${filterBytes} B)`,
     `multi-kanji keys (first record): split ${stats.split}, partly split ${stats.partial}, * ${stats.star}`,
-    `x ${stats.x} keys, w ${stats.w} records, keys over ${MAX_RECORDS} records ${stats.capped}`,
+    `x ${stats.x} keys, w ${stats.w} records, m ${[...spellings].filter((k) => entries.has(k)).length} keys, keys over ${MAX_RECORDS} records ${stats.capped}`,
     `shipped for the page: o ${stats.o} records, b ${stats.b}, c ${stats.c}, t ${stats.t}`,
     `q bands 1-5: ${qs.join(' / ')}; unranked ${all.length - [...bands.keys()].filter((k) => entries.has(k)).length}`,
     `senses whose first gloss was passed over (dash or banned word) ${first.skippedGloss}; records dropped for an empty g ${first.emptyG}`,
