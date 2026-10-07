@@ -60,14 +60,30 @@ The production deployment of project `yomu` already exists, and is empty:
 `wandering-ox-429` (`https://wandering-ox-429.convex.cloud`). Convex made it
 with the project; `npx convex function-spec --prod` lists no functions
 (checked 2026-10-07), so nothing is deployed to it and the page still points
-at the dev deployment. To ship, from the main checkout and never from a
-worktree:
+at the dev deployment. Ship from the main checkout, never from a worktree.
+The main checkout has no `.env.local` (it is gitignored, and the one that
+names the project lives in the worktree that made it), so link the checkout
+to the project first, or give the deploy a production deploy key:
 
 ```bash
+npx convex dev --configure existing --team lucio --project yomu --dev-deployment cloud --once
+                                        # writes .env.local naming project yomu (and pushes to dev once)
 npx convex deploy                       # pushes schema and functions to wandering-ox-429
 ```
 
-then put `https://wandering-ox-429.convex.cloud` in `js/account.js`
+or, with no `.env.local`, a production deploy key from the project's
+settings in the Convex dashboard:
+
+```bash
+CONVEX_DEPLOY_KEY='prod:...' npx convex deploy
+```
+
+`npx convex deploy` with `CONVEX_DEPLOYMENT` set (`.env.local`) deploys to
+that project's production deployment; with `CONVEX_DEPLOY_KEY` set, to the
+deployment the key belongs to. The key is a secret: give it in the shell,
+never in a committed file.
+
+Then put `https://wandering-ox-429.convex.cloud` in `js/account.js`
 (`CONVEX_URL`) and in `index.html`'s CSP `connect-src`, in one commit
 (`tests/sync-account.test.mjs` fails when they disagree), and run
 `packages/neorgon-ui/sync-auth.sh` from the root so every site's "Your
