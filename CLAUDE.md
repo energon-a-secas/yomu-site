@@ -573,7 +573,9 @@ the key is the fleet's production `pk_live_`). Signed in, My kanji, the
 saved phrases, Play's store and the six display preferences sync to Convex
 project `yomu` (team lucio; dev deployment `jovial-mouse-131`, its URL in
 `js/account.js CONVEX_URL`; `convex/README.md`). Signed out, or never signed
-in, every store stays in this browser exactly as before. The modules:
+in, every store stays in this browser exactly as before. The rules in
+brief, which a review checks the code against, open `convex/README.md`
+("Sync rules"); the paragraphs below say why each is so. The modules:
 `js/sync-rules.js` (the rows and how two copies join, pure; the page,
 `convex/model/sync.ts` and the tests import this one file, which is `.js`
 because a browser cannot strip types), `js/sync-local.js` (the stores as

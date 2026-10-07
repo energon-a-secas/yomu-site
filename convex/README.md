@@ -1,5 +1,71 @@
 # Yomu on Convex
 
+## Sync rules
+
+The contract the code is checked against. Every time is the device's own
+clock, in ms; every join of two copies of a row is commutative and
+idempotent (`../js/sync-rules.js`).
+
+**What syncs**, signed in only: My kanji (each save with its review
+schedule; each kanji's count, first and last day, where it was last met and
+its eight most recently met words), the saved phrases (text, counts,
+source), Play's best scores and mixed-up pairs, and six display
+preferences (lang, furigana, romaji, highlights, unsaved, slow). **Never**:
+History's texts that are not saved, the session, the text in the box, the
+remember and translate preferences, an embed, and anything from a browser
+that never signs in.
+
+**How each change is stamped** (in the book, `../js/sync-book.js`, until a
+push carries it):
+
+- A save: `s`, its latest save time (`at` and `saved` stay the earliest).
+  Every save made here is stamped `max(own time, newest removal known + 1)`
+  and the stamp never goes down; a row's `s` is the latest of that stamp,
+  its join stamp, the store's own time, and the account's `s` when the
+  account's save is the same save (the same `at`, or `saved`).
+- An unsave: a tombstone `removed`, stamped `max(now, newest save known +
+  1)`. A copy whose `s` is not newer than `removed` is dead.
+- Clear all (My kanji only): one tombstone for every kanji, the account's
+  `clear`, stamped `max(now, newest kanji save known + 1)`. It kills every
+  save not newer than it and every count made under an older clear.
+- Import: each kanji and phrase it brings back counts as saved now, one past
+  any removal or Clear all known.
+- Counts and Play keep no time: they join by the higher number. A
+  preference carries when it last changed, and the later change wins.
+- What sync itself writes is never stamped as the learner's.
+
+**Joins.** A browser joins an account once, at a first sign-in or by the
+answer to the question below, and the join is in the book from the moment
+it is decided (`pending`: `first` until its way is settled, then `adopt` or
+`replace`) until a sync finishes it; a retry continues it. With Add, each
+save the browser holds before the account's rows arrive is stamped
+(`brought`) at the time the join was settled (`joined`), and stays saved
+over the account's Clear all or that row's removal when that is older. One
+stamped after `joined` and before the finishing sync's own time is taken as
+made after the join, and wins; one stamped at that time or later, which
+only a clock ahead of this one can do, is stepped past. What the join
+receives from the account keeps the account's stamps.
+
+**The Add / Use question** is asked when another account signs in on a
+browser that synced before, and on a first sign-in when this browser holds
+a saved kanji or phrase while the account holds any kanji or phrase row,
+live or removed, or a Clear all. Any other first sign-in joins as Add,
+unasked. Not now syncs nothing and asks again later.
+
+- Add: this browser's data joins the account, saves counted as made at the
+  answer, so one older than the account's removal or Clear all comes back
+  everywhere. Removals, Clear all and changes made after signing in (a
+  first sign-in) or after the answer (an account switch) reach the account.
+- Use: this browser takes the account's data. Of its own it keeps only
+  saves counted after the answer and preferences changed since; a removal
+  or Clear all made before the account's data arrived applies here only.
+  Everything else of this browser's (saves, counts, scores) is gone from
+  it, and on a first sign-in it was never in the account.
+- After an account switch the old account keeps what it had: nothing
+  changed here since its last sync with it is sent to it.
+
+## The backend
+
 Optional and per person: a learner who signs in keeps My kanji, the saved
 phrases, Play's store and the display preferences on every device. The page
 works in full without it, and an anonymous visit never calls this backend.
