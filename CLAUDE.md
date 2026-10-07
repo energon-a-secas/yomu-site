@@ -691,6 +691,20 @@ Use the account's removal or clear stands, and what this browser held
 stays behind. This browser's data was never in the account, so Use loses
 it; the dialog says so, and to export first.
 
+**A pending join does not depend on when another device's removal
+arrives.** A removal or a Clear all stamped after `joined` and before the
+time of the sync that finishes the join is taken as made after the join,
+and wins, whether it reached the account before that sync or after it;
+only one stamped at that sync's time or later, which no correct clock has
+made yet, is stepped past (`sync.js joinStamps`). Before, an Add answered
+at T10 whose pull failed kept a kanji another device unsaved at T15 when
+the unsave reached the account before the retry at T20, and lost it when
+the unsave arrived after (the review's probe-addwindow; both orders and
+both kinds of join in `tests/sync-join.test.mjs`). What is left depends
+on clocks, not on network timing: a removal made before the answer by a
+clock ahead of this one, by less than the wait, lands inside that window
+and wins.
+
 **Only what the browser brings is stamped, each row on its own.**
 `brought` is taken from the stores before anything of the account's is
 applied, and written with the merge, so a retry after a failed push, or a

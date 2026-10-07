@@ -137,27 +137,35 @@ export function counts(server, snap) {
 }
 
 /**
- * When a joining browser's data counts as saved, row by row. `joined` is
- * `at`, or one past the account's Clear all when another device's clock ran
- * ahead of this one. Each save the browser brings (the stores before the
- * account's rows are applied) counts as saved at `joined`, a phrase at
- * `at`, or one past the account's removal of that row when that is later:
- * the browser keeps its own data even then, and a removal stamped by a
- * clock ahead moves only the row it removed. What the join receives from
- * the account is not brought and keeps the account's own stamp, so a
- * removal another device has not pushed yet still wins over it
- * (tests/sync-join.test.mjs).
+ * When a joining browser's data counts as saved, row by row. `at` is when
+ * the join was settled (begin() decided it, or the learner answered), `now`
+ * this sync's own time. `joined` is `at`, or one past the account's Clear
+ * all when another device's clock ran ahead of this one. Each save the
+ * browser brings (the stores before the account's rows are applied) counts
+ * as saved at `joined`, a phrase at `at`, or one past the account's removal
+ * of that row when that is later: the browser keeps its own data even then,
+ * and a removal stamped by a clock ahead moves only the row it removed.
+ *
+ * A removal or a clear stamped after `at` and before `now` is not stepped
+ * past: by this clock it was made after the join was settled, so it wins,
+ * whether it reached the account before this sync or after it (a pending
+ * Add that waited on a retry). One stamped at `now` or later, no correct
+ * clock has made yet; it is a clock ahead, and is stepped past. What the
+ * join receives from the account is not brought and keeps the account's
+ * own stamp, so a removal another device has not pushed yet still wins over
+ * it (tests/sync-join.test.mjs).
  */
-export function joinStamps(server, snap, at) {
-  const joined = Math.max(at, server.clear + 1);
+export function joinStamps(server, snap, at, now = at) {
+  const past = (t) => (t > at && t < now ? 0 : t + 1);
+  const joined = Math.max(at, past(server.clear));
   const brought = { kanji: {}, phrases: {} };
   for (const ch of Object.keys(snap.kanji.saved)) {
     const row = server.kanji.get(ch);
-    brought.kanji[ch] = row ? Math.max(joined, row.removed + 1, (row.seen ? row.seen.e : 0) + 1) : joined;
+    brought.kanji[ch] = row ? Math.max(joined, past(row.removed), past(row.seen ? row.seen.e : 0)) : joined;
   }
   for (const entry of snap.phrases) {
     const row = server.phrases.get(entry.key);
-    brought.phrases[entry.key] = row ? Math.max(at, row.removed + 1) : at;
+    brought.phrases[entry.key] = row ? Math.max(at, past(row.removed)) : at;
   }
   return { joined, brought };
 }
@@ -229,7 +237,7 @@ export function createSync({ client, local, book: books, now = Date.now }) {
       return book;
     }
     book.epoch = Math.max(book.epoch, server.clear);
-    const { joined, brought } = joinStamps(server, snap, book.joined);
+    const { joined, brought } = joinStamps(server, snap, book.joined, now());
     book.joined = joined;
     book.brought = brought;
     return book;

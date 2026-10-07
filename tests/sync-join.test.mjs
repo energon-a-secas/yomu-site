@@ -17,6 +17,7 @@ import assert from 'node:assert/strict';
 
 import { fakeDb } from './helpers/fake-convex.mjs';
 import { device, T } from './helpers/sync-device.mjs';
+import { newBook } from '../js/sync-book.js';
 import { textKey } from '../js/history-store.js';
 
 const savedOn = (server) => server.rowsOf('user_a').kanji.filter((r) => r.saved).map((r) => r.char).sort();
@@ -231,4 +232,63 @@ test('a first sign-in whose pull fails: a save another device made in between do
   assert.deepEqual(savedOn(server), ['地']);
   await w.sync.sync('same');
   assert.equal(w.kanji.isSaved('天'), false, 'the unsave at T15 is the last action');
+});
+
+// An Add that waits on a retry joins at the time of the answer, and its
+// result no longer depends on when another device's removal reaches the
+// account. A review found that it did: a removal made after the answer that
+// arrived before the retry was outranked by the join (the rule that steps
+// past a removal stamped by a clock ahead), and one that arrived after it
+// won. A removal stamped after the answer and before the retry's own clock
+// is now taken as made after the answer; only one stamped at the retry's
+// time or later, which no correct clock could have made yet, is stepped
+// past.
+
+async function addWaitsWhileWRemoves({ pushedFirst, first = false, wAt = 0 }) {
+  const server = fakeDb();
+  const w = device(server, 'user_b', { at: wAt });
+  w.kanji.save('地', w.now());
+  await w.signIn();
+  const z = device(server, 'user_b', { at: 10 });
+  if (!first) z.books.write(newBook('user_a', T(0), {}));
+  z.kanji.save('地', T(2));
+  z.kanji.save('月', T(2));
+  const asked = await z.sync.begin();
+  assert.deepEqual([asked.mode, !!asked.first], ['ask', first]);
+  z.sync.choose('adopt');                           // T10
+  z.failing.on = (name) => name === 'sync:pullMeta';
+  await assert.rejects(z.sync.sync('adopt'));
+  w.tick(15);                                       // T15 by W's clock
+  if (!pushedFirst) w.failing.on = offline;
+  w.kanji.unsave('地');
+  await w.sync.flush().catch(() => {});
+  z.tick(10);                                       // T20: the retry
+  z.failing.on = online;
+  await z.sync.sync('same');
+  w.tick(10);
+  w.failing.on = online;
+  await w.sync.sync('same');
+  await z.sync.sync('same');
+  return { server, w, z };
+}
+
+for (const first of [false, true]) {
+  test(`a pending Add ends the same whether another device's later removal reaches the account before its retry or after (${first ? 'a first sign-in' : 'another account'})`, async () => {
+    const results = [];
+    for (const pushedFirst of [true, false]) {
+      const { server, w, z } = await addWaitsWhileWRemoves({ pushedFirst, first });
+      results.push([z.kanji.isSaved('地'), w.kanji.isSaved('地'), server.rowsOf('user_b').kanji.some((r) => r.char === '地' && r.saved && r.saved.s > r.removed)]);
+      assert.ok(z.kanji.isSaved('月'), 'what Add brought and nobody removed stays');
+    }
+    assert.deepEqual(results[0], results[1], 'the same either way');
+    assert.deepEqual(results[0], [false, false, false], 'the removal at T15 is later than the answer at T10');
+  });
+}
+
+test('a pending Add still steps past a removal stamped by a clock ahead of the retry\'s', async () => {
+  // W's clock runs an hour ahead: its removal at real T15 is stamped T75,
+  // later than the retry's own time, so no correct clock made it yet.
+  const { z, w } = await addWaitsWhileWRemoves({ pushedFirst: true, wAt: 60 });
+  assert.ok(z.kanji.isSaved('地'), 'the browser keeps what it brought');
+  assert.ok(w.kanji.isSaved('地'));
 });
