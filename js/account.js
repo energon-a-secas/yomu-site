@@ -23,6 +23,8 @@ export const PUSH_AFTER = 4000;
 /** A page shown again pulls at most this often. */
 export const PULL_EVERY = 60 * 1000;
 
+const NOTHING_KNOWN = Object.freeze({ s: 0, removed: 0 });
+
 export function clerkKey(doc) {
   const meta = doc && doc.querySelector('meta[name="clerk-publishable-key"]');
   return meta && typeof meta.content === 'string' ? meta.content.trim() : '';
@@ -226,7 +228,10 @@ export function startAccount(deps) {
     timer = setTimer(() => { void flush(); }, PUSH_AFTER);
   }
 
-  watchStores({ kanji, history, play, onPrefsSaved: prefs.onSaved, books, local, now, changed: schedule });
+  watchStores({
+    kanji, history, play, onPrefsSaved: prefs.onSaved, books, local, now, changed: schedule,
+    known: (kind, id) => (engine ? engine.known(kind, id) : NOTHING_KNOWN),
+  });
 
   function stop() {
     gen += 1;

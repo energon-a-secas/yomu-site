@@ -6,6 +6,7 @@
 // has no book, and nothing here writes anything for it.
 
 import { noteRemoval, noteClear, notePrefs } from './sync-book.js';
+import { textKey } from './history-text.js';
 
 /**
  * Every change goes through a store's own call: My kanji's adopt() (its
@@ -42,24 +43,84 @@ export function storesAdapter({ kanji, history, play, prefs, remembering }) {
   return adapter;
 }
 
+const NOTHING = Object.freeze({ s: 0, removed: 0 });
+
 /**
  * Listen to the four stores. An unsave and a Clear all go into the book as
- * tombstones, a preference saved with a new value is stamped, and
- * `changed()` hears every change the learner made (js/account.js debounces
- * a push on it). Returns a function that stops listening.
+ * tombstones, a save that a known tombstone would outrank is stamped after
+ * it, a preference saved with a new value is stamped, and `changed()` hears
+ * every change the learner made (js/account.js debounces a push on it).
+ * `known(kind, id)` is the account's copy of a row as the page last saw it
+ * (js/sync.js known()). Returns a function that stops listening.
+ *
+ * Every time here is this device's clock, and another device's may run
+ * ahead of it. So a removal or a Clear all is stamped one past the newest
+ * save of that row this browser knows (the store's own, a stamp in the book,
+ * the account's copy) when that is later than now, and a save made after a
+ * removal it knows is stamped one past that removal: what the learner just
+ * did on the screen is what syncs, whatever the clocks say.
  */
-export function watchStores({ kanji, history, play, onPrefsSaved, books, local, now = Date.now, changed = () => {} }) {
+export function watchStores({ kanji, history, play, onPrefsSaved, books, local, now = Date.now, changed = () => {}, known = () => NOTHING }) {
   const mine = () => !local.applying;
+  /** The newest save of one row: `own` is the store's save time, which sync-local.js raises to `joined`. */
+  const newestSave = (b, kind, id, own) => Math.max(own ? Math.max(own, b.joined) : 0, b.saves[kind][id] || 0, known(kind, id).s);
+  /** The newest removal of one row: a removal made here, a Clear all (kanji only), the account's copy. */
+  const newestRemoval = (b, kind, id) => Math.max(b.removed[kind][id] || 0, kind === 'kanji' ? b.epoch : 0, known(kind, id).removed);
+
+  function unsaved(kind, id, own) {
+    books.update((b) => {
+      noteRemoval(b, kind, id, Math.max(now(), newestSave(b, kind, id, own) + 1));
+      delete b.saves[kind][id];
+    });
+  }
+  function cleared(at, saved) {
+    books.update((b) => {
+      let newest = known('kanji', null).s;
+      for (const rec of Object.values(saved || {})) newest = Math.max(newest, rec.at, b.joined);
+      for (const t of Object.values(b.saves.kanji)) newest = Math.max(newest, t);
+      noteClear(b, Math.max(at, newest + 1));
+      b.saves.kanji = {};
+    });
+  }
+  /** A save made here: its own time stands unless a removal this browser knows is as late. */
+  function saved(kind, id, at) {
+    books.update((b) => {
+      const removal = newestRemoval(b, kind, id);
+      if (removal >= Math.max(at, b.joined)) b.saves[kind][id] = removal + 1;
+      else delete b.saves[kind][id];
+    });
+  }
+  /**
+   * Import is a choice made now: each save it brought back counts as saved
+   * now, and after any removal or Clear all this browser knows, so the next
+   * sync keeps it. Its schedule and counts are the backup's own.
+   */
+  function imported(chars, texts) {
+    const keys = texts.map(textKey).filter((key) => history.isSaved(key));
+    const kept = chars.filter((ch) => kanji.isSaved(ch));
+    if (!keys.length && !kept.length) return;
+    books.update((b) => {
+      const at = now();
+      for (const ch of kept) b.saves.kanji[ch] = Math.max(b.saves.kanji[ch] || 0, at, newestRemoval(b, 'kanji', ch) + 1);
+      for (const key of keys) b.saves.phrases[key] = Math.max(b.saves.phrases[key] || 0, at, newestRemoval(b, 'phrases', key) + 1);
+    });
+  }
+
   const offs = [
     kanji.onChange((ev) => {
       if (!mine()) return;
-      if (ev && ev.type === 'unsave') books.update((b) => noteRemoval(b, 'kanji', ev.ch, now()));
-      else if (ev && ev.type === 'clear') books.update((b) => noteClear(b, ev.at));
+      const type = ev && ev.type;
+      if (type === 'unsave') unsaved('kanji', ev.ch, ev.rec && ev.rec.at);
+      else if (type === 'clear') cleared(ev.at, ev.saved);
+      else if (type === 'save') saved('kanji', ev.ch, ev.at);
+      else if (type === 'import') imported(ev.chars || [], ev.texts || []);
       changed();
     }),
     history.onChange((ev) => {
       if (!mine()) return;
-      if (ev && ev.type === 'unsave') books.update((b) => noteRemoval(b, 'phrases', ev.key, now()));
+      const type = ev && ev.type;
+      if (type === 'unsave') unsaved('phrases', ev.key, ev.saved);
+      else if (type === 'save') saved('phrases', ev.key, ev.at);
       changed();
     }),
     play.onChange(() => { if (mine()) changed(); }),

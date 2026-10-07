@@ -13,6 +13,11 @@
 //   at        the last sync that finished (ms), for the My kanji line
 //   removed   { kanji: { 天: ms }, phrases: { key: ms } }: removals made here
 //             and not yet known to have reached the account
+//   saves     { kanji: { 天: ms }, phrases: { key: ms } }: when a save here
+//             counts as made, where its own time would lose to a removal or
+//             a Clear all this browser knew of: a save brought back by
+//             Import (saved now, after any removal known), and a save made
+//             after a removal this browser stamped ahead of its own clock
 //   prefsAt   { lang: ms, ... }: when each synced preference last changed here
 //   prefsVal  { lang: 'es', ... }: its value then, to tell a change from a save
 //
@@ -39,7 +44,7 @@ export function syncedPrefs(prefs) {
 
 /** A book for `account`, joined at `now`, with no preference changed yet. */
 export function newBook(account, now, prefs, epoch = 0) {
-  return { account, joined: now, epoch, at: 0, removed: { kanji: {}, phrases: {} }, prefsAt: {}, prefsVal: syncedPrefs(prefs) };
+  return { account, joined: now, epoch, at: 0, removed: { kanji: {}, phrases: {} }, saves: { kanji: {}, phrases: {} }, prefsAt: {}, prefsVal: syncedPrefs(prefs) };
 }
 
 function cleanMap(raw, keyOk) {
@@ -51,6 +56,7 @@ function cleanMap(raw, keyOk) {
 export function cleanBook(raw) {
   if (!isObject(raw) || typeof raw.account !== 'string' || !raw.account || raw.account.length > 200 || !isTime(raw.joined)) return null;
   const removed = isObject(raw.removed) ? raw.removed : {};
+  const saves = isObject(raw.saves) ? raw.saves : {};
   const prefsAt = {};
   for (const k of PREF_KEYS) if (isObject(raw.prefsAt) && isStamp(raw.prefsAt[k])) prefsAt[k] = raw.prefsAt[k];
   return {
@@ -59,6 +65,7 @@ export function cleanBook(raw) {
     epoch: isStamp(raw.epoch) ? raw.epoch : 0,
     at: isStamp(raw.at) ? raw.at : 0,
     removed: { kanji: cleanMap(removed.kanji, oneKanji), phrases: cleanMap(removed.phrases, (k) => HISTORY_KEY.test(k)) },
+    saves: { kanji: cleanMap(saves.kanji, oneKanji), phrases: cleanMap(saves.phrases, (k) => HISTORY_KEY.test(k)) },
     prefsAt,
     prefsVal: syncedPrefs(raw.prefsVal),
   };
@@ -87,15 +94,25 @@ export function notePrefs(book, prefs, at) {
   return changed;
 }
 
+/** The removals and save stamps a sync plans with, copied: what pruneCarried may forget once its push is in. */
+export function carriedOf(book) {
+  const copy = (m) => ({ kanji: { ...m.kanji }, phrases: { ...m.phrases } });
+  return { removed: copy(book.removed), saves: copy(book.saves) };
+}
+
 /**
- * Forget the removals a finished sync carried: each one no newer than what
- * the sync had in hand (`carried`, the book's removals when it planned). A
- * removal made while the sync ran is newer, and stays for the next one.
+ * Forget what a finished sync carried to the account: each removal and save
+ * stamp no newer than what the sync had in hand (`carried`, carriedOf(book)
+ * when it planned). One made while the sync ran is newer, and stays for the
+ * next one. A save stamp can go because the account now holds that save's
+ * `s` at least as late, and sync-local.js borrows it from there.
  */
-export function pruneRemovals(book, carried) {
-  for (const kind of ['kanji', 'phrases']) {
-    for (const [id, t] of Object.entries(carried[kind] || {})) {
-      if (book.removed[kind][id] !== undefined && book.removed[kind][id] <= t) delete book.removed[kind][id];
+export function pruneCarried(book, carried) {
+  for (const part of ['removed', 'saves']) {
+    for (const kind of ['kanji', 'phrases']) {
+      for (const [id, t] of Object.entries(carried[part][kind] || {})) {
+        if (book[part][kind][id] !== undefined && book[part][kind][id] <= t) delete book[part][kind][id];
+      }
     }
   }
 }

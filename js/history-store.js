@@ -423,7 +423,7 @@ export function openHistory({
     return api;
   }
 
-  /** A listener hears { type: 'unsave', key } for a phrase unsaved, { type: 'change' } for the rest. */
+  /** A listener hears { type: 'save', key, at } and { type: 'unsave', key, saved } for a phrase, { type: 'change' } for the rest. */
   function commit(event = { type: 'change' }) {
     writable = store.save(data);
     for (const fn of listeners) fn(event);
@@ -469,10 +469,10 @@ export function openHistory({
     get savedCount() { return savedCount(data); },
     save(text, sessionId, src, now) {
       const r = saveText(data, text, sessionId, src, now);
-      if (r.changed) commit();
+      if (r.changed) commit({ type: 'save', key: r.key, at: now });
       return r;
     },
-    unsave(key, remembering) { return unsaveText(data, key, remembering) ? commit({ type: 'unsave', key }) : false; },
+    unsave(key, remembering) { const was = api.entry(key); return unsaveText(data, key, remembering) ? commit({ type: 'unsave', key, saved: was && was.saved }) : false; },
     mergePhrases(phrases) {
       const sum = mergePhrases(data, phrases);
       if (sum.added || sum.updated) commit();

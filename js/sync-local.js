@@ -10,9 +10,12 @@
 // own copy of the row, so a store never has to hold them:
 //
 //   s    the save's own time, or when the browser joined the account if
-//        later, or the server's s if later still and the server's save is
-//        this same save (the same `at`, or for a phrase the same `saved`):
-//        a save made before a removal must not borrow a newer save's time
+//        later, or the book's stamp for it (sync-book.js `saves`: a save
+//        brought back by Import, or made after a removal stamped ahead of
+//        this clock) if later, or the server's s if later still and the
+//        server's save is this same save (the same `at`, or for a phrase
+//        the same `saved`): a save made before a removal must not borrow a
+//        newer save's time
 //   day  the server's day for that word, or the kanji's last day here
 //   e    the book's epoch
 //
@@ -34,7 +37,7 @@ export function localKanjiRow(ch, kanji, book, cached) {
   const met = kanji.seen[ch];
   return cleanKanjiRow({
     char: ch,
-    saved: rec ? { ...rec, s: Math.max(rec.at, book.joined, cached && cached.saved && cached.saved.at === rec.at ? cached.saved.s : 0) } : null,
+    saved: rec ? { ...rec, s: Math.max(rec.at, book.joined, book.saves.kanji[ch] || 0, cached && cached.saved && cached.saved.at === rec.at ? cached.saved.s : 0) } : null,
     removed: Math.max(book.removed.kanji[ch] || 0, cached ? cached.removed : 0),
     seen: met
       ? { n: met.n, first: met.first, last: met.last, words: met.words.map(([w, r]) => [w, r, dayOf(cached, w, r) || met.last]), src: met.src, h: met.h, e: book.epoch }
@@ -48,7 +51,7 @@ export function localPhraseRow(key, entry, book, cached) {
     key,
     removed: Math.max(book.removed.phrases[key] || 0, cached ? cached.removed : 0),
     phrase: entry
-      ? { t: entry.t, first: entry.first, last: entry.last, n: entry.n, src: entry.src, saved: entry.saved, s: Math.max(entry.saved, book.joined, cached && cached.phrase && cached.phrase.saved === entry.saved ? cached.phrase.s : 0) }
+      ? { t: entry.t, first: entry.first, last: entry.last, n: entry.n, src: entry.src, saved: entry.saved, s: Math.max(entry.saved, book.joined, book.saves.phrases[key] || 0, cached && cached.phrase && cached.phrase.saved === entry.saved ? cached.phrase.s : 0) }
       : null,
   });
 }

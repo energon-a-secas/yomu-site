@@ -15,7 +15,7 @@
 
 import { cleanKanjiRow, cleanPhraseRow, cleanPlay, cleanPrefs, cleanClear } from './sync-rules.js';
 import { planSync, pushes, applies } from './sync-local.js';
-import { newBook, pruneRemovals } from './sync-book.js';
+import { newBook, carriedOf, pruneCarried } from './sync-book.js';
 
 /** The Convex functions, by name (convex/sync.ts). */
 export const FN = Object.freeze({
@@ -158,12 +158,12 @@ export function createSync({ client, local, book: books, now = Date.now }) {
     const book = mode === 'same' ? had : newBook(who, mode === 'replace' ? 1 : now(), snap.prefs, server.clear);
     const merge = planSync(server, snap, book, { replace: mode === 'replace' });
     local.apply(merge.apply);
-    if (mode === 'replace') book.removed = { kanji: {}, phrases: {} };
+    if (mode === 'replace') { book.removed = { kanji: {}, phrases: {} }; book.saves = { kanji: {}, phrases: {} }; }
     // What the account lacks is worked out from the stores as the merge left
     // them, since a store's own merge may keep more than the join did: History
     // folds an ordinary entry's reads into a phrase it saves again.
     const plan = planSync(server, local.snapshot(), book);
-    const carried = { kanji: { ...book.removed.kanji }, phrases: { ...book.removed.phrases } };
+    const carried = carriedOf(book);
     book.epoch = plan.clear;
     if (plan.next.prefs) {
       for (const [k, p] of Object.entries(plan.next.prefs.values)) { book.prefsAt[k] = p.at; book.prefsVal[k] = p.v; }
@@ -173,7 +173,7 @@ export function createSync({ client, local, book: books, now = Date.now }) {
     const res = await pushAll(client, plan.push);
     cache = plan.next;
     const at = now();
-    books.update((b) => { if (b.account === who) { pruneRemovals(b, carried); b.at = at; } });
+    books.update((b) => { if (b.account === who) { pruneCarried(b, carried); b.at = at; } });
     return { ok: true, at, wrote: res.wrote, applied: applies(merge), stale: res.clear > plan.clear };
   }
 
@@ -196,11 +196,11 @@ export function createSync({ client, local, book: books, now = Date.now }) {
       if (!book || book.account !== who) throw new SyncError('account-changed');
       const plan = planSync(cache, local.snapshot(), book);
       if (!pushes(plan)) return { ok: true, wrote: 0 };
-      const carried = { kanji: { ...book.removed.kanji }, phrases: { ...book.removed.phrases } };
+      const carried = carriedOf(book);
       const res = await pushAll(client, plan.push);
       cache = plan.next;
       const at = now();
-      books.update((b) => { if (b.account === who) { pruneRemovals(b, carried); b.epoch = Math.max(b.epoch, plan.clear); b.at = at; } });
+      books.update((b) => { if (b.account === who) { pruneCarried(b, carried); b.epoch = Math.max(b.epoch, plan.clear); b.at = at; } });
       return { ok: true, at, wrote: res.wrote, stale: res.clear > plan.clear };
     });
   }
@@ -211,8 +211,31 @@ export function createSync({ client, local, book: books, now = Date.now }) {
     cache = null;
   }
 
+  /**
+   * The newest save (`s`) and the newest removal the account's copy of one
+   * row holds, as this page last read or wrote it: kind 'kanji' or
+   * 'phrases', and for 'kanji' with no id, over every kanji (a Clear all).
+   * A Clear all counts as a removal of every kanji. Nothing before a pull.
+   * sync-watch.js stamps a removal after the save, and a save after the
+   * removal, so a clock behind another device's cannot undo what it shows.
+   */
+  function known(kind, id) {
+    if (!cache) return { s: 0, removed: 0 };
+    if (kind === 'phrases') {
+      const row = cache.phrases.get(id);
+      return { s: row && row.phrase ? row.phrase.s : 0, removed: row ? row.removed : 0 };
+    }
+    if (id === null || id === undefined) {
+      let s = 0;
+      for (const row of cache.kanji.values()) if (row.saved) s = Math.max(s, row.saved.s);
+      return { s, removed: cache.clear };
+    }
+    const row = cache.kanji.get(id);
+    return { s: row && row.saved ? row.saved.s : 0, removed: Math.max(cache.clear, row ? row.removed : 0) };
+  }
+
   return {
-    begin, sync, flush, stop,
+    begin, sync, flush, stop, known,
     get subject() { return subject; },
     get pulled() { return cache !== null; },
   };

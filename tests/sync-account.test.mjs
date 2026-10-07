@@ -447,3 +447,21 @@ test('signing out closes the account question, and an answer given after it appl
   assert.equal(JSON.parse(p.bookStore.raw).account, 'user_a');
   assert.equal(p.last().phase, 'idle');
 });
+
+test('the page stamps an unsave after the account\'s newest save of it, whatever this clock says', async () => {
+  // Another device, its clock an hour ahead, saved 天 again: the account's
+  // save is shown at its first time but counts from an hour from now here.
+  const NOW = 1_759_800_000_000;
+  const server = fakeDb();
+  await fakeClient(server, 'user_a').mutation('sync:push', {
+    kanji: [{ char: '天', saved: { at: NOW - 60_000, box: 0, due: '2025-10-07', reviews: 0, lapses: 0, s: NOW + 3_600_000 }, removed: 0, seen: null }],
+  });
+  const p = page({ server });
+  await p.account.ready;
+  p.kit.become(signedIn('user_a'));
+  await until(() => p.last().phase === 'synced', 'the first sync');
+  assert.ok(p.kanji.isSaved('天'));
+  p.kanji.unsave('天');
+  await until(() => !server.rowsOf('user_a').kanji.find((r) => r.char === '天' && r.saved), 'the removal reaching the account');
+  assert.equal(p.kanji.isSaved('天'), false);
+});
