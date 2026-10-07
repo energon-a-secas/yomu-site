@@ -224,13 +224,17 @@ pair mixed up comes round more often. No text is kept.
   as [katakana, Latin spelling, given | surname | person | place, sentence
   count], for a game; the type is that of the JMnedict sense the spelling
   comes from, or person for a place the corpus uses as one (Mr. Smith,
-  スミスさん); it carries the same licence block
+  スミスさん, Gogh painted), or place for a name it uses as a place and
+  JMnedict types a place too (from Milan, Mt. Everest), or, for the few
+  names no evidence reaches, a class written for Yomu (Romeo is a person);
+  it carries the same licence block
 - KanjiVG, by Ulrich Apel, CC BY-SA 3.0: the parts of each kanji
 - Tatoeba, CC BY 2.0 FR: used only to rank how common each word is, to
   choose and count names, and, through the English translations of its
   Japanese sentences, to choose which JMnedict spelling of a katakana name
-  is shown (ジョン John, not Jon); no sentence ships
+  is shown (ジョン John, not Jon) and whether the game calls it a name or a
+  place; no sentence ships
 - The phrase library, the notes, the deinflection rules, and Play's hints,
-  example words and look-alike rules are written for Yomu and are public
-  domain. Nothing is taken from Genki, the Japan
+  example words, look-alike rules and the Name decoder's few authored name
+  classes are written for Yomu and are public domain. Nothing is taken from Genki, the Japan
   Foundation apps, Tofugu, Yomitan, rikaichan or 10ten.

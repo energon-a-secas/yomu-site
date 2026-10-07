@@ -388,3 +388,177 @@ test('the game\'s type: the record\'s first, a place the corpus uses as a person
   const rows = popularCandidates(records, new Map([['エイヴォン', 1], ['スミス', 4], ['ベルベル', 2]]), new Set(records.keys()), new Map([['スミス', smith], ['ベルベル', berber]]));
   assert.deepEqual(rows, [['スミス', 'Smith', 'person', 4]]);
 });
+
+// ── The game's class by the English sentences' cues (2026-10-07) ─────────
+
+test('the English cues: a verb after the spelling, or Van or de before it, is a person; in, to, from and the like before it a place', async () => {
+  const {
+    englishCues, PERSON_VERBS, PLACE_BEFORE, SURNAME_PARTICLES,
+  } = await import('../tools/lib/popular.mjs');
+  assert.deepEqual([...PERSON_VERBS], ['is', 'was', 'has', 'had', 'said', 'says', 'likes', 'loved', 'loves', 'went', 'wants', 'can',
+    'will', 'would', 'did', 'does', 'told', 'asked', 'looked', 'lived', 'died', 'painted', 'wrote']);
+  // Mt. and Mount since the second pass of 2026-10-07: エベレスト is "Mt.
+  // Everest" or "Mount Everest" in 25 of its 27 English sentences
+  assert.deepEqual([...PLACE_BEFORE], ['in', 'to', 'from', 'at', 'near', 'visit', 'visited', 'the city of', 'Mt.', 'Mount']);
+  assert.deepEqual([...SURNAME_PARTICLES], ['van', 'de']);
+  // ゴッホ's two English sentences, and four of ミラノ's six (left out: one
+  // more "to Milan" and a "Mirano" with no Milan in it), "for Milan" no cue
+  assert.deepEqual(englishCues('Gogh', ['He imitated the works of Van Gogh.', 'I like such a passionate picture as Gogh painted.']), { person: 2, place: 0 });
+  assert.deepEqual(englishCues('Milan', [
+    'When are you going to return from Milan?', 'How are you going to Milan?', 'I\'m from Milan.', 'What time does the train for Milan leave?',
+  ]), { person: 0, place: 3 });
+  // is a, was a; an auxiliary with n't; can't; a cue word opening the sentence; the city of
+  assert.deepEqual(englishCues('Tom', ['Tom is a doctor.', 'Tom wasn\'t there.', 'If Tom doesn\'t come, call.', 'Tom can\'t swim.']), { person: 4, place: 0 });
+  assert.deepEqual(englishCues('Rio', ['In Rio, it rains.', 'the city of Rio', 'The city of Rio is big.', 'near Rio', 'We visited Rio.']), { person: 1, place: 5 });
+  // Gérard de Gogh counted 2 here until the second pass of 2026-10-07: de
+  // after a capitalised word is no cue any more, since that makes the row
+  // the tail of a longer name, a place as often as a person (Rio de
+  // Janeiro, below). van still counts after a given name.
+  assert.deepEqual(englishCues('Gogh', ['Vincent van Gogh', 'Gérard de Gogh']), { person: 1, place: 0 });
+  // a sentence counts once for each kind it holds
+  assert.deepEqual(englishCues('Tom', ['Tom is here, and Tom was there, and I went to Tom.']), { person: 1, place: 1 });
+  // no cue: another word (Tomorrow), no capital, a comma or "and" between,
+  // a possessive, a verb not on the list, "in" inside "within", a quote
+  // between the word and the name, a word before the verb
+  assert.deepEqual(englishCues('Tom', ['Tomorrow is Monday.', 'tom is', 'Tom, who is late.', 'Tom and Mary went.', 'Tom\'s dog is big.', 'Tom looks up.', 'Tom sometimes is late.']), { person: 0, place: 0 });
+  assert.deepEqual(englishCues('Romeo', ['There was bad blood in "Romeo and Juliet".', 'within Romeo', 'O Romeo Romeo, wherefore art thou Romeo?']), { person: 0, place: 0 });
+  assert.deepEqual(englishCues('Tom', []), { person: 0, place: 0 });
+  assert.deepEqual(englishCues('Tom', null), { person: 0, place: 0 });
+});
+
+test('the English cues decide at two and twice the other kind, and move a row only across the game\'s two classes', async () => {
+  const {
+    cueVerdict, rowType, popularCandidates, listsPlace, CUES_MIN, CUES_RATIO,
+  } = await import('../tools/lib/popular.mjs');
+  assert.equal(CUES_MIN, 2);
+  assert.equal(CUES_RATIO, 2);
+  assert.equal(cueVerdict({ person: 2, place: 0 }), 'person');
+  assert.equal(cueVerdict({ person: 2, place: 1 }), 'person');
+  assert.equal(cueVerdict({ person: 3, place: 2 }), null, 'three is not twice two');
+  assert.equal(cueVerdict({ person: 1, place: 0 }), null, 'one cue is not enough');
+  assert.equal(cueVerdict({ person: 0, place: 2 }), 'place');
+  assert.equal(cueVerdict({ person: 1, place: 2 }), 'place');
+  assert.equal(cueVerdict({ person: 0, place: 0 }), null);
+  assert.equal(cueVerdict(null), null);
+  assert.ok(listsPlace('fem place') && listsPlace('place') && !listsPlace('surname') && !listsPlace(undefined));
+  const u = (person, place, extra = {}) => ({ n: 1, person: 0, word: 0, cues: { person, place }, ...extra });
+  // JMnedict types ゴッホ and モリー only place; the English says a person
+  assert.deepEqual(rowType({ n: 'place', o: 'Gogh' }, 2, u(2, 0)), { type: 'person', by: 'english' });
+  // ミラノ is fem first, a place too; the English says a place
+  assert.deepEqual(rowType({ n: 'fem place', o: 'Milan' }, 8, u(0, 4)), { type: 'place', by: 'english' });
+  assert.deepEqual(rowType({ n: 'surname place', o: 'Montgomery' }, 4, u(1, 2)), { type: 'place', by: 'english' });
+  // エメット is typed only surname: "in Emmet's sense" makes no place of it
+  assert.deepEqual(rowType({ n: 'surname', o: 'Emmet' }, 31, u(0, 2)), { type: 'surname', by: 'jmnedict' });
+  // a person's name the cues call a person, and a place they call a place, keep their type
+  assert.deepEqual(rowType({ n: 'given', o: 'Tom' }, 9, u(9, 1)), { type: 'given', by: 'jmnedict' });
+  assert.deepEqual(rowType({ n: 'place fem', o: 'Lyon' }, 5, u(0, 5)), { type: 'place', by: 'jmnedict' });
+  // undecided keeps its class: ロミオ has one cue of each kind
+  assert.deepEqual(rowType({ n: 'place', o: 'Romeo' }, 12, u(1, 1)), { type: 'place', by: 'jmnedict' });
+  // the honorifics come first: スミスさん outweighs a preposition
+  assert.deepEqual(rowType({ n: 'place', o: 'Smith' }, 4, u(0, 4, { n: 4, person: 2 })), { type: 'person', by: 'corpus' });
+  // and a name used only as a word's stem is still no row
+  assert.deepEqual(rowType({ n: 'place', o: 'Berber' }, 2, u(2, 0, { n: 2, word: 2 })), { type: null, by: 'word' });
+  // through popularCandidates, as the builder calls it
+  const records = new Map([
+    ['ゴッホ', { o: 'Gogh', n: 'place' }], ['ミラノ', { o: 'Milan', n: 'fem place' }], ['エメット', { o: 'Emmet', n: 'surname' }],
+  ]);
+  const usage = new Map([['ゴッホ', u(2, 0)], ['ミラノ', u(0, 4)], ['エメット', u(0, 2)]]);
+  const rows = popularCandidates(records, new Map([['ゴッホ', 2], ['ミラノ', 8], ['エメット', 31]]), new Set(records.keys()), usage);
+  assert.deepEqual(rows, [['エメット', 'Emmet', 'surname', 31], ['ミラノ', 'Milan', 'place', 8], ['ゴッホ', 'Gogh', 'person', 2]]);
+});
+
+// ── The second pass over the cues (2026-10-07) ───────────────────────────
+
+test('Mt. and Mount before a spelling are place cues, which make エベレスト a place', async () => {
+  const { englishCues, cueVerdict, rowType } = await import('../tools/lib/popular.mjs');
+  // "Mt. Everest is" is a person cue by the verb and now a place cue too
+  const everest = englishCues('Everest', [
+    'Mt. Everest is the highest mountain in the world.', 'They climbed Mount Everest.', 'He conquered Mt. Everest.',
+    'mount Everest', 'I have never seen a mountain more beautiful than Everest.',
+  ]);
+  assert.deepEqual(everest, { person: 1, place: 4 });
+  assert.equal(cueVerdict(everest), 'place');
+  // the word must stand alone: no cue inside another word, nor without its dot
+  assert.deepEqual(englishCues('Everest', ['Amount Everest', 'Mt Everest', 'Mtn. Everest']), { person: 0, place: 0 });
+  // the counts the build measures for エベレスト: ten person cues, 25 place
+  const u = (person, place) => ({ n: 24, person: 0, word: 0, cues: { person, place } });
+  assert.deepEqual(rowType({ n: 'surname place', o: 'Everest' }, 24, u(10, 25)), { type: 'place', by: 'english' });
+});
+
+test('de is a surname particle only where it opens the name: Rio de Janeiro is no person', async () => {
+  const { englishCues, cueVerdict } = await import('../tools/lib/popular.mjs');
+  // the review's probe gave Janeiro two person cues, one from each de; the
+  // verb after it ("Janeiro is") still counts, and one cue decides nothing
+  const janeiro = englishCues('Janeiro', ['Rio de Janeiro is in Brazil.', 'I live in Rio de Janeiro.']);
+  assert.deepEqual(janeiro, { person: 1, place: 0 });
+  assert.equal(cueVerdict(janeiro), null);
+  // any capitalised word before de, hyphened or accented, and De in the middle
+  assert.deepEqual(englishCues('Janeiro', ['From Rio de Janeiro we flew home.', 'Rio De Janeiro', 'São Paulo de Janeiro', 'Notre-Dame de Janeiro']), { person: 0, place: 0 });
+  // de that opens the name, in either case, still counts (de Gaulle, De Gaulle)
+  assert.deepEqual(englishCues('Nerval', ['a poem by de Nerval', 'De Nerval travelled east.', 'I read de Nerval.']), { person: 3, place: 0 });
+  // the cost: a full name with de counts by its verb only (Gérard de Nerval wrote)
+  assert.deepEqual(englishCues('Nerval', ['Gérard de Nerval wrote Journey to the East.', 'Gérard de Nerval']), { person: 1, place: 0 });
+  // van is unchanged, after a given name too
+  assert.deepEqual(englishCues('Gogh', ['Vincent van Gogh', 'the works of Van Gogh']), { person: 2, place: 0 });
+});
+
+test('a preposition before a known given name is no place cue: talked to Tom', async () => {
+  const { englishCues, knownGivenName, rowType } = await import('../tools/lib/popular.mjs');
+  // a given name JMnedict never types a place; a name it types a place too
+  // (リオ fem place, ミラノ fem place) keeps its prepositions
+  assert.ok(knownGivenName('given') && knownGivenName('masc surname') && knownGivenName('fem'));
+  assert.ok(!knownGivenName('fem place') && !knownGivenName('place masc') && !knownGivenName('place'));
+  assert.ok(!knownGivenName('surname') && !knownGivenName('person') && !knownGivenName(undefined));
+  const people = ['I talked to Tom.', 'He looked at Tom.', 'It is a letter from Tom.', 'She sat near Tom.', 'We visited Tom in hospital.', 'Trust in Tom.'];
+  assert.deepEqual(englishCues('Tom', people), { person: 0, place: 6 }, 'without the name known, each is a place cue');
+  assert.deepEqual(englishCues('Tom', people, { givenName: true }), { person: 0, place: 0 });
+  // a place named outright still counts, and the person cues are untouched
+  assert.deepEqual(englishCues('Tom', ['the city of Tom', 'Mt. Tom', 'Tom said so.', 'I went to Tom.'], { givenName: true }), { person: 1, place: 2 });
+  assert.deepEqual(englishCues('Rio', ['I live in Rio.', 'I\'m from Rio.'], { givenName: knownGivenName('fem place') }), { person: 0, place: 2 });
+  // so "talked to" a known given name can neither move it nor be held as a place
+  const u = (person, place) => ({ n: 4, person: 0, word: 0, cues: { person, place } });
+  const tom = englishCues('Tom', people, { givenName: knownGivenName('given place') });
+  assert.deepEqual(rowType({ n: 'given place', o: 'Tom' }, 4, u(tom.person, tom.place)), { type: 'place', by: 'english' }, 'a name JMnedict types a place too is not guarded');
+  const guarded = englishCues('Tom', people, { givenName: knownGivenName('given') });
+  assert.deepEqual(rowType({ n: 'given', o: 'Tom' }, 4, u(guarded.person, guarded.place)), { type: 'given', by: 'jmnedict' });
+});
+
+test('an authored class decides a few rows the corpus cannot reach, each with its reason, within the checker\'s bounds', async () => {
+  const { NAME_CLASSES, authoredClass } = await import('../tools/lib/name-classes.mjs');
+  const {
+    rowType, popularCandidates, popularProblems, ROW_TYPES,
+  } = await import('../tools/lib/popular.mjs');
+  assert.deepEqual(NAME_CLASSES.map((e) => [e.name, e.o, e.type]), [
+    ['ロミオ', 'Romeo', 'person'], ['フランツ', 'Franz', 'person'], ['ノラ', 'Nora', 'person'],
+  ]);
+  assert.ok(Object.isFrozen(NAME_CLASSES) && NAME_CLASSES.every((e) => Object.isFrozen(e)));
+  for (const e of NAME_CLASSES) {
+    assert.ok(ROW_TYPES.includes(e.type), e.name);
+    assert.ok(typeof e.reason === 'string' && e.reason.length > 10 && !/\n/.test(e.reason), `${e.name}: a one-line reason`);
+    assert.ok(!/\u2014/.test(e.reason), `${e.name}: no em dash`);
+    assert.equal(authoredClass(e.name, e.o), e);
+  }
+  assert.match(NAME_CLASSES[0].reason, /Romeo and Juliet/);
+  assert.match(NAME_CLASSES[1].reason, /Franz Liszt/);
+  assert.match(NAME_CLASSES[2].reason, /woman's name/);
+  // keyed by both spellings: a rebuild that spells the name another way does not inherit it
+  assert.equal(authoredClass('ロミオ', 'Romio'), null);
+  assert.equal(authoredClass('トム', 'Tom'), null);
+  // first after the rules that keep a row out; the evidence alone keeps ロミオ a place
+  const u = (person, place, extra = {}) => ({ n: 12, person: 0, word: 0, cues: { person, place }, ...extra });
+  assert.deepEqual(rowType({ n: 'place', o: 'Romeo' }, 12, u(1, 1), 'ロミオ'), { type: 'person', by: 'authored' });
+  assert.deepEqual(rowType({ n: 'place', o: 'Romeo' }, 12, u(1, 1)), { type: 'place', by: 'jmnedict' });
+  assert.deepEqual(rowType({ n: 'place', o: 'Franz' }, 3, null, 'フランツ'), { type: 'person', by: 'authored' });
+  assert.deepEqual(rowType({ n: 'place', o: 'Nora' }, 2, u(0, 0, { n: 1 }), 'ノラ'), { type: 'person', by: 'authored' });
+  assert.deepEqual(rowType({ n: 'place', o: 'Romeo' }, 2, u(0, 0, { n: 2, word: 2 }), 'ロミオ'), { type: null, by: 'word' }, 'it never keeps a row in');
+  assert.deepEqual(rowType({ n: 'person', o: 'Romeo' }, 2, null, 'ロミオ'), { type: null, by: 'jmnedict' }, 'nor puts one in');
+  const records = new Map([['ロミオ', { o: 'Romeo', n: 'place' }], ['フランツ', { o: 'Franz', n: 'place' }], ['ノラ', { o: 'Nora', n: 'place' }]]);
+  const rows = popularCandidates(records, new Map([['ロミオ', 12], ['フランツ', 3], ['ノラ', 2]]), new Set(records.keys()), new Map([['ロミオ', u(1, 1)]]));
+  assert.deepEqual(rows, [['ロミオ', 'Romeo', 'person', 12], ['フランツ', 'Franz', 'person', 3], ['ノラ', 'Nora', 'person', 2]]);
+  // the checker holds a row to its authored class
+  const licence = { id: 'jmnedict' };
+  assert.deepEqual(popularProblems({ _licence: licence, names: rows }, { names: records }), []);
+  const flipped = rows.map((r) => (r[0] === 'ロミオ' ? ['ロミオ', 'Romeo', 'place', 12] : r));
+  assert.deepEqual(popularProblems({ _licence: licence, names: flipped }, { names: records }),
+    ['names[0]: ロミオ is authored a person (tools/lib/name-classes.mjs), not a place']);
+});

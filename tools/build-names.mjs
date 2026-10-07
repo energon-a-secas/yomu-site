@@ -60,8 +60,10 @@ import {
 } from './lib/jmnedict.mjs';
 import { buildFilter } from '../js/bloom.js';
 import {
-  katakanaRunCounts, popularCandidates, popularProblems, popularType, rowType, usageOf, POPULAR_FORMAT, POPULAR_MAX,
+  katakanaRunCounts, popularCandidates, popularProblems, popularType, rowType, usageOf, englishCues, cueVerdict, listsPlace,
+  knownGivenName, POPULAR_FORMAT, POPULAR_MAX,
 } from './lib/popular.mjs';
+import { NAME_CLASSES, authoredClass } from './lib/name-classes.mjs';
 import {
   chooseOriginal, englishFor, linkedSentences, sentenceRows,
 } from './lib/original.mjs';
@@ -204,21 +206,37 @@ async function main() {
   let passed = 0;
   const confirmed = new Set([...picks].filter(([, p]) => p.by === 'evidence').map(([k]) => k));
   // How the corpus uses each spelled name, sentence by sentence (a place
-  // used as a person, a name only ever the stem of 語 or 人).
+  // used as a person, a name only ever the stem of 語 or 人), and the
+  // person and place cues of its English sentences, each once; a
+  // preposition before a name JMnedict knows only as a given name is a
+  // person's (talked to Tom), and no cue.
   const usage = new Map();
   for (const [k, held] of linked.byName) {
     const rec = records.get(k);
-    if (rec && rec.o) usage.set(k, usageOf(k, rec.o, held.map(([id, text]) => [text, (linked.english.get(id) || []).map(([, line]) => line)])));
+    if (!rec || !rec.o) continue;
+    const u = usageOf(k, rec.o, held.map(([id, text]) => [text, (linked.english.get(id) || []).map(([, line]) => line)]));
+    usage.set(k, { ...u, cues: englishCues(rec.o, english.get(k) || [], { givenName: knownGivenName(rec.n) }) });
   }
   const counts = katakanaRunCounts(sentences);
-  const moved = [];
+  const moved = {
+    corpus: [], english: [], held: [], authored: [],
+  };
   for (const row of popularCandidates(records, counts, confirmed, usage)) {
     if (rows.length === POPULAR_MAX) break;
     const r = await analyze(row[0], { dict });
     const t = r.tokens.length === 1 ? r.tokens[0] : null;
     if (t && t.kind === 'name' && t.name && t.name.o === row[1]) {
       rows.push(row);
-      if (popularType(records.get(row[0]).n) !== row[2]) moved.push(`${row[0]} ${row[1]} (${row[3]}, ${usage.get(row[0]).person} as a person)`);
+      const rec = records.get(row[0]);
+      const u = usage.get(row[0]);
+      const { by } = rowType(rec, row[3], u || null, row[0]);
+      const cues = u ? `${u.cues.person} person, ${u.cues.place} place` : '';
+      // An authored class, with what the evidence alone would have made it,
+      // so an entry the evidence has come to agree with shows in the log.
+      if (by === 'authored') moved.authored.push(`${row[0]} ${row[1]} ${rowType(rec, row[3], u || null).type} to ${row[2]}${u ? ` (${cues})` : ''}: ${authoredClass(row[0], row[1]).reason}`);
+      else if (by === 'corpus') moved.corpus.push(`${row[0]} ${row[1]} (${row[3]}, ${u.person} as a person)`);
+      else if (by === 'english') moved.english.push(`${row[0]} ${row[1]} ${popularType(rec.n)} to ${row[2]} (${cues})`);
+      else if (u && cueVerdict(u.cues) === 'place' && row[2] !== 'place' && !listsPlace(rec.n)) moved.held.push(`${row[0]} ${row[1]} ${row[2]} (${cues}, typed ${rec.n})`);
     } else passed += 1;
   }
   // What the rules left out of the game, for the log: a spelling with no
@@ -229,6 +247,7 @@ async function main() {
     if (!/^\p{Lu}/u.test(rec.o)) refused.push(`${text} ${rec.o} (no capital)`);
     else if (rowType(rec, counts.get(text), usage.get(text) || null).by === 'word') refused.push(`${text} ${rec.o} (${usage.get(text).word} of ${counts.get(text)} sentences a word's stem)`);
   }
+  const notAuthored = NAME_CLASSES.filter((e) => !rows.some((r) => authoredClass(r[0], r[1]) === e)).map((e) => `${e.name} ${e.o}`);
   const popular = { _licence: licence, format: POPULAR_FORMAT, names: rows };
   const problems = popularProblems(popular, { names: records, licence });
   if (problems.length) {
@@ -243,7 +262,9 @@ async function main() {
     `names ${records.size}: in the corpus ${stats.attested}, by evidence only (${STRONG_EXT} or more other names use it) ${stats.strongOnly}, katakana decoded only ${stats.decoded}; kanji ${stats.kanji}, katakana ${stats.katakana} (${stats.original} with an original spelling, ${stats.person} typed person); strong ${stats.strong}, sure (ext >= ${SURE_EXT}) ${stats.sure}; read as a whole (*) ${stats.star}`,
     `katakana names spelled by the English sentences linked to theirs: ${stats.byEvidence} of ${stats.original} (${stats.linked} have linked English sentences, ${stats.unseen} of those with no spelling seen); ${stats.changed} differ from JMnedict's first (${stats.changes.sort((a, b) => b[3] - a[3]).slice(0, 12).map(([k, a, b, n]) => `${k} ${a} to ${b} ${n}`).join(', ')})`,
     `popular.json: ${popular.names.length} names, ${fmtBytes(popularBytes)} (${popularBytes} B), passing over ${passed} the page does not read as that name; first ${popular.names.slice(0, 8).map((r) => `${r[0]} ${r[1]} ${r[3]}`).join(', ')}`,
-    `popular.json types: ${['given', 'surname', 'person', 'place'].map((ty) => `${ty} ${popular.names.filter((r) => r[2] === ty).length}`).join(', ')}; places the corpus uses as a person, now person: ${moved.length} (${moved.join(', ')})`,
+    `popular.json types: ${['given', 'surname', 'person', 'place'].map((ty) => `${ty} ${popular.names.filter((r) => r[2] === ty).length}`).join(', ')}; places the corpus uses as a person, now person: ${moved.corpus.length} (${moved.corpus.join(', ')})`,
+    `popular.json classes the English cues moved: ${moved.english.length} (${moved.english.join(', ')}); called places but not typed place, kept: ${moved.held.length} (${moved.held.join(', ')})`,
+    `popular.json classes authored in tools/lib/name-classes.mjs, applied: ${moved.authored.length} (${moved.authored.join('; ')}); not applied, no such row: ${notAuthored.length ? notAuthored.join(', ') : 'none'}`,
     `popular.json left out by rule: ${refused.length} (${refused.join(', ')})`,
     `left out, in the corpus but best read as a type that does not ship: ${stats.untyped}`,
     `shards ${docs.length}: total ${fmtBytes(total)} (${total} B); index with its filter ${fmtBytes(indexBytes)} (${indexBytes} B)`,
