@@ -21,11 +21,17 @@
 //              loanword does: ド, ト, ス, ク, グ or ル after a consonant sound
 //   nostart    the word before ends in ン, ッ, ー or a small kana: no word
 //              starts with one, so the word ran on through it to the edge
-//   guess      the word before is a guess, with no dictionary word behind it
+//   guess      the word before is a guess, with no dictionary word behind it,
+//              or the word after starts with a kana no word starts with (す|ご|ー|いね):
+//              the edge is the analysis guessing, whatever the scripts say
 //   compound   the edge is between two parts of one katakana compound
 //   word       the word before is a word the dictionary knows (or a number
 //              and its counter, a form of a dictionary word, or a prefix
 //              such as お that the dictionary lists on its own)
+//
+// Whatever the reason, `guess` on a gap says whether a guessed word touches
+// it, and the words a learner reads say so too (render-gaps.js), not only the
+// dashed line.
 //
 // A token carries ids, never prose (docs/ANALYZER.md), and so does a gap: the
 // strings are strings-gaps.js's.
@@ -56,11 +62,15 @@ export function scriptOf(ch) {
   return null;
 }
 
-/** The script a word ends in. ー takes the script of the kana it lengthens (すごーい is hiragana). */
+/**
+ * The script a word ends in. ー takes the script of the kana it lengthens
+ * (すごーい is hiragana), so a word that is only ー has none of its own: it
+ * lengthens the word before it, whichever script that is (す|ご|ー|いね).
+ */
 function lastScript(surface) {
   const chars = [...String(surface || '')];
   for (let k = chars.length - 1; k >= 0; k -= 1) if (chars[k] !== 'ー') return scriptOf(chars[k]);
-  return chars.length ? 'katakana' : null;
+  return null;
 }
 
 function firstScript(surface) {
@@ -113,6 +123,10 @@ export function reasonOf(left, right, { inside = false } = {}) {
   if (right.kind === 'copula') return { why: 'copula', w: right.surface };
   if (left.kind === 'particle') return { why: 'particle', w: left.surface };
   if (left.kind === 'copula') return { why: 'copula', w: left.surface };
+  // An edge before a kana no word starts with is the analysis guessing: the
+  // script that seems to change there (ご|ー) is the bar lengthening ご.
+  const head = firstChar(right.surface);
+  if (NOSTART.has(head)) return { why: 'guess', k: head };
   const named = [left, right].find((u) => u.kind === 'name' && u.confidence === 'dict');
   if (named) {
     const o = named.name && typeof named.name.o === 'string' && named.name.o ? named.name.o : null;
@@ -170,6 +184,21 @@ export function gapsOf(tokens) {
     });
   });
   return out.sort((a, b) => a.at - b.at);
+}
+
+/**
+ * What stands beside token `i` on one side (`'before'` or `'after'`), for the
+ * Word panel's line where no gap is: 'start' or 'end' of the line,
+ * 'punct', 'space', 'latin', or 'other' (a word that does not touch it).
+ */
+export function besideOf(tokens, i, side) {
+  const list = Array.isArray(tokens) ? tokens : [];
+  const here = list.findIndex((t) => t && t.i === i);
+  const at = here >= 0 ? here : i;
+  const t = list[side === 'before' ? at - 1 : at + 1];
+  if (!t || t.kind === 'newline') return side === 'before' ? 'start' : 'end';
+  if (t.kind === 'punct' || t.kind === 'space' || t.kind === 'latin') return t.kind;
+  return 'other';
 }
 
 /** The gaps on each side of a token and inside it, for the Word panel. */

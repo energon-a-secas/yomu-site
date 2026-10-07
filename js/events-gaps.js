@@ -1,12 +1,15 @@
 // The Gaps option's listeners, bound once from bindEvents.
 //
 // A pointer over a gap shows its reason beside it; a tap or click on a gap
-// between two words pins the reason until the next tap, Escape, a scroll or
-// a resize. A hairline inside a compound is inside the word's button, so a
-// tap there chooses the word, and the Word panel says what the hairline
-// means, as it does for every gap around the chosen word: that is the way
-// to a reason for a keyboard and a screen reader, since a gap takes no focus
-// and adds no tab stop to the reading.
+// between two words pins the reason until the next tap, Escape or a resize,
+// and every repaint of the reading puts it away (render.js paintReading), so
+// a reason never outlives the text it explains. A scroll leaves it be: the
+// reason sits inside the reading, placed against it, so it scrolls with its
+// gap. A hairline inside a compound is inside the word's button, so a tap
+// there chooses the word, and the Word panel says what the hairline means,
+// as it does for every gap around the chosen word: that is the way to a
+// reason for a keyboard and a screen reader, since a gap takes no focus and
+// adds no tab stop to the reading.
 
 import { $ } from './utils.js';
 import { state, savePrefs } from './state.js';

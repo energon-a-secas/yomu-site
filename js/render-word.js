@@ -265,10 +265,13 @@ function kanjiPart(token, { kidOf, kanjiOf }) {
 
 /**
  * @param {object|null} token
- * @param {{ noteOf: Function, kidOf: Function, canSpeak: boolean, kanjiOf?: Function, gaps?: object[]|null }} ctx
- *   `gaps` is the analysis' gap list while the Gaps option is on, else null.
+ * @param {{ noteOf: Function, kidOf: Function, canSpeak: boolean, kanjiOf?: Function, gaps?: object[]|null, tokens?: object[] }} ctx
+ *   `gaps` is the analysis' gap list while the Gaps option is on, else null;
+ *   `tokens` the analysis' tokens, which say what stands where no gap is.
  */
-export function wordNode(token, { noteOf, kidOf, canSpeak, kanjiOf = null, gaps = null }) {
+export function wordNode(token, {
+  noteOf, kidOf, canSpeak, kanjiOf = null, gaps = null, tokens = [],
+}) {
   if (!token) return h('p', { class: 'side-empty' }, ui('wordEmpty'));
   const romaji = token.romaji || {};
   const kinds = posWords(token);
@@ -285,7 +288,7 @@ export function wordNode(token, { noteOf, kidOf, canSpeak, kanjiOf = null, gaps 
       h('div', null, [h('dt', null, ui('spelledLine')), h('dd', { lang: 'ja-Latn' }, romaji.spelled || '')]),
     ]),
     // Asked for with the Gaps option, so drawn where the sheet shows it first.
-    gaps ? gapsPart(token, gaps) : null,
+    gaps ? gapsPart(token, gaps, tokens) : null,
     beatsPart(token, canSpeak),
     kinds.length ? section('partOfSpeech', h('p', null, withJa(kinds.join('; ')))) : null,
     partsPart(token),

@@ -11,7 +11,7 @@
 
 import { $, h, fill } from './utils.js';
 import { ui } from './strings.js';
-import { gapsAround } from './gaps.js';
+import { gapsAround, besideOf } from './gaps.js';
 
 const KEY = Object.freeze({
   particle: 'gapParticle',
@@ -29,15 +29,26 @@ const SCRIPT_KEY = Object.freeze({
   kanji: 'gapScriptKanji', hiragana: 'gapScriptHiragana', katakana: 'gapScriptKatakana', latin: 'gapScriptLatin', digit: 'gapScriptDigit',
 });
 
+/** What stands where a word has no gap, as the string that says so (gaps.js besideOf). */
+const BESIDE_KEY = Object.freeze({
+  start: 'gapEdgeStart', end: 'gapEdgeEnd', punct: 'gapEdgePunct', space: 'gapEdgeSpace', latin: 'gapEdgeLatin', other: 'gapEdgeOther',
+});
+
 /** The string a reason is said with. */
 export function reasonKey(g) {
   if (!g) return null;
   if (g.why === 'name') return g.o ? 'gapNameO' : 'gapName';
+  if (g.why === 'guess' && g.k) return 'gapGuessNostart';
   if (g.why === 'word') return WORD_KEY[g.f] || 'gapWord';
   return KEY[g.why] || null;
 }
 
-/** A gap's reason, one sentence, as nodes: the words it names in lang="ja" spans. */
+/**
+ * A gap's reason, one sentence, as nodes: the words it names in lang="ja"
+ * spans. When a guessed word touches the gap and another reason won, the
+ * sentence says the guess too ("...; the reading here is a guess."), so a
+ * reader who cannot see the dashed line still learns it.
+ */
 export function reasonNodes(g) {
   const key = reasonKey(g);
   if (!key) return [];
@@ -53,6 +64,11 @@ export function reasonNodes(g) {
     at = m.index + m[0].length;
   }
   if (at < raw.length) out.push(raw.slice(at));
+  if (g.guess && g.why !== 'guess') {
+    const last = out[out.length - 1];
+    if (typeof last === 'string' && last.endsWith('.')) out[out.length - 1] = last.slice(0, -1);
+    out.push(ui('gapGuessToo'));
+  }
   return out;
 }
 
@@ -66,20 +82,21 @@ function partPair(token, g) {
 
 /**
  * The Word panel's lines: what the gap before the word, each hairline inside
- * it and the gap after it say. A word at the start of a line, or beside a
- * mark of punctuation, has no gap there to find, and says so.
+ * it and the gap after it say. Where there is no gap the line says what
+ * stands there instead (the line's start or end, punctuation, a space, Latin
+ * letters), read from `tokens`, the analysis the gaps came from.
  */
-export function gapsPart(token, gaps) {
+export function gapsPart(token, gaps, tokens = []) {
   if (!token || !Array.isArray(gaps)) return null;
   const { before, inside, after } = gapsAround(gaps, token.i);
   const row = (label, body) => h('div', null, [h('dt', null, ui(label)), h('dd', null, body)]);
-  const edge = (g) => (g ? reasonNodes(g) : ui('gapLineEdge'));
+  const edge = (g, side) => (g ? reasonNodes(g) : ui(BESIDE_KEY[besideOf(tokens, token.i, side)]));
   return h('div', { class: 'word-part word-gaps' }, [
     h('h3', { class: 'word-sub' }, ui('gapsTitle')),
     h('dl', { class: 'word-gapl' }, [
-      row('gapBefore', edge(before)),
+      row('gapBefore', edge(before, 'before')),
       ...inside.map((g) => row('gapInside', [...partPair(token, g), ...reasonNodes(g)])),
-      row('gapAfter', edge(after)),
+      row('gapAfter', edge(after, 'after')),
     ]),
   ]);
 }

@@ -18,8 +18,9 @@
 // into an attribute.
 //
 // Gaps (gaps.js): every edge between two words gets an empty span.gap
-// between their buttons, and every edge between two parts of a katakana
-// compound a span.gap--part inside its surface. Both are always built, and
+// after the button of the word before it, in one span.tok-group with it so
+// a line never wraps between a word and its gap, and every edge between two
+// parts of a katakana compound a span.gap--part inside its surface. Both are always built, and
 // drawn only while #reading[data-gaps="on"], so the toggle repaints nothing.
 // They hold no text, so copying the reading copies nothing they add, and
 // they are found again by data-gap, their index in the analysis' gap list.
@@ -268,7 +269,18 @@ export function readingNodes(tokens, { selected = null, kidOf = null, gaps = [] 
       line.appendChild(node);
       last = null;
     } else {
-      if (before.has(token.i)) put(gapNode(before.get(token.i), { guess: !!gaps[before.get(token.i)].guess }));
+      if (before.has(token.i)) {
+        const ix = before.get(token.i);
+        const gap = gapNode(ix, { guess: !!gaps[ix].guess });
+        // A gap goes with the word it follows, in one wrapping unit, so a
+        // row never starts on a gap and never ends on one left without its
+        // word. Only two word tokens that touch have a gap, so `last` is the
+        // word before it.
+        if (last && !opener) {
+          last = group(last);
+          last.appendChild(gap);
+        } else put(gap);
+      }
       put(node);
     }
     if (token.kind !== 'space') blank = false;

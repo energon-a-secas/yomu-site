@@ -10,10 +10,10 @@ import assert from 'node:assert/strict';
 
 import {
   REASONS, NOSTART, scriptOf, reasonOf, gapsOf, gapsAround, unitsOf, isPrefix, slotsOf, codePointAt, checkLine,
-  extraReason, wordsOf, pairAt,
+  extraReason, wordsOf, pairAt, besideOf,
 } from '../js/gaps.js';
-import { reasonKey } from '../js/render-gaps.js';
-import { STRINGS } from '../js/strings.js';
+import { reasonKey, reasonNodes } from '../js/render-gaps.js';
+import { STRINGS, useLang } from '../js/strings.js';
 import { run } from './helpers/disk.mjs';
 
 const w = (surface, extra = {}) => ({ kind: 'word', surface, confidence: 'dict', ...extra });
@@ -59,7 +59,43 @@ test('inside katakana: a loanword ending, then a kana no word starts with, then 
   assert.deepEqual(reasonOf(part('ラーメン'), part('ショップ'), { inside: true }), { why: 'nostart', k: 'ン' });
   assert.deepEqual(reasonOf(part('ギター'), part('ケース'), { inside: true }), { why: 'nostart', k: 'ー' });
   assert.deepEqual(reasonOf(part('インフォーム', null), part('ショップ'), { inside: true }), { why: 'guess' });
-  for (const k of 'ンッーャュョァィゥェォ') assert.ok(NOSTART.has(k), k);
+  for (const k of 'ンッーャュョァィゥェォっゃゅょ') assert.ok(NOSTART.has(k), k);
+});
+
+test('an edge before a kana no word starts with is the reading guessing, never a change of script', async () => {
+  assert.deepEqual(reasonOf(w('ご'), { kind: 'katakana', surface: 'ー', confidence: 'guess' }), { why: 'guess', k: 'ー' });
+  const r = await run('すごーいね');
+  const chars = [...r.text];
+  for (const g of gapsOf(r.tokens)) {
+    if (NOSTART.has(chars[codePointAt(r.text, g.at)])) assert.deepEqual([g.why, g.k], ['guess', chars[codePointAt(r.text, g.at)]], brief(r).join());
+    assert.notEqual(g.why, 'script', `${brief(r).join()}: the bar lengthens ご, no script changes`);
+  }
+});
+
+test('a guess beside a gap is said in words whatever reason won, and only once', () => {
+  useLang('en');
+  const say = (g) => reasonNodes(g).map((n) => (typeof n === 'string' ? n : n.textContent)).join('');
+  assert.equal(say({ why: 'script', from: 'hiragana', to: 'katakana', guess: true }), 'The script changes: hiragana to katakana; the reading here is a guess.');
+  assert.equal(say({ why: 'script', from: 'hiragana', to: 'katakana', guess: false }), 'The script changes: hiragana to katakana.');
+  assert.equal(say({ why: 'guess', guess: true }), 'The reading is a guess here: no dictionary word backs this edge.');
+  useLang('es');
+  assert.equal(say({ why: 'script', from: 'kanji', to: 'hiragana', guess: true }), 'Cambia la escritura: de kanji a hiragana; aquí la lectura es una suposición.');
+  useLang('en');
+});
+
+test('where a word has no gap, the Word panel says what stands there: the line, punctuation, a space, Latin letters', async () => {
+  const r = await run('ABCの本、そして Tom です');
+  const at = (s) => r.tokens.find((t) => t.surface === s).i;
+  assert.equal(besideOf(r.tokens, at('の'), 'before'), 'latin');
+  assert.equal(besideOf(r.tokens, at('本'), 'after'), 'punct');
+  assert.equal(besideOf(r.tokens, at('そして'), 'after'), 'space');
+  assert.equal(besideOf(r.tokens, at('です'), 'after'), 'end');
+  const s = await run('本です');
+  assert.equal(besideOf(s.tokens, 0, 'before'), 'start');
+  for (const k of ['gapEdgeStart', 'gapEdgeEnd', 'gapEdgePunct', 'gapEdgeSpace', 'gapEdgeLatin', 'gapEdgeOther']) {
+    assert.ok(STRINGS[k] && STRINGS[k].en && STRINGS[k].es, k);
+  }
+  assert.ok(!/punctuation/.test(STRINGS.gapEdgeLatin.en) && !/line/.test(STRINGS.gapEdgeLatin.en));
 });
 
 test('a dictionary word ends here: a plain word, a form of one, a number, a prefix', () => {
@@ -80,7 +116,7 @@ test('every reason, and every kind of word, has a string in both languages', () 
   const cases = [
     { why: 'particle' }, { why: 'copula' }, { why: 'name' }, { why: 'name', o: 'Tom' }, { why: 'script' }, { why: 'loan' },
     { why: 'nostart' }, { why: 'guess' }, { why: 'compound' }, { why: 'word' }, { why: 'word', f: 'form' }, { why: 'word', f: 'number' },
-    { why: 'word', f: 'prefix' }, { why: 'nostart-extra' }, { why: 'inside' },
+    { why: 'word', f: 'prefix' }, { why: 'nostart-extra' }, { why: 'inside' }, { why: 'guess', k: 'ー' },
   ];
   for (const g of cases) {
     const key = reasonKey(g);

@@ -18,7 +18,13 @@ export const GAPS_STRINGS = Object.freeze({
   gapBefore: { en: 'Before it', es: 'Antes' },
   gapAfter: { en: 'After it', es: 'Después' },
   gapInside: { en: 'Inside it', es: 'Dentro' },
-  gapLineEdge: { en: 'The line or a mark of punctuation: no gap to find.', es: 'El borde de la línea o un signo de puntuación: no hay espacio que buscar.' },
+  // Where a word has no gap, what stands there instead (gaps.js besideOf).
+  gapEdgeStart: { en: 'The line starts here: no gap to find.', es: 'Aquí empieza la línea: no hay espacio que buscar.' },
+  gapEdgeEnd: { en: 'The line ends here: no gap to find.', es: 'Aquí termina la línea: no hay espacio que buscar.' },
+  gapEdgePunct: { en: 'A mark of punctuation stands here and shows the edge already.', es: 'Aquí hay un signo de puntuación, que ya muestra el borde.' },
+  gapEdgeSpace: { en: 'A space is typed here already.', es: 'Aquí ya hay un espacio escrito.' },
+  gapEdgeLatin: { en: 'Latin letters stand here, and the change of script shows the edge.', es: 'Aquí hay letras latinas, y el cambio de escritura muestra el borde.' },
+  gapEdgeOther: { en: 'No Japanese word touches it here: no gap to find.', es: 'Aquí no la toca ninguna palabra japonesa: no hay espacio que buscar.' },
 
   // One reason per gap (js/gaps.js REASONS).
   gapParticle: { en: '{w} is a particle, a word of its own.', es: '{w} es una partícula, una palabra aparte.' },
@@ -38,6 +44,12 @@ export const GAPS_STRINGS = Object.freeze({
     en: 'The reading is a guess here: no dictionary word backs this edge.',
     es: 'Aquí la lectura es una suposición: ninguna palabra del diccionario respalda este borde.',
   },
+  gapGuessNostart: {
+    en: 'No word starts with {k}, so this edge is the reading guessing.',
+    es: 'Ninguna palabra empieza con {k}, así que este borde es una suposición de la lectura.',
+  },
+  // Added to any other reason when a guessed word touches the gap.
+  gapGuessToo: { en: '; the reading here is a guess.', es: '; aquí la lectura es una suposición.' },
   gapCompound: { en: 'Two words make one katakana word: {a} + {b}.', es: 'Dos palabras forman una sola en katakana: {a} + {b}.' },
   gapWord: { en: '{w} is a word the dictionary knows, and it ends here.', es: '{w} es una palabra del diccionario, y termina aquí.' },
   gapWordForm: { en: '{w} is a form of {base}, a word the dictionary knows, and it ends here.', es: '{w} es una forma de {base}, una palabra del diccionario, y termina aquí.' },
