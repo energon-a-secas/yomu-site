@@ -23,7 +23,7 @@ const phraseRow = (server, owner, key) => server.rowsOf(owner).phrases.find((r) 
 const offline = () => true;
 const online = () => false;
 
-/** A and B on one account; A saves 二 at T10 and syncs, then unsaves it at T15 offline. */
+/** A and B share an account; A saves 二 at T10, syncs, unsaves it at T15. */
 async function savedThenUnsavedOffline() {
   const server = fakeDb();
   const b = device(server, 'user_a', { at: 5 });
@@ -104,7 +104,10 @@ test('a phrase saved after another device\'s offline unsave wins, though this de
   assert.ok(a.history.isSaved(key));
 });
 
-/** user_b holds 雪 from device W; this browser, last on user_a, answers the question, and its pull fails. */
+/**
+ * user_b holds 雪 from device W; this browser, last on user_a, answers the
+ * question, and its pull fails.
+ */
 async function answeredWhileWRemoves(answer) {
   const server = fakeDb();
   const w = device(server, 'user_b', { at: 1 });

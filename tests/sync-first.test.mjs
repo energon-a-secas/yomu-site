@@ -17,7 +17,10 @@ import { decide, holdsOwn } from '../js/sync.js';
 import { answeredBook, FIRST } from '../js/sync-book.js';
 import { textKey } from '../js/history-store.js';
 
-/** The kanji the account holds saved: a row the account's Clear all covers is dead, and is deleted only when a push next touches it. */
+/**
+ * The kanji the account holds saved: a row the account's Clear all covers
+ * is dead, and is deleted only when a push next touches it.
+ */
 function savedOn(server) {
   const rows = server.rowsOf('user_a');
   const clear = Math.max(0, ...rows.clears.map((c) => c.at));
@@ -25,7 +28,7 @@ function savedOn(server) {
 }
 const savedHere = (d) => Object.keys(d.kanji.data.saved).sort();
 
-/** P1: X saved 天 at T0 and never signed in; Y saved it, synced, and unsaved it at T11. */
+/** P1: X saved 天 at T0, never signed in; Y saved, synced, unsaved it at T11. */
 async function removedInAccount() {
   const server = fakeDb();
   const x = device(server, 'user_a', { at: 0 });
@@ -40,7 +43,7 @@ async function removedInAccount() {
   return { server, x, y };
 }
 
-/** P2: X saved three kanji and never signed in; Y saved them, synced, and cleared them at T11. */
+/** P2: X saved three kanji, never signed in; Y saved, synced, cleared, T11. */
 async function clearedInAccount() {
   const server = fakeDb();
   const x = device(server, 'user_a', { at: 0 });
