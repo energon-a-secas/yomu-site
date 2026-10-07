@@ -34,14 +34,31 @@ export function accountsWanted(doc, embed) {
 }
 
 /**
+ * What kind of failure an error is, which is all the line says about it:
+ * 'offline'; 'signin', the account did not accept this sign-in's token;
+ * 'switched', another tab changed the account this browser syncs with;
+ * 'refused', the server said no to what was sent; 'server', anything else,
+ * a Convex error with its request id included. The error itself goes to the
+ * console, never to the page: a code or a request id is no help to a learner.
+ */
+export function failureKind(err, online = true) {
+  if (!online || err instanceof TypeError) return 'offline';
+  const code = err && err.code;
+  if (code === 'not-authenticated') return 'signin';
+  if (code === 'account-changed') return 'switched';
+  if (code === 'too-many-rows') return 'refused';
+  return 'server';
+}
+
+/**
  * Start accounts on this page, or do nothing at all. Returns null when
  * dormant, otherwise { ready, signIn(invoker), choose(invoker), status }.
  *
  * deps: doc, win, embed; importKit, importClient, importEngine (the three
  * dynamic imports); kanji, history, play (the stores); prefs { get, set,
  * onSaved }; remembering(); books (sync-book.js openBook()); ui { paint(status),
- * ask(info) -> 'add' | 'use' | null, refresh(), reason() }; now; setTimer,
- * clearTimer.
+ * ask(info) -> 'add' | 'use' | null, dismiss(), refresh(), reason() }; now;
+ * setTimer, clearTimer.
  */
 export function startAccount(deps) {
   const { doc, win, embed, importKit, importClient, importEngine, kanji, history, play, prefs, remembering, books, ui } = deps;
@@ -59,18 +76,28 @@ export function startAccount(deps) {
   let user = null;
   let timer = null;
   let lastPull = 0;
-  let asked = null;      // the question waiting for an answer: { counts }
+  let asked = null;      // the question waiting for an answer: { counts, since }
+  // The step every retry runs (the online event, the page shown again, a
+  // change): 'connect' (whoami, and the pull behind the account question)
+  // until the server has said which way this sign-in goes; 'ask' while the
+  // learner decides; then the sync that was chosen, 'adopt' (a first
+  // sign-in, or Add) or 'replace' (Use); and 'same' once a sync has written
+  // this account into the book. Never 'same' before that: there is no book
+  // for it to run on, and js/sync.js refuses it.
+  let step = 'connect';
+  let gen = 0;           // a sign-out or another account: what was under way stops touching the page
+  let running = null;    // { gen, done }: the one resume under way
 
   const paint = () => { try { ui.paint({ ...status }); } catch (err) { console.error('[yomu] sync line', err); } };
-  const syncing = () => !!engine && status.signedIn && status.phase !== 'paused';
+  const live = () => status.signedIn && status.phase !== 'paused';
 
   function fail(err) {
-    const offline = (win && win.navigator && win.navigator.onLine === false) || err instanceof TypeError;
-    const kind = offline ? 'offline' : 'server';
+    const online = !(win && win.navigator && win.navigator.onLine === false);
+    const kind = failureKind(err, online);
     // Said once on the line, and once on the console, however often it repeats.
     if (status.phase !== 'error' || !status.error || status.error.kind !== kind) console.warn('[yomu] sync failed, everything stays in this browser:', err);
     status.phase = 'error';
-    status.error = { kind, detail: offline ? '' : String((err && (err.code || err.message)) || err) };
+    status.error = { kind };
   }
 
   function finished(r) {
@@ -81,96 +108,154 @@ export function startAccount(deps) {
     if (r && r.applied) ui.refresh();
   }
 
-  async function runSync(mode = 'same') {
-    if (!engine) return;
+  /**
+   * The step to retry after a failed sync. A sync that got as far as writing
+   * the book (the pull went through, the push did not) leaves an ordinary
+   * sync to finish it; another tab's account in the book means deciding again.
+   */
+  function failedAt(err) {
+    if (err && err.code === 'account-changed') { step = 'connect'; return; }
+    const book = books.read();
+    if (engine && engine.subject && book && book.account === engine.subject) step = 'same';
+  }
+
+  async function runSync(mode, g) {
     status.phase = status.phase === 'error' ? 'error' : 'syncing';
     paint();
     try {
       const r = await engine.sync(mode);
+      if (g !== gen) return;
+      step = 'same';
       lastPull = now();
       finished(r);
     } catch (err) {
+      if (g !== gen) return;
+      failedAt(err);
       fail(err);
     }
     paint();
   }
 
+  /** Another account signed in: ask, and sync only with an answer. Resolves to the answer, or null. */
+  async function ask(invoker, g = gen) {
+    if (!asked) return null;
+    status.phase = 'paused';
+    status.error = null;     // the pull behind the question went through
+    paint();
+    const answer = await ui.ask({ label: status.label, counts: asked.counts, since: asked.since, invoker });
+    // Signed out, or someone else signed in, while the question was open: the answer was for nobody.
+    if (g !== gen || (answer !== 'add' && answer !== 'use')) return null;
+    asked = null;
+    step = answer === 'use' ? 'replace' : 'adopt';
+    status.phase = 'syncing';
+    return answer;
+  }
+
+  /** The client, the engine and whoami, then the sync begin() decided on, or the question. */
+  async function connect(g) {
+    try {
+      if (!client) {
+        const { ConvexHttpClient } = await importClient();
+        if (g !== gen) return;
+        if (!client) client = new ConvexHttpClient(CONVEX_URL);
+      }
+      const token = await kit.convexToken();
+      if (g !== gen) return;
+      if (token) client.setAuth(token);
+      kit.bindConvex(client);      // kept on a fresh token from here on
+      if (!engine) {
+        const { createSync } = await importEngine();
+        if (g !== gen) return;
+        if (!engine) engine = createSync({ client, local, book: books, now });
+      }
+      const begun = await engine.begin();
+      if (g !== gen) return;
+      if (begun.mode === 'ask') {
+        const old = books.read();
+        asked = { counts: begun.counts, since: old ? old.at : 0 };
+        step = 'ask';
+        if (await ask(null, g)) await runSync(step, g);
+        return;
+      }
+      step = begun.mode;
+      await runSync(step, g);
+    } catch (err) {
+      if (g !== gen) return;
+      fail(err);
+      paint();
+    }
+  }
+
+  /** Run the step this sign-in is at (see `step`), once at a time. */
+  function resume() {
+    if (running && running.gen === gen) return running.done;
+    if (!live()) return Promise.resolve();
+    const g = gen;
+    const done = (async () => {
+      if (step === 'connect' || !engine) await connect(g);
+      else if (step !== 'ask') await runSync(step, g);
+    })().finally(() => { if (running && running.gen === g) running = null; });
+    running = { gen: g, done };
+    return done;
+  }
+
   async function flush() {
     timer = null;
-    if (!syncing()) return;
+    if (!live()) return;
+    const g = gen;
+    if (running && running.gen === g) await running.done;   // the sync under way first; this change goes after it
+    if (g !== gen || !live()) return;
+    // Until a sync has finished for this account, or after one failed, the retry is the whole step.
+    if (step !== 'same' || !engine || status.phase === 'error') { await resume(); return; }
     try {
       const r = await engine.flush();
+      if (g !== gen) return;
       finished(r);
-      if (r && r.stale) { await runSync('same'); return; }   // a Clear all made elsewhere: read it now
+      if (r && r.stale) { await resume(); return; }   // a Clear all made elsewhere: read it now
     } catch (err) {
+      if (g !== gen) return;
+      failedAt(err);
       fail(err);
     }
     paint();
   }
 
   function schedule() {
-    if (!syncing()) return;
+    if (!live()) return;
     if (timer !== null) clearTimer(timer);
     timer = setTimer(() => { void flush(); }, PUSH_AFTER);
   }
 
   watchStores({ kanji, history, play, onPrefsSaved: prefs.onSaved, books, local, now, changed: schedule });
 
-  /** Another account signed in: ask, and sync only with an answer. */
-  async function ask(invoker) {
-    if (!asked) return;
-    status.phase = 'paused';
-    paint();
-    const answer = await ui.ask({ label: status.label, counts: asked.counts, invoker });
-    if (answer !== 'add' && answer !== 'use') return;
-    asked = null;
-    await runSync(answer === 'use' ? 'replace' : 'adopt');
-  }
-
   function stop() {
+    gen += 1;
     if (timer !== null) clearTimer(timer);
     timer = null;
     asked = null;
     user = null;
+    step = 'connect';
+    running = null;
     if (engine) engine.stop();
+    // A question left open would otherwise answer for whoever is signed in by then.
+    if (typeof ui.dismiss === 'function') ui.dismiss();
   }
 
-  async function signedIn(s) {
+  function signedIn(s) {
+    if (user === s.userId) { status.label = s.label || ''; paint(); return; }   // a new label, nothing more
+    if (user !== null) stop();      // another account, straight after the last one
+    user = s.userId;
     status.signedIn = true;
     status.label = s.label || '';
-    if (user === s.userId && engine) { paint(); return; }   // a new label, nothing more
-    user = s.userId;
     status.phase = 'syncing';
     status.error = null;
     paint();
-    try {
-      if (!client) {
-        const { ConvexHttpClient } = await importClient();
-        client = new ConvexHttpClient(CONVEX_URL);
-      }
-      const token = await kit.convexToken();
-      if (token) client.setAuth(token);
-      kit.bindConvex(client);      // kept on a fresh token from here on
-      if (!engine) {
-        const { createSync } = await importEngine();
-        engine = createSync({ client, local, book: books, now });
-      }
-      const begun = await engine.begin();
-      if (begun.mode === 'ask') {
-        asked = { counts: begun.counts };
-        await ask(null);
-        return;
-      }
-      await runSync(begun.mode);
-    } catch (err) {
-      fail(err);
-      paint();
-    }
+    void resume();
   }
 
   function onAuth(s) {
     status.available = s.status !== 'unavailable';
-    if (s.signedIn) { void signedIn(s); return; }
+    if (s.signedIn) { signedIn(s); return; }
     stop();
     status.signedIn = false;
     status.label = '';
@@ -180,14 +265,14 @@ export function startAccount(deps) {
   }
 
   doc.addEventListener('visibilitychange', () => {
-    if (!syncing()) return;
+    if (!live()) return;
     if (doc.visibilityState === 'hidden') {
       if (timer !== null) { clearTimer(timer); void flush(); }
       return;
     }
-    if (now() - lastPull >= PULL_EVERY) void runSync('same');
+    if (status.phase === 'error' || now() - lastPull >= PULL_EVERY) void resume();
   });
-  if (win && typeof win.addEventListener === 'function') win.addEventListener('online', () => { if (syncing() && status.phase === 'error') void runSync('same'); });
+  if (win && typeof win.addEventListener === 'function') win.addEventListener('online', () => { if (live() && status.phase === 'error') void resume(); });
 
   const ready = (async () => {
     const mod = await importKit();
@@ -209,7 +294,10 @@ export function startAccount(deps) {
     /** The line's Sign in: the kit's dialog, with this page's reason. */
     signIn: async (invoker) => { await ready; return kit ? kit.requireSignIn({ reason: ui.reason(), invoker }) : false; },
     /** The line's Choose, while another account waits for an answer. */
-    choose: (invoker) => ask(invoker),
+    async choose(invoker) {
+      if (running && running.gen === gen) return;
+      if (await ask(invoker)) await resume();
+    },
     get status() { return { ...status }; },
   };
 }

@@ -10,7 +10,7 @@ import { myHistory } from './history-store.js';
 import { myPlay } from './play-store.js';
 import { openBook } from './sync-book.js';
 import { startAccount, CONVEX_CLIENT } from './account.js';
-import { paintSync, askAccount, bindSyncDialog } from './render-sync.js';
+import { paintSync, askAccount, dismissAsk, bindSyncDialog } from './render-sync.js';
 import { paintAll, afterPaintAll, paintStatus } from './render.js';
 import { afterChange } from './events-kanji.js';
 import { repaint as repaintPlay } from './events-play.js';
@@ -41,6 +41,7 @@ export function startAccounts() {
     ui: {
       paint: (status) => { shown = status; paintSync(status); },
       ask: askAccount,
+      dismiss: dismissAsk,
       // What sync changed here: My kanji's screens and marks, Play's screen, the reader's bookmark.
       refresh: () => { afterChange(); repaintPlay(); paintStatus(state); },
       reason: () => ui('authReason'),

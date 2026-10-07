@@ -27,9 +27,23 @@ export const SYNC_STRINGS = Object.freeze({
     en: 'Could not sync with {name}\'s account: this browser is offline. Everything is still kept here, and Yomu tries again.',
     es: 'No se pudo sincronizar con la cuenta de {name}: este navegador no tiene conexión. Todo sigue guardado aquí, y Yomu lo intentará de nuevo.',
   },
+  // A failure by its kind (account.js failureKind), never by its code: the
+  // code and any Convex request id go to the console only.
   syncFailed: {
-    en: 'Could not sync with {name}\'s account ({detail}). Everything is still kept here, and Yomu tries again.',
-    es: 'No se pudo sincronizar con la cuenta de {name} ({detail}). Todo sigue guardado aquí, y Yomu lo intentará de nuevo.',
+    en: 'Could not sync with {name}\'s account: the server did not answer as expected. Everything is still kept here, and Yomu tries again.',
+    es: 'No se pudo sincronizar con la cuenta de {name}: el servidor no respondió como se esperaba. Todo sigue guardado aquí, y Yomu lo intentará de nuevo.',
+  },
+  syncFailedSignIn: {
+    en: 'Could not sync with {name}\'s account: the account did not accept this sign-in. Everything is still kept here; Yomu tries again, and signing out and back in may help.',
+    es: 'No se pudo sincronizar con la cuenta de {name}: la cuenta no aceptó este inicio de sesión. Todo sigue guardado aquí; Yomu lo intentará de nuevo, y cerrar sesión y volver a iniciarla puede ayudar.',
+  },
+  syncFailedSwitched: {
+    en: 'Could not sync with {name}\'s account: another tab changed the account this browser syncs with. Everything is still kept here, and Yomu checks again.',
+    es: 'No se pudo sincronizar con la cuenta de {name}: otra pestaña cambió la cuenta con la que se sincroniza este navegador. Todo sigue guardado aquí, y Yomu lo revisará de nuevo.',
+  },
+  syncFailedRefused: {
+    en: 'Could not sync with {name}\'s account: the account refused what this browser sent. Everything is still kept here, and Yomu tries again.',
+    es: 'No se pudo sincronizar con la cuenta de {name}: la cuenta rechazó lo que envió este navegador. Todo sigue guardado aquí, y Yomu lo intentará de nuevo.',
   },
   // The sign-in dialog's lede: index.html's <meta name="neo-auth-reason">
   // carries it as data-ui-content, so a language switch relabels it.
@@ -48,9 +62,16 @@ export const SYNC_STRINGS = Object.freeze({
     en: 'In {name}\'s account: saved kanji {kanji}, saved phrases {phrases}. In this browser: saved kanji {hereKanji}, saved phrases {herePhrases}.',
     es: 'En la cuenta de {name}: kanji guardados {kanji}, frases guardadas {phrases}. En este navegador: kanji guardados {hereKanji}, frases guardadas {herePhrases}.',
   },
+  // What each answer does, and no more than that. The account this browser
+  // synced with before is never written to again from here: it keeps what
+  // it had at its last sync, and nothing changed since reaches it.
   syncAskHow: {
-    en: 'Adding keeps both: this browser\'s data joins the account. Using the account\'s data replaces what this browser holds; the account it synced with before keeps its own copy.',
-    es: 'Añadir conserva ambos: los datos de este navegador se suman a la cuenta. Usar los datos de la cuenta reemplaza lo que tiene este navegador; la cuenta con la que se sincronizó antes conserva su propia copia.',
+    en: 'Adding keeps both: this browser\'s data joins the account that just signed in. Using the account\'s data replaces what this browser holds with that account\'s. Either way, the account this browser synced with before keeps what it already had, and nothing more: what changed in this browser since its last sync with that account (kanji and phrases saved or unsaved, reviews, scores, display settings) is not sent to it. If you use the account\'s data, those changes are gone from this browser too.',
+    es: 'Añadir conserva ambos: los datos de este navegador se suman a la cuenta que acaba de iniciar sesión. Usar los datos de la cuenta reemplaza lo que tiene este navegador por lo de esa cuenta. En ambos casos, la cuenta con la que este navegador se sincronizó antes conserva lo que ya tenía, y nada más: lo que cambió en este navegador desde su última sincronización con esa cuenta (kanji y frases guardados o quitados, repasos, puntajes, ajustes de la vista) no se le envía. Si usas los datos de la cuenta, esos cambios también desaparecen de este navegador.',
+  },
+  syncAskSince: {
+    en: 'This browser last synced with that account {when}.',
+    es: 'Este navegador se sincronizó por última vez con esa cuenta {when}.',
   },
   syncAdd: { en: 'Add this browser\'s data', es: 'Añadir los datos de este navegador' },
   syncUse: { en: 'Use the account\'s data', es: 'Usar los datos de la cuenta' },

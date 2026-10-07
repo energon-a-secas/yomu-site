@@ -21,6 +21,18 @@ export function whenText(at, now = Date.now()) {
   return ui('syncOn', { day: d.toLocaleDateString(lang, { day: 'numeric', month: 'short' }), time });
 }
 
+/**
+ * A failure's sentence by its kind (account.js failureKind). The error's own
+ * text, a code or a Convex request id, is on the console and never here.
+ */
+const FAILED = Object.freeze({
+  offline: (name) => ui('syncOffline', { name }),
+  signin: (name) => ui('syncFailedSignIn', { name }),
+  switched: (name) => ui('syncFailedSwitched', { name }),
+  refused: (name) => ui('syncFailedRefused', { name }),
+  server: (name) => ui('syncFailed', { name }),
+});
+
 /** The line's words and its one button, if any, for a status from account.js. */
 export function lineParts(status, now = Date.now()) {
   const name = status.label;
@@ -28,8 +40,8 @@ export function lineParts(status, now = Date.now()) {
   if (!status.signedIn) return { text: ui('syncSignedOut'), act: 'signin', label: ui('syncSignIn') };
   if (status.phase === 'paused') return { text: ui('syncPaused', { name }), act: 'choose', label: ui('syncChoose') };
   if (status.phase === 'error') {
-    const text = status.error && status.error.kind === 'offline' ? ui('syncOffline', { name }) : ui('syncFailed', { name, detail: status.error ? status.error.detail : '' });
-    return { text, act: null };
+    const say = (status.error && Object.hasOwn(FAILED, status.error.kind) && FAILED[status.error.kind]) || FAILED.server;
+    return { text: say(name), act: null };
   }
   // While a sync runs, the last one that finished is what the line can vouch for.
   if (status.at) return { text: ui('syncSynced', { name, when: whenText(status.at, now) }), act: null };
@@ -64,17 +76,26 @@ let answer = null;
  * in: 'add', 'use', or null for Not now (or Escape). Resolves when the
  * dialog closes.
  */
-export function askAccount({ label, counts, invoker }) {
+export function askAccount({ label, counts, since, invoker }) {
   const dialog = $('sync-dialog');
   if (!dialog) return Promise.resolve(null);
   fill($('sync-body'), [h('span', null, ui('syncAskBody', { name: label }))]);
-  fill($('sync-counts'), [h('span', null, ui('syncAskCounts', {
+  const parts = [h('span', null, ui('syncAskCounts', {
     name: label, kanji: counts.account.kanji, phrases: counts.account.phrases, hereKanji: counts.here.kanji, herePhrases: counts.here.phrases,
-  }))]);
+  }))];
+  // When the changes the old account will not get began: its last sync with this browser.
+  if (since) parts.push(' ', h('span', null, ui('syncAskSince', { when: whenText(since) })));
+  fill($('sync-counts'), parts);
   return new Promise((resolve) => {
     answer = resolve;
     openDialog(dialog, invoker || document.activeElement);
   });
+}
+
+/** Close the question if it is open, as Not now: what a sign-out does (account.js stop). */
+export function dismissAsk() {
+  const dialog = $('sync-dialog');
+  if (dialog && dialog.open) dialog.close();
 }
 
 /** Bind the dialog once: its two answers, and a close by any other way as Not now. */

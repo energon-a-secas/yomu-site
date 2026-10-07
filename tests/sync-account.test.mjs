@@ -61,10 +61,28 @@ function fakeKit(first) {
 const SIGNED_OUT = { status: 'signed-out', signedIn: false, userId: null, label: '' };
 const signedIn = (userId, label = 'Aiko') => ({ status: 'signed-in', signedIn: true, userId, label });
 
-function page({ key = KEY, embed = false, kit = fakeKit(SIGNED_OUT), server = fakeDb(), subject = 'user_a', fail, book } = {}) {
+function fakeWin() {
+  const listeners = {};
+  return {
+    navigator: { onLine: true },
+    addEventListener: (type, fn) => { (listeners[type] ||= []).push(fn); },
+    fire(type) { for (const fn of listeners[type] || []) fn(); },
+  };
+}
+
+/**
+ * The page, with fakes. `fail(name)` true makes that call throw as a lost
+ * connection does, and the test may swap it later (`failing.on`);
+ * `answer(name, args)` returning something answers that call in the
+ * server's place; `clientFails` makes loading the Convex client throw that
+ * many times first. An answer queued in `answers` is what the learner
+ * chooses; `held` keeps the question open until the test settles it.
+ */
+function page({ key = KEY, embed = false, kit = fakeKit(SIGNED_OUT), server = fakeDb(), subject = 'user_a', fail, answer, book, clientFails = 0 } = {}) {
   const imported = [];
   const painted = [];
   const asked = [];
+  const dismissed = [];
   const bookStore = memoryStore();
   if (book) bookStore.save(book);
   const kanji = openKanji({ store: memoryStore(), readRaw: () => null, keepRaw: () => {} }).load(1);
@@ -72,13 +90,28 @@ function page({ key = KEY, embed = false, kit = fakeKit(SIGNED_OUT), server = fa
   const play = openPlay({ store: memoryStore(), readRaw: () => null, keepRaw: () => {} }).load();
   const prefs = { lang: 'en', furigana: true, romaji: 'said', highlights: true, unsaved: 'mark', slow: false, remember: 'ask', translate: 'off' };
   const doc = fakeDoc(key);
+  const win = fakeWin();
   const answers = [];
+  const failing = { on: fail || (() => false), answer: answer || (() => undefined), client: clientFails };
+  const held = { open: null };
+  let clients = 0;
   const account = startAccount({
-    doc, win: { navigator: { onLine: true }, addEventListener() {} }, embed,
+    doc, win, embed,
     importKit: async () => { imported.push('kit'); return kit; },
     importClient: async () => {
       imported.push('convex');
-      return { ConvexHttpClient: class { constructor(url) { assert.equal(url, CONVEX_URL); return fakeClient(server, subject, { fail }); } } };
+      if (failing.client > 0) { failing.client -= 1; throw new TypeError('Failed to fetch dynamically imported module'); }
+      return {
+        ConvexHttpClient: class {
+          constructor(url) {
+            assert.equal(url, CONVEX_URL);
+            clients += 1;
+            const base = fakeClient(server, subject, { fail: (...a) => failing.on(...a) });
+            const call = (kind) => async (name, args) => { const r = failing.answer(name, args); return r === undefined ? base[kind](name, args) : r; };
+            return { ...base, query: call('query'), mutation: call('mutation') };
+          }
+        },
+      };
     },
     importEngine: async () => { imported.push('engine'); return import('../js/sync.js'); },
     kanji, history, play,
@@ -87,7 +120,13 @@ function page({ key = KEY, embed = false, kit = fakeKit(SIGNED_OUT), server = fa
     books: openBook({ store: bookStore }),
     ui: {
       paint: (s) => painted.push(s),
-      ask: async (info) => { asked.push(info); return answers.shift() ?? null; },
+      ask: (info) => {
+        asked.push(info);
+        if (answers.length) return Promise.resolve(answers.shift());
+        if (!held.on) return Promise.resolve(null);
+        return new Promise((resolve) => { held.open = resolve; });
+      },
+      dismiss() { dismissed.push(true); if (held.open) { const done = held.open; held.open = null; done(null); } },
       refresh() {},
       reason: () => 'Sign in to keep your kanji.',
     },
@@ -95,7 +134,11 @@ function page({ key = KEY, embed = false, kit = fakeKit(SIGNED_OUT), server = fa
     setTimer: (fn) => { fn(); return 1; },
     clearTimer() {},
   });
-  return { account, imported, painted, asked, answers, bookStore, kanji, kit, server, doc, last: () => painted.at(-1) };
+  return {
+    account, imported, painted, asked, answers, bookStore, kanji, history, kit, server, doc, win, failing, held, dismissed,
+    get clients() { return clients; },
+    last: () => painted.at(-1),
+  };
 }
 
 test('no key, or an embed: nothing is imported, nothing is drawn, nothing is stored', async () => {
@@ -195,4 +238,212 @@ test('the CSP allows the Convex deployment and the pinned client the code uses, 
   assert.equal(pin[1].match(/@([\d.]+)\//)[1], pkg.dependencies.convex.replace(/^\^/, ''));
   assert.match(html, /<meta name="clerk-publishable-key" content="pk_live_/);
   assert.match(html, /<div class="neo-auth" data-neo-auth data-keep-mobile hidden><\/div>\s*(<!--[^>]*-->\s*)?<a class="header-home"/);
+});
+
+// ── Retries run the step that failed ──────────────────────────────────────
+//
+// Every retry used to be an ordinary sync, which js/sync.js refuses until a
+// sync has written the account into the book: a first sign-in that failed
+// once never recovered without a reload, and the account question was never
+// asked. Each test fails one step once, then lets the server answer.
+
+const offline = (name) => (call) => call === name;
+
+test('a first sign-in whose pull fails once completes on the online event, with nothing lost', async () => {
+  const p = page({ fail: offline('sync:pullKanji') });
+  p.kanji.save('天', 2);
+  await p.account.ready;
+  p.kit.become(signedIn('user_a'));
+  await until(() => p.last().phase === 'error', 'the failure');
+  assert.equal(p.bookStore.raw, null, 'a first sign-in that failed remembers no account');
+  p.failing.on = () => false;
+  p.win.fire('online');
+  await until(() => p.last().phase === 'synced', 'the retry');
+  assert.ok(p.server.rowsOf('user_a').kanji.find((r) => r.char === '天'), 'this browser\'s kanji reached the account');
+  assert.equal(JSON.parse(p.bookStore.raw).account, 'user_a');
+  // From here a change is an ordinary push.
+  p.kanji.save('雨', 3);
+  await until(() => p.server.rowsOf('user_a').kanji.length === 2, 'the push after a change');
+  assert.equal(p.last().phase, 'synced');
+});
+
+test('a first sign-in that fails once is retried by the next change too, and by the page shown again', async () => {
+  for (const retry of ['change', 'visible']) {
+    const p = page({ fail: offline('sync:pullMeta') });
+    p.kanji.save('天', 2);
+    await p.account.ready;
+    p.kit.become(signedIn('user_a'));
+    await until(() => p.last().phase === 'error', 'the failure');
+    p.failing.on = () => false;
+    if (retry === 'change') p.kanji.save('雪', 3);
+    else p.doc.fire('visibilitychange');
+    await until(() => p.last().phase === 'synced', `the retry on ${retry}`);
+    assert.ok(p.server.rowsOf('user_a').kanji.find((r) => r.char === '天'), retry);
+  }
+});
+
+test('whoami failing once (offline at sign-in): the retry asks the server again and syncs', async () => {
+  const p = page({ fail: offline('sync:whoami') });
+  p.kanji.save('天', 2);
+  await p.account.ready;
+  p.kit.become(signedIn('user_a'));
+  await until(() => p.last().phase === 'error', 'the failure');
+  p.failing.on = () => false;
+  p.win.fire('online');
+  await until(() => p.last().phase === 'synced', 'the retry');
+  assert.ok(p.server.rowsOf('user_a').kanji.find((r) => r.char === '天'));
+});
+
+test('the Convex client failing to load is retried: a later attempt loads it and syncs', async () => {
+  const p = page({ clientFails: 1 });
+  p.kanji.save('天', 2);
+  await p.account.ready;
+  p.kit.become(signedIn('user_a'));
+  await until(() => p.last().phase === 'error', 'the failure');
+  assert.equal(p.last().error.kind, 'offline');
+  p.win.fire('online');
+  await until(() => p.last().phase === 'synced', 'the retry');
+  assert.equal(p.clients, 1, 'one client, made once it loaded');
+  assert.ok(p.server.rowsOf('user_a').kanji.find((r) => r.char === '天'));
+});
+
+test('another account: the pull behind the question fails once, and the retry asks it, merging nothing first', async () => {
+  const p = page({ subject: 'user_b', book: newBook('user_a', 1, {}), fail: offline('sync:pullKanji') });
+  p.kanji.save('月', 2);
+  await p.account.ready;
+  p.kit.become(signedIn('user_b', 'Ben'));
+  await until(() => p.last().phase === 'error', 'the failure');
+  assert.equal(p.asked.length, 0);
+  p.failing.on = () => false;
+  p.win.fire('online');
+  await until(() => p.asked.length === 1 && p.last().phase === 'paused', 'the question');
+  assert.equal(p.last().error, null, 'the line no longer says the pull failed');
+  assert.deepEqual(p.server.rowsOf('user_b').kanji, [], 'never merged without an answer');
+  assert.equal(JSON.parse(p.bookStore.raw).account, 'user_a', 'the book still names the old account');
+});
+
+test('a sync after Add that fails once is retried as Add, not as an ordinary sync', async () => {
+  const p = page({ subject: 'user_b', book: newBook('user_a', 1, {}) });
+  p.kanji.save('月', 2);
+  await p.account.ready;
+  p.kit.become(signedIn('user_b', 'Ben'));
+  await until(() => p.asked.length === 1 && p.last().phase === 'paused', 'the question');
+  p.failing.on = offline('sync:pullPhrases');
+  p.answers.push('add');
+  await p.account.choose(null);
+  await until(() => p.last().phase === 'error', 'the failure after Add');
+  const asked = p.asked.length;     // the first question (Not now) and Choose's
+  assert.equal(JSON.parse(p.bookStore.raw).account, 'user_a', 'nothing was decided for the new account yet');
+  p.failing.on = () => false;
+  p.win.fire('online');
+  await until(() => p.last().phase === 'synced', 'the retry');
+  assert.equal(p.asked.length, asked, 'the answer is not asked for again');
+  assert.equal(JSON.parse(p.bookStore.raw).account, 'user_b');
+  assert.ok(p.server.rowsOf('user_b').kanji.find((r) => r.char === '月'), 'Add brought this browser\'s kanji in');
+});
+
+test('a sync after Use that fails once is retried as Use: this browser ends with the account\'s data only', async () => {
+  const server = fakeDb();
+  await fakeClient(server, 'user_b').mutation('sync:push', { kanji: [{ char: '雪', saved: { at: 5, box: 0, due: '2026-10-07', reviews: 0, lapses: 0, s: 5 }, removed: 0, seen: null }] });
+  const p = page({ server, subject: 'user_b', book: newBook('user_a', 1, {}) });
+  p.kanji.save('月', 2);
+  await p.account.ready;
+  p.kit.become(signedIn('user_b', 'Ben'));
+  await until(() => p.asked.length === 1 && p.last().phase === 'paused', 'the question');
+  p.failing.on = offline('sync:pullMeta');
+  p.answers.push('use');
+  await p.account.choose(null);
+  await until(() => p.last().phase === 'error', 'the failure after Use');
+  assert.ok(p.kanji.isSaved('月'), 'a failed Use changes nothing here');
+  p.failing.on = () => false;
+  p.win.fire('online');
+  await until(() => p.last().phase === 'synced', 'the retry');
+  assert.ok(p.kanji.isSaved('雪'));
+  assert.ok(!p.kanji.isSaved('月'), 'Use replaced this browser\'s data');
+  assert.ok(!p.server.rowsOf('user_b').kanji.find((r) => r.char === '月'), 'and brought none of it in');
+});
+
+test('a push that fails after the pull wrote the book is finished by an ordinary sync', async () => {
+  const p = page({ fail: (name) => name === 'sync:push' });
+  p.kanji.save('天', 2);
+  await p.account.ready;
+  p.kit.become(signedIn('user_a'));
+  await until(() => p.last().phase === 'error', 'the failure');
+  assert.equal(JSON.parse(p.bookStore.raw).account, 'user_a', 'the merge and the account are kept');
+  p.failing.on = () => false;
+  p.win.fire('online');
+  await until(() => p.last().phase === 'synced', 'the retry');
+  assert.ok(p.server.rowsOf('user_a').kanji.find((r) => r.char === '天'));
+});
+
+// ── What the line says about a failure ────────────────────────────────────
+
+test('a failure is a plain sentence in both languages, never a code or a Convex request id', async () => {
+  const { lineParts } = await import('../js/render-sync.js');
+  const { useLang } = await import('../js/strings.js');
+  const convexError = new Error('[CONVEX Q(sync:pullKanji)] [Request ID: 5f1c0a7e2b9d4c11] Server Error');
+  const cases = [
+    { kind: 'signin', opts: { subject: null } },
+    { kind: 'refused', opts: { answer: (name) => (name === 'sync:push' ? { ok: false, error: 'too-many-rows', wrote: 0 } : undefined) } },
+    { kind: 'server', opts: { answer: (name) => { if (name === 'sync:pullKanji') throw convexError; return undefined; } } },
+    { kind: 'server', opts: { answer: (name) => (name === 'sync:pullMeta' ? { ok: false, error: 'something-new' } : undefined) } },
+    { kind: 'offline', opts: { fail: offline('sync:pullMeta') } },
+  ];
+  const raw = /account-changed|not-authenticated|too-many-rows|something-new|Request ID|CONVEX|\(|\)/;
+  try {
+    for (const { kind, opts } of cases) {
+      const p = page(opts);
+      p.kanji.save('天', 2);
+      await p.account.ready;
+      p.kit.become(signedIn('user_a'));
+      await until(() => p.last().phase === 'error', `the ${kind} failure`);
+      assert.deepEqual(p.last().error, { kind }, `${kind}: the status carries the kind and nothing of the error`);
+      for (const lang of ['en', 'es']) {
+        useLang(lang);
+        const { text } = lineParts(p.last());
+        assert.ok(text.includes('Aiko'), `${kind} ${lang}: ${text}`);
+        assert.ok(!raw.test(text), `${kind} ${lang}: ${text}`);
+      }
+      useLang('en');
+    }
+    // Another tab writes another account into the book: 'switched', and the retry decides again.
+    const p = page();
+    await p.account.ready;
+    p.kit.become(signedIn('user_a'));
+    await until(() => p.last().phase === 'synced', 'the first sync');
+    p.bookStore.save(newBook('user_b', 2, {}));
+    p.kanji.save('天', 3);
+    await until(() => p.last().phase === 'error', 'the push refused');
+    assert.deepEqual(p.last().error, { kind: 'switched' });
+    for (const lang of ['en', 'es']) { useLang(lang); assert.ok(!raw.test(lineParts(p.last()).text), lang); }
+    useLang('en');
+    assert.equal(p.asked.length, 0);
+    p.win.fire('online');
+    await until(() => p.asked.length === 1, 'the question, since the book now names another account');
+    assert.deepEqual(p.server.rowsOf('user_a').kanji, [], 'nothing pushed into either account without an answer');
+  } finally {
+    useLang('en');
+  }
+});
+
+// ── Signing out while the question is open ────────────────────────────────
+
+test('signing out closes the account question, and an answer given after it applies to nobody', async () => {
+  const p = page({ subject: 'user_b', book: newBook('user_a', 1, {}) });
+  p.held.on = true;
+  p.kanji.save('月', 2);
+  await p.account.ready;
+  p.kit.become(signedIn('user_b', 'Ben'));
+  await until(() => p.asked.length === 1 && p.held.open, 'the question, open');
+  const answerLater = p.held.open;
+  p.held.open = null;              // keep the resolver: the dialog's late click
+  const before = p.dismissed.length;
+  p.kit.become(SIGNED_OUT);
+  await until(() => p.last().signedIn === false, 'signing out');
+  assert.equal(p.dismissed.length, before + 1, 'stop() closed the dialog');
+  answerLater('add');
+  await settle();
+  assert.deepEqual(p.server.rowsOf('user_b').kanji, [], 'the late Add merged nothing');
+  assert.equal(JSON.parse(p.bookStore.raw).account, 'user_a');
+  assert.equal(p.last().phase, 'idle');
 });
