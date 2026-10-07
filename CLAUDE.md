@@ -224,6 +224,27 @@ gloss (`loan-align.js`); a word `ls` says is from another language gets none
 (ビール is Dutch), and a later gloss is ignored for a word marked `u` (サバ
 is 鯖, and its slang sense "server" read as v written バ).
 
+**Gaps are drawn, never typed, and their reasons are decided in one pure
+module.** The Display row's Gaps (`state.prefs.gaps`, Off by default, a
+boolean read field by field like the other toggles; `gapsSeen` remembers that
+the one-line hint, `#gaps-hint`, was shown once) sets `#reading[data-gaps]`,
+and CSS does the rest: `render-reading.js` always builds an empty `span.gap`
+between two word tokens that touch and a `span.gap--part` inside a katakana
+compound's surface at each edge between its parts, so the toggle repaints
+nothing. A gap holds no text node, so copying the reading copies nothing it
+adds (measured in Chromium, WebKit and Firefox: the pasted text with Gaps on
+is the text with Gaps off). `js/gaps.js` decides each edge's one reason from
+the tokens alone (docs/ANALYZER.md, "Gaps"), in the order particle, copula,
+name, script, loan, nostart, guess, compound, word; the strings are
+`strings-gaps.js`'s and `render-gaps.js` draws them. A reason reaches a
+pointer by hover (`#gap-tip`, inside the reading, never fixed to the
+viewport), a tap on a gap pins it, and the Word panel lists the gaps before,
+inside and after the chosen word as text, which is the way for a keyboard
+and a screen reader: a gap takes no focus and no tab stop. WebKit gives the
+click of a tap on a 12px gap to the word beside it (the pointerdown was on
+the gap), so `events-gaps.js` reads a tap from `touchend` and cancels its
+click; do not move that back to `click` alone.
+
 **The text stays in the browser.** It persists under
 `localStorage['yomu-site:text']`, and under
 `localStorage['yomu-site:history']` while the learner has Remember on, or
@@ -480,12 +501,13 @@ header controls; everything on the screen itself is 44px under
 
 ## Play
 
-Four games with the characters that look alike, at `#/play`: Which one?
+Five games at `#/play`, four with the characters that look alike: Which one?
 (`#/play/which`, the kana for a romaji, or the kanji for its meanings and a
 reading, among its look-alikes), Odd one out (`#/play/odd`, a grid of one
 character hiding one look-alike), Twins across scripts (`#/play/twins`, カ or
 力 by the word around it) and Name decoder (`#/play/names`, a katakana name
-to its original spelling). `js/routes.js` names every route (moved out of
+to its original spelling); and Where are the spaces? (`#/play/spaces`,
+¿Dónde van los espacios?, where one word ends and the next begins, below). `js/routes.js` names every route (moved out of
 `events-kanji.js`, which still applies them, with the same history stamps and
 Back for Play: a game's parent is `#/play`, `#/play`'s the reader).
 `js/events-play.js` (the hook that draws a route, the rounds, the keys, the
@@ -495,7 +517,9 @@ actions), `js/events-odd.js` (Odd one out's grid and clock),
 `js/play-rounds.js`, `js/play-store.js`, `js/play-data.js`,
 `js/play-clock.js` (Odd one out's deadline), `js/play-kana.js` and
 `js/play-twins.js` (the authored content, CC0), all run by
-`tests/play.test.mjs`. The section is `#play` in `index.html`; the
+`tests/play.test.mjs`; Where are the spaces? is `js/play-spaces.js` (no
+DOM, run by `tests/spaces.test.mjs`), `js/render-spaces.js` and
+`js/events-spaces.js`. The section is `#play` in `index.html`; the
 header's Play link moves into the kit's ⋯ menu on a phone (with it kept, the
 Spanish header ran 2px past 390), and the embed bar has one beside My kanji.
 
@@ -525,9 +549,9 @@ moved focus from the first grid to the prompt when the load finished after
 the click.
 
 **One store, `localStorage['yomu-site:play']`, Persist kit version 1:**
-`{ games: { which|odd|oddFree|twins|names: { best, rounds } }, mixed:
+`{ games: { which|odd|oddFree|twins|names|spaces: { best, rounds } }, mixed:
 { 'シ|ツ': n } }`. `odd` is timed and `oddFree` untimed, since the scores do
-not compare. A `mixed` key is two of the games' own characters, sorted
+not compare; `spaces` is points (below), at most 999 like `odd`. A `mixed` key is two of the games' own characters, sorted
 (`pairKey`), counted at each wrong answer; Which one? and Odd one out draw a
 pair mixed up `n` times `1 + 2 min(n, 5)` times as often. No text is kept.
 Read field by field like the kanji store; a damaged value is copied to
@@ -575,6 +599,39 @@ throw; Chromium and WebKit still log that one 404 as a console line, since a
 static page can only learn a file is missing by asking. Tests use the
 hand-written `tests/fixtures/popular-names.json`; never copy it into `data/`.
 
+**Where are the spaces? asks for the reader's gaps, and its answer key is
+the analysis, emitted.** A question is one line shown with no gaps (the
+line, then a board of it: each character, and a toggle button at each place
+between two characters words are made of, `gaps.js slotsOf`); the learner
+marks places and checks, and the first check counts. Missed and extra places
+are marked on the board, each with words for a screen reader, and the
+feedback lists every space of the answer with its reason from Gaps (the same
+`render-gaps.js reasonNodes`), then each extra with why there is none (the
+word it cut, or a kana no word starts with). A line scores the spaces placed
+right minus the extras, never below 0 (`gaps.js checkLine`), so marking
+every place scores nothing; the round's score is the sum. Ten lines, four
+hiragana (the particles are the clue), four with kanji and katakana, two
+katakana compounds (`play-spaces.js DRAW`; a short tier lends its turn to the
+next), never two spellings of one sentence. Keys: the arrows, Home and End
+move between the places, which hold one tab stop; Space marks (the button's
+own press); Enter checks, its press prevented so it marks nothing; then
+Enter or Space goes on. The places are 44px targets everywhere: a character
+is 28px wide and its button, 44px, is pulled 14px over the character on each
+side, so they tile the line without overlapping, and the board's right
+padding holds the last one's reach (`play.css`). Closing punctuation stays
+with the character before it, opening with the one after. The lines are
+`data/play/spaces.json` (`yomu-spaces/1`), emitted by
+`node tools/build-spaces.mjs` through `tools/lib/spaces.mjs` from the phrase
+library and `tools/lib/compound-lines.mjs`; `tests/spaces.test.mjs` builds it
+again with the analyzer and fails when they differ, so **rerun the builder
+after any change to the analyzer, the dictionary or the library**, and
+`tools/check-data.mjs` holds its shape. Measured 2026-10-07: 159 lines, 90
+of the library's 151 sentences as written, 57 in hiragana from the library's
+own kana, and the twelve compound lines (docs/ANALYZER.md, "Gaps", has what
+is left out and why). The library holds no katakana compound the analyzer
+splits; the compound lines were written for Yomu, each with its kana, and are
+held to the same rules as the library's.
+
 **The hints and the twins' words are ours.** Which kana and kanji look alike
 is a fact; every hint, word and note in `js/play-kana.js` and
 `js/play-twins.js` was written for Yomu from the shapes, and none was taken
@@ -589,4 +646,5 @@ ones and its note says it is rare.
 - `data/dict/**`, `data/kanji/**`, `data/names/**`: emitted by `tools/build-*.mjs` from the pins in `tools/lib/sources.mjs` (`build-names.mjs` after `build-dict.mjs`, which it reads, and it writes `data/names/popular.json` too; `data/kanji/joyo.json` by `build-joyo.mjs` from the committed shards, or by `build-kanji.mjs`). Rebuild, do not hand-edit.
 - `data/like/**`: emitted by `tools/build-sounds-like.mjs` from the committed `data/dict/` (after `build-dict.mjs`). Rebuild, do not hand-edit.
 - `data/play/lookalikes.json`: emitted by `tools/build-lookalikes.mjs` from the committed `data/kanji/` (after `build-kanji.mjs` or `build-joyo.mjs`). Rebuild, do not hand-edit.
+- `data/play/spaces.json`: emitted by `tools/build-spaces.mjs` from the phrase library, `tools/lib/compound-lines.mjs` and the analyzer over the committed `data/` (after any change to `js/`'s analyzer, the dictionary or the library). Rebuild, do not hand-edit.
 - `favicon.*`, `apple-touch-icon.png`, `web-app-manifest-*.png`, `site.webmanifest`: generated by `packages/neorgon-ui/sync-favicon.sh` once the site has a hub card.

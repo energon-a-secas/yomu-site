@@ -62,6 +62,36 @@ words, read from the full dictionary).
 Records of borrowed words carry where they came from (ls, e.g. ["ger",
 "Arbeit"]) and whether they were made in Japan (ws).
 
+## Where the words part: Gaps
+
+Japanese is written with no spaces. Display: Gaps (Off by default, On; saved
+with the other preferences) draws a gap at every edge between two words of
+the reading, and a hairline between the parts of a katakana compound
+(テニス|トーナメント). A gap is a width and a line, never a typed space:
+copying the reading copies no space it adds. Each gap carries one short
+reason, decided by js/gaps.js from the analysis alone (token kinds, parts,
+confidence and the characters), the first that holds of:
+
+- particle or copula: the word after the edge, or before it, is a particle
+  (は, を, か) or a form of the copula (です, だ)
+- name: the word on either side is a name the dictionary knows
+- script: the script changes across the edge (hiragana to kanji, ...)
+- loan: katakana on both sides, and the word before ends the way a loanword
+  does, ド, ト, ス, ク, グ or ル after a consonant sound (クレアディルド|オナニー,
+  ゴールド|カード)
+- nostart: the word before ends in ン, ッ, ー or a small kana, which no word
+  starts with, so the word ran on through it to the edge (ラーメン|ショップ)
+- guess: the word before has no dictionary word behind it
+- compound: two plain parts of one katakana word
+- word: the word before is a dictionary word (a form of one, a number and its
+  counter, or a prefix such as お the dictionary lists on its own)
+
+A pointer over a gap shows its reason beside it, a tap on one pins it, and
+the Word panel lists the reasons of the gaps before, inside and after the
+chosen word, in text, which is how a keyboard or a screen reader reaches them.
+The first time Gaps is turned on, a one-line hint under the Display row says
+what the gaps mean.
+
 The full contract, including the token shape, is docs/ANALYZER.md in the
 repository: https://github.com/energon-a-secas/yomu-site
 
@@ -179,11 +209,11 @@ the host sends always opens the reader.
 
 ## Play
 
-https://yomu.neorgon.com/#/play holds four short games with the characters
-that look alike, each a round of ten (keys 1 to 4 answer, Enter or Space goes
-on, Escape leaves), with the right answer marked and a one-line reason after
-each, and a result with the best score and the pairs mixed up, each kanji with
-its save toggle:
+https://yomu.neorgon.com/#/play holds five short games: four with the
+characters that look alike, each a round of ten (keys 1 to 4 answer, Enter or
+Space goes on, Escape leaves), with the right answer marked and a one-line
+reason after each, and a result with the best score and the pairs mixed up,
+each kanji with its save toggle, and one with where the words part:
 
 - Which one? (#/play/which): the kana for a romaji among its look-alikes
   (twenty sets of hiragana and katakana, each kana with a hint written for
@@ -203,6 +233,25 @@ its save toggle:
   kana by kana (ト-ム, to-mu: Tom). It reads data/names/popular.json
   (yomu-names-popular/1) and says it is not available until that file
   ships.
+- Where are the spaces? (#/play/spaces, ¿Dónde van los espacios?): a line
+  with no gaps, and a toggle at every place between two characters; the
+  learner marks where each word ends and checks. Missed and extra spaces are
+  marked, and each space of the answer shows its reason from Gaps. A line
+  scores the spaces placed right minus the extras, never below 0; a round is
+  ten lines, the hiragana ones first (the particles are the clue), then
+  lines with kanji and katakana, then katakana compounds. Keys: the arrows
+  move between the places, Space marks one, Enter checks, then Enter or
+  Space goes on, Escape leaves. The answer key is Yomu's own analysis of
+  each line, emitted with the lines as data/play/spaces.json
+  (yomu-spaces/1) by tools/build-spaces.mjs: the phrase library's lines, cut
+  into sentences, as written and spelled in hiragana from the library's own
+  kana, and twelve lines written for Yomu around a katakana compound (the
+  library has none). A line is left out when its reading disagrees with the
+  library's kana, when it is or holds a set phrase the analysis cuts inside,
+  when a prefix stands as a word of its own, when its kana spelling parts
+  where the kanji do not, when it holds a guess, or when it has no space to
+  find. On 2026-10-07: 159 lines, 90 of the library's 151 sentences as
+  written and 57 in hiragana.
 
 The kanji look-alikes are data/play/lookalikes.json (yomu-lookalikes/1): for
 each jōyō kanji that has any, at most five, best first, chosen by rule from
@@ -210,8 +259,9 @@ the KanjiVG parts and KANJIDIC stroke counts of the kanji shards, plus
 authored classic pairs (土 士, 己 已 巳, 日 曰, ...); on 60 pairs drawn at
 random, 58 were ones a learner would confuse at a glance. Kept in this
 browser's localStorage under yomu-site:play: each game's best score and
-number of rounds, and how often each pair of characters was mixed up, so a
-pair mixed up comes round more often. No text is kept.
+number of rounds (the spaces game's best in points), and how often each pair
+of characters was mixed up, so a pair mixed up comes round more often. No
+text is kept.
 
 ## Data and licences
 
@@ -235,6 +285,8 @@ pair mixed up comes round more often. No text is kept.
   is shown (ジョン John, not Jon) and whether the game calls it a name or a
   place; no sentence ships
 - The phrase library, the notes, the deinflection rules, and Play's hints,
-  example words, look-alike rules and the Name decoder's few authored name
-  classes are written for Yomu and are public domain. Nothing is taken from Genki, the Japan
+  example words, look-alike rules, the Name decoder's few authored name
+  classes and the spaces game's compound lines are written for Yomu and are
+  public domain. Where a line's words part is Yomu's reading of it over
+  JMdict and JMnedict, so data/play/spaces.json carries their licence block. Nothing is taken from Genki, the Japan
   Foundation apps, Tofugu, Yomitan, rikaichan or 10ten.

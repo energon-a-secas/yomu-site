@@ -112,6 +112,7 @@ same text and the same data give the same tokens.
 | `furigana.js` | aligning a reading to a surface, per kanji where the data allows | `kana.js` |
 | `analyze.js` | the pipeline above: the first pass, the second phase where it guessed, the tokens | all of the above |
 | `render*.js`, `events*.js`, `state.js` | the page | `analyze.js`, `notes.js`, `strings.js` |
+| `gaps.js` | where one word ends and the next begins, and the one reason for each edge, read from tokens the analyzer built (kinds, parts, confidence, the characters); the places, marks and score of "Where are the spaces?" | `kana.js` |
 | `play-*.js`, `routes.js` | Play's rounds, store, data and authored content, and the page's routes, with no DOM (CLAUDE.md, "Play") | `kana.js`, `reader.js` (`fetchJson`), `neorgon-persist.js` |
 
 The analyzer modules (`kana` to `analyze`) never touch the DOM, so `npm test`
@@ -1306,10 +1307,58 @@ right word; ビリーブ (believe), リクワイア (require) and シャイン (
 none. No guess is offered under four katakana: at two and three, more than
 half the dictionary's short loanwords line up with some other word first.
 
+## Gaps: where the words part (2026-10-07)
+
+The reading has no spaces, as Japanese has none. `gaps.js gapsOf(tokens)`
+lists every edge between two word tokens that touch (punctuation, spaces and
+Latin letters have none beside them) and every edge between two parts of a
+katakana compound, as `{ at, i, j, part, guess, why, ...vars }`: `at` a UTF-16
+offset like a token's `start`, `part` the index of the part after a
+compound's edge or null, `guess` whether a guess touches it. It reads nothing
+the tokens do not hold, and it never moves an edge: the edges are the
+lattice's.
+
+One reason per edge, the first that holds: `particle` and `copula` (the
+token on either side is one: a closed class, so the surest edge), `name` (a
+name the names tier knows, with its Latin spelling when it has one), `script`
+(the last script of the word before, read past ー, against the first of the
+word after), `loan` (katakana on both sides and the word before ends in ド,
+ト, ス, ク, グ or ル after ン, ッ, a u-column kana, ト or ド: ゴールド|カード,
+クレアディルド|オナニー), `nostart` (the word before ends in a kana no word
+starts with: ン, ッ, ー, a small kana; ラーメン|ショップ), `guess` (the word
+before has no dictionary support), `compound` (two plain parts), `word` (a
+dictionary word ends here; `f` says a form of one, with `base`, a number and
+its counter, or a prefix, a record whose first part of speech is `pref`).
+The order puts what a reader can see on the page before what only the
+dictionary knows, and a guess below every cue: クレアディルド is a guess, and
+its ド after ル is still what shows where it ends. The strings are
+`strings-gaps.js`'s; a gap, like a token, carries ids.
+
+"Where are the spaces?" asks for the same edges in lines from the phrase
+library: `data/play/spaces.json` (`yomu-spaces/1`, `{ format, count, tiers,
+lines: [{ id, src, of?, tier, ja, en?, es?, gaps: [{ at, why, ...vars,
+part? }] }] }`, `at` in code points), emitted by `tools/build-spaces.mjs`
+through `tools/lib/spaces.mjs`, which says what is kept and what is left out
+and why. Measured on 2026-10-07: the library's 71 phrases and 61 dialogue
+turns are 151 sentences; 90 are kept as written and 57 more in hiragana (the
+library's own kana, punctuation put back, kept only where that spelling
+reads with the written line's edges). Left out: the 31 set phrases
+(`chunk`; no dialogue sentence holds one the analysis cuts inside), 12 with
+a prefix standing alone (お|元気, ご|利用, where the dictionary has お名前 as
+one word, and six kana spellings the analyzer reads with one, ごひゃくえん), 7
+kana spellings that part where the kanji do not (おとないちまい for
+大人一枚), 21 with no edge to find, 1 whose reading the library's kana does not
+confirm (空いて, the one tests/library-reading.test.mjs allows), 1 too long
+for a phone's board, 1 twice. No line holds a guess. Not one library line
+holds a katakana compound the analyzer splits, so the hard tier is twelve
+lines written for Yomu (`tools/lib/compound-lines.mjs`), checked the same
+way. `tests/spaces.test.mjs` builds the file again and fails when the
+analyzer moves an edge.
+
 ## Licences
 
 - JMdict (jmdict-simplified's jmdict-eng) and KANJIDIC: Electronic Dictionary Research and Development Group, CC BY-SA 4.0. The acknowledgement is shown on the page whenever a gloss or a kanji reading is.
 - JMnedict (jmdict-simplified's jmnedict-all), for `data/names/`: the same Group and licence. Its acknowledgement (`tools/lib/licence.mjs`, the EDRDG's sample text with the names file named) must be on the page whenever a name from the names tier is.
 - KanjiVG: Ulrich Apel, CC BY-SA 3.0, for `parts`.
 - Tatoeba: CC BY 2.0 FR, used to rank keys, to choose and count names, and, through the English translations of its Japanese sentences, to choose which of a katakana name's JMnedict spellings is shown; no sentence ships.
-- The phrase library and every note are written here and are public domain.
+- The phrase library, the compound lines of "Where are the spaces?" and every note are written here and are public domain. `data/play/spaces.json` carries JMdict's licence block, with JMnedict and the authored lines as inputs, because where its lines part is the analysis over both.
