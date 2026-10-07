@@ -180,7 +180,7 @@
 
         <div class="empty" id="empty" hidden></div>
 
-        <section class="reading" id="reading" aria-labelledby="reading-title" data-furigana="on" data-romaji="said" data-highlights="on" data-unsaved="mark" hidden>
+        <section class="reading" id="reading" aria-labelledby="reading-title" data-furigana="on" data-romaji="said" data-highlights="on" data-unsaved="mark" data-gaps="off" hidden>
           <h2 class="sr-only" id="reading-title" data-ui="reading">Reading</h2>
 
           <div class="tools">
@@ -207,6 +207,14 @@
                 <button class="seg-btn" type="button" data-act="set" data-pref="unsaved" data-value="mark" aria-pressed="true" data-ui="mark">Mark</button>
                 <button class="seg-btn" type="button" data-act="set" data-pref="unsaved" data-value="off" aria-pressed="false" data-ui="off">Off</button>
               </div>
+              <!-- Gaps (js/gaps.js, js/render-gaps.js): a mark at every edge between two
+                   words, and a hairline between the parts of a katakana compound. Off by
+                   default. A gap holds no text, so copying the reading copies no space. -->
+              <div class="seg" role="group" aria-labelledby="seg-gaps">
+                <span class="seg-label" id="seg-gaps" data-ui="gaps">Gaps</span>
+                <button class="seg-btn" type="button" data-act="set" data-pref="gaps" data-value="off" aria-pressed="true" data-ui="off">Off</button>
+                <button class="seg-btn" type="button" data-act="set" data-pref="gaps" data-value="on" aria-pressed="false" data-ui="on">On</button>
+              </div>
             </div>
 
             <div class="tools-row">
@@ -223,7 +231,13 @@
           </div>
 
           <p class="reading-hint" data-ui="readingHint">Choose a word to see it on its own. The arrow keys move between words.</p>
+          <!-- Said once, the first time Gaps is turned on (js/render-gaps.js). A live
+               region that stays in the page: only its text changes. -->
+          <p class="reading-hint gaps-hint" id="gaps-hint" role="status" aria-live="polite"></p>
           <div class="reading-body" id="reading-body" lang="ja"></div>
+          <!-- A gap's reason, beside it, for a pointer (js/events-gaps.js). The same
+               reason is in the Word panel, for a keyboard, a tap and a screen reader. -->
+          <p class="gap-tip" id="gap-tip" hidden></p>
         </section>
 
         <!-- On-device translation (js/render-translate.js, js/translate.js): the

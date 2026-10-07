@@ -26,6 +26,7 @@ import { KANJI_ACTIONS, bindKanji } from './events-kanji.js';
 import { startTranslation, stopTranslation } from './render-translate.js';
 import { COLLECT_ACTIONS, bindCollect } from './events-collect.js';
 import { PLAY_ACTIONS, bindPlay } from './events-play.js';
+import { bindGaps, gapsToggled } from './events-gaps.js';
 
 export { analyzeNow, loadText };
 
@@ -335,6 +336,7 @@ function setPref(name, value) {
   else state.prefs[name] = value === 'on';
   savePrefs(state);
   paintChrome(state);
+  if (name === 'gaps') gapsToggled();
 }
 
 const ACTIONS = {
@@ -380,6 +382,7 @@ export function bindEvents() {
   });
   bindInput();
   bindLights();
+  bindGaps();
   bindTranslators();
   const dialog = $('phrases-dialog');
   if (dialog) {

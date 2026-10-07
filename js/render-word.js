@@ -13,6 +13,7 @@ import { surfaceNode } from './render-reading.js';
 import { noteTitle, noteGist, tokenNotes, humanize } from './render-notes.js';
 import { saveToggle, seenText } from './render-save.js';
 import { NAME_LINE_TYPES } from './name-types.js';
+import { gapsPart } from './render-gaps.js';
 
 /** A token's beats with the romaji each one is spelled with. */
 export function tokenBeats(token) {
@@ -264,9 +265,10 @@ function kanjiPart(token, { kidOf, kanjiOf }) {
 
 /**
  * @param {object|null} token
- * @param {{ noteOf: Function, kidOf: Function, canSpeak: boolean, kanjiOf?: Function }} ctx
+ * @param {{ noteOf: Function, kidOf: Function, canSpeak: boolean, kanjiOf?: Function, gaps?: object[]|null }} ctx
+ *   `gaps` is the analysis' gap list while the Gaps option is on, else null.
  */
-export function wordNode(token, { noteOf, kidOf, canSpeak, kanjiOf = null }) {
+export function wordNode(token, { noteOf, kidOf, canSpeak, kanjiOf = null, gaps = null }) {
   if (!token) return h('p', { class: 'side-empty' }, ui('wordEmpty'));
   const romaji = token.romaji || {};
   const kinds = posWords(token);
@@ -282,6 +284,8 @@ export function wordNode(token, { noteOf, kidOf, canSpeak, kanjiOf = null }) {
       h('div', null, [h('dt', null, ui('saidLine')), h('dd', { lang: 'ja-Latn' }, romaji.said || '')]),
       h('div', null, [h('dt', null, ui('spelledLine')), h('dd', { lang: 'ja-Latn' }, romaji.spelled || '')]),
     ]),
+    // Asked for with the Gaps option, so drawn where the sheet shows it first.
+    gaps ? gapsPart(token, gaps) : null,
     beatsPart(token, canSpeak),
     kinds.length ? section('partOfSpeech', h('p', null, withJa(kinds.join('; ')))) : null,
     partsPart(token),

@@ -16,6 +16,13 @@
 // Kanji are found again by their position in the text's kanji list (data-kid),
 // never by the character itself: no piece of the learner's text is written
 // into an attribute.
+//
+// Gaps (gaps.js): every edge between two words gets an empty span.gap
+// between their buttons, and every edge between two parts of a katakana
+// compound a span.gap--part inside its surface. Both are always built, and
+// drawn only while #reading[data-gaps="on"], so the toggle repaints nothing.
+// They hold no text, so copying the reading copies nothing they add, and
+// they are found again by data-gap, their index in the analysis' gap list.
 
 import { h } from './utils.js';
 import { isKanji } from './kana.js';
@@ -104,11 +111,19 @@ function kanjiSpan(ch, kidOf) {
   return h('span', { class: 'kj', 'data-kid': kid >= 0 ? kid : null }, ch);
 }
 
+/** An edge between two words, or two parts of a compound: an empty mark, its index in data-gap. */
+export function gapNode(ix, { part = false, guess = false } = {}) {
+  const cls = ['gap', part ? 'gap--part' : '', guess ? 'gap--guess' : ''].filter(Boolean).join(' ');
+  return h('span', { class: cls, 'data-gap': ix, 'aria-hidden': 'true' });
+}
+
 /**
  * The surface with its ruby. With marks off (the Word panel's large copy) the
- * sounds are not drawn; the panel lists them in words instead.
+ * sounds are not drawn; the panel lists them in words instead. `cuts` are
+ * the edges between a compound's parts, `{ at, ix }` with `at` in code
+ * points of the surface: a hairline is drawn at each.
  */
-export function surfaceNode(token, { kidOf = null, marks = true } = {}) {
+export function surfaceNode(token, { kidOf = null, marks = true, cuts = [] } = {}) {
   const ps = parts(token);
   const { reading, marks: typeAt } = marks ? soundMarks(token) : { reading: [], marks: [] };
   const walked = ps.reduce((n, p) => n + [...(p.ruby || p.text)].length, 0);
@@ -131,9 +146,17 @@ export function surfaceNode(token, { kidOf = null, marks = true } = {}) {
       }, [...base, rt]));
       r += rubyChars.length;
     } else {
-      const at = r;
-      const nodes = runs(chars, (j) => (aligned ? typeAt[at + j] : null), lightFrom, s);
-      for (const n of nodes) wrap.appendChild(typeof n === 'string' ? document.createTextNode(n) : n);
+      // Split at the compound's edges, so a hairline can stand between two parts.
+      let from = 0;
+      const here = cuts.filter((c) => c.at > s && c.at < s + chars.length);
+      for (const piece of [...here, null]) {
+        const to = piece ? piece.at - s : chars.length;
+        const at = r + from;
+        const nodes = runs(chars.slice(from, to), (j) => (aligned ? typeAt[at + j] : null), lightFrom, s + from);
+        for (const n of nodes) wrap.appendChild(typeof n === 'string' ? document.createTextNode(n) : n);
+        if (piece) wrap.appendChild(gapNode(piece.ix, { part: true, guess: piece.guess }));
+        from = to;
+      }
       r += chars.length;
     }
     s += chars.length;
@@ -147,7 +170,7 @@ export function surfaceNode(token, { kidOf = null, marks = true } = {}) {
  * it, so the learner's text stays in text nodes and out of attributes, and the
  * romaji lines are aria-hidden because a screen reader says the kana better.
  */
-export function tokenNode(token, { kidOf = null } = {}) {
+export function tokenNode(token, { kidOf = null, cuts = [] } = {}) {
   if (!selectable(token)) {
     return h('span', { class: `tok-plain tok-plain--${token.kind || 'other'}` }, token.surface);
   }
@@ -169,7 +192,7 @@ export function tokenNode(token, { kidOf = null } = {}) {
     'aria-pressed': 'false',
     tabindex: '-1',
   }, [
-    surfaceNode(token, { kidOf }),
+    surfaceNode(token, { kidOf, cuts }),
     h('span', { class: 'tok-romaji tok-romaji--said', 'aria-hidden': 'true', lang: 'ja-Latn' }, said || ' '),
     h('span', { class: 'tok-romaji tok-romaji--spelled', 'aria-hidden': 'true', lang: 'ja-Latn' }, spelled || ' '),
   ]);
@@ -185,7 +208,20 @@ const CLOSING = /^[。、．，！？!?.,…‥」』）)〉》】〕ー〜~：:
 /** Punctuation that opens what comes after it, and never ends a line. */
 const OPENING = /^[「『（(〈《【〔]+$/u;
 
-export function readingNodes(tokens, { selected = null, kidOf = null } = {}) {
+export function readingNodes(tokens, { selected = null, kidOf = null, gaps = [] } = {}) {
+  // The gap before each token, and the hairlines inside each compound.
+  const before = new Map();
+  const inside = new Map();
+  gaps.forEach((g, ix) => {
+    if (g.part === null) before.set(g.j, ix);
+    else {
+      const t = tokens[g.i];
+      if (!t) return;
+      const list = inside.get(g.i) || [];
+      list.push({ at: [...t.surface.slice(0, g.at - t.start)].length, ix, guess: !!g.guess });
+      inside.set(g.i, list);
+    }
+  });
   const lines = [];
   let line = h('p', { class: 'reading-line' });
   let blank = true;
@@ -220,7 +256,7 @@ export function readingNodes(tokens, { selected = null, kidOf = null } = {}) {
       last = null;
       continue;
     }
-    const node = tokenNode(token, { kidOf });
+    const node = tokenNode(token, { kidOf, cuts: inside.get(token.i) || [] });
     if (token.kind === 'punct' && CLOSING.test(token.surface) && last && !opener) {
       last = group(last);
       last.appendChild(node);
@@ -232,6 +268,7 @@ export function readingNodes(tokens, { selected = null, kidOf = null } = {}) {
       line.appendChild(node);
       last = null;
     } else {
+      if (before.has(token.i)) put(gapNode(before.get(token.i), { guess: !!gaps[before.get(token.i)].guess }));
       put(node);
     }
     if (token.kind !== 'space') blank = false;

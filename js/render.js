@@ -16,6 +16,7 @@ import { noteOf } from './reader.js';
 import { myKanji } from './kanji-store.js';
 import { paintSavedMarks } from './render-save.js';
 import { syncTranslation } from './render-translate.js';
+import { gapsOf } from './gaps.js';
 
 export { paintChrome, paintStatus, paintSpeech, paintSavedMarks };
 
@@ -62,6 +63,7 @@ export function paintEmpty(state) {
 export function paintReading(state) {
   const a = state.analysis;
   if (a && !a.order) a.order = kanjiOrder(a.tokens);
+  if (a && !a.gaps) a.gaps = gapsOf(a.tokens);
   const show = hasReading(state);
 
   paintEmpty(state);
@@ -71,7 +73,7 @@ export function paintReading(state) {
   if (section) section.hidden = !show;
   if (body) {
     if (show) {
-      const { lines, stop } = readingNodes(a.tokens, { selected: state.selected, kidOf: (ch) => kidOf(state, ch) });
+      const { lines, stop } = readingNodes(a.tokens, { selected: state.selected, kidOf: (ch) => kidOf(state, ch), gaps: a.gaps });
       fill(body, lines);
       const holder = stop === null ? null : body.querySelector(`.tok[data-i="${stop}"]`);
       if (holder) holder.tabIndex = 0;
@@ -143,6 +145,7 @@ export function paintWord(state) {
     kidOf: (ch) => kidOf(state, ch),
     canSpeak: state.speech === 'ok',
     kanjiOf: (ch) => ({ info: info.get(ch), saved: mine.isSaved(ch), n: mine.seenOf(ch) ? mine.seenOf(ch).n : 0 }),
+    gaps: state.prefs.gaps && state.analysis ? state.analysis.gaps : null,
   }));
 }
 
