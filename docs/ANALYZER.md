@@ -249,7 +249,8 @@ naming the keys it ships under (`tools/lib/extra.mjs` explains them):
   spelling 付物 is search-only and so never reached the test, not 憑き物
   (never matched). Where none is matched, every entry the test chose keeps
   it, as before ("秋りん and つき物", below). Every record of a mixed
-  spelling carries `m` (below); its katakana fold carries none.
+  spelling carries `m` (below), which is what the lattice reads to price
+  秋りん in 毎秋りんご園; its katakana fold carries none.
 
 The corpus counts a spelling, not a word: 上野 was matched for Ueno, the
 place and surname, and shipped under its one entry outside the common set
@@ -349,7 +350,7 @@ build reads 3, 3.46, 6 on the same sentences.
 | `ls` | where a borrowed word came from, from the record's first sense: `[language, source word or null]`, JMdict's ISO 639-2 code (`eng`, `ger`, `fre`, `por`...) and its source text: アルバイト `['ger', 'Arbeit']`, パン `['por', 'pão']`, an English loan JMdict names no source word for `['eng', null]`. A word built from two sources keeps the first. Absent means JMdict did not say, never that the word is native: JMdict marks a source on 6,219 of its 218,672 entries, so most katakana words carry none |
 | `ws` | 1 when that source is wasei, a word made in Japan from foreign parts: ナイター `ls: ['eng', 'nighter'], ws: 1` (a game under lights). Never without `ls` |
 | `e` | second tier only: 1 when the key is a kana spelling of a common word (リンゴ is 林檎's, カギ 鍵's), which the second phase trusts more than a rare word |
-| `m` | first tier only: 1 on every record of a key the first tier holds for the mixed rule alone (あめ色, 秋りん, つき物: kanji and one run of two or more hiragana; 808 keys), never on its katakana fold (アメ色). `tools/check-data.mjs` fails an `m` that is not 1, one in the second tier, one on some of a key's records and not the others, and one on a key of another shape |
+| `m` | first tier only: 1 on every record of a key the first tier holds for the mixed rule alone (あめ色, 秋りん, つき物: kanji and one run of two or more hiragana; 808 keys), never on its katakana fold (アメ色). `candidates.js endsInsideWord` reads it ("秋りん and つき物", below); `tools/check-data.mjs` fails an `m` that is not 1, one in the second tier, one on some of a key's records and not the others, and one on a key of another shape |
 
 `ls` and `ws` are for the loanword rules (`loanwords.js`) and the Word
 panel's "Where it comes from" line; nothing in the lattice reads them.
@@ -930,24 +931,69 @@ KB after; 田中 loads 1,655 KB (1,571), the paragraph 27 dictionary files
 ### 秋りん and つき物 (2026-10-07)
 
 The two readings the mixed rule left wrong had two causes, so they have two
-fixes, each measured alone over all 248,924 Tatoeba sentences
-(`tools/compare-readings.mjs --all`, the committed tree as A).
+fixes: a price in the lattice for 秋りん, and a choice in the build for
+つき物.
 
 **毎秋りんご園 read 毎|秋りん|ご|園.** 秋りん is the mixed spelling of 秋霖,
 the long autumn rains, and it took the first two kana of りんご: the path
-through the prefix ご and 園 was 24 cheaper than 秋|りんご|園, which pays 20
-twice for two nouns side by side. That is a price, so it is fixed in the
-lattice: a key with no band (the corpus never matched it, which is what a
-mixed spelling or a katakana fold usually is) whose closing hiragana come
-after a kanji and start a longer banded key that runs on past it pays
-`COST.endsInsideWord` (40, `candidates.js endsInsideWord`). The longer word
-is a substring of the run, so the keys `keysForRun` asks for already hold
-it, and nothing new is fetched. A particle or a copula form past the key is
-no longer word: without that guard 大ごとになる read 大|ごとに "one by one",
-and 世間なみだ was within reach of なみだ "tears". The same rule on every key,
-banded or not, changed 1,006 readings (189 distinct), and of 30 read from
-that list most were worse (しない became "in the city", 二度と言うな
-二度|と言う), so it stays on the keys the corpus never banded.
+through the prefix ご and 園 was cheaper than 秋|りんご|園, which pays 20
+twice for two nouns side by side. 毎秋りんご狩り, 秋りんごジュース and 黄りんご
+(yellow phosphorus, then ご) read the same way; 秋りんごを and 秋りんの季節
+read right before and after. So a record marked `m` (a mixed spelling,
+"Data formats" above) whose key ends in hiragana after a kanji pays
+`COST.endsInsideWord` (40, `candidates.js endsInsideWord`) when two things
+hold:
+
+- the hiragana from its own to the next kanji, katakana or the end of the
+  run are one key the corpus banded: りんご before 園. A longer word that
+  ends inside hiragana is as often the start of what follows, and without
+  this 肉まんまだある read 肉|まんま|だ "as it is" and 交渉ごとした
+  交渉|ごと|した;
+- the text after the key does not open with a particle or a copula form,
+  after which it ends as readily as any word: without this 誰それでは read
+  誰|それでは "well then" and 大ごとに直面した 大|ごと|に.
+
+The stretch is a substring of the run, so the keys `keysForRun` asks for
+already hold it, and nothing new is fetched. `tests/regressions.test.mjs`
+holds each guard to two sentences that fail without it.
+
+**The first version asked the band, and the corpus could not see what
+that cost.** It priced every key with no band, on the idea that a mixed
+spelling has none. But a key has no band exactly when Tatoeba never
+matches it: 19,021 of the first tier's 40,875 keys, most of them common
+words the corpus happens not to use, and the sentences they misread are by
+construction not in Tatoeba. Over the whole corpus that version changed
+the one target; on sentences outside it, the review of 2026-10-07 found これで一区切りついた read 一|区|切り, 支払いは円建てらしい 円|建て,
+時間を割くみたいだ 割|くみたい, 公園で憩うみたいだ 憩|うみたい, もう指切りしかない
+指|切り and 大ごとしかない 大|ごと, all right before it (they are
+regression tests now). Its guard also only skipped a following string that
+was exactly a particle, so しか, read as し, let ごとし "like" through. So
+the rule's reach is measured on the first tier as well as on the corpus:
+
+| | the band (first version) | `m` and both guards |
+|---|---:|---:|
+| keys asked | 19,021 with no band | 808 marked |
+| ending in hiragana after a kanji | 1,126 | 332 |
+| with a banded longer word the guards let through, which is every key the cost can be paid on | 704 | 158 |
+| its 444 (key, longer word) pairs, each tried alone, before 。 and before 中: texts whose reading changes against the code before the cost | | 58 of 1,332 |
+| each of those keys with 98 common continuations, bare and inside 彼は...。: texts whose reading changes | 460 of 137,984 | 2 of 30,968 |
+| Tatoeba sentences, of 248,924, in which the cost is paid | | 2 |
+
+The 158 keys are the ones marked `m` that end in hiragana after a kanji,
+where a banded key of hiragana alone starts with that hiragana and runs on
+past it, and what it runs on by opens with no particle or copula form:
+一こま, 中華まん, 交渉ごと, 冬うつ, 執よう, 大ごと, 心配ごと, 秋りん, 肉まん,
+誰それ and the like. Of the 58 texts, one is a word that now reads right
+(黄りんご is 黄|りんご, a yellow apple); the others are read one wrong way
+instead of another, nearly all strings no sentence holds (乾せんて,
+後じんぶつ, 執ようし), and 小倉あんこ中 went from 小倉あん|こ to
+小|倉|あんこ. The 2 continuations are 執ようし、, not Japanese either way,
+and the 2 corpus sentences are the target and 私の結婚祝いに何くれる？,
+which reads 何|くれる with the cost and without it. Over those two sentences
+any price from 24 to 1,000 reads the same; over the 1,332 built texts, 25
+reads 33 of them otherwise than 40 does, and 1,000 reads 201 otherwise.
+Nothing measured argues for another price, so 40, the first version's,
+stays.
 
 **疲労がつき物 read つき物 as 憑き物, an evil spirit.** No price could fix
 it: the first tier held only 憑き物's record under つき物. JMdict lists
@@ -964,20 +1010,33 @@ for any, the entries the test chose keep it: the five other spellings
 shipped for two entries (かん水, ろう管, 卵めん, 後じん, 手すき) are
 unchanged.
 
+That is a trade, not only a fix. つき物 and ツキ物 now hold 付き物's record
+alone, so 彼にはつき物が落ちたようだ, where a possession lifts, reads
+"natural accompaniment" too; 憑き物 is in the second tier, which never
+reads a token the first pass read. By the corpus the trade is right (付き物's
+spellings matched twice, 憑き物's never). Written in full, 憑き物 reads
+憑|き|物, a guess, before and after: open.
+
+Measured over all 248,924 Tatoeba sentences (`tools/compare-readings.mjs
+--all`), the code and data before both fixes as A:
+
 | | before | after |
 |---|---:|---:|
-| the rule in the lattice, same data: sentences whose tokens change | | 1 |
-| changes of segmentation, reading or kind | | 1: 秋りん\|ご to 秋\|りんご |
-| first-pass tokens that change, of 2,356,125 | | 2 (秋りん and ご) |
-| `COST.endsInsideWord` from 25 to 1,000, over the 107 sentences where it can apply | | the same one change |
-| the rule in the build, same code: keys whose records change, of 472,965 in both tiers | | 3 (つき物 and ツキ物 in the first tier, つき物 in the second) |
-| sentences whose tokens change | | 1, a gloss: 欧州までのフライトには疲労がつき物である。 |
-| first-tier range shards, bytes | 3,960,654 | 3,960,798 (the core unchanged) |
-| second tier, bytes | 44,089,067 | 44,089,016 |
+| sentences whose tokens change | | 2 |
+| changes of segmentation, reading or kind | | 1: 秋りん\|ご to 秋\|りんご, in 私は、毎秋りんご園へ行くのが楽しみだ。 |
+| changes of gloss alone | | 1: つき物 "natural accompaniment", in 欧州までのフライトには疲労がつき物である。 |
+| first-pass tokens that differ field for field, of 2,356,125 | | 115: 秋りん and ご, and 113 tokens of mixed spellings whose `entry` carries `m` (つき物 among them, with its new gloss) |
+| the same, against the first version of the 秋りん cost (c05fc05 with da1b0c9): sentences whose tokens change | | 0, and the same 113 tokens differ by `m` |
 | guesses | 14,542 | 14,542 |
+| keys whose records change, of 472,965 in both tiers, `m` aside | | 3 (つき物 and ツキ物 in the first tier, つき物 in the second) |
+| first-tier range shards, bytes | 3,960,654 | 3,965,622 (3,960,798 before `m`; the core unchanged) |
+| second tier, bytes | 44,089,067 | 44,089,016 |
+| files per sentence, 1,556 sentences on a fresh dictionary: dictionary files, all files, KB (means; medians 3, 8 and 819 on both sides) | 3.745, 8.589, 851.5 | 3.737, 8.581, 849.9 |
 
-The rebuild moved key ranges, so 6 first-tier range shards and 28 of the
-second tier's were rewritten; no other record changed.
+The つき物 rebuild moved key ranges, so 6 first-tier range shards and 28
+of the second tier's were rewritten. The `m` rebuild moved them again and
+rewrote all 29 first-tier range shards; every one of the 472,965 keys of
+both tiers holds the records it held before it, but for `m`.
 
 ## Katakana compounds and loanword rules (2026-10-03)
 
