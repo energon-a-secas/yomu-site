@@ -282,8 +282,8 @@ test('the device behind saves what the device ahead removed: the save stands', a
 
 // ── Joining an account whose clocks ran ahead ─────────────────────────────
 //
-// A browser that never synced brings all of its own data when it first
-// joins (CLAUDE.md). The join used to stamp `joined` at this clock's now, so
+// A browser that never synced brings all of its own data when it joins with
+// Add (CLAUDE.md). The join used to stamp `joined` at this clock's now, so
 // a Clear all or a removal stamped by a device an hour ahead outranked
 // everything the joining browser brought, and its first sign-in emptied it
 // with nothing on screen to say why. `joined` is now one past the account's

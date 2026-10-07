@@ -73,6 +73,18 @@ export const SYNC_STRINGS = Object.freeze({
     en: 'This browser last synced with that account {when}.',
     es: 'Este navegador se sincronizó por última vez con esa cuenta {when}.',
   },
+  // A first sign-in, when this browser holds saved kanji or phrases of its
+  // own and the account holds data too (sync.js begin()). This browser's
+  // data was never in the account, so Use loses it: the text says so.
+  syncFirstTitle: { en: 'This browser has kanji and phrases of its own', es: 'Este navegador tiene kanji y frases propios' },
+  syncFirstBody: {
+    en: 'This browser has kanji and phrases from before you signed in. Add them to your account, or use your account\'s data here?',
+    es: 'Este navegador tiene kanji y frases de antes de que iniciaras sesión. ¿Los añades a tu cuenta, o usas aquí los datos de tu cuenta?',
+  },
+  syncFirstHow: {
+    en: 'Adding keeps both: this browser\'s kanji, phrases, reviews and scores join your account, including any your account had removed or cleared. Using your account\'s data replaces this browser\'s saved kanji, their reviews and counts, its saved phrases and its scores with your account\'s. They were never in your account, so they are gone from this browser too: to keep a copy, choose Not now and use Export in My kanji first.',
+    es: 'Añadir conserva ambos: los kanji, las frases, los repasos y los puntajes de este navegador se suman a tu cuenta, incluso los que tu cuenta había quitado o borrado. Usar los datos de tu cuenta reemplaza los kanji guardados de este navegador, sus repasos y conteos, sus frases guardadas y sus puntajes por los de tu cuenta. Nunca estuvieron en tu cuenta, así que también desaparecen de este navegador: para guardar una copia, elige Ahora no y usa Exportar en Mis kanji antes.',
+  },
   syncAdd: { en: 'Add this browser\'s data', es: 'Añadir los datos de este navegador' },
   syncUse: { en: 'Use the account\'s data', es: 'Usar los datos de la cuenta' },
   syncNotNow: { en: 'Not now', es: 'Ahora no' },

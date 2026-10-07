@@ -589,14 +589,16 @@ Import),
 `js/account.js` (the guard, the kit, the timers, the step a retry runs;
 every dependency passed in), `js/events-sync.js` (the page's
 dependencies), `js/render-sync.js` (the My kanji line `#mk-sync`, the
-`#sync-dialog` question) and `js/strings-sync.js`. `npm test` runs
-`tests/sync-rules.test.mjs`, `tests/sync-server.test.mjs` (the real handlers
-over an in-memory database, `tests/helpers/fake-convex.mjs`, which refuses
-what Convex refuses), `tests/sync-client.test.mjs` (devices made of the real
+`#sync-dialog` question, in its two wordings) and `js/strings-sync.js`.
+`npm test` runs `tests/sync-rules.test.mjs`, `tests/sync-server.test.mjs`
+(the real handlers over an in-memory database,
+`tests/helpers/fake-convex.mjs`, which refuses what Convex refuses),
+`tests/sync-client.test.mjs` (devices made of the real
 stores, `tests/helpers/sync-device.mjs`, three of them in random order,
 converging), `tests/sync-stamps.test.mjs` (Import, and clocks that disagree),
 `tests/sync-join.test.mjs` (what a join stamps),
 `tests/sync-saves.test.mjs` (a save keeps its own time through a merge),
+`tests/sync-first.test.mjs` (what a first sign-in asks, and each answer),
 `tests/sync-account.test.mjs` and `tests/sync-tabs.test.mjs` (two tabs of
 one browser over the same storage).
 
@@ -655,27 +657,39 @@ So a device that counted kanji after the clear, before it heard of it,
 loses those counts at its next sync; a push answers with the server's
 clear, and a newer one makes the client pull at once.
 
-**A browser that never synced brings all of its own data when it first
-joins, on purpose.** On a first sign-in, or Add, the browser takes the
-account's clear as its own and every save it holds counts as made when it
-joined. The book's `joined` is now (with Add, the time of the answer), or
-one past the account's Clear all when that is later; each save the browser
-brings is stamped in the book (`brought`) at `joined`, or one past the
-account's removal of that row when that is later (`sync.js joinStamps`):
-another device's clock may run ahead, and joining at this clock's now lost
-a whole browser's saves to a clear stamped an hour in the future
-(`tests/sync-stamps.test.mjs`). So a save older than a removal or a Clear
-all the account made before this browser joined comes back, on every
-device.
-That is intended: those saves were never in the account, so the account's
-removal or clear was never about them. The learner made them in a browser
-the account had not seen, and taking them away the moment it signs in
-would empty that browser with nothing on screen to say why. It also
-happens with no Sign in pressed on Yomu: the fleet's Clerk session covers
-every `*.neorgon.com` site, so the first visit by someone already signed in
-on another Neorgon site is a first sign-in. `tests/sync-client.test.mjs`
-pins it ("a browser joining an account keeps its own data even when the
-account was cleared before it joined").
+**A browser that never synced is asked before its data meets an
+account's.** On a first sign-in `sync.js begin()` writes the join into the
+book (`pending: 'first'`). If this browser holds a saved kanji or a saved
+phrase, and the account holds any row of My kanji or of the saved phrases,
+live or removed, or a Clear all, it asks the Add / Use question an account
+switch asks, worded for this case (the `syncFirst*` strings: "This browser
+has kanji and phrases from before you signed in. Add them to your account,
+or use your account's data here?"). A first device with an empty account,
+and a browser with nothing saved, join without asking, as Add: counts,
+scores and display settings alone are never asked about. A browser that
+never synced used to bring its data with no question, so a kanji the
+learner had removed or cleared on another device came back on every device
+(the review's P1 and P2, both answers in `tests/sync-first.test.mjs`). Not
+now leaves the join pending `first`, and the next sign-in asks again. The
+fleet's Clerk session covers every `*.neorgon.com` site, so the first visit
+by someone already signed in on another Neorgon site is a first sign-in,
+and is asked the same way.
+
+**Add brings all of this browser's data; Use brings none of it.** With Add
+(answered, or a first sign-in not asked) the browser takes the account's
+clear as its own and every save it holds counts as made when it joined.
+The book's `joined` is when the join was settled (begin() decided it, or
+the learner answered), or one past the account's Clear all when that is
+later; each save the browser brings is stamped in the book (`brought`) at
+`joined`, or one past the account's removal of that row when that is
+later (`sync.js joinStamps`): another device's clock may run ahead, and
+joining at this clock's now lost a whole browser's saves to a clear stamped
+an hour in the future (`tests/sync-stamps.test.mjs`). So with Add a save
+older than a removal or a Clear all the account made before this browser
+joined comes back, on every device: the learner chose to bring it. With
+Use the account's removal or clear stands, and what this browser held
+stays behind. This browser's data was never in the account, so Use loses
+it; the dialog says so, and to export first.
 
 **Only what the browser brings is stamped, each row on its own.**
 `brought` is taken from the stores before anything of the account's is
@@ -720,9 +734,10 @@ preference setter), then plans again from the stores as they now are and
 pushes that: History's merge folds an ordinary entry's reads into a phrase
 it saves again, and pushing the first plan left the account a sync behind.
 
-**Another account is asked about, never merged.** `decide()`: no book is a
-first sign-in and merges (`adopt`); the book's account merges (`same`);
-another one opens `#sync-dialog` with what each side holds. Add is `adopt`
+**Another account is asked about, never merged.** `decide()`: no book, or
+a first sign-in not settled, is a first join (`adopt`, asked about as
+above); the book's account merges (`same`); another one opens
+`#sync-dialog` with what each side holds. Add is `adopt`
 and Use is `replace`; Not now pauses sync and the line offers Choose. The
 answer goes into the book as it is given (`sync.js choose()`): a book for
 the new account with `pending` set until a sync finishes it, so a retry, a

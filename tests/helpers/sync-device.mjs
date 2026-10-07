@@ -56,8 +56,20 @@ export function device(server, subject, { at = 0, remember = 'on', fail } = {}) 
       kanji.record(chars, new Map(Object.entries(words)), day(clock / 60_000 - T(0) / 60_000));
     },
     saveText(text) { return history.save(text, kanji.sessionId, 'paste', now()); },
-    async signIn() {
+    /**
+     * A sign-in, as js/account.js runs it. A browser that never joined an
+     * account, holding saved kanji or phrases, is asked first when the
+     * account holds data too (CLAUDE.md); the learner's answer is `answer`,
+     * Add by default, which is what every test written before that question
+     * existed assumed. `answer: null` returns the question instead, as does
+     * a sign-in to another account.
+     */
+    async signIn({ answer = 'adopt' } = {}) {
       const b = await sync.begin();
+      if (b.mode === 'ask' && b.first && answer) {
+        sync.choose(answer);
+        return sync.sync(answer);
+      }
       if (b.mode === 'ask') return b;
       return sync.sync(b.mode);
     },

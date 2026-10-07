@@ -71,14 +71,14 @@ export function startAccount(deps) {
 
   const local = storesAdapter({ kanji, history, play, prefs, remembering });
   const kept = books.read();
-  const status = { available: false, signedIn: false, label: '', phase: 'idle', at: kept ? kept.at : 0, synced: !!kept, error: null };
+  const status = { available: false, signedIn: false, label: '', phase: 'idle', at: kept ? kept.at : 0, synced: false, error: null };
   let kit = null;
   let client = null;
   let engine = null;
   let user = null;
   let timer = null;
   let lastPull = 0;
-  let asked = null;      // the question waiting for an answer: { counts, since }
+  let asked = null;      // the question waiting for an answer: { counts, since, first }
   // The step every retry runs (the online event, the page shown again, a
   // change): 'connect' (whoami, and the pull behind the account question)
   // until the server has said which way this sign-in goes; 'ask' while the
@@ -93,7 +93,17 @@ export function startAccount(deps) {
   let gen = 0;           // a sign-out or another account: what was under way stops touching the page
   let running = null;    // { gen, done }: the one resume under way
 
-  const paint = () => { try { ui.paint({ ...status }); } catch (err) { console.error('[yomu] sync line', err); } };
+  /**
+   * Whether what the learner changes here reaches an account (`synced`,
+   * which words the Clear all dialog and Play's lead): a book that joined
+   * one, or a join that will carry it. A first sign-in that has not settled
+   * its way carries nothing yet.
+   */
+  const carries = () => { const b = books.read(); return !!b && b.pending !== 'first'; };
+  const paint = () => {
+    status.synced = carries();
+    try { ui.paint({ ...status }); } catch (err) { console.error('[yomu] sync line', err); }
+  };
   const live = () => status.signedIn && status.phase !== 'paused';
 
   function fail(err) {
@@ -109,7 +119,6 @@ export function startAccount(deps) {
     if (r && r.at) status.at = r.at;
     status.phase = 'synced';
     status.error = null;
-    status.synced = true;
     if (r && r.applied) ui.refresh();
   }
 
@@ -144,13 +153,17 @@ export function startAccount(deps) {
     paint();
   }
 
-  /** Another account signed in: ask, and sync only with an answer. Resolves to the answer, or null. */
+  /**
+   * Another account signed in, or a first sign-in where both this browser
+   * and the account hold data (`first`): ask, and sync only with an answer.
+   * Resolves to the answer, or null.
+   */
   async function ask(invoker, g = gen) {
     if (!asked) return null;
     status.phase = 'paused';
     status.error = null;     // the pull behind the question went through
     paint();
-    const answer = await ui.ask({ label: status.label, counts: asked.counts, since: asked.since, invoker });
+    const answer = await ui.ask({ label: status.label, counts: asked.counts, since: asked.since, first: asked.first, invoker });
     // Signed out, or someone else signed in, while the question was open: the answer was for nobody.
     if (g !== gen || (answer !== 'add' && answer !== 'use')) return null;
     asked = null;
@@ -184,7 +197,8 @@ export function startAccount(deps) {
       if (g !== gen) return;
       if (begun.mode === 'ask') {
         const old = books.read();
-        asked = { counts: begun.counts, since: old ? old.at : 0 };
+        const first = !!begun.first;
+        asked = { counts: begun.counts, since: old && !first ? old.at : 0, first };
         step = 'ask';
         if (await ask(null, g)) await runSync(step, g);
         return;

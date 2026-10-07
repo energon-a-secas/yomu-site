@@ -15,7 +15,7 @@
 
 import { cleanKanjiRow, cleanPhraseRow, cleanPlay, cleanPrefs, cleanClear } from './sync-rules.js';
 import { planSync, pushes, applies } from './sync-local.js';
-import { newBook, answeredBook, carriedOf, pruneCarried, PENDING } from './sync-book.js';
+import { newBook, answeredBook, answerBook, carriedOf, pruneCarried, PENDING, FIRST } from './sync-book.js';
 
 /** The Convex functions, by name (convex/sync.ts). */
 export const FN = Object.freeze({
@@ -46,14 +46,32 @@ function answer(res) {
 }
 
 /**
- * Which way a sign-in goes: 'adopt' on a browser that never synced (its data
- * joins the account), 'same' for the account in the book (synced with, or
- * answered for: run() finishes a pending answer), and 'ask' for another one,
- * which is never merged without the learner's say.
+ * Which way a sign-in goes, by the book alone: 'adopt' on a browser that
+ * never joined an account (no book, or a first sign-in not settled yet),
+ * which begin() turns into a question when both sides hold data; 'same' for
+ * the account in the book (synced with, or answered for: run() finishes a
+ * pending join); and 'ask' for another one, which is never merged without
+ * the learner's say.
  */
 export function decide(book, subject) {
-  if (!book) return 'adopt';
+  if (!book || book.pending === FIRST) return 'adopt';
   return book.account === subject ? 'same' : 'ask';
+}
+
+/**
+ * Whether this browser holds what a first join asks about: a saved kanji or
+ * a saved phrase. Counts, scores and display settings alone never ask.
+ */
+export function holdsOwn(snap) {
+  return Object.keys(snap.kanji.saved).length > 0 || snap.phrases.length > 0;
+}
+
+/**
+ * Whether the account holds any of My kanji or the saved phrases: a row of
+ * either, live or removed, or a Clear all.
+ */
+export function holdsAny(server) {
+  return server.clear > 0 || server.kanji.size > 0 || server.phrases.size > 0;
 }
 
 /** Everything the account holds, page by page. */
@@ -159,22 +177,36 @@ export function createSync({ client, local, book: books, now = Date.now }) {
     return run;
   };
 
-  /** Who the server says is signed in, and which way this sign-in goes. For 'ask', what each side holds. */
+  /**
+   * Who the server says is signed in, and which way this sign-in goes. For
+   * 'ask', what each side holds, and `first` when this browser never joined
+   * an account: it holds saved kanji or phrases of its own and the account
+   * holds data too, so the learner chooses Add or Use, as for another
+   * account. A first sign-in with nothing of its own, or into an account
+   * that holds nothing, joins as is.
+   */
   async function begin() {
     const who = await client.query(FN.whoami, {});
     subject = who && typeof who.subject === 'string' && who.subject ? who.subject : null;
     cache = null;
     if (!subject) throw new SyncError('not-authenticated');
-    const mode = decide(books.read(), subject);
-    if (mode === 'adopt') {
-      // A first sign-in: the join goes into the book now, pending until a
-      // sync finishes it, as an answer to the account question does. A
-      // retry after a failed pull continues it, and what the learner
-      // removes, saves or changes in between goes to this account.
-      books.write(answeredBook(subject, 'adopt', now(), local.snapshot().prefs));
+    const me = subject;
+    const book = books.read();
+    const mode = decide(book, me);
+    if (mode === 'same') return { subject: me, mode };
+    if (mode === 'ask') return { subject: me, mode, counts: counts(await pullAll(client), local.snapshot()) };
+    // A first sign-in: the join goes into the book now, pending, as an
+    // answer to the account question does. A retry after a failed pull
+    // continues it, and what the learner removes, saves or changes in
+    // between goes to this account.
+    if (!book || book.account !== me) books.write(answeredBook(me, FIRST, now(), local.snapshot().prefs));
+    if (holdsOwn(local.snapshot())) {
+      const server = await pullAll(client);
+      if (subject !== me) throw new SyncError('stopped');
+      if (holdsAny(server)) return { subject: me, mode: 'ask', first: true, counts: counts(server, local.snapshot()) };
     }
-    if (mode !== 'ask') return { subject, mode };
-    return { subject, mode, counts: counts(await pullAll(client), local.snapshot()) };
+    books.update((b) => { if (b.account === me && b.pending === FIRST) { b.pending = 'adopt'; b.joined = now(); } });
+    return { subject: me, mode };
   }
 
   /**
@@ -210,9 +242,17 @@ export function createSync({ client, local, book: books, now = Date.now }) {
     // is finished as that answer; one already joined syncs as 'same'
     // whatever was asked, since a second join would drop the removals the
     // book holds and count what it received from the account as its own.
-    const as = ours ? had.pending || 'same' : mode;
+    let as = ours ? had.pending || 'same' : mode;
     const snap = local.snapshot();
-    const book = as === 'same' ? had : joinBook(ours ? had : null, who, as, server, snap);
+    let start = had;
+    if (as === FIRST) {
+      // A first sign-in not settled yet: an answer passed here settles it,
+      // as choose() would; anything else decides again (begin()).
+      if (!PENDING.includes(mode)) throw new SyncError('account-changed');
+      start = answerBook(had, who, mode, now(), snap.prefs);
+      as = mode;
+    }
+    const book = as === 'same' ? had : joinBook(ours ? start : null, who, as, server, snap);
     const merge = planSync(server, snap, book, { replace: as === 'replace' });
     local.apply(merge.apply);
     // What the account lacks is worked out from the stores as the merge left
@@ -239,14 +279,15 @@ export function createSync({ client, local, book: books, now = Date.now }) {
    * account with the answer pending, so a retry after a failed sync
    * finishes it, and what the learner removes, clears or changes before
    * then goes to this account rather than the old one. A book that already
-   * names this account was answered in another tab: that answer stands.
+   * names this account was answered in another tab, and that answer stands,
+   * unless it is a first sign-in still waiting on the answer (answerBook).
    */
   function choose(mode) {
     const who = subject;
     if (!who || !PENDING.includes(mode)) return false;
     const had = books.read();
-    if (had && had.account === who) return false;
-    books.write(answeredBook(who, mode, now(), local.snapshot().prefs));
+    if (had && had.account === who && had.pending !== FIRST) return false;
+    books.write(answerBook(had, who, mode, now(), local.snapshot().prefs));
     return true;
   }
 

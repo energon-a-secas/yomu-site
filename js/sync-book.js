@@ -6,14 +6,16 @@
 //
 //   account   the Clerk subject this browser syncs with (the server's
 //             whoami, never the browser's own say)
-//   pending   'adopt' (a first sign-in, or Add) or 'replace' (Use) while
-//             that join waits for its first sync; absent once a sync has
-//             joined the account
-//   joined    when this browser joined that account (ms): now, or one past
-//             the account's Clear all when a clock ahead of this one made
-//             it; while an answer is pending, when the learner gave it
-//             (with Use, a save counted after it is the learner's own in the
-//             new account, and the rest stays behind)
+//   pending   'first' while a first sign-in has not settled which way it
+//             joins (sync.js begin() asks when both sides hold data); then
+//             'adopt' (joining as is, or Add) or 'replace' (Use) while that
+//             join waits for its first sync; absent once a sync has joined
+//             the account
+//   joined    when this browser joined that account (ms): when the join was
+//             settled (begin() decided it, or the learner answered), or one
+//             past the account's Clear all when a clock ahead of this one
+//             made it (with Use, a save counted after it is the learner's
+//             own in the account, and the rest stays behind)
 //   brought   { kanji: { 天: ms }, phrases: { key: ms } }: each save this
 //             browser held when it joined, and when it counts as saved: no
 //             earlier than `joined`, and one past the account's removal of
@@ -59,6 +61,8 @@ export function syncedPrefs(prefs) {
 
 /** The two answers a book can be waiting on: Add and Use. */
 export const PENDING = Object.freeze(['adopt', 'replace']);
+/** A first sign-in's join, its way not settled: begin() decides, may ask. */
+export const FIRST = 'first';
 
 /** A book for `account`, joined at `now`: nothing brought or changed yet. */
 export function newBook(account, now, prefs, epoch = 0) {
@@ -78,6 +82,18 @@ export function newBook(account, now, prefs, epoch = 0) {
  */
 export function answeredBook(account, mode, now, prefs) {
   return { ...newBook(account, now, prefs), pending: mode };
+}
+
+/**
+ * The book an answer writes. A first sign-in still waiting on it (`had`,
+ * pending FIRST for this account) keeps what the learner did since signing
+ * in when the answer is Add, so it goes to the account with the rest of
+ * this browser; Use starts afresh, and what was here stays behind. Any
+ * other answer starts a book for the account.
+ */
+export function answerBook(had, account, mode, now, prefs) {
+  if (had && had.account === account && had.pending === FIRST && mode === 'adopt') return { ...had, pending: mode, joined: now };
+  return answeredBook(account, mode, now, prefs);
 }
 
 function cleanMap(raw, keyOk) {
@@ -104,7 +120,7 @@ export function cleanBook(raw) {
     prefsAt,
     prefsVal: syncedPrefs(raw.prefsVal),
   };
-  if (PENDING.includes(raw.pending)) book.pending = raw.pending;
+  if (PENDING.includes(raw.pending) || raw.pending === FIRST) book.pending = raw.pending;
   return book;
 }
 

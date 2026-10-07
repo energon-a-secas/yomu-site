@@ -1,5 +1,6 @@
 // Where the data lives, on screen: the line under My kanji's lead, the
-// question asked when another account signs in, and the two texts that say
+// question asked when another account signs in, or when a first sign-in
+// finds data on both sides, and the two texts that say
 // where things are kept (the Clear all dialog's body, Play's lead), which
 // read differently once this browser syncs with an account.
 //
@@ -72,19 +73,41 @@ export function paintSync(status) {
 let answer = null;
 
 /**
- * Ask what to do with this browser's data now that another account signed
- * in: 'add', 'use', or null for Not now (or Escape). Resolves when the
- * dialog closes.
+ * The question's words. `first`: this browser never synced and holds data
+ * of its own, and so does the account it just signed in to; otherwise
+ * another account signed in on a browser that synced with one before.
+ * `title` and `how` are string keys (relabelled, so a language switch keeps
+ * them); `body`, `counts` and `since` are text, `since` null when there is
+ * no earlier sync to name.
  */
-export function askAccount({ label, counts, since, invoker }) {
+export function askParts({ label, counts, since, first }) {
+  return {
+    title: first ? 'syncFirstTitle' : 'syncAskTitle',
+    how: first ? 'syncFirstHow' : 'syncAskHow',
+    body: first ? ui('syncFirstBody') : ui('syncAskBody', { name: label }),
+    counts: ui('syncAskCounts', {
+      name: label, kanji: counts.account.kanji, phrases: counts.account.phrases, hereKanji: counts.here.kanji, herePhrases: counts.here.phrases,
+    }),
+    // When the changes the old account will not get began: its last sync
+    // with this browser.
+    since: !first && since ? ui('syncAskSince', { when: whenText(since) }) : null,
+  };
+}
+
+/**
+ * Ask what to do with this browser's data now that an account signed in:
+ * 'add', 'use', or null for Not now (or Escape). Resolves when the dialog
+ * closes.
+ */
+export function askAccount({ label, counts, since, first, invoker }) {
   const dialog = $('sync-dialog');
   if (!dialog) return Promise.resolve(null);
-  fill($('sync-body'), [h('span', null, ui('syncAskBody', { name: label }))]);
-  const parts = [h('span', null, ui('syncAskCounts', {
-    name: label, kanji: counts.account.kanji, phrases: counts.account.phrases, hereKanji: counts.here.kanji, herePhrases: counts.here.phrases,
-  }))];
-  // When the changes the old account will not get began: its last sync with this browser.
-  if (since) parts.push(' ', h('span', null, ui('syncAskSince', { when: whenText(since) })));
+  const words = askParts({ label, counts, since, first });
+  relabel($('sync-title'), words.title);
+  relabel($('sync-how'), words.how);
+  fill($('sync-body'), [h('span', null, words.body)]);
+  const parts = [h('span', null, words.counts)];
+  if (words.since) parts.push(' ', h('span', null, words.since));
   fill($('sync-counts'), parts);
   return new Promise((resolve) => {
     answer = resolve;

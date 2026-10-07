@@ -1,5 +1,6 @@
-// What a join stamps. A browser joining an account (a first sign-in, or Add)
-// brings its own saves in as saved when it joined, on purpose (CLAUDE.md).
+// What a join stamps. A browser joining an account with Add (answered, or a
+// first sign-in that is not asked) brings its own saves in as saved when it
+// joined, on purpose (CLAUDE.md).
 // A review found the join stamping every save the stores held once the
 // merge was in, the ones it had just received from the account too, and
 // pushing them all back: a removal or a Clear all another device made
@@ -225,7 +226,7 @@ test('a first sign-in whose pull fails: a save another device made in between do
   z.kanji.unsave('天');                              // T15
   z.failing.on = online;
   z.tick(1);
-  await z.sync.sync('same');                        // account.js retries the step that failed
+  await z.signIn();                                 // account.js retries the step that failed: begin()
   assert.equal(z.kanji.isSaved('天'), false);
   assert.deepEqual(savedOn(server), ['地']);
   await w.sync.sync('same');

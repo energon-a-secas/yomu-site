@@ -206,6 +206,75 @@ test('another account signing in is asked about first, and nothing moves until i
   assert.ok(p.server.rowsOf('user_b').kanji.find((r) => r.char === '月'));
 });
 
+test('a first sign-in into an account that holds data, with data here too, is asked first, worded for a first sign-in', async () => {
+  for (const choice of ['add', 'use']) {
+    const server = fakeDb();
+    await fakeClient(server, 'user_a').mutation('sync:push', { kanji: [kanjiRow('雪', 5)] });
+    const p = page({ server });
+    p.kanji.save('月', 2);
+    await p.account.ready;
+    p.kit.become(signedIn('user_a'));
+    await until(() => p.asked.length === 1 && p.last().phase === 'paused', 'the question');
+    assert.equal(p.asked[0].first, true);
+    assert.equal(p.asked[0].since, 0, 'no earlier sync to name');
+    assert.deepEqual(p.asked[0].counts, { account: { kanji: 1, phrases: 0 }, here: { kanji: 1, phrases: 0 } });
+    assert.deepEqual(savedIn(server, 'user_a'), ['雪'], 'nothing moved before the answer');
+    assert.equal(p.last().synced, false, 'nothing here syncs yet');
+    p.answers.push(choice);
+    await p.account.choose(null);
+    await until(() => p.last().phase === 'synced', `the sync after ${choice}`);
+    const here = Object.keys(p.kanji.data.saved).sort();
+    if (choice === 'add') {
+      assert.deepEqual(here, ['月', '雪']);
+      assert.deepEqual(savedIn(server, 'user_a'), ['月', '雪']);
+    } else {
+      assert.deepEqual(here, ['雪'], 'Use: this browser\'s own stayed behind');
+      assert.deepEqual(savedIn(server, 'user_a'), ['雪']);
+    }
+  }
+});
+
+test('the first sign-in\'s question has its own words, in both languages, and names no earlier sync', async () => {
+  const { askParts } = await import('../js/render-sync.js');
+  const { useLang } = await import('../js/strings.js');
+  const counts = { account: { kanji: 3, phrases: 1 }, here: { kanji: 2, phrases: 0 } };
+  try {
+    for (const lang of ['en', 'es']) {
+      useLang(lang);
+      const first = askParts({ label: 'Aiko', counts, since: 123, first: true });
+      const other = askParts({ label: 'Aiko', counts, since: 123, first: false });
+      assert.deepEqual([first.title, first.how], ['syncFirstTitle', 'syncFirstHow']);
+      assert.deepEqual([other.title, other.how], ['syncAskTitle', 'syncAskHow']);
+      assert.equal(first.since, null);
+      assert.ok(other.since, 'an account switch names its last sync');
+      assert.notEqual(first.body, other.body);
+      assert.match(first.counts, /3/);
+    }
+    useLang('en');
+    assert.equal(askParts({ label: 'A', counts, first: true }).body, 'This browser has kanji and phrases from before you signed in. Add them to your account, or use your account\'s data here?');
+  } finally {
+    useLang('en');
+  }
+});
+
+test('no question on a first sign-in when this browser holds nothing saved, or the account holds nothing', async () => {
+  const server = fakeDb();
+  await fakeClient(server, 'user_a').mutation('sync:push', { kanji: [kanjiRow('雪', 5)] });
+  const empty = page({ server });
+  await empty.account.ready;
+  empty.kit.become(signedIn('user_a'));
+  await until(() => empty.last().phase === 'synced', 'an empty browser\'s first sync');
+  assert.equal(empty.asked.length, 0);
+  assert.ok(empty.kanji.isSaved('雪'));
+  const first = page();
+  first.kanji.save('月', 2);
+  await first.account.ready;
+  first.kit.become(signedIn('user_a'));
+  await until(() => first.last().phase === 'synced', 'a first device\'s sync');
+  assert.equal(first.asked.length, 0);
+  assert.ok(first.server.rowsOf('user_a').kanji.find((r) => r.char === '月'));
+});
+
 test('a failure is said on the line once, as offline or as the server\'s error, and the stores stay as they were', async () => {
   const p = page({ fail: (name) => name === 'sync:pullKanji' });
   p.kanji.save('天', 2);
