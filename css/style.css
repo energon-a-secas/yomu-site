@@ -424,6 +424,66 @@ rt .snd { border-bottom: 0; padding-bottom: 0; }
   outline-offset: 1px;
 }
 
+/* ── Gaps (js/gaps.js, js/render-gaps.js) ──────────────────────
+   Every edge between two words is an empty span.gap between their buttons;
+   every edge between two parts of a katakana compound a span.gap--part
+   inside its surface. Both hold no text, so copying the reading copies no
+   space, and both are drawn only while Gaps is on: a width and a hairline,
+   the same line for both, a part's narrower. An edge a guess touches is
+   dashed, as a guessed word is. */
+.reading { position: relative; }
+.gap { display: none; }
+#reading[data-gaps="on"] .gap {
+  display: inline-block;
+  position: relative;
+  align-self: stretch;
+  width: 0.75rem;
+  cursor: help;
+}
+#reading[data-gaps="on"] .gap::before {
+  content: "";
+  position: absolute;
+  left: 50%; top: 0.3rem; bottom: 1.3rem;
+  border-left: 1px solid var(--text-muted);
+  pointer-events: none;
+}
+#reading[data-romaji="off"][data-gaps="on"] .gap::before { bottom: 0.3rem; }
+#reading[data-gaps="on"] .gap--part {
+  align-self: auto;
+  width: 0.3em; height: 1em;
+  vertical-align: -0.12em;
+}
+#reading[data-gaps="on"] .gap--part::before { top: 0; bottom: 0; }
+#reading[data-gaps="on"] .gap--guess::before { border-left-style: dashed; }
+#reading[data-gaps="on"] .gap:hover::before { border-left-color: var(--accent-bright); }
+
+/* A gap's reason, beside it, for a pointer. Inside the reading, never fixed
+   to the viewport: an embedded frame is as tall as its page (CLAUDE.md). */
+.gap-tip {
+  position: absolute; z-index: 3;
+  max-width: min(22rem, 100%);
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface-toast);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-card);
+  font-family: var(--font); font-size: var(--text-sm); line-height: 1.45;
+  color: var(--text-primary);
+  overflow-wrap: anywhere;
+  pointer-events: none;
+}
+.gaps-hint:empty { margin: 0; }
+
+/* The Word panel: the gap before the word, inside it, after it. */
+.word-gapl {
+  display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: baseline;
+  gap: var(--space-1) var(--space-3);
+  font-size: var(--text-sm); line-height: 1.5;
+}
+.word-gapl > div { display: contents; }
+.word-gapl dt { font-size: var(--text-xs); color: var(--text-muted); }
+.word-gapl dd { overflow-wrap: anywhere; }
+
 /* ── In this text ──────────────────────────────────────────── */
 .region-title {
   font-size: var(--text-sm);

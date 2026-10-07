@@ -46,4 +46,5 @@ data:
 	node tools/build-names.mjs
 	node tools/build-sounds-like.mjs
 	node tools/build-lookalikes.mjs
+	node tools/build-spaces.mjs
 	node tools/check-data.mjs

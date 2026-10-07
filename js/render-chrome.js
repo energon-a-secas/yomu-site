@@ -9,6 +9,7 @@ import { $, fill, h } from './utils.js';
 import { ui, useLang, currentLang, PLACEHOLDER } from './strings.js';
 import { MAX_CHARS } from './state.js';
 import { paintRemember } from './render-remember.js';
+import { paintGapsHint } from './render-gaps.js';
 
 const SPEECH_REASON = { checking: 'speechChecking', none: 'speechNone', 'no-api': 'speechNoApi' };
 
@@ -52,7 +53,9 @@ export function paintChrome(state) {
     reading.dataset.romaji = state.prefs.romaji;
     reading.dataset.highlights = state.prefs.highlights ? 'on' : 'off';
     reading.dataset.unsaved = state.prefs.unsaved;
+    reading.dataset.gaps = state.prefs.gaps ? 'on' : 'off';
   }
+  paintGapsHint(state);
 
   // The language toggle names the current language in bold and says in its
   // accessible name what a press switches to.

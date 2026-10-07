@@ -39,6 +39,10 @@ import { play, paintPlay, playFocus, resultOf } from './render-play.js';
 import {
   startOdd, newOddSitting, startClock, stopClock, tapCell, moveInGrid, oddGoOn, onVisibility, watchView,
 } from './events-odd.js';
+import {
+  startSpaces, spacesRoundNow, spacesKey, lendPaint, SPACES_ACTIONS,
+} from './events-spaces.js';
+import { spacesScore, spacesTotal, spacesCounts, missedLines } from './play-spaces.js';
 
 let epoch = 0;              // a new round or a new route makes older async work stale
 
@@ -220,6 +224,7 @@ async function startGame(game, { focus = true } = {}) {
   if (game === 'which') await startWhich(mine);
   else if (game === 'odd') await startOdd(() => mine !== epoch);
   else if (game === 'twins') play.twins.round = createRound('twins', twinsRound(TWINS));
+  else if (game === 'spaces') await startSpaces(() => mine !== epoch);
   else if (game === 'names') {
     play.name.round = null;
     await names();
@@ -233,11 +238,21 @@ async function startGame(game, { focus = true } = {}) {
 }
 
 function roundOf(game) {
-  return { which: play.which.round, twins: play.twins.round, names: play.name.round }[game] || null;
+  return {
+    which: play.which.round, twins: play.twins.round, names: play.name.round, spaces: spacesRoundNow(),
+  }[game] || null;
 }
 
 /** The round is over: count it, keep the best, show the result. */
 function finish(game, r) {
+  if (game === 'spaces') {
+    const points = spacesScore(r);
+    play.result = resultOf(game, r, myPlay().finish(game, points), {
+      score: points, of: spacesTotal(r), counts: spacesCounts(r), mixups: missedLines(r),
+    });
+    show();
+    return;
+  }
   const rec = myPlay().finish(game, score(r));
   play.result = resultOf(game, r, rec, { score: score(r), of: r.questions.length });
   ensureInfo(play.result.mixups.flat());
@@ -262,6 +277,7 @@ function goOn() {
   const r = roundOf(game);
   if (!r || !answeredNow(r)) return;
   next(r);
+  if (game === 'spaces') play.spaces.cursor = 0;
   if (finished(r)) { finish(game, r); return; }
   show();
 }
@@ -278,6 +294,7 @@ function onKey(e) {
   if (e.key === 'Escape') { e.preventDefault(); leave(); return; }
   if (play.result && play.result.game === game) return;
   if (game === 'odd' && moveInGrid(e)) return;
+  if (game === 'spaces' && spacesKey(e)) return;
   const onButton = !!(t && t.closest && t.closest('button, a'));
   if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
     if (onButton) return;            // the button does what it says
@@ -285,7 +302,7 @@ function onKey(e) {
     goOn();
     return;
   }
-  if (game === 'odd') return;
+  if (game === 'odd' || game === 'spaces') return;
   const r = roundOf(game);
   const q = current(r);
   if (!q || answeredNow(r) || !/^[1-9]$/.test(e.key)) return;
@@ -340,6 +357,7 @@ export const PLAY_ACTIONS = {
   'pl-retry': () => {
     if (play.look.state === 'error') play.look.state = 'idle';
     if (play.names.state === 'error') play.names.state = 'idle';
+    if (play.spaces.state === 'error') play.spaces.state = 'idle';
     startGame(gameOf(currentRoute()));
   },
   'pl-hear': () => {
@@ -350,10 +368,12 @@ export const PLAY_ACTIONS = {
   'pl-clock': () => startClock(),
   'pl-cell': (b) => tapCell(Number(b.dataset.ix)),
   'pl-save': savedToggle,
+  ...SPACES_ACTIONS,
 };
 
 /** Bind once, from bindEvents, before the route the page opened at is shown. */
 export function bindPlay() {
+  lendPaint({ repaint, show });
   onRoute((next, prev, { boot = false } = {}) => {
     if (gameOf(prev) && next !== prev) { epoch += 1; stopClock(); cancel(); }
     if (!isPlay(next)) return;

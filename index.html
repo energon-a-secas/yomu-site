@@ -180,7 +180,7 @@
 
         <div class="empty" id="empty" hidden></div>
 
-        <section class="reading" id="reading" aria-labelledby="reading-title" data-furigana="on" data-romaji="said" data-highlights="on" data-unsaved="mark" hidden>
+        <section class="reading" id="reading" aria-labelledby="reading-title" data-furigana="on" data-romaji="said" data-highlights="on" data-unsaved="mark" data-gaps="off" hidden>
           <h2 class="sr-only" id="reading-title" data-ui="reading">Reading</h2>
 
           <div class="tools">
@@ -207,6 +207,14 @@
                 <button class="seg-btn" type="button" data-act="set" data-pref="unsaved" data-value="mark" aria-pressed="true" data-ui="mark">Mark</button>
                 <button class="seg-btn" type="button" data-act="set" data-pref="unsaved" data-value="off" aria-pressed="false" data-ui="off">Off</button>
               </div>
+              <!-- Gaps (js/gaps.js, js/render-gaps.js): a mark at every edge between two
+                   words, and a hairline between the parts of a katakana compound. Off by
+                   default. A gap holds no text, so copying the reading copies no space. -->
+              <div class="seg" role="group" aria-labelledby="seg-gaps">
+                <span class="seg-label" id="seg-gaps" data-ui="gaps">Gaps</span>
+                <button class="seg-btn" type="button" data-act="set" data-pref="gaps" data-value="off" aria-pressed="true" data-ui="off">Off</button>
+                <button class="seg-btn" type="button" data-act="set" data-pref="gaps" data-value="on" aria-pressed="false" data-ui="on">On</button>
+              </div>
             </div>
 
             <div class="tools-row">
@@ -223,7 +231,13 @@
           </div>
 
           <p class="reading-hint" data-ui="readingHint">Choose a word to see it on its own. The arrow keys move between words.</p>
+          <!-- Said once, the first time Gaps is turned on (js/render-gaps.js). A live
+               region that stays in the page: only its text changes. -->
+          <p class="reading-hint gaps-hint" id="gaps-hint" role="status" aria-live="polite"></p>
           <div class="reading-body" id="reading-body" lang="ja"></div>
+          <!-- A gap's reason, beside it, for a pointer (js/events-gaps.js). The same
+               reason is in the Word panel, for a keyboard, a tap and a screen reader. -->
+          <p class="gap-tip" id="gap-tip" hidden></p>
         </section>
 
         <!-- On-device translation (js/render-translate.js, js/translate.js): the
@@ -283,13 +297,13 @@
       <input type="file" id="mk-file" accept=".json,application/json" tabindex="-1" hidden>
     </section>
 
-    <!-- Play (#/play, and #/play/which, /odd, /twins, /names for a game). Drawn
+    <!-- Play (#/play, and #/play/which, /odd, /twins, /names, /spaces for a game). Drawn
          by js/render-play.js and js/render-games.js into #pl-body; the reader is
          hidden, not emptied, while it shows, as it is for My kanji. -->
     <section class="mk pl" id="play" aria-labelledby="pl-title" hidden>
       <button class="text-link mk-back" type="button" id="pl-back" data-act="pl-back"><span aria-hidden="true">← </span><span id="pl-back-label">Back to the reader</span></button>
       <h2 class="mk-title" id="pl-title" tabindex="-1">Play</h2>
-      <p class="quiet mk-lead" id="pl-lead" data-ui="playLead">Four short games with the characters that look alike. Your best scores stay in this browser.</p>
+      <p class="quiet mk-lead" id="pl-lead" data-ui="playLead">Five short games: the characters that look alike, and where one word ends and the next begins. Your best scores stay in this browser.</p>
       <p class="mk-note" id="pl-note" role="status" aria-live="polite"></p>
       <div class="mk-body" id="pl-body"></div>
     </section>
@@ -366,7 +380,7 @@
       <p><strong>JMnedict.</strong> This site uses the JMnedict/ENAMDICT dictionary file. This file is the property of the Electronic Dictionary Research and Development Group, and is used in conformance with the Group's licence. The readings and types of the names Yomu shows (surnames, given names, places, people), and how a name written in katakana is spelled in Latin letters (トム, Tom), come from it, under <a href="https://www.edrdg.org/edrdg/licence.html" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a>; see the <a href="https://www.edrdg.org/enamdict/enamdict_doc.html" target="_blank" rel="noopener noreferrer">JMnedict</a> documentation.</p>
       <p><strong>KanjiVG.</strong> The parts listed for each kanji come from KanjiVG by Ulrich Apel, <a href="http://kanjivg.tagaini.net" target="_blank" rel="noopener noreferrer">http://kanjivg.tagaini.net</a>, used under <a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank" rel="noopener noreferrer">CC BY-SA 3.0</a>.</p>
       <p><strong>Tatoeba.</strong> Word frequency bands are counted over the Tatoeba Project's Japanese sentences, and the spelling shown for a name written in katakana is the one their English translations use most, used under the Creative Commons Attribution 2.0 France licence. No sentence is included. <a href="https://tatoeba.org/en/downloads" target="_blank" rel="noopener noreferrer">tatoeba.org</a></p>
-      <p><strong>Written here.</strong> The notes on sounds and grammar, the phrase library and the dialogues, and Play's hints, example words and look-alike rules were written for Yomu and are in the public domain. Which kanji look alike is chosen from KanjiVG's parts and KANJIDIC's stroke counts.</p>
+      <p><strong>Written here.</strong> The notes on sounds and grammar, the phrase library and the dialogues, and Play's hints, example words, look-alike rules and the lines with katakana compounds were written for Yomu and are in the public domain. Where the words of a line part, in the Gaps view and in Where are the spaces?, is Yomu's own reading of it over JMdict and JMnedict. Which kanji look alike is chosen from KanjiVG's parts and KANJIDIC's stroke counts.</p>
       <p><strong>Your text.</strong> What you paste is read in this browser. It is kept in this browser's local storage so a reload does not lose it, and Clear forgets it. It is never put in the address bar or sent anywhere, unless you click DeepL, Google Translate or Jisho, which open that site in a new tab with the text or the word.</p>
       <p><strong>My kanji.</strong> The kanji you save, their review dates, how many texts you met each kanji in, what kind of text each was last met in, and up to eight dictionary words per kanji are kept in this browser's local storage too. The text itself is not. Export writes them to a file on your device; nothing is sent anywhere.</p>
       <p><strong>Play.</strong> Each game's best score, how many rounds you played, and how often you mixed up each pair of characters are kept in this browser's local storage. No text is.</p>

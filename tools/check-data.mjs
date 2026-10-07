@@ -52,6 +52,12 @@
  *     five, one twice or a kanji as its own, a pair between two jōyō kanji
  *     one way only, or anything but what tools/lib/lookalikes.mjs builds
  *     from the shards
+ *   - the lines of "Where are the spaces?" (data/play/spaces.json) missing
+ *     beside the phrase library, or not in the shape tools/lib/spaces.mjs
+ *     emits: tiers in order, every gap at a position between two characters
+ *     words are made of, in order, with a reason js/gaps.js knows, and no
+ *     text or id twice. Whether the gaps are the analyzer's is
+ *     tests/spaces.test.mjs's to say, since that needs the analyzer
  *
  * A new kind of data file gets its format id and a checker in FORMATS below,
  * in the same commit that adds the file.
@@ -70,6 +76,7 @@ import { BANNED_WORDS } from './lib/licence.mjs';
 import { LOOKALIKES_FORMAT, LOOKALIKES_SRC, lookalikesProblems } from './lib/lookalikes.mjs';
 import { KATAKANA_TYPES, LATIN_NAME } from './lib/jmnedict.mjs';
 import { popularProblems, POPULAR_FORMAT } from './lib/popular.mjs';
+import { SPACES_FORMAT, SPACES_SRC, spacesProblems } from './lib/spaces.mjs';
 
 const DATA = process.argv[2] ? path.resolve(process.argv[2]) : path.join(SITE, 'data');
 // Paths are reported, and index `src` values resolved, relative to the
@@ -266,6 +273,7 @@ const FORMATS = {
   'yomu-like-index/1': null,
   'yomu-like/1': checkLikeGroup,
   [LOOKALIKES_FORMAT]: null,
+  [SPACES_FORMAT]: (rel, doc) => { for (const why of spacesProblems(doc)) fail(rel, why); },
 };
 
 // ── Indexes against their shards ──────────────────────────────────────────
@@ -445,6 +453,11 @@ function checkLookalikes(docs) {
   for (const why of lookalikesProblems(doc, entries, chars)) fail(LOOKALIKES_SRC, why);
 }
 
+/** "Where are the spaces?" reads the phrase library's lines: its file goes where the library goes. */
+function checkSpaces(docs) {
+  if (!docs.get(SPACES_SRC) && docs.get('data/phrases/library.json')) fail(SPACES_SRC, 'missing, but the phrase library exists');
+}
+
 /**
  * The popular names (data/names/popular.json, tools/lib/popular.mjs): the
  * rows' format and order, and, where the names tier is beside it, that each
@@ -572,6 +585,7 @@ function main() {
   checkPopular(docs);
   checkLikeIndex(docs);
   checkLookalikes(docs);
+  checkSpaces(docs);
 
   if (failures.length) {
     for (const f of failures.slice(0, 50)) process.stderr.write(`FAIL ${f}\n`);

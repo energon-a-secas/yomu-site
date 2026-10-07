@@ -16,6 +16,7 @@ import { STRINGS } from '../js/strings.js';
 import { COLLECT_STRINGS } from '../js/strings-collect.js';
 import { PLAY_STRINGS } from '../js/strings-play.js';
 import { READER_STRINGS } from '../js/strings-reader.js';
+import { GAPS_STRINGS } from '../js/strings-gaps.js';
 
 const SITE = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const BANNED = /\b(powerful|seamless|leverages?|robust|utili[sz]e)\b/i;
@@ -34,8 +35,16 @@ test('Play\'s strings are in the table, none overridden, and no key is in both m
   }
 });
 
+test('the Gaps option\'s strings are in the table, none overridden, and no key is in another merged table', () => {
+  for (const [key, value] of Object.entries(GAPS_STRINGS)) {
+    assert.equal(STRINGS[key], value, key);
+    for (const other of [COLLECT_STRINGS, PLAY_STRINGS, READER_STRINGS]) assert.ok(!Object.hasOwn(other, key), `${key} is in two tables`);
+  }
+});
+
 test('every new string has English and neutral Spanish, the same placeholders, and none of the banned words', () => {
-  for (const [key, value] of [...Object.entries(COLLECT_STRINGS), ...Object.entries(PLAY_STRINGS), ...Object.entries(READER_STRINGS)]) {
+  const tables = [COLLECT_STRINGS, PLAY_STRINGS, READER_STRINGS, GAPS_STRINGS];
+  for (const [key, value] of tables.flatMap((x) => Object.entries(x))) {
     assert.equal(typeof value.en, 'string', `${key}.en`);
     assert.equal(typeof value.es, 'string', `${key}.es`);
     assert.ok(value.en.trim() && value.es.trim(), key);

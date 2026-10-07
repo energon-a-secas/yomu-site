@@ -506,7 +506,13 @@ test('the store keeps the best and the rounds per game, and counts mix-ups', () 
   assert.equal(recordMixed(d, 'シ', 'ツ'), 2);
   assert.equal(recordMixed(d, 'Tom', 'Tim'), 0, 'a name is not a pair of characters');
   assert.deepEqual(d.mixed, { 'シ|ツ': 2 });
-  assert.deepEqual(GAME_IDS, ['which', 'odd', 'oddFree', 'twins', 'names']);
+  // 'spaces' joined on 2026-10-07 with "Where are the spaces?", the fifth
+  // game; its score is points, not ten questions, so its top is no ten.
+  assert.deepEqual(GAME_IDS, ['which', 'odd', 'oddFree', 'twins', 'names', 'spaces']);
+  assert.deepEqual(recordRound(d, 'spaces', 37), { best: 37, isBest: true });
+  assert.deepEqual(recordRound(d, 'spaces', 12), { best: 37, isBest: false });
+  assert.deepEqual(validate({ games: { spaces: { best: 37, rounds: 2 } } }).data.games, { spaces: { best: 37, rounds: 2 } });
+  assert.equal(validate({ games: { spaces: { best: 1000, rounds: 2 } } }).dropped, 1, 'over any round\'s points');
 });
 
 test('a store is read field by field: what does not fit is left out and counted', () => {

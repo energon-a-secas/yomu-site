@@ -112,6 +112,7 @@ same text and the same data give the same tokens.
 | `furigana.js` | aligning a reading to a surface, per kanji where the data allows | `kana.js` |
 | `analyze.js` | the pipeline above: the first pass, the second phase where it guessed, the tokens | all of the above |
 | `render*.js`, `events*.js`, `state.js` | the page | `analyze.js`, `notes.js`, `strings.js` |
+| `gaps.js` | where one word ends and the next begins, and the one reason for each edge, read from tokens the analyzer built (kinds, parts, confidence, the characters); the places, marks and score of "Where are the spaces?" | `kana.js` |
 | `play-*.js`, `routes.js` | Play's rounds, store, data and authored content, and the page's routes, with no DOM (CLAUDE.md, "Play") | `kana.js`, `reader.js` (`fetchJson`), `neorgon-persist.js` |
 
 The analyzer modules (`kana` to `analyze`) never touch the DOM, so `npm test`
@@ -1306,10 +1307,94 @@ right word; ビリーブ (believe), リクワイア (require) and シャイン (
 none. No guess is offered under four katakana: at two and three, more than
 half the dictionary's short loanwords line up with some other word first.
 
+## Gaps: where the words part (2026-10-07)
+
+The reading has no spaces, as Japanese has none. `gaps.js gapsOf(tokens)`
+lists every edge between two word tokens that touch (punctuation, spaces and
+Latin letters have none beside them) and every edge between two parts of a
+katakana compound, as `{ at, i, j, part, guess, why, ...vars }`: `at` a UTF-16
+offset like a token's `start`, `part` the index of the part after a
+compound's edge or null, `guess` whether a guess touches it. It reads nothing
+the tokens do not hold, and it never moves an edge: the edges are the
+lattice's.
+
+One reason per edge, the first that holds: `particle` and `copula` (the
+token on either side is one: a closed class, so the surest edge), `name` (a
+name the names tier knows, with its Latin spelling when it has one), `script`
+(the last script of the word before, read past ー, against the first of the
+word after; a word that is only ー has no script of its own, and an edge
+before a kana no word starts with is `guess`, never `script`: す|ご|ー|いね
+was "hiragana to katakana" before the bar that lengthens ご), `loan` (katakana on both sides and the word before ends in ド,
+ト, ス, ク, グ or ル after ン, ッ, a u-column kana, ト or ド: ゴールド|カード,
+クレアディルド|オナニー), `nostart` (the word before ends in a kana no word
+starts with: katakana ン, ッ, ー, a small kana; ラーメン|ショップ. Not
+hiragana ん, which the analyzer reads as a word of its own, the explanatory
+ん of 登る|ん|です), `guess` (the word before has no dictionary support, or
+the word after starts with a kana no word starts with; `k` names that kana),
+`compound` (two plain parts), `word` (a
+dictionary word ends here; `f` says a form of one, with `base`, a number and
+its counter, or a prefix, a record whose first part of speech is `pref`).
+The order puts what a reader can see on the page before what only the
+dictionary knows, and a guess below every cue: クレアディルド is a guess, and
+its ド after ル is still what shows where it ends, and the gap's `guess`
+flag puts that in words after whatever reason won ("; the reading here is a
+guess"). The strings are `strings-gaps.js`'s; a gap, like a token, carries
+ids. Where a word has no gap, `besideOf(tokens, i, side)` says what stands
+there instead (`start`, `end`, `punct`, `space`, `latin`, `other`), for the
+Word panel.
+
+"Where are the spaces?" asks for the same edges in lines from the phrase
+library: `data/play/spaces.json` (`yomu-spaces/1`, `{ format, count, tiers,
+lines: [{ id, src, of?, tier, ja, en?, es?, gaps: [{ at, why, ...vars,
+part? }] }] }`, `at` in code points), emitted by `tools/build-spaces.mjs`
+through `tools/lib/spaces.mjs`, which says what is kept and what is left out
+and why. A key must never dock a learner for a split the language makes, so
+a line is kept only where the analysis settles where its words part;
+`unsettled` reads the dictionary (both tiers, through `dictWords`, over a
+dictionary of its own so nothing it loads reaches the analysis) and no list
+of lines. Measured on 2026-10-07, after the review of the first build (159
+lines, which kept 卵|焼き, 何|と言います and いって read as 要る): the
+library's 71 phrases and 61 dialogue turns are 151 sentences; 67 are kept as
+written and 42 more in hiragana (the library's own kana, punctuation put
+back, kept only where that spelling reads with the written line's edges and
+its words), with the twelve compound lines 121, tiers 48, 61 and 12. Left
+out:
+
+| reason | lines | what |
+|---|---:|---|
+| set | 31 | the set phrases (`chunk`); no dialogue sentence holds one the analysis cuts inside |
+| none | 20 | no edge to find |
+| two | 15 | one token that is two words: a te-form and its verb (しています, 見ている, 持っていきます, 作ってみます), and an expression that is a word and a form of する or ございます: お願い\|します (eleven, where the same file splits 連絡\|します), ありがとう\|ございました |
+| prefix | 12 | a prefix standing alone (お\|元気, ご\|利用, where the dictionary has お名前 as one word), six written and six kana spellings (ごひゃくえん) |
+| tail | 5 | a word that ends in a particle: 何\|と (と quotes), 一緒\|に twice, 何\|か, and だ\|っけ, the copula and a particle |
+| kana | 3 | kana spellings that part where the kanji do not (であいます, 出会う, for で\|会います) |
+| joined | 2 | two tokens that spell one word: 卵\|焼き (rare tier, rolled omelette), 作り\|方 (recipe) |
+| counter | 2 | the counter runs on: 何番\|線, 五番\|線 (番線, track number) |
+| base | 2 | a kana spelling read as another word: いって as 要る for 行って, さとう as 砂糖 for 佐藤 |
+| reading | 1 | 空いて, the one disagreement tests/library-reading.test.mjs allows |
+| long | 1 | too long for a phone's board |
+| twice | 1 | the same text again |
+
+A written line left out takes its kana spelling with it, so 53 spellings
+were tried, not 70. What the checks do not count: an expression JMdict lists
+as `exp` is several words, so もう\|少し and 気\|を\|つけて stay split; a
+particle never joins a word (と\|山 is not 外山); and the dictionary's
+one-kana particles (て, つ, い) end too many words to count after one, so
+they count only after the copula. Read by hand, the keys that stand though a
+grammar could argue them: a prefix joined to its word (お名前, お会計, お弁当:
+a prefix never stands alone, and no writing puts a space after it), どういう
+(one adnominal in JMdict), 二つ目 and 何時 (a number and its counter),
+はじめまして, and a te-form before もらえます or ください, which the analysis
+already splits. No line holds a guess. Not one library line
+holds a katakana compound the analyzer splits, so the hard tier is twelve
+lines written for Yomu (`tools/lib/compound-lines.mjs`), checked the same
+way. `tests/spaces.test.mjs` builds the file again and fails when the
+analyzer moves an edge.
+
 ## Licences
 
 - JMdict (jmdict-simplified's jmdict-eng) and KANJIDIC: Electronic Dictionary Research and Development Group, CC BY-SA 4.0. The acknowledgement is shown on the page whenever a gloss or a kanji reading is.
 - JMnedict (jmdict-simplified's jmnedict-all), for `data/names/`: the same Group and licence. Its acknowledgement (`tools/lib/licence.mjs`, the EDRDG's sample text with the names file named) must be on the page whenever a name from the names tier is.
 - KanjiVG: Ulrich Apel, CC BY-SA 3.0, for `parts`.
 - Tatoeba: CC BY 2.0 FR, used to rank keys, to choose and count names, and, through the English translations of its Japanese sentences, to choose which of a katakana name's JMnedict spellings is shown; no sentence ships.
-- The phrase library and every note are written here and are public domain.
+- The phrase library, the compound lines of "Where are the spaces?" and every note are written here and are public domain. `data/play/spaces.json` carries JMdict's licence block, with JMnedict and the authored lines as inputs, because where its lines part is the analysis over both.

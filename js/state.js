@@ -1,6 +1,6 @@
 // The page's state, and the two places any of it is kept.
 //
-// Preferences (language, the four display toggles, slow speech, and whether
+// Preferences (language, the five display toggles, slow speech, and whether
 // to remember what was read) go through the Persist kit under
 // 'yomu-site:preferences', version 1. The pasted text is kept apart, raw,
 // under 'yomu-site:text', for one reason: a reload should not lose a sentence
@@ -36,7 +36,11 @@ export const REMEMBER = Object.freeze(['ask', 'on', 'off']);
 export const TRANSLATE = Object.freeze(['on', 'off']);
 
 export const state = {
-  prefs: { lang: 'en', furigana: true, romaji: 'said', highlights: true, unsaved: 'mark', slow: false, remember: 'ask', translate: 'off' },
+  // `gaps` draws the edges between words (gaps.js), off until the learner
+  // asks; `gapsSeen` is whether its one-line hint was shown once already.
+  prefs: {
+    lang: 'en', furigana: true, romaji: 'said', highlights: true, unsaved: 'mark', gaps: false, gapsSeen: false, slow: false, remember: 'ask', translate: 'off',
+  },
   embed: false,
   text: '',
   truncated: false,
@@ -50,6 +54,9 @@ export const state = {
   pinnedKanji: null,     // a kanji tapped on a touch screen
   speech: 'checking',    // checking | ok | none | no-api
   speaking: false,
+  // The Gaps hint shows: Gaps was turned on for the first time ever, in this
+  // visit, and has not been turned off since.
+  gapsHint: false,
   // What History knew about the text on screen before this session read it
   // (history-store.js recordText), for "You read this before". Null when
   // remembering is off or nothing was known.
@@ -89,6 +96,8 @@ export function loadPrefs(s, loc = globalThis.location, nav = globalThis.navigat
   if (ROMAJI.includes(p.romaji)) s.prefs.romaji = p.romaji;
   if (typeof p.highlights === 'boolean') s.prefs.highlights = p.highlights;
   if (UNSAVED.includes(p.unsaved)) s.prefs.unsaved = p.unsaved;
+  if (typeof p.gaps === 'boolean') s.prefs.gaps = p.gaps;
+  if (typeof p.gapsSeen === 'boolean') s.prefs.gapsSeen = p.gapsSeen;
   if (typeof p.slow === 'boolean') s.prefs.slow = p.slow;
   if (REMEMBER.includes(p.remember)) s.prefs.remember = p.remember;
   if (TRANSLATE.includes(p.translate)) s.prefs.translate = p.translate;

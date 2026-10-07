@@ -6,7 +6,7 @@
 //
 // My kanji: the list (#/kanji), a review, the Collection and History; the
 // parent of each of the last three is the list, and the list's is the reader.
-// Play: the four games (#/play) and one route per game, whose parent is
+// Play: the five games (#/play) and one route per game, whose parent is
 // #/play. Back is history.back() when the history entry before this one is
 // the parent route, otherwise a replaceState to it (events-kanji.js leave).
 
@@ -20,6 +20,7 @@ export const ROUTES = Object.freeze({
   '#/play/odd': 'play-odd',
   '#/play/twins': 'play-twins',
   '#/play/names': 'play-names',
+  '#/play/spaces': 'play-spaces',
 });
 
 export const HASH = Object.freeze({
@@ -33,6 +34,7 @@ export const HASH = Object.freeze({
   'play-odd': '#/play/odd',
   'play-twins': '#/play/twins',
   'play-names': '#/play/names',
+  'play-spaces': '#/play/spaces',
 });
 
 export const PARENT = Object.freeze({
@@ -46,22 +48,23 @@ export const PARENT = Object.freeze({
   'play-odd': 'play',
   'play-twins': 'play',
   'play-names': 'play',
+  'play-spaces': 'play',
 });
 
 /** The string each of Play's routes is titled with (strings-play.js). */
 export const PLAY_TITLE = Object.freeze({
-  play: 'play', 'play-which': 'gameWhich', 'play-odd': 'gameOdd', 'play-twins': 'gameTwins', 'play-names': 'gameNames',
+  play: 'play', 'play-which': 'gameWhich', 'play-odd': 'gameOdd', 'play-twins': 'gameTwins', 'play-names': 'gameNames', 'play-spaces': 'gameSpaces',
 });
 
 /** The games, by route; each route is 'play-' and the game's id. */
-export const GAMES = Object.freeze(['which', 'odd', 'twins', 'names']);
+export const GAMES = Object.freeze(['which', 'odd', 'twins', 'names', 'spaces']);
 
 /** The route an address names; anything else is the reader. */
 export function routeOf(hash) {
   return ROUTES[hash] || 'reader';
 }
 
-/** Is this route Play's: the four games, or one of them. */
+/** Is this route Play's: the five games, or one of them. */
 export function isPlay(route) {
   return route === 'play' || String(route).startsWith('play-');
 }

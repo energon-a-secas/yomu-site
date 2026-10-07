@@ -21,8 +21,9 @@ http://localhost:8895/?embed=1&lang=en         when the host itself is on localh
 - The embed bar holds three links. "My kanji" opens the learner's saved kanji
   inside the frame (`#/kanji`, and a review at `#/kanji/review`), with the
   number of reviews due beside it; Back on that screen returns to the reading,
-  and the host's own URL never changes. "Play" opens the four look-alike
-  games inside the frame (`#/play`); Escape in a game goes back to the list
+  and the host's own URL never changes. "Play" opens the five games
+  inside the frame (`#/play`): the four look-alike games and Where are the
+  spaces?; Escape in a game goes back to the list
   of games and is not passed to the host, as in a review. "Open in Yomu"
   opens Yomu on its own in a new tab. My kanji lives in the frame's storage, so inside
   `runcible.neorgon.com` it is the same list as on yomu.neorgon.com only where
