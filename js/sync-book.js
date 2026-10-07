@@ -24,11 +24,13 @@
 //   at        the last sync that finished (ms), for the My kanji line
 //   removed   { kanji: { 天: ms }, phrases: { key: ms } }: removals made here
 //             and not yet known to have reached the account
-//   saves     { kanji: { 天: ms }, phrases: { key: ms } }: when a save here
-//             counts as made, where its own time would lose to a removal or
-//             a Clear all this browser knew of: a save brought back by
-//             Import (saved now, after any removal known), and a save made
-//             after a removal this browser stamped ahead of its own clock
+//   saves     { kanji: { 天: ms }, phrases: { key: ms } }: when each save
+//             made here counts as made, until a push carries it: its own
+//             time, or one past a removal or Clear all this browser knows
+//             when that is later; and a save brought back by Import (saved
+//             now, after any removal known). Kept here because the store
+//             cannot keep it: a merge moves the store's save time back to
+//             the earliest copy's (sync-watch.js)
 //   prefsAt   { lang: ms, ... }: when each synced preference last changed here
 //   prefsVal  { lang: 'es', ... }: its value then, to tell a change from a save
 //

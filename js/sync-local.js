@@ -9,14 +9,16 @@
 // They are rebuilt here from the book (sync-book.js) and from the server's
 // own copy of the row, so a store never has to hold them:
 //
-//   s    the save's own time, or the book's stamp for it if later: its
-//        join stamp when this browser brought it to the account
-//        (sync-book.js `brought`), or a save brought back by Import or made
-//        after a removal stamped ahead of this clock (`saves`); or the
-//        server's s if later still and the server's save is this same save
-//        (the same `at`, or for a phrase the same `saved`): a save made
-//        before a removal must not borrow a newer save's time. A save the
-//        join received from the account has no stamp of its own here
+//   s    the latest of: the save's own time in the store; the book's
+//        stamps for it, its join stamp when this browser brought it to the
+//        account (sync-book.js `brought`) and the stamp of a save made here
+//        or brought back by Import (`saves`, kept until a push carries it);
+//        and the server's s when the server's save is this same save (the
+//        same `at`, or for a phrase the same `saved`): a save made before a
+//        removal must not borrow a newer save's time. The store's own time
+//        is no stamp: merging the account's older copy moves it back to the
+//        earliest, which is why a save made here is stamped in the book. A
+//        save the join received from the account has no stamp here
 //   day  the server's day for that word, or the kanji's last day here
 //   e    the book's epoch
 //

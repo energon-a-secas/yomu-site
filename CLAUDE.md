@@ -596,6 +596,7 @@ what Convex refuses), `tests/sync-client.test.mjs` (devices made of the real
 stores, `tests/helpers/sync-device.mjs`, three of them in random order,
 converging), `tests/sync-stamps.test.mjs` (Import, and clocks that disagree),
 `tests/sync-join.test.mjs` (what a join stamps),
+`tests/sync-saves.test.mjs` (a save keeps its own time through a merge),
 `tests/sync-account.test.mjs` and `tests/sync-tabs.test.mjs` (two tabs of
 one browser over the same storage).
 
@@ -625,12 +626,23 @@ are ASCII (`mixed` travels as `[{ k, n }]`).
 one.** A row carries `removed`; a saved kanji or phrase carries `s`, the
 latest time it was saved (`at` and `saved` stay the earliest, as Import
 keeps them). The stores never hold `s`: `sync-local.js` rebuilds it as the
-save's own time, the book's stamp for that save if later (its join stamp in
-`brought`, or `saves`, both below), or the server's `s` when the server's save
-is the same save (the same `at`, or `saved`). Borrowing the
+latest of the save's own time, the book's stamps for that save (its join
+stamp in `brought`, and `saves`, both below), and the server's `s` when the
+server's save is the same save (the same `at`, or `saved`). Borrowing the
 server's `s` for a different save brought a save made before a Clear all
 back to life inside the newer one (its regression test is in
-`tests/sync-client.test.mjs`). A removal is written to the book only by
+`tests/sync-client.test.mjs`).
+
+**Every save made here is stamped in the book with its own time.**
+`sync-watch.js` writes it into `saves` (one past the newest removal this
+browser knows, when that is later), the stamp never goes down, and it is
+forgotten only once a push has carried it. The store cannot keep that
+time: a merge moves its save time back to the earliest copy's. Before the
+stamp, a save of 二 at T20 by a browser that did not hold it took the
+account's T10 in the merge, borrowed the account's `s`, and lost to
+another device's offline unsave at T15, with every clock correct
+(`tests/sync-saves.test.mjs`, kanji and phrases, and saves made after an
+answer to the account question). A removal is written to the book only by
 the learner's own unsave: `sync-watch.js` ignores what sync writes
 (`applying`), since a removal stamped "now" while applying another device's
 would outrank a save made after it. The book is read from storage on every
@@ -691,10 +703,10 @@ is the device's own clock. A removal or a Clear all made here is stamped at
 least one past the newest save this browser knows for that row (the
 store's own, a stamp in the book, the account's copy as the page last saw
 it, `sync.js known()`): `max(now, known s + 1)`. A save made here is
-stamped one past the newest removal it knows when its own time is not
-later. Without the first, a device an hour behind unsaved a kanji and saw
-it come straight back; without the second, the same device could not save
-again what it had just removed. Both are in `tests/sync-stamps.test.mjs`.
+stamped `max(its own time, known removal + 1)`. Without the first, a
+device an hour behind unsaved a kanji and saw it come straight back;
+without the second, the same device could not save again what it had just
+removed. Both are in `tests/sync-stamps.test.mjs`.
 
 **The eight words per kanji are the eight met last.** A word travels with
 the day it was last met (`[written, reading, day]`, the server's day or the

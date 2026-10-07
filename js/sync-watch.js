@@ -47,18 +47,19 @@ const NOTHING = Object.freeze({ s: 0, removed: 0 });
 
 /**
  * Listen to the four stores. An unsave and a Clear all go into the book as
- * tombstones, a save that a known tombstone would outrank is stamped after
- * it, a preference saved with a new value is stamped, and `changed()` hears
- * every change the learner made (js/account.js debounces a push on it).
+ * tombstones, every save is stamped with its own time, a preference saved
+ * with a new value is stamped, and `changed()` hears every change the
+ * learner made (js/account.js debounces a push on it).
  * `known(kind, id)` is the account's copy of a row as the page last saw it
  * (js/sync.js known()). Returns a function that stops listening.
  *
  * Every time here is this device's clock, and another device's may run
  * ahead of it. So a removal or a Clear all is stamped one past the newest
  * save of that row this browser knows (the store's own, a stamp in the book,
- * the account's copy) when that is later than now, and a save made after a
- * removal it knows is stamped one past that removal: what the learner just
- * did on the screen is what syncs, whatever the clocks say.
+ * the account's copy) when that is later than now, and a save is stamped
+ * one past the newest removal it knows when that is later than its own
+ * time: what the learner just did on the screen is what syncs, whatever
+ * the clocks say.
  */
 export function watchStores({ kanji, history, play, onPrefsSaved, books, local, now = Date.now, changed = () => {}, known = () => NOTHING }) {
   const mine = () => !local.applying;
@@ -88,14 +89,16 @@ export function watchStores({ kanji, history, play, onPrefsSaved, books, local, 
     });
   }
   /**
-   * A save made here: its own time stands unless a removal this browser
-   * knows is as late. It is a new save, so it was not brought to a join.
+   * A save made here is stamped at its own time, or one past the newest
+   * removal this browser knows when that is later. The store cannot keep
+   * that time: a sync that merges the account's older copy of the row
+   * moves the store's save back to the earliest. The stamp stays until a
+   * push carries it, and never goes down. It is a new save, so it was not
+   * brought to a join.
    */
   function saved(kind, id, at) {
     books.update((b) => {
-      const removal = newestRemoval(b, kind, id);
-      if (removal >= at) b.saves[kind][id] = removal + 1;
-      else delete b.saves[kind][id];
+      b.saves[kind][id] = Math.max(b.saves[kind][id] || 0, at, newestRemoval(b, kind, id) + 1);
       delete b.brought[kind][id];
     });
   }
