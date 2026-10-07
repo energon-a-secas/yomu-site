@@ -293,17 +293,21 @@ test('a failure is said on the line once, as offline or as the server\'s error, 
  * with or without spaces (`import{a}from'...'`), and with comments between
  * the braces, before the specifier (`import /* c *\/ '...'`, `from // c`
  * then the specifier on the next line) or before the `import` on its line.
- * A comment is taken whole (a line comment to its end, a block comment to
- * its first close), so an apostrophe in one does not end the clause and a
- * `from '...'` written in one is never read as the import. A dynamic
- * import('...') is not one, with a comment before it or not: that is the
- * guard.
+ * A statement starts a line, or follows a `;` or a `}` on it (`const a = 1;
+ * import '...'`, `;import '...'`), and a file may open with a byte order
+ * mark. A comment is taken whole (a line comment to its end, a block
+ * comment to its first close), so an apostrophe in one does not end the
+ * clause and a `from '...'` written in one is never read as the import. A
+ * dynamic import('...') is not one, with a comment before it or not: that
+ * is the guard.
  */
 const COMMENT = String.raw`\/\/[^\n]*$|\/\*[^*]*\*+(?:[^/*][^*]*\*+)*\/`;
 const BLOCK = String.raw`\/\*[^*]*\*+(?:[^/*][^*]*\*+)*\/`;
 /** Between two parts of the statement: spaces, line breaks and comments. */
 const GAP = String.raw`(?:\s|${COMMENT})*`;
-const STATIC_IMPORT = new RegExp(String.raw`^[ \t]*(?:${BLOCK}[ \t]*)*(?:import|export)${GAP}(?:(?:[^'"\x60;()/]|${COMMENT})*?\bfrom${GAP})?(['"])([^'"\n]+)\1`, 'gm');
+/** Where a statement may start: a line's start, or after a `;` or `}` on it. */
+const START = String.raw`(?:^|[;}])[ \t\uFEFF]*(?:${BLOCK}[ \t]*)*`;
+const STATIC_IMPORT = new RegExp(String.raw`${START}(?:import|export)\b${GAP}(?:(?:[^'"\x60;()/]|${COMMENT})*?\bfrom${GAP})?(['"])([^'"\n]+)\1`, 'gm');
 const staticSpecifiers = (src) => [...src.matchAll(STATIC_IMPORT)].map((m) => m[2]);
 /** What only a signed-in page may load: the kit, the sync client, the page's sign-in, esm.sh, the Convex package. */
 const SIGNED_IN_ONLY = /neorgon-auth\.js$|(^|\/)sync\.js$|events-sync\.js$|esm\.sh|^convex(\/|$)/;
@@ -335,6 +339,12 @@ test('the import guard finds every kind of static import, in either quote, and n
     "/* sign-in only */ import './neorgon-auth.js';",
     "export * from /* the kit */ './neorgon-auth.js';",
     "import\n  './sync.js';",
+    // Found by the review after: a statement before it on the same line.
+    "const a = 1; import './sync.js';",
+    ";import './sync.js';",
+    "function f() {} import './sync.js';",
+    "let b = 2; export * from './neorgon-auth.js';",
+    "\uFEFFimport './sync.js';",
   ];
   for (const line of planted) {
     const found = staticSpecifiers(`// a module\n${line}\nconst x = 1;\n`);
@@ -353,6 +363,9 @@ test('the import guard finds every kind of static import, in either quote, and n
     "export const a = 1; // from './sync.js'",
     "const m = await import(/* the client */ './sync.js');",
     "import /* dynamic */ ('./sync.js').then(() => {});",
+    "const a = 1; const m = await import('./sync.js');",
+    "x = 1; import('./events-sync.js').then((m) => m.startAccounts());",
+    "const important = 1; exported(); // not from './sync.js'",
   ];
   for (const line of fine) {
     assert.ok(staticSpecifiers(line).every((s) => !signedInOnly(s)), line);

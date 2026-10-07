@@ -610,8 +610,9 @@ clerk-js only with a Neorgon session or on Sign in; the Convex client
 the CSP allows that one path) and `sync.js` are imported on sign-in. A
 static import of any of them (`import ... from`, a side-effect `import '...'`,
 an `export ... from`, in either quote, with no spaces, with comments inside
-the braces, before the specifier or before the `import`, across lines, or
-with a query on the specifier) fails `tests/sync-account.test.mjs`, which
+the braces, before the specifier or before the `import`, across lines,
+after another statement on its line, or with a query on the specifier)
+fails `tests/sync-account.test.mjs`, which
 also fails when the CSP's connect-src lacks `CONVEX_URL` or script-src lacks
 the pinned path: a new deployment changes both in one commit. The client is
 `ConvexHttpClient`, so there is no websocket and no `wss:` in the CSP.
