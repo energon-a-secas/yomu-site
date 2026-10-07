@@ -96,8 +96,19 @@ tier reads as another word (あめ is 雨 first) and folds its katakana form
 (アメ色) onto it; its hiragana part needs two kana and may not start with a
 particle after a kanji (何がし read 何がしたい as 何がし|たい), and it is
 banded only on `MIN_MATCHES` matches, so the bands the common keys fill do not
-grow. `YOMU_RULES_OFF=mixed` (or `asked`) builds without a rule, for a
-measuring run only.
+grow. A spelling JMdict gives several entries goes to the one the corpus
+matches (つき物 is 付き物, whose all-kanji 付物 is search-only, not 憑き物).
+Every record of a mixed spelling carries `m`, and `m` is all the lattice's
+`COST.endsInsideWord` reads (毎秋りんご園 is 秋|りんご): such a key pays it
+when its closing hiragana and the rest of the hiragana after it are one banded
+word, and no particle or copula form follows the key. Do not scope it by the
+band again: half the first tier has no band, and the corpus cannot see what
+that misreads (一区切り read 一|区|切り). The cost reads the hiragana stretch
+with `dict.get` and ships nothing, which stays deterministic only because
+`keysForRun` asks for every hiragana substring up to `maxKey` and the filter
+has no false negatives (the argument `countedRecord` also rests on).
+`YOMU_RULES_OFF=mixed` (or `asked`) builds without a rule, for a measuring run
+only.
 
 **A number before 名 is a count of people, めい.** 名 is in the counter
 table (`numbers.js`), so 十名 is じゅうめい and 三名 さんめい, one number token;

@@ -528,9 +528,14 @@ test('an authored class decides a few rows the corpus cannot reach, each with it
   const {
     rowType, popularCandidates, popularProblems, ROW_TYPES,
   } = await import('../tools/lib/popular.mjs');
-  assert.deepEqual(NAME_CLASSES.map((e) => [e.name, e.o, e.type]), [
+  // the three no evidence reaches come first; the people read by hand from
+  // their own sentences on 2026-10-07 follow, every one a person
+  assert.deepEqual(NAME_CLASSES.slice(0, 3).map((e) => [e.name, e.o, e.type]), [
     ['ロミオ', 'Romeo', 'person'], ['フランツ', 'Franz', 'person'], ['ノラ', 'Nora', 'person'],
   ]);
+  assert.deepEqual(NAME_CLASSES.slice(3).map((e) => [e.name, e.o]).slice(0, 3), [['パークス', 'Parks'], ['カイリー', 'Kylie'], ['ゲーリー', 'Gary']]);
+  assert.ok(NAME_CLASSES.every((e) => e.type === 'person'));
+  assert.equal(new Set(NAME_CLASSES.map((e) => e.name)).size, NAME_CLASSES.length, 'one entry per name');
   assert.ok(Object.isFrozen(NAME_CLASSES) && NAME_CLASSES.every((e) => Object.isFrozen(e)));
   for (const e of NAME_CLASSES) {
     assert.ok(ROW_TYPES.includes(e.type), e.name);

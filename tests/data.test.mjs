@@ -618,12 +618,17 @@ test('popular.json: the corpus\'s commonest katakana names with their original s
   assert.deepEqual(row('エベレスト').slice(1, 3), ['Everest', 'place'], 'Mt. Everest, Mount Everest');
   assert.equal(names.get('エベレスト').n, 'surname place', 'the names tier keeps JMnedict\'s types');
   // and the rows no corpus evidence reaches take their authored class, each
-  // over a tier that still types it only a place
+  // over a tier that types it a place
   const { NAME_CLASSES } = await import('../tools/lib/name-classes.mjs');
-  assert.equal(NAME_CLASSES.length, 3);
+  // three no evidence reaches, and 21 people read by hand from their own
+  // sentences on 2026-10-07 (Rosa Parks, Kylie Minogue, Sammy Davis...)
+  assert.equal(NAME_CLASSES.length, 24);
   for (const { name, o, type } of NAME_CLASSES) {
     assert.deepEqual(row(name), [name, o, type, row(name)[3]], `${name} ${o}: authored ${type}`);
-    assert.equal(names.get(name).n, 'place', `${name}: the names tier keeps JMnedict's type`);
+    // アルマ is 'place given' in JMnedict, its row's sense a place: the
+    // authored class is for rows the game called a place, whatever else
+    // JMnedict lists, and the tier keeps all of it
+    assert.ok(names.get(name).n.split(' ').includes('place'), `${name}: the names tier keeps JMnedict's types, a place among them`);
   }
   assert.deepEqual(['ロミオ', 'フランツ', 'ノラ'].map((k) => row(k)[2]), ['person', 'person', 'person']);
 });
