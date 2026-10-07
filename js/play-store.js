@@ -126,6 +126,7 @@ export function openPlay({ store = createStore({ key: KEY, version: VERSION }), 
   let note = null;
   let dropped = 0;
   let writable = true;
+  const listeners = new Set();
 
   function load() {
     const raw = readRaw();
@@ -150,6 +151,7 @@ export function openPlay({ store = createStore({ key: KEY, version: VERSION }), 
 
   function commit() {
     writable = store.save(data);
+    for (const fn of listeners) fn();
   }
 
   const api = {
@@ -158,6 +160,12 @@ export function openPlay({ store = createStore({ key: KEY, version: VERSION }), 
     get note() { return note; },
     get dropped() { return dropped; },
     get writable() { return writable; },
+    onChange(fn) { listeners.add(fn); return () => listeners.delete(fn); },
+    /** What sync decided (js/sync.js), read through this store's own validation. */
+    adopt(next) {
+      data = validate(next).data;
+      commit();
+    },
     best: (game) => (data.games[game] ? data.games[game].best : 0),
     rounds: (game) => (data.games[game] ? data.games[game].rounds : 0),
     finish(game, score) {

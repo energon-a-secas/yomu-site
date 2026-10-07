@@ -49,9 +49,7 @@ import { MAX_TEXT, normalizeText, textKey, clipText } from './history-text.js';
 
 // The text helpers live in history-text.js; every module and test that
 // imports them from here still does.
-export {
-  MAX_TEXT, MAX_AROUND, normalizeText, cyrb53, textKey, clipText, sentenceAround,
-} from './history-text.js';
+export { MAX_TEXT, MAX_AROUND, normalizeText, cyrb53, textKey, clipText, sentenceAround } from './history-text.js';
 
 export const KEY = 'yomu-site:history';
 export const VERSION = 1;
@@ -402,6 +400,7 @@ export function openHistory({
   let note = null;
   let dropped = 0;
   let writable = true;
+  const listeners = new Set();
 
   function load() {
     const raw = readRaw();
@@ -424,8 +423,10 @@ export function openHistory({
     return api;
   }
 
-  function commit() {
+  /** A listener hears { type: 'unsave', key } for a phrase unsaved, { type: 'change' } for the rest. */
+  function commit(event = { type: 'change' }) {
     writable = store.save(data);
+    for (const fn of listeners) fn(event);
     return true;
   }
 
@@ -436,6 +437,7 @@ export function openHistory({
     get dropped() { return dropped; },
     get writable() { return writable; },
     get size() { return Object.keys(data.entries).length; },
+    onChange(fn) { listeners.add(fn); return () => listeners.delete(fn); },
     entry: (key) => (key && Object.hasOwn(data.entries, key) ? data.entries[key] : null),
     /** The `before` of the text this session is on, if `key` is that text. */
     beforeOf(sessionId, key) {
@@ -470,7 +472,7 @@ export function openHistory({
       if (r.changed) commit();
       return r;
     },
-    unsave(key, remembering) { return unsaveText(data, key, remembering) ? commit() : false; },
+    unsave(key, remembering) { return unsaveText(data, key, remembering) ? commit({ type: 'unsave', key }) : false; },
     mergePhrases(phrases) {
       const sum = mergePhrases(data, phrases);
       if (sum.added || sum.updated) commit();
