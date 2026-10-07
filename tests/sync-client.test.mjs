@@ -347,6 +347,30 @@ test('another account signing in is asked about, and either answer leaves the fi
   assert.equal(JSON.stringify(server.rowsOf('user_a')), accountA, 'user_a\'s account is untouched');
 });
 
+test('adopt or replace on a book that already names the account is an ordinary sync: no second join', async () => {
+  // Another tab may write this account into the book after begin() said
+  // 'adopt', or after the learner answered: a second join would drop the
+  // removals the book holds and move `joined` to now.
+  const server = fakeDb();
+  const a = device(server, 'user_a');
+  for (const ch of ['天', '地', '雨']) a.kanji.save(ch, a.now());
+  await a.signIn();
+  const joined = a.books.read().joined;
+  a.tick(1);
+  a.kanji.unsave('天');
+  a.tick(1);
+  await a.sync.sync('adopt');
+  assert.equal(a.books.read().joined, joined, 'adopt did not join again');
+  assert.deepEqual(server.rowsOf('user_a').kanji.filter((r) => r.saved).map((r) => r.char).sort(), ['地', '雨']);
+  a.tick(1);
+  a.kanji.unsave('地');
+  a.tick(1);
+  await a.sync.sync('replace');
+  assert.equal(a.books.read().joined, joined, 'replace did not take the account\'s data over again');
+  assert.deepEqual(server.rowsOf('user_a').kanji.filter((r) => r.saved).map((r) => r.char), ['雨'], 'the pending removal reached the account');
+  assert.deepEqual(Object.keys(a.kanji.data.saved), ['雨']);
+});
+
 test('after a sync, a change pushes only the rows it touched, and a removal made while a pull is out is kept', async () => {
   const server = fakeDb();
   const a = device(server, 'user_a');

@@ -592,8 +592,9 @@ dependencies), `js/render-sync.js` (the My kanji line `#mk-sync`, the
 over an in-memory database, `tests/helpers/fake-convex.mjs`, which refuses
 what Convex refuses), `tests/sync-client.test.mjs` (devices made of the real
 stores, `tests/helpers/sync-device.mjs`, three of them in random order,
-converging), `tests/sync-stamps.test.mjs` (Import, and clocks that disagree)
-and `tests/sync-account.test.mjs`.
+converging), `tests/sync-stamps.test.mjs` (Import, and clocks that disagree),
+`tests/sync-account.test.mjs` and `tests/sync-tabs.test.mjs` (two tabs of
+one browser over the same storage).
 
 **An anonymous visit fetches nothing from Clerk, Convex or esm.sh.**
 `app.js` imports `events-sync.js` only with a key on the page and only
@@ -707,7 +708,12 @@ and the pull behind the account question), `ask`, the chosen `adopt` or
 `online` event and the page shown again (a pull at most once a minute when
 nothing failed) all run that step, one at a time. A retry used to be an
 ordinary sync, which `sync.js` refuses with no book (`account-changed`), so
-a first sign-in that failed once never recovered without a reload. The
+a first sign-in that failed once never recovered without a reload. A
+book that already names the signed-in account is joined, so `sync.js` runs
+an `adopt` or a `replace` on it as `same`: another tab may have written it
+since begin() or the answer, and a second join would drop that tab's
+removals not yet pushed and move `joined` past every removal the account
+received in between (`tests/sync-tabs.test.mjs`). The
 line says the failure's kind in a plain sentence (offline, the sign-in not
 accepted, another tab switched accounts, refused, a server error), never a
 code or a Convex request id; those go to the console.

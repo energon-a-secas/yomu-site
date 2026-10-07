@@ -152,13 +152,18 @@ export function createSync({ client, local, book: books, now = Date.now }) {
     // the pull was out is already in the book, and none can slip in between.
     const had = books.read();
     if (mode === 'same' && (!had || had.account !== who)) throw new SyncError('account-changed');
+    // A book that already names this account was joined (here, or in another
+    // tab since begin() or the answer): the join is never made twice, since a
+    // new book would drop that tab's removals not yet pushed, and move
+    // `joined` past every removal the account received in between.
+    const as = had && had.account === who ? 'same' : mode;
     const snap = local.snapshot();
     // A browser joining the account brings what it holds in as saved now; one
     // taking the account's data instead brings nothing in (joined at 1 ms).
-    const book = mode === 'same' ? had : newBook(who, mode === 'replace' ? 1 : now(), snap.prefs, server.clear);
-    const merge = planSync(server, snap, book, { replace: mode === 'replace' });
+    const book = as === 'same' ? had : newBook(who, as === 'replace' ? 1 : now(), snap.prefs, server.clear);
+    const merge = planSync(server, snap, book, { replace: as === 'replace' });
     local.apply(merge.apply);
-    if (mode === 'replace') { book.removed = { kanji: {}, phrases: {} }; book.saves = { kanji: {}, phrases: {} }; }
+    if (as === 'replace') { book.removed = { kanji: {}, phrases: {} }; book.saves = { kanji: {}, phrases: {} }; }
     // What the account lacks is worked out from the stores as the merge left
     // them, since a store's own merge may keep more than the join did: History
     // folds an ordinary entry's reads into a phrase it saves again.

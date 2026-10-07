@@ -1,0 +1,185 @@
+// Two tabs of one browser, signed in to one account: js/account.js twice,
+// over the same storage (My kanji, History, Play and the sync book), with
+// the real js/sync.js against a fake Convex. A review found that a tab
+// whose first sync failed retried the whole join ('adopt', or 'replace'
+// after Use) even after the other tab had written this account into the
+// book: the new book dropped the other tab's removals not yet pushed, and
+// moved `joined` to now, so this browser's saves outranked every removal
+// the account received in between. A book that already names the account
+// is joined; every sync on it is an ordinary one.
+
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+
+import { startAccount } from '../js/account.js';
+import { openBook, newBook } from '../js/sync-book.js';
+import { openKanji } from '../js/kanji-store.js';
+import { openHistory } from '../js/history-store.js';
+import { openPlay } from '../js/play-store.js';
+import { fakeDb, fakeClient, memoryStore } from './helpers/fake-convex.mjs';
+import { device, T } from './helpers/sync-device.mjs';
+
+async function until(ok, what, ms = 10000) {
+  const end = Date.now() + ms;
+  while (!ok()) {
+    if (Date.now() > end) throw new Error(`timed out waiting for ${what}`);
+    await new Promise((r) => setTimeout(r, 5));
+  }
+}
+const listeners = () => {
+  const l = {};
+  return { addEventListener: (type, fn) => { (l[type] ||= []).push(fn); }, fire(type) { for (const fn of l[type] || []) fn(); } };
+};
+
+/** One browser's storage, shared by its tabs, and a clock in ms that the test moves. */
+function browser() {
+  const clock = { t: T(0) };
+  return { clock, now: () => clock.t, kanji: memoryStore(), history: memoryStore(), play: memoryStore(), book: memoryStore() };
+}
+const openKanjiOf = (b) => openKanji({ store: b.kanji, readRaw: () => null, keepRaw: () => {} }).load(b.now());
+
+/**
+ * One tab: the page's stores read from the browser's storage, the account
+ * against the server as `subject`. `failing.on(name)` makes that call throw
+ * as a lost connection does. The debounced push is held in `timers` until
+ * the test runs it, the way a tab in the background holds it. `answers`
+ * is what the learner picks when this tab asks about another account.
+ */
+function tab(b, server, subject, failing = { on: () => false }) {
+  const auth = new Set();
+  let state = { status: 'signed-out', signedIn: false, userId: null, label: '' };
+  const NeoAuth = {
+    onChange(fn) { auth.add(fn); queueMicrotask(() => fn(state)); return () => auth.delete(fn); },
+    start: async () => state,
+    convexToken: async () => 'a-token',
+    bindConvex() {},
+    requireSignIn: async () => true,
+  };
+  const kanji = openKanjiOf(b);
+  const history = openHistory({ store: b.history, readRaw: () => null, keepRaw: () => {}, dropRaw: () => {} }).load();
+  const play = openPlay({ store: b.play, readRaw: () => null, keepRaw: () => {} }).load();
+  const prefs = { lang: 'en', furigana: true, romaji: 'said', highlights: true, unsaved: 'mark', slow: false, remember: 'ask', translate: 'off' };
+  const painted = [];
+  const timers = [];
+  const answers = [];
+  const doc = { ...listeners(), visibilityState: 'visible', querySelector: (s) => (s === 'meta[name="clerk-publishable-key"]' ? { content: 'pk_live_x' } : null) };
+  const win = { ...listeners(), navigator: { onLine: true } };
+  const account = startAccount({
+    doc, win, embed: false,
+    importKit: async () => ({ NeoAuth }),
+    importClient: async () => ({ ConvexHttpClient: class { constructor() { return fakeClient(server, subject, { fail: (name) => failing.on(name) }); } } }),
+    importEngine: async () => import('../js/sync.js'),
+    kanji, history, play,
+    prefs: { get: () => prefs, set: (c) => Object.assign(prefs, c), onSaved: () => () => {} },
+    remembering: () => false,
+    books: openBook({ store: b.book }),
+    ui: { paint: (s) => painted.push(s), ask: async () => answers.shift() || null, dismiss() {}, refresh() {}, reason: () => 'Sign in.' },
+    now: b.now,
+    setTimer: (fn) => { timers.push(fn); return timers.length; },
+    clearTimer() {},
+  });
+  return {
+    account, kanji, failing, answers, win, doc,
+    last: () => painted.at(-1),
+    signIn(label = 'Aiko') { state = { status: 'signed-in', signedIn: true, userId: subject, label }; for (const fn of auth) fn(state); },
+    /** The storage event: this tab reads My kanji again, as events-kanji.js does. */
+    reload() { kanji.load(b.now()); },
+    /** The held push runs. */
+    async push() { for (const fn of timers.splice(0)) fn(); await until(() => painted.at(-1).phase !== 'syncing', 'the push'); },
+  };
+}
+
+const savedOn = (server, owner) => server.rowsOf(owner).kanji.filter((r) => r.saved).map((r) => r.char).sort();
+const bookOf = (b) => JSON.parse(b.book.raw);
+
+/** A browser that never synced, holding 天 and 地; tab 2's first pull fails, then tab 1 signs in and syncs. */
+async function firstSignInOneFails() {
+  const b = browser();
+  const seed = openKanjiOf(b);
+  seed.save('天', b.now());
+  seed.save('地', b.now());
+  b.clock.t = T(10);
+  const server = fakeDb();
+  const t1 = tab(b, server, 'user_a');
+  const t2 = tab(b, server, 'user_a', { on: (name) => name === 'sync:pullKanji' });
+  await t1.account.ready;
+  await t2.account.ready;
+  t2.signIn();
+  await until(() => t2.last().phase === 'error', 'tab 2\'s failure');
+  assert.equal(b.book.raw, null, 'tab 2 remembered no account');
+  t1.signIn();
+  await until(() => t1.last().phase === 'synced', 'tab 1\'s first sync');
+  assert.deepEqual(savedOn(server, 'user_a'), ['地', '天']);
+  return { b, server, t1, t2 };
+}
+
+test('two tabs, first sign-in: the failed tab\'s retry keeps the unsave the other tab has not pushed yet', async () => {
+  const { b, server, t1, t2 } = await firstSignInOneFails();
+  const joined = bookOf(b).joined;
+  b.clock.t = T(11);
+  t1.kanji.unsave('天');                        // tab 1's push is held
+  assert.ok(bookOf(b).removed.kanji['天'], 'the removal is in the book');
+  t2.reload();
+  t2.failing.on = () => false;
+  b.clock.t = T(12);
+  t2.win.fire('online');
+  await until(() => t2.last().phase === 'synced', 'tab 2\'s retry');
+  assert.deepEqual(savedOn(server, 'user_a'), ['地'], 'tab 2\'s retry carried tab 1\'s removal');
+  assert.equal(bookOf(b).joined, joined, 'the book was not joined again');
+  assert.equal(t2.kanji.isSaved('天'), false);
+  t1.reload();
+  await t1.push();
+  assert.deepEqual(savedOn(server, 'user_a'), ['地'], 'and tab 1\'s own push leaves it removed');
+  assert.equal(t1.kanji.isSaved('天'), false);
+});
+
+test('two tabs, first sign-in: the failed tab shown again an hour later does not undo a removal made on another device since', async () => {
+  const { b, server, t2 } = await firstSignInOneFails();
+  b.clock.t = T(70);
+  const other = device(server, 'user_a', { at: 70 });
+  await other.signIn();
+  other.kanji.unsave('地');
+  await other.sync.flush();
+  assert.deepEqual(savedOn(server, 'user_a'), ['天']);
+  b.clock.t = T(80);
+  t2.failing.on = () => false;
+  t2.doc.fire('visibilitychange');
+  await until(() => t2.last().phase === 'synced', 'tab 2 shown again');
+  assert.deepEqual(savedOn(server, 'user_a'), ['天'], 'the other device\'s removal stands');
+  assert.equal(t2.kanji.isSaved('地'), false, 'and reached this browser');
+  assert.equal(bookOf(b).joined, T(10), 'joined is still the first join\'s');
+});
+
+test('two tabs asked about another account: Use answered in one after Add in the other is an ordinary sync', async () => {
+  // The browser last synced with user_a; user_b signs in, and both tabs ask.
+  const b = browser();
+  const seed = openKanjiOf(b);
+  seed.save('月', b.now());
+  seed.save('火', b.now());
+  b.book.save(newBook('user_a', T(0), {}));
+  b.clock.t = T(10);
+  const server = fakeDb();
+  await fakeClient(server, 'user_b').mutation('sync:push', { kanji: [{ char: '雪', saved: { at: T(1), box: 0, due: '2023-11-14', reviews: 0, lapses: 0, s: T(1) }, removed: 0, seen: null }] });
+  const t1 = tab(b, server, 'user_b');
+  const t2 = tab(b, server, 'user_b');
+  await t1.account.ready;
+  await t2.account.ready;
+  t2.signIn('Ben');                              // asked, and Not now
+  await until(() => t2.last().phase === 'paused', 'tab 2\'s question');
+  t1.answers.push('add');
+  t1.signIn('Ben');
+  await until(() => t1.last().phase === 'synced', 'tab 1\'s Add');
+  assert.deepEqual(savedOn(server, 'user_b'), ['月', '火', '雪']);
+  b.clock.t = T(11);
+  t1.reload();
+  t1.kanji.unsave('火');                         // tab 1's push is held
+  t2.reload();
+  t2.answers.push('use');
+  b.clock.t = T(12);
+  await t2.account.choose(null);
+  await until(() => t2.last().phase === 'synced', 'tab 2\'s Use');
+  assert.equal(bookOf(b).account, 'user_b');
+  assert.deepEqual(savedOn(server, 'user_b'), ['月', '雪'], 'tab 1\'s removal reached the account');
+  assert.ok(t2.kanji.isSaved('月'), 'what tab 1 added stays here: Use did not run twice');
+  assert.equal(t2.kanji.isSaved('火'), false);
+});
