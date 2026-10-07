@@ -732,6 +732,13 @@ last sync was; do not promise the old account more. A sign-out closes an
 open question (`ui.dismiss`), and an answer given after it applies to
 nobody.
 
+**A tab answered second runs as an ordinary sync.** Two tabs signed in to
+the new account both ask. A tab left paused on the question (Not now) does
+not hear the other tab's answer and stays paused until Choose; answered
+then, it finds the book already naming the account, writes nothing, and
+runs as an ordinary sync on it: the first answer stands, and is finished
+there if it is still pending (`tests/sync-tabs.test.mjs`).
+
 **A failure changes nothing, is said once, and the retry runs the step that
 failed.** A pull that fails applies nothing, and on a first sign-in
 remembers no account; a push that fails keeps the merge and the remembered
