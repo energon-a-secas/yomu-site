@@ -524,7 +524,11 @@ test('popular.json: the corpus\'s commonest katakana names with their original s
     assert.ok(Number.isInteger(n) && n >= 1, `${text} ${n}`);
     assert.equal(names.get(text).o, o, text);
     const tier = popularType(names.get(text).n);
-    assert.ok(tier === type || (type === 'person' && tier === 'place'), `${text}: ${type}, the tier says ${tier}`);
+    // place since 2026-10-07 too: the English cues move a person's name to
+    // place when the tier types the spelling a place among its types (ミラノ)
+    const lists = names.get(text).n.split(' ');
+    assert.ok(tier === type || (type === 'person' && tier === 'place') || (type === 'place' && lists.includes('place')),
+      `${text}: ${type}, the tier says ${names.get(text).n}`);
     if (k) {
       const [prev, , , m] = doc.names[k - 1];
       assert.ok(m > n || (m === n && prev < text), `${prev} before ${text}`);
@@ -549,6 +553,18 @@ test('popular.json: the corpus\'s commonest katakana names with their original s
   assert.deepEqual(row('スミス').slice(1, 3), ['Smith', 'person'], 'スミスさん, Mr. Smith');
   assert.equal(row('エイヴォン'), null, 'avon');
   assert.equal(row('ベルベル'), null, 'ベルベル語, ベルベル人');
+  // the English sentences' cues (2026-10-07): Van Gogh and Gogh painted, Molly
+  // has, from Milan and to Milan; only the row's class moves, never the tier
+  assert.deepEqual(row('ゴッホ').slice(1, 3), ['Gogh', 'person'], 'Van Gogh, Gogh painted');
+  assert.deepEqual(row('モリー').slice(1, 3), ['Molly', 'person'], 'Molly is, Molly has');
+  assert.deepEqual(row('フランクリン').slice(1, 3), ['Franklin', 'person'], 'Benjamin Franklin was');
+  assert.deepEqual(row('ミラノ').slice(1, 3), ['Milan', 'place'], 'from Milan, to Milan');
+  assert.deepEqual(row('モントゴメリー').slice(1, 3), ['Montgomery', 'place'], 'in Montgomery, Alabama');
+  assert.equal(names.get('ミラノ').n, 'fem place', 'the names tier keeps JMnedict\'s types');
+  // "in Emmet's sense" and "to Kennedy Airport" are place cues, and both are
+  // typed only surname: the cues never make a place JMnedict does not type so
+  assert.deepEqual(row('エメット').slice(1, 3), ['Emmet', 'surname']);
+  assert.deepEqual(row('ケネディ').slice(1, 3), ['Kennedy', 'surname']);
 });
 
 test('a katakana name in the names tier carries its original spelling in Latin letters, and only a katakana name does', () => {
@@ -581,6 +597,10 @@ test('check-data fails a broken popular-names file, and a name record out of its
     ['a given name typed person', (rw) => rw('data/names/popular.json', (d) => {
       d.names[3][2] = 'person';
     }), /popular\.json: names\[3\]: ジェーン is a given first in the names tier, not a person/],
+    // a place over a person's name only where the tier types it a place too (ミラノ)
+    ['a given name the tier never types a place, typed place', (rw) => rw('data/names/popular.json', (d) => {
+      d.names[3][2] = 'place';
+    }), /popular\.json: names\[3\]: ジェーン is a given first in the names tier, not a place/],
     ['a spelling with no capital', (rw) => rw('data/names/popular.json', (d) => {
       d.names[2][1] = 'john';
     }), /popular\.json: names\[2\]: "john" does not begin with a capital/],

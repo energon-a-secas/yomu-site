@@ -605,8 +605,9 @@ have it, and the page reads the rose. 522 names (22.6 KB) pass; 230
 candidates did not. `tools/check-data.mjs` holds the rows to the format, the
 order and the names tier beside it.
 
-The corpus corrects two things JMnedict's types get wrong for the game,
-each by a rule measured 2026-10-05 and printed by the build:
+The corpus corrects three things JMnedict's types get wrong for the game,
+each by a rule measured (2026-10-05, the third 2026-10-07) and printed by
+the build:
 
 - **A place used as a person is a person.** JMnedict types スミス, ロミオ,
   フランツ and ゴッホ only `place`. A row typed `place` becomes `person`
@@ -616,28 +617,79 @@ each by a rule measured 2026-10-05 and printed by the build:
   Eight move: スミス (155 of 179), パターソン (9 of 11), ウィルソン (6 of
   7), クリントン (2 of 6), トマス (2 of 6), ロビンソン (2 of 5), トンプソン
   (3 of 3), エリオット (2 of 2). ロミオ, フランツ and ゴッホ have no such
-  sentence and stay places; so do the six used so in one sentence only
-  (スペンサー, of 4, and アダムズ, ハリントン, マーリー, ミッチェル, モリス, of
-  1 each). Only the row moves: the names tier, and so the Word panel, keeps
-  JMnedict's types, and the checker accepts `person` over a tier `place`
-  because only the builder holds the corpus.
+  sentence, and neither do the six used so in one sentence only (スペンサー,
+  of 4, and アダムズ, ハリントン, マーリー, ミッチェル, モリス, of 1 each);
+  ゴッホ, スペンサー and アダムズ move by the English cues below. Only the
+  row moves: the names tier, and so the Word panel, keeps JMnedict's types,
+  and the checker accepts `person` over a tier `place` because only the
+  builder holds the corpus.
 - **A name met only as a word's stem is no name.** ベルベル is followed by
   語 or 人 in all 15 of its sentences (Berber, a language and a people), and
   so are タタール (3) and タガログ (2), of every katakana name with a
   confirmed spelling; they are left out. The rule asks for every sentence:
   the nearest after them are places (アラビア 29 of 36, ノルウェー 4 of 7,
   グルジア 1 of 2).
+- **The English sentences say a person or a place.** Over the English
+  sentences linked to a name's sentences, each once (the ones that choose
+  its spelling), `englishCues` counts the sentences that hold its spelling,
+  as a whole capitalised word, with a person cue and those with a place
+  cue. A person cue is the spelling directly followed by is, was, has, had,
+  said, says, likes, loved, loves, went, wants, can, will, would, did,
+  does, told, asked, looked, lived, died, painted or wrote (is a and was a
+  are is and was; is, was, has, had, would, did and does count with n't
+  too, and can't is can), or directly after Van or de (Van Gogh, de
+  Nerval: one part of a surname). A place cue is the spelling directly
+  after in, to, from, at, near, visit, visited or "the city of". A cue word
+  may open the sentence (In Rio). Two cues of one kind, and at least twice
+  the other kind's, decide (`cueVerdict`); otherwise the row keeps its
+  class. A decision moves a row only across the game's two classes, after
+  the honorifics (a `place` they made a `person` stays one): a `place`
+  becomes `person`, and a given name, surname or person becomes `place`
+  only when JMnedict types the spelling a place among its types. The
+  checker holds the file to that bound.
+
+  Measured 2026-10-07 over the 522 rows: the cues decide 114, 104 as the
+  row already was. Without the bound, 10 rows change class and 8 are
+  right; the two wrong are エメット Emmet (31 sentences, "I am using this
+  term in Emmet's sense", "to Emmet's 'dyad' style": the author of a
+  linguistics text) and ケネディ Kennedy ("I went to Kennedy Airport", "at
+  Kennedy Airport"), each two place cues on a preposition that governs the
+  noun after the name, and each typed only `surname`, so the bound keeps
+  both (the build prints them). Eight rows ship moved, judged by hand
+  against every English sentence linked to them, the criterion being
+  whether the name in those sentences is a person or a place, and all
+  eight are right: リオ Rio (7 place cues, 1 person: the city in all 9
+  sentences) and ミラノ Milan (4 place, from and to Milan) were given
+  names, モントゴメリー Montgomery (2 place, 1 person: Montgomery,
+  Alabama, in all 4) a surname, and モリー Molly (Molly is, Molly has),
+  スペンサー Spenser (would, doesn't), フランクリン Franklin (4 person, 1
+  place: Benjamin Franklin), ゴッホ Gogh (Van Gogh, Gogh painted) and
+  アダムズ Adams (Mr Adams was, in two translations of one sentence)
+  places. Counting every match instead of every sentence moves the same
+  eight; without the n't forms, スペンサー stays a place.
+
+  What the cues do not reach, of the rows JMnedict mistypes: ロミオ Romeo
+  has one cue of each kind ("Romeo can't even write his own name", "Juliet
+  talked to Romeo"); フランツ Franz has none (Franz Liszt, twice, the
+  surname right after it); ノラ Nora has one English sentence ("Nora looks
+  up to her mother", and looks is not on the list), and one sentence can
+  never make two cues. All three stay places. エベレスト Everest stays a
+  surname: "Mt. Everest is the highest mountain" is a person cue by the
+  list, ten of them, and nothing puts in, to or from directly before it.
+  The verbs follow a place as readily as a person (Everest is, Rio is); it
+  is the prepositions, and the factor of two, that keep the places.
 
 The type from the sense moved six rows (キャシー Cathy, トーニー Tony and
 バーナード Bernard are given names, not surnames; リヨン Lyon, アルマ Alma
 and カナ Cana places, not given names) and made ガンジー Gandhi a person
 (Ghanzi is the place); 66 katakana records list their types in a new order.
-A name JMnedict types only `person` (ナポレオン) is still no row. One case
-stays open: 22 rows come from a sense JMnedict types both a person and a
-place, and take the person (the types' fixed order). That is right for
-アリス, ジャクソン and リンカーン and wrong for ミラノ Milan (a given name
-here) and エベレスト Everest (a surname); the sense's own order would fix
-those two and mistype オリバー and アントン as places, so neither is used. The game
+A name JMnedict types only `person` (ナポレオン) is still no row. 22 rows
+come from a sense JMnedict types both a person and a place, and take the
+person (the types' fixed order). That is right for アリス, ジャクソン and
+リンカーン and was wrong for ミラノ Milan and エベレスト Everest; the
+sense's own order would fix those two and mistype オリバー and アントン as
+places, so it is not used. The English cues make ミラノ a place; エベレスト
+is still a surname in the game (above). The game
 names two classes, "a name" for given, surname and person and "a place"
 (`js/play-rounds.js nameClass`), and offers three spellings of the answer's
 class. サン (San, three sentences: アウン・サン・スー・チー, サン・ピエトロ
