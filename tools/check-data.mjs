@@ -32,7 +32,8 @@
  *     at least 1], highest count first, at most 1,000, or disagree with the
  *     names tier beside it (its spelling, and its first type, or a `person`
  *     over a tier `place`, or a `place` over a spelling the tier types a
- *     place among its types), or that does not carry the tier's licence block
+ *     place among its types), or give a row tools/lib/name-classes.mjs
+ *     authors another class, or that does not carry the tier's licence block
  *   - a kanji shard ranged by first and last character that holds a
  *     character outside its range, or one a listed shard holds too
  *   - a jōyō list (data/kanji/joyo.json) whose grades are not the seven
@@ -424,8 +425,9 @@ function checkLookalikes(docs) {
  * The popular names (data/names/popular.json, tools/lib/popular.mjs): the
  * rows' format and order, and, where the names tier is beside it, that each
  * row is a name the tier ships with the same original spelling and first
- * type (or the class the corpus moved it to, within the bound
- * `popularProblems` states), and that the file carries the tier's licence
+ * type (or the class the corpus or tools/lib/name-classes.mjs moved it
+ * to, within the bound `popularProblems` states), that an authored row
+ * carries its authored class, and that the file carries the tier's licence
  * block.
  */
 function checkPopular(docs) {

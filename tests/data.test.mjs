@@ -565,6 +565,19 @@ test('popular.json: the corpus\'s commonest katakana names with their original s
   // typed only surname: the cues never make a place JMnedict does not type so
   assert.deepEqual(row('エメット').slice(1, 3), ['Emmet', 'surname']);
   assert.deepEqual(row('ケネディ').slice(1, 3), ['Kennedy', 'surname']);
+  // the second pass (2026-10-07): Mt. and Mount are place cues, and JMnedict
+  // types エベレスト a place too, so Mt. Everest is a place in the game
+  assert.deepEqual(row('エベレスト').slice(1, 3), ['Everest', 'place'], 'Mt. Everest, Mount Everest');
+  assert.equal(names.get('エベレスト').n, 'surname place', 'the names tier keeps JMnedict\'s types');
+  // and the rows no corpus evidence reaches take their authored class, each
+  // over a tier that still types it only a place
+  const { NAME_CLASSES } = await import('../tools/lib/name-classes.mjs');
+  assert.equal(NAME_CLASSES.length, 3);
+  for (const { name, o, type } of NAME_CLASSES) {
+    assert.deepEqual(row(name), [name, o, type, row(name)[3]], `${name} ${o}: authored ${type}`);
+    assert.equal(names.get(name).n, 'place', `${name}: the names tier keeps JMnedict's type`);
+  }
+  assert.deepEqual(['ロミオ', 'フランツ', 'ノラ'].map((k) => row(k)[2]), ['person', 'person', 'person']);
 });
 
 test('a katakana name in the names tier carries its original spelling in Latin letters, and only a katakana name does', () => {
@@ -601,6 +614,10 @@ test('check-data fails a broken popular-names file, and a name record out of its
     ['a given name the tier never types a place, typed place', (rw) => rw('data/names/popular.json', (d) => {
       d.names[3][2] = 'place';
     }), /popular\.json: names\[3\]: ジェーン is a given first in the names tier, not a place/],
+    // a row tools/lib/name-classes.mjs authors keeps its class (2026-10-07)
+    ['an authored person typed back to place', (rw) => rw('data/names/popular.json', (d) => {
+      d.names.find((r) => r[0] === 'ロミオ')[2] = 'place';
+    }), /popular\.json: names\[\d+\]: ロミオ is authored a person \(tools\/lib\/name-classes\.mjs\), not a place/],
     ['a spelling with no capital', (rw) => rw('data/names/popular.json', (d) => {
       d.names[2][1] = 'john';
     }), /popular\.json: names\[2\]: "john" does not begin with a capital/],

@@ -38,15 +38,22 @@
  *
  * Failing that, the English sentences linked to the name's sentences decide
  * the class (`englishCues`, `cueVerdict`): its spelling followed by a verb
- * such as is, was or painted (Gogh painted, Molly has), or after Van or de
- * (Van Gogh), is a person cue; after in, to, from, at, near, visit, visited
- * or "the city of" (from Milan) a place cue. CUES_MIN cues and CUES_RATIO
- * times the other kind make a `place` row a `person`, or a person's row a
- * `place`, the second only when JMnedict types the spelling a place too:
- * "in Emmet's sense" and "to Kennedy Airport" are two place cues each, and
- * Emmet and Kennedy are typed only surname. The game names two classes
- * (js/play-rounds.js nameClass), so a given name or a surname the cues call
- * a person keeps its type, and so does a place they call a place.
+ * such as is, was or painted (Gogh painted, Molly has), or after Van, or
+ * after a de that opens the name (Van Gogh, de Nerval, but not Rio de
+ * Janeiro), is a person cue; after in, to, from, at, near, visit, visited,
+ * "the city of", Mt. or Mount (from Milan, Mt. Everest) a place cue, and
+ * only the last three before a name JMnedict knows only as a given name
+ * (talked to Tom). CUES_MIN cues and CUES_RATIO times the other kind make
+ * a `place` row a `person`, or a person's row a `place`, the second only
+ * when JMnedict types the spelling a place too: "in Emmet's sense" and "to
+ * Kennedy Airport" are two place cues each, and Emmet and Kennedy are typed
+ * only surname. The game names two classes (js/play-rounds.js nameClass),
+ * so a given name or a surname the cues call a person keeps its type, and
+ * so does a place they call a place.
+ *
+ * Before all of that, a row tools/lib/name-classes.mjs writes a class for
+ * takes it (ロミオ Romeo, フランツ Franz and ノラ Nora are people JMnedict
+ * types only `place` and no evidence here reaches), within the same bounds.
  *
  * A name the corpus writes only as the stem of a language or a people
  * (ベルベル語, ベルベル人: Berber, in all 15 of its sentences) is no name of
@@ -65,6 +72,7 @@
  */
 import { LATIN_NAME } from './jmnedict.mjs';
 import { spellingPattern } from './original.mjs';
+import { authoredClass } from './name-classes.mjs';
 
 export const POPULAR_FORMAT = 'yomu-names-popular/1';
 export const POPULAR_MAX = 1000;
@@ -175,33 +183,71 @@ export const PERSON_VERBS = Object.freeze([
   'will', 'would', 'did', 'does', 'told', 'asked', 'looked', 'lived', 'died', 'painted', 'wrote',
 ]);
 const NEGATED = new Set(['is', 'was', 'has', 'had', 'would', 'did', 'does']);
-/** The particles that, directly before a spelling, make it one part of a surname (Van Gogh, de Nerval). */
+/**
+ * The particles that, directly before a spelling, make it one part of a
+ * surname (Van Gogh, de Nerval). de counts only where it opens the name as
+ * written (de Nerval, De Gaulle): a capitalised word before it makes the
+ * row the tail of a longer name, which is a place as often as a person
+ * (Rio de Janeiro, Santiago de Cuba, Tour de France, beside Gérard de
+ * Nerval). van after a given name still counts (Vincent van Gogh).
+ */
 export const SURNAME_PARTICLES = Object.freeze(['van', 'de']);
-/** The words that, directly before a spelling, say a place is meant (from Milan, the city of Milan). */
-export const PLACE_BEFORE = Object.freeze(['in', 'to', 'from', 'at', 'near', 'visit', 'visited', 'the city of']);
+const OPENS_THE_NAME = new Set(['de']);
+/** The words that, directly before a spelling, say a place is meant (from Milan, the city of Milan, Mt. Everest). */
+export const PLACE_BEFORE = Object.freeze(['in', 'to', 'from', 'at', 'near', 'visit', 'visited', 'the city of', 'Mt.', 'Mount']);
+/**
+ * The ones of PLACE_BEFORE that name a place outright, the only place cues a
+ * known given name takes (`knownGivenName`): a person is talked to, looked
+ * at, sat near and visited as readily as a place is gone to.
+ */
+export const PLACE_NOUNS = Object.freeze(['the city of', 'Mt.', 'Mount']);
 /** The fewest cues of one kind that decide, and how many times the other kind's count they must be. */
 export const CUES_MIN = 2;
 export const CUES_RATIO = 2;
 
 const EDGE_AFTER = '(?![\\p{L}\\p{M}\\p{N}])';
 const EDGE_BEFORE = '(?<![\\p{L}\\p{M}\\p{N}])';
-// A cue word may open the sentence: its first letter in either case (In Milan, Van Gogh).
+// No capitalised word directly before: Rio in "Rio de", Notre-Dame, São.
+const NO_CAPITAL_BEFORE = '(?<!\\p{Lu}[\\p{L}\\p{M}]*\\s+)';
+// A cue word may open the sentence: its first letter in either case (In Milan, Van Gogh, mount).
 const eitherCase = (phrase) => phrase.split(' ')
-  .map((w, i) => (i ? escape(w) : `[${w[0]}${w[0].toUpperCase()}]${escape(w.slice(1))}`))
+  .map((w, i) => (i ? escape(w) : `[${w[0].toLowerCase()}${w[0].toUpperCase()}]${escape(w.slice(1))}`))
   .join('\\s+');
+const before = (words) => new RegExp(`${EDGE_BEFORE}(?:${words.map(eitherCase).join('|')})\\s+$`, 'u');
 const VERB_AFTER = new RegExp(`^\\s+(?:${PERSON_VERBS.map((v) => (NEGATED.has(v) ? `${v}(?:n['’]t)?` : v)).join('|')})${EDGE_AFTER}`, 'u');
-const PARTICLE_BEFORE = new RegExp(`${EDGE_BEFORE}(?:${SURNAME_PARTICLES.map(eitherCase).join('|')})\\s+$`, 'u');
-const PLACE_CUE_BEFORE = new RegExp(`${EDGE_BEFORE}(?:${PLACE_BEFORE.map(eitherCase).join('|')})\\s+$`, 'u');
+const PARTICLE_BEFORE = new RegExp(`(?:${SURNAME_PARTICLES
+  .map((p) => `${OPENS_THE_NAME.has(p) ? NO_CAPITAL_BEFORE : ''}${EDGE_BEFORE}${eitherCase(p)}`).join('|')})\\s+$`, 'u');
+const PLACE_CUE_BEFORE = before(PLACE_BEFORE);
+const PLACE_NOUN_BEFORE = before(PLACE_NOUNS);
+
+/** JMnedict's given-name types. */
+const GIVEN_TYPES = new Set(['given', 'masc', 'fem']);
+
+/**
+ * Whether JMnedict knows a record's spelling as a given name and never as a
+ * place (トム given, ジョージ given): then in, to, from, at, near, visit and
+ * visited before it are a person's (talked to Tom), and englishCues does
+ * not count them. A name it types a place too keeps them: リオ and ミラノ
+ * are fem and place, and "in Rio", "from Milan" are the evidence that makes
+ * them places in the game.
+ */
+export function knownGivenName(n) {
+  const types = String(n || '').split(' ');
+  return types.some((t) => GIVEN_TYPES.has(t)) && !types.includes('place');
+}
 
 /**
  * How many of `english` (the English sentences linked to the sentences that
  * hold the name, each once) hold a person cue and how many a place cue for
  * `spelling`, matched as tools/lib/original.mjs matches a spelling (a whole
  * word, capitalised): `{ person, place }`. A sentence counts once for each
- * kind it holds, as the other measures here count sentences.
+ * kind it holds, as the other measures here count sentences. `givenName`
+ * (knownGivenName of the record's types) leaves only PLACE_NOUNS as place
+ * cues.
  */
-export function englishCues(spelling, english) {
+export function englishCues(spelling, english, { givenName = false } = {}) {
   const word = new RegExp(spellingPattern(spelling).source, 'gu');
+  const placeCue = givenName ? PLACE_NOUN_BEFORE : PLACE_CUE_BEFORE;
   let person = 0;
   let place = 0;
   for (const line of english || []) {
@@ -209,9 +255,9 @@ export function englishCues(spelling, english) {
     let p = false;
     let l = false;
     for (const m of text.matchAll(word)) {
-      const before = text.slice(0, m.index);
-      if (VERB_AFTER.test(text.slice(m.index + m[0].length)) || PARTICLE_BEFORE.test(before)) p = true;
-      if (PLACE_CUE_BEFORE.test(before)) l = true;
+      const head = text.slice(0, m.index);
+      if (VERB_AFTER.test(text.slice(m.index + m[0].length)) || PARTICLE_BEFORE.test(head)) p = true;
+      if (placeCue.test(head)) l = true;
     }
     if (p) person += 1;
     if (l) place += 1;
@@ -237,21 +283,27 @@ export const listsPlace = (n) => String(n || '').split(' ').includes('place');
 
 /**
  * The row type a record's name takes, and why: `{ type, by }`, `by` one of
- * 'jmnedict' (the record's own first type), 'corpus' (a place the corpus
- * uses as a person, by its honorifics and titles), 'english' (the English
- * cues moved it to the other class) or 'word' (no name: `type` is null).
- * `usage` is usageOf's answer for it, with `cues`, englishCues' answer, when
- * those were measured, or null.
+ * 'jmnedict' (the record's own first type), 'authored' (the class
+ * tools/lib/name-classes.mjs writes down for `name`, the katakana
+ * spelling, when given), 'corpus' (a place the corpus uses as a person, by
+ * its honorifics and titles), 'english' (the English cues moved it to the
+ * other class) or 'word' (no name: `type` is null). `usage` is usageOf's
+ * answer for it, with `cues`, englishCues' answer, when those were
+ * measured, or null.
  *
- * The honorifics come first: スミスさん in a fifth of a name's sentences is
- * more direct than a preposition. The cues move a row only across the
- * game's two classes, and to `place` only a spelling JMnedict types a place
- * too (listsPlace), which is the bound the checker holds the file to.
+ * An authored class comes first, after the rules that keep a row out of the
+ * file: it is written where no evidence reaches. Then the honorifics:
+ * スミスさん in a fifth of a name's sentences is more direct than a
+ * preposition. The cues move a row only across the game's two classes, and
+ * to `place` only a spelling JMnedict types a place too (listsPlace), which
+ * is the bound the checker holds the file to.
  */
-export function rowType(rec, count, usage = null) {
+export function rowType(rec, count, usage = null, name = null) {
   const type = popularType(rec.n);
   if (!type || !rowWorthy(rec.n)) return { type: null, by: 'jmnedict' };
   if (usedAsWord(usage)) return { type: null, by: 'word' };
+  const authored = name === null ? null : authoredClass(name, rec.o);
+  if (authored) return { type: authored.type, by: 'authored' };
   if (type === 'place' && usedAsPerson(usage, count)) return { type: 'person', by: 'corpus' };
   const verdict = cueVerdict(usage && usage.cues);
   if (verdict === 'person' && type === 'place') return { type: 'person', by: 'english' };
@@ -274,7 +326,7 @@ export function popularCandidates(records, counts, confirmed, usage = new Map())
   for (const [text, rec] of records) {
     if (!rec || !rec.o || rec.r || !confirmed.has(text) || !CAPITAL.test(rec.o)) continue;
     const n = counts.get(text) || 0;
-    const { type } = rowType(rec, n, usage.get(text) || null);
+    const { type } = rowType(rec, n, usage.get(text) || null, text);
     if (!type || n < 1 || !KATAKANA_ROW.test(text)) continue;
     rows.push([text, rec.o, type, n]);
   }
@@ -285,8 +337,10 @@ export function popularCandidates(records, counts, confirmed, usage = new Map())
  * What is wrong with a popular.json document, as reasons; empty when
  * nothing is. `names` (spelling -> names-tier record), when given, is the
  * tier the rows must agree with: each row a katakana name the tier ships,
- * with the same original spelling and a type it has. `licence` is the block
- * the names shards carry, which this file must carry too.
+ * with the same original spelling and a type it has. A row
+ * tools/lib/name-classes.mjs writes a class for must carry that class,
+ * tier or no tier. `licence` is the block the names shards carry, which
+ * this file must carry too.
  */
 export function popularProblems(doc, { names = null, licence = null } = {}) {
   const out = [];
@@ -309,6 +363,8 @@ export function popularProblems(doc, { names = null, licence = null } = {}) {
     if (!Number.isInteger(n) || n < 1) out.push(`${at}: count ${JSON.stringify(n)} is not a whole number of at least 1`);
     if (seen.has(text)) out.push(`${at}: ${text} is listed twice`);
     seen.add(text);
+    const authored = authoredClass(text, o);
+    if (authored && authored.type !== type) out.push(`${at}: ${text} is authored a ${authored.type} (tools/lib/name-classes.mjs), not a ${type}`);
     if (k > 0 && Array.isArray(rows[k - 1]) && byCount(rows[k - 1], row) > 0) out.push(`${at}: out of order after ${JSON.stringify(rows[k - 1][0])}`);
     if (names && typeof text === 'string') {
       const rec = names.get(text);

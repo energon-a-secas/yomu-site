@@ -163,12 +163,19 @@ linked English, in 2 sentences and a fifth of its count: スミス and 7 more)
 is a `person` there and only there; the Word panel keeps JMnedict's.
 Failing that, the linked English decides the game's class
 (`popular.mjs englishCues`): the spelling followed by a verb from a fixed
-list (Gogh painted, Molly has) or after Van or de is a person cue, after
-in, to, from, at, near, visit, visited or "the city of" a place cue; two of
+list (Gogh painted, Molly has), after Van, or after a de that opens the
+name is a person cue (de Nerval; Rio de Janeiro, a capitalised word
+before de, is none), after in, to, from, at, near, visit, visited, "the
+city of", Mt. or Mount a place cue, and before a name JMnedict knows only
+as a given name just the last three (talked to Tom is no place); two of
 one kind and twice the other move a `place` to `person`, or a person's
 name to `place` only when JMnedict types the spelling a place too
 (エメット is typed only surname, and "in Emmet's sense" is two place cues).
-Eight rows moved, all judged right (docs/ANALYZER.md). A
+Nine rows moved, all judged right (docs/ANALYZER.md). Rows no evidence
+reaches take a class from `tools/lib/name-classes.mjs` (ロミオ, フランツ,
+ノラ: people), keyed by both spellings, each with a reason, applied before
+the honorifics, held to the checker's bounds and printed by the build; add
+an entry there, never a cue fitted to one row. A
 spelling with no capital (エイヴォン "avon") and a name met only as the
 stem of 語 or 人 (ベルベル, タタール, タガログ) are left out; a name typed
 only `person` stays out, as before. Change the format only together with
@@ -547,11 +554,10 @@ classes, "a name" or "a place" (`play-rounds.js nameClass`), and draws the
 three other spellings from the answer's class: JMnedict's finer types are
 wrong for many a famous foreign name, and options of one finer type gave the
 answer away (フランツ Franz among Fairmont, Lucca and Tampa). The English
-cues made ゴッホ and モリー names and ミラノ a place; ロミオ, フランツ and
-ノラ are still places and エベレスト a surname, because their English holds
-too few cues of the list, or the wrong ones ("Mt. Everest is"). Fix a
-row's class by changing the class, never by leaving the row out: a rule
-that left rows out took right ones with the wrong.
+cues made ゴッホ and モリー names and ミラノ and エベレスト places; ロミオ,
+フランツ and ノラ, whose English holds too few cues, are names by the
+authored list. Fix a row's class by changing the class, never by leaving
+the row out: a rule that left rows out took right ones with the wrong.
 Before it ships the file is a 404,
 which the list and the game say in words ("Not available yet") and never
 throw; Chromium and WebKit still log that one 404 as a console line, since a
