@@ -6,9 +6,10 @@
 //             whoami, never the browser's own say)
 //   joined    when this browser's data joined that account (ms): what it
 //             held then counts as saved then, so a removal made in the
-//             account before the browser joined does not take it back out;
-//             1 when the browser took the account's data instead, since
-//             then nothing of its own joined
+//             account before the browser joined does not take it back out
+//             (now, or one past such a removal stamped by a clock ahead of
+//             this one: sync.js joinedAt); 1 when the browser took the
+//             account's data instead, since then nothing of its own joined
 //   epoch     the latest Clear all of My kanji this browser has applied (ms)
 //   at        the last sync that finished (ms), for the My kanji line
 //   removed   { kanji: { 天: ms }, phrases: { key: ms } }: removals made here

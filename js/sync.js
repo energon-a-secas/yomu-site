@@ -118,6 +118,26 @@ export function counts(server, snap) {
 }
 
 /**
+ * When a joining browser's data counts as saved: now, and one past the
+ * account's Clear all and past its removal of anything this browser brings.
+ * Another device's clock may run ahead, so "now" here can be earlier than a
+ * removal the account already holds; joining at now would then lose the
+ * browser's own saves to a clear it never saw (tests/sync-stamps.test.mjs).
+ */
+export function joinedAt(server, snap, at) {
+  let after = server.clear;
+  for (const ch of Object.keys(snap.kanji.saved)) {
+    const row = server.kanji.get(ch);
+    if (row) after = Math.max(after, row.removed);
+  }
+  for (const entry of snap.phrases) {
+    const row = server.phrases.get(entry.key);
+    if (row) after = Math.max(after, row.removed);
+  }
+  return Math.max(at, after + 1);
+}
+
+/**
  * One account's sync. `client` answers query(name, args) and mutation(name,
  * args) (a ConvexHttpClient on the page); `local` is sync-watch.js
  * storesAdapter(); `book` is sync-book.js openBook().
@@ -158,9 +178,10 @@ export function createSync({ client, local, book: books, now = Date.now }) {
     // `joined` past every removal the account received in between.
     const as = had && had.account === who ? 'same' : mode;
     const snap = local.snapshot();
-    // A browser joining the account brings what it holds in as saved now; one
-    // taking the account's data instead brings nothing in (joined at 1 ms).
-    const book = as === 'same' ? had : newBook(who, as === 'replace' ? 1 : now(), snap.prefs, server.clear);
+    // A browser joining the account brings what it holds in as saved when it
+    // joined (joinedAt); one taking the account's data instead brings nothing
+    // in (joined at 1 ms).
+    const book = as === 'same' ? had : newBook(who, as === 'replace' ? 1 : joinedAt(server, snap, now()), snap.prefs, server.clear);
     const merge = planSync(server, snap, book, { replace: as === 'replace' });
     local.apply(merge.apply);
     if (as === 'replace') { book.removed = { kanji: {}, phrases: {} }; book.saves = { kanji: {}, phrases: {} }; }

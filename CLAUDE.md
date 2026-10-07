@@ -642,8 +642,13 @@ clear, and a newer one makes the client pull at once.
 **A browser that never synced brings all of its own data when it first
 joins, on purpose.** On a first sign-in, or Add, the browser takes the
 account's clear as its own and every save it holds counts as made when it
-joined (the book's `joined`). So a save older than a removal or a Clear all
-the account made before this browser joined comes back, on every device.
+joined (the book's `joined`). `joined` is now, or one past the account's
+Clear all and past its removal of any row the browser brings, whichever is
+latest (`sync.js joinedAt`): another device's clock may run ahead, and
+joining at this clock's now lost a whole browser's saves to a clear stamped
+an hour in the future (`tests/sync-stamps.test.mjs`). So a save older than
+a removal or a Clear all the account made before this browser joined comes
+back, on every device.
 That is intended: those saves were never in the account, so the account's
 removal or clear was never about them. The learner made them in a browser
 the account had not seen, and taking them away the moment it signs in

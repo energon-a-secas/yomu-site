@@ -279,3 +279,70 @@ test('the device behind saves what the device ahead removed: the save stands', a
   assert.ok(y.kanji.isSaved('天'));
   assert.ok(x.kanji.isSaved('天'));
 });
+
+// ── Joining an account whose clocks ran ahead ─────────────────────────────
+//
+// A browser that never synced brings all of its own data when it first
+// joins (CLAUDE.md). The join used to stamp `joined` at this clock's now, so
+// a Clear all or a removal stamped by a device an hour ahead outranked
+// everything the joining browser brought, and its first sign-in emptied it
+// with nothing on screen to say why. `joined` is now one past the account's
+// clear and past its removal of anything the browser brings.
+
+test('a browser that never synced joins after a Clear all stamped an hour ahead: it keeps every kanji it brings', async () => {
+  const server = fakeDb();
+  const x = device(server, 'user_a', { at: 100 });   // an hour ahead: real time 40
+  x.kanji.save('一', x.now());
+  await x.signIn();
+  x.tick(1);
+  x.kanji.clearAll(x.now());                          // stamped T(101), at real T(41)
+  await x.sync.flush();
+  const z = device(server, 'user_a', { at: 45 });     // a correct clock, real T(45)
+  z.kanji.save('天', z.now() - 3 * 60_000);
+  z.kanji.save('地', z.now());
+  z.read(['地']);
+  await z.signIn();
+  assert.deepEqual(savedChars(z), ['地', '天'], 'the first sign-in emptied nothing');
+  assert.ok(z.books.read().joined > server.rowsOf('user_a').clears[0].at, 'joined after the account\'s clear');
+  assert.ok(z.kanji.seenOf('地'), 'and the counts it made came along');
+  await x.sync.sync('same');
+  assert.deepEqual(savedChars(x), ['地', '天'], 'and the account holds them');
+});
+
+test('a browser that never synced joins after a removal stamped an hour ahead: the kanji and the phrase it brings stay saved', async () => {
+  const server = fakeDb();
+  const t = '天気がいい。';
+  const key = textKey(t);
+  const x = device(server, 'user_a', { at: 100 });
+  x.kanji.save('天', x.now());
+  x.saveText(t);
+  await x.signIn();
+  x.tick(1);
+  x.kanji.unsave('天');                               // T(101)
+  x.history.unsave(key, true);
+  await x.sync.flush();
+  const z = device(server, 'user_a', { at: 45 });
+  z.kanji.save('天', z.now());
+  z.saveText(t);
+  await z.signIn();
+  assert.ok(z.kanji.isSaved('天'));
+  assert.ok(z.history.isSaved(key));
+  await x.sync.sync('same');
+  assert.ok(x.kanji.isSaved('天'), 'the account took the joining browser\'s kanji');
+  assert.ok(x.history.isSaved(key), 'and its phrase');
+});
+
+test('a removal of a row the joining browser does not bring leaves `joined` at now', async () => {
+  const server = fakeDb();
+  const x = device(server, 'user_a', { at: 100 });
+  x.kanji.save('雨', x.now());
+  await x.signIn();
+  x.tick(1);
+  x.kanji.unsave('雨');                               // T(101), and this browser never held 雨
+  await x.sync.flush();
+  const z = device(server, 'user_a', { at: 45 });
+  z.kanji.save('天', z.now());
+  await z.signIn();
+  assert.equal(z.books.read().joined, z.now());
+  assert.equal(z.kanji.isSaved('雨'), false);
+});
