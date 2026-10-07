@@ -18,10 +18,13 @@ import {
 import { COMPOUND_LINES } from '../tools/lib/compound-lines.mjs';
 import {
   parseSpaces, cleanLine, spacesRound, toggleMark, checkMarks, marksOf, spacesScore, spacesTotal, spacesCounts, missedLines,
-  loadSpaces, resetSpaces, DRAW,
+  loadSpaces, resetSpaces, DRAW, tierHint,
 } from '../js/play-spaces.js';
+import { STRINGS } from '../js/strings.js';
 import { makeRand, current, next, answeredNow, finished, ROUND } from '../js/play-rounds.js';
-import { isKana, isHiragana, toHira } from '../js/kana.js';
+import {
+  isKana, isHiragana, isKatakana, isKanji, toHira,
+} from '../js/kana.js';
 import { isWordChar, slotsOf, gapsOf, isPrefix } from '../js/gaps.js';
 
 const read = (rel) => JSON.parse(readFileSync(join(SITE, rel), 'utf8'));
@@ -203,4 +206,25 @@ test('a round played to the end: the score, the counts and the lines to look at 
   assert.equal(c.right, spacesTotal(r));
   assert.equal(c.of, spacesTotal(r));
   assert.deepEqual(missedLines(r).map((q) => q.id), r.questions.filter((q, i) => i % 2 && q.slots.some((pl) => !q.key.includes(pl))).map((q) => q.id));
+});
+
+test('the hint over a line names only the scripts the line holds: no kanji where there is none', () => {
+  assert.equal(tierHint({ tier: 2, ja: 'トイレはどこですか' }), 'spacesTier2TH');
+  assert.equal(tierHint({ tier: 2, ja: 'サイズはいかがなさいますか。' }), 'spacesTier2TH');
+  assert.equal(tierHint({ tier: 2, ja: '駅はどこですか' }), 'spacesTier2KH');
+  assert.equal(tierHint({ tier: 2, ja: '私はマリアです' }), 'spacesTier2KTH');
+  assert.equal(tierHint({ tier: 2, ja: '十一時十五分。' }), 'spacesTier2K');
+  assert.equal(tierHint({ tier: 1, ja: 'これをください' }), 'spacesTier1');
+  assert.equal(tierHint({ tier: 3, ja: 'テニストーナメントに出ます。' }), 'spacesTier3');
+  const names = { kanji: isKanji, katakana: isKatakana, hiragana: isHiragana };
+  for (const l of LINES) {
+    const key = tierHint(l);
+    assert.ok(STRINGS[key] && STRINGS[key].en && STRINGS[key].es, `${l.id}: ${key}`);
+    if (l.tier !== 2) continue;
+    const said = STRINGS[key].en.split(':')[0].toLowerCase();
+    const chars = [...l.ja].filter((ch) => ch !== 'ー');
+    for (const [name, is] of Object.entries(names)) {
+      assert.equal(said.includes(name), chars.some(is), `${l.id} ${l.ja}: "${STRINGS[key].en}"`);
+    }
+  }
 });

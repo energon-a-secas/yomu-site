@@ -148,7 +148,15 @@ export const PLAY_STRINGS = Object.freeze({
     es: '¿Dónde termina una palabra y empieza la siguiente? Marca cada lugar y luego comprueba.',
   },
   spacesTier1: { en: 'All hiragana: look for the particles.', es: 'Todo en hiragana: busca las partículas.' },
-  spacesTier2: { en: 'Kanji and kana: the script changes too.', es: 'Kanji y kana: la escritura también cambia.' },
+  // Tier 2 names the scripts its line holds (play-spaces.js tierHint): K kanji, T katakana, H hiragana.
+  spacesTier2KTH: { en: 'Kanji, katakana and hiragana: the script changes too.', es: 'Kanji, katakana e hiragana: la escritura también cambia.' },
+  spacesTier2KH: { en: 'Kanji and hiragana: the script changes too.', es: 'Kanji e hiragana: la escritura también cambia.' },
+  spacesTier2TH: { en: 'Katakana and hiragana: the script changes too.', es: 'Katakana e hiragana: la escritura también cambia.' },
+  spacesTier2KT: { en: 'Kanji and katakana: the script changes too.', es: 'Kanji y katakana: la escritura también cambia.' },
+  spacesTier2K: { en: 'All kanji: look for where each word ends.', es: 'Todo en kanji: busca dónde termina cada palabra.' },
+  spacesTier2T: { en: 'All katakana: look for where each word ends.', es: 'Todo en katakana: busca dónde termina cada palabra.' },
+  spacesTier2H: { en: 'All hiragana: look for the particles.', es: 'Todo en hiragana: busca las partículas.' },
+  spacesTier2Any: { en: 'Look for where each word ends.', es: 'Busca dónde termina cada palabra.' },
   spacesTier3: { en: 'A katakana compound: two words written as one.', es: 'Un compuesto en katakana: dos palabras escritas como una.' },
   spacesBoard: { en: 'The places between the characters', es: 'Los lugares entre los caracteres' },
   spacesBetween: { en: 'between {a} and {b}', es: 'entre {a} y {b}' },
@@ -173,6 +181,8 @@ export const PLAY_STRINGS = Object.freeze({
   resultPointOne: { en: '1 point', es: '1 punto' },
   resultSpaces: { en: 'Spaces found: {right} of {of}, with {extra} extra.', es: 'Espacios encontrados: {right} de {of}, con {extra} de más.' },
   spacesMissedHead: { en: 'Lines to look at again', es: 'Líneas para mirar otra vez' },
+  // What a screen reader hears for each gap of a line the result lists again (render-spaces.js spacedLine).
+  spacesGapSaid: { en: 'space', es: 'espacio' },
   spacesNoneMissed: { en: 'Every line was right.', es: 'Todas las líneas estuvieron bien.' },
 
   // The result.

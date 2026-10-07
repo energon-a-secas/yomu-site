@@ -18,6 +18,7 @@
 
 import { fetchJson } from './reader.js';
 import { slotsOf, checkLine, REASONS } from './gaps.js';
+import { isKanji, isKatakana, isHiragana } from './kana.js';
 import { ROUND, shuffle, createRound, current, answeredNow } from './play-rounds.js';
 
 export const SPACES_SRC = 'data/play/spaces.json';
@@ -41,6 +42,19 @@ export function cleanLine(l) {
   const out = { id: l.id, of: isText(l.of) ? l.of : l.id, tier: l.tier, ja: l.ja, gaps: l.gaps, slots, key: l.gaps.map((g) => g.at) };
   if (isText(l.en) && isText(l.es)) out.meaning = { en: l.en, es: l.es };
   return out;
+}
+
+/**
+ * The string of the hint over a line. Tiers 1 and 3 say what the tier is;
+ * tier 2 names the scripts the line holds, so a line with no kanji is never
+ * told it has some (トイレはどこですか is katakana and hiragana). ー is
+ * no script of its own: it lengthens the kana before it.
+ */
+export function tierHint(q) {
+  if (!q || q.tier !== 2) return q && q.tier === 3 ? 'spacesTier3' : 'spacesTier1';
+  const chars = [...String(q.ja || '')].filter((ch) => ch !== 'ー');
+  const held = [[isKanji, 'K'], [isKatakana, 'T'], [isHiragana, 'H']].filter(([is]) => chars.some(is)).map(([, x]) => x).join('');
+  return held ? `spacesTier2${held}` : 'spacesTier2Any';
 }
 
 /** The file, checked: { lines, dropped }. */

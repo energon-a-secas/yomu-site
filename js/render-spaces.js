@@ -13,7 +13,7 @@
 // side, which takes no target from anyone, since a character is not one.
 
 import { h } from './utils.js';
-import { ui, t } from './strings.js';
+import { ui, t, currentLang } from './strings.js';
 import { pairAt, extraReason } from './gaps.js';
 import { reasonNodes } from './render-gaps.js';
 import { play, uiNodes, ja } from './render-play.js';
@@ -21,9 +21,8 @@ import {
   keysLine, questionHead, feedbackBlock, prompt, loading,
 } from './render-games.js';
 import { current, answeredNow } from './play-rounds.js';
-import { marksOf } from './play-spaces.js';
+import { marksOf, tierHint } from './play-spaces.js';
 
-const TIER_KEY = Object.freeze({ 1: 'spacesTier1', 2: 'spacesTier2', 3: 'spacesTier3' });
 /** Punctuation that closes what came before it, and that opens what comes after (render-reading.js keeps them the same way). */
 const CLOSING = /^[。、．，！？!?.,…‥」』）)〉》】〕]$/u;
 const OPENING = /^[「『（(〈《【〔]$/u;
@@ -135,7 +134,7 @@ export function spacesNodes() {
     questionHead(r),
     prompt([
       h('p', { class: 'pl-ask' }, ui('spacesPrompt')),
-      h('p', { class: 'sp-tier mk-meta' }, ui(TIER_KEY[q.tier])),
+      h('p', { class: 'sp-tier mk-meta' }, ui(tierHint(q))),
       h('p', { class: 'sp-line', lang: 'ja' }, q.ja),
     ]),
     board(q, r),
@@ -146,12 +145,17 @@ export function spacesNodes() {
   ])];
 }
 
-/** A line with its spaces drawn, for the result: "これ を ください", the gaps as marks, not typed spaces. */
+/**
+ * A line with its spaces drawn, for the result: "これ を ください", the gaps
+ * as marks, not typed spaces. The mark says nothing to a screen reader, so
+ * each holds the word "space" in the page's language, visually hidden (out
+ * of the flow, so the line looks as it did).
+ */
 export function spacedLine(q) {
   const cuts = new Set(q.key);
   const out = [];
   [...q.ja].forEach((ch, k) => {
-    if (cuts.has(k)) out.push(h('span', { class: 'sp-gap', 'aria-hidden': 'true' }));
+    if (cuts.has(k)) out.push(h('span', { class: 'sp-gap' }, h('span', { class: 'sr-only', lang: currentLang() }, ` ${ui('spacesGapSaid')} `)));
     out.push(ch);
   });
   return h('span', { class: 'sp-spaced', lang: 'ja' }, out);
