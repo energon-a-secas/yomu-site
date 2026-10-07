@@ -1,12 +1,9 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "のわき",
-"last": "はじをさらす",
+"first": "のんき者",
+"last": "はじん",
 "entries": {
-"のわき": [{"g":["typhoon in the early autumn"],"p":"n","k":["野分き","野分"]},{"g":["Nowaki (28th roll of the Tale of Genji)"],"p":"n","k":["野分き"],"t":1}],
-"のん": [{"g":["indicates a confident conclusion","indicates emotional emphasis","indicates question"],"p":"prt"}],
-"のんきもの": [{"g":["happy-go-lucky person"],"p":"n","k":["のんき者","呑気者"]}],
 "のんき者": [{"r":["のんきもの"],"g":["happy-go-lucky person"],"p":"n"}],
 "のんだくれ": [{"g":["drunkard"],"p":"n","k":["飲んだくれ"]}],
 "のんだくれる": [{"g":["to get dead drunk"],"p":"v1 vi","k":["飲んだくれる"]}],
@@ -1386,6 +1383,10 @@
 "はじろがも": [{"g":["any duck with white specula (bright patches on the wings)"],"p":"n","k":["羽白鴨"]}],
 "はじろこちどり": [{"g":["ringed plover (Charadrius hiaticula)"],"p":"n","k":["羽白小千鳥"],"u":1}],
 "はじをかく": [{"g":["to be embarrassed"],"p":"exp v5k","k":["恥をかく","恥を掻く"]}],
-"はじをさらす": [{"g":["to disgrace oneself"],"p":"exp v5s","k":["恥をさらす","恥を曝す"]}]
+"はじをさらす": [{"g":["to disgrace oneself"],"p":"exp v5s","k":["恥をさらす","恥を曝す"]}],
+"はじをしのぶ": [{"g":["to abide one's shame"],"p":"exp v5b","k":["恥を忍ぶ","恥をしのぶ"]}],
+"はじをしる": [{"g":["to know shame"],"p":"exp v5r","k":["恥を知る"]}],
+"はじをしれ": [{"g":["for shame!"],"p":"exp int","k":["恥を知れ"]}],
+"はじん": [{"g":["resident of ancient Sichuan","bumpkin"],"p":"n","k":["巴人"]}]
 }
 }

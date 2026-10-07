@@ -123,6 +123,15 @@ export const COST = Object.freeze({
   nounVerb: 30,       // a noun straight into a verb, no particle (connect)
   suruNeedsVs: 60,    // ...and more when the verb is する and the noun takes none
   suffixAfterPredicate: 40, // a suffix-first noun met in kana after a verb or adjective (connect)
+  // A mixed spelling (a record marked `m`) whose closing hiragana are the
+  // start of a longer banded word that takes the rest of the hiragana
+  // (candidates.js endsInsideWord): 毎秋りんご園 read 秋りん, the long autumn
+  // rains, then ご and 園, where 秋|りんご|園 is meant. The cost is paid in 2
+  // of 248,924 Tatoeba sentences, and any price from 24 to 1,000 reads both
+  // the same, so this is a direction more than a number. The corpus cannot
+  // test it alone: a mixed spelling is one the corpus seldom matches
+  // (docs/ANALYZER.md, "秋りん and つき物").
+  endsInsideWord: 40,
   homographSpelling: 10, // per place this kanji sits down its reading's list
   homographAffix: 10, // an affix-first record, where another is not
   homographKanaUsual: 20, // a record marked usually-kana, met in kanji

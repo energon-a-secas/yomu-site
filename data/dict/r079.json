@@ -1,11 +1,9 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "にっぽんせいぶつぶつりがっかい",
-"last": "にらめつける",
+"first": "にっぽんせいめいほけん",
+"last": "にりつはいはん",
 "entries": {
-"にっぽんせいぶつぶつりがっかい": [{"g":["Biophysical Society of Japan"],"p":"n","k":["日本生物物理学会"]}],
-"にっぽんせいめい": [{"g":["Nippon Life"],"p":"n","k":["日本生命"]}],
 "にっぽんせいめいほけん": [{"g":["Nippon Life Insurance"],"p":"n","k":["日本生命保険"]}],
 "にっぽんせきじゅうじあきたかんごだいがく": [{"g":["Japanese Red Cross Akita College of Nursing"],"p":"n","k":["日本赤十字秋田看護大学"]}],
 "にっぽんせきじゅうじあきたたんきだいがく": [{"g":["Japanese Red Cross Junior College of Akita"],"p":"n","k":["日本赤十字秋田短期大学"]}],
@@ -1272,6 +1270,9 @@
 "にらみ鯛": [{"r":["にらみだい"],"g":["decorative fish displayed during festive occasions"],"p":"n"}],
 "にらめくら": [{"g":["staring contest"],"p":"n","k":["睨め競"]}],
 "にらめっこ": [{"g":["staring-out (down) game","constant looking at something…"],"p":"n vs vi","k":["睨めっこ"],"u":1}],
-"にらめつける": [{"g":["to glare at"],"p":"v1 vt","k":["睨め付ける","睨めつける"]}]
+"にらめつける": [{"g":["to glare at"],"p":"v1 vt","k":["睨め付ける","睨めつける"]}],
+"にらんせい": [{"g":["fraternal (of twins)"],"p":"adj-no n","k":["二卵性"]}],
+"にらんせいそうせいじ": [{"g":["fraternal twins"],"p":"n","k":["二卵性双生児"]}],
+"にりつはいはん": [{"g":["antinomy"],"p":"n","k":["二律背反"]}]
 }
 }

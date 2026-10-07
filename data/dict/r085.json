@@ -1,13 +1,9 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "はんぱつさよう",
-"last": "ひかす",
+"first": "はんぱもの",
+"last": "ひかせき",
 "entries": {
-"はんぱつさよう": [{"g":["repulsion"],"p":"n","k":["反発作用"]}],
-"はんぱつしん": [{"g":["rebellious spirit"],"p":"n","k":["反発心"]}],
-"はんぱつりょく": [{"g":["repellent force"],"p":"n","k":["反発力"]}],
-"はんぱない": [{"g":["to a great extent"],"p":"exp adj-i","k":["半端ない"],"u":1}],
 "はんぱもの": [{"g":["halfwit"],"p":"n","k":["半端者","ハンパ者"]},{"g":["odd piece"],"p":"n","k":["半端物"],"t":1}],
 "はんぱもん": [{"g":["halfwit"],"p":"n","k":["半端者","ハンパ者"]}],
 "はんびょうにん": [{"g":["semi-invalid"],"p":"n","k":["半病人"]}],
@@ -1444,6 +1440,10 @@
 "ひかさんめいし": [{"g":["uncountable noun"],"p":"n","k":["非可算名詞"]}],
 "ひかしぼう": [{"g":["subcutaneous fat"],"p":"n","k":["皮下脂肪"]}],
 "ひかしゅっけつ": [{"g":["subcutaneous hemorrhage"],"p":"n","k":["皮下出血"]}],
-"ひかす": [{"g":["to redeem debts (e.g. of a geisha)"],"p":"v5s vt","k":["引かす","落籍す"]}]
+"ひかす": [{"g":["to redeem debts (e.g. of a geisha)"],"p":"v5s vt","k":["引かす","落籍す"]}],
+"ひかすいそ": [{"g":["arsine"],"p":"n","k":["砒化水素"]}],
+"ひかすう": [{"g":["augend"],"p":"n","k":["被加数"]}],
+"ひかず": [{"g":["number of days"],"p":"n","k":["日数"],"e":1}],
+"ひかせき": [{"g":["non-fossil (energy, fuel, etc.)"],"p":"adj-f","k":["非化石"]}]
 }
 }

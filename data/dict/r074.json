@@ -1,11 +1,9 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "ととう",
-"last": "どうしせい",
+"first": "ととく",
+"last": "どうしたって",
 "entries": {
-"ととう": [{"g":["conspirators"],"p":"n vs vi","k":["徒党"]},{"g":["going to China"],"p":"n vs","k":["渡唐"],"t":1},{"g":["visiting an island"],"p":"n vs","k":["渡島"],"t":2}],
-"ととうをくむ": [{"g":["to form a faction"],"p":"exp v5m","k":["徒党を組む"]}],
 "ととく": [{"g":["governor-general"],"p":"n","k":["都督"]}],
 "ととのえ": [{"g":["preparation"],"p":"n","k":["整え"]}],
 "とともに": [{"g":["together with"],"p":"exp","k":["と共に"],"u":1}],
@@ -1386,6 +1384,9 @@
 "どうししゃだいがく": [{"g":["Doshisha University"],"p":"n","k":["同志社大学"]}],
 "どうししょう": [{"g":["voyeurism"],"p":"n","k":["瞠視症"]}],
 "どうしじょうめいし": [{"g":["gerund"],"p":"n","k":["動詞状名詞"]}],
-"どうしせい": [{"g":["homodont"],"p":"adj-no n","k":["同歯性"]}]
+"どうしせい": [{"g":["homodont"],"p":"adj-no n","k":["同歯性"]}],
+"どうした": [{"g":["somehow"],"p":"adj-pn","k":["如何した"],"u":1}],
+"どうしたかぜのふきまわしか": [{"g":["whatever brought that on?"],"p":"exp","k":["どうした風の吹き回しか"]}],
+"どうしたって": [{"g":["by all means"],"p":"adv"}]
 }
 }

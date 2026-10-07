@@ -8,10 +8,10 @@
 // a path always exists. Its `cost` is the node's own; what it costs to sit
 // next to its neighbours is costs.js's `connect`.
 
-import { isKanji, isKatakana, isKana, hasKanji } from './kana.js';
+import { isKanji, isKatakana, isKana, hasKanji, isHiragana } from './kana.js';
 import { deinflect, deinflectStem, posMatches } from './deinflect.js';
 import { numberAt, counterAt, readCounted, readNumber, numberBends, readQuestion, countedEnd, countedParts } from './numbers.js';
-import { PARTICLE, COPULA, COST, classOf, homographCost, bandOf } from './costs.js';
+import { PARTICLE, PARTICLES, COPULA, COST, classOf, homographCost, bandOf } from './costs.js';
 import { unsupported, wholeNameAt } from './names.js';
 import { refused } from './key-rules.js';
 import { kanaHomographCost } from './spellings.js';
@@ -107,6 +107,46 @@ function stemNouns(s, i, j, dict, whole, env) {
   return out;
 }
 
+/** A band from the corpus: a key the corpus never matched has none. */
+const banded = (rec) => rec.q >= 1 && rec.q <= 5;
+
+/** What any word may end before: a particle or a copula form. */
+const ENDERS = Object.freeze([...PARTICLES, ...Object.keys(COPULA)]);
+
+/**
+ * Whether the hiragana a mixed spelling ends in, after a kanji, are only the
+ * start of a longer word of the text: 秋りん (秋霖, the long autumn rains) in
+ * 毎秋りんご園, where りんご "apple" starts at its りん. Only a record marked
+ * `m` asks (the build marks the spellings the mixed rule of
+ * tools/lib/extra.mjs adds, docs/ANALYZER.md): asked of every key the corpus
+ * never banded, half the first tier, it read 一区切り as 一|区|切り and
+ * 円建て as 円|建て.
+ *
+ * The longer word is the whole stretch of hiragana from the key's own to the
+ * next kanji, katakana or the end of the run, and a key the corpus banded.
+ * Where a kanji follows, the key's path must read the kana left over as a
+ * word of their own (ご, the honorific prefix, before 園), which is the
+ * misreading; a longer word that ends inside hiragana is as often the start
+ * of what follows (肉まんまだある is 肉まん|まだ, not まんま "as it is"). And
+ * the text after the key must not open with a particle or a copula form,
+ * after which it ends as readily as any word (誰それでは is 誰それ|では, and
+ * 大ごとに直面 大ごと|に). The stretch is a substring of the run, so
+ * keysForRun has already asked for it.
+ */
+function endsInsideWord(run, i, j, dict, maxKey) {
+  let k = j;
+  while (k > i && isHiragana(run[k - 1])) k--;
+  if (k === j || k === i) return false;
+  const prev = /[\uDC00-\uDFFF]/.test(run[k - 1]) ? run.codePointAt(k - 2) : run.codePointAt(k - 1);
+  if (!isKanji(String.fromCodePoint(prev))) return false;
+  if (ENDERS.some((w) => run.startsWith(w, j))) return false;
+  let e = j;
+  while (e < run.length && isHiragana(run[e])) e++;
+  if (e === j || e - k > maxKey) return false;
+  const recs = dict.get(run.slice(k, e));
+  return !!recs && recs.some(banded);
+}
+
 export function candidates(run, i, dict, env) {
   const out = [];
   const push = (node) => { if (node) out.push(node); };
@@ -122,11 +162,16 @@ export function candidates(run, i, dict, env) {
     const last = s[len - 1];
     if (isDigitish(last)) break;
     const whole = i === 0 && j === run.length;
+    let inside = null;
     for (const rec of dict.get(s) || []) {
       const node = wordNode(s, i, j, rec, s, NO_CHAIN, NO_CHAIN, whole, env);
       if (node && j === counted) {
         if (rec.q !== 1) node.cost += COST.numberKey;
         else node.countLike = true;
+      }
+      if (node && rec.m) {
+        if (inside === null) inside = endsInsideWord(run, i, j, dict, env.maxKey);
+        if (inside) node.cost += COST.endsInsideWord;
       }
       push(node);
     }

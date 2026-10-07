@@ -21,7 +21,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { isKana, isKanji, toHira } from '../js/kana.js';
+import { isKana, isKanji, isHiragana, toHira } from '../js/kana.js';
 import { groupsOfWord } from '../js/sounds-like.js';
 import { BANNED_WORDS } from '../tools/lib/licence.mjs';
 
@@ -227,6 +227,22 @@ test('x is not set where the particle-looking kana belongs to the word', () => {
   for (const k of ['には', 'とは']) assert.equal(dict.get(k)[0].x, undefined, `${k} is a particle`);
 });
 
+test('m marks the mixed spellings the build added, on every record, and nothing else', () => {
+  const marked = [...dict].filter(([, recs]) => recs.some((r) => r.m !== undefined));
+  // 808 on 2026-10-07: 813 spellings of entries, five of them shared
+  assert.ok(marked.length > 700 && marked.length < 900, `${marked.length} keys marked`);
+  for (const [key, recs] of marked) {
+    for (const r of recs) assert.equal(r.m, 1, `${key}: m`);
+    assert.ok([...key].some((ch) => isKanji(ch)) && [...key].every((ch) => isKanji(ch) || isHiragana(ch)), `${key}: kanji and hiragana`);
+  }
+  for (const key of ['秋りん', 'あめ色', '大ごと', 'つき物', '誰それ']) assert.equal(dict.get(key)[0].m, 1, `${key} is marked`);
+  // a katakana fold, and words of the common set the corpus never matched
+  for (const key of ['アメ色', 'ツキ物', '区切り', '円建て', '指切り', '割く', '憩う']) {
+    assert.ok(dict.has(key), key);
+    assert.equal(dict.get(key)[0].m, undefined, `${key} is not marked`);
+  }
+});
+
 test('the frequency bands have their stated sizes', () => {
   const band = new Map();
   for (const recs of dict.values()) band.set(recs[0].q, (band.get(recs[0].q) || 0) + 1);
@@ -429,6 +445,38 @@ test('check-data fails each broken rule and names the file', async () => {
     ['a ranged kanji shard holding a character outside its range', (rw) => rw('data/kanji/k05.json', (d) => {
       d.entries = { 一: Object.values(d.entries)[0], ...d.entries };
     }), /k05\.json|kanji\/index\.json/],
+  ];
+  const runs = await Promise.all([
+    ...cases.map(([, mutate]) => brokenCopy(mutate)),
+    ...second.map(([, mutate]) => brokenCopy(mutate, { full: true })),
+  ]);
+  [...cases, ...second].forEach(([name, , expect], k) => {
+    assert.equal(runs[k].status, 1, `${name}: exit ${runs[k].status}`);
+    assert.match(runs[k].stderr, expect, name);
+  });
+});
+
+/** The file of data/dict a first-tier key is in: the core, or the shard the page would fetch. */
+const fileOf = (key) => (Object.hasOwn(dictCore.entries, key) ? dictIndex.core.src : shardFor(key).src);
+
+test('check-data fails an m mark out of place and names the file', async () => {
+  const shared = [...dict].find(([, recs]) => recs.length > 1 && recs[0].m)[0];
+  const cases = [
+    ['an m that is not 1', (rw) => rw(fileOf('秋りん'), (d) => {
+      d.entries['秋りん'][0].m = 2;
+    }), /: 秋りん\[0\]: m is not 1/],
+    ['an m on a key that is no mixed spelling', (rw) => rw(fileOf('区切り'), (d) => {
+      for (const r of d.entries['区切り']) r.m = 1;
+    }), /: 区切り: m on a key that is no mixed spelling/],
+    ['an m on one record of a key and not the other', (rw) => rw(fileOf(shared), (d) => {
+      delete d.entries[shared][1].m;
+    }), new RegExp(`: ${shared}: m on 1 of 2 records`)],
+  ];
+  const second = [
+    ['an m in the second tier', (rw) => rw('data/dict/r010.json', (d) => {
+      const [key] = Object.keys(d.entries);
+      for (const r of d.entries[key]) r.m = 1;
+    }), /r010\.json: .*: m in the second tier/],
   ];
   const runs = await Promise.all([
     ...cases.map(([, mutate]) => brokenCopy(mutate)),

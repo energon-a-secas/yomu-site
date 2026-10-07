@@ -1,10 +1,9 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "ひでん",
-"last": "ひゃくぶんはいっけんにしかず",
+"first": "ひでんか",
+"last": "ひゃくぶんりつ",
 "entries": {
-"ひでん": [{"g":["secret (recipe, medicine, etc.)"],"p":"n adj-no","k":["秘伝"]},{"g":["flash of lightning","urgent telegram"],"p":"n","k":["飛電"],"t":1}],
 "ひでんか": [{"g":["specific charge"],"p":"n","k":["比電荷"]},{"g":["non-electrified"],"p":"adj-no","k":["非電化"],"t":1}],
 "ひでんしょ": [{"g":["book of secrets"],"p":"n","k":["秘伝書"]}],
 "ひでー": [{"g":["cruel","violent","very bad"],"p":"adj-i","k":["酷い","非道い"],"u":1}],
@@ -1404,6 +1403,8 @@
 "ひゃくびょう": [{"g":["all kinds of illnesses"],"p":"n","k":["百病"]}],
 "ひゃくぶん": [{"g":["hearing many times"],"p":"n","k":["百聞"]}],
 "ひゃくぶんいすう": [{"g":["percentile"],"p":"n","k":["百分位数"]}],
-"ひゃくぶんはいっけんにしかず": [{"g":["seeing is believing"],"p":"exp","k":["百聞は一見にしかず","百聞は一見に如かず"]}]
+"ひゃくぶんはいっけんにしかず": [{"g":["seeing is believing"],"p":"exp","k":["百聞は一見にしかず","百聞は一見に如かず"]}],
+"ひゃくぶんひ": [{"g":["percentage"],"p":"n","k":["百分比"]}],
+"ひゃくぶんりつ": [{"g":["percentage"],"p":"n","k":["百分率"]}]
 }
 }

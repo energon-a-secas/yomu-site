@@ -1,10 +1,9 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "ほうすん",
-"last": "ほのぎく",
+"first": "ほうず",
+"last": "ほのぐらい",
 "entries": {
-"ほうすん": [{"g":["a square sun (i.e. approx 9sq. cm.)","one's mind"],"p":"n","k":["方寸"]}],
 "ほうず": [{"g":["end"],"p":"n","k":["方図"]}],
 "ほうずき": [{"g":["ground cherry (Physalis alkekengi var. franchetii)","children's noisemaking toy"],"p":"n","k":["酸漿","鬼灯"],"u":1}],
 "ほうずる": [{"g":["to report","to repay"],"p":"vz vt vi","k":["報ずる"]},{"g":["to present","to obey","to proudly bear"],"p":"vz vt","k":["奉ずる"],"t":1},{"g":["to roast (i.e. tea leaves)"],"p":"vz vt","k":["焙ずる"],"t":2},{"g":["to die (of the emperor, etc.)"],"p":"vz vi","k":["崩ずる"],"t":3},{"g":["to invest someone with a fief"],"p":"vz vt","k":["封ずる"],"t":4}],
@@ -1430,6 +1429,7 @@
 "ほのあかり": [{"g":["faint light"],"p":"n","k":["ほの明かり","仄明かり"]}],
 "ほのおけんしゅつき": [{"g":["flame detector"],"p":"n","k":["炎検出器"]}],
 "ほのきく": [{"g":["to hear faintly"],"p":"v4k vt","k":["仄聞く"]}],
-"ほのぎく": [{"g":["to hear faintly"],"p":"v4k vt","k":["仄聞く"]}]
+"ほのぎく": [{"g":["to hear faintly"],"p":"v4k vt","k":["仄聞く"]}],
+"ほのぐらい": [{"g":["dim"],"p":"adj-i","k":["ほの暗い","仄暗い"]}]
 }
 }

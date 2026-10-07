@@ -654,6 +654,88 @@ test('a mixed spelling whose kana start with a particle after a kanji stays out:
   assert.equal(d.get('友達がい'), undefined);
 });
 
+// ── Found on 2026-10-07, what the mixed rule got wrong ─────────────────────
+
+test('毎秋りんご園 is 毎|秋|りんご|園 (was 秋りん "long autumn rains", then ご and 園)', async () => {
+  for (const text of ['毎秋りんご園', '私は、毎秋りんご園へ行くのが楽しみだ。']) {
+    const r = await run(text);
+    assert.ok(cut(r).includes('毎|秋|りんご|園'), `${text}: ${cut(r)}`);
+    assert.equal(tok(r, '秋').reading, 'あき', text);
+    assert.equal(gloss(tok(r, 'りんご')), 'apple (fruit)', text);
+    assert.equal(r.unknown, 0, text);
+  }
+  // 秋りん is still the autumn rains where no longer word starts at its りん,
+  // and two mixed spellings before a particle and the copula read as they
+  // always did (the guards themselves are held by the tests below: removing
+  // either one of them leaves these two as they are)
+  const rains = tok(await run('秋りんが続く。'), '秋りん');
+  assert.ok(rains, cut(await run('秋りんが続く。')));
+  assert.equal(rains.reading, 'しゅうりん');
+  assert.ok(cut(await run('ここまで大ごとになると、かばいきれない。')).includes('大ごと|に|なる'));
+  assert.ok(cut(await run('そのくらいは世間なみだ。')).includes('世間なみ|だ'));
+});
+
+test('つき物 is 付き物, something that always comes with it (was 憑き物 "evil spirit")', async () => {
+  for (const [text, s] of [
+    ['疲労がつき物', 'つき物'], ['欧州までのフライトには疲労がつき物である。', 'つき物'], ['疲労がツキ物', 'ツキ物'],
+  ]) {
+    const r = await run(text);
+    const t = tok(r, s);
+    assert.ok(t, `${s} in ${cut(r)}`);
+    assert.equal(t.reading, 'つきもの', text);
+    assert.equal(gloss(t), 'natural accompaniment', text);
+    assert.equal(t.confidence, 'dict', text);
+    assert.equal(t.entry.tier, undefined, `${text}: a first-tier word, read by the first pass`);
+  }
+});
+
+// ── Found by the review of 2026-10-07: the cost was on every key with no band ─
+
+test('the 秋りん cost is on mixed spellings only: words the corpus never met read as before (were 一|区|切り, 円|建て, 割|くみたい)', async () => {
+  // Tatoeba never matches 区切り, 円建て, 割く, 憩う or 指切り, so none has a
+  // band, and none is a mixed spelling; each one's closing kana start a
+  // banded word (りつ, てら, くみ, うみ, りし). 大ごと is a mixed spelling,
+  // and しか follows it, which ごとし "like" starts.
+  for (const [text, s, reading, next] of [
+    ['これで一区切りついた。', '区切り', 'くぎり', 'ついた'],
+    ['一区切りつけて休もう。', '区切り', 'くぎり', 'つけて'],
+    ['仕事に一区切りつけるつもりだ。', '区切り', 'くぎり', 'つける'],
+    ['支払いは円建てらしい。', '円建て', 'えんだて', 'らしい'],
+    ['契約は円建てまで決まった。', '円建て', 'えんだて', 'まで'],
+    ['彼は会議に多くの時間を割くみたいだ。', '割く', 'さく', 'みたい'],
+    ['人々が公園で憩うみたいだ。', '憩う', 'いこう', 'みたい'],
+    ['もう指切りしかない。', '指切り', 'ゆびきり', 'しかない'],
+    ['大ごとしかない', '大ごと', 'おおごと', 'しかない'],
+  ]) {
+    const r = await run(text);
+    const t = tok(r, s);
+    assert.ok(t, `${text}: ${cut(r)}`);
+    assert.equal(t.reading, reading, text);
+    assert.ok(cut(r).includes(`${s}|${next}`), `${text}: ${cut(r)}`);
+    assert.equal(r.unknown, 0, text);
+  }
+});
+
+test('the 秋りん cost has two guards, each needed: a particle after the key, and a longer word that ends inside hiragana', async () => {
+  const reads = async (text, want) => {
+    const r = await run(text);
+    assert.ok(cut(r).includes(want), `${text}: ${cut(r)}`);
+  };
+  // a particle or a copula form after the key: without the guard, 誰|それでは
+  // "well then" and 大|ごと|に
+  await reads('誰それでは', '誰それ|では');
+  await reads('大ごとに直面した。', '大ごと|に|直面');
+  // a banded word made of the key's kana and more that ends inside hiragana:
+  // without the guard, 肉|まんま|だ "as it is" and 交渉|ごと|した
+  await reads('肉まんまだある？', '肉まん|まだ|ある');
+  await reads('交渉ごとした', '交渉ごと|した');
+  // and where a kanji or katakana ends the longer word, the cost is what
+  // reads it (all three were 秋りん or 黄りん, then the prefix ご)
+  await reads('毎秋りんご狩りに行く。', '秋|りんご|狩り');
+  await reads('秋りんごジュース', '秋|りんご|ジュース');
+  await reads('黄りんご', '黄|りんご');
+});
+
 /** The committed dictionary with one key taken away, everything else as shipped. */
 function without(key) {
   const d = diskDict();

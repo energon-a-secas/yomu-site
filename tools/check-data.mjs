@@ -24,6 +24,9 @@
  *     the key filter would call absent (the page would never fetch it)
  *   - a string anywhere, object keys included, carrying U+2014
  *   - a dictionary record with an empty `g`, or a field it does not know
+ *   - an `m` (a mixed spelling's mark) in the second tier, on a key that is
+ *     not kanji with one run of two or more hiragana, or on some of a key's
+ *     records and not the others
  *   - the second tier (data/dict/rare.json) or the names (data/names/) held
  *     to the same range rule, a key in a filter part that calls it absent,
  *     and a name record outside its shape
@@ -58,6 +61,7 @@ import path from 'node:path';
 import { walkStrings, EM_DASH } from './lib/licence.mjs';
 import { MAX_BYTES, SITE, fmtBytes } from './lib/emit.mjs';
 import { readFilter } from '../js/bloom.js';
+import { isKanji, isHiragana } from '../js/kana.js';
 import {
   joyoDoc, JOYO_FORMAT, JOYO_GRADES, JOYO_SIZES, JOYO_TOTAL,
 } from './lib/joyo.mjs';
@@ -105,20 +109,39 @@ function checkLicence(rel, block, at = '_licence') {
 
 // ── Per-format checks ─────────────────────────────────────────────────────
 
-const RECORD_FIELDS = new Set(['r', 'g', 'p', 'f', 'k', 'u', 'x', 'q', 'w', 'o', 'b', 'c', 't', 'ls', 'ws', 'e']);
+const RECORD_FIELDS = new Set(['r', 'g', 'p', 'f', 'k', 'u', 'x', 'q', 'w', 'o', 'b', 'c', 't', 'ls', 'ws', 'e', 'm']);
 
-/** `ls` is [language, source word or null]; `ws` and `e` are 1 when present. */
+/** `ls` is [language, source word or null]; `ws`, `e` and `m` are 1 when present. */
 function checkRecordMarks(rel, key, i, rec) {
   if (rec.ls !== undefined) {
     const ok = Array.isArray(rec.ls) && rec.ls.length === 2 && typeof rec.ls[0] === 'string' && rec.ls[0]
       && (rec.ls[1] === null || (typeof rec.ls[1] === 'string' && rec.ls[1]));
     if (!ok) fail(rel, `${key}[${i}]: ls is not [language, source or null]`);
   }
-  for (const f of ['ws', 'e']) if (rec[f] !== undefined && rec[f] !== 1) fail(rel, `${key}[${i}]: ${f} is not 1`);
+  for (const f of ['ws', 'e', 'm']) if (rec[f] !== undefined && rec[f] !== 1) fail(rel, `${key}[${i}]: ${f} is not 1`);
   if (rec.ws && !rec.ls) fail(rel, `${key}[${i}]: ws without ls`);
 }
 
-function checkDictShard(rel, doc) {
+/** Kanji and one run of two or more hiragana, the shape of a spelling the mixed rule ships (あめ色, ひと昔前). */
+function mixedShape(key) {
+  const shape = [...key].map((ch) => (isKanji(ch) ? 'k' : isHiragana(ch) ? 'h' : '?')).join('');
+  return /^k*hh+k*$/.test(shape) && shape.includes('k');
+}
+
+/**
+ * `m` marks a key the first tier holds for the mixed rule alone, so it is a
+ * property of the key: on every record or on none, only in the first tier,
+ * and only on a key of that shape (tools/build-dict.mjs).
+ */
+function checkMixedMark(rel, key, recs, rare) {
+  const marked = recs.filter((rec) => rec.m !== undefined).length;
+  if (!marked) return;
+  if (rare) fail(rel, `${key}: m in the second tier`);
+  if (marked !== recs.length) fail(rel, `${key}: m on ${marked} of ${recs.length} records`);
+  if (!mixedShape(key)) fail(rel, `${key}: m on a key that is no mixed spelling`);
+}
+
+function checkDictShard(rel, doc, rare = false) {
   const keys = Object.keys(doc.entries || {});
   if (!keys.length) { fail(rel, 'no entries'); return; }
   for (let i = 1; i < keys.length; i += 1) {
@@ -138,6 +161,7 @@ function checkDictShard(rel, doc) {
       for (const f of Object.keys(rec)) if (!RECORD_FIELDS.has(f)) fail(rel, `${key}[${i}]: unknown field ${f}`);
       checkRecordMarks(rel, key, i, rec);
     });
+    checkMixedMark(rel, key, recs, rare);
   }
 }
 
@@ -230,7 +254,7 @@ const FORMATS = {
   'yomu-dict-core/1': checkDictShard,
   'yomu-dict-filter/1': null,
   'yomu-dict-rare-index/1': null,
-  'yomu-dict-rare/1': checkDictShard,
+  'yomu-dict-rare/1': (rel, doc) => checkDictShard(rel, doc, true),
   'yomu-names-index/1': null,
   'yomu-names/1': checkNamesShard,
   [POPULAR_FORMAT]: null,
