@@ -238,11 +238,12 @@ back between the two buttons. A gap holds no text node, so copying the reading
 copies nothing it adds (measured in Chromium, WebKit and Firefox: the pasted
 text with Gaps on is the text with Gaps off). `js/gaps.js` decides each edge's
 one reason from the tokens alone (docs/ANALYZER.md, "Gaps"), in the order
-particle, copula, name, script, loan, nostart, guess, compound, word; the
-strings are `strings-gaps.js`'s and `render-gaps.js` draws them. Hiragana ん is
-not in `NOSTART`: the analyzer reads the explanatory ん as a word of its own
-(登る|ん|です), and a game that said no word starts with ん had keys that started
-one with it; `tests/spaces.test.mjs` holds every key to every reason the game
+particle, copula, an edge before a no-start kana (a guess), name, script, loan,
+nostart, guess, compound, word; the
+strings are `strings-gaps.js`'s and `render-gaps.js` draws them. Hiragana ん and
+っ are not in `NOSTART`: the analyzer reads the explanatory ん (登る|ん|です) and
+the quoting って (行く|って|言った) as words of their own, and a game that said no
+word starts with ん had keys that started one with it; `tests/spaces.test.mjs` holds every key to every reason the game
 can show. An edge before a kana in `NOSTART` is a guess, never a change of
 script (す|ご|ー|いね: the bar lengthens ご). A guess touching a gap is said in
 words whatever reason won ("...; the reading here is a guess"), in the tip and

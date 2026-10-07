@@ -21,7 +21,7 @@
  *
  * The rest of each line is held to the same checks as the library's: on
  * 2026-10-07 hotel-lobby read 待っています, a te-form and いる that the
- * build now leaves out (`auxiliary`), so it says 待ちます instead.
+ * build now leaves out (`two`), so it says 待ちます instead.
  */
 
 export const COMPOUND_LINES = Object.freeze([

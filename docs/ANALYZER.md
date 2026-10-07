@@ -1364,7 +1364,7 @@ out:
 |---|---:|---|
 | set | 31 | the set phrases (`chunk`); no dialogue sentence holds one the analysis cuts inside |
 | none | 20 | no edge to find |
-| two | 15 | one token that is two words: a te-form and its verb (しています, 見ている, 持っていきます, 作ってみます), and an expression that is a word and a form of する or ございます: お願い\|します (eleven, where the same file splits 連絡\|します), ありがとう\|ございました |
+| two | 15 | one token that is two words: a te-form and its verb (しています, 見ている, 持っていきます, 作ってみます), and an expression that is a word and a form of する or ございます: お願い\|します (ten, where the same file splits 連絡\|します), ありがとう\|ございました |
 | prefix | 12 | a prefix standing alone (お\|元気, ご\|利用, where the dictionary has お名前 as one word), six written and six kana spellings (ごひゃくえん) |
 | tail | 5 | a word that ends in a particle: 何\|と (と quotes), 一緒\|に twice, 何\|か, and だ\|っけ, the copula and a particle |
 | kana | 3 | kana spellings that part where the kanji do not (であいます, 出会う, for で\|会います) |

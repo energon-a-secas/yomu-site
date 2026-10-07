@@ -45,12 +45,12 @@ export const SCRIPTS = Object.freeze(['kanji', 'hiragana', 'katakana', 'latin', 
 const PLAIN = new Set(['punct', 'space', 'newline', 'latin']);
 
 /**
- * Kana no word starts with: katakana ン, the small tsu, the bar, the small
- * kana. Not hiragana ん: the analyzer reads the explanatory ん as a word of
- * its own (のぼる|ん|です, a particle token), so a reason that said no word
- * starts with ん would be contradicted by the answer key beside it.
+ * Kana no word starts with: katakana ン and ッ, the bar, the small kana. Not
+ * hiragana ん or っ: the analyzer reads the explanatory ん (のぼる|ん|です) and
+ * the quoting って (行く|って|言った) as words of their own, so a reason that
+ * said no word starts with them would be contradicted by the reading beside it.
  */
-export const NOSTART = Object.freeze(new Set([...'ンっッーゃゅょャュョぁぃぅぇぉァィゥェォゎヮ']));
+export const NOSTART = Object.freeze(new Set([...'ンッーゃゅょャュョぁぃぅぇぉァィゥェォゎヮ']));
 /** How a loanword often ends, after a consonant sound: bed ベッド, test テスト, pink ピンク. */
 const LOAN_FINAL = new Set([...'ドトスクグル']);
 /** A katakana beat that stands for a bare consonant in a loanword, or ン and ッ. */

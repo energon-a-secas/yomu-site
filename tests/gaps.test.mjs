@@ -59,7 +59,9 @@ test('inside katakana: a loanword ending, then a kana no word starts with, then 
   assert.deepEqual(reasonOf(part('ラーメン'), part('ショップ'), { inside: true }), { why: 'nostart', k: 'ン' });
   assert.deepEqual(reasonOf(part('ギター'), part('ケース'), { inside: true }), { why: 'nostart', k: 'ー' });
   assert.deepEqual(reasonOf(part('インフォーム', null), part('ショップ'), { inside: true }), { why: 'guess' });
-  for (const k of 'ンッーャュョァィゥェォっゃゅょ') assert.ok(NOSTART.has(k), k);
+  for (const k of 'ンッーャュョァィゥェォゃゅょ') assert.ok(NOSTART.has(k), k);
+  // not hiragana っ: the quoting って is a word of its own (行く|って|言った)
+  assert.ok(!NOSTART.has('っ'), 'っ');
 });
 
 test('hiragana ん is no kana that starts no word: the analyzer reads the explanatory ん as a word', async () => {
