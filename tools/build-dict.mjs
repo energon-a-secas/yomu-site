@@ -277,7 +277,7 @@ function main() {
   const before = assemble(jmdict, extras, new Map(), sentences, kanjidic);
   // the counters are the shipped build's, not the sum of both
   Object.assign(stats, zero);
-  const mixed = selectMixed(jmdict, (kana) => (before.entries.get(kana) || [])[0], before.keySet);
+  const mixed = selectMixed(jmdict, (kana) => (before.entries.get(kana) || [])[0], before.keySet, sentences);
   for (const [index, keys] of mixed.extras) {
     if (!extras.has(index)) extras.set(index, new Set());
     for (const k of keys) extras.get(index).add(k);
@@ -354,6 +354,7 @@ function main() {
     `matched spellings left out as strong names read another way: ${extra.named.length} (${extra.named.join(', ')})`,
     `of the evidence, 何 and a counter read as one number token, which lends it its gloss: ${extra.asked.length} (${extra.asked.join(', ')})`,
     `mixed spellings whose kana the first tier read as another word: ${mixed.stats.mixed}, and ${mixed.stats.folded} katakana folds; keys added ${added.length}, ${added.reduce((n, k) => n + lineBytes(k), 0)} B (${mixed.stats.sample.join(', ')})`,
+    `mixed spellings JMdict gives several entries, moved to the one the corpus matches most: ${mixed.stats.claimed.length} (${mixed.stats.claimed.join(', ')})`,
     `core ${coreKeys.length} keys, ${fmtBytes(coreBytes)} (${coreBytes} B), chosen over ${sampled} sampled sentences`,
     `range shards ${docs.length}: min ${fmtBytes(Math.min(...sizes))} (${Math.min(...sizes)} B), max ${fmtBytes(Math.max(...sizes))} (${Math.max(...sizes)} B), total ${fmtBytes(total)} (${total} B); index ${fmtBytes(indexBytes)}`,
     `filter ${filter.n} keys, ${filter.m} bits, ${filter.k} hashes, ${fmtBytes(filterBytes)} (${filterBytes} B)`,

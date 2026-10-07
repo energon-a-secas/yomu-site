@@ -243,7 +243,12 @@ naming the keys it ships under (`tools/lib/extra.mjs` explains them):
   Its katakana form (アメ色) ships with the same records, unless JMdict spells
   something that way. It is banded only on `MIN_MATCHES` matches, so the
   bands the common keys fill do not grow ("飴色 written あめ色 or アメ色",
-  below).
+  below). A spelling JMdict gives several entries outside the common set
+  goes to the one whose other spellings the corpus matches most, the test
+  above or not: つき物 is 付き物 (matched twice), whose one all-kanji
+  spelling 付物 is search-only and so never reached the test, not 憑き物
+  (never matched). Where none is matched, every entry the test chose keeps
+  it, as before ("秋りん and つき物", below).
 
 The corpus counts a spelling, not a word: 上野 was matched for Ueno, the
 place and surname, and shipped under its one entry outside the common set
@@ -881,7 +886,8 @@ wait" and 毛), 耳あか earwax (耳 and "red"), 水ぼうそう chickenpox (�
 モモ肉. One reads worse: 毎秋りんご園 is 毎|秋りん|ご|園 (秋りん, the long
 autumn rains, took the first kana of りんご). One trades a wrong word for
 another: 疲労がつき物 is 憑き物 "evil spirit" where 付き物 is meant (it was
-つき "Moon" and 物). Two guards were measured before they were kept: a
+つき "Moon" and 物). Both were fixed on 2026-10-07 ("秋りん and つき物",
+below). Two guards were measured before they were kept: a
 hiragana part that starts with a particle right after a kanji is left out
 (with it, 何がしたい read 何がし|たい "a certain amount", and 友達がいなかった
 友達がい|なかった "true friendship"), and a mixed spelling is banded only on
@@ -918,6 +924,58 @@ dictionary: median 3 dictionary files and 8 in all, before and after
 measurement: median 4 dictionary files, 7 in all, 675 KB before and 679
 KB after; 田中 loads 1,655 KB (1,571), the paragraph 27 dictionary files
 (29).
+
+### 秋りん and つき物 (2026-10-07)
+
+The two readings the mixed rule left wrong had two causes, so they have two
+fixes, each measured alone over all 248,924 Tatoeba sentences
+(`tools/compare-readings.mjs --all`, the committed tree as A).
+
+**毎秋りんご園 read 毎|秋りん|ご|園.** 秋りん is the mixed spelling of 秋霖,
+the long autumn rains, and it took the first two kana of りんご: the path
+through the prefix ご and 園 was 24 cheaper than 秋|りんご|園, which pays 20
+twice for two nouns side by side. That is a price, so it is fixed in the
+lattice: a key with no band (the corpus never matched it, which is what a
+mixed spelling or a katakana fold usually is) whose closing hiragana come
+after a kanji and start a longer banded key that runs on past it pays
+`COST.endsInsideWord` (40, `candidates.js endsInsideWord`). The longer word
+is a substring of the run, so the keys `keysForRun` asks for already hold
+it, and nothing new is fetched. A particle or a copula form past the key is
+no longer word: without that guard 大ごとになる read 大|ごとに "one by one",
+and 世間なみだ was within reach of なみだ "tears". The same rule on every key,
+banded or not, changed 1,006 readings (189 distinct), and of 30 read from
+that list most were worse (しない became "in the city", 二度と言うな
+二度|と言う), so it stays on the keys the corpus never banded.
+
+**疲労がつき物 read つき物 as 憑き物, an evil spirit.** No price could fix
+it: the first tier held only 憑き物's record under つき物. JMdict lists
+つき物 for 付き物 and 憑き物, both outside the common set; the mixed test
+locates the kana through an all-kanji spelling it may show, and 付き物's
+one, 付物, is search-only, so the test passed 付き物 over and gave the key
+to 憑き物 alone. Letting the test read search-only spellings would have
+fixed it and shipped 51 more spellings besides (その場, それ相応 and
+中だし among them), so the build asks instead which entry a spelling means
+(`extra.mjs claim`): every entry outside the common set that lists it is
+weighed by the corpus matches of its other spellings, and the key and its
+katakana fold go to those matched most (付き物 2, 憑き物 0). With no match
+for any, the entries the test chose keep it: the five other spellings
+shipped for two entries (かん水, ろう管, 卵めん, 後じん, 手すき) are
+unchanged.
+
+| | before | after |
+|---|---:|---:|
+| the rule in the lattice, same data: sentences whose tokens change | | 1 |
+| changes of segmentation, reading or kind | | 1: 秋りん\|ご to 秋\|りんご |
+| first-pass tokens that change, of 2,356,125 | | 2 (秋りん and ご) |
+| `COST.endsInsideWord` from 25 to 1,000, over the 107 sentences where it can apply | | the same one change |
+| the rule in the build, same code: keys whose records change, of 472,965 in both tiers | | 3 (つき物 and ツキ物 in the first tier, つき物 in the second) |
+| sentences whose tokens change | | 1, a gloss: 欧州までのフライトには疲労がつき物である。 |
+| first-tier range shards, bytes | 3,960,654 | 3,960,798 (the core unchanged) |
+| second tier, bytes | 44,089,067 | 44,089,016 |
+| guesses | 14,542 | 14,542 |
+
+The rebuild moved key ranges, so 6 first-tier range shards and 28 of the
+second tier's were rewritten; no other record changed.
 
 ## Katakana compounds and loanword rules (2026-10-03)
 

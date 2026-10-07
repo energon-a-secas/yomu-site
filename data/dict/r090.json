@@ -1,10 +1,9 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "ふくレコードキー",
-"last": "ふゆがしら",
+"first": "ふぐ",
+"last": "ふゆがた",
 "entries": {
-"ふくレコードキー": [{"g":["alternate record key"],"p":"n","k":["副レコードキー"]}],
 "ふぐ": [{"g":["puffer fish"],"p":"n","k":["河豚","鰒"],"u":1},{"g":["deformity","word written at the end of a letter"],"p":"n adj-no","k":["不具"],"t":1},{"g":["unforeseen (occurrence)"],"p":"n adj-no","k":["不虞"],"t":2}],
 "ふぐあい": [{"g":["flaw","inconvenient"],"p":"n adj-na","k":["不具合"]}],
 "ふぐう": [{"g":["misfortune"],"p":"n adj-na adj-no","k":["不遇"]}],
@@ -1469,6 +1468,7 @@
 "ふゆうほう": [{"g":["flotation"],"p":"n","k":["浮遊法"]}],
 "ふゆうれい": [{"g":["wandering ghost"],"p":"n","k":["浮遊霊"]}],
 "ふゆがこい": [{"g":["insulating one's house for winter climate","covering one's crops for winter climate","covering unused boats in winter (e.g. with straw mats)"],"p":"n vs vt","k":["冬囲い"]}],
-"ふゆがしら": [{"g":["kanji \"winter\" radical at top (radical 34)"],"p":"n","k":["冬頭"]}]
+"ふゆがしら": [{"g":["kanji \"winter\" radical at top (radical 34)"],"p":"n","k":["冬頭"]}],
+"ふゆがた": [{"g":["atmospheric pressure pattern in winter","wintery"],"p":"n adj-no","k":["冬型"]}]
 }
 }

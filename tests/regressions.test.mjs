@@ -674,6 +674,20 @@ test('毎秋りんご園 is 毎|秋|りんご|園 (was 秋りん "long autumn ra
   assert.ok(cut(await run('そのくらいは世間なみだ。')).includes('世間なみ|だ'));
 });
 
+test('つき物 is 付き物, something that always comes with it (was 憑き物 "evil spirit")', async () => {
+  for (const [text, s] of [
+    ['疲労がつき物', 'つき物'], ['欧州までのフライトには疲労がつき物である。', 'つき物'], ['疲労がツキ物', 'ツキ物'],
+  ]) {
+    const r = await run(text);
+    const t = tok(r, s);
+    assert.ok(t, `${s} in ${cut(r)}`);
+    assert.equal(t.reading, 'つきもの', text);
+    assert.equal(gloss(t), 'natural accompaniment', text);
+    assert.equal(t.confidence, 'dict', text);
+    assert.equal(t.entry.tier, undefined, `${text}: a first-tier word, read by the first pass`);
+  }
+});
+
 /** The committed dictionary with one key taken away, everything else as shipped. */
 function without(key) {
   const d = diskDict();

@@ -359,20 +359,27 @@ function kanaFor(s, spellings) {
  *          katakana the first pass guessed アメ, and the second phase found
  *          the prefix アメ, "American".
  *
+ *          Which entry a spelling means is asked apart from whether it
+ *          ships (`claim`, below): JMdict spells several words the same.
+ *
  * @param {object} jmdict
  * @param {(kana: string) => (object | undefined)} firstRecord  the first
  *   tier's first record of a hiragana key, as the first three reasons built it
  * @param {Set<string>} taken  every key the first tier already has
+ * @param {string[]} [sentences]  the corpus, for `claim`; without it every
+ *   entry the test chose keeps its spelling
  * @returns {{ extras: Map<number, Set<string>>, folds: Map<string, { index: number, spelling: string }>, stats: object }}
  */
-export function selectMixed(jmdict, firstRecord, taken) {
+export function selectMixed(jmdict, firstRecord, taken, sentences = []) {
   const { words } = jmdict;
   const { pos, owned } = commonIndex(words);
   const spelled = new Set();
   for (const e of words) for (const k of [...e.kanji, ...e.kana]) spelled.add(k.text);
   const extras = new Map();
   const folds = new Map();
-  const stats = { mixed: 0, folded: 0, sample: [] };
+  const stats = {
+    mixed: 0, folded: 0, sample: [], claimed: [],
+  };
   if (RULES_OFF.has('mixed')) return { extras, folds, stats };
   words.forEach((e, index) => {
     if (isCommon(e) || e.sense[0].partOfSpeech.includes('exp')) return;
@@ -400,5 +407,61 @@ export function selectMixed(jmdict, firstRecord, taken) {
       }
     }
   });
+  claim(words, extras, folds, sentences, taken, stats);
   return { extras, folds, stats };
+}
+
+/**
+ * The entries a shipped mixed spelling belongs to. The test above asks a
+ * question of the spelling (does the first tier read its kana as another
+ * word?), and every entry JMdict spells that way shares the answer; but the
+ * test reaches an entry only through an all-kanji spelling it may show, and
+ * 付き物 "something that always comes with it" has one, 付物, marked
+ * search-only. So つき物 shipped for 憑き物 "evil spirit" alone, and
+ * 疲労がつき物 read as one. Here every entry outside the common set that is
+ * no expression and lists the spelling is weighed by how often the corpus
+ * matches its other spellings, greedily among the first tier's keys (付き物
+ * twice, 憑き物 never), and the spelling and its fold go to those matched
+ * most. Where none is matched (かん水, sprinkling or lye water), the entries
+ * the test chose keep it, as before.
+ */
+function claim(words, extras, folds, sentences, taken, stats) {
+  const chosen = new Map();
+  for (const [index, keys] of extras) {
+    for (const s of keys) {
+      if (!chosen.has(s)) chosen.set(s, new Set());
+      chosen.get(s).add(index);
+    }
+  }
+  const listers = new Map();
+  words.forEach((e, index) => {
+    if (isCommon(e) || e.sense[0].partOfSpeech.includes('exp')) return;
+    for (const k of kanjiOf(e)) {
+      if (!chosen.has(k.text)) continue;
+      if (!listers.has(k.text)) listers.set(k.text, []);
+      listers.get(k.text).push(index);
+    }
+  });
+  const contested = [...listers].filter(([, list]) => list.length > 1);
+  if (!contested.length || !sentences.length) return;
+  const others = (index, s) => kanjiOf(words[index]).map((k) => k.text).filter((t) => t !== s);
+  const counts = countKeys(sentences, new Set([...taken, ...contested.flatMap(([s, list]) => list.flatMap((i) => others(i, s)))]));
+  for (const [s, list] of contested) {
+    const score = new Map(list.map((i) => [i, others(i, s).reduce((n, t) => n + (counts.get(t) || 0), 0)]));
+    const best = Math.max(...score.values());
+    if (!best) continue;
+    const win = list.filter((i) => score.get(i) === best);
+    const was = chosen.get(s);
+    if (win.length === was.size && win.every((i) => was.has(i))) continue;
+    for (const i of was) {
+      extras.get(i).delete(s);
+      if (!extras.get(i).size) extras.delete(i);
+    }
+    for (const i of win) {
+      if (!extras.has(i)) extras.set(i, new Set());
+      extras.get(i).add(s);
+    }
+    for (const fold of folds.values()) if (fold.spelling === s && !win.includes(fold.index)) [fold.index] = win;
+    stats.claimed.push(`${s} ${kanjiOf(words[win[0]])[0].text}`);
+  }
 }

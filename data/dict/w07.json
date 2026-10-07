@@ -2,7 +2,7 @@
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict/1",
 "first": "ちかぢか",
-"last": "とりしらべ",
+"last": "とりしまる",
 "entries": {
 "ちかぢか": [{"g":["soon","close (by)"],"p":"adv adv-to","k":["近々","近近"]}],
 "ちかって": [{"g":["surely","(with neg) by no means"],"p":"adv","k":["誓って"]}],
@@ -485,7 +485,7 @@
 "つきやま": [{"g":["artificial hill (in a garden)"],"p":"n","k":["築山"]}],
 "つきよ": [{"g":["moonlit night"],"p":"n","k":["月夜"]}],
 "つきる": [{"g":["to be used up"],"p":"v1 vi","k":["尽きる"]}],
-"つき物": [{"r":["つきもの"],"g":["evil spirit (that possesses someone)"],"p":"n"}],
+"つき物": [{"r":["つきもの"],"g":["natural accompaniment","inevitable aspect (of something)","supplementary printed insert (in a book or magazine)"],"p":"n","u":1}],
 "つぎ": [{"g":["next","stage"],"p":"n adj-no","k":["次"],"q":3}],
 "つぎこむ": [{"g":["to invest in"],"p":"v5m vt","k":["注ぎ込む","つぎ込む"]}],
 "つぎつぎ": [{"g":["in succession"],"p":"adv adv-to n","k":["次々","次次"]}],
@@ -1373,7 +1373,6 @@
 "とりしまりほう": [{"g":["control law"],"p":"n","k":["取締法"]}],
 "とりしまりやく": [{"g":["company director"],"p":"n","k":["取締役"]}],
 "とりしまりやくかい": [{"g":["board of directors","board of directors' meeting"],"p":"n","k":["取締役会"]}],
-"とりしまる": [{"g":["to manage","to crack down on"],"p":"v5r vt","k":["取り締まる","取締る"]}],
-"とりしらべ": [{"g":["investigation (e.g. by police or prosecutors)"],"p":"n","k":["取り調べ","取調べ"]}]
+"とりしまる": [{"g":["to manage","to crack down on"],"p":"v5r vt","k":["取り締まる","取締る"]}]
 }
 }

@@ -2,7 +2,7 @@
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict/1",
 "first": "エー・ティー・エム",
-"last": "テニスコート",
+"last": "テナー",
 "entries": {
 "エー・ティー・エム": [{"g":["automated teller machine","asynchronous transfer mode","anti-tank missile"],"p":"n","k":["ＡＴＭ"]}],
 "オアシス": [{"g":["oasis"],"p":"n","q":4}],
@@ -1866,7 +1866,7 @@
 "ツアー": [{"g":["tour"],"p":"n","q":3}],
 "ツイン": [{"g":["twin","twin room"],"p":"n","q":4}],
 "ツガイ目": [{"r":["つがいめ"],"g":["joint"],"p":"n"}],
-"ツキ物": [{"r":["つきもの"],"g":["evil spirit (that possesses someone)"],"p":"n"}],
+"ツキ物": [{"r":["つきもの"],"g":["natural accompaniment","inevitable aspect (of something)","supplementary printed insert (in a book or magazine)"],"p":"n","u":1}],
 "ツギ木": [{"r":["つぎき"],"g":["grafting"],"p":"n vs vt"}],
 "ツクリ絵": [{"r":["つくりえ"],"g":["tsukuri-e"],"p":"n"}],
 "ツケ毛": [{"r":["つけげ"],"g":["hairpiece"],"p":"n"}],
@@ -1922,7 +1922,6 @@
 "テックス": [{"g":["(soft) fiberboard","cloth"],"p":"n","ls":["eng","tex(ture)"]}],
 "テトラクロロエチレン": [{"g":["tetrachloroethylene"],"p":"n"}],
 "テナント": [{"g":["tenant (usu. office block, shopping center, etc.)"],"p":"n"}],
-"テナー": [{"g":["tenor"],"p":"n"}],
-"テニスコート": [{"g":["tennis court"],"p":"n","q":4}]
+"テナー": [{"g":["tenor"],"p":"n"}]
 }
 }

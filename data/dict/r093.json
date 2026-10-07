@@ -1,10 +1,9 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "へんこうほうどう",
-"last": "ほうする",
+"first": "へんこうりれき",
+"last": "ほうすん",
 "entries": {
-"へんこうほうどう": [{"g":["biased coverage"],"p":"n","k":["偏向報道"]}],
 "へんこうりれき": [{"g":["change log"],"p":"n","k":["変更履歴"]}],
 "へんこうセット": [{"g":["changeset"],"p":"n","k":["変更セット"]}],
 "へんこうプリズム": [{"g":["polarizing prism"],"p":"n","k":["偏光プリズム"]}],
@@ -1370,6 +1369,7 @@
 "ほうすいろ": [{"g":["flood bypass"],"p":"n","k":["放水路"]}],
 "ほうすいクロラール": [{"g":["chloral hydrate"],"p":"n","k":["抱水クロラール"]}],
 "ほうすう": [{"g":["gifted young person who shows much promise"],"p":"n","k":["鳳雛"]}],
-"ほうする": [{"g":["to guarantee"],"p":"vs-s vt","k":["保する"]}]
+"ほうする": [{"g":["to guarantee"],"p":"vs-s vt","k":["保する"]}],
+"ほうすん": [{"g":["a square sun (i.e. approx 9sq. cm.)","one's mind"],"p":"n","k":["方寸"]}]
 }
 }

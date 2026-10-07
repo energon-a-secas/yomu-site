@@ -1,9 +1,10 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict/1",
-"first": "とりそろえる",
-"last": "はばひろ",
+"first": "とりしらべ",
+"last": "はば",
 "entries": {
+"とりしらべ": [{"g":["investigation (e.g. by police or prosecutors)"],"p":"n","k":["取り調べ","取調べ"]}],
 "とりそろえる": [{"g":["to assemble (e.g. goods into a set)"],"p":"v1 vt","k":["取り揃える","取りそろえる"]}],
 "とりたて": [{"g":["collection (of a debt, rent, taxes, etc.)","selection (for a position)","fresh"],"p":"n adj-no","k":["取り立て","取立て"]}],
 "とりだす": [{"g":["to take out","to fetch"],"p":"v5s vt","k":["取り出す"]}],
@@ -1411,8 +1412,6 @@
 "はは": [{"g":["mother"],"p":"n","k":["母"],"q":2,"b":1},{"g":["mother-in-law","foster mother","step mother"],"p":"n","k":["義母"],"q":2,"b":6}],
 "ははおや": [{"g":["mother"],"p":"n","k":["母親"]}],
 "ははかた": [{"g":["mother's side of family","maternal (grandfather, uncle, etc.)"],"p":"n adj-no","k":["母方"]}],
-"はば": [{"g":["width","freedom (e.g. of thought)","gap"],"p":"n","k":["幅","巾"],"q":2}],
-"はばつ": [{"g":["clique"],"p":"n adj-no","k":["派閥"],"q":4}],
-"はばひろ": [{"g":["wide (esp. of clothing)"],"p":"adj-no adj-na n","k":["幅広","巾広"]}]
+"はば": [{"g":["width","freedom (e.g. of thought)","gap"],"p":"n","k":["幅","巾"],"q":2}]
 }
 }
