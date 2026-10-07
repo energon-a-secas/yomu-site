@@ -15,7 +15,7 @@
 
 import { cleanKanjiRow, cleanPhraseRow, cleanPlay, cleanPrefs, cleanClear } from './sync-rules.js';
 import { planSync, pushes, applies } from './sync-local.js';
-import { newBook, carriedOf, pruneCarried } from './sync-book.js';
+import { newBook, answeredBook, carriedOf, pruneCarried, PENDING } from './sync-book.js';
 
 /** The Convex functions, by name (convex/sync.ts). */
 export const FN = Object.freeze({
@@ -47,8 +47,9 @@ function answer(res) {
 
 /**
  * Which way a sign-in goes: 'adopt' on a browser that never synced (its data
- * joins the account), 'same' for the account it last synced with, and 'ask'
- * for another one, which is never merged without the learner's say.
+ * joins the account), 'same' for the account in the book (synced with, or
+ * answered for: run() finishes a pending answer), and 'ask' for another one,
+ * which is never merged without the learner's say.
  */
 export function decide(book, subject) {
   if (!book) return 'adopt';
@@ -170,13 +171,17 @@ export function createSync({ client, local, book: books, now = Date.now }) {
   }
 
   /**
-   * The book a join writes, taking the account's Clear all as its own. Add
-   * brings every save the stores hold now, before anything of the account's
-   * is applied (`brought`, joinStamps); Use brings none of its own.
+   * The book a join writes: the answer's own (`had`, pending) or a new one,
+   * taking the account's Clear all as its own. Add brings every save the
+   * stores hold now, before anything of the account's is applied (`brought`,
+   * joinStamps); Use brings none of its own, and planSync keeps only what
+   * the learner did after answering.
    */
-  function joinBook(who, as, server, snap) {
-    const book = newBook(who, now(), snap.prefs, server.clear);
-    if (as === 'replace') return book;
+  function joinBook(had, who, as, server, snap) {
+    const book = had || newBook(who, now(), snap.prefs);
+    delete book.pending;
+    book.epoch = Math.max(book.epoch, server.clear);
+    if (as === 'replace') { book.brought = { kanji: {}, phrases: {} }; return book; }
     const { joined, brought } = joinStamps(server, snap, book.joined);
     book.joined = joined;
     book.brought = brought;
@@ -191,17 +196,18 @@ export function createSync({ client, local, book: books, now = Date.now }) {
     // From here until the push there is no await, so a removal made while
     // the pull was out is already in the book, and none can slip in between.
     const had = books.read();
-    if (mode === 'same' && (!had || had.account !== who)) throw new SyncError('account-changed');
-    // A book that already names this account was joined (here, or in another
-    // tab since begin() or the answer): the join is never made twice, since a
-    // new book would drop that tab's removals not yet pushed, and count what
-    // it received from the account as its own.
-    const as = had && had.account === who ? 'same' : mode;
+    const ours = !!had && had.account === who;
+    if (mode === 'same' && !ours) throw new SyncError('account-changed');
+    // A book that names this account is this browser's join with it. One
+    // still waiting on an answer (`pending`, given here or in another tab)
+    // is finished as that answer; one already joined syncs as 'same'
+    // whatever was asked, since a second join would drop the removals the
+    // book holds and count what it received from the account as its own.
+    const as = ours ? had.pending || 'same' : mode;
     const snap = local.snapshot();
-    const book = as === 'same' ? had : joinBook(who, as, server, snap);
+    const book = as === 'same' ? had : joinBook(ours ? had : null, who, as, server, snap);
     const merge = planSync(server, snap, book, { replace: as === 'replace' });
     local.apply(merge.apply);
-    if (as === 'replace') { book.removed = { kanji: {}, phrases: {} }; book.saves = { kanji: {}, phrases: {} }; }
     // What the account lacks is worked out from the stores as the merge left
     // them, since a store's own merge may keep more than the join did: History
     // folds an ordinary entry's reads into a phrase it saves again.
@@ -220,7 +226,27 @@ export function createSync({ client, local, book: books, now = Date.now }) {
     return { ok: true, at, wrote: res.wrote, applied: applies(merge), stale: res.clear > plan.clear };
   }
 
-  /** Pull, merge here, push. `mode` is 'adopt', 'same' or 'replace' (begin() says which, or the learner did). */
+  /**
+   * The learner answered the account question: Add ('adopt') or Use
+   * ('replace'). The answer goes into the book at once, as a book for this
+   * account with the answer pending, so a retry after a failed sync
+   * finishes it, and what the learner removes, clears or changes before
+   * then goes to this account rather than the old one. A book that already
+   * names this account was answered in another tab: that answer stands.
+   */
+  function choose(mode) {
+    const who = subject;
+    if (!who || !PENDING.includes(mode)) return false;
+    const had = books.read();
+    if (had && had.account === who) return false;
+    books.write(answeredBook(who, mode, now(), local.snapshot().prefs));
+    return true;
+  }
+
+  /**
+   * Pull, merge here, push. `mode` is 'adopt', 'same' or 'replace': begin()
+   * says which, or the learner did, through choose().
+   */
   function sync(mode = 'same') {
     return serial(() => run(mode));
   }
@@ -278,7 +304,7 @@ export function createSync({ client, local, book: books, now = Date.now }) {
   }
 
   return {
-    begin, sync, flush, stop, known,
+    begin, choose, sync, flush, stop, known,
     get subject() { return subject; },
     get pulled() { return cache !== null; },
   };

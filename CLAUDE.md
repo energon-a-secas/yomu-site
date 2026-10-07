@@ -580,9 +580,10 @@ because a browser cannot strip types), `js/sync-local.js` (the stores as
 rows, and one sync's plan: what to push, what to change here, what the
 server holds after), `js/sync.js` (pull, merge, push; imported on sign-in
 only), `js/sync-book.js` (`localStorage['yomu-site:sync']`: the account this
-browser last synced with, when it joined and what it brought, the last Clear
-all it applied, removals not yet carried, save stamps not yet carried, when
-each preference changed), `js/sync-watch.js` (the stores as sync changes
+browser syncs with, an answer to the account question not yet finished, when
+it joined and what it brought, the last Clear all it applied, removals not
+yet carried, save stamps not yet carried, when each preference changed),
+`js/sync-watch.js` (the stores as sync changes
 them, and the listeners that stamp an unsave, a Clear all, a save and an
 Import),
 `js/account.js` (the guard, the kit, the timers, the step a retry runs;
@@ -644,14 +645,15 @@ clear, and a newer one makes the client pull at once.
 **A browser that never synced brings all of its own data when it first
 joins, on purpose.** On a first sign-in, or Add, the browser takes the
 account's clear as its own and every save it holds counts as made when it
-joined. The book's `joined` is now, or one past the account's Clear all
-when that is later; each save the browser brings is stamped in the book
-(`brought`) at `joined`, or one past the account's removal of that row when
-that is later (`sync.js joinStamps`): another device's clock may run ahead,
-and joining at this clock's now lost a whole browser's saves to a clear
-stamped an hour in the future (`tests/sync-stamps.test.mjs`). So a save
-older than a removal or a Clear all the account made before this browser
-joined comes back, on every device.
+joined. The book's `joined` is now (with Add, the time of the answer), or
+one past the account's Clear all when that is later; each save the browser
+brings is stamped in the book (`brought`) at `joined`, or one past the
+account's removal of that row when that is later (`sync.js joinStamps`):
+another device's clock may run ahead, and joining at this clock's now lost
+a whole browser's saves to a clear stamped an hour in the future
+(`tests/sync-stamps.test.mjs`). So a save older than a removal or a Clear
+all the account made before this browser joined comes back, on every
+device.
 That is intended: those saves were never in the account, so the account's
 removal or clear was never about them. The learner made them in a browser
 the account had not seen, and taking them away the moment it signs in
@@ -708,32 +710,45 @@ it saves again, and pushing the first plan left the account a sync behind.
 **Another account is asked about, never merged.** `decide()`: no book is a
 first sign-in and merges (`adopt`); the book's account merges (`same`);
 another one opens `#sync-dialog` with what each side holds. Add is `adopt`
-(the book starts again for that account, `joined` and `brought` as above);
-Use is `replace` (this browser takes the account's data and brings nothing
-of its own, `brought` empty; its pending removals are dropped with the old
-account); Not now
-pauses sync and the line offers Choose. The old account keeps what it
-already had and nothing more: what changed here since its last sync with
-it is never sent to it, and with Use it is gone from this browser too. The
-dialog says exactly that, and when that last sync was; do not promise the
-old account more. A sign-out closes an open question (`ui.dismiss`), and
-an answer given after it applies to nobody.
+and Use is `replace`; Not now pauses sync and the line offers Choose. The
+answer goes into the book as it is given (`sync.js choose()`): a book for
+the new account with `pending` set until a sync finishes it, so a retry, a
+reload or another tab finishes that answer, and what the learner saves,
+removes, clears or changes in between goes to the new account, as in any
+sync. It used to live only in the page: after Use a save made before the
+retry was wiped by it, and after Add an unsave, a Clear all or a
+preference change went into the old account's book and was dropped
+(`tests/sync-account.test.mjs`). Add joins as above, from the time of the
+answer (`joined`, `brought`). Use takes the account's data and, of this
+browser's own, only what the learner did after answering: a save counted
+after `joined` (the time of the answer), a preference changed since, and
+every removal and Clear all since (`sync-local.js sinceAnswer`). What it
+held at the answer stays behind, with its counts and Play's scores, and
+the old account's removals not yet pushed are dropped with that account.
+The old account keeps what it already had and nothing more: what changed
+here since its last sync with it is never sent to it, and with Use it is
+gone from this browser too. The dialog says exactly that, and when that
+last sync was; do not promise the old account more. A sign-out closes an
+open question (`ui.dismiss`), and an answer given after it applies to
+nobody.
 
 **A failure changes nothing, is said once, and the retry runs the step that
 failed.** A pull that fails applies nothing, and on a first sign-in
 remembers no account; a push that fails keeps the merge and the remembered
 account. `account.js` keeps the step a sign-in is at: `connect` (whoami,
 and the pull behind the account question), `ask`, the chosen `adopt` or
-`replace`, then `same` once a sync wrote the book. The next change, the
+`replace`, then `same` once the book names the account (a sync wrote it,
+or it holds the answer). The next change, the
 `online` event and the page shown again (a pull at most once a minute when
 nothing failed) all run that step, one at a time. A retry used to be an
 ordinary sync, which `sync.js` refuses with no book (`account-changed`), so
 a first sign-in that failed once never recovered without a reload. A
-book that already names the signed-in account is joined, so `sync.js` runs
-an `adopt` or a `replace` on it as `same`: another tab may have written it
-since begin() or the answer, and a second join would drop that tab's
-removals not yet pushed and count what it received from the account as its
-own (`tests/sync-tabs.test.mjs`). The
+book that already names the signed-in account is joined, or holds the
+answer that will join it, so `sync.js` runs an `adopt` or a `replace` on it
+as `same`, or as its pending answer: another tab may have written it since
+begin() or the answer, and a second join would drop that tab's removals not
+yet pushed and count what it received from the account as its own
+(`tests/sync-tabs.test.mjs`). The
 line says the failure's kind in a plain sentence (offline, the sign-in not
 accepted, another tab switched accounts, refused, a server error), never a
 code or a Convex request id; those go to the console.

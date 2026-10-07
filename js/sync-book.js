@@ -1,11 +1,17 @@
 // What this browser knows about its account: one Persist kit store,
-// 'yomu-site:sync' version 1, written only once the browser has synced with
-// an account. A visitor who never signs in never has one.
+// 'yomu-site:sync' version 1, written once the browser has synced with an
+// account, or once the learner has answered which way to sync with one. A
+// visitor who never signs in never has one.
 //
-//   account   the Clerk subject this browser last synced with (the server's
+//   account   the Clerk subject this browser syncs with (the server's
 //             whoami, never the browser's own say)
+//   pending   'adopt' (Add) or 'replace' (Use) while that answer waits for
+//             its first sync; absent once a sync has joined the account
 //   joined    when this browser joined that account (ms): now, or one past
-//             the account's Clear all when a clock ahead of this one made it
+//             the account's Clear all when a clock ahead of this one made
+//             it; while an answer is pending, when the learner gave it
+//             (with Use, a save counted after it is the learner's own in the
+//             new account, and the rest stays behind)
 //   brought   { kanji: { 天: ms }, phrases: { key: ms } }: each save this
 //             browser held when it joined, and when it counts as saved: no
 //             earlier than `joined`, and one past the account's removal of
@@ -47,13 +53,26 @@ export function syncedPrefs(prefs) {
   return out;
 }
 
-/** A book for `account`, joined at `now`: nothing brought, no preference changed. */
+/** The two answers a book can be waiting on: Add and Use. */
+export const PENDING = Object.freeze(['adopt', 'replace']);
+
+/** A book for `account`, joined at `now`: nothing brought or changed yet. */
 export function newBook(account, now, prefs, epoch = 0) {
   return {
     account, joined: now, epoch, at: 0,
     brought: { kanji: {}, phrases: {} }, removed: { kanji: {}, phrases: {} }, saves: { kanji: {}, phrases: {} },
     prefsAt: {}, prefsVal: syncedPrefs(prefs),
   };
+}
+
+/**
+ * The learner's answer to the account question, kept from the moment it is
+ * given: a book for the new account, the answer pending until a sync
+ * finishes it. What the learner removes, clears or changes before then goes
+ * into this book, so the retry carries it to the new account.
+ */
+export function answeredBook(account, mode, now, prefs) {
+  return { ...newBook(account, now, prefs), pending: mode };
 }
 
 function cleanMap(raw, keyOk) {
@@ -69,7 +88,7 @@ export function cleanBook(raw) {
   const saves = isObject(raw.saves) ? raw.saves : {};
   const prefsAt = {};
   for (const k of PREF_KEYS) if (isObject(raw.prefsAt) && isStamp(raw.prefsAt[k])) prefsAt[k] = raw.prefsAt[k];
-  return {
+  const book = {
     account: raw.account,
     joined: raw.joined,
     epoch: isStamp(raw.epoch) ? raw.epoch : 0,
@@ -80,6 +99,8 @@ export function cleanBook(raw) {
     prefsAt,
     prefsVal: syncedPrefs(raw.prefsVal),
   };
+  if (PENDING.includes(raw.pending)) book.pending = raw.pending;
+  return book;
 }
 
 /** A removal made here (`kind` is 'kanji' or 'phrases'), kept until a sync carries it. */

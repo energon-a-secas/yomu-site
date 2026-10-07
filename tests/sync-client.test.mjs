@@ -347,6 +347,23 @@ test('another account signing in is asked about, and either answer leaves the fi
   assert.equal(JSON.stringify(server.rowsOf('user_a')), accountA, 'user_a\'s account is untouched');
 });
 
+test('choose() keeps the answer in the book at once, pending, and the first answer stands', async () => {
+  const server = fakeDb();
+  const d = device(server, 'user_b');
+  d.books.write(newBook('user_a', T(0), {}));
+  d.kanji.save('月', d.now());
+  assert.equal((await d.sync.begin()).mode, 'ask');
+  assert.equal(d.sync.choose('adopt'), true);
+  assert.deepEqual([d.books.read().account, d.books.read().pending], ['user_b', 'adopt']);
+  assert.equal(d.sync.choose('replace'), false, 'a second answer changes nothing');
+  assert.equal(decide(d.books.read(), 'user_b'), 'same', 'a sign-in finds the answer');
+  await d.sync.sync('replace');       // the tab that answered second
+  assert.ok(d.kanji.isSaved('月'), 'the Add was finished, not the Use');
+  assert.ok(server.rowsOf('user_b').kanji.find((r) => r.char === '月'));
+  assert.equal(d.books.read().pending, undefined, 'and is no longer pending');
+  assert.equal(d.sync.choose('adopt'), false, 'a joined book is never answered again');
+});
+
 test('adopt or replace on a book that already names the account is an ordinary sync: no second join', async () => {
   // Another tab may write this account into the book after begin() said
   // 'adopt', or after the learner answered: a second join would drop the

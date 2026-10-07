@@ -6,7 +6,9 @@
 // book: the new book dropped the other tab's removals not yet pushed, and
 // moved `joined` to now, so this browser's saves outranked every removal
 // the account received in between. A book that already names the account
-// is joined; every sync on it is an ordinary one.
+// is joined; every sync on it is an ordinary one. An answer to the account
+// question is kept in the book as it is given, so a tab that answers
+// second, or the page loaded again, finishes that answer.
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -182,4 +184,69 @@ test('two tabs asked about another account: Use answered in one after Add in the
   assert.deepEqual(savedOn(server, 'user_b'), ['月', '雪'], 'tab 1\'s removal reached the account');
   assert.ok(t2.kanji.isSaved('月'), 'what tab 1 added stays here: Use did not run twice');
   assert.equal(t2.kanji.isSaved('火'), false);
+});
+
+test('two tabs asked about another account: Use answered in one while the other\'s Add waits on a retry finishes the Add', async () => {
+  // The first answer is kept in the book as it is given, so a tab that
+  // answers second runs as an ordinary sync on it: here, the Add that the
+  // other tab's failed pull left pending.
+  const b = browser();
+  const seed = openKanjiOf(b);
+  seed.save('月', b.now());
+  b.book.save(newBook('user_a', T(0), {}));
+  b.clock.t = T(10);
+  const server = fakeDb();
+  await fakeClient(server, 'user_b').mutation('sync:push', { kanji: [{ char: '雪', saved: { at: T(1), box: 0, due: '2023-11-14', reviews: 0, lapses: 0, s: T(1) }, removed: 0, seen: null }] });
+  const t1 = tab(b, server, 'user_b');
+  const t2 = tab(b, server, 'user_b');
+  await t1.account.ready;
+  await t2.account.ready;
+  t1.signIn('Ben');
+  t2.signIn('Ben');
+  await until(() => t1.last().phase === 'paused' && t2.last().phase === 'paused', 'both questions');
+  t1.failing.on = (name) => name === 'sync:pullPhrases';
+  t1.answers.push('add');
+  await t1.account.choose(null);
+  await until(() => t1.last().phase === 'error', 'tab 1\'s Add, failed at its pull');
+  assert.equal(bookOf(b).pending, 'adopt');
+  b.clock.t = T(11);
+  t2.answers.push('use');
+  await t2.account.choose(null);
+  await until(() => t2.last().phase === 'synced', 'tab 2\'s answer');
+  assert.equal(bookOf(b).pending, undefined);
+  assert.deepEqual(savedOn(server, 'user_b'), ['月', '雪'], 'the Add was finished: this browser\'s kanji joined');
+  t2.reload();
+  assert.ok(t2.kanji.isSaved('月'), 'and Use did not take it away');
+  t1.failing.on = () => false;
+  t1.win.fire('online');
+  await until(() => t1.last().phase === 'synced', 'tab 1\'s retry');
+  t1.reload();
+  assert.deepEqual(Object.keys(t1.kanji.data.saved).sort(), ['月', '雪']);
+});
+
+test('an answer whose sync failed is finished by the page loaded again, with what was saved since', async () => {
+  const b = browser();
+  const seed = openKanjiOf(b);
+  seed.save('月', b.now());
+  b.book.save(newBook('user_a', T(0), {}));
+  b.clock.t = T(10);
+  const server = fakeDb();
+  await fakeClient(server, 'user_b').mutation('sync:push', { kanji: [{ char: '雪', saved: { at: T(1), box: 0, due: '2023-11-14', reviews: 0, lapses: 0, s: T(1) }, removed: 0, seen: null }] });
+  const before = tab(b, server, 'user_b');
+  await before.account.ready;
+  before.signIn('Ben');
+  await until(() => before.last().phase === 'paused', 'the question');
+  before.failing.on = (name) => name === 'sync:pullMeta';
+  before.answers.push('use');
+  await before.account.choose(null);
+  await until(() => before.last().phase === 'error', 'Use, failed at its pull');
+  b.clock.t = T(11);
+  before.kanji.save('星', b.now());
+  const after = tab(b, server, 'user_b');           // the page loaded again
+  await after.account.ready;
+  after.signIn('Ben');
+  await until(() => after.last().phase === 'synced', 'the sync after the reload');
+  assert.deepEqual(Object.keys(after.kanji.data.saved).sort(), ['星', '雪'], 'Use finished, with the save made since');
+  assert.deepEqual(savedOn(server, 'user_b'), ['星', '雪']);
+  assert.equal(bookOf(b).pending, undefined);
 });

@@ -77,6 +77,8 @@ function fakeWin() {
  * server's place; `clientFails` makes loading the Convex client throw that
  * many times first. An answer queued in `answers` is what the learner
  * chooses; `held` keeps the question open until the test settles it.
+ * `clock.t` is the page's now, which a test may move; `setPref` saves a
+ * display preference as the page's setter does.
  */
 function page({ key = KEY, embed = false, kit = fakeKit(SIGNED_OUT), server = fakeDb(), subject = 'user_a', fail, answer, book, clientFails = 0 } = {}) {
   const imported = [];
@@ -94,6 +96,8 @@ function page({ key = KEY, embed = false, kit = fakeKit(SIGNED_OUT), server = fa
   const answers = [];
   const failing = { on: fail || (() => false), answer: answer || (() => undefined), client: clientFails };
   const held = { open: null };
+  const clock = { t: 1_759_800_000_000 };
+  const prefsSaved = new Set();
   let clients = 0;
   const account = startAccount({
     doc, win, embed,
@@ -115,7 +119,7 @@ function page({ key = KEY, embed = false, kit = fakeKit(SIGNED_OUT), server = fa
     },
     importEngine: async () => { imported.push('engine'); return import('../js/sync.js'); },
     kanji, history, play,
-    prefs: { get: () => prefs, set: (c) => Object.assign(prefs, c), onSaved: () => () => {} },
+    prefs: { get: () => prefs, set: (c) => Object.assign(prefs, c), onSaved: (fn) => { prefsSaved.add(fn); return () => prefsSaved.delete(fn); } },
     remembering: () => prefs.remember === 'on',
     books: openBook({ store: bookStore }),
     ui: {
@@ -130,12 +134,13 @@ function page({ key = KEY, embed = false, kit = fakeKit(SIGNED_OUT), server = fa
       refresh() {},
       reason: () => 'Sign in to keep your kanji.',
     },
-    now: () => 1_759_800_000_000,
+    now: () => clock.t,
     setTimer: (fn) => { fn(); return 1; },
     clearTimer() {},
   });
   return {
-    account, imported, painted, asked, answers, bookStore, kanji, history, kit, server, doc, win, failing, held, dismissed,
+    account, imported, painted, asked, answers, bookStore, kanji, history, kit, server, doc, win, failing, held, dismissed, clock, prefs,
+    setPref(k, v) { prefs[k] = v; for (const fn of prefsSaved) fn(prefs); },
     get clients() { return clients; },
     last: () => painted.at(-1),
   };
@@ -393,12 +398,20 @@ test('a sync after Add that fails once is retried as Add, not as an ordinary syn
   await p.account.choose(null);
   await until(() => p.last().phase === 'error', 'the failure after Add');
   const asked = p.asked.length;     // the first question (Not now) and Choose's
-  assert.equal(JSON.parse(p.bookStore.raw).account, 'user_a', 'nothing was decided for the new account yet');
+  // The answer is kept as it is given. This said "nothing was decided for
+  // the new account yet" until a review found that an unsave, a Clear all
+  // or a preference change made before the retry then went into the old
+  // account's book and was dropped: the book now names the new account,
+  // with the answer pending until a sync finishes it.
+  assert.equal(JSON.parse(p.bookStore.raw).account, 'user_b', 'the answer is kept for the new account');
+  assert.equal(JSON.parse(p.bookStore.raw).pending, 'adopt', 'and waits for a sync to finish it');
+  assert.deepEqual(p.server.rowsOf('user_b').kanji, [], 'nothing was merged yet');
   p.failing.on = () => false;
   p.win.fire('online');
   await until(() => p.last().phase === 'synced', 'the retry');
   assert.equal(p.asked.length, asked, 'the answer is not asked for again');
   assert.equal(JSON.parse(p.bookStore.raw).account, 'user_b');
+  assert.equal(JSON.parse(p.bookStore.raw).pending, undefined, 'the answer is finished');
   assert.ok(p.server.rowsOf('user_b').kanji.find((r) => r.char === '月'), 'Add brought this browser\'s kanji in');
 });
 
@@ -421,6 +434,74 @@ test('a sync after Use that fails once is retried as Use: this browser ends with
   assert.ok(p.kanji.isSaved('雪'));
   assert.ok(!p.kanji.isSaved('月'), 'Use replaced this browser\'s data');
   assert.ok(!p.server.rowsOf('user_b').kanji.find((r) => r.char === '月'), 'and brought none of it in');
+});
+
+// What the learner does between an answer and the retry that finishes it
+// belongs to the new account. A review found the answer was held only in
+// the page: after Use a save made before the retry was wiped by it, and
+// after Add an unsave, a Clear all or a preference change went into the old
+// account's book and was dropped. Each test fails the pull once.
+
+const kanjiRow = (char, at) => ({ char, saved: { at, box: 0, due: '2025-10-07', reviews: 0, lapses: 0, s: at }, removed: 0, seen: null });
+const savedIn = (server, owner) => server.rowsOf(owner).kanji.filter((r) => r.saved).map((r) => r.char).sort();
+
+/** user_b holds `chars` and English; this browser, last on user_a, `here`. */
+async function answeredThenFailed(answer, chars, here) {
+  const server = fakeDb();
+  await fakeClient(server, 'user_b').mutation('sync:push', { kanji: chars.map((ch) => kanjiRow(ch, 5)), prefs: { values: { lang: { v: 'en', at: 5 } } } });
+  const p = page({ server, subject: 'user_b', book: newBook('user_a', 1, {}) });
+  for (const ch of here) p.kanji.save(ch, 2);
+  await p.account.ready;
+  p.kit.become(signedIn('user_b', 'Ben'));
+  await until(() => p.asked.length === 1 && p.last().phase === 'paused', 'the question');
+  p.failing.on = offline('sync:pullMeta');
+  p.answers.push(answer);
+  await p.account.choose(null);
+  await until(() => p.last().phase === 'error', `the failure after ${answer}`);
+  p.clock.t += 60_000;
+  return p;
+}
+async function retried(p) {
+  p.failing.on = () => false;
+  p.win.fire('online');
+  await until(() => p.last().phase === 'synced', 'the retry');
+}
+
+test('after Use fails at its pull, a save and a preference made before the retry are kept, and nothing older joins', async () => {
+  const p = await answeredThenFailed('use', ['雪'], ['月']);
+  p.kanji.save('星', p.clock.t);
+  p.setPref('lang', 'es');
+  await retried(p);
+  assert.deepEqual(Object.keys(p.kanji.data.saved).sort(), ['星', '雪'], 'the account\'s data, and the save made since');
+  assert.deepEqual(savedIn(p.server, 'user_b'), ['星', '雪'], 'the save reached the account');
+  assert.equal(p.prefs.lang, 'es', 'the preference changed since stands here');
+  assert.equal(p.server.rowsOf('user_b').prefs[0].values.lang.v, 'es', 'and in the account');
+  assert.ok(!p.server.rowsOf('user_b').kanji.find((r) => r.char === '月'), 'what was here at the answer stayed behind');
+});
+
+test('after Add fails at its pull, an unsave and a preference made before the retry reach the new account', async () => {
+  const p = await answeredThenFailed('add', ['火'], ['月', '火']);
+  p.kanji.unsave('火');
+  p.setPref('lang', 'es');
+  await retried(p);
+  assert.equal(p.kanji.isSaved('火'), false, 'the unsave stands here');
+  assert.deepEqual(savedIn(p.server, 'user_b'), ['月'], 'and removed the account\'s copy');
+  assert.equal(p.prefs.lang, 'es');
+  assert.equal(p.server.rowsOf('user_b').prefs[0].values.lang.v, 'es');
+});
+
+test('after Add fails at its pull, a Clear all made before the retry clears the new account too', async () => {
+  const p = await answeredThenFailed('add', ['雪'], ['月']);
+  const at = p.clock.t;
+  p.kanji.clearAll(at);
+  await retried(p);
+  assert.deepEqual(Object.keys(p.kanji.data.saved), [], 'nothing came back here');
+  assert.ok(p.server.rowsOf('user_b').clears.some((c) => c.at >= at), 'the account holds the Clear all');
+  const other = page({ server: p.server, subject: 'user_b', book: newBook('user_b', 1, {}) });
+  await other.account.ready;
+  other.kit.become(signedIn('user_b', 'Ben'));
+  await until(() => other.last().phase === 'synced', 'another device\'s sync');
+  assert.deepEqual(Object.keys(other.kanji.data.saved), [], 'another device of the account sees it cleared');
 });
 
 test('a push that fails after the pull wrote the book is finished by an ordinary sync', async () => {

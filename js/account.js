@@ -83,9 +83,11 @@ export function startAccount(deps) {
   // change): 'connect' (whoami, and the pull behind the account question)
   // until the server has said which way this sign-in goes; 'ask' while the
   // learner decides; then the sync that was chosen, 'adopt' (a first
-  // sign-in, or Add) or 'replace' (Use); and 'same' once a sync has written
-  // this account into the book. Never 'same' before that: there is no book
-  // for it to run on, and js/sync.js refuses it.
+  // sign-in, or Add) or 'replace' (Use); and 'same' once this account is in
+  // the book. Never 'same' before that: there is no book for it to run on,
+  // and js/sync.js refuses it. An answer is written into the book as it is
+  // given (engine.choose), so after Add or Use the book names the new
+  // account, and a sync there finishes the answer it holds.
   let step = 'connect';
   let gen = 0;           // a sign-out or another account: what was under way stops touching the page
   let running = null;    // { gen, done }: the one resume under way
@@ -111,9 +113,11 @@ export function startAccount(deps) {
   }
 
   /**
-   * The step to retry after a failed sync. A sync that got as far as writing
-   * the book (the pull went through, the push did not) leaves an ordinary
-   * sync to finish it; another tab's account in the book means deciding again.
+   * The step to retry after a failed sync. A book that names this account
+   * leaves an ordinary sync to finish what is in it: the push, when a sync
+   * got as far as writing the book (the pull went through, the push did
+   * not), or the learner's answer, when the pull after it failed. Another
+   * tab's account in the book means deciding again.
    */
   function failedAt(err) {
     if (err && err.code === 'account-changed') { step = 'connect'; return; }
@@ -149,6 +153,10 @@ export function startAccount(deps) {
     if (g !== gen || (answer !== 'add' && answer !== 'use')) return null;
     asked = null;
     step = answer === 'use' ? 'replace' : 'adopt';
+    // Kept at once, so a sync that fails finishes this answer on its retry,
+    // and what the learner does meanwhile goes to the new account. Another
+    // tab's answer, already in the book, stands instead.
+    engine.choose(step);
     status.phase = 'syncing';
     return answer;
   }
