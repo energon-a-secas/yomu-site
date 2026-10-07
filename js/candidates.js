@@ -8,7 +8,7 @@
 // a path always exists. Its `cost` is the node's own; what it costs to sit
 // next to its neighbours is costs.js's `connect`.
 
-import { isKanji, isKatakana, isKana, hasKanji } from './kana.js';
+import { isKanji, isKatakana, isKana, hasKanji, isHiragana } from './kana.js';
 import { deinflect, deinflectStem, posMatches } from './deinflect.js';
 import { numberAt, counterAt, readCounted, readNumber, numberBends, readQuestion, countedEnd, countedParts } from './numbers.js';
 import { PARTICLE, COPULA, COST, classOf, homographCost, bandOf } from './costs.js';
@@ -107,6 +107,35 @@ function stemNouns(s, i, j, dict, whole, env) {
   return out;
 }
 
+/** A band from the corpus: a key the corpus never matched has none. */
+const banded = (rec) => rec.q >= 1 && rec.q <= 5;
+
+/**
+ * Whether the hiragana a key ends in, after a kanji, are only the start of a
+ * longer word of the text: 秋りん (秋霖, the long autumn rains, a mixed
+ * spelling tools/lib/extra.mjs ships) in 毎秋りんご園, where りんご "apple"
+ * starts at its りん and runs on past it. The longer word must be a key the
+ * corpus banded, and must run past the key by more than a particle or a
+ * copula form, which follow such a key as readily as they end a word:
+ * 大ごとになる is 大ごと|に, not 大|ごとに "one by one", and 世間なみだ is
+ * 世間なみ|だ, not なみだ "tears". It is a substring of the run, so
+ * keysForRun has already asked for it.
+ */
+function endsInsideWord(run, i, j, dict, maxKey) {
+  let k = j;
+  while (k > i && isHiragana(run[k - 1])) k--;
+  if (k === j || k === i) return false;
+  const prev = /[\uDC00-\uDFFF]/.test(run[k - 1]) ? run.codePointAt(k - 2) : run.codePointAt(k - 1);
+  if (!isKanji(String.fromCodePoint(prev))) return false;
+  for (let e = j + 1; e <= run.length && e - k <= maxKey; e++) {
+    const rest = run.slice(j, e);
+    if (PARTICLE.has(rest) || COPULA[rest]) continue;
+    const recs = dict.get(run.slice(k, e));
+    if (recs && recs.some(banded)) return true;
+  }
+  return false;
+}
+
 export function candidates(run, i, dict, env) {
   const out = [];
   const push = (node) => { if (node) out.push(node); };
@@ -122,11 +151,16 @@ export function candidates(run, i, dict, env) {
     const last = s[len - 1];
     if (isDigitish(last)) break;
     const whole = i === 0 && j === run.length;
+    let inside = null;
     for (const rec of dict.get(s) || []) {
       const node = wordNode(s, i, j, rec, s, NO_CHAIN, NO_CHAIN, whole, env);
       if (node && j === counted) {
         if (rec.q !== 1) node.cost += COST.numberKey;
         else node.countLike = true;
+      }
+      if (node && !banded(rec)) {
+        if (inside === null) inside = endsInsideWord(run, i, j, dict, env.maxKey);
+        if (inside) node.cost += COST.endsInsideWord;
       }
       push(node);
     }

@@ -654,6 +654,26 @@ test('a mixed spelling whose kana start with a particle after a kanji stays out:
   assert.equal(d.get('友達がい'), undefined);
 });
 
+// ── Found on 2026-10-07, what the mixed rule got wrong ─────────────────────
+
+test('毎秋りんご園 is 毎|秋|りんご|園 (was 秋りん "long autumn rains", then ご and 園)', async () => {
+  for (const text of ['毎秋りんご園', '私は、毎秋りんご園へ行くのが楽しみだ。']) {
+    const r = await run(text);
+    assert.ok(cut(r).includes('毎|秋|りんご|園'), `${text}: ${cut(r)}`);
+    assert.equal(tok(r, '秋').reading, 'あき', text);
+    assert.equal(gloss(tok(r, 'りんご')), 'apple (fruit)', text);
+    assert.equal(r.unknown, 0, text);
+  }
+  // 秋りん is still the autumn rains where no longer word starts at its りん,
+  // and a particle or the copula after such a key is no longer word:
+  // 大ごと|に, not 大|ごとに "one by one"; 世間なみ|だ, not なみだ "tears"
+  const rains = tok(await run('秋りんが続く。'), '秋りん');
+  assert.ok(rains, cut(await run('秋りんが続く。')));
+  assert.equal(rains.reading, 'しゅうりん');
+  assert.ok(cut(await run('ここまで大ごとになると、かばいきれない。')).includes('大ごと|に|なる'));
+  assert.ok(cut(await run('そのくらいは世間なみだ。')).includes('世間なみ|だ'));
+});
+
 /** The committed dictionary with one key taken away, everything else as shipped. */
 function without(key) {
   const d = diskDict();

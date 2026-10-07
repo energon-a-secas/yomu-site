@@ -123,6 +123,14 @@ export const COST = Object.freeze({
   nounVerb: 30,       // a noun straight into a verb, no particle (connect)
   suruNeedsVs: 60,    // ...and more when the verb is する and the noun takes none
   suffixAfterPredicate: 40, // a suffix-first noun met in kana after a verb or adjective (connect)
+  // A key the corpus never matched (no band) whose closing hiragana are the
+  // start of a longer banded word that runs on past it (candidates.js
+  // endsInsideWord): 毎秋りんご園 read 秋りん, a mixed spelling of 秋霖 "long
+  // autumn rains", then ご and 園, 24 cheaper than 秋|りんご|園. Over all
+  // 248,924 Tatoeba sentences it changes that one reading and nothing else,
+  // and so does any price from 25 to 1,000 (docs/ANALYZER.md, "秋りん and
+  // つき物"): this is a direction more than a number.
+  endsInsideWord: 40,
   homographSpelling: 10, // per place this kanji sits down its reading's list
   homographAffix: 10, // an affix-first record, where another is not
   homographKanaUsual: 20, // a record marked usually-kana, met in kanji
