@@ -27,6 +27,8 @@ import { startTranslation, stopTranslation } from './render-translate.js';
 import { COLLECT_ACTIONS, bindCollect } from './events-collect.js';
 import { PLAY_ACTIONS, bindPlay } from './events-play.js';
 import { bindGaps, gapsToggled } from './events-gaps.js';
+import { watchPress, isField } from './press.js';
+import { bindLayout } from './layout.js';
 
 export { analyzeNow, loadText };
 
@@ -35,6 +37,55 @@ const NARROW = '(max-width: 1099px)';
 /** One column: a narrow screen, or an embed, which is always one column. */
 function oneColumn() {
   return state.embed || matchMedia(NARROW).matches;
+}
+
+/** The side column rides at the bottom of the screen, over the reading. */
+function sheetUp(side = $('side')) {
+  return !!side && side.hasAttribute('data-sheet') && !state.embed && matchMedia(NARROW).matches;
+}
+
+const chosenWord = () => document.querySelector('#reading-body .tok[aria-pressed="true"]');
+
+/** What reveal last kept above the sheet: the chosen word, or the line of "In this text" that opened a note. */
+let kept = null;
+
+/**
+ * Scroll `el` into the band between the header's scroll padding and the
+ * sheet's top, both measured as they are now. scrollIntoView with the
+ * sheet's scroll-margin left a turned word 28px under the sheet in WebKit
+ * one time in three, with the margin read from a viewport height that was
+ * no longer the page's.
+ */
+function intoBand(el) {
+  const r = el.getBoundingClientRect();
+  const top = parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
+  const side = $('side');
+  const bottom = (side ? side.getBoundingClientRect().top : innerHeight) - 16;
+  const dy = r.top < top || r.height > bottom - top ? r.top - top : Math.max(0, r.bottom - bottom);
+  if (dy) scrollBy(0, dy);
+}
+
+/**
+ * A phone turned on its side, or back, with the sheet up: what the sheet was
+ * opened for comes back above it. Nothing listened before, and the new
+ * layout left the word under the sheet in every browser; in a long text
+ * WebKit, which has no scroll anchoring, lost it by thousands of pixels. Only
+ * a change of width counts: Safari's toolbars change the height as the page
+ * scrolls, and a learner reading on past the word was pulled back to it.
+ * Never while a field has focus, where the learner is typing.
+ */
+function bindTurn() {
+  let width = innerWidth;
+  let timer = 0;
+  addEventListener('resize', () => {
+    if (innerWidth === width) return;
+    width = innerWidth;
+    clearTimeout(timer);
+    timer = setTimeout(() => requestAnimationFrame(() => {
+      const keep = kept && kept.isConnected && kept.getClientRects().length ? kept : chosenWord();
+      if (keep && sheetUp() && !isField(document.activeElement)) intoBand(keep);
+    }), 200);
+  });
 }
 
 /**
@@ -46,14 +97,16 @@ function oneColumn() {
  * column, which left the reading off screen at every word. An embed has no
  * sheet, and scrolls to the side as before.
  */
-function reveal(panel) {
+function reveal(panel, opener = null) {
   if (!panel) return;
   const behavior = prefersReducedMotion() ? 'auto' : 'smooth';
   const side = $('side');
-  if (side && side.hasAttribute('data-sheet') && !state.embed && matchMedia(NARROW).matches) {
+  if (sheetUp(side)) {
     side.scrollTo({ top: 0 });
-    const chosen = document.querySelector('#reading-body .tok[aria-pressed="true"]');
-    if (chosen) chosen.scrollIntoView({ block: 'nearest', behavior });
+    // A line of "In this text" that opened a note stays above the sheet as
+    // the chosen word does: the sheet rose over it, focus and all.
+    kept = opener && opener.closest('#in-text') ? opener : chosenWord();
+    if (kept) kept.scrollIntoView({ block: 'nearest', behavior });
     return;
   }
   if (oneColumn() || !side) {
@@ -182,7 +235,7 @@ function openNote(kind, id, opener) {
   state.note = { kind, id };
   state.tab = 'notes';
   paintSide(state);
-  reveal(oneColumn() ? $('side') : $('panel-notes'));
+  reveal(oneColumn() ? $('side') : $('panel-notes'), opener);
   const title = $('note-title');
   if (title && opener && opener.closest('#word-body')) { title.tabIndex = -1; title.focus({ preventScroll: true }); }
 }
@@ -339,8 +392,22 @@ function setPref(name, value) {
   if (name === 'gaps') gapsToggled();
 }
 
+/**
+ * The Display button, which only a phone's screen shows (under 600px wide,
+ * or 480px tall): it opens and folds the five display switches (style.css
+ * .display-panel). Not saved: a new visit starts folded, with the reading
+ * near the top.
+ */
+function toggleDisplay(b) {
+  const open = b.getAttribute('aria-expanded') !== 'true';
+  b.setAttribute('aria-expanded', String(open));
+  const panel = $('display-panel');
+  if (panel) panel.toggleAttribute('data-folded', !open);
+}
+
 const ACTIONS = {
   set: (b) => setPref(b.dataset.pref, b.dataset.value),
+  display: toggleDisplay,
   slow: () => { state.prefs.slow = !state.prefs.slow; savePrefs(state); paintChrome(state); },
   'speak-all': (b) => speechOk(b) && speakAll(),
   clear: clearText,
@@ -380,6 +447,9 @@ export function bindEvents() {
     if (!b || !ACTIONS[b.dataset.act]) return;
     ACTIONS[b.dataset.act](b, e);
   });
+  watchPress();
+  bindLayout();
+  bindTurn();
   bindInput();
   bindLights();
   bindGaps();

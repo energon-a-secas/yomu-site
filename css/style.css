@@ -49,6 +49,11 @@
 [hidden] { display: none !important; }
 
 html { min-height: 100%; color-scheme: dark; }
+/* The header kit's bar is sticky and comes back on every scroll up, so what
+   the browser scrolls into view (a word reached with the arrow keys, a
+   focused control) stops under it, not behind it: WebKit put a word the
+   arrows reached at the very top, under the bar. An embed has no bar. */
+html:not([data-embed="1"]) { scroll-padding-top: calc(var(--header-h-app, 56px) + var(--space-2)); }
 body {
   font-family: var(--font);
   background: var(--bg);
@@ -74,9 +79,41 @@ main#main:focus { outline: none; }
 
 /* ── Header ────────────────────────────────────────────────────
  * Owned by the Neorgon Header Kit (css/neorgon-header.css). Only the
- * language toggle's two codes are this site's. */
+ * language toggle's two codes are this site's, and, under 900px, the side
+ * padding of the labelled controls and My kanji's due badge: the kit owns
+ * each control's height, the gaps, the menu and the Sign in slot, and
+ * leaves a labelled control's padding to the site's own .btn. */
 .lang-code { color: var(--text-muted); font-weight: 500; }
 .lang-code--on { color: var(--text-primary); font-weight: 700; }
+/* On a phone My kanji is the one control kept in the bar. Under 360px the
+   title, My kanji, the menu, Sign in and the hub mark leave 1px at 320
+   (Sign in under the menu, in Spanish); 6px a side gives 12 back. From 360
+   up the bar has 40px to spare. */
+@media (max-width: 359.98px) {
+  #mykanji-open { padding: 0 6px; }
+}
+/* Past the kit's 700px every control is in the bar, and the bar does not
+   fold what does not fit: in Spanish the language toggle ran 46px under
+   Iniciar sesión at 734 (an iPhone 15 on its side) and 12 at 768 (an iPad
+   mini). 5px a side gives 56 back; it fits from 725px, and in English from
+   701. */
+@media (min-width: 700.02px) and (max-width: 899.98px) {
+  #phrases-open, #mykanji-open, #play-open, #lang-toggle { padding: 0 5px; }
+}
+/* Still 23px short in Spanish from 701 to 724 (a mini iPhone on its side):
+   there the toggle shows only the code it switches to, which its spoken
+   name already says ("Switch to Spanish"). That gives about 30px back. */
+@media (min-width: 700.02px) and (max-width: 759.98px) {
+  #lang-toggle .lang-code--on, #lang-toggle .lang-sep { display: none; }
+}
+/* The reviews-due count widened My kanji by 30px and pushed the menu over
+   Sign in on every phone, a 412px one too, and the language toggle under it
+   up to 760px. Under 900px it rides on the button's corner instead, and the
+   button keeps its width. */
+@media (max-width: 899.98px) {
+  #mykanji-open { position: relative; }
+  #mykanji-open .mk-due { position: absolute; top: -8px; right: -8px; background: var(--bg); }
+}
 
 /* ── Buttons ───────────────────────────────────────────────── */
 .btn {
@@ -283,8 +320,33 @@ dialog.dialog--wide { width: min(760px, calc(100% - 16px)); }
   border-bottom: 1px solid var(--border-subtle);
 }
 .tools-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-6); }
-.tools-row + .tools-row { gap: var(--space-2); }
+.tools-bar { gap: var(--space-2); }
 .tools-note { font-size: var(--text-xs); color: var(--text-muted); line-height: 1.5; }
+
+/* The Display button folds the five switches on a phone (the block after
+   Narrow below); on a wider and taller screen it is not drawn and the
+   switches are a row. */
+.display-toggle { display: none; margin-left: auto; }
+.display-chevron {
+  width: 16px; height: 16px;
+  fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+  transition: transform var(--dur);
+}
+.display-toggle[aria-expanded="true"] .display-chevron { transform: rotate(180deg); }
+
+/* The send links. On a phone, after the reading and before its Translation;
+   on a wider screen js/layout.js moves the block into the row of Speak all
+   and Slow, where they were before phones: the links on that row, and their
+   note on a line of its own under it. */
+.send-block {
+  display: flex; flex-direction: column; gap: var(--space-2);
+  margin-top: var(--space-2);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border-subtle);
+}
+.tools-bar > .send-block { display: contents; }
+.tools-bar > .send-block > .send { margin-left: var(--space-4); }
+.tools-bar > .send-block > .tools-note { flex-basis: 100%; }
 
 .seg { display: inline-flex; align-items: center; }
 .seg-label { font-size: var(--text-xs); color: var(--text-muted); margin-right: var(--space-2); }
@@ -305,9 +367,8 @@ dialog.dialog--wide { width: min(760px, calc(100% - 16px)); }
 .seg-btn[aria-pressed="true"] { background: rgba(255, 255, 255, 0.14); color: var(--text-primary); }
 .seg-btn:focus-visible { position: relative; z-index: 1; }
 
-.send { display: inline-flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+.send { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
 .send .seg-label { margin-right: 0; }
-.tools-row > .send { margin-left: var(--space-4); }
 
 /* ── The reading ───────────────────────────────────────────────
  * Every word is a button: the surface with its ruby, then its romaji line.
@@ -351,11 +412,15 @@ dialog.dialog--wide { width: min(760px, calc(100% - 16px)); }
 /* Particles, the copula and conjugated endings are lighter than the words
    that carry the meaning, so the eye lands on the content first. */
 .tok--light .tok-surface, .tok-ending { color: color-mix(in srgb, var(--text-primary) 66%, transparent); font-weight: 400; }
+/* One line under its word. A word is as wide as its longest line until the
+   reading is narrower than that, and only then does its romaji wrap: an
+   eleven-part katakana compound read 363px of unbroken romaji, and pushed a
+   375px phone's page sideways. */
 .tok-romaji {
   font-size: 0.8125rem;
   line-height: 1.25;
   color: var(--text-muted);
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 .tok-plain { font-size: 1.75rem; line-height: 1.3; color: var(--text-secondary); padding: 3px 1px; overflow-wrap: anywhere; }
 .tok-plain--latin { font-family: var(--font); font-size: 1.25rem; }
@@ -976,7 +1041,7 @@ a.mk-open[aria-current="page"], a.pl-open[aria-current="page"] { background: rgb
 /* ── Toast ─────────────────────────────────────────────────── */
 .toast {
   position: fixed;
-  bottom: var(--space-6);
+  bottom: calc(var(--space-6) + env(safe-area-inset-bottom, 0px));
   right: var(--space-6);
   z-index: var(--z-toast);
   max-width: min(360px, calc(100vw - var(--space-8)));
@@ -1061,7 +1126,7 @@ a.mk-open[aria-current="page"], a.pl-open[aria-current="page"] { background: rgb
     max-height: 50dvh;
     overflow-y: auto; overscroll-behavior: contain;
     margin: 0 calc(var(--space-4) * -1);
-    padding: 0 var(--space-4) var(--space-4);
+    padding: 0 var(--space-4) calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
     background: var(--bg);
     border-top: 1px solid var(--border-strong);
     box-shadow: var(--shadow-modal);
@@ -1071,8 +1136,9 @@ a.mk-open[aria-current="page"], a.pl-open[aria-current="page"] { background: rgb
     background: var(--bg);
   }
   html:not([data-embed="1"]) .side[data-sheet] .side-close { display: inline-block; }
-  /* A word chosen near the bottom is scrolled up above the sheet. */
-  html:not([data-embed="1"]) .yomu:has(> .side[data-sheet]) .tok { scroll-margin-bottom: calc(50dvh + var(--space-4)); }
+  /* A word chosen near the bottom is scrolled up above the sheet, and so is
+     the line of "In this text" that opened a note (js/events.js reveal). */
+  html:not([data-embed="1"]) .yomu:has(> .side[data-sheet]) :is(.tok, .it-line) { scroll-margin-bottom: calc(50dvh + var(--space-4)); }
 }
 
 /* ── Embed (docs/EMBED.md) ─────────────────────────────────────
@@ -1095,20 +1161,22 @@ html[data-embed="1"] body:has(> .neo-footer) { min-height: 0; }
   .it-line, .kj-row { min-height: 44px; }
   .save-toggle { width: 44px; height: 44px; }
   .mk-back, .mk-filter-input, .mk-tab { min-height: 44px; }
+  /* iOS zooms the page into a field whose text is under 16px when it takes focus. */
+  .mk-filter-input { font-size: 1rem; }
   .col-tile { min-width: 44px; min-height: 44px; }
   .text-link.mk-open, .text-link.pl-open { display: inline-flex; align-items: center; min-height: 44px; }
   .seen-before .text-link, .embed-bar .text-link { display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; }
   .mk-sync .btn { min-height: 44px; }
   /* A touch screen has no keys to press, so the key hints go. */
-  .rv-kbd, .rv-keys { display: none; }
-  .word-notes .text-link, .word-out .text-link { display: inline-flex; align-items: center; min-height: 44px; }
+  .rv-kbd, .rv-keys, .key-hint { display: none; }
+  /* A note's title can be short: the Spanish の: de was 39px wide. */
+  .word-notes .text-link, .word-out .text-link { display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; }
 }
 
 /* ── Narrow ────────────────────────────────────────────────── */
 @media (max-width: 600px) {
   .tok-surface, .tok-plain { font-size: 1.5rem; }
   .tools-row { gap: var(--space-2) var(--space-4); }
-  .tools-row > .send { margin-left: 0; }
   .word-surface { font-size: 2.25rem; }
   .ph { grid-template-columns: minmax(0, 1fr); }
   .ph-actions { flex-direction: row; flex-wrap: wrap; }
@@ -1120,6 +1188,15 @@ html[data-embed="1"] body:has(> .neo-footer) { min-height: 0; }
   .col-next { gap: var(--space-2); }
   .col-next-item { width: 4.5rem; }
   .rv-btn { min-width: 0; flex: 1 1 8rem; }
+}
+
+/* A phone, under 600px wide or on its side (480px tall or less): the display
+   switches fold behind the Display button (js/events.js toggleDisplay), so the
+   first word of a reading sits under one row of tools, not five rows of
+   switches (two on its side, which put the word 137px below a 375px fold). */
+@media (max-width: 599.98px), (max-height: 480px) {
+  .display-toggle { display: inline-flex; }
+  .display-panel[data-folded] { display: none; }
 }
 
 /* ── Reduced motion ────────────────────────────────────────── */

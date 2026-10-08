@@ -1,11 +1,59 @@
 /** The platform owns trapping and Escape; this module owns launch/return focus. */
+import { isField, pressedByTouch } from './press.js';
+
 const openers = new WeakMap();
 
+/**
+ * What takes focus for `el`: itself while it is drawn, or, while it sits in
+ * the header kit's closed ⋯ menu (Phrases, on a phone), the ⋯ button, the
+ * control the learner pressed to reach it. A button in a closed menu cannot
+ * take focus, and focus fell to <body>.
+ */
+function drawn(el) {
+  if (!el || !el.isConnected || typeof el.focus !== 'function') return null;
+  if (el.getClientRects().length) return el;
+  const menu = el.closest('.header-overflow');
+  const toggle = menu && menu.querySelector('.header-overflow-toggle');
+  return toggle && toggle.getClientRects().length ? toggle : null;
+}
+
+const ringed = (el) => { try { return el.matches(':focus-visible'); } catch { return false; } };
+
+/**
+ * Focus for `el`, without a ring after a touch or a pen. Script focus takes
+ * its ring from what had focus before, and a text box always has one, so on
+ * an iPhone the box's ring rode onto the header button a dialog gave focus
+ * back to. `focusVisible: false` is read where a browser knows it (Chromium,
+ * WebKit and Firefox, measured) and ignored elsewhere; focus already there
+ * with a ring is let go first, since focusing it again changes nothing.
+ */
+function focusBack(el) {
+  if (!el) return;
+  // A field's ring is the caret's, and blurring it would drop the keyboard.
+  if (!pressedByTouch() || isField(el)) {
+    el.focus({ preventScroll: true });
+    return;
+  }
+  if (el === document.activeElement && ringed(el)) el.blur();
+  el.focus({ preventScroll: true, focusVisible: false });
+}
+
+/**
+ * The platform gives focus back on close to what had it at showModal(), before
+ * the close listener below runs. Safari focuses no button a tap presses, so on
+ * an iPhone that was still the text box: choosing a phrase closed the dialog
+ * into the box and raised the keyboard over the new reading. So the opener
+ * takes focus first, and a field the opener is not lets it go.
+ */
 export function openDialog(dialog, opener = document.activeElement) {
   if (!dialog || dialog.open) return;
-  openers.set(dialog, opener);
+  const back = drawn(opener) || opener;
+  openers.set(dialog, back);
+  if (back && back.isConnected && typeof back.focus === 'function') focusBack(back);
+  const held = document.activeElement;
+  if (held !== back && isField(held)) held.blur();
   dialog.showModal();
-  if (document.documentElement.dataset.embed === '1') placeNear(dialog, opener);
+  if (document.documentElement.dataset.embed === '1') placeNear(dialog, back);
 }
 
 /**
@@ -69,9 +117,7 @@ export function bindDialog(dialog, fallback) {
     if (event.key === 'Escape') event.stopPropagation();
   });
   dialog.addEventListener('close', () => {
-    const opener = openers.get(dialog);
-    const target = opener?.isConnected && opener.getClientRects().length ? opener : fallback;
-    target?.focus({ preventScroll: true });
+    focusBack(drawn(openers.get(dialog)) || drawn(fallback) || fallback);
     openers.delete(dialog);
   });
 }

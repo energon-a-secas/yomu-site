@@ -115,8 +115,8 @@ export const STRINGS = Object.freeze({
 
   reading: { en: 'Reading', es: 'Lectura' },
   readingHint: {
-    en: 'Choose a word to see it on its own. The arrow keys move between words.',
-    es: 'Elige una palabra para verla sola. Las flechas recorren las palabras.',
+    en: 'Choose a word to see it on its own.',
+    es: 'Elige una palabra para verla sola.',
   },
   inText: { en: 'In this text', es: 'En este texto' },
   inTextNone: { en: 'No special sounds or grammar notes in this text.', es: 'No hay sonidos especiales ni notas de gramática en este texto.' },

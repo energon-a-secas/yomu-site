@@ -1,8 +1,13 @@
-// The Translation section's strings (render-translate.js), { en, es }, kept
-// apart from strings.js so both stay under the 500-line rule and merged into
-// the same table. Spanish is neutral.
+// The Translation section's strings (render-translate.js), and the reading
+// hint's line about keys, { en, es }, kept apart from strings.js so both stay
+// under the 500-line rule and merged into the same table. Spanish is neutral.
+// The lines that point at DeepL and Google name them by the row's own label,
+// Send the text to, and never by place: the row is above the reading on a
+// wide screen and after it on a phone (js/layout.js).
 
 export const READER_STRINGS = Object.freeze({
+  // Not drawn on a touch screen (style.css .key-hint), which has no arrow keys.
+  readingHintKeys: { en: 'The arrow keys move between words.', es: 'Las flechas recorren las palabras.' },
   translation: { en: 'Translation', es: 'Traducción' },
   translateHere: { en: 'Translate here', es: 'Traducir aquí' },
   translateLeadDownload: {
@@ -14,12 +19,12 @@ export const READER_STRINGS = Object.freeze({
     es: 'La hace tu navegador en este dispositivo: el texto no se envía a ninguna parte.',
   },
   translateUnsupported: {
-    en: 'A translation on this page needs Chrome or Edge on a computer. DeepL and Google Translate above open in a new tab.',
-    es: 'Para traducir en esta página hace falta Chrome o Edge en una computadora. DeepL y Google Traductor, arriba, se abren en una pestaña nueva.',
+    en: 'A translation on this page needs Chrome or Edge on a computer. Send the text to DeepL or Google Translate instead: each opens in a new tab.',
+    es: 'Para traducir en esta página hace falta Chrome o Edge en una computadora. En su lugar, envía el texto a DeepL o a Google Traductor: cada uno se abre en una pestaña nueva.',
   },
   translateUnavailable: {
-    en: 'This browser cannot translate Japanese on this device. DeepL and Google Translate above open in a new tab.',
-    es: 'Este navegador no puede traducir japonés en este dispositivo. DeepL y Google Traductor, arriba, se abren en una pestaña nueva.',
+    en: 'This browser cannot translate Japanese on this device. Send the text to DeepL or Google Translate instead: each opens in a new tab.',
+    es: 'Este navegador no puede traducir japonés en este dispositivo. En su lugar, envía el texto a DeepL o a Google Traductor: cada uno se abre en una pestaña nueva.',
   },
   translateDownloading: {
     en: 'Downloading the translation model: {n}%',
@@ -38,8 +43,8 @@ export const READER_STRINGS = Object.freeze({
     es: 'Tu navegador pide un clic antes de empezar a traducir. Haz clic en Intentar de nuevo.',
   },
   translateBusy: {
-    en: 'Your browser could not translate just now; it may be busy translating in other tabs. Try again in a moment, or use DeepL or Google Translate above.',
-    es: 'Tu navegador no pudo traducir en este momento; quizá está ocupado traduciendo en otras pestañas. Vuelve a intentarlo en un momento, o usa DeepL o Google Traductor, arriba.',
+    en: 'Your browser could not translate just now; it may be busy translating in other tabs. Try again in a moment, or send the text to DeepL or Google Translate.',
+    es: 'Tu navegador no pudo traducir en este momento; quizá está ocupado traduciendo en otras pestañas. Vuelve a intentarlo en un momento, o envía el texto a DeepL o a Google Traductor.',
   },
   translateStalled: {
     en: 'Your browser\'s translator stopped answering: no translation and no download progress for {s} seconds.',

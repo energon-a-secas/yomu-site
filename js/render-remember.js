@@ -4,9 +4,12 @@
 // collected a kanji, and the line that says where a kanji was last seen (on
 // the My kanji list and in the Collection's dialog).
 //
-// The card and the line sit under the status line and are painted with it
-// (render-chrome.js paintStatus calls paintRemember), so they follow every
-// read, every Clear and every language switch. The line is a polite live
+// The line sits under the status line, and the card after the reading and
+// its Translation (above them, it and the tools put a 375x667 phone's first
+// word at 972px); both
+// are painted with the status line (render-chrome.js paintStatus calls
+// paintRemember), so they follow every read, every Clear and every language
+// switch. The line is a polite live
 // region that stays in the page with only its text changing, the same rule
 // the status line keeps, and it changes only when what it says changes.
 //

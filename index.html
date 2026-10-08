@@ -97,9 +97,10 @@
 
   <!-- Neorgon Header Kit contract (packages/neorgon-ui/header/README.md). App mode:
        Yomu is a tool someone uses with a sentence in hand, so the header stays slim
-       and gets out of the way on scroll. Phrases and My kanji are the controls kept
-       on a phone; Play and the language toggle move into the kit's overflow menu
-       there (with Play kept too, the Spanish header ran 2px past a 390px screen).
+       and gets out of the way on scroll. My kanji is the one control kept on a
+       phone, beside Sign in; Phrases, Play and the language toggle move into the
+       kit's overflow menu there (with Phrases kept too, the menu covered 11px of
+       Sign in at 360px and 30 at 320, and took its taps).
        My kanji is a link, because it is a place (#/kanji): it carries the number of
        reviews due, drawn by js/render-save.js. Play (#/play) is a place too. -->
   <header class="header-bar" data-header-mode="app">
@@ -115,12 +116,12 @@
 
     <div class="header-right">
       <div class="header-actions">
-        <button class="btn btn--ghost btn--sm" type="button" id="phrases-open" data-act="phrases" aria-haspopup="dialog" data-keep-mobile data-ui="phrases">Phrases</button>
+        <button class="btn btn--ghost btn--sm" type="button" id="phrases-open" data-act="phrases" aria-haspopup="dialog" data-ui="phrases">Phrases</button>
         <a class="btn btn--ghost btn--sm mk-open" href="#/kanji" id="mykanji-open" data-keep-mobile><span data-ui="myKanji">My kanji</span><span class="mk-due" data-due-count hidden></span></a>
         <a class="btn btn--ghost btn--sm pl-open" href="#/play" id="play-open"><span data-ui="play">Play</span></a>
         <!-- The current language is the bold one; the accessible name says which
              is on and what a press switches to. render-chrome.js rewrites both. -->
-        <button class="btn btn--ghost btn--sm" type="button" id="lang-toggle" data-act="lang" data-lang="en" aria-label="Language: English. Switch to Spanish" title="Language: English. Switch to Spanish"><span class="lang-code lang-code--on" data-lang-code="en">EN</span> / <span class="lang-code" data-lang-code="es">ES</span></button>
+        <button class="btn btn--ghost btn--sm" type="button" id="lang-toggle" data-act="lang" data-lang="en" aria-label="Language: English. Switch to Spanish" title="Language: English. Switch to Spanish"><span class="lang-code lang-code--on" data-lang-code="en">EN</span><span class="lang-sep"> / </span><span class="lang-code" data-lang-code="es">ES</span></button>
       </div>
 
       <!-- The Auth Kit's slot: Sign in, or the account menu. Hidden until the kit decides. -->
@@ -180,16 +181,6 @@
         <!-- An embed's toasts (js/render-remember.js notify): a frame as tall as
              its page put a fixed toast below what the host's sheet shows. -->
         <p class="embed-note" id="embed-note" role="status" aria-live="polite" hidden></p>
-        <!-- Asked once, after the first read; History (#/kanji/history) has the
-             switch after that. Not a modal: the reading stays usable under it. -->
-        <section class="remember-ask" id="remember-ask" aria-labelledby="remember-ask-title" hidden>
-          <h2 class="remember-ask-title" id="remember-ask-title" data-ui="rememberAskTitle">Remember what you read?</h2>
-          <p class="remember-ask-body" data-ui="rememberAskBody">Yomu can keep the texts you read in this browser, tell you when you read one before, keep a History, and show the sentence each kanji was last seen in. Nothing is sent anywhere.</p>
-          <p class="remember-ask-actions">
-            <button class="btn btn--primary btn--sm" type="button" data-act="remember-yes" data-ui="rememberYes">Remember</button>
-            <button class="btn btn--ghost btn--sm" type="button" data-act="remember-no" data-ui="rememberNo">No thanks</button>
-          </p>
-        </section>
         <div class="read-error" id="read-error" role="alert" hidden></div>
 
         <div class="empty" id="empty" hidden></div>
@@ -197,8 +188,18 @@
         <section class="reading" id="reading" aria-labelledby="reading-title" data-furigana="on" data-romaji="said" data-highlights="on" data-unsaved="mark" data-gaps="off" hidden>
           <h2 class="sr-only" id="reading-title" data-ui="reading">Reading</h2>
 
+          <!-- Speak all and Slow first. On a phone (under 600px wide, or 480px tall
+               on its side) the five display switches fold behind one Display
+               button (aria-expanded, js/events.js), so the reading starts near the
+               top; on a larger screen the button is hidden and the switches show
+               as a row (style.css .display-panel). -->
           <div class="tools">
-            <div class="tools-row" role="group" aria-labelledby="display-label">
+            <div class="tools-row tools-bar">
+              <button class="btn btn--secondary btn--sm" type="button" id="speak-all" data-act="speak-all" data-speak aria-pressed="false"><span data-speak-label>Speak all</span></button>
+              <button class="btn btn--ghost btn--sm" type="button" id="slow-toggle" data-act="slow" data-speak aria-pressed="false" data-ui="slow">Slow</button>
+              <button class="btn btn--ghost btn--sm display-toggle" type="button" id="display-toggle" data-act="display" aria-expanded="false" aria-controls="display-panel"><span data-ui="display">Display</span><svg class="display-chevron" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></button>
+            </div>
+            <div class="tools-row display-panel" id="display-panel" role="group" aria-labelledby="display-label" data-folded>
               <span class="sr-only" id="display-label" data-ui="display">Display</span>
               <div class="seg" role="group" aria-labelledby="seg-furigana">
                 <span class="seg-label" id="seg-furigana" data-ui="furigana">Furigana</span>
@@ -230,21 +231,10 @@
                 <button class="seg-btn" type="button" data-act="set" data-pref="gaps" data-value="on" aria-pressed="false" data-ui="on">On</button>
               </div>
             </div>
-
-            <div class="tools-row">
-              <button class="btn btn--secondary btn--sm" type="button" id="speak-all" data-act="speak-all" data-speak aria-pressed="false"><span data-speak-label>Speak all</span></button>
-              <button class="btn btn--ghost btn--sm" type="button" id="slow-toggle" data-act="slow" data-speak aria-pressed="false" data-ui="slow">Slow</button>
-              <div class="send" role="group" aria-labelledby="send-label" aria-describedby="send-hint">
-                <span class="seg-label" id="send-label" data-ui="sendTo">Send the text to</span>
-                <a class="btn btn--ghost btn--sm" data-translate="deepl" href="https://www.deepl.com/translator" target="_blank" rel="noopener noreferrer"><span data-ui="deepl">DeepL</span> ↗</a>
-                <a class="btn btn--ghost btn--sm" data-translate="google" href="https://translate.google.com/" target="_blank" rel="noopener noreferrer"><span data-ui="google">Google Translate</span> ↗</a>
-              </div>
-            </div>
-            <p class="tools-note" id="send-hint" data-ui="sendHint">Opens a new tab. The text leaves this page only when you click one of these.</p>
             <p class="tools-note" id="speech-note" hidden></p>
           </div>
 
-          <p class="reading-hint" data-ui="readingHint">Choose a word to see it on its own. The arrow keys move between words.</p>
+          <p class="reading-hint"><span data-ui="readingHint">Choose a word to see it on its own.</span> <span class="key-hint" data-ui="readingHintKeys">The arrow keys move between words.</span></p>
           <!-- Said once, the first time Gaps is turned on (js/render-gaps.js). A live
                region that stays in the page: only its text changes. -->
           <p class="reading-hint gaps-hint" id="gaps-hint" role="status" aria-live="polite"></p>
@@ -252,6 +242,21 @@
           <!-- A gap's reason, beside it, for a pointer (js/events-gaps.js). The same
                reason is in the Word panel, for a keyboard, a tap and a screen reader. -->
           <p class="gap-tip" id="gap-tip" hidden></p>
+
+          <!-- On a phone (under 600px wide, or 480px tall on its side), after the
+               reading, just above the Translation that points at them: read first,
+               then send. Above the reading, the row and its note took three lines
+               of a phone's screen. On a wider screen js/layout.js moves the block
+               into the row of Speak all and Slow, where a long text did not push
+               the links thousands of pixels down. -->
+          <div class="send-block" id="send-block">
+            <div class="send" role="group" aria-labelledby="send-label" aria-describedby="send-hint">
+              <span class="seg-label" id="send-label" data-ui="sendTo">Send the text to</span>
+              <a class="btn btn--ghost btn--sm" data-translate="deepl" href="https://www.deepl.com/translator" target="_blank" rel="noopener noreferrer"><span data-ui="deepl">DeepL</span> ↗</a>
+              <a class="btn btn--ghost btn--sm" data-translate="google" href="https://translate.google.com/" target="_blank" rel="noopener noreferrer"><span data-ui="google">Google Translate</span> ↗</a>
+            </div>
+            <p class="tools-note" id="send-hint" data-ui="sendHint">Opens a new tab. The text leaves this page only when you click one of these.</p>
+          </div>
         </section>
 
         <!-- On-device translation (js/render-translate.js, js/translate.js): the
@@ -261,6 +266,18 @@
           <div id="translation-body"></div>
         </section>
 
+        <!-- Asked once, after the first read; History (#/kanji/history) has the
+             switch after that. Not a modal, and after the reading and its
+             Translation, not above them: above, with the tools, it put a
+             375x667 phone's first word at 972px. -->
+        <section class="remember-ask" id="remember-ask" aria-labelledby="remember-ask-title" hidden>
+          <h2 class="remember-ask-title" id="remember-ask-title" data-ui="rememberAskTitle">Remember what you read?</h2>
+          <p class="remember-ask-body" data-ui="rememberAskBody">Yomu can keep the texts you read in this browser, tell you when you read one before, keep a History, and show the sentence each kanji was last seen in. Nothing is sent anywhere.</p>
+          <p class="remember-ask-actions">
+            <button class="btn btn--primary btn--sm" type="button" data-act="remember-yes" data-ui="rememberYes">Remember</button>
+            <button class="btn btn--ghost btn--sm" type="button" data-act="remember-no" data-ui="rememberNo">No thanks</button>
+          </p>
+        </section>
         <section class="in-text" id="in-text" aria-labelledby="in-text-title" hidden>
           <h2 class="region-title" id="in-text-title" data-ui="inText">In this text</h2>
           <div id="in-text-body"></div>
