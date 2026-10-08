@@ -69,6 +69,8 @@ export const clearBodyKey = (status) => CLEAR_BODY[clearsIn(status)];
 
 let clearing = 'here';   // what a Clear all does, as the line last painted it
 let opened = null;       // the same, as the Clear all dialog opened with it
+let about = null;        // the account the book named when the line was painted
+let openedAbout = null;  // and when the dialog opened
 
 export function paintSync(status) {
   const line = $('mk-sync');
@@ -81,6 +83,7 @@ export function paintSync(status) {
     ].filter(Boolean));
   }
   clearing = clearsIn(status);
+  about = typeof status.account === 'string' ? status.account : null;
   if (opened === null) relabel($('mk-clear-body'), CLEAR_BODY[clearing]);
   relabel($('pl-lead'), status.signedIn && status.synced ? 'playLeadSynced' : 'playLead');
 }
@@ -96,6 +99,7 @@ export function openClearWords() {
   const dialog = $('mk-clear-dialog');
   if (opened !== null && dialog && dialog.open) return opened;
   opened = clearing;
+  openedAbout = about;
   relabel($('mk-clear-body'), CLEAR_BODY[opened]);
   if (dialog) {
     dialog.addEventListener('close', () => {
@@ -108,6 +112,13 @@ export function openClearWords() {
 
 /** What the open Clear all dialog says a Clear all does, or null. */
 export const clearWords = () => opened;
+
+/**
+ * What the click hands the clear: the words, and the account they were
+ * about. A clear whose book names another account by the click (one signed
+ * in under the open dialog) reaches no account (sync-watch.js cleared).
+ */
+export const clearScope = () => (opened === null ? null : { kind: opened, account: openedAbout });
 
 let answer = null;
 

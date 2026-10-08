@@ -123,6 +123,7 @@ export function startAccount(deps) {
     const b = books.read();
     status.synced = carries(b);
     status.clears = clears(b);
+    status.account = b ? b.account : null;
     try { ui.paint({ ...status }); } catch (err) { console.error('[yomu] sync line', err); }
   };
   const live = () => status.signedIn && status.phase !== 'paused';

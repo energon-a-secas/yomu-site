@@ -680,11 +680,15 @@ so it reached neither account. The dialog has three wordings, by
 account than the book's signed in, `clearBody`), the kanji held here (a
 pending first sign-in or Add, `clearBodyJoining`), the account (joined,
 `clearBodySynced`). The dialog keeps the words it opened with until it
-closes, and the click hands them to the clear (`render-sync.js
-openClearWords`, `clearAll(now, said)`): `sync-watch.js` does what they
-said, or what a Clear all does now when that reaches less, so a first sync
-landing under the open dialog, or another tab, never makes the click do
-more than the words said. A review found the words relabelled under the
+closes, and the click hands them to the clear with the account they were
+about (`render-sync.js openClearWords` and `clearScope`, `clearAll(now,
+said)`): `sync-watch.js` does what they said, or what a Clear all does now
+when that reaches less, so a first sync landing under the open dialog, or
+another tab, never makes the click do more than the words said. If another
+account signed in under the open dialog, the clear never reaches it
+account-wide: joined to it, only the kanji this browser brought to it go;
+its join pending, the clear stays here and brings nothing, so it keeps its
+own copy (round 7's review found the click emptying that account). A review found the words relabelled under the
 open dialog, from the kanji held here to the whole account, and the click
 then emptying the account. Another tab's write to the book reaches this
 one as a storage event, on which `account.js` paints the line and the

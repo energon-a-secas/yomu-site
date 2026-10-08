@@ -38,7 +38,7 @@ import { paintHistory } from './render-history.js';
 import { paintSavedMarks, paintDueCount, today } from './render-save.js';
 import { paintSide, afterPaintAll } from './render.js';
 import { openDialog, bindDialog } from './dialogs.js';
-import { openClearWords, clearWords } from './render-sync.js';
+import { openClearWords, clearScope } from './render-sync.js';
 import { downloadText } from './neorgon-dom.js';
 import { describe, loadText } from './events-read.js';
 import {
@@ -420,7 +420,7 @@ export const KANJI_ACTIONS = {
   'mk-import': () => { const input = $('mk-file'); if (input) input.click(); },
   'mk-clear': (b) => { openClearWords(); openDialog($('mk-clear-dialog'), b); },
   'mk-clear-yes': () => {
-    myKanji().clearAll(Date.now(), clearWords());
+    myKanji().clearAll(Date.now(), clearScope());
     view.note = ui('cleared');
     clearedJustNow = true;
     afterChange();

@@ -35,7 +35,11 @@ push carries it):
   question open or put off, or whoami still out after a switch), it
   records no removal and reaches no account. Its dialog says which, and a
   Clear all does what the dialog said when it opened, or less when the
-  book has moved since; never more.
+  book has moved since; never more. The click carries the account the
+  words were about: if another account was signed in under the open
+  dialog, the clear never reaches it account-wide. Joined to it, only the
+  kanji this browser brought to it go; its join still pending, the clear
+  stays here and brings nothing, and that account keeps its own copy.
 - Import: each kanji and phrase it brings back counts as saved now, one past
   any removal or Clear all known.
 - Counts and Play keep no time: they join by the higher number. A

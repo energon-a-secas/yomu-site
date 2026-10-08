@@ -932,10 +932,35 @@ test('the Clear all dialog keeps the words it opened with, and the click is hand
     globalThis.document = before;
   }
   // The page opens the dialog through openClearWords, and the click passes
-  // clearWords() to the clear.
+  // clearScope() to the clear: the words and the account they were about
+  // (it was clearWords(), the words alone, until a review showed a clear
+  // reaching an account signed in under the open dialog).
   const src = readFileSync(join(SITE, 'js/events-kanji.js'), 'utf8');
   assert.match(src, /'mk-clear': \(b\) => \{ openClearWords\(\); openDialog\(/);
-  assert.match(src, /myKanji\(\)\.clearAll\(Date\.now\(\), clearWords\(\)\)/);
+  assert.match(src, /myKanji\(\)\.clearAll\(Date\.now\(\), clearScope\(\)\)/);
+});
+
+test('a Clear all opened about one account reaches no other one signed in under the dialog', async () => {
+  // Opened over user_a's joined book; another tab signs in as user_b, Add
+  // is answered and its sync lands; the click must not clear user_b.
+  const { createSyncWatch } = await import('../js/sync-watch.js').catch(() => ({}));
+  const { paintSync, openClearWords, clearScope } = await import('../js/render-sync.js');
+  const el = (more = {}) => ({ dataset: {}, textContent: '', ...more });
+  const dialog = el({ open: false, addEventListener: () => {} });
+  const els = { 'mk-clear-body': el(), 'pl-lead': el(), 'mk-clear-dialog': dialog };
+  const before = globalThis.document;
+  globalThis.document = { getElementById: (id) => els[id] || null };
+  try {
+    paintSync({ available: true, signedIn: true, label: 'Aiko', phase: 'synced', at: 0, synced: true, clears: 'account', account: 'user_a', error: null });
+    openClearWords();
+    dialog.open = true;
+    paintSync({ available: true, signedIn: true, label: 'Ben', phase: 'synced', at: 0, synced: true, clears: 'account', account: 'user_b', error: null });
+    assert.deepEqual(clearScope(), { kind: 'account', account: 'user_a' }, 'the scope is what the dialog opened about');
+  } finally {
+    dialog.open = false;
+    globalThis.document = before;
+  }
+  void createSyncWatch;
 });
 
 // What the learner does from the moment the kit says "signed in" counts.
@@ -1114,4 +1139,49 @@ test('the page stamps an unsave after the account\'s newest save of it, whatever
   p.kanji.unsave('天');
   await until(() => !server.rowsOf('user_a').kanji.find((r) => r.char === '天' && r.saved), 'the removal reaching the account');
   assert.equal(p.kanji.isSaved('天'), false);
+});
+
+// A Clear all opened about one account, clicked once another account has
+// signed in under the dialog. A review (round 7) found the click emptied
+// the new account, which the words at opening never named.
+test('a Clear all opened about user_a, clicked after user_b joined under it: only what this browser brought to user_b goes', async () => {
+  const server = fakeDb();
+  await fakeClient(server, 'user_a').mutation('sync:push', { kanji: [kanjiRow('月', 2)] });
+  await fakeClient(server, 'user_b').mutation('sync:push', { kanji: [kanjiRow('雪', 5)] });
+  const p = page({ server, subject: 'user_b', book: newBook('user_a', 1, {}) });
+  p.kanji.save('月', 2);
+  await p.account.ready;
+  const said = { kind: 'account', account: 'user_a' };   // the dialog opens
+  p.answers.push('add');
+  p.kit.become(signedIn('user_b', 'Ben'));
+  await until(() => p.last().phase === 'synced' && savedIn(server, 'user_b').includes('月'), 'Add, its sync landed');
+  p.clock.t += 60_000;
+  p.kanji.clearAll(p.clock.t, said);
+  await until(() => !savedIn(server, 'user_b').includes('月'), 'the removal reaching user_b');
+  assert.deepEqual(server.rowsOf('user_b').clears, [], 'no account-wide clear for an account the words never named');
+  assert.deepEqual(savedIn(server, 'user_b'), ['雪'], 'what user_b sent here stays');
+  assert.deepEqual(savedIn(server, 'user_a'), ['月'], 'and user_a is not written to after the switch');
+});
+
+test('a Clear all opened about user_a, clicked while user_b\'s Add still waits: user_b keeps its own copy', async () => {
+  const server = fakeDb();
+  await fakeClient(server, 'user_b').mutation('sync:push', { kanji: [kanjiRow('月', 2), kanjiRow('雪', 5)] });
+  const p = page({ server, subject: 'user_b', book: newBook('user_a', 1, {}) });
+  p.kanji.save('月', 2);
+  await p.account.ready;
+  const said = { kind: 'account', account: 'user_a' };   // the dialog opens
+  p.kit.become(signedIn('user_b', 'Ben'));
+  await until(() => p.asked.length === 1 && p.last().phase === 'paused', 'the question');
+  p.failing.on = offline('sync:pullPhrases');
+  p.answers.push('add');
+  await p.account.choose(null);
+  await until(() => p.last().phase === 'error', 'the Add, its pull lost');
+  p.clock.t += 60_000;
+  p.kanji.clearAll(p.clock.t, said);
+  const book = JSON.parse(p.bookStore.raw);
+  assert.deepEqual([book.epoch, book.removed.kanji, book.brought.kanji], [0, {}, {}], 'nothing recorded for user_b, and nothing brought to it');
+  p.failing.on = () => false;
+  p.win.fire('online');
+  await until(() => p.last().phase === 'synced', 'the Add finishes');
+  assert.deepEqual(savedIn(server, 'user_b'), ['月', '雪'], 'user_b keeps its own 月 and 雪');
 });

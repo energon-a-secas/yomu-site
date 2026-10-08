@@ -44,6 +44,7 @@ export function storesAdapter({ kanji, history, play, prefs, remembering }) {
 }
 
 const NOTHING = Object.freeze({ s: 0, removed: 0 });
+const isObject = (v) => !!v && typeof v === 'object' && !Array.isArray(v);
 /** What a Clear all reaches, least first (sync-book.js clearsOf). */
 const REACH = Object.freeze(['here', 'joining', 'account']);
 /** The lesser of what the dialog said (when it said) and what is so now. */
@@ -115,7 +116,16 @@ export function watchStores({ kanji, history, play, onPrefsSaved, books, local, 
    */
   function cleared(at, saved, said) {
     books.update((b) => {
-      const how = least(said, clears(b));
+      // said: the dialog's words, or { kind, account } with the account they
+      // were about. A book that names another account by the click (one
+      // signed in under the open dialog) never gets an account-wide clear:
+      // joined, the kanji this browser brought to it go and the ones it sent
+      // here stay ('joining'); its join still pending, the clear stays here
+      // and brings nothing to it, so the account keeps its own copy.
+      const kind = isObject(said) ? said.kind : said;
+      const other = isObject(said) && said.account !== (b ? b.account : null);
+      const mine = other ? (b && b.pending ? 'here' : least(kind, 'joining')) : kind;
+      const how = least(mine, clears(b));
       if (how === 'joining') {
         for (const [ch, rec] of Object.entries(saved || {})) {
           if (!b.pending && !Object.hasOwn(b.brought.kanji, ch) && !Object.hasOwn(b.saves.kanji, ch)) continue;
