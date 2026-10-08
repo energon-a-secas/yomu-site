@@ -283,8 +283,27 @@ dialog.dialog--wide { width: min(760px, calc(100% - 16px)); }
   border-bottom: 1px solid var(--border-subtle);
 }
 .tools-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-6); }
-.tools-row + .tools-row { gap: var(--space-2); }
+.tools-bar { gap: var(--space-2); }
 .tools-note { font-size: var(--text-xs); color: var(--text-muted); line-height: 1.5; }
+
+/* The Display button folds the five switches on a phone (the block after
+   Narrow below); on a wider and taller screen it is not drawn and the
+   switches are a row. */
+.display-toggle { display: none; margin-left: auto; }
+.display-chevron {
+  width: 16px; height: 16px;
+  fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+  transition: transform var(--dur);
+}
+.display-toggle[aria-expanded="true"] .display-chevron { transform: rotate(180deg); }
+
+/* The send links, after the reading and before its Translation. */
+.send-block {
+  display: flex; flex-direction: column; gap: var(--space-2);
+  margin-top: var(--space-2);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border-subtle);
+}
 
 .seg { display: inline-flex; align-items: center; }
 .seg-label { font-size: var(--text-xs); color: var(--text-muted); margin-right: var(--space-2); }
@@ -305,9 +324,8 @@ dialog.dialog--wide { width: min(760px, calc(100% - 16px)); }
 .seg-btn[aria-pressed="true"] { background: rgba(255, 255, 255, 0.14); color: var(--text-primary); }
 .seg-btn:focus-visible { position: relative; z-index: 1; }
 
-.send { display: inline-flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+.send { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
 .send .seg-label { margin-right: 0; }
-.tools-row > .send { margin-left: var(--space-4); }
 
 /* ── The reading ───────────────────────────────────────────────
  * Every word is a button: the surface with its ruby, then its romaji line.
@@ -1100,7 +1118,7 @@ html[data-embed="1"] body:has(> .neo-footer) { min-height: 0; }
   .seen-before .text-link, .embed-bar .text-link { display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; }
   .mk-sync .btn { min-height: 44px; }
   /* A touch screen has no keys to press, so the key hints go. */
-  .rv-kbd, .rv-keys { display: none; }
+  .rv-kbd, .rv-keys, .key-hint { display: none; }
   .word-notes .text-link, .word-out .text-link { display: inline-flex; align-items: center; min-height: 44px; }
 }
 
@@ -1108,7 +1126,6 @@ html[data-embed="1"] body:has(> .neo-footer) { min-height: 0; }
 @media (max-width: 600px) {
   .tok-surface, .tok-plain { font-size: 1.5rem; }
   .tools-row { gap: var(--space-2) var(--space-4); }
-  .tools-row > .send { margin-left: 0; }
   .word-surface { font-size: 2.25rem; }
   .ph { grid-template-columns: minmax(0, 1fr); }
   .ph-actions { flex-direction: row; flex-wrap: wrap; }
@@ -1120,6 +1137,15 @@ html[data-embed="1"] body:has(> .neo-footer) { min-height: 0; }
   .col-next { gap: var(--space-2); }
   .col-next-item { width: 4.5rem; }
   .rv-btn { min-width: 0; flex: 1 1 8rem; }
+}
+
+/* A phone, under 600px wide or on its side (480px tall or less): the display
+   switches fold behind the Display button (js/events.js toggleDisplay), so the
+   first word of a reading sits under one row of tools, not five rows of
+   switches (two on its side, which put the word 137px below a 375px fold). */
+@media (max-width: 599.98px), (max-height: 480px) {
+  .display-toggle { display: inline-flex; }
+  .display-panel[data-folded] { display: none; }
 }
 
 /* ── Reduced motion ────────────────────────────────────────── */

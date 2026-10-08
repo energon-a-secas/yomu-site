@@ -1,8 +1,10 @@
-// The Translation section's strings (render-translate.js), { en, es }, kept
-// apart from strings.js so both stay under the 500-line rule and merged into
-// the same table. Spanish is neutral.
+// The Translation section's strings (render-translate.js), and the reading
+// hint's line about keys, { en, es }, kept apart from strings.js so both stay
+// under the 500-line rule and merged into the same table. Spanish is neutral.
 
 export const READER_STRINGS = Object.freeze({
+  // Not drawn on a touch screen (style.css .key-hint), which has no arrow keys.
+  readingHintKeys: { en: 'The arrow keys move between words.', es: 'Las flechas recorren las palabras.' },
   translation: { en: 'Translation', es: 'Traducción' },
   translateHere: { en: 'Translate here', es: 'Traducir aquí' },
   translateLeadDownload: {

@@ -61,6 +61,50 @@ function blocks(prelude) {
 }
 const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
+test('the Remember card comes after the reading and its Translation, never above the first word', () => {
+  assert.ok(at('id="remember-ask"') > at('id="reading-body"'), 'the card follows the reading body');
+  assert.ok(at('id="remember-ask"') > at('id="translation"'), 'the card follows the Translation');
+  assert.ok(at('id="remember-ask"') < at('id="in-text"'), 'and comes before In this text');
+});
+
+test('the five display switches sit behind one Display button, folded in the markup', () => {
+  const toggle = element('id="display-toggle"');
+  assert.match(toggle, /aria-expanded="false"/);
+  assert.match(toggle, /aria-controls="display-panel"/);
+  assert.match(toggle, /data-act="display"/);
+  const panel = element('id="display-panel"');
+  assert.match(panel.slice(0, panel.indexOf('>')), /data-folded/);
+  for (const pref of ['furigana', 'romaji', 'highlights', 'unsaved', 'gaps']) {
+    assert.match(panel, new RegExp(`data-pref="${pref}"`), `${pref} is in the panel`);
+  }
+  assert.ok(at('id="display-toggle"') < at('id="display-panel"'), 'the button comes before what it opens');
+});
+
+test('Speak all and the translate links stay outside the Display panel, and the send links follow the reading', () => {
+  const panel = element('id="display-panel"');
+  for (const id of ['id="speak-all"', 'id="slow-toggle"', 'data-translate="deepl"', 'data-translate="google"']) {
+    assert.ok(!panel.includes(id), `${id} is not folded away`);
+  }
+  assert.ok(at('data-translate="deepl"') > at('id="reading-body"'), 'DeepL is after the reading');
+  assert.ok(at('id="send-hint"') > at('data-translate="google"'), 'the privacy note stays under the links');
+});
+
+test('the switches fold only on a phone: under 600px wide or 480px tall', () => {
+  const phone = blocks(esc('@media (max-width: 599.98px), (max-height: 480px)'));
+  assert.equal(phone.length, 1, 'one phone block');
+  assert.match(phone[0], /\.display-toggle\s*\{\s*display:\s*inline-flex/);
+  assert.match(phone[0], /\.display-panel\[data-folded\]\s*\{\s*display:\s*none/);
+  // Anywhere else, the button is not drawn and nothing folds.
+  const outside = css.replace(phone[0], '');
+  assert.ok(!/\.display-panel\[data-folded\]/.test(outside), 'no fold outside the phone block');
+  assert.match(blocks(esc('.display-toggle'))[0], /display:\s*none/);
+});
+
+test('on a touch screen, the arrow-key hint goes', () => {
+  const touch = blocks(esc('@media (pointer: coarse)')).join('\n');
+  assert.match(touch, /\.key-hint[^{]*\{\s*display:\s*none/);
+});
+
 test('after a touch or a pen, focus stays out of the text box; after a key or a mouse it may go there', () => {
   assert.equal(keepOutOfField('touch', false), true);
   assert.equal(keepOutOfField('pen', false), true);

@@ -340,8 +340,22 @@ function setPref(name, value) {
   if (name === 'gaps') gapsToggled();
 }
 
+/**
+ * The Display button, which only a phone's screen shows (under 600px wide,
+ * or 480px tall): it opens and folds the five display switches (style.css
+ * .display-panel). Not saved: a new visit starts folded, with the reading
+ * near the top.
+ */
+function toggleDisplay(b) {
+  const open = b.getAttribute('aria-expanded') !== 'true';
+  b.setAttribute('aria-expanded', String(open));
+  const panel = $('display-panel');
+  if (panel) panel.toggleAttribute('data-folded', !open);
+}
+
 const ACTIONS = {
   set: (b) => setPref(b.dataset.pref, b.dataset.value),
+  display: toggleDisplay,
   slow: () => { state.prefs.slow = !state.prefs.slow; savePrefs(state); paintChrome(state); },
   'speak-all': (b) => speechOk(b) && speakAll(),
   clear: clearText,
