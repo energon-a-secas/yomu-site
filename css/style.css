@@ -100,6 +100,12 @@ main#main:focus { outline: none; }
 @media (min-width: 700.02px) and (max-width: 899.98px) {
   #phrases-open, #mykanji-open, #play-open, #lang-toggle { padding: 0 5px; }
 }
+/* Still 23px short in Spanish from 701 to 724 (a mini iPhone on its side):
+   there the toggle shows only the code it switches to, which its spoken
+   name already says ("Switch to Spanish"). That gives about 30px back. */
+@media (min-width: 700.02px) and (max-width: 759.98px) {
+  #lang-toggle .lang-code--on, #lang-toggle .lang-sep { display: none; }
+}
 /* The reviews-due count widened My kanji by 30px and pushed the menu over
    Sign in on every phone, a 412px one too, and the language toggle under it
    up to 760px. Under 900px it rides on the button's corner instead, and the

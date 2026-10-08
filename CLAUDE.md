@@ -370,7 +370,9 @@ and notes panels, Phrases, the header's menu, My kanji with its sync line, a
 review, the Collection and a tile, History, Clear all, Sign in, all five games
 to their result, Retry after a failed shard) at 375x667, 393x852, 412x915,
 360x780 and 320x568 with each device's touch and user agent, the reader on its
-side too, the header alone with no review due and with 128, in both
+side too, the header alone with no review due and with 128 and at eight
+widths from 701 to 899px (no device lands there; in Spanish the language
+toggle ran under Iniciar sesión until it showed only one code), in both
 languages, and fails on what is Yomu's: focus in the text box after a tap, a
 focus ring on the header button a tap closed a dialog back to, the first word
 below the fold, the switches unfolded on a phone, horizontal scroll, a

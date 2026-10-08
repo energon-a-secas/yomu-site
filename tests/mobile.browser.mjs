@@ -226,7 +226,7 @@ async function audit(page, where, screen, opts = {}) {
 }
 
 async function context(browser, device, lang, extra = {}) {
-  const { defaultBrowserType, ...d } = devices[device];
+  const { defaultBrowserType, ...d } = device ? devices[device] : {};
   const ctx = await browser.newContext({ ...d, ...extra, locale: lang === 'es' ? 'es-ES' : 'en-US' });
   const page = await ctx.newPage();
   page.setDefaultTimeout(10000);
@@ -580,6 +580,31 @@ async function header(browser, phone, lang) {
   }
 }
 
+/**
+ * The header across the band where the kit puts every control in the bar,
+ * 701px up, at a phone's height with touch. No device above lands there: an
+ * iPhone mini on its side is 712px, and in Spanish from 701 to 724 the
+ * language toggle ran 11px under Iniciar sesión until it showed only the
+ * code it switches to.
+ */
+const BAND = [701, 712, 718, 724, 736, 768, 800, 899];
+async function band(browser, lang) {
+  for (const width of BAND) {
+    const where = `${browser.engine} ${width}px ${lang}`;
+    const { ctx, page } = await context(browser, null, lang, { viewport: { width, height: 390 }, screen: { width, height: 390 }, hasTouch: true, isMobile: browser.engine === 'chromium' });
+    await step(where, 'the header', async () => {
+      await page.goto(BASE);
+      await page.waitForSelector('.example');
+      await signInDrawn(page);
+      await page.waitForTimeout(200);
+      measured.push(`${where}: header at ${await page.evaluate(() => innerWidth)}px`);
+      await audit(page, where, 'header');
+    });
+    for (const e of page.errors) fail(where, `console: ${e.slice(0, 160)}`);
+    await ctx.close();
+  }
+}
+
 /** The chosen word against the header and the word sheet, in the viewport. */
 const placeOfChosen = (page) => page.evaluate(() => {
   const t = document.querySelector('#reading-body .tok[aria-pressed="true"]');
@@ -772,6 +797,7 @@ await Promise.all(browsers.map(async (engine) => {
   const browser = await ENGINES[engine].launch();
   browser.engine = engine;
   await keys(browser);
+  for (const lang of langs) await band(browser, lang);
   for (const key of phones) {
     const phone = { key, ...PHONES[key] };
     await rotate(browser, phone, langs[0]);
