@@ -243,10 +243,13 @@
                reason is in the Word panel, for a keyboard, a tap and a screen reader. -->
           <p class="gap-tip" id="gap-tip" hidden></p>
 
-          <!-- After the reading, just above the Translation that points at them:
-               read first, then send. Above the reading, the row and its note took
-               three lines of a phone's screen. -->
-          <div class="send-block">
+          <!-- On a phone (under 600px wide, or 480px tall on its side), after the
+               reading, just above the Translation that points at them: read first,
+               then send. Above the reading, the row and its note took three lines
+               of a phone's screen. On a wider screen js/layout.js moves the block
+               into the row of Speak all and Slow, where a long text did not push
+               the links thousands of pixels down. -->
+          <div class="send-block" id="send-block">
             <div class="send" role="group" aria-labelledby="send-label" aria-describedby="send-hint">
               <span class="seg-label" id="send-label" data-ui="sendTo">Send the text to</span>
               <a class="btn btn--ghost btn--sm" data-translate="deepl" href="https://www.deepl.com/translator" target="_blank" rel="noopener noreferrer"><span data-ui="deepl">DeepL</span> ↗</a>

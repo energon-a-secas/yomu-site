@@ -23,6 +23,8 @@
 //     side) before the Display button opens them, or folded at 1280x800, the
 //     Remember card above the reading, Speak all or the translate links
 //     hidden;
+//   - the send links above the reading on a phone, or anywhere but the row
+//     of Speak all on a wider screen;
 //   - a romaji line wider than the reading, and a Word panel note button
 //     under 44px wide however short its title;
 //   - horizontal scroll, a control of Yomu's under 44px (a link inside a
@@ -286,7 +288,7 @@ async function reader(browser, phone, lang) {
         word: top('#reading-body .tok'), vh: innerHeight, ask: top('#remember-ask'), readingEnd: bottom('#reading'),
         toggle: vis('#display-toggle'), expanded: document.querySelector('#display-toggle')?.getAttribute('aria-expanded'),
         panel: vis('#display-panel'), speak: vis('#speak-all'), deepl: vis('[data-translate="deepl"]'), google: vis('[data-translate="google"]'),
-        keyHint: vis('.key-hint'),
+        keyHint: vis('.key-hint'), deeplAt: top('[data-translate="deepl"]'), bodyEnd: bottom('#reading-body'),
       };
     });
     measured.push(`${where}: first word at ${lay.word}px of a ${lay.vh}px screen, Remember card at ${lay.ask}`);
@@ -295,6 +297,7 @@ async function reader(browser, phone, lang) {
     if (!lay.toggle || lay.expanded !== 'false' || lay.panel) fail(where, `under 600px the Display button should show, folded (button ${lay.toggle}, aria-expanded ${lay.expanded}, switches ${lay.panel})`);
     if (!lay.speak || !lay.deepl || !lay.google) fail(where, `Speak all ${lay.speak}, DeepL ${lay.deepl}, Google ${lay.google}: all should be reachable without Display`);
     if (lay.keyHint) fail(where, 'the arrow-key hint is drawn on a touch screen');
+    if (lay.deeplAt !== null && lay.deeplAt < lay.bodyEnd) fail(where, `on a phone the send links (${lay.deeplAt}) come after the reading (${lay.bodyEnd})`);
     await audit(page, where, 'reading');
   });
 
@@ -615,9 +618,14 @@ async function landscape(browser, phone, lang) {
     await page.waitForSelector('.example');
     await readExample(page, KANJI);
     // A phone on its side is wide but short: the switches fold there too.
-    const lay = await page.evaluate(() => ({ h: innerHeight, word: Math.round(document.querySelector('#reading-body .tok').getBoundingClientRect().top + scrollY), toggle: !!document.querySelector('#display-toggle')?.getClientRects().length, panel: !!document.querySelector('#display-panel')?.getClientRects().length }));
+    const lay = await page.evaluate(() => ({
+      h: innerHeight, word: Math.round(document.querySelector('#reading-body .tok').getBoundingClientRect().top + scrollY),
+      toggle: !!document.querySelector('#display-toggle')?.getClientRects().length, panel: !!document.querySelector('#display-panel')?.getClientRects().length,
+      deepl: Math.round(document.querySelector('[data-translate="deepl"]').getBoundingClientRect().top), bodyEnd: Math.round(document.querySelector('#reading-body').getBoundingClientRect().bottom),
+    }));
     measured.push(`${where}: first word at ${lay.word}px of a ${lay.h}px screen`);
     if (lay.h <= 480 && (!lay.toggle || lay.panel)) fail(where, `${lay.h}px tall: the switches should fold behind Display (button ${lay.toggle}, switches ${lay.panel})`);
+    if (lay.h <= 480 && lay.deepl < lay.bodyEnd) fail(where, `on its side a phone keeps the send links (${lay.deepl}) after the reading (${lay.bodyEnd})`);
     await audit(page, where, 'reading');
     await tap(page, '#reading-body .tok');
     await page.waitForSelector('#side[data-sheet] #word-body *');
@@ -644,6 +652,19 @@ async function keys(browser) {
     const shown = (sel) => `!!document.querySelector('${sel}')?.getClientRects().length`;
     const wide = await page.evaluate(`({ toggle: ${shown('#display-toggle')}, panel: ${shown('#display-panel')} })`);
     if (wide.toggle || !wide.panel) fail(where, `at 1280px the switches show and the Display button does not (button ${wide.toggle}, switches ${wide.panel})`);
+  });
+  // On a wider screen the send links are where they were before phones moved
+  // them: on Speak all's row, above the reading, with their note under it.
+  for (const size of [{ width: 1280, height: 800 }, { width: 768, height: 1024 }, { width: 600, height: 900 }]) await step(where, `the send links at ${size.width}px`, async () => {
+    await page.setViewportSize(size);
+    await page.waitForTimeout(200);
+    const at = await page.evaluate(() => {
+      const r = (sel) => document.querySelector(sel).getBoundingClientRect();
+      return { deepl: Math.round(r('[data-translate="deepl"]').top), speak: Math.round(r('#speak-all').top), word: Math.round(r('#reading-body .tok').top), hint: Math.round(r('#send-hint').top), panel: Math.round(r('#display-panel').top) };
+    });
+    if (!(at.deepl < at.word)) fail(where, `at ${size.width}px the send links (${at.deepl}) are not above the reading (${at.word})`);
+    if (Math.abs(at.deepl - at.speak) > 8) fail(where, `at ${size.width}px the send links (${at.deepl}) are not on Speak all's row (${at.speak})`);
+    if (!(at.hint > at.deepl && at.hint < at.panel)) fail(where, `at ${size.width}px the send note (${at.hint}) is not between the links (${at.deepl}) and the switches (${at.panel})`);
   });
   // A key that closes Phrases gives its button focus back with a ring.
   await step(where, 'Escape from Phrases', async () => {

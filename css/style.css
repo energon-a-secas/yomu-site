@@ -328,13 +328,19 @@ dialog.dialog--wide { width: min(760px, calc(100% - 16px)); }
 }
 .display-toggle[aria-expanded="true"] .display-chevron { transform: rotate(180deg); }
 
-/* The send links, after the reading and before its Translation. */
+/* The send links. On a phone, after the reading and before its Translation;
+   on a wider screen js/layout.js moves the block into the row of Speak all
+   and Slow, where they were before phones: the links on that row, and their
+   note on a line of its own under it. */
 .send-block {
   display: flex; flex-direction: column; gap: var(--space-2);
   margin-top: var(--space-2);
   padding-top: var(--space-4);
   border-top: 1px solid var(--border-subtle);
 }
+.tools-bar > .send-block { display: contents; }
+.tools-bar > .send-block > .send { margin-left: var(--space-4); }
+.tools-bar > .send-block > .tools-note { flex-basis: 100%; }
 
 .seg { display: inline-flex; align-items: center; }
 .seg-label { font-size: var(--text-xs); color: var(--text-muted); margin-right: var(--space-2); }

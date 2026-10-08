@@ -381,6 +381,8 @@ controls or the due count overlapping, a tap at a control's edge that lands
 on another, a console error.
 It fails on a romaji line wider than the reading, and on a Word panel note
 button under 44px wide however short its title.
+It fails on the send links above the reading on a phone, and anywhere but the
+row of Speak all on a wider screen.
 What belongs to a fleet kit it prints as a note. `tests/mobile.test.mjs`
 holds the markup and stylesheet half under npm test. Run the browser check
 after a change to the reader's markup, a phone block of `style.css`, a header
@@ -411,10 +413,16 @@ or 480px tall on its side) the five display switches fold behind
 `#display-toggle` (`aria-expanded`, `data-folded` on `#display-panel`, not
 saved; above that the button is not drawn), the Remember card comes after the
 reading and its Translation, the send links and their note after the reading,
-just above the Translation that points at them, and the hint's arrow-key line
-(`.key-hint`) is not drawn under `pointer: coarse`. The first word of a
-reading: 972px down a 375x667 screen (1045 in Spanish) before, 429 after; on
-its side, 717 before and 408 after, still under a 375px fold.
+just above the Translation, and the hint's arrow-key line (`.key-hint`) is not
+drawn under `pointer: coarse`. The first word of a reading: 972px down a
+375x667 screen (1045 in Spanish) before, 429 after; on its side, 717 before
+and 408 after, still under a 375px fold. On a wider screen `js/layout.js`
+moves the same block into the row of Speak all and Slow, where it was before:
+after the reading, a 2,000-character text put the links 9,955px down a
+desktop. Moved, never drawn twice, so the links keep their one listener and
+the tab order follows the page; `layout.js PHONE` and the phone block of
+`style.css` are the same query. The Translation's lines name the row by its
+label, Send the text to, never by a place.
 
 **The phone header keeps one control beside Sign in.** Under the kit's
 700px, My kanji is the one `data-keep-mobile` action, and Phrases, Play and

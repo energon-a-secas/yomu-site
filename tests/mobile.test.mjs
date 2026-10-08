@@ -11,6 +11,8 @@ import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { keepOutOfField, isField } from '../js/press.js';
+import { PHONE } from '../js/layout.js';
+import { READER_STRINGS } from '../js/strings-reader.js';
 
 const SITE = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const html = readFileSync(join(SITE, 'index.html'), 'utf8');
@@ -174,6 +176,23 @@ test('a romaji line wraps only when its word is wider than the reading', () => {
 test('on a touch screen the Word panel\'s note buttons are 44px wide however short the title', () => {
   const touch = blocks(esc('@media (pointer: coarse)')).join('\n');
   assert.match(touch, /\.word-notes \.text-link[^{]*\{[^}]*min-width:\s*44px/);
+});
+
+test('the send links move with the phone line, which layout.js and style.css draw at the same place', () => {
+  assert.equal(blocks(esc(`@media ${PHONE}`)).length, 1, `style.css has a block for ${PHONE}`);
+  assert.match(element('id="send-block"'), /data-translate="google"/);
+  assert.match(css, /\.tools-bar > \.send-block\s*\{\s*display:\s*contents/);
+  const events = readFileSync(join(SITE, 'js/events.js'), 'utf8');
+  assert.match(events, /bindLayout\(\);/);
+});
+
+test('the Translation names the send row by its label, never by a place', () => {
+  for (const id of ['translateUnsupported', 'translateUnavailable', 'translateBusy']) {
+    assert.doesNotMatch(READER_STRINGS[id].en, /\babove\b|\bbelow\b/i, `${id} en`);
+    assert.doesNotMatch(READER_STRINGS[id].es, /\barriba\b|\babajo\b/i, `${id} es`);
+    assert.match(READER_STRINGS[id].en, /send the text to DeepL or Google Translate/i, `${id} en`);
+    assert.match(READER_STRINGS[id].es, /envía el texto a DeepL o a Google Traductor/i, `${id} es`);
+  }
 });
 
 test('after a touch, a dialog gives focus back with no ring, and to the ⋯ button for a control in its menu', () => {

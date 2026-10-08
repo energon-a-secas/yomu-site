@@ -28,6 +28,7 @@ import { COLLECT_ACTIONS, bindCollect } from './events-collect.js';
 import { PLAY_ACTIONS, bindPlay } from './events-play.js';
 import { bindGaps, gapsToggled } from './events-gaps.js';
 import { watchPress } from './press.js';
+import { bindLayout } from './layout.js';
 
 export { analyzeNow, loadText };
 
@@ -398,6 +399,7 @@ export function bindEvents() {
     ACTIONS[b.dataset.act](b, e);
   });
   watchPress();
+  bindLayout();
   bindInput();
   bindLights();
   bindGaps();
