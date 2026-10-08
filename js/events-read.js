@@ -37,6 +37,7 @@ import { myKanji, wordsByKanji } from './kanji-store.js';
 import { myHistory, textKey } from './history-store.js';
 import { today } from './render-save.js';
 import { hasJapanese, announceCollected, clearNote } from './render-remember.js';
+import { pressedByTouch } from './press.js';
 
 let seq = 0;
 
@@ -205,12 +206,14 @@ function autosize(ta) {
 
 /**
  * Somewhere sensible for focus when the control that had it is about to be
- * removed (an example button, Retry): the text box, or in an embed, where
- * there is none, the page's main region. Left alone, focus fell to <body>.
+ * removed (an example button, Retry): the text box after a key or a mouse,
+ * and the page's main region after a touch (press.js: in the box, a phone's
+ * keyboard came up over the reading the tap had just loaded), or in an
+ * embed with the box hidden. Left alone, focus fell to <body>.
  */
 export function focusHome() {
   const ta = $('yomu-text');
-  const target = ta && ta.getClientRects().length ? ta : $('main');
+  const target = ta && ta.getClientRects().length && !pressedByTouch() ? ta : $('main');
   if (target) target.focus({ preventScroll: true });
 }
 

@@ -1,9 +1,21 @@
 /** The platform owns trapping and Escape; this module owns launch/return focus. */
+import { isField } from './press.js';
+
 const openers = new WeakMap();
 
+/**
+ * The platform gives focus back on close to what had it at showModal(), before
+ * the close listener below runs. Safari focuses no button a tap presses, so on
+ * an iPhone that was still the text box: choosing a phrase closed the dialog
+ * into the box and raised the keyboard over the new reading. So the opener
+ * takes focus first, and a field the opener is not lets it go.
+ */
 export function openDialog(dialog, opener = document.activeElement) {
   if (!dialog || dialog.open) return;
   openers.set(dialog, opener);
+  if (opener && opener !== document.activeElement && opener.isConnected && typeof opener.focus === 'function') opener.focus({ preventScroll: true });
+  const held = document.activeElement;
+  if (held !== opener && isField(held)) held.blur();
   dialog.showModal();
   if (document.documentElement.dataset.embed === '1') placeNear(dialog, opener);
 }
