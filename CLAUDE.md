@@ -18,7 +18,7 @@ make serve       # http://localhost:8895
 make validate    # node tools/check-data.mjs, then npm test
 make data        # rebuild data/dict, data/kanji, data/names, data/like and data/play from the pinned upstreams (manual)
 npm test         # node --test tests/*.test.mjs
-node tests/mobile.browser.mjs [--base=http://localhost:8895/] [--shots=DIR]   # every screen on three phones, WebKit and Chromium (On a phone, below)
+node tests/mobile.browser.mjs [--base=http://localhost:8895/] [--shots=DIR]   # every screen on five phones, WebKit and Chromium (On a phone, below)
 node tools/compare-readings.mjs <old data/> [data/]   # every token two builds read differently, over Tatoeba
 npx convex dev --once   # push convex/ to the dev deployment (convex/README.md); never `npx convex deploy` from a worktree
 ```
