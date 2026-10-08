@@ -232,3 +232,26 @@ for (const answer of ['adopt', 'replace']) {
     assert.deepEqual(savedHere(y), kept, 'another device agrees');
   });
 }
+
+test('a begin() that outlives a sign-out writes nothing over the book the next sign-in keeps', async () => {
+  // js/account.js writes a first sign-in's join when the kit says who
+  // signed in. A whoami still out from the account before must not write
+  // its subject over that book when it answers, which would drop what the
+  // learner did since under the new one.
+  const server = fakeDb();
+  const x = device(server, 'user_a', { at: 0 });
+  x.kanji.save('天', x.now());
+  let release;
+  const gate = new Promise((r) => { release = r; });
+  const whoami = x.client.query;
+  x.client.query = async (name, args) => { if (name === 'sync:whoami') await gate; return whoami(name, args); };
+  const stale = x.sync.begin();
+  x.sync.stop();                                            // signed out, then user_b signed in
+  x.books.write(answeredBook('user_b', FIRST, T(1), {}));
+  x.books.update((b) => { b.removed.kanji['天'] = T(2); });   // user_b's unsave, kept for its join
+  release();
+  await assert.rejects(stale, (err) => err.code === 'stopped');
+  assert.equal(x.books.read().account, 'user_b');
+  assert.equal(x.books.read().removed.kanji['天'], T(2), 'the new sign-in\'s unsave is kept');
+  assert.equal(x.sync.subject, null, 'and the stale answer named nobody');
+});

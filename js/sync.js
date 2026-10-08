@@ -178,6 +178,7 @@ export function joinStamps(server, snap, at, now = at) {
 export function createSync({ client, local, book: books, now = Date.now }) {
   let subject = null;
   let cache = null;      // the account as this page last read or wrote it
+  let stops = 0;         // stop() calls: a begin() that outlives one writes nothing
   let queue = Promise.resolve();
   const serial = (fn) => {
     const run = queue.then(fn, fn);
@@ -194,7 +195,12 @@ export function createSync({ client, local, book: books, now = Date.now }) {
    * that holds nothing, joins as is.
    */
   async function begin() {
+    // A sign-out or another account while whoami was out: this begin() is
+    // over, and must not write its subject over the book the next one
+    // keeps from the kit's sign-in (js/account.js).
+    const ticket = stops;
     const who = await client.query(FN.whoami, {});
+    if (ticket !== stops) throw new SyncError('stopped');
     subject = who && typeof who.subject === 'string' && who.subject ? who.subject : null;
     cache = null;
     if (!subject) throw new SyncError('not-authenticated');
@@ -203,14 +209,17 @@ export function createSync({ client, local, book: books, now = Date.now }) {
     const mode = decide(book, me);
     if (mode === 'same') return { subject: me, mode };
     if (mode === 'ask') return { subject: me, mode, counts: counts(await pullAll(client), local.snapshot()) };
-    // A first sign-in: the join goes into the book now, pending, as an
-    // answer to the account question does. A retry after a failed pull
-    // continues it, and what the learner removes, saves or changes in
-    // between goes to this account.
+    // A first sign-in: the join is in the book, pending, as an answer to
+    // the account question is (js/account.js writes it when the kit says
+    // who signed in). A retry after a failed pull continues it, and what
+    // the learner removes, saves or changes in between goes to this
+    // account. A book pending for another subject than whoami's is another
+    // account's first sign-in: begun again for this one, carrying nothing
+    // of what it kept.
     if (!book || book.account !== me) books.write(answeredBook(me, FIRST, now(), local.snapshot().prefs));
     if (holdsOwn(local.snapshot())) {
       const server = await pullAll(client);
-      if (subject !== me) throw new SyncError('stopped');
+      if (ticket !== stops || subject !== me) throw new SyncError('stopped');
       if (holdsAny(server)) return { subject: me, mode: 'ask', first: true, counts: counts(server, local.snapshot()) };
     }
     books.update((b) => { if (b.account === me && b.pending === FIRST) { b.pending = 'adopt'; b.joined = now(); } });
@@ -342,6 +351,7 @@ export function createSync({ client, local, book: books, now = Date.now }) {
 
   /** Signed out: stop. The stores and the book stay as they are. */
   function stop() {
+    stops += 1;
     subject = null;
     cache = null;
   }

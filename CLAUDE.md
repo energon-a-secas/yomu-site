@@ -672,22 +672,26 @@ held here (a pending first sign-in or Add, `clearBodyJoining`), the account
 (joined, `clearBodySynced`).
 
 **A browser that never synced is asked before its data meets an
-account's.** On a first sign-in `sync.js begin()` writes the join into the
-book (`pending: 'first'`). If this browser holds a saved kanji or a saved
-phrase, and the account holds any row of My kanji or of the saved phrases,
-live or removed, or a Clear all, it asks the Add / Use question an account
-switch asks, worded for this case (the `syncFirst*` strings: "This browser
-has kanji and phrases from before you signed in. Add them to your account,
-or use your account's data here?"). A first device with an empty account,
-and a browser with nothing saved, join without asking, as Add: counts,
-scores and display settings alone are never asked about. A browser that
-never synced used to bring its data with no question, so a kanji the
+account's.** On a first sign-in `account.js` writes the join into the
+book (`pending: 'first'`) as soon as the kit says who signed in, for the
+kit's user id (the Clerk user id, which is the subject whoami answers
+with), and `sync.js begin()` checks it against whoami: a book pending for
+another subject is another account's first sign-in, begun again for
+whoami's, carrying nothing it kept. If this browser holds a saved kanji or a
+saved phrase, and the account holds any row of My kanji or of the saved
+phrases, live or removed, or a Clear all, it asks the Add / Use question an
+account switch asks, worded for this case (the `syncFirst*` strings: "This
+browser has kanji and phrases from before you signed in. Add them to your
+account, or use your account's data here?"). A first device with an empty
+account, and a browser with nothing saved, join without asking, as Add:
+counts, scores and display settings alone are never asked about. A browser
+that never synced used to bring its data with no question, so a kanji the
 learner had removed or cleared on another device came back on every device
 (the review's P1 and P2, both answers in `tests/sync-first.test.mjs`). Not
 now leaves the join pending `first`, and the next sign-in asks again. The
 fleet's Clerk session covers every `*.neorgon.com` site, so the first visit
-by someone already signed in on another Neorgon site is a first sign-in,
-and is asked the same way.
+by someone already signed in on another Neorgon site is a first sign-in, and
+is asked the same way.
 
 **Add brings all of this browser's data; Use brings none of it.** With Add
 (answered, or a first sign-in not asked) the browser takes the account's
@@ -806,31 +810,35 @@ there if it is still pending (`tests/sync-tabs.test.mjs`).
 
 **A failure changes nothing, is said once, and the retry runs the step that
 failed.** A pull that fails applies nothing; a push that fails keeps the
-merge and the remembered account. A first sign-in's join is in the book from
-the moment it is decided (`pending: 'first'`, then `'adopt'` once settled,
-as an answered Add), so the retry continues it, and an unsave, a save or a
-preference change made in between counts. It used to write nothing until a
-sync finished: the unsave was recorded nowhere and the retry brought the
-account's copy back (`tests/sync-join.test.mjs`,
-`tests/sync-account.test.mjs`). `account.js` keeps the step a sign-in is at:
-`connect` (whoami, and the pull behind the account question or a first
-sign-in's), `ask`, the chosen `adopt` or `replace`, then `same` once the
-book names the account (a sync wrote it, or it holds the pending join). The
-next change, the `online` event and the page shown again (a pull at most
-once a minute when nothing failed) all run that step, one at a time. A retry
-used to be an ordinary sync, which `sync.js` refuses with no book
-(`account-changed`), so a first sign-in that failed once never recovered
-without a reload. A book that already names the signed-in account is joined,
-or holds the answer that will join it, so `sync.js` runs an `adopt` or a
-`replace` on it as `same`, or as its pending answer: another tab may have
-written it since begin() or the answer, and a second join would drop that
-tab's removals not yet pushed and count what it received from the account as
-its own (`tests/sync-tabs.test.mjs`). A first sign-in still `first` is never
-run as `same`: `run()` refuses it, and the step goes back to `connect`,
-where begin() settles it or asks. The line says the failure's kind in a
-plain sentence (offline, the sign-in not accepted, another tab switched
-accounts, refused, a server error), never a code or a Convex request id;
-those go to the console.
+merge and the remembered account. A first sign-in's join is in the book
+from the kit's sign-in (`pending: 'first'`, then `'adopt'` once settled,
+as an answered Add), so the retry continues it, and an unsave, a save, a
+Clear all (as the unsaves above) or a preference change made in between
+counts. It used to write nothing until a sync finished, and then nothing
+until begin() had whoami's answer: an unsave made while the pull failed,
+the Convex client failed to load, whoami was out or the token was refused
+was recorded nowhere, and the retry brought the account's copy back
+(`tests/sync-join.test.mjs`, `tests/sync-account.test.mjs`). A begin()
+whose whoami answers after a sign-out writes nothing (`stopped`), so it
+cannot put the old subject over the next sign-in's book. `account.js` keeps
+the step a sign-in is at: `connect` (whoami, and the pull behind the account
+question or a first sign-in's), `ask`, the chosen `adopt` or `replace`, then
+`same` once the book names the account (a sync wrote it, or it holds the
+pending join). The next change, the `online` event and the page shown again
+(a pull at most once a minute when nothing failed) all run that step, one at
+a time. A retry used to be an ordinary sync, which `sync.js` refuses with no
+book (`account-changed`), so a first sign-in that failed once never
+recovered without a reload. A book that already names the signed-in account
+is joined, or holds the answer that will join it, so `sync.js` runs an
+`adopt` or a `replace` on it as `same`, or as its pending answer: another
+tab may have written it since begin() or the answer, and a second join would
+drop that tab's removals not yet pushed and count what it received from the
+account as its own (`tests/sync-tabs.test.mjs`). A first sign-in still
+`first` is never run as `same`: `run()` refuses it, and the step goes back
+to `connect`, where begin() settles it or asks. The line says the failure's
+kind in a plain sentence (offline, the sign-in not accepted, another tab
+switched accounts, refused, a server error), never a code or a Convex
+request id; those go to the console.
 
 **Two joins depend on the grouping, and it does not matter which.**
 `joinKanji` and `joinPhrase` are commutative and idempotent but not

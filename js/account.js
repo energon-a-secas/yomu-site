@@ -13,6 +13,7 @@
 // tests/sync-account.test.mjs runs this file under plain node with fakes.
 
 import { storesAdapter, watchStores } from './sync-watch.js';
+import { answeredBook, FIRST } from './sync-book.js';
 
 /** The dev deployment of Convex project yomu. Public: a Convex URL is not a secret, the token is. */
 export const CONVEX_URL = 'https://jovial-mouse-131.convex.cloud';
@@ -86,9 +87,10 @@ export function startAccount(deps) {
   // sign-in, or Add) or 'replace' (Use); and 'same' once this account is in
   // the book. Never 'same' before that: there is no book for it to run on,
   // and js/sync.js refuses it. A join is written into the book as it is
-  // decided (a first sign-in's in engine.begin, an answer in engine.choose),
-  // so the book names the account from then on, and a sync there finishes
-  // the join it holds.
+  // decided (a first sign-in's when the kit says who signed in, recordFrom,
+  // checked against whoami in engine.begin; an answer in engine.choose), so
+  // the book names the account from then on, and a sync there finishes the
+  // join it holds.
   let step = 'connect';
   let gen = 0;           // a sign-out or another account: what was under way stops touching the page
   let running = null;    // { gen, done }: the one resume under way
@@ -284,10 +286,29 @@ export function startAccount(deps) {
     if (typeof ui.dismiss === 'function') ui.dismiss();
   }
 
+  /**
+   * A first sign-in counts from the moment the kit says who signed in: its
+   * join goes into the book now, pending, for the kit's user id (the Clerk
+   * user id, which is the subject whoami answers with). So what the learner
+   * removes, saves, clears or changes while the Convex client loads, while
+   * whoami is out or lost, or while the token is refused, is kept for that
+   * join, where it used to be recorded nowhere. begin() checks the book
+   * against whoami: one pending for another subject is another account's,
+   * begun again for whoami's, and what it kept is not carried there. A
+   * browser that joined an account, or answered for one, keeps its book.
+   */
+  function recordFrom(id) {
+    if (typeof id !== 'string' || !id) return;
+    const b = books.read();
+    if (b && (b.pending !== FIRST || b.account === id)) return;
+    books.write(answeredBook(id, FIRST, now(), prefs.get()));
+  }
+
   function signedIn(s) {
     if (user === s.userId) { status.label = s.label || ''; paint(); return; }   // a new label, nothing more
     if (user !== null) stop();      // another account, straight after the last one
     user = s.userId;
+    recordFrom(user);
     status.signedIn = true;
     status.label = s.label || '';
     status.phase = 'syncing';

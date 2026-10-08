@@ -40,7 +40,10 @@ push carries it):
 **Joins.** A browser joins an account once, at a first sign-in or by the
 answer to the question below, and the join is in the book from the moment
 it is decided (`pending`: `first` until its way is settled, then `adopt` or
-`replace`) until a sync finishes it; a retry continues it. With Add, each
+`replace`) until a sync finishes it; a retry continues it. A first
+sign-in's is written when the kit says who signed in, before whoami
+answers; a book pending for another subject than whoami's is another
+account's, begun again for whoami's with nothing it kept. With Add, each
 save the browser holds before the account's rows arrive is stamped
 (`brought`) at the time the join was settled (`joined`), and stays saved
 over the account's Clear all or that row's removal when that is older. One

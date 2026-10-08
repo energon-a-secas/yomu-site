@@ -1,11 +1,13 @@
 // What this browser knows about its account: one Persist kit store,
-// 'yomu-site:sync' version 1, written once a sign-in has decided to join an
-// account (a first sign-in, or the learner's answer to the account
-// question), and kept from then on. A visitor who never signs in never has
-// one.
+// 'yomu-site:sync' version 1, written once a sign-in joins an account (a
+// first sign-in, from the moment the kit says who signed in, or the
+// learner's answer to the account question), and kept from then on. A
+// visitor who never signs in never has one.
 //
-//   account   the Clerk subject this browser syncs with (the server's
-//             whoami, never the browser's own say)
+//   account   the Clerk subject this browser syncs with. A first sign-in's
+//             pending join is written for the kit's user id (the same Clerk
+//             id) before whoami answers; begin() checks it against whoami,
+//             and a join is only ever settled for whoami's subject
 //   pending   'first' while a first sign-in has not settled which way it
 //             joins (sync.js begin() asks when both sides hold data); then
 //             'adopt' (joining as is, or Add) or 'replace' (Use) while that

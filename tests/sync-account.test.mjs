@@ -764,6 +764,81 @@ test('the Clear all dialog\'s words follow what a Clear all does: this browser, 
   assert.equal(clearBodyKey({}), 'clearBody', 'a status from before it said, read as this browser only');
 });
 
+// What the learner does from the moment the kit says "signed in" counts.
+// A review found it recorded nowhere until begin() wrote the join: an
+// unsave made while the Convex client failed to load, while whoami was out
+// or lost, or while the token was refused was lost, and the join brought
+// the account's copy back, while the line said Yomu would try again.
+
+for (const [what, opts, mend] of [
+  ['the Convex client fails to load', { clientFails: 1 }, () => {}],
+  ['whoami is lost', { fail: offline('sync:whoami') }, (p) => { p.failing.on = () => false; }],
+  ['the token is refused', { answer: (name) => (name === 'sync:whoami' ? null : undefined) }, (p) => { p.failing.answer = () => undefined; }],
+]) {
+  test(`a first sign-in where ${what}: an unsave, a save and a preference made before whoami answers count`, async () => {
+    const server = fakeDb();
+    await fakeClient(server, 'user_a').mutation('sync:push', {
+      kanji: [kanjiRow('一', 5), kanjiRow('二', 5)], prefs: { values: { lang: { v: 'en', at: 5 } } },
+    });
+    const p = page({ server, ...opts });
+    p.kanji.save('一', 2);
+    p.kanji.save('三', 2);
+    await p.account.ready;
+    p.kit.become(signedIn('user_a'));
+    await until(() => p.last().phase === 'error', 'the failure');
+    const kept = JSON.parse(p.bookStore.raw);
+    assert.deepEqual([kept.account, kept.pending], ['user_a', 'first'], 'the join waits in the book from the kit\'s sign-in');
+    assert.equal(p.last().clears, 'joining');
+    mend(p);
+    p.answers.push('add');
+    p.clock.t += 60_000;
+    p.kanji.unsave('一');
+    p.kanji.save('四', p.clock.t);
+    p.setPref('lang', 'es');
+    await until(() => p.last().phase === 'synced', 'the retry');
+    assert.equal(p.asked.length, 1, 'asked, as both sides hold kanji');
+    assert.deepEqual(savedIn(server, 'user_a'), ['三', '二', '四'], 'the unsave of 一 reached the account, and the saves did');
+    assert.deepEqual(savedHere(p), ['三', '二', '四']);
+    assert.equal(p.prefs.lang, 'es');
+    assert.equal(server.rowsOf('user_a').prefs[0].values.lang.v, 'es');
+  });
+}
+
+test('a Clear all made before whoami answers removes the kanji held here, and the account keeps the rest', async () => {
+  const server = fakeDb();
+  await fakeClient(server, 'user_a').mutation('sync:push', { kanji: [kanjiRow('一', 5), kanjiRow('二', 5)] });
+  const p = page({ server, clientFails: 1 });
+  p.kanji.save('一', 2);
+  p.kanji.save('三', 2);
+  await p.account.ready;
+  p.kit.become(signedIn('user_a'));
+  await until(() => p.last().phase === 'error', 'the client failing to load');
+  p.clock.t += 60_000;
+  p.kanji.clearAll(p.clock.t);
+  await until(() => p.last().phase === 'synced', 'the retry');
+  assert.deepEqual(server.rowsOf('user_a').clears, [], 'the account was not cleared');
+  assert.deepEqual(savedIn(server, 'user_a'), ['二']);
+  assert.deepEqual(savedHere(p), ['二']);
+});
+
+test('the kit\'s user and whoami disagree: the join begins again for whoami\'s subject, and nothing kept for the other reaches it', async () => {
+  const server = fakeDb();
+  await fakeClient(server, 'user_a').mutation('sync:push', { kanji: [kanjiRow('一', 5)] });
+  const p = page({ server, clientFails: 1 });
+  p.kanji.save('一', 2);
+  await p.account.ready;
+  p.kit.become(signedIn('user_x'));
+  await until(() => p.last().phase === 'error', 'the client failing to load');
+  assert.deepEqual([JSON.parse(p.bookStore.raw).account, JSON.parse(p.bookStore.raw).pending], ['user_x', 'first']);
+  p.clock.t += 60_000;
+  p.kanji.unsave('一');
+  await until(() => p.last().phase === 'synced', 'the retry');
+  const book = JSON.parse(p.bookStore.raw);
+  assert.deepEqual([book.account, book.pending], ['user_a', undefined], 'the book follows whoami, as another account would');
+  assert.deepEqual(savedIn(server, 'user_a'), ['一'], 'the unsave kept for user_x did not reach user_a');
+  assert.ok(p.kanji.isSaved('一'), 'and user_a\'s 一 is here');
+});
+
 test('a push that fails after the pull wrote the book is finished by an ordinary sync', async () => {
   const p = page({ fail: (name) => name === 'sync:push' });
   p.kanji.save('天', 2);
