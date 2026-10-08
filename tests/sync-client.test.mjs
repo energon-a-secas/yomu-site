@@ -329,7 +329,9 @@ test('another account signing in is asked about, and either answer leaves the fi
   add.kanji.save('月', add.now());
   const asked = await add.sync.begin();
   assert.equal(asked.mode, 'ask');
-  assert.deepEqual(asked.counts, { account: { kanji: 1, phrases: 0 }, here: { kanji: 1, phrases: 0 } });
+  // The account's side also says what it removed and whether it cleared,
+  // which a first sign-in is asked about (sync.js accountHolds).
+  assert.deepEqual(asked.counts, { account: { kanji: 1, phrases: 0, removed: { kanji: 0, phrases: 0 }, cleared: false }, here: { kanji: 1, phrases: 0 } });
   assert.deepEqual(Object.keys(add.kanji.data.saved), ['月'], 'asking changes nothing here');
   assert.equal(add.mutations().length, 0, 'and sends nothing');
   await add.sync.sync('adopt');          // Add this browser's data to user_b

@@ -13,7 +13,7 @@ import assert from 'node:assert/strict';
 
 import { fakeDb } from './helpers/fake-convex.mjs';
 import { device, T } from './helpers/sync-device.mjs';
-import { decide, holdsOwn } from '../js/sync.js';
+import { decide, holdsOwn, holdsAny, accountHolds } from '../js/sync.js';
 import { answeredBook, FIRST } from '../js/sync-book.js';
 import { textKey } from '../js/history-store.js';
 
@@ -72,7 +72,9 @@ test('a never-synced browser holding a kanji the account removed is asked first,
   const asked = await x.signIn({ answer: null });
   assert.equal(asked.mode, 'ask');
   assert.equal(asked.first, true);
-  assert.deepEqual(asked.counts, { account: { kanji: 0, phrases: 0 }, here: { kanji: 1, phrases: 0 } });
+  // The account's side also says what it removed, which is why this is
+  // asked: it holds no save, only the removal of 天 (sync.js accountHolds).
+  assert.deepEqual(asked.counts, { account: { kanji: 0, phrases: 0, removed: { kanji: 1, phrases: 0 }, cleared: false }, here: { kanji: 1, phrases: 0 } });
   assert.equal(JSON.stringify(x.kanji.data), before, 'nothing changed here');
   assert.equal(x.mutations().length, 0, 'and nothing was sent');
   assert.deepEqual(savedOn(server), []);
@@ -254,4 +256,56 @@ test('a begin() that outlives a sign-out writes nothing over the book the next s
   assert.equal(x.books.read().account, 'user_b');
   assert.equal(x.books.read().removed.kanji['天'], T(2), 'the new sign-in\'s unsave is kept');
   assert.equal(x.sync.subject, null, 'and the stale answer named nobody');
+});
+
+// The question is asked only when the account holds what it is about: a
+// saved or removed kanji or phrase, or a Clear all. A review found it asked
+// when the account held only counts (a kanji read, never saved), with the
+// dialog reading "saved kanji 0, saved phrases 0", and Use then dropped
+// this browser's saves for an account that had saved nothing.
+
+test('what the account holds for the question: saves, removals and a Clear all, never counts alone', () => {
+  const seen = { n: 1, first: '2025-10-07', last: '2025-10-07', words: [], e: 0 };
+  const saved = { at: 1, box: 0, due: '2025-10-07', reviews: 0, lapses: 0, s: 1 };
+  const phrase = { t: '雨。', first: 1, last: 1, n: 1, src: 'paste', saved: 1, s: 1 };
+  const server = (kanji = [], phrases = [], clear = 0) => ({
+    clear, kanji: new Map(kanji.map((r) => [r.char, r])), phrases: new Map(phrases.map((r) => [r.key, r])),
+  });
+  const counted = server([{ char: '山', saved: null, removed: 0, seen }]);
+  assert.deepEqual(accountHolds(counted), { kanji: 0, phrases: 0, removed: { kanji: 0, phrases: 0 }, cleared: false });
+  assert.equal(holdsAny(counted), false, 'a kanji read and never saved is not asked about');
+  const mixed = server(
+    [{ char: '山', saved, removed: 0, seen }, { char: '川', saved: null, removed: 5, seen }, { char: '雨', saved: null, removed: 0, seen }],
+    [{ key: 'a', removed: 0, phrase }, { key: 'b', removed: 7, phrase: null }],
+  );
+  assert.deepEqual(accountHolds(mixed), { kanji: 1, phrases: 1, removed: { kanji: 1, phrases: 1 }, cleared: false });
+  for (const one of [
+    server([{ char: '川', saved: null, removed: 5, seen: null }]),
+    server([], [{ key: 'b', removed: 7, phrase: null }]),
+    server([], [], 9),
+  ]) assert.equal(holdsAny(one), true);
+  assert.equal(accountHolds(server([], [], 9)).cleared, true);
+});
+
+test('a first sign-in into an account holding only counts is not asked, and the counts join', async () => {
+  const server = fakeDb();
+  const y = device(server, 'user_a', { at: 0 });
+  y.read(['山']);
+  await y.signIn();
+  assert.deepEqual(server.rowsOf('user_a').kanji.map((r) => [r.char, r.saved, r.removed]), [['山', null, 0]]);
+  const x = device(server, 'user_a', { at: 5 });
+  x.kanji.save('一', x.now());
+  const begun = await x.sync.begin();
+  assert.equal(begun.mode, 'adopt', 'not asked');
+  await x.sync.sync(begun.mode);
+  assert.deepEqual(savedHere(x), ['一']);
+  assert.ok(x.kanji.seenOf('山'), 'the account\'s counts arrived');
+  assert.deepEqual(savedOn(server), ['一']);
+});
+
+test('the question\'s counts say why a first sign-in is asked: a Clear all is named', async () => {
+  const { x } = await clearedInAccount();
+  const asked = await x.signIn({ answer: null });
+  assert.equal(asked.first, true);
+  assert.deepEqual(asked.counts.account, { kanji: 0, phrases: 0, removed: { kanji: 0, phrases: 0 }, cleared: true });
 });

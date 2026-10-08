@@ -85,6 +85,16 @@ export const SYNC_STRINGS = Object.freeze({
     en: 'Adding keeps both: this browser\'s kanji, phrases, reviews and scores join your account, including any your account had removed or cleared. Using your account\'s data replaces this browser\'s saved kanji, their reviews and counts, its saved phrases and its scores with your account\'s. They were never in your account, so they are gone from this browser too: to keep a copy, choose Not now and use Export in My kanji first.',
     es: 'Añadir conserva ambos: los kanji, las frases, los repasos y los puntajes de este navegador se suman a tu cuenta, incluso los que tu cuenta había quitado o borrado. Usar los datos de tu cuenta reemplaza los kanji guardados de este navegador, sus repasos y conteos, sus frases guardadas y sus puntajes por los de tu cuenta. Nunca estuvieron en tu cuenta, así que también desaparecen de este navegador: para guardar una copia, elige Ahora no y usa Exportar en Mis kanji antes.',
   },
+  // The rest of what a first sign-in asks about (sync.js accountHolds),
+  // shown only when the account holds it.
+  syncFirstRemoved: {
+    en: 'Removed in {name}\'s account: kanji {kanji}, phrases {phrases}.',
+    es: 'Quitados en la cuenta de {name}: kanji {kanji}, frases {phrases}.',
+  },
+  syncFirstCleared: {
+    en: 'In {name}\'s account, My kanji was cleared.',
+    es: 'En la cuenta de {name}, Mis kanji se vació.',
+  },
   syncAdd: { en: 'Add this browser\'s data', es: 'Añadir los datos de este navegador' },
   syncUse: { en: 'Use the account\'s data', es: 'Usar los datos de la cuenta' },
   syncNotNow: { en: 'Not now', es: 'Ahora no' },

@@ -54,9 +54,10 @@ receives from the account keeps the account's stamps.
 
 **The Add / Use question** is asked when another account signs in on a
 browser that synced before, and on a first sign-in when this browser holds
-a saved kanji or phrase while the account holds any kanji or phrase row,
-live or removed, or a Clear all. Any other first sign-in joins as Add,
-unasked. Not now syncs nothing and asks again later.
+a saved kanji or phrase while the account holds a saved or removed kanji or
+phrase, or a Clear all; a row holding only counts is none of these. The
+dialog counts each of them. Any other first sign-in joins as Add, unasked.
+Not now syncs nothing and asks again later.
 
 - Add: this browser's data joins the account, saves counted as made at the
   answer, so one older than the account's removal or Clear all comes back

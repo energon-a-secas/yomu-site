@@ -678,20 +678,26 @@ kit's user id (the Clerk user id, which is the subject whoami answers
 with), and `sync.js begin()` checks it against whoami: a book pending for
 another subject is another account's first sign-in, begun again for
 whoami's, carrying nothing it kept. If this browser holds a saved kanji or a
-saved phrase, and the account holds any row of My kanji or of the saved
-phrases, live or removed, or a Clear all, it asks the Add / Use question an
+saved phrase, and the account holds a saved or removed kanji or phrase, or a
+Clear all (`sync.js accountHolds`), it asks the Add / Use question an
 account switch asks, worded for this case (the `syncFirst*` strings: "This
 browser has kanji and phrases from before you signed in. Add them to your
-account, or use your account's data here?"). A first device with an empty
-account, and a browser with nothing saved, join without asking, as Add:
-counts, scores and display settings alone are never asked about. A browser
-that never synced used to bring its data with no question, so a kanji the
-learner had removed or cleared on another device came back on every device
-(the review's P1 and P2, both answers in `tests/sync-first.test.mjs`). Not
-now leaves the join pending `first`, and the next sign-in asks again. The
-fleet's Clerk session covers every `*.neorgon.com` site, so the first visit
-by someone already signed in on another Neorgon site is a first sign-in, and
-is asked the same way.
+account, or use your account's data here?"). Its counts are what it asks
+about: the account's saved kanji and phrases, and a line each for the
+account's removals and its Clear all when it holds them (`syncFirstRemoved`,
+`syncFirstCleared`). A first device with an empty account, and a browser
+with nothing saved, join without asking, as Add: counts, scores and display
+settings alone are never asked about, on either side. A kanji row holding
+only counts used to ask, with the dialog reading "saved kanji 0, saved
+phrases 0", and Use then dropped this browser's saves for an account that
+had saved nothing (`tests/sync-first.test.mjs`). A browser that never synced
+used to bring its data with no question, so a kanji the learner had removed
+or cleared on another device came back on every device (the review's P1 and
+P2, both answers in `tests/sync-first.test.mjs`). Not now leaves the join
+pending `first`, and the next sign-in asks again. The fleet's Clerk session
+covers every `*.neorgon.com` site, so the first visit by someone already
+signed in on another Neorgon site is a first sign-in, and is asked the same
+way.
 
 **Add brings all of this browser's data; Use brings none of it.** With Add
 (answered, or a first sign-in not asked) the browser takes the account's

@@ -197,7 +197,9 @@ test('another account signing in is asked about first, and nothing moves until i
   p.kit.become(signedIn('user_b', 'Ben'));
   await until(() => p.asked.length === 1 && p.last().phase === 'paused', 'the question');
   assert.equal(p.asked[0].label, 'Ben');
-  assert.deepEqual(p.asked[0].counts, { account: { kanji: 0, phrases: 0 }, here: { kanji: 1, phrases: 0 } });
+  // The account's side also says what it removed and whether it cleared,
+  // which a first sign-in is asked about (sync.js accountHolds).
+  assert.deepEqual(p.asked[0].counts, { account: { kanji: 0, phrases: 0, removed: { kanji: 0, phrases: 0 }, cleared: false }, here: { kanji: 1, phrases: 0 } });
   assert.equal(p.last().phase, 'paused', 'Not now leaves sync paused');
   assert.deepEqual(p.server.rowsOf('user_b').kanji, []);
   p.answers.push('add');
@@ -217,7 +219,9 @@ test('a first sign-in into an account that holds data, with data here too, is as
     await until(() => p.asked.length === 1 && p.last().phase === 'paused', 'the question');
     assert.equal(p.asked[0].first, true);
     assert.equal(p.asked[0].since, 0, 'no earlier sync to name');
-    assert.deepEqual(p.asked[0].counts, { account: { kanji: 1, phrases: 0 }, here: { kanji: 1, phrases: 0 } });
+    // The account's side also says what it removed and whether it cleared,
+    // which a first sign-in is asked about (sync.js accountHolds).
+    assert.deepEqual(p.asked[0].counts, { account: { kanji: 1, phrases: 0, removed: { kanji: 0, phrases: 0 }, cleared: false }, here: { kanji: 1, phrases: 0 } });
     assert.deepEqual(savedIn(server, 'user_a'), ['雪'], 'nothing moved before the answer');
     assert.equal(p.last().synced, false, 'nothing here syncs yet');
     p.answers.push(choice);
@@ -255,6 +259,43 @@ test('the first sign-in\'s question has its own words, in both languages, and na
   } finally {
     useLang('en');
   }
+});
+
+test('a first sign-in\'s question names the account\'s removals and its Clear all, which are why it is asked', async () => {
+  const { askParts } = await import('../js/render-sync.js');
+  const { useLang } = await import('../js/strings.js');
+  const none = { kanji: 0, phrases: 0 };
+  const counts = (removed, cleared) => ({ account: { kanji: 0, phrases: 0, removed, cleared }, here: { kanji: 1, phrases: 0 } });
+  try {
+    useLang('en');
+    const both = askParts({ label: 'Aiko', counts: counts({ kanji: 2, phrases: 1 }, true), first: true });
+    assert.equal(both.removed, 'Removed in Aiko\'s account: kanji 2, phrases 1.');
+    assert.equal(both.cleared, 'In Aiko\'s account, My kanji was cleared.');
+    const plain = askParts({ label: 'Aiko', counts: counts(none, false), first: true });
+    assert.deepEqual([plain.removed, plain.cleared], [null, null], 'nothing to name');
+    const other = askParts({ label: 'Aiko', counts: counts({ kanji: 2, phrases: 1 }, true), first: false });
+    assert.deepEqual([other.removed, other.cleared], [null, null], 'an account switch keeps its own words');
+    const before = askParts({ label: 'Aiko', counts: { account: none, here: none }, first: true });
+    assert.deepEqual([before.removed, before.cleared], [null, null], 'counts without the new fields');
+    useLang('es');
+    assert.equal(askParts({ label: 'Aiko', counts: counts({ kanji: 2, phrases: 1 }, true), first: true }).removed, 'Quitados en la cuenta de Aiko: kanji 2, frases 1.');
+  } finally {
+    useLang('en');
+  }
+});
+
+test('a first sign-in into an account that holds only counts is not asked, through the page', async () => {
+  const server = fakeDb();
+  await fakeClient(server, 'user_a').mutation('sync:push', {
+    kanji: [{ char: '山', saved: null, removed: 0, seen: { n: 2, first: '2025-10-01', last: '2025-10-02', words: [], e: 0 } }],
+  });
+  const p = page({ server });
+  p.kanji.save('一', 2);
+  await p.account.ready;
+  p.kit.become(signedIn('user_a'));
+  await until(() => p.last().phase === 'synced', 'the first sync');
+  assert.equal(p.asked.length, 0, 'an account that saved nothing is not asked about');
+  assert.deepEqual(savedIn(server, 'user_a'), ['一']);
 });
 
 test('no question on a first sign-in when this browser holds nothing saved, or the account holds nothing', async () => {

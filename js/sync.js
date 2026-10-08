@@ -67,11 +67,31 @@ export function holdsOwn(snap) {
 }
 
 /**
- * Whether the account holds any of My kanji or the saved phrases: a row of
- * either, live or removed, or a Clear all.
+ * What the account holds that a first sign-in asks about: its saved kanji
+ * and phrases, the ones it removed (a removal not saved again), and whether
+ * it made a Clear all. A row that only holds counts, a kanji read and never
+ * saved, is none of these. The question's counts are these numbers.
+ */
+export function accountHolds(server) {
+  const out = { kanji: 0, phrases: 0, removed: { kanji: 0, phrases: 0 }, cleared: server.clear > 0 };
+  for (const row of server.kanji.values()) {
+    if (row.saved) out.kanji += 1;
+    else if (row.removed > 0) out.removed.kanji += 1;
+  }
+  for (const row of server.phrases.values()) {
+    if (row.phrase) out.phrases += 1;
+    else if (row.removed > 0) out.removed.phrases += 1;
+  }
+  return out;
+}
+
+/**
+ * Whether the account holds any of that: a saved or removed kanji or
+ * phrase, or a Clear all.
  */
 export function holdsAny(server) {
-  return server.clear > 0 || server.kanji.size > 0 || server.phrases.size > 0;
+  const a = accountHolds(server);
+  return a.cleared || a.kanji + a.phrases + a.removed.kanji + a.removed.phrases > 0;
 }
 
 /** Everything the account holds, page by page. */
@@ -127,13 +147,9 @@ export async function pushAll(client, push) {
   return { wrote, clear };
 }
 
-/** What each side holds, for the question asked when another account signs in. */
+/** What each side holds, for the account question. */
 export function counts(server, snap) {
-  let kanji = 0;
-  for (const row of server.kanji.values()) if (row.saved) kanji += 1;
-  let phrases = 0;
-  for (const row of server.phrases.values()) if (row.phrase) phrases += 1;
-  return { account: { kanji, phrases }, here: { kanji: Object.keys(snap.kanji.saved).length, phrases: snap.phrases.length } };
+  return { account: accountHolds(server), here: { kanji: Object.keys(snap.kanji.saved).length, phrases: snap.phrases.length } };
 }
 
 /**

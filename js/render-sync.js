@@ -87,10 +87,15 @@ let answer = null;
  * another account signed in on a browser that synced with one before.
  * `title` and `how` are string keys (relabelled, so a language switch keeps
  * them); `body`, `counts` and `since` are text, `since` null when there is
- * no earlier sync to name.
+ * no earlier sync to name. A first sign-in is asked about removals and a
+ * Clear all too (sync.js accountHolds), so `removed` and `cleared` name
+ * them when the account holds them, and are null otherwise.
  */
 export function askParts({ label, counts, since, first }) {
+  const gone = counts.account.removed || { kanji: 0, phrases: 0 };
   return {
+    removed: first && gone.kanji + gone.phrases > 0 ? ui('syncFirstRemoved', { name: label, kanji: gone.kanji, phrases: gone.phrases }) : null,
+    cleared: first && counts.account.cleared ? ui('syncFirstCleared', { name: label }) : null,
     title: first ? 'syncFirstTitle' : 'syncAskTitle',
     how: first ? 'syncFirstHow' : 'syncAskHow',
     body: first ? ui('syncFirstBody') : ui('syncAskBody', { name: label }),
@@ -116,7 +121,7 @@ export function askAccount({ label, counts, since, first, invoker }) {
   relabel($('sync-how'), words.how);
   fill($('sync-body'), [h('span', null, words.body)]);
   const parts = [h('span', null, words.counts)];
-  if (words.since) parts.push(' ', h('span', null, words.since));
+  for (const more of [words.removed, words.cleared, words.since]) if (more) parts.push(' ', h('span', null, more));
   fill($('sync-counts'), parts);
   return new Promise((resolve) => {
     answer = resolve;
