@@ -18,6 +18,7 @@ make serve       # http://localhost:8895
 make validate    # node tools/check-data.mjs, then npm test
 make data        # rebuild data/dict, data/kanji, data/names, data/like and data/play from the pinned upstreams (manual)
 npm test         # node --test tests/*.test.mjs
+node tests/mobile.browser.mjs [--base=http://localhost:8895/] [--shots=DIR]   # every screen on three phones, WebKit and Chromium (On a phone, below)
 node tools/compare-readings.mjs <old data/> [data/]   # every token two builds read differently, over Tatoeba
 npx convex dev --once   # push convex/ to the dev deployment (convex/README.md); never `npx convex deploy` from a worktree
 ```
@@ -356,6 +357,83 @@ only; the phrase library and every note are original. Keep it that way: GPL
 rule tables cannot be copied into this MIT site, and textbook text is
 copyrighted.
 
+## On a phone
+
+`tests/mobile.browser.mjs` is the check, and npm test does not run it (it
+needs Playwright's browsers and a server): serve the site, then `node
+tests/mobile.browser.mjs`, with `--base=`, `--shots=DIR`,
+`--browsers=webkit,chromium`, `--devices=se,15,pixel` and `--langs=en,es` to
+narrow it, and `PLAYWRIGHT_MODULE` naming Playwright's `index.mjs` when the
+monorepo's `node_modules` is not three directories up (a worktree kept
+elsewhere). It walks every screen (the empty page, a reading, the word, kanji
+and notes panels, Phrases, the header's menu, My kanji with its sync line, a
+review, the Collection and a tile, History, Clear all, Sign in, all five games
+to their result, Retry after a failed shard) at 375x667, 393x852 and 412x915
+with each device's touch and user agent, the reader on its side too, in both
+languages, and fails on what is Yomu's: focus in the text box after a tap,
+the first word below the fold, the switches unfolded on a phone, horizontal
+scroll, a control under 44px, a field under 16px, something focused or chosen
+under the header or the word sheet, a dialog that does not fit, a header that
+does not hold Phrases, My kanji and Sign in, a console error. What belongs to
+a fleet kit it prints as a note. `tests/mobile.test.mjs` holds the markup and
+stylesheet half under npm test. Run the browser check after a change to the
+reader's markup, a phone block of `style.css`, a header control or a dialog;
+it took 2.5 minutes on 2026-10-08.
+
+**A tap never leaves focus in the text box.** On an iPhone, focus in the box
+during a tap raises the keyboard over the reading the tap just loaded (the
+learner met it with an example). `js/press.js` remembers what pressed the last
+control, and `focusHome` (an example, Retry, the Remember card's answers,
+History's Read again) sends focus to `main` after a touch or a pen, or, with
+no press heard, on a coarse primary pointer; after a key or a mouse, to the box
+as before. A key pressed inside a field is not a keyboard user: an on-screen
+keyboard types there too. `openDialog` focuses its opener before
+`showModal()`, and blurs a field the opener is not, because the platform gives
+focus back on close to what had it at `showModal()`, before the close listener
+runs, and Safari focuses no button a tap presses: choosing a phrase closed the
+dialog into the box. Clear still focuses the box; a learner who clears is
+about to type.
+
+**The reading starts under one row of tools.** On a phone (under 600px wide,
+or 480px tall on its side) the five display switches fold behind
+`#display-toggle` (`aria-expanded`, `data-folded` on `#display-panel`, not
+saved; above that the button is not drawn), the Remember card comes after the
+reading and its Translation, the send links and their note after the reading,
+just above the Translation that points at them, and the hint's arrow-key line
+(`.key-hint`) is not drawn under `pointer: coarse`. The first word of a
+reading: 972px down a 375x667 screen (1045 in Spanish) before, 429 after; on
+its side, 717 before and 408 after, still under a 375px fold.
+
+**The phone header is at its budget.** At 375px the title, Phrases, My kanji,
+the menu, Sign in and the hub mark leave 4px. Yomu's two kept controls take
+6px of side padding under 420px (the kit owns a control's height, the gaps,
+the menu and the Sign in slot; a labelled control's padding is the site's
+`.btn`), and under 700px the reviews-due count rides on My kanji's corner: as
+a part of the label it widened the button by 30px and put the menu over Sign
+in on every phone, 412px included. Before both, the menu covered 20px of Sign
+in at 375 (14 in Spanish) and took its taps. A longer label, a third kept
+control or a wider badge brings that back, and the check fails on any overlap
+in the bar. The fleet's `scripts/check_site_shell.py` allows one kept action
+beside auth and home, and fails Yomu's two, as it did before Sign in came.
+
+**What scrolls into view stops below the header and above the sheet.** `html`
+has `scroll-padding-top` for the header kit's bar, which comes back on every
+scroll up: WebKit scrolled a word the arrow keys reached to the very top,
+under it. A line of "In this text" that opens a note stays above the word
+sheet as the chosen word does (`events.js reveal`, `scroll-margin-bottom`);
+the sheet rose over it, focus and all. The sheet's padding and the toast's
+offset add `env(safe-area-inset-bottom)`, which is 0 until the page declares
+`viewport-fit=cover`, as the kits do. A text field is 16px under `pointer:
+coarse` (`.mk-filter-input` was 14): iOS zooms the page into a smaller one
+when it takes focus.
+
+**What still overlaps belongs to a fleet kit**, and the check lists it: the
+Beacon (36px, bottom left) over whatever scrolls under it, controls included
+(Again in a review, a cell of Odd one out, a place in Where are the spaces?,
+Sound it out); the footer's links at 24px, and English on a Spanish page (the
+kit has no language hook, and reads the disclaimer's `data-label` once); the
+header's 36px controls; the Auth Kit dialog's Privacy and Terms at 18px.
+
 ## My kanji
 
 The kanji a learner saves for review, how many texts they met each kanji
@@ -424,7 +502,8 @@ kanji empties the collection; it never touches History.
 **History is opt-in, and a separate store.** `state.prefs.remember` is `ask`
 (the default), `on` or `off`, saved with the other preferences. The reader
 asks once, after the first read that found Japanese (`#remember-ask`, a card,
-not a modal); History's switch is the only control after that. While it is
+not a modal, after the reading and its Translation); History's switch is the
+only control after that. While it is
 not `on`, `js/history-store.js` is opened only to read the saved phrases,
 and written only to save or unsave one or to count a saved one read again
 (below). `localStorage['yomu-site:history']`, Persist kit version 1:
