@@ -195,6 +195,21 @@ test('the Translation names the send row by its label, never by a place', () => 
   }
 });
 
+test('a turn of the phone brings what the sheet was opened for back above it, on a change of width only', () => {
+  const events = readFileSync(join(SITE, 'js/events.js'), 'utf8');
+  const turn = events.match(/function bindTurn\(\) \{[\s\S]*?\n\}/);
+  assert.ok(turn, 'events.js has bindTurn');
+  assert.match(turn[0], /addEventListener\('resize'/);
+  assert.match(turn[0], /innerWidth === width\) return/);
+  assert.match(turn[0], /intoBand\(keep\)/);
+  // The band is measured, not read from the sheet's scroll-margin (WebKit read a stale one).
+  const band = events.match(/function intoBand\(el\) \{[\s\S]*?\n\}/);
+  assert.ok(band, 'events.js has intoBand');
+  assert.match(band[0], /scrollPaddingTop/);
+  assert.match(band[0], /side\.getBoundingClientRect\(\)\.top/);
+  assert.match(events, /bindTurn\(\);/);
+});
+
 test('after a touch, a dialog gives focus back with no ring, and to the ⋯ button for a control in its menu', () => {
   const dialogs = readFileSync(join(SITE, 'js/dialogs.js'), 'utf8');
   assert.match(dialogs, /focusVisible: false/);

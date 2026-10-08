@@ -27,6 +27,8 @@
 //     of Speak all on a wider screen;
 //   - a romaji line wider than the reading, and a Word panel note button
 //     under 44px wide however short its title;
+//   - the chosen word out of sight, or under the header or the word sheet,
+//     after the phone is turned on its side and back;
 //   - horizontal scroll, a control of Yomu's under 44px (a link inside a
 //     sentence is listed, not failed), a text field under 16px (iOS zooms),
 //     a focused element or the chosen word under the sticky header or the
@@ -63,6 +65,8 @@ const langs = arg('langs', 'en,es').split(',');
 const KANJI = 2;          // EXAMPLES[2], 今日は雨が降っています。
 // One katakana compound of eleven parts, whose romaji is wider than a phone.
 const COMPOUND = 'アイスクリームショップチェーンストアマネージャーアシスタントディレクター';
+const SENTENCES = ['今日は朝から雨が降っていたので、駅まで歩いて行きました。', '電車の中でスマートフォンを見ながら、日本語のニュースを読みました。', '私の友だちは東京大学で経済学を勉強しています。', '来週の土曜日に、みんなで富士山に登る予定です。'];
+const LONG = SENTENCES.join('').repeat(20).slice(0, 2000);
 
 if (SHOTS) mkdirSync(SHOTS, { recursive: true });
 
@@ -561,6 +565,71 @@ async function header(browser, phone, lang) {
   }
 }
 
+/** The chosen word against the header and the word sheet, in the viewport. */
+const placeOfChosen = (page) => page.evaluate(() => {
+  const t = document.querySelector('#reading-body .tok[aria-pressed="true"]');
+  const bar = document.querySelector('.header-bar');
+  const sheet = document.querySelector('.side[data-sheet]');
+  const r = t.getBoundingClientRect();
+  const sheetTop = sheet && sheet.getClientRects().length && getComputedStyle(sheet).position === 'sticky' ? sheet.getBoundingClientRect().top : innerHeight;
+  return { top: Math.round(r.top), bottom: Math.round(r.bottom), header: Math.max(0, Math.round(bar.getBoundingClientRect().bottom)), sheet: Math.round(sheetTop), vh: innerHeight };
+});
+const outside = (p) => p.top < p.header - 1 || p.bottom > p.sheet + 1 || p.top < 0 || p.bottom > p.vh;
+/** Given up to 3s to settle after the turn, as a busy phone takes its time. */
+async function expectChosen(page, where, what) {
+  let p = await placeOfChosen(page);
+  for (let i = 0; i < 23 && outside(p); i += 1) {
+    await page.waitForTimeout(100);
+    p = await placeOfChosen(page);
+  }
+  if (outside(p)) fail(where, `${what}: the chosen word is at ${p.top}..${p.bottom}, outside ${p.header}..${p.sheet} of a ${p.vh}px screen`);
+}
+
+/**
+ * The phone turned on its side and back with a word chosen: the word comes
+ * back above the sheet. WebKit has no scroll anchoring, and lost a word in a
+ * long text by 1,100 to 3,000px; a short text's word sat under the sheet in
+ * both engines. Playwright's setViewportSize stands in for a real turn.
+ */
+async function rotate(browser, phone, lang) {
+  const where = `${browser.engine} ${phone.key}-turned ${lang}`;
+  const { ctx, page } = await context(browser, phone.name, lang, { viewport: phone.viewport, screen: phone.viewport, reducedMotion: 'reduce' });
+  const { width, height } = phone.viewport;
+  const turn = async (w, h) => { await page.setViewportSize({ width: w, height: h }); await page.waitForTimeout(700); };
+  const both = async (what) => {
+    await turn(height, width);
+    await expectChosen(page, where, `${what}, on its side`);
+    if (SHOTS) await page.screenshot({ path: join(SHOTS, `${where.replace(/ /g, '-')}-${what.replace(/ /g, '-')}-side.png`) });
+    await turn(width, height);
+    await expectChosen(page, where, `${what}, upright again`);
+  };
+  await step(where, 'turning with a short text', async () => {
+    await page.goto(BASE);
+    await page.waitForSelector('.example');
+    await readExample(page, KANJI);
+    await page.locator('#reading-body .tok').nth(3).tap();
+    await page.waitForSelector('#side[data-sheet] #word-body *');
+    await page.waitForTimeout(300);
+    await both('a short text');
+  });
+  await step(where, 'turning with a long text', async () => {
+    await tap(page, '.side-close');
+    await page.evaluate(() => scrollTo(0, 0));
+    await page.fill('#yomu-text', LONG);
+    await page.waitForFunction(() => document.querySelectorAll('#reading-body .tok').length > 400, null, { timeout: 20000 });
+    await page.evaluate(() => document.activeElement && document.activeElement.blur());
+    const toks = page.locator('#reading-body .tok');
+    const at = Math.floor((await toks.count()) * 0.6);
+    await toks.nth(at).scrollIntoViewIfNeeded();
+    await toks.nth(at).tap();
+    await page.waitForSelector('#side[data-sheet] #word-body *');
+    await page.waitForTimeout(300);
+    await both('a long text');
+  });
+  for (const e of page.errors) fail(where, `console: ${e.slice(0, 160)}`);
+  await ctx.close();
+}
+
 /**
  * Two narrow edges: a katakana compound whose romaji line is wider than the
  * reading (it pushed the page sideways), and a Word panel note whose title is
@@ -689,6 +758,7 @@ await Promise.all(browsers.map(async (engine) => {
   await keys(browser);
   for (const key of phones) {
     const phone = { key, ...PHONES[key] };
+    await rotate(browser, phone, langs[0]);
     for (const lang of langs) {
       await header(browser, phone, lang);
       await edges(browser, phone, lang);

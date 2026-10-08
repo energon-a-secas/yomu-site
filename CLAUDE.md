@@ -383,6 +383,8 @@ It fails on a romaji line wider than the reading, and on a Word panel note
 button under 44px wide however short its title.
 It fails on the send links above the reading on a phone, and anywhere but the
 row of Speak all on a wider screen.
+It fails on a chosen word out of sight, under the header or under the sheet
+after the phone is turned on its side and back.
 What belongs to a fleet kit it prints as a note. `tests/mobile.test.mjs`
 holds the markup and stylesheet half under npm test. Run the browser check
 after a change to the reader's markup, a phone block of `style.css`, a header
@@ -451,11 +453,19 @@ has `scroll-padding-top` for the header kit's bar, which comes back on every
 scroll up: WebKit scrolled a word the arrow keys reached to the very top,
 under it. A line of "In this text" that opens a note stays above the word
 sheet as the chosen word does (`events.js reveal`, `scroll-margin-bottom`);
-the sheet rose over it, focus and all. The sheet's padding and the toast's
-offset add `env(safe-area-inset-bottom)`, which is 0 until the page declares
-`viewport-fit=cover`, as the kits do. A text field is 16px under `pointer:
-coarse` (`.mk-filter-input` was 14): iOS zooms the page into a smaller one
-when it takes focus.
+the sheet rose over it, focus and all. A turn of the phone with the sheet up
+brings that word or line back above the sheet (`events.js bindTurn`): nothing
+listened, the turned layout left the word under the sheet in both engines,
+and WebKit, which has no scroll anchoring, lost a word in a long text by
+thousands of pixels. Only a change of width counts, because Safari's
+toolbars change the height as the page scrolls. It measures the band between
+the header's scroll padding and the sheet's top (`intoBand`): scrollIntoView
+with the sheet's scroll-margin left the word 28px under the sheet in WebKit
+one turn in three. The sheet's padding and the
+toast's offset add `env(safe-area-inset-bottom)`, which is 0 until the page
+declares `viewport-fit=cover`, as the kits do. A text field is 16px under
+`pointer: coarse` (`.mk-filter-input` was 14): iOS zooms the page into a
+smaller one when it takes focus.
 
 **What still overlaps belongs to a fleet kit**, and the check lists it: the
 Beacon (36px, bottom left) over whatever scrolls under it, controls included
