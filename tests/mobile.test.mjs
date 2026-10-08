@@ -100,9 +100,23 @@ test('the switches fold only on a phone: under 600px wide or 480px tall', () => 
   assert.match(blocks(esc('.display-toggle'))[0], /display:\s*none/);
 });
 
-test('on a touch screen, the arrow-key hint goes', () => {
+test('on a touch screen: the arrow-key hint goes, and no text field is under 16px', () => {
   const touch = blocks(esc('@media (pointer: coarse)')).join('\n');
   assert.match(touch, /\.key-hint[^{]*\{\s*display:\s*none/);
+  const filter = touch.match(/\.mk-filter-input\s*\{[^}]*font-size:\s*([\d.]+)(rem|px)/);
+  assert.ok(filter, 'the filter field has a touch font size');
+  const px = filter[2] === 'rem' ? Number(filter[1]) * 16 : Number(filter[1]);
+  assert.ok(px >= 16, `the filter field is ${px}px`);
+  assert.match(blocks(esc('.yomu-text'))[0], /font-size:\s*1\.25rem/, 'the text box is 20px');
+});
+
+test('what scrolls into view stops below the sticky header, and the word sheet and toast clear the bottom safe area', () => {
+  assert.match(css, /html:not\(\[data-embed="1"\]\)\s*\{\s*scroll-padding-top:\s*calc\(var\(--header-h-app/);
+  const sheet = css.match(/\.side\[data-sheet\]\s*\{[^}]*\}/)[0];
+  assert.match(sheet, /padding:[^;]*env\(safe-area-inset-bottom/);
+  const toast = blocks(esc('.toast'))[0];
+  assert.match(toast, /bottom:[^;]*env\(safe-area-inset-bottom/);
+  assert.match(css, /:is\(\.tok, \.it-line\)\s*\{\s*scroll-margin-bottom/);
 });
 
 test('after a touch or a pen, focus stays out of the text box; after a key or a mouse it may go there', () => {

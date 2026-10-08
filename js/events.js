@@ -47,14 +47,16 @@ function oneColumn() {
  * column, which left the reading off screen at every word. An embed has no
  * sheet, and scrolls to the side as before.
  */
-function reveal(panel) {
+function reveal(panel, opener = null) {
   if (!panel) return;
   const behavior = prefersReducedMotion() ? 'auto' : 'smooth';
   const side = $('side');
   if (side && side.hasAttribute('data-sheet') && !state.embed && matchMedia(NARROW).matches) {
     side.scrollTo({ top: 0 });
-    const chosen = document.querySelector('#reading-body .tok[aria-pressed="true"]');
-    if (chosen) chosen.scrollIntoView({ block: 'nearest', behavior });
+    // A line of "In this text" that opened a note stays above the sheet as
+    // the chosen word does: the sheet rose over it, focus and all.
+    const keep = opener && opener.closest('#in-text') ? opener : document.querySelector('#reading-body .tok[aria-pressed="true"]');
+    if (keep) keep.scrollIntoView({ block: 'nearest', behavior });
     return;
   }
   if (oneColumn() || !side) {
@@ -183,7 +185,7 @@ function openNote(kind, id, opener) {
   state.note = { kind, id };
   state.tab = 'notes';
   paintSide(state);
-  reveal(oneColumn() ? $('side') : $('panel-notes'));
+  reveal(oneColumn() ? $('side') : $('panel-notes'), opener);
   const title = $('note-title');
   if (title && opener && opener.closest('#word-body')) { title.tabIndex = -1; title.focus({ preventScroll: true }); }
 }

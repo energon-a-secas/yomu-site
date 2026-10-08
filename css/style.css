@@ -49,6 +49,11 @@
 [hidden] { display: none !important; }
 
 html { min-height: 100%; color-scheme: dark; }
+/* The header kit's bar is sticky and comes back on every scroll up, so what
+   the browser scrolls into view (a word reached with the arrow keys, a
+   focused control) stops under it, not behind it: WebKit put a word the
+   arrows reached at the very top, under the bar. An embed has no bar. */
+html:not([data-embed="1"]) { scroll-padding-top: calc(var(--header-h-app, 56px) + var(--space-2)); }
 body {
   font-family: var(--font);
   background: var(--bg);
@@ -74,9 +79,25 @@ main#main:focus { outline: none; }
 
 /* ── Header ────────────────────────────────────────────────────
  * Owned by the Neorgon Header Kit (css/neorgon-header.css). Only the
- * language toggle's two codes are this site's. */
+ * language toggle's two codes are this site's, and, on a phone, the side
+ * padding and the due badge of the two controls kept in the bar: the kit
+ * owns each control's height, the gaps, the menu and the Sign in slot, and
+ * leaves a labelled control's padding to the site's own .btn. */
 .lang-code { color: var(--text-muted); font-weight: 500; }
 .lang-code--on { color: var(--text-primary); font-weight: 700; }
+/* Phrases, My kanji, the menu, Sign in and the hub mark beside the title ran
+   20px past a 375px screen (14 in Spanish), and the menu covered half of
+   Sign in. 6px a side gives the 24 back. */
+@media (max-width: 420px) {
+  #phrases-open, #mykanji-open { padding: 0 6px; }
+}
+/* The reviews-due count widened My kanji by 30px and pushed the menu over
+   Sign in on every phone, a 412px one too. In the kit's phone header it
+   rides on the button's corner instead, and the button keeps its width. */
+@media (max-width: 700px) {
+  #mykanji-open { position: relative; }
+  #mykanji-open .mk-due { position: absolute; top: -8px; right: -8px; background: var(--bg); }
+}
 
 /* ── Buttons ───────────────────────────────────────────────── */
 .btn {
@@ -994,7 +1015,7 @@ a.mk-open[aria-current="page"], a.pl-open[aria-current="page"] { background: rgb
 /* ── Toast ─────────────────────────────────────────────────── */
 .toast {
   position: fixed;
-  bottom: var(--space-6);
+  bottom: calc(var(--space-6) + env(safe-area-inset-bottom, 0px));
   right: var(--space-6);
   z-index: var(--z-toast);
   max-width: min(360px, calc(100vw - var(--space-8)));
@@ -1079,7 +1100,7 @@ a.mk-open[aria-current="page"], a.pl-open[aria-current="page"] { background: rgb
     max-height: 50dvh;
     overflow-y: auto; overscroll-behavior: contain;
     margin: 0 calc(var(--space-4) * -1);
-    padding: 0 var(--space-4) var(--space-4);
+    padding: 0 var(--space-4) calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
     background: var(--bg);
     border-top: 1px solid var(--border-strong);
     box-shadow: var(--shadow-modal);
@@ -1089,8 +1110,9 @@ a.mk-open[aria-current="page"], a.pl-open[aria-current="page"] { background: rgb
     background: var(--bg);
   }
   html:not([data-embed="1"]) .side[data-sheet] .side-close { display: inline-block; }
-  /* A word chosen near the bottom is scrolled up above the sheet. */
-  html:not([data-embed="1"]) .yomu:has(> .side[data-sheet]) .tok { scroll-margin-bottom: calc(50dvh + var(--space-4)); }
+  /* A word chosen near the bottom is scrolled up above the sheet, and so is
+     the line of "In this text" that opened a note (js/events.js reveal). */
+  html:not([data-embed="1"]) .yomu:has(> .side[data-sheet]) :is(.tok, .it-line) { scroll-margin-bottom: calc(50dvh + var(--space-4)); }
 }
 
 /* ── Embed (docs/EMBED.md) ─────────────────────────────────────
@@ -1113,6 +1135,8 @@ html[data-embed="1"] body:has(> .neo-footer) { min-height: 0; }
   .it-line, .kj-row { min-height: 44px; }
   .save-toggle { width: 44px; height: 44px; }
   .mk-back, .mk-filter-input, .mk-tab { min-height: 44px; }
+  /* iOS zooms the page into a field whose text is under 16px when it takes focus. */
+  .mk-filter-input { font-size: 1rem; }
   .col-tile { min-width: 44px; min-height: 44px; }
   .text-link.mk-open, .text-link.pl-open { display: inline-flex; align-items: center; min-height: 44px; }
   .seen-before .text-link, .embed-bar .text-link { display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; }
