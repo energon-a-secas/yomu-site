@@ -5,7 +5,7 @@
 // back a kanji or a phrase unsaved meanwhile. A browser that never signed
 // in has no book, and nothing here writes anything for it.
 
-import { noteRemoval, noteClear, notePrefs, heardOf } from './sync-book.js';
+import { noteRemoval, noteClear, notePrefs, heardOf, clearsOf } from './sync-book.js';
 import { textKey } from './history-text.js';
 
 /**
@@ -48,13 +48,16 @@ const NOTHING = Object.freeze({ s: 0, removed: 0 });
 /**
  * Listen to the four stores. An unsave and a Clear all go into the book as
  * tombstones (a Clear all as one per kanji it emptied while a join waits
- * for the account's data), every save is stamped with its own time, a
- * preference saved with a new value is stamped, and `changed()` hears
- * every change the learner made (js/account.js debounces a push on it).
+ * for the account's data, and as none while it stays in this browser),
+ * every save is stamped with its own time, a preference saved with a new
+ * value is stamped, and `changed()` hears every change the learner made
+ * (js/account.js debounces a push on it).
  * `known(kind, id)` is the account's copy of a row as the page last saw it
  * (js/sync.js known()); the book's `heard` is the same as this browser last
- * pulled or pushed it, which a reload keeps, and both are read. Returns a
- * function that stops listening.
+ * pulled or pushed it, which a reload keeps, and both are read.
+ * `clears(book)` is what a Clear all does now (js/account.js, which knows
+ * who is signed in; sync-book.js clearsOf). Returns a function that stops
+ * listening.
  *
  * Every time here is this device's clock, and another device's may run
  * ahead of it. So a removal or a Clear all is stamped one past the newest
@@ -64,7 +67,7 @@ const NOTHING = Object.freeze({ s: 0, removed: 0 });
  * time: what the learner just did on the screen is what syncs, whatever
  * the clocks say.
  */
-export function watchStores({ kanji, history, play, onPrefsSaved, books, local, now = Date.now, changed = () => {}, known = () => NOTHING }) {
+export function watchStores({ kanji, history, play, onPrefsSaved, books, local, now = Date.now, changed = () => {}, known = () => NOTHING, clears = (b) => clearsOf(b) }) {
   const mine = () => !local.applying;
   /**
    * The account's copy of a row: as the page last saw it (`known`), or as
@@ -91,27 +94,28 @@ export function watchStores({ kanji, history, play, onPrefsSaved, books, local, 
     });
   }
   /**
-   * A Clear all. Once the account's data has arrived here, one tombstone
-   * for the whole of My kanji, the account's too. Before (a join pending:
-   * a first sign-in, Add or Use, its pull not applied yet), a removal of
-   * each kanji it emptied here, stamped as an unsave is, and no clear: the
-   * account's other rows never reached this browser, and the Clear all
-   * dialog said so.
+   * A Clear all, as `clears` says it acts now, which its dialog said.
+   * 'account' (the account's data has arrived here): one tombstone for the
+   * whole of My kanji, the account's too. 'joining' (a first sign-in or an
+   * Add, its pull not applied yet): a removal of each kanji it emptied
+   * here, stamped as an unsave is, and no clear, since the account's other
+   * rows never reached this browser. 'here' (a pending Use, or another
+   * account than the book's signed in): no removal at all, so it reaches
+   * no account. Each drops the save stamps of the kanji it emptied.
    */
   function cleared(at, saved) {
     books.update((b) => {
-      if (b.pending) {
+      const how = clears(b);
+      if (how === 'joining') {
         for (const [ch, rec] of Object.entries(saved || {})) {
           noteRemoval(b, 'kanji', ch, Math.max(now(), newestSave(b, 'kanji', ch, rec && rec.at) + 1));
         }
-        b.saves.kanji = {};
-        b.brought.kanji = {};
-        return;
+      } else if (how === 'account') {
+        let newest = account(b, 'kanji', null).s;
+        for (const [ch, rec] of Object.entries(saved || {})) newest = Math.max(newest, rec.at, b.brought.kanji[ch] || 0);
+        for (const t of Object.values(b.saves.kanji)) newest = Math.max(newest, t);
+        noteClear(b, Math.max(at, newest + 1));
       }
-      let newest = account(b, 'kanji', null).s;
-      for (const [ch, rec] of Object.entries(saved || {})) newest = Math.max(newest, rec.at, b.brought.kanji[ch] || 0);
-      for (const t of Object.values(b.saves.kanji)) newest = Math.max(newest, t);
-      noteClear(b, Math.max(at, newest + 1));
       b.saves.kanji = {};
       b.brought.kanji = {};
     });

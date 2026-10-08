@@ -13,7 +13,7 @@
 // tests/sync-account.test.mjs runs this file under plain node with fakes.
 
 import { storesAdapter, watchStores } from './sync-watch.js';
-import { answeredBook, FIRST } from './sync-book.js';
+import { answeredBook, clearsOf, FIRST } from './sync-book.js';
 
 /** The dev deployment of Convex project yomu. Public: a Convex URL is not a secret, the token is. */
 export const CONVEX_URL = 'https://jovial-mouse-131.convex.cloud';
@@ -103,17 +103,17 @@ export function startAccount(deps) {
    */
   const carries = (b) => !!b && b.pending !== 'first' && b.pending !== 'replace';
   /**
-   * What a Clear all does (`clears`, which words its dialog): 'account'
-   * once a join has brought the account's data here, which empties the
-   * account on every device; 'joining' while a first sign-in or an Add
-   * waits for it, when only the kanji held here are removed, and reach the
-   * account if this browser's data is added (sync-watch.js); 'here' with no
-   * account, or under a pending Use, whose removals stay in this browser.
+   * Whose this sign-in is: whoami's subject once it has answered, the
+   * kit's id (the Clerk user id, whoami's subject in production) until
+   * then, and null signed out.
    */
-  const clears = (b) => {
-    if (!b || b.pending === 'replace') return 'here';
-    return b.pending ? 'joining' : 'account';
-  };
+  const signedAs = () => (user === null ? null : (engine && engine.subject) || user);
+  /**
+   * What a Clear all does (`clears`, which words its dialog): the account,
+   * the kanji held here, or this browser only, which it is whenever the
+   * one signed in is not the book's account (sync-book.js clearsOf).
+   */
+  const clears = (b) => clearsOf(b, signedAs());
   const paint = () => {
     const b = books.read();
     status.synced = carries(b);
@@ -271,6 +271,7 @@ export function startAccount(deps) {
   watchStores({
     kanji, history, play, onPrefsSaved: prefs.onSaved, books, local, now, changed: schedule,
     known: (kind, id) => (engine ? engine.known(kind, id) : NOTHING_KNOWN),
+    clears,
   });
 
   function stop() {

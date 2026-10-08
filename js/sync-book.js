@@ -105,6 +105,25 @@ export function answerBook(had, account, mode, now, prefs) {
   return answeredBook(account, mode, now, prefs);
 }
 
+/**
+ * What a Clear all does with this book, which words its dialog
+ * (render-sync.js): 'account' once a join has brought the account's data
+ * here, which empties the account on every device; 'joining' while a
+ * first sign-in or an Add waits for that data, when only the kanji held
+ * here are removed, and reach the account if this browser's data is added
+ * (sync-watch.js); 'here' with no book, under a pending Use, and while
+ * someone other than the book's account is signed in (`who`, whoami's
+ * subject or the kit's id; null signed out): another account's question
+ * open or put off, or whoami still out after a switch. Then nothing of it
+ * reaches any account: an answer starts a book for the new one, and in the
+ * old one's book it would wait for a sign-in to that account after Not now.
+ */
+export function clearsOf(book, who = null) {
+  if (!book || book.pending === 'replace') return 'here';
+  if (who !== null && book.account !== who) return 'here';
+  return book.pending ? 'joining' : 'account';
+}
+
 function cleanMap(raw, keyOk) {
   const out = {};
   if (isObject(raw)) for (const [k, v] of Object.entries(raw)) if (keyOk(k) && isTime(v)) out[k] = v;

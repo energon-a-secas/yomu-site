@@ -805,6 +805,60 @@ test('the Clear all dialog\'s words follow what a Clear all does: this browser, 
   assert.equal(clearBodyKey({}), 'clearBody', 'a status from before it said, read as this browser only');
 });
 
+// While someone other than the book's account is signed in (another
+// account's question open or put off, or whoami still out after the
+// switch), a Clear all is this browser's only. A review found the dialog
+// saying the account it syncs with empties on every device while the clear
+// went into the old account's book as its Clear all: an answer replaces
+// that book, so it reached neither account, and only Not now and a sign-in
+// to the old account would ever have delivered it.
+
+for (const when of ['answered Add', 'answered Use', 'Not now', 'whoami out, then Add']) {
+  test(`another account signed in, ${when}: the Clear all dialog says this browser only, and the clear reaches no account`, async () => {
+    const server = fakeDb();
+    await fakeClient(server, 'user_b').mutation('sync:push', { kanji: [kanjiRow('雪', 5)] });
+    await fakeClient(server, 'user_a').mutation('sync:push', { kanji: [kanjiRow('月', 2)] });
+    let whoami = null;
+    const out = when.startsWith('whoami');
+    const p = page({
+      server, subject: 'user_b', book: newBook('user_a', 1, {}),
+      answer: (name) => (out && name === 'sync:whoami' && !whoami ? new Promise((r) => { whoami = r; }) : undefined),
+    });
+    p.held.on = true;
+    p.kanji.save('月', 2);
+    await p.account.ready;
+    p.kit.become(signedIn('user_b', 'Ben'));
+    if (out) await until(() => whoami, 'whoami sent');
+    else await until(() => p.held.open && p.last().phase === 'paused', 'the question, open');
+    assert.equal(p.last().clears, 'here', 'the dialog says this browser only');
+    p.clock.t += 60_000;
+    p.kanji.clearAll(p.clock.t);
+    const book = JSON.parse(p.bookStore.raw);
+    assert.deepEqual([book.account, book.epoch, book.removed.kanji], ['user_a', 0, {}], 'nothing of it is kept for the old account');
+    if (out) {
+      whoami({ subject: 'user_b' });
+      await until(() => p.held.open, 'the question, after whoami');
+      assert.equal(p.last().clears, 'here');
+    }
+    const answer = when.includes('Add') ? 'add' : when.includes('Use') ? 'use' : null;
+    const done = p.held.open;
+    p.held.open = null;
+    done(answer);
+    if (answer) await until(() => p.last().phase === 'synced', 'the answer\'s sync');
+    else await settle();
+    assert.deepEqual(server.rowsOf('user_b').clears, [], 'the new account was not cleared');
+    assert.deepEqual(savedIn(server, 'user_b'), ['雪'], 'and keeps 雪, which this browser never held');
+    if (answer) return;
+    // Not now, then the old account signs in here again: still nothing of it.
+    const again = page({ server, subject: 'user_a', book: JSON.parse(p.bookStore.raw) });
+    await again.account.ready;
+    again.kit.become(signedIn('user_a'));
+    await until(() => again.last().phase === 'synced', 'the old account\'s sync');
+    assert.deepEqual(server.rowsOf('user_a').clears, [], 'the old account was not cleared');
+    assert.deepEqual(savedIn(server, 'user_a'), ['月']);
+  });
+}
+
 // What the learner does from the moment the kit says "signed in" counts.
 // A review found it recorded nowhere until begin() wrote the join: an
 // unsave made while the Convex client failed to load, while whoami was out

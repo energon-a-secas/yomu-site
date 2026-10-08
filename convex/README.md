@@ -28,9 +28,12 @@ push carries it):
 - Clear all (My kanji only): one tombstone for every kanji, the account's
   `clear`, stamped `max(now, newest kanji save known + 1)`. It kills every
   save not newer than it and every count made under an older clear. Made
-  before the account's data has arrived here (a join pending: a first
-  sign-in, Add or Use), it is an unsave of each kanji it emptied here
-  instead, and no clear, so the account's other rows stay.
+  before the account's data has arrived here (a first sign-in or an Add
+  pending), it is an unsave of each kanji it emptied here instead, and no
+  clear, so the account's other rows stay. Under a pending Use, and while
+  someone other than the book's account is signed in (another account's
+  question open or put off, or whoami still out after a switch), it
+  records no removal and reaches no account. Its dialog says which.
 - Import: each kanji and phrase it brings back counts as saved now, one past
   any removal or Clear all known.
 - Counts and Play keep no time: they join by the higher number. A

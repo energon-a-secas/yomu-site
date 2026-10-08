@@ -661,16 +661,23 @@ So a device that counted kanji after the clear, before it heard of it,
 loses those counts at its next sync; a push answers with the server's
 clear, and a newer one makes the client pull at once. That is a Clear all
 made once the account's data has arrived here. One made before (the book
-`pending`: a first sign-in, an Add or a Use whose sync has not applied the
-pull) is an unsave of each kanji it emptied here, stamped as one, and no
-clear (`sync-watch.js cleared`): Add carries those removals, Use drops
-them, and the account's other rows stay. A review found it kept as the
-account's clear, which emptied every device of kanji this browser never
-showed while the dialog said "in this browser" (`tests/sync-account.test.mjs`,
-`tests/sync-first.test.mjs`). The dialog has three wordings, by
-`account.js` `clears`: this browser (no book, or a pending Use), the kanji
-held here (a pending first sign-in or Add, `clearBodyJoining`), the account
-(joined, `clearBodySynced`).
+`pending`: a first sign-in or an Add whose sync has not applied the pull)
+is an unsave of each kanji it emptied here, stamped as one, and no clear
+(`sync-watch.js cleared`): Add carries those removals, and the account's
+other rows stay. A review found it kept as the account's clear, which
+emptied every device of kanji this browser never showed while the dialog
+said "in this browser" (`tests/sync-account.test.mjs`,
+`tests/sync-first.test.mjs`). Under a pending Use, and while someone other
+than the book's account is signed in (another account's question open or
+put off, or whoami still out after a switch), it records no removal at
+all: it stays in this browser. A review found one made with another
+account's question open kept as the old account's clear while the dialog
+said every device of the account empties: the answer replaced that book,
+so it reached neither account. The dialog has three wordings, by
+`sync-book.js clearsOf`: this browser (no book, a pending Use, or another
+account than the book's signed in, `clearBody`), the kanji held here (a
+pending first sign-in or Add, `clearBodyJoining`), the account (joined,
+`clearBodySynced`).
 
 **A browser that never synced is asked before its data meets an
 account's.** On a first sign-in `account.js` writes the join into the
