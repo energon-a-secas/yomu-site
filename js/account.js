@@ -15,8 +15,8 @@
 import { storesAdapter, watchStores } from './sync-watch.js';
 import { answeredBook, clearsOf, FIRST, BOOK_KEY } from './sync-book.js';
 
-/** The dev deployment of Convex project yomu. Public: a Convex URL is not a secret, the token is. */
-export const CONVEX_URL = 'https://jovial-mouse-131.convex.cloud';
+/** The production deployment of Convex project yomu. Public: a Convex URL is not a secret, the token is. */
+export const CONVEX_URL = 'https://wandering-ox-429.convex.cloud';
 /** Pinned to package.json's convex, under one path, which index.html's CSP allows and nothing wider. */
 export const CONVEX_CLIENT = 'https://esm.sh/convex@1.46.0/browser';
 /** A change is pushed this long after the last one. */

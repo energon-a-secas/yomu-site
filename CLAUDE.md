@@ -813,9 +813,10 @@ vendored as `js/neorgon-auth.js`, `js/neorgon-auth-sites.js`,
 `css/neorgon-auth.css`; the slot is `div.neo-auth` before `.header-home`,
 the key is the fleet's production `pk_live_`). Signed in, My kanji, the
 saved phrases, Play's store and the six display preferences sync to Convex
-project `yomu` (team lucio; dev deployment `jovial-mouse-131`, its URL in
-`js/account.js CONVEX_URL`; `convex/README.md`). Signed out, or never signed
-in, every store stays in this browser exactly as before. The rules in
+project `yomu` (team lucio; production deployment `wandering-ox-429`, its
+URL in `js/account.js CONVEX_URL`; dev `jovial-mouse-131`;
+`convex/README.md`). Signed out, or never signed in, every store stays in
+this browser exactly as before. The rules in
 brief, which a review checks the code against, open `convex/README.md`
 ("Sync rules"); the paragraphs below say why each is so. The modules:
 `js/sync-rules.js` (the rows and how two copies join, pure; the page,
@@ -1147,9 +1148,9 @@ last-read time and spelling, or the date History sorts a saved phrase by.
 **Sign-in cannot be tried on localhost.** The production key refuses it and
 the kit's dialog says so (expected). The functions are checked with
 `npx convex run sync:<fn> --identity '{"subject":"user_a","issuer":"https://clerk.neorgon.com"}'`
-(`convex/README.md`); a real Clerk session against the deployment, and the
-production deployment (`wandering-ox-429`, which exists and holds no
-functions yet), are untested.
+(`convex/README.md`). The production deployment (`wandering-ox-429`) has
+held the functions since 2026-10-08 and the page points at it; a real Clerk
+session against it is checked on the live domain only.
 
 ## Do not touch
 

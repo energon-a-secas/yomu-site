@@ -96,9 +96,10 @@ works in full without it, and an anonymous visit never calls this backend.
 The client half is `../js/sync.js`; the merge rules are `../js/sync-rules.js`,
 which these functions bundle from outside this folder.
 
-Project `yomu` (team `lucio`), dev deployment `jovial-mouse-131`
-(`https://jovial-mouse-131.convex.cloud`). `.env.local` names it and is
-gitignored. The URL is public by design: what authorises a call is the Clerk
+Project `yomu` (team `lucio`). The page calls the production deployment,
+`wandering-ox-429` (Production, below); `npx convex dev` pushes to the dev
+deployment `jovial-mouse-131` (`https://jovial-mouse-131.convex.cloud`),
+which `.env.local` names and which is gitignored. The URL is public by design: what authorises a call is the Clerk
 token Convex verifies, and every function reads its owner from it.
 
 ## What is here
@@ -146,36 +147,29 @@ deployment; no real Clerk user has those subjects.
 
 ## Production
 
-The production deployment of project `yomu` already exists, and is empty:
-`wandering-ox-429` (`https://wandering-ox-429.convex.cloud`). Convex made it
-with the project; `npx convex function-spec --prod` lists no functions
-(checked 2026-10-07), so nothing is deployed to it and the page still points
-at the dev deployment. Ship from the main checkout, never from a worktree.
-The main checkout has no `.env.local` (it is gitignored, and the one that
-names the project lives in the worktree that made it), so link the checkout
-to the project first, or give the deploy a production deploy key:
+`wandering-ox-429` (`https://wandering-ox-429.convex.cloud`), the production
+deployment of project `yomu`, has held the schema and functions since
+2026-10-08, and `js/account.js` (`CONVEX_URL`) and `index.html`'s CSP
+`connect-src` name it (`tests/sync-account.test.mjs` fails when they
+disagree). It needs no environment variable: there is no admin role, and
+`auth.config.ts` names the Clerk issuer itself. Ship from the main checkout,
+whose `.env.local` (gitignored) names the project, never from a worktree:
 
 ```bash
-npx convex dev --configure existing --team lucio --project yomu --dev-deployment cloud --once
-                                        # writes .env.local naming project yomu (and pushes to dev once)
+npx convex deploy --dry-run -y          # what would change, nothing pushed
 npx convex deploy                       # pushes schema and functions to wandering-ox-429
+npx convex function-spec --prod         # lists whoami, pullKanji, pullPhrases, pullMeta, push
 ```
 
-or, with no `.env.local`, a production deploy key from the project's
-settings in the Convex dashboard:
+**Run it from this site's folder.** `npx convex deploy` deploys whatever
+project the folder's `.env.local` names. Team `lucio` is on the Starter plan;
+most of the fleet's projects are in another team on the Free plan, whose 40
+deployments are all in use, so a deploy run from another site's folder
+fails with `DeploymentQuotaReached` (it did on 2026-10-08, from
+runcible-site) and says nothing about Yomu.
 
-```bash
-CONVEX_DEPLOY_KEY='prod:...' npx convex deploy
-```
-
-`npx convex deploy` with `CONVEX_DEPLOYMENT` set (`.env.local`) deploys to
-that project's production deployment; with `CONVEX_DEPLOY_KEY` set, to the
-deployment the key belongs to. The key is a secret: give it in the shell,
-never in a committed file.
-
-Then put `https://wandering-ox-429.convex.cloud` in `js/account.js`
-(`CONVEX_URL`) and in `index.html`'s CSP `connect-src`, in one commit
-(`tests/sync-account.test.mjs` fails when they disagree), and run
-`packages/neorgon-ui/sync-auth.sh` from the root so every site's "Your
-Neorgon sites" lists Yomu. The production deployment needs no environment
-variable: there is no admin role.
+With no `.env.local`, link the checkout first (`npx convex dev --configure
+existing --team lucio --project yomu --dev-deployment cloud --once`), or give
+the deploy a production deploy key from the project's settings in the
+dashboard, in the shell and never in a committed file:
+`CONVEX_DEPLOY_KEY='prod:...' npx convex deploy`.
