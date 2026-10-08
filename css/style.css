@@ -400,11 +400,15 @@ dialog.dialog--wide { width: min(760px, calc(100% - 16px)); }
 /* Particles, the copula and conjugated endings are lighter than the words
    that carry the meaning, so the eye lands on the content first. */
 .tok--light .tok-surface, .tok-ending { color: color-mix(in srgb, var(--text-primary) 66%, transparent); font-weight: 400; }
+/* One line under its word. A word is as wide as its longest line until the
+   reading is narrower than that, and only then does its romaji wrap: an
+   eleven-part katakana compound read 363px of unbroken romaji, and pushed a
+   375px phone's page sideways. */
 .tok-romaji {
   font-size: 0.8125rem;
   line-height: 1.25;
   color: var(--text-muted);
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 .tok-plain { font-size: 1.75rem; line-height: 1.3; color: var(--text-secondary); padding: 3px 1px; overflow-wrap: anywhere; }
 .tok-plain--latin { font-family: var(--font); font-size: 1.25rem; }
@@ -1153,7 +1157,8 @@ html[data-embed="1"] body:has(> .neo-footer) { min-height: 0; }
   .mk-sync .btn { min-height: 44px; }
   /* A touch screen has no keys to press, so the key hints go. */
   .rv-kbd, .rv-keys, .key-hint { display: none; }
-  .word-notes .text-link, .word-out .text-link { display: inline-flex; align-items: center; min-height: 44px; }
+  /* A note's title can be short: the Spanish の: de was 39px wide. */
+  .word-notes .text-link, .word-out .text-link { display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; }
 }
 
 /* ── Narrow ────────────────────────────────────────────────── */

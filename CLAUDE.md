@@ -379,6 +379,8 @@ header or the word sheet, a dialog that does not fit, a header that does not
 hold My kanji and Sign in (with Phrases in its ⋯ menu on a phone), two of its
 controls or the due count overlapping, a tap at a control's edge that lands
 on another, a console error.
+It fails on a romaji line wider than the reading, and on a Word panel note
+button under 44px wide however short its title.
 What belongs to a fleet kit it prints as a note. `tests/mobile.test.mjs`
 holds the markup and stylesheet half under npm test. Run the browser check
 after a change to the reader's markup, a phone block of `style.css`, a header

@@ -165,6 +165,17 @@ test('on a phone the bar keeps one action, My kanji, beside Sign in; Phrases goe
   assert.match(blocks(esc('@media (max-width: 899.98px)')).join('\n'), /#mykanji-open \.mk-due\s*\{\s*position:\s*absolute/);
 });
 
+test('a romaji line wraps only when its word is wider than the reading', () => {
+  const romaji = blocks(esc('.tok-romaji'))[0];
+  assert.match(romaji, /overflow-wrap:\s*anywhere/);
+  assert.doesNotMatch(romaji, /white-space:\s*nowrap/);
+});
+
+test('on a touch screen the Word panel\'s note buttons are 44px wide however short the title', () => {
+  const touch = blocks(esc('@media (pointer: coarse)')).join('\n');
+  assert.match(touch, /\.word-notes \.text-link[^{]*\{[^}]*min-width:\s*44px/);
+});
+
 test('after a touch, a dialog gives focus back with no ring, and to the ⋯ button for a control in its menu', () => {
   const dialogs = readFileSync(join(SITE, 'js/dialogs.js'), 'utf8');
   assert.match(dialogs, /focusVisible: false/);

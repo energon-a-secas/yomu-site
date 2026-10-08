@@ -23,6 +23,8 @@
 //     side) before the Display button opens them, or folded at 1280x800, the
 //     Remember card above the reading, Speak all or the translate links
 //     hidden;
+//   - a romaji line wider than the reading, and a Word panel note button
+//     under 44px wide however short its title;
 //   - horizontal scroll, a control of Yomu's under 44px (a link inside a
 //     sentence is listed, not failed), a text field under 16px (iOS zooms),
 //     a focused element or the chosen word under the sticky header or the
@@ -57,6 +59,8 @@ const browsers = arg('browsers', 'webkit,chromium').split(',');
 const phones = arg('devices', 'se,15,pixel,s24,se1').split(',');
 const langs = arg('langs', 'en,es').split(',');
 const KANJI = 2;          // EXAMPLES[2], 今日は雨が降っています。
+// One katakana compound of eleven parts, whose romaji is wider than a phone.
+const COMPOUND = 'アイスクリームショップチェーンストアマネージャーアシスタントディレクター';
 
 if (SHOTS) mkdirSync(SHOTS, { recursive: true });
 
@@ -554,6 +558,55 @@ async function header(browser, phone, lang) {
   }
 }
 
+/**
+ * Two narrow edges: a katakana compound whose romaji line is wider than the
+ * reading (it pushed the page sideways), and a Word panel note whose title is
+ * short (Spanish の: de was a 39px wide button).
+ */
+async function edges(browser, phone, lang) {
+  const where = `${browser.engine} ${phone.key} ${lang}`;
+  const { ctx, page } = await context(browser, phone.name, lang, { viewport: phone.viewport, screen: phone.viewport });
+  await step(where, 'the Word panel notes', async () => {
+    await page.goto(`${BASE}#t=${encodeURIComponent('私の本です。東京へ行きます。')}`);
+    await page.waitForSelector('#reading-body .tok');
+    const n = await page.locator('#reading-body .tok').count();
+    const small = new Set();
+    for (let i = 0; i < n; i += 1) {
+      await page.locator('#reading-body .tok').nth(i).tap();
+      await page.waitForTimeout(150);
+      for (const s of await page.evaluate(() => [...document.querySelectorAll('#word-body .word-notes [data-act="note"]')]
+        .filter((e) => e.offsetWidth < 44 || e.offsetHeight < 44).map((e) => `"${e.textContent.trim()}" ${e.offsetWidth}x${e.offsetHeight}`))) small.add(s);
+    }
+    for (const s of small) fail(where, `the Word panel's note button ${s} is under 44px`);
+  });
+  await step(where, 'a long katakana compound', async () => {
+    await page.goto('about:blank');
+    await page.goto(`${BASE}#t=${encodeURIComponent(`${COMPOUND}。今日は雨です。`)}`);
+    await page.waitForSelector('#reading-body .tok');
+    await page.waitForTimeout(200);
+    for (const mode of ['said', 'spelled']) {
+      if (mode === 'spelled') {
+        await tap(page, '#display-toggle');
+        await tap(page, '[data-pref="romaji"][data-value="spelled"]');
+        await tap(page, '#display-toggle');
+      }
+      const r = await page.evaluate(() => {
+        const body = document.querySelector('#reading-body').getBoundingClientRect();
+        const wide = [...document.querySelectorAll('#reading-body .tok-romaji')].filter((e) => e.getClientRects().length)
+          .map((e) => e.getBoundingClientRect()).filter((q) => q.left < body.left - 1 || q.right > body.right + 1);
+        return { sw: document.documentElement.scrollWidth, vw: document.documentElement.clientWidth, wide: wide.map((q) => `${Math.round(q.left)}..${Math.round(q.right)}`), body: `${Math.round(body.left)}..${Math.round(body.right)}` };
+      });
+      if (r.wide.length) fail(where, `${mode} romaji runs past the reading (${r.wide.join(', ')} against ${r.body})`);
+      if (r.sw > r.vw + 1) fail(where, `${mode} romaji: the page scrolls sideways (${r.sw} > ${r.vw})`);
+    }
+    await audit(page, where, 'long-compound');
+    await tap(page, '#display-toggle');
+    await tap(page, '[data-pref="romaji"][data-value="said"]');
+  });
+  for (const e of page.errors) fail(where, `console: ${e.slice(0, 160)}`);
+  await ctx.close();
+}
+
 async function landscape(browser, phone, lang) {
   const where = `${browser.engine} ${phone.key}-landscape ${lang}`;
   const { ctx, page } = await context(browser, phone.land, lang);
@@ -617,6 +670,7 @@ await Promise.all(browsers.map(async (engine) => {
     const phone = { key, ...PHONES[key] };
     for (const lang of langs) {
       await header(browser, phone, lang);
+      await edges(browser, phone, lang);
       await reader(browser, phone, lang);
       await retry(browser, phone, lang);
       await arrows(browser, phone, lang);
