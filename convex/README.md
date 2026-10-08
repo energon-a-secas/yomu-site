@@ -72,9 +72,8 @@ Not now syncs nothing and asks again later.
   saves stamped in the book since the answer (by hand or by Import; the
   store's own save time is not read) and preferences changed since; a
   removal or Clear all made before the account's data arrived applies here
-  only.
-  Everything else of this browser's (saves, counts, scores) is gone from
-  it, and on a first sign-in it was never in the account.
+  only. Everything else of this browser's (saves, counts, scores) is gone
+  from it, and on a first sign-in it was never in the account.
 - After an account switch the old account keeps what it had: nothing
   changed here since its last sync with it is sent to it.
 

@@ -206,9 +206,9 @@ export function createSync({ client, local, book: books, now = Date.now }) {
    * Who the server says is signed in, and which way this sign-in goes. For
    * 'ask', what each side holds, and `first` when this browser never joined
    * an account: it holds saved kanji or phrases of its own and the account
-   * holds data too, so the learner chooses Add or Use, as for another
-   * account. A first sign-in with nothing of its own, or into an account
-   * that holds nothing, joins as is.
+   * holds what the question is about (holdsAny), so the learner chooses Add
+   * or Use, as for another account. A first sign-in with nothing of its
+   * own, or into an account that holds none of that, joins as is.
    */
   async function begin() {
     // A sign-out or another account while whoami was out: this begin() is
