@@ -119,6 +119,11 @@ function inspect({ chosen = true } = {}) {
   if (bar && !open) {
     const b = bar.getBoundingClientRect();
     headerBottom = Math.max(0, b.bottom);
+    // The kit anchors its ⋯ panel (260px at least) to the actions' right
+    // edge: on a 320px phone it ran 40px off the left, cutting Frases.
+    const panel = document.querySelector('.header-menu.open');
+    const p = panel && panel.getBoundingClientRect();
+    if (p && (p.left < -1 || p.right > vw + 1)) out.menu = `the ⋯ menu runs from ${Math.round(p.left)} to ${Math.round(p.right)} of a ${vw}px screen`;
     if (bar.scrollWidth > bar.clientWidth + 1) out.header.push(`the bar scrolls (${bar.scrollWidth} > ${bar.clientWidth})`);
     // On a phone (the kit's 700px) the bar keeps My kanji and Sign in, and
     // Phrases is in the ⋯ menu: kept as well, at 360px the menu covered 11px
@@ -216,6 +221,7 @@ async function audit(page, where, screen, opts = {}) {
   for (const d of r.dialogs) fail(at, `dialog: ${d}`);
   for (const u of r.under) fail(at, u);
   for (const b of r.beacon) note(`beacon kit: the Beacon covers ${b}`, `${screen}`);
+  if (r.menu) note(`header kit: ${r.menu}`, where);
   if (SHOTS) await page.screenshot({ path: join(SHOTS, `${where.replace(/ /g, '-')}-${screen}.png`) });
 }
 

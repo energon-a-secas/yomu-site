@@ -472,7 +472,11 @@ Beacon (36px, bottom left) over whatever scrolls under it, controls included
 (Again in a review, a cell of Odd one out, a place in Where are the spaces?,
 Sound it out); the footer's links at 24px, and English on a Spanish page (the
 kit has no language hook, and reads the disclaimer's `data-label` once); the
-header's 36px controls; the Auth Kit dialog's Privacy and Terms at 18px.
+header's 36px controls; the header's ⋯ menu, at least 260px wide and
+anchored to the right edge of the actions, which runs 40px off the left of a
+320px screen and cuts the first letters of Phrases, Play and the language
+toggle there (it meets the edge at 360); the Auth Kit dialog's Privacy and
+Terms at 18px.
 
 ## My kanji
 
