@@ -83,7 +83,8 @@ function tab(b, server, subject, failing = { on: () => false }) {
   return {
     account, kanji, failing, answers, win, doc,
     last: () => painted.at(-1),
-    signIn(label = 'Aiko') { state = { status: 'signed-in', signedIn: true, userId: subject, label }; for (const fn of auth) fn(state); },
+    /** The kit's sign-in: `as` is its user id, whoami's subject by default. */
+    signIn(label = 'Aiko', as = subject) { state = { status: 'signed-in', signedIn: true, userId: as, label }; for (const fn of auth) fn(state); },
     /**
      * The storage events of what the other tab wrote: this tab reads My
      * kanji again, as events-kanji.js does, and the account hears the
@@ -292,4 +293,37 @@ test('a tab hears the book another tab joined: its line and its Clear all words 
   await t2.push();
   await until(() => t2.last().phase === 'synced', 'tab 2 synced');
   assert.equal(server.rowsOf('user_a').clears.length, 1, 'which its Clear all did');
+});
+
+// The kit's user id is the Clerk user id, which is whoami's subject; if the
+// two ever differ, begin() begins a first sign-in's join again for
+// whoami's. A review found the page loaded again then writing the kit's id
+// over that book (account.js recordFrom), which dropped an unsave made
+// under whoami's subject since, so Add brought the account's copy back.
+
+test('a first sign-in begun again for whoami\'s subject keeps its book when the page loads again', async () => {
+  const live = (server) => server.rowsOf('user_a').kanji.filter((r) => r.saved && r.saved.s > r.removed).map((r) => r.char);
+  const b = browser();
+  openKanjiOf(b).save('一', b.now());
+  b.clock.t = T(10);
+  const server = fakeDb();
+  await fakeClient(server, 'user_a').mutation('sync:push', { kanji: [{ char: '一', saved: { at: T(1), box: 0, due: '2023-11-14', reviews: 0, lapses: 0, s: T(1) }, removed: 0, seen: null }] });
+  const before = tab(b, server, 'user_a');
+  await before.account.ready;
+  before.signIn('Aiko', 'clerk_x');
+  await until(() => before.last().phase === 'paused', 'asked, as both sides hold 一, and Not now');
+  assert.deepEqual([bookOf(b).account, bookOf(b).pending], ['user_a', 'first'], 'begun again for whoami\'s subject');
+  assert.equal(before.last().clears, 'joining', 'the Clear all dialog: the kanji held here');
+  b.clock.t = T(11);
+  before.kanji.unsave('一');
+  assert.ok(bookOf(b).removed.kanji['一'], 'the unsave is kept for user_a');
+  const after = tab(b, server, 'user_a');            // the page loaded again
+  await after.account.ready;
+  after.signIn('Aiko', 'clerk_x');
+  assert.equal(bookOf(b).account, 'user_a', 'the reload keeps user_a\'s join');
+  assert.ok(bookOf(b).removed.kanji['一'], 'and the unsave in it');
+  assert.equal(after.last().clears, 'joining', 'and says so before whoami answers');
+  await until(() => after.last().phase === 'synced', 'the sync after the reload');
+  assert.deepEqual(live(server), [], 'the unsave reached the account');
+  assert.equal(after.kanji.isSaved('一'), false);
 });

@@ -582,8 +582,9 @@ because a browser cannot strip types), `js/sync-local.js` (the stores as
 rows, and one sync's plan: what to push, what to change here, what the
 server holds after), `js/sync.js` (pull, merge, push; imported on sign-in
 only), `js/sync-book.js` (`localStorage['yomu-site:sync']`: the account this
-browser syncs with, an answer to the account question not yet finished, when
-it joined and what it brought, the last Clear all it applied, removals not
+browser syncs with, and the kit's id for it when that is not whoami's, an
+answer to the account question not yet finished, when it joined and what it
+brought, the last Clear all it applied, removals not
 yet carried, save stamps not yet carried, what it last heard of the
 account's rows, when each preference changed),
 `js/sync-watch.js` (the stores as sync changes
@@ -697,7 +698,12 @@ book (`pending: 'first'`) as soon as the kit says who signed in, for the
 kit's user id (the Clerk user id, which is the subject whoami answers
 with), and `sync.js begin()` checks it against whoami: a book pending for
 another subject is another account's first sign-in, begun again for
-whoami's, carrying nothing it kept. If this browser holds a saved kanji or a
+whoami's, carrying nothing it kept. That book names the kit's id when the
+two differ (`kit`, which should never be written: both are the Clerk user
+id), and `account.js recordFrom` keeps it on the page loaded again under
+that id. A review found the reload writing the kit's id over it, which
+dropped an unsave made there since (`tests/sync-tabs.test.mjs`). If this
+browser holds a saved kanji or a
 saved phrase, and the account holds a saved or removed kanji or phrase, or a
 Clear all (`sync.js accountHolds`), it asks the Add / Use question an
 account switch asks, worded for this case (the `syncFirst*` strings: "This

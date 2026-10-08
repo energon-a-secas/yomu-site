@@ -189,9 +189,10 @@ export function joinStamps(server, snap, at, now = at) {
 /**
  * One account's sync. `client` answers query(name, args) and mutation(name,
  * args) (a ConvexHttpClient on the page); `local` is sync-watch.js
- * storesAdapter(); `book` is sync-book.js openBook().
+ * storesAdapter(); `book` is sync-book.js openBook(); `kit()` is the Auth
+ * Kit's user id for the sign-in under way (js/account.js), or null.
  */
-export function createSync({ client, local, book: books, now = Date.now }) {
+export function createSync({ client, local, book: books, now = Date.now, kit = () => null }) {
   let subject = null;
   let cache = null;      // the account as this page last read or wrote it
   let stops = 0;         // stop() calls: a begin() that outlives one writes nothing
@@ -231,8 +232,13 @@ export function createSync({ client, local, book: books, now = Date.now }) {
     // the learner removes, saves or changes in between goes to this
     // account. A book pending for another subject than whoami's is another
     // account's first sign-in: begun again for this one, carrying nothing
-    // of what it kept.
-    if (!book || book.account !== me) books.write(answeredBook(me, FIRST, now(), local.snapshot().prefs));
+    // of what it kept, and naming the kit's id when that is not whoami's
+    // (sync-book.js `kit`), so the page loaded again keeps it.
+    if (!book || book.account !== me) {
+      const via = kit();
+      const named = typeof via === 'string' && via && via !== me ? { kit: via } : {};
+      books.write({ ...answeredBook(me, FIRST, now(), local.snapshot().prefs), ...named });
+    }
     if (holdsOwn(local.snapshot())) {
       const server = await pullAll(client);
       if (ticket !== stops || subject !== me) throw new SyncError('stopped');

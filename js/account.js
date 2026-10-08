@@ -103,17 +103,22 @@ export function startAccount(deps) {
    */
   const carries = (b) => !!b && b.pending !== 'first' && b.pending !== 'replace';
   /**
-   * Whose this sign-in is: whoami's subject once it has answered, the
-   * kit's id (the Clerk user id, whoami's subject in production) until
-   * then, and null signed out.
+   * Whose this sign-in is, by the book `b`: whoami's subject once it has
+   * answered; until then the kit's id (the Clerk user id, whoami's subject
+   * in production), or the book's account when the book says whoami
+   * answered that for this kit id (sync-book.js `kit`); null signed out.
    */
-  const signedAs = () => (user === null ? null : (engine && engine.subject) || user);
+  const signedAs = (b) => {
+    if (user === null) return null;
+    if (engine && engine.subject) return engine.subject;
+    return b && b.kit === user ? b.account : user;
+  };
   /**
    * What a Clear all does (`clears`, which words its dialog): the account,
    * the kanji held here, or this browser only, which it is whenever the
    * one signed in is not the book's account (sync-book.js clearsOf).
    */
-  const clears = (b) => clearsOf(b, signedAs());
+  const clears = (b) => clearsOf(b, signedAs(b));
   const paint = () => {
     const b = books.read();
     status.synced = carries(b);
@@ -207,7 +212,7 @@ export function startAccount(deps) {
       if (!engine) {
         const { createSync } = await importEngine();
         if (g !== gen) return;
-        if (!engine) engine = createSync({ client, local, book: books, now });
+        if (!engine) engine = createSync({ client, local, book: books, now, kit: () => user });
       }
       const begun = await engine.begin();
       if (g !== gen) return;
@@ -296,12 +301,15 @@ export function startAccount(deps) {
    * join, where it used to be recorded nowhere. begin() checks the book
    * against whoami: one pending for another subject is another account's,
    * begun again for whoami's, and what it kept is not carried there. A
-   * browser that joined an account, or answered for one, keeps its book.
+   * browser that joined an account, or answered for one, keeps its book,
+   * and so does one begin() began again for whoami's subject under this
+   * kit id (`kit`): written over on a reload, it lost what the learner
+   * did there since.
    */
   function recordFrom(id) {
     if (typeof id !== 'string' || !id) return;
     const b = books.read();
-    if (b && (b.pending !== FIRST || b.account === id)) return;
+    if (b && (b.pending !== FIRST || b.account === id || b.kit === id)) return;
     books.write(answeredBook(id, FIRST, now(), prefs.get()));
   }
 
@@ -348,7 +356,7 @@ export function startAccount(deps) {
       const key = e && typeof e.key === 'string' ? e.key : null;
       if (key !== null && key !== BOOK_KEY) return;
       const b = books.read();
-      if (b && b.account === signedAs() && b.at > status.at) status.at = b.at;
+      if (b && b.account === signedAs(b) && b.at > status.at) status.at = b.at;
       paint();
     });
   }

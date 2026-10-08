@@ -8,6 +8,11 @@
 //             pending join is written for the kit's user id (the same Clerk
 //             id) before whoami answers; begin() checks it against whoami,
 //             and a join is only ever settled for whoami's subject
+//   kit       the kit's user id whoami answered `account` for, kept only
+//             when the two differ (they should not: both are the Clerk
+//             user id). begin() writes it as it begins a first sign-in's
+//             join again for whoami's subject, so the page loaded again
+//             under that kit id keeps the join (account.js recordFrom)
 //   pending   'first' while a first sign-in has not settled which way it
 //             joins (sync.js begin() asks when both sides hold data); then
 //             'adopt' (joining as is, or Add) or 'replace' (Use) while that
@@ -161,6 +166,7 @@ export function cleanBook(raw) {
     prefsVal: syncedPrefs(raw.prefsVal),
   };
   if (PENDING.includes(raw.pending) || raw.pending === FIRST) book.pending = raw.pending;
+  if (typeof raw.kit === 'string' && raw.kit && raw.kit.length <= 200 && raw.kit !== raw.account) book.kit = raw.kit;
   return book;
 }
 

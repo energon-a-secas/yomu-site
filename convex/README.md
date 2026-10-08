@@ -52,7 +52,9 @@ it is decided (`pending`: `first` until its way is settled, then `adopt` or
 `replace`) until a sync finishes it; a retry continues it. A first
 sign-in's is written when the kit says who signed in, before whoami
 answers; a book pending for another subject than whoami's is another
-account's, begun again for whoami's with nothing it kept. With Add, each
+account's, begun again for whoami's with nothing it kept, and naming the
+kit's id when the two differ (`kit`), so the page loaded again under that
+id keeps it. With Add, each
 save the browser holds before the account's rows arrive is stamped
 (`brought`) at the time the join was settled (`joined`), and stays saved
 over the account's Clear all or that row's removal when that is older. One
