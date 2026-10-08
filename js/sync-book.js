@@ -38,6 +38,12 @@
 //             now, after any removal known). Kept here because the store
 //             cannot keep it: a merge moves the store's save time back to
 //             the earliest copy's (sync-watch.js)
+//   heard     { kanji: { 天: [s, removed] }, phrases: { key: [s, removed] } }:
+//             the account's newest save and removal of each row, as this
+//             browser last pulled or pushed it (a row with neither is left
+//             out), so a removal, a save or a Clear all made after a reload,
+//             before the page's first pull, is still stamped past them
+//             (sync-watch.js); the account's Clear all is `epoch`
 //   prefsAt   { lang: ms, ... }: when each synced preference last changed here
 //   prefsVal  { lang: 'es', ... }: its value then, to tell a change from a save
 //
@@ -72,7 +78,7 @@ export function newBook(account, now, prefs, epoch = 0) {
   return {
     account, joined: now, epoch, at: 0,
     brought: { kanji: {}, phrases: {} }, removed: { kanji: {}, phrases: {} }, saves: { kanji: {}, phrases: {} },
-    prefsAt: {}, prefsVal: syncedPrefs(prefs),
+    heard: { kanji: {}, phrases: {} }, prefsAt: {}, prefsVal: syncedPrefs(prefs),
   };
 }
 
@@ -105,11 +111,22 @@ function cleanMap(raw, keyOk) {
   return out;
 }
 
+/** A `heard` map: [s, removed] per row, two stamps, at least one a time. */
+function cleanHeard(raw, keyOk) {
+  const out = {};
+  if (!isObject(raw)) return out;
+  for (const [k, v] of Object.entries(raw)) {
+    if (keyOk(k) && Array.isArray(v) && v.length === 2 && v.every(isStamp) && (v[0] > 0 || v[1] > 0)) out[k] = [v[0], v[1]];
+  }
+  return out;
+}
+
 export function cleanBook(raw) {
   if (!isObject(raw) || typeof raw.account !== 'string' || !raw.account || raw.account.length > 200 || !isTime(raw.joined)) return null;
   const brought = isObject(raw.brought) ? raw.brought : {};
   const removed = isObject(raw.removed) ? raw.removed : {};
   const saves = isObject(raw.saves) ? raw.saves : {};
+  const heard = isObject(raw.heard) ? raw.heard : {};
   const prefsAt = {};
   for (const k of PREF_KEYS) if (isObject(raw.prefsAt) && isStamp(raw.prefsAt[k])) prefsAt[k] = raw.prefsAt[k];
   const book = {
@@ -120,11 +137,46 @@ export function cleanBook(raw) {
     brought: { kanji: cleanMap(brought.kanji, oneKanji), phrases: cleanMap(brought.phrases, (k) => HISTORY_KEY.test(k)) },
     removed: { kanji: cleanMap(removed.kanji, oneKanji), phrases: cleanMap(removed.phrases, (k) => HISTORY_KEY.test(k)) },
     saves: { kanji: cleanMap(saves.kanji, oneKanji), phrases: cleanMap(saves.phrases, (k) => HISTORY_KEY.test(k)) },
+    heard: { kanji: cleanHeard(heard.kanji, oneKanji), phrases: cleanHeard(heard.phrases, (k) => HISTORY_KEY.test(k)) },
     prefsAt,
     prefsVal: syncedPrefs(raw.prefsVal),
   };
   if (PENDING.includes(raw.pending) || raw.pending === FIRST) book.pending = raw.pending;
   return book;
+}
+
+/**
+ * The account's rows as a sync left them (`server`: kanji and phrases as
+ * Maps of rows), in the shape `heard` keeps: each row's newest save and
+ * removal, rows with neither left out.
+ */
+export function heardFrom(server) {
+  const out = { kanji: {}, phrases: {} };
+  for (const [ch, row] of server.kanji) {
+    const s = row.saved ? row.saved.s : 0;
+    if (s > 0 || row.removed > 0) out.kanji[ch] = [s, row.removed];
+  }
+  for (const [key, row] of server.phrases) {
+    const s = row.phrase ? row.phrase.s : 0;
+    if (s > 0 || row.removed > 0) out.phrases[key] = [s, row.removed];
+  }
+  return out;
+}
+
+/**
+ * The account's newest save (`s`) and removal of one row as the book last
+ * heard them; for 'kanji' with no id, the newest save of any kanji (what a
+ * Clear all is stamped past). Zeros for a row it never heard of.
+ */
+export function heardOf(book, kind, id) {
+  const map = book.heard[kind];
+  if (kind === 'kanji' && (id === null || id === undefined)) {
+    let s = 0;
+    for (const [t] of Object.values(map)) s = Math.max(s, t);
+    return { s, removed: 0 };
+  }
+  const row = Object.hasOwn(map, id) ? map[id] : null;
+  return row ? { s: row[0], removed: row[1] } : { s: 0, removed: 0 };
 }
 
 /** A removal made here (`kind` is 'kanji' or 'phrases'), kept until a sync carries it. */

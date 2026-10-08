@@ -36,6 +36,10 @@ push carries it):
 - Counts and Play keep no time: they join by the higher number. A
   preference carries when it last changed, and the later change wins.
 - What sync itself writes is never stamped as the learner's.
+- "Known" is this browser's store and stamps, and the account's rows as
+  this browser last pulled or pushed them; the book keeps each row's newest
+  `s` and removal from those (`heard`), so a reload before the next pull,
+  offline for as long as it lasts, knows them too.
 
 **Joins.** A browser joins an account once, at a first sign-in or by the
 answer to the question below, and the join is in the book from the moment

@@ -15,7 +15,7 @@
 
 import { cleanKanjiRow, cleanPhraseRow, cleanPlay, cleanPrefs, cleanClear } from './sync-rules.js';
 import { planSync, pushes, applies } from './sync-local.js';
-import { newBook, answeredBook, answerBook, carriedOf, pruneCarried, PENDING, FIRST } from './sync-book.js';
+import { newBook, answeredBook, answerBook, carriedOf, pruneCarried, heardFrom, PENDING, FIRST } from './sync-book.js';
 
 /** The Convex functions, by name (convex/sync.ts). */
 export const FN = Object.freeze({
@@ -307,12 +307,15 @@ export function createSync({ client, local, book: books, now = Date.now }) {
     if (plan.next.prefs) {
       for (const [k, p] of Object.entries(plan.next.prefs.values)) { book.prefsAt[k] = p.at; book.prefsVal[k] = p.v; }
     }
+    // What the page knows of the account's rows goes into the book with it,
+    // so a reload before the next pull still stamps past them (known()).
+    book.heard = heardFrom(server);
     books.write(book);   // the account is remembered from here, even if the push fails
     cache = server;
     const res = await pushAll(client, plan.push);
     cache = plan.next;
     const at = now();
-    books.update((b) => { if (b.account === who) { pruneCarried(b, carried); b.at = at; } });
+    books.update((b) => { if (b.account === who) { pruneCarried(b, carried); b.heard = heardFrom(plan.next); b.at = at; } });
     return { ok: true, at, wrote: res.wrote, applied: applies(merge), stale: res.clear > plan.clear };
   }
 
@@ -360,7 +363,13 @@ export function createSync({ client, local, book: books, now = Date.now }) {
       const res = await pushAll(client, plan.push);
       cache = plan.next;
       const at = now();
-      books.update((b) => { if (b.account === who) { pruneCarried(b, carried); b.epoch = Math.max(b.epoch, plan.clear); b.at = at; } });
+      books.update((b) => {
+        if (b.account !== who) return;
+        pruneCarried(b, carried);
+        b.epoch = Math.max(b.epoch, plan.clear);
+        b.heard = heardFrom(plan.next);
+        b.at = at;
+      });
       return { ok: true, at, wrote: res.wrote, stale: res.clear > plan.clear };
     });
   }
@@ -376,8 +385,9 @@ export function createSync({ client, local, book: books, now = Date.now }) {
    * The newest save (`s`) and the newest removal the account's copy of one
    * row holds, as this page last read or wrote it: kind 'kanji' or
    * 'phrases', and for 'kanji' with no id, over every kanji (a Clear all).
-   * A Clear all counts as a removal of every kanji. Nothing before a pull.
-   * sync-watch.js stamps a removal after the save, and a save after the
+   * A Clear all counts as a removal of every kanji. Nothing before a pull;
+   * the book's `heard` keeps the same across a reload, and sync-watch.js
+   * reads both. It stamps a removal after the save, and a save after the
    * removal, so a clock behind another device's cannot undo what it shows.
    */
   function known(kind, id) {

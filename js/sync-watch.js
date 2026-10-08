@@ -5,7 +5,7 @@
 // back a kanji or a phrase unsaved meanwhile. A browser that never signed
 // in has no book, and nothing here writes anything for it.
 
-import { noteRemoval, noteClear, notePrefs } from './sync-book.js';
+import { noteRemoval, noteClear, notePrefs, heardOf } from './sync-book.js';
 import { textKey } from './history-text.js';
 
 /**
@@ -52,7 +52,9 @@ const NOTHING = Object.freeze({ s: 0, removed: 0 });
  * preference saved with a new value is stamped, and `changed()` hears
  * every change the learner made (js/account.js debounces a push on it).
  * `known(kind, id)` is the account's copy of a row as the page last saw it
- * (js/sync.js known()). Returns a function that stops listening.
+ * (js/sync.js known()); the book's `heard` is the same as this browser last
+ * pulled or pushed it, which a reload keeps, and both are read. Returns a
+ * function that stops listening.
  *
  * Every time here is this device's clock, and another device's may run
  * ahead of it. So a removal or a Clear all is stamped one past the newest
@@ -65,12 +67,21 @@ const NOTHING = Object.freeze({ s: 0, removed: 0 });
 export function watchStores({ kanji, history, play, onPrefsSaved, books, local, now = Date.now, changed = () => {}, known = () => NOTHING }) {
   const mine = () => !local.applying;
   /**
+   * The account's copy of a row: as the page last saw it (`known`), or as
+   * the book last heard it, which a reload keeps (sync-book.js `heard`).
+   */
+  const account = (b, kind, id) => {
+    const page = known(kind, id);
+    const book = heardOf(b, kind, id);
+    return { s: Math.max(page.s, book.s), removed: Math.max(page.removed, book.removed) };
+  };
+  /**
    * The newest save of one row: `own` is the store's save time, which
    * sync-local.js raises to the row's join stamp when this browser brought it.
    */
-  const newestSave = (b, kind, id, own) => Math.max(own ? Math.max(own, b.brought[kind][id] || 0) : 0, b.saves[kind][id] || 0, known(kind, id).s);
+  const newestSave = (b, kind, id, own) => Math.max(own ? Math.max(own, b.brought[kind][id] || 0) : 0, b.saves[kind][id] || 0, account(b, kind, id).s);
   /** The newest removal of one row: a removal made here, a Clear all (kanji only), the account's copy. */
-  const newestRemoval = (b, kind, id) => Math.max(b.removed[kind][id] || 0, kind === 'kanji' ? b.epoch : 0, known(kind, id).removed);
+  const newestRemoval = (b, kind, id) => Math.max(b.removed[kind][id] || 0, kind === 'kanji' ? b.epoch : 0, account(b, kind, id).removed);
 
   function unsaved(kind, id, own) {
     books.update((b) => {
@@ -97,7 +108,7 @@ export function watchStores({ kanji, history, play, onPrefsSaved, books, local, 
         b.brought.kanji = {};
         return;
       }
-      let newest = known('kanji', null).s;
+      let newest = account(b, 'kanji', null).s;
       for (const [ch, rec] of Object.entries(saved || {})) newest = Math.max(newest, rec.at, b.brought.kanji[ch] || 0);
       for (const t of Object.values(b.saves.kanji)) newest = Math.max(newest, t);
       noteClear(b, Math.max(at, newest + 1));

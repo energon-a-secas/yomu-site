@@ -400,3 +400,95 @@ test('after Use, a save and an Import made since the answer join, whatever their
   assert.deepEqual(savedChars(x), ['四', '星', '雪']);
   assert.deepEqual(server.rowsOf('user_a').kanji.filter((r) => r.saved).map((r) => r.char).sort(), ['四', '星', '雪']);
 });
+
+// ── A reload before the page's first pull ─────────────────────────────────
+//
+// What the page last saw of the account's rows used to live only in the
+// page (sync.js known()). A review found that after a reload, until the
+// first pull (indefinitely while offline), an unsave, a save or a Clear all
+// was stamped against the store alone: another device's newer stamp that
+// this browser had already pulled, a join stamp or a removal from a clock
+// ahead, then outranked the learner's later action. The book keeps each
+// row's newest save and removal as last pulled or pushed (`heard`).
+
+/**
+ * y joins with 一, 二 and a phrase at T31 (all saved at T1); x, 45 minutes
+ * behind, pulls them, then loads the page again, offline.
+ */
+async function joinedThenPulledBehind() {
+  const server = fakeDb();
+  const t = '天気がいい。';
+  const y = device(server, 'user_a', { at: 1 });
+  y.kanji.save('一', y.now());
+  y.kanji.save('二', y.now());
+  y.saveText(t);
+  y.tick(30);
+  await y.signIn();                                  // joined at T31: they count as saved then
+  const x = device(server, 'user_a', { at: -14 });   // real T31
+  await x.signIn();
+  assert.ok(x.kanji.isSaved('一') && x.history.isSaved(textKey(t)));
+  const again = x.reload();                          // offline: no pull yet
+  again.failing.on = () => true;
+  again.tick(1);
+  return { server, y, again, key: textKey(t) };
+}
+async function backOnline(again, y) {
+  again.failing.on = () => false;
+  await again.signIn();                              // the reloaded page signs in again
+  await y.sync.sync('same');
+}
+
+test('reloaded, on a clock behind, before its first pull: an unsave of a kanji and of a phrase another device joined with stands', async () => {
+  const { y, again, key } = await joinedThenPulledBehind();
+  assert.ok(again.books.read().heard.kanji['一'], 'the book kept what the page heard');
+  again.kanji.unsave('一');
+  again.history.unsave(key, true);
+  await backOnline(again, y);
+  assert.equal(again.kanji.isSaved('一'), false);
+  assert.equal(y.kanji.isSaved('一'), false, 'the unsave reached the device that joined');
+  assert.equal(again.history.isSaved(key), false);
+  assert.equal(y.history.isSaved(key), false);
+});
+
+test('reloaded, on a clock behind, before its first pull: a Clear all empties what another device joined with', async () => {
+  const { y, again } = await joinedThenPulledBehind();
+  again.kanji.clearAll(again.now());
+  await backOnline(again, y);
+  assert.deepEqual(savedChars(again), []);
+  assert.deepEqual(savedChars(y), []);
+});
+
+test('reloaded before its first pull: a save of a kanji a clock ahead removed stands', async () => {
+  const server = fakeDb();
+  const z = device(server, 'user_a', { at: 100 });   // an hour ahead: real T40
+  z.kanji.save('天', z.now());
+  await z.signIn();
+  z.tick(1);
+  z.kanji.unsave('天');                              // stamped T101, at real T41
+  await z.sync.flush();
+  const x = device(server, 'user_a', { at: 45 });    // correct, real T45
+  await x.signIn();
+  assert.equal(x.kanji.isSaved('天'), false);
+  const again = x.reload();
+  again.failing.on = () => true;
+  again.tick(1);
+  again.kanji.save('天', again.now());               // T46: after the removal it pulled
+  again.failing.on = () => false;
+  await again.signIn();
+  await z.sync.sync('same');
+  assert.ok(again.kanji.isSaved('天'));
+  assert.ok(z.kanji.isSaved('天'), 'the save reached the device that removed it');
+});
+
+test('the book keeps what it heard of the account\'s rows, field by field', async () => {
+  const { cleanBook, heardOf } = await import('../js/sync-book.js');
+  const book = cleanBook({
+    account: 'user_a', joined: 5,
+    heard: { kanji: { 一: [7, 0], 二: [0, 9], 三: [0, 0], ab: [1, 1], 四: [1], 五: ['x', 1] }, phrases: { 'no key': [1, 1] } },
+  });
+  assert.deepEqual(book.heard, { kanji: { 一: [7, 0], 二: [0, 9] }, phrases: {} });
+  assert.deepEqual(heardOf(book, 'kanji', '二'), { s: 0, removed: 9 });
+  assert.deepEqual(heardOf(book, 'kanji', '六'), { s: 0, removed: 0 });
+  assert.deepEqual(heardOf(book, 'kanji', null), { s: 7, removed: 0 }, 'the newest save of any kanji, for a Clear all');
+  assert.deepEqual(cleanBook({ account: 'user_a', joined: 5 }).heard, { kanji: {}, phrases: {} }, 'a book from before it hears nothing');
+});

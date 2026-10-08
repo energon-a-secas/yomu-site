@@ -584,7 +584,8 @@ server holds after), `js/sync.js` (pull, merge, push; imported on sign-in
 only), `js/sync-book.js` (`localStorage['yomu-site:sync']`: the account this
 browser syncs with, an answer to the account question not yet finished, when
 it joined and what it brought, the last Clear all it applied, removals not
-yet carried, save stamps not yet carried, when each preference changed),
+yet carried, save stamps not yet carried, what it last heard of the
+account's rows, when each preference changed),
 `js/sync-watch.js` (the stores as sync changes
 them, and the listeners that stamp an unsave, a Clear all, a save and an
 Import),
@@ -754,12 +755,19 @@ that save's `s`, which `sync-local.js` borrows.
 **Clocks disagree, and the learner's last action wins anyway.** Every time
 is the device's own clock. A removal or a Clear all made here is stamped at
 least one past the newest save this browser knows for that row (the
-store's own, a stamp in the book, the account's copy as the page last saw
-it, `sync.js known()`): `max(now, known s + 1)`. A save made here is
+store's own, a stamp in the book, the account's copy as this browser last
+pulled or pushed it): `max(now, known s + 1)`. A save made here is
 stamped `max(its own time, known removal + 1)`. Without the first, a
 device an hour behind unsaved a kanji and saw it come straight back;
 without the second, the same device could not save again what it had just
-removed. Both are in `tests/sync-stamps.test.mjs`.
+removed. Both are in `tests/sync-stamps.test.mjs`. The account's copy is
+the page's (`sync.js known()`) and the book's (`heard`, each row's newest
+`s` and removal, written with every sync and push), which a reload keeps:
+with the page's alone, a reload before the first pull (offline, for as long
+as it lasted) stamped against the store alone, whose save time is the
+earliest, and another device's newer stamp that this browser had already
+pulled, a join stamp or a removal from a clock ahead, outranked the
+learner's later unsave, save or Clear all.
 
 **The eight words per kanji are the eight met last.** A word travels with
 the day it was last met (`[written, reading, day]`, the server's day or the
