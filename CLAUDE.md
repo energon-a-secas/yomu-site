@@ -592,7 +592,8 @@ Import),
 `js/account.js` (the guard, the kit, the timers, the step a retry runs;
 every dependency passed in), `js/events-sync.js` (the page's
 dependencies), `js/render-sync.js` (the My kanji line `#mk-sync`, the
-`#sync-dialog` question, in its two wordings) and `js/strings-sync.js`.
+`#sync-dialog` question, in its two wordings, and the Clear all dialog's
+words) and `js/strings-sync.js`.
 `npm test` runs `tests/sync-rules.test.mjs`, `tests/sync-server.test.mjs`
 (the real handlers over an in-memory database,
 `tests/helpers/fake-convex.mjs`, which refuses what Convex refuses),
@@ -677,7 +678,18 @@ so it reached neither account. The dialog has three wordings, by
 `sync-book.js clearsOf`: this browser (no book, a pending Use, or another
 account than the book's signed in, `clearBody`), the kanji held here (a
 pending first sign-in or Add, `clearBodyJoining`), the account (joined,
-`clearBodySynced`).
+`clearBodySynced`). The dialog keeps the words it opened with until it
+closes, and the click hands them to the clear (`render-sync.js
+openClearWords`, `clearAll(now, said)`): `sync-watch.js` does what they
+said, or what a Clear all does now when that reaches less, so a first sync
+landing under the open dialog, or another tab, never makes the click do
+more than the words said. A review found the words relabelled under the
+open dialog, from the kanji held here to the whole account, and the click
+then emptying the account. Another tab's write to the book reaches this
+one as a storage event, on which `account.js` paints the line and the
+words again: painted from its own syncs only, a tab whose pull failed went
+on saying the account keeps its kanji after another tab had joined it,
+while its Clear all emptied the account (`tests/sync-tabs.test.mjs`).
 
 **A browser that never synced is asked before its data meets an
 account's.** On a first sign-in `account.js` writes the join into the

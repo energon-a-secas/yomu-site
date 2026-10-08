@@ -371,10 +371,12 @@ export function openKanji({ store = createStore({ key: KEY, version: VERSION }),
   }
 
   // A listener hears what changed: { type: 'save', ch, at }, { type:
-  // 'unsave', ch, rec } (the record removed), { type: 'clear', at, saved }
-  // (every record removed), { type: 'import', chars, texts } (the kanji a
-  // backup saved, the texts of its phrases), { type: 'sync' } for what sync
-  // itself wrote, or { type: 'change' }. js/sync-watch.js stamps the times.
+  // 'unsave', ch, rec } (the record removed), { type: 'clear', at, saved,
+  // said } (every record removed; `said`, what the Clear all dialog said it
+  // does, when the clear came from it), { type: 'import', chars, texts } (the
+  // kanji a backup saved, the texts of its phrases), { type: 'sync' } for
+  // what sync itself wrote, or { type: 'change' }. js/sync-watch.js stamps
+  // the times.
   function commit(changed = true, event = { type: 'change' }) {
     if (!changed) return false;
     writable = store.save(data);
@@ -438,11 +440,11 @@ export function openKanji({ store = createStore({ key: KEY, version: VERSION }),
       commit(true, { type: 'import', chars: Object.keys((incoming && incoming.saved) || {}), texts });
       return sum;
     },
-    clearAll(now) {
+    clearAll(now, said) {
       const saved = data.saved;
       data = { saved: {}, seen: {}, session: startedAt({ id: data.session.id + 1, counted: [] }, now) };
       note = null;
-      return commit(true, { type: 'clear', at: now, saved });
+      return commit(true, { type: 'clear', at: now, saved, said });
     },
     /**
      * What sync decided (js/sync.js): per kanji a record, or null to remove

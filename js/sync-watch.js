@@ -44,6 +44,10 @@ export function storesAdapter({ kanji, history, play, prefs, remembering }) {
 }
 
 const NOTHING = Object.freeze({ s: 0, removed: 0 });
+/** What a Clear all reaches, least first (sync-book.js clearsOf). */
+const REACH = Object.freeze(['here', 'joining', 'account']);
+/** The lesser of what the dialog said (when it said) and what is so now. */
+const least = (said, now) => (REACH.includes(said) && REACH.indexOf(said) < REACH.indexOf(now) ? said : now);
 
 /**
  * Listen to the four stores. An unsave and a Clear all go into the book as
@@ -94,20 +98,27 @@ export function watchStores({ kanji, history, play, onPrefsSaved, books, local, 
     });
   }
   /**
-   * A Clear all, as `clears` says it acts now, which its dialog said.
+   * A Clear all, as `clears` says it acts now, or as its dialog said when
+   * it opened (`said`) when that reaches less: the words and the book can
+   * part while the dialog is open (the first sync lands, another tab
+   * answers), and the click never does more than the words said.
    * 'account' (the account's data has arrived here): one tombstone for the
    * whole of My kanji, the account's too. 'joining' (a first sign-in or an
    * Add, its pull not applied yet): a removal of each kanji it emptied
    * here, stamped as an unsave is, and no clear, since the account's other
-   * rows never reached this browser. 'here' (a pending Use, or another
-   * account than the book's signed in): no removal at all, so it reaches
-   * no account. Each drops the save stamps of the kanji it emptied.
+   * rows never reached this browser; with the data arrived under the open
+   * dialog, a kanji the account sent here is not one, since the words said
+   * the account keeps it (its join left it out of `brought`). 'here' (a
+   * pending Use, or another account than the book's signed in): no removal
+   * at all, so it reaches no account. Each drops the save stamps of the
+   * kanji it emptied.
    */
-  function cleared(at, saved) {
+  function cleared(at, saved, said) {
     books.update((b) => {
-      const how = clears(b);
+      const how = least(said, clears(b));
       if (how === 'joining') {
         for (const [ch, rec] of Object.entries(saved || {})) {
+          if (!b.pending && !Object.hasOwn(b.brought.kanji, ch) && !Object.hasOwn(b.saves.kanji, ch)) continue;
           noteRemoval(b, 'kanji', ch, Math.max(now(), newestSave(b, 'kanji', ch, rec && rec.at) + 1));
         }
       } else if (how === 'account') {
@@ -155,7 +166,7 @@ export function watchStores({ kanji, history, play, onPrefsSaved, books, local, 
       if (!mine()) return;
       const type = ev && ev.type;
       if (type === 'unsave') unsaved('kanji', ev.ch, ev.rec && ev.rec.at);
-      else if (type === 'clear') cleared(ev.at, ev.saved);
+      else if (type === 'clear') cleared(ev.at, ev.saved, ev.said);
       else if (type === 'save') saved('kanji', ev.ch, ev.at);
       else if (type === 'import') imported(ev.chars || [], ev.texts || []);
       changed();

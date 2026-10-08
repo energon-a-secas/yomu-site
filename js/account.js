@@ -13,7 +13,7 @@
 // tests/sync-account.test.mjs runs this file under plain node with fakes.
 
 import { storesAdapter, watchStores } from './sync-watch.js';
-import { answeredBook, clearsOf, FIRST } from './sync-book.js';
+import { answeredBook, clearsOf, FIRST, BOOK_KEY } from './sync-book.js';
 
 /** The dev deployment of Convex project yomu. Public: a Convex URL is not a secret, the token is. */
 export const CONVEX_URL = 'https://jovial-mouse-131.convex.cloud';
@@ -337,7 +337,21 @@ export function startAccount(deps) {
     }
     if (status.phase === 'error' || now() - lastPull >= PULL_EVERY) void resume();
   });
-  if (win && typeof win.addEventListener === 'function') win.addEventListener('online', () => { if (live() && status.phase === 'error') void resume(); });
+  if (win && typeof win.addEventListener === 'function') {
+    win.addEventListener('online', () => { if (live() && status.phase === 'error') void resume(); });
+    // Another tab wrote the book (it joined, answered, synced): what this
+    // tab says of it is painted again from the book, the line's last sync
+    // and the Clear all dialog's words with it. Painted from this tab's own
+    // syncs only, a tab whose pull failed went on saying the account keeps
+    // its kanji while a Clear all there emptied the account.
+    win.addEventListener('storage', (e) => {
+      const key = e && typeof e.key === 'string' ? e.key : null;
+      if (key !== null && key !== BOOK_KEY) return;
+      const b = books.read();
+      if (b && b.account === signedAs() && b.at > status.at) status.at = b.at;
+      paint();
+    });
+  }
 
   const ready = (async () => {
     const mod = await importKit();

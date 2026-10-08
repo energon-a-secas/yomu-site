@@ -14,7 +14,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
 import { startAccount } from '../js/account.js';
-import { openBook, newBook } from '../js/sync-book.js';
+import { openBook, newBook, BOOK_KEY } from '../js/sync-book.js';
 import { openKanji } from '../js/kanji-store.js';
 import { openHistory } from '../js/history-store.js';
 import { openPlay } from '../js/play-store.js';
@@ -30,7 +30,7 @@ async function until(ok, what, ms = 10000) {
 }
 const listeners = () => {
   const l = {};
-  return { addEventListener: (type, fn) => { (l[type] ||= []).push(fn); }, fire(type) { for (const fn of l[type] || []) fn(); } };
+  return { addEventListener: (type, fn) => { (l[type] ||= []).push(fn); }, fire(type, ev) { for (const fn of l[type] || []) fn(ev); } };
 };
 
 /** One browser's storage, shared by its tabs, and a clock in ms that the test moves. */
@@ -84,8 +84,12 @@ function tab(b, server, subject, failing = { on: () => false }) {
     account, kanji, failing, answers, win, doc,
     last: () => painted.at(-1),
     signIn(label = 'Aiko') { state = { status: 'signed-in', signedIn: true, userId: subject, label }; for (const fn of auth) fn(state); },
-    /** The storage event: this tab reads My kanji again, as events-kanji.js does. */
-    reload() { kanji.load(b.now()); },
+    /**
+     * The storage events of what the other tab wrote: this tab reads My
+     * kanji again, as events-kanji.js does, and the account hears the
+     * book's (js/account.js).
+     */
+    reload() { kanji.load(b.now()); win.fire('storage', { key: BOOK_KEY }); },
     /** The held push runs. */
     async push() { for (const fn of timers.splice(0)) fn(); await until(() => painted.at(-1).phase !== 'syncing', 'the push'); },
   };
@@ -253,4 +257,39 @@ test('an answer whose sync failed is finished by the page loaded again, with wha
   assert.deepEqual(Object.keys(after.kanji.data.saved).sort(), ['星', '雪'], 'Use finished, with the save made since');
   assert.deepEqual(savedOn(server, 'user_b'), ['星', '雪']);
   assert.equal(bookOf(b).pending, undefined);
+});
+
+// A tab paints what it says about the book from its own syncs. A review
+// found a tab whose first pull failed still saying, after another tab had
+// joined the account, that the account keeps its kanji, while a Clear all
+// there emptied the account on every device. The book's storage event now
+// paints it again from the book.
+
+test('a tab hears the book another tab joined: its line and its Clear all words follow', async () => {
+  const b = browser();
+  openKanjiOf(b).save('天', b.now());
+  b.clock.t = T(10);
+  const server = fakeDb();
+  await fakeClient(server, 'user_a').mutation('sync:push', { kanji: [{ char: '雪', saved: { at: T(1), box: 0, due: '2023-11-14', reviews: 0, lapses: 0, s: T(1) }, removed: 0, seen: null }] });
+  const t1 = tab(b, server, 'user_a');
+  const t2 = tab(b, server, 'user_a', { on: (name) => name === 'sync:pullKanji' });
+  await t1.account.ready;
+  await t2.account.ready;
+  t2.signIn();
+  await until(() => t2.last().phase === 'error', 'tab 2\'s first pull failing');
+  assert.equal(t2.last().clears, 'joining', 'tab 2: only the kanji held here leave the account');
+  t1.answers.push('add');
+  t1.signIn();
+  await until(() => t1.last().phase === 'synced', 'tab 1 joins');
+  t2.reload();
+  assert.deepEqual(Object.keys(t2.kanji.data.saved).sort(), ['天', '雪']);
+  assert.equal(t2.last().clears, 'account', 'tab 2 now says the account empties');
+  assert.equal(t2.last().synced, true);
+  assert.equal(t2.last().at, bookOf(b).at, 'and when it last synced');
+  b.clock.t = T(11);
+  t2.kanji.clearAll(b.now());
+  t2.failing.on = () => false;
+  await t2.push();
+  await until(() => t2.last().phase === 'synced', 'tab 2 synced');
+  assert.equal(server.rowsOf('user_a').clears.length, 1, 'which its Clear all did');
 });

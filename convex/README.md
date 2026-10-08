@@ -33,7 +33,9 @@ push carries it):
   clear, so the account's other rows stay. Under a pending Use, and while
   someone other than the book's account is signed in (another account's
   question open or put off, or whoami still out after a switch), it
-  records no removal and reaches no account. Its dialog says which.
+  records no removal and reaches no account. Its dialog says which, and a
+  Clear all does what the dialog said when it opened, or less when the
+  book has moved since; never more.
 - Import: each kanji and phrase it brings back counts as saved now, one past
   any removal or Clear all known.
 - Counts and Play keep no time: they join by the higher number. A

@@ -4,6 +4,7 @@
 // where things are kept (the Clear all dialog's body, Play's lead), which
 // read differently once this browser syncs with an account, and the Clear
 // all dialog differently again while a join waits for the account's data.
+// The Clear all dialog keeps the words it opened with until it closes.
 //
 // Text nodes only. The account's name is the Auth Kit's label (a username,
 // a first name, or the part of an email before the @) and goes nowhere but
@@ -63,7 +64,11 @@ function relabel(el, key) {
  * for the account's data, or this browser alone.
  */
 const CLEAR_BODY = Object.freeze({ account: 'clearBodySynced', joining: 'clearBodyJoining', here: 'clearBody' });
-export const clearBodyKey = (status) => (Object.hasOwn(CLEAR_BODY, status.clears) ? CLEAR_BODY[status.clears] : CLEAR_BODY.here);
+const clearsIn = (status) => (Object.hasOwn(CLEAR_BODY, status.clears) ? status.clears : 'here');
+export const clearBodyKey = (status) => CLEAR_BODY[clearsIn(status)];
+
+let clearing = 'here';   // what a Clear all does, as the line last painted it
+let opened = null;       // the same, as the Clear all dialog opened with it
 
 export function paintSync(status) {
   const line = $('mk-sync');
@@ -75,9 +80,34 @@ export function paintSync(status) {
       p.act ? h('button', { type: 'button', class: 'btn btn--secondary btn--sm', 'data-sync': p.act }, p.label) : null,
     ].filter(Boolean));
   }
-  relabel($('mk-clear-body'), clearBodyKey(status));
+  clearing = clearsIn(status);
+  if (opened === null) relabel($('mk-clear-body'), CLEAR_BODY[clearing]);
   relabel($('pl-lead'), status.signedIn && status.synced ? 'playLeadSynced' : 'playLead');
 }
+
+/**
+ * The Clear all dialog opens (events-kanji.js): its words are what a Clear
+ * all does now, and stay so until it closes, whatever is painted meanwhile.
+ * Returns that, which the click hands to the clear (`clearWords()`, read by
+ * sync-watch.js), so the words the learner read are what it does, or more
+ * than it does when the book has moved since, never less.
+ */
+export function openClearWords() {
+  const dialog = $('mk-clear-dialog');
+  if (opened !== null && dialog && dialog.open) return opened;
+  opened = clearing;
+  relabel($('mk-clear-body'), CLEAR_BODY[opened]);
+  if (dialog) {
+    dialog.addEventListener('close', () => {
+      opened = null;
+      relabel($('mk-clear-body'), CLEAR_BODY[clearing]);
+    }, { once: true });
+  }
+  return opened;
+}
+
+/** What the open Clear all dialog says a Clear all does, or null. */
+export const clearWords = () => opened;
 
 let answer = null;
 

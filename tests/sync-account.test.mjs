@@ -859,6 +859,85 @@ for (const when of ['answered Add', 'answered Use', 'Not now', 'whoami out, then
   });
 }
 
+// A Clear all acts on what its dialog said when it opened. A review found
+// the words relabelled under an open dialog when the first sync landed
+// (from the kanji held here to the whole account), and the click then read
+// the book, so words read at opening promised less than the click did.
+
+test('a Clear all does what its dialog said when it opened, though the first sync landed under it', async () => {
+  const server = fakeDb();
+  const seen = { n: 5, first: '2025-10-01', last: '2025-10-01', words: [], e: 0 };
+  await fakeClient(server, 'user_a').mutation('sync:push', { kanji: [{ ...kanjiRow('雪', 5), seen }, kanjiRow('月', 5)] });
+  let hold = null;
+  const p = page({ server, answer: (name) => (name === 'sync:pullKanji' && !hold ? new Promise((r) => { hold = r; }) : undefined) });
+  await p.account.ready;
+  p.kit.become(signedIn('user_a'));
+  await until(() => hold, 'the first pull out');
+  p.kanji.save('月', p.clock.t);
+  const said = p.last().clears;          // the learner opens Clear all now
+  assert.equal(said, 'joining');
+  hold(fakeClient(server, 'user_a').query('sync:pullKanji', { cursor: null }));
+  await until(() => p.last().phase === 'synced' && savedHere(p).length === 2, 'the first sync, under the open dialog');
+  assert.equal(p.last().clears, 'account');
+  p.clock.t += 60_000;
+  p.kanji.clearAll(p.clock.t, said);     // the click, with the words it opened with
+  await until(() => savedIn(server, 'user_a').length === 1 || server.rowsOf('user_a').clears.length, 'the clear reaching the account');
+  assert.deepEqual(server.rowsOf('user_a').clears, [], 'the account was not cleared');
+  assert.deepEqual(savedIn(server, 'user_a'), ['雪'], 'it keeps 雪, which was not here at the opening, and loses 月, which was');
+  assert.equal(server.rowsOf('user_a').kanji.find((r) => r.char === '雪').seen.n, 5, 'and keeps its counts');
+});
+
+test('a Clear all whose dialog said the account does no more than what a Clear all does now', async () => {
+  // Opened signed out over a joined book (the account), clicked once
+  // another account's question is open (this browser only).
+  const server = fakeDb();
+  await fakeClient(server, 'user_a').mutation('sync:push', { kanji: [kanjiRow('月', 2)] });
+  const p = page({ server, subject: 'user_b', book: newBook('user_a', 1, {}) });
+  p.held.on = true;
+  p.kanji.save('月', 2);
+  await p.account.ready;
+  const said = p.last().clears;
+  assert.equal(said, 'account');
+  p.kit.become(signedIn('user_b', 'Ben'));
+  await until(() => p.held.open, 'the question');
+  p.clock.t += 60_000;
+  p.kanji.clearAll(p.clock.t, said);
+  const book = JSON.parse(p.bookStore.raw);
+  assert.deepEqual([book.epoch, book.removed.kanji], [0, {}], 'nothing kept for the old account');
+});
+
+test('the Clear all dialog keeps the words it opened with, and the click is handed them', async () => {
+  const { paintSync, openClearWords, clearWords } = await import('../js/render-sync.js');
+  const el = (more = {}) => ({ dataset: {}, textContent: '', ...more });
+  const closers = [];
+  const dialog = el({ open: false, addEventListener: (type, fn) => { if (type === 'close') closers.push(fn); } });
+  const els = { 'mk-clear-body': el(), 'pl-lead': el(), 'mk-clear-dialog': dialog };
+  const before = globalThis.document;
+  globalThis.document = { getElementById: (id) => els[id] || null };
+  try {
+    const status = (clears) => ({ available: true, signedIn: true, label: 'Aiko', phase: 'syncing', at: 0, synced: true, clears, error: null });
+    paintSync(status('joining'));
+    assert.equal(els['mk-clear-body'].dataset.ui, 'clearBodyJoining');
+    assert.equal(clearWords(), null, 'no dialog open');
+    assert.equal(openClearWords(), 'joining');
+    dialog.open = true;
+    paintSync(status('account'));        // the first sync lands while it is open
+    assert.equal(els['mk-clear-body'].dataset.ui, 'clearBodyJoining', 'the words stay as opened');
+    assert.equal(clearWords(), 'joining', 'and the click is handed them');
+    dialog.open = false;
+    for (const fn of closers.splice(0)) fn();
+    assert.equal(els['mk-clear-body'].dataset.ui, 'clearBodySynced', 'closed, they follow again');
+    assert.equal(clearWords(), null);
+  } finally {
+    globalThis.document = before;
+  }
+  // The page opens the dialog through openClearWords, and the click passes
+  // clearWords() to the clear.
+  const src = readFileSync(join(SITE, 'js/events-kanji.js'), 'utf8');
+  assert.match(src, /'mk-clear': \(b\) => \{ openClearWords\(\); openDialog\(/);
+  assert.match(src, /myKanji\(\)\.clearAll\(Date\.now\(\), clearWords\(\)\)/);
+});
+
 // What the learner does from the moment the kit says "signed in" counts.
 // A review found it recorded nowhere until begin() wrote the join: an
 // unsave made while the Convex client failed to load, while whoami was out
