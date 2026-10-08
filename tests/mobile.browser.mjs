@@ -256,6 +256,12 @@ async function step(where, label, fn) {
   }
 }
 
+/**
+ * The Auth Kit draws Sign in after its module loads, which on a busy run
+ * came after Play's first screen: the header was measured without it.
+ */
+const signInDrawn = (page) => page.waitForSelector('.neo-auth:not([hidden]) button');
+
 /** Phrases is in the header kit's ⋯ menu on a phone, and in the bar above 700px. */
 async function openPhrases(page) {
   if (await page.locator('.header-overflow-menu #phrases-open').count()) {
@@ -277,6 +283,7 @@ async function reader(browser, phone, lang) {
   await step(where, 'the empty page', async () => {
     await page.goto(BASE);
     await page.waitForSelector('.example');
+    await signInDrawn(page);
     await audit(page, where, 'empty');
   });
 
@@ -448,6 +455,7 @@ async function play(browser, phone, lang) {
   await step(where, 'Play', async () => {
     await page.goto(`${BASE}#/play`);
     await page.waitForSelector('[data-act="pl-start"]');
+    await signInDrawn(page);
     await audit(page, where, 'play');
   });
   for (const game of ['which', 'odd', 'twins', 'names', 'spaces']) await step(where, `Play ${game}`, async () => {
@@ -492,6 +500,7 @@ async function retry(browser, phone, lang) {
     await page.route('**/data/dict/**', (r) => r.abort());
     await page.goto(BASE);
     await page.waitForSelector('.example');
+    await signInDrawn(page);
     await tap(page, `.example[data-ex="${KANJI}"]`);
     await page.waitForSelector('#read-error [data-act="retry"]');
     await audit(page, where, 'read-error');
@@ -549,7 +558,7 @@ async function header(browser, phone, lang) {
       }, due);
       await page.goto(BASE);
       await page.waitForSelector('.example');
-      await page.waitForSelector('.neo-auth:not([hidden]) button');
+      await signInDrawn(page);
       await page.waitForTimeout(200);
       const shown = await page.evaluate(() => {
         const b = document.querySelector('#mykanji-open .mk-due');
@@ -685,6 +694,7 @@ async function landscape(browser, phone, lang) {
   await step(where, 'the reader in landscape', async () => {
     await page.goto(BASE);
     await page.waitForSelector('.example');
+    await signInDrawn(page);
     await readExample(page, KANJI);
     // A phone on its side is wide but short: the switches fold there too.
     const lay = await page.evaluate(() => ({
