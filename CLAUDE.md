@@ -789,23 +789,26 @@ preference change went into the old account's book and was dropped
 answer (`joined`, `brought`), and carries every removal made since (a
 Clear all before the account's data arrived as the removals of the kanji
 it emptied here). Use takes the account's data and, of this browser's
-own, only what the learner did after answering: a save counted after
-`joined` (the time of the answer) and a preference changed since
-(`sync-local.js sinceAnswer`). A removal or a Clear all made under a pending
-Use before the account's data has arrived here applies here only, never to
-the account (`sync.js joinBook`): the learner could not have seen the
-account's rows, and carrying it cleared kanji of the account's this browser
-never showed. Once the data has arrived (the sync that finishes the answer
-applied it), removals and a Clear all go to the account as usual; the Clear
-all dialog says this browser only until then. What it held at the answer
-stays behind, with its counts and Play's scores, and the old account's
-removals not yet pushed are dropped with that account.
-The old account keeps what it already had and nothing more: what changed
-here since its last sync with it is never sent to it, and with Use it is
-gone from this browser too. The dialog says exactly that, and when that
-last sync was; do not promise the old account more. A sign-out closes an
-open question (`ui.dismiss`), and an answer given after it applies to
-nobody.
+own, only what the learner did after answering: a save stamped in the
+book since the answer (`saves`, by hand or by Import; the answer starts the
+book afresh) and a preference changed since (`sync-local.js sinceAnswer`).
+The store's own save time is not read: Import keeps a backup's, and one
+exported on a clock ahead looked made after the answer and entered the
+account, though the dialog said this browser's kanji were gone
+(`tests/sync-stamps.test.mjs`). A removal or a Clear all made under a
+pending Use before the account's data has arrived here applies here only,
+never to the account (`sync.js joinBook`): the learner could not have seen
+the account's rows, and carrying it cleared kanji of the account's this
+browser never showed. Once the data has arrived (the sync that finishes the
+answer applied it), removals and a Clear all go to the account as usual; the
+Clear all dialog says this browser only until then. What it held at the
+answer stays behind, with its counts and Play's scores, and the old
+account's removals not yet pushed are dropped with that account. The old
+account keeps what it already had and nothing more: what changed here since
+its last sync with it is never sent to it, and with Use it is gone from this
+browser too. The dialog says exactly that, and when that last sync was; do
+not promise the old account more. A sign-out closes an open question
+(`ui.dismiss`), and an answer given after it applies to nobody.
 
 **A tab answered second runs as an ordinary sync.** Two tabs signed in to
 the new account both ask. A tab left paused on the question (Not now) does

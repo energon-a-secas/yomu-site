@@ -346,3 +346,57 @@ test('a removal of a row the joining browser does not bring leaves `joined` at n
   assert.equal(z.books.read().joined, z.now());
   assert.equal(z.kanji.isSaved('雨'), false);
 });
+
+// ── Use, and a backup made on a clock ahead ───────────────────────────────
+//
+// Use keeps of this browser's own only what the learner did after the
+// answer. A review found it reading the store's own save time, which an
+// Import keeps from the backup: a backup exported on a clock ahead of this
+// one carried a save that looked made after the answer, and it entered the
+// account although the dialog said this browser's kanji were gone. Only a
+// save stamped in the book since the answer counts.
+
+test('Use leaves behind a kanji and a phrase imported, before the answer, from a backup made on a clock ahead', async () => {
+  const server = fakeDb();
+  const t = '雨がふる。';
+  const z = lend(device(server, 'user_a', { at: 60 }));   // an hour ahead
+  z.kanji.save('三', z.now());
+  z.saveText(t);
+  const file = backup(z);
+  const y = device(server, 'user_a', { at: 0 });
+  y.saveText('山に行く。');
+  await y.signIn();                                      // the account holds a phrase
+  const x = lend(device(server, 'user_a', { at: 5 }));   // correct, never signed in
+  restore(x, file);
+  assert.ok(x.kanji.isSaved('三') && x.history.isSaved(textKey(t)));
+  const asked = await x.signIn({ answer: null });
+  assert.equal(asked.first, true);
+  x.tick(1);
+  await x.signIn({ answer: 'replace' });
+  assert.deepEqual(savedChars(x), [], 'this browser\'s 三 is gone from it');
+  assert.equal(x.history.isSaved(textKey(t)), false, 'and so is its phrase');
+  assert.deepEqual(server.rowsOf('user_a').kanji.filter((r) => r.saved).map((r) => r.char), [], 'neither was ever in the account');
+  assert.ok(!server.rowsOf('user_a').phrases.some((r) => r.key === textKey(t) && r.phrase));
+});
+
+test('after Use, a save and an Import made since the answer join, whatever their own times say', async () => {
+  const server = fakeDb();
+  const z = lend(device(server, 'user_a', { at: 0 }));
+  z.kanji.save('四', z.now() - 10 * 60_000);             // saved long before the answer
+  const file = backup(z);
+  const y = device(server, 'user_a', { at: 0 });
+  y.kanji.save('雪', y.now());
+  await y.signIn();
+  const x = lend(device(server, 'user_a', { at: 5 }));
+  x.kanji.save('月', x.now());
+  await x.signIn({ answer: null });
+  x.tick(1);
+  x.sync.choose('replace');                              // the answer, kept; its pull is still to come
+  x.tick(1);
+  x.kanji.save('星', x.now());
+  restore(x, file);                                      // 四, at a time before the answer
+  x.tick(1);
+  await x.sync.sync('replace');
+  assert.deepEqual(savedChars(x), ['四', '星', '雪']);
+  assert.deepEqual(server.rowsOf('user_a').kanji.filter((r) => r.saved).map((r) => r.char).sort(), ['四', '星', '雪']);
+});

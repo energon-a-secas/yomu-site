@@ -99,24 +99,26 @@ const samePhrase = (e, p) => PHRASE_FIELDS.every((f) => e[f] === p[f]);
 
 /**
  * With Use, this browser's own part of the join: only what the learner did
- * after answering (`book.joined`, kept in the book when the answer was
- * given). A save counted after it, by its own time or the book's stamp,
- * joins, and so does a preference changed since; whatever was saved before
- * stays behind, with every count and Play's scores. A removal or a Clear
- * all made before the account's data arrived is not carried: sync.js
- * joinBook drops it from the book, as the learner never saw the rows it
- * would remove from the account.
+ * after answering. A save stamped in the book (`saves`) joins: the answer
+ * starts the book afresh, so every stamp in it is a save made since, by
+ * hand or by Import, whatever this clock says. The store's own save time is
+ * never read here: an Import keeps its backup's, which a clock ahead of
+ * this one may have made, and that let a save from before the answer in. A
+ * preference changed since joins too; whatever was saved before stays
+ * behind, with every count and Play's scores. A removal or a Clear all made
+ * before the account's data arrived is not carried: sync.js joinBook drops
+ * it from the book, as the learner never saw the rows it would remove from
+ * the account.
  */
 function sinceAnswer(local, book) {
-  const after = (own, stamp) => Math.max(own, stamp || 0) > book.joined;
   const saved = {};
-  for (const [ch, rec] of Object.entries(local.kanji.saved)) if (after(rec.at, book.saves.kanji[ch])) saved[ch] = rec;
+  for (const [ch, rec] of Object.entries(local.kanji.saved)) if (Object.hasOwn(book.saves.kanji, ch)) saved[ch] = rec;
   const values = {};
   const mine = localPrefs(local.prefs, book);
   for (const [k, p] of Object.entries(mine ? mine.values : {})) if (book.prefsAt[k]) values[k] = p;
   return {
     kanji: { saved, seen: {} },
-    phrases: local.phrases.filter((e) => after(e.saved, book.saves.phrases[e.key])),
+    phrases: local.phrases.filter((e) => Object.hasOwn(book.saves.phrases, e.key)),
     prefs: Object.keys(values).length ? { values } : null,
   };
 }

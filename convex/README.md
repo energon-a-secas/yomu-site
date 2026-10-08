@@ -65,8 +65,10 @@ Not now syncs nothing and asks again later.
   data arrived) and changes made after signing in (a first sign-in) or
   after the answer (an account switch) reach the account.
 - Use: this browser takes the account's data. Of its own it keeps only
-  saves counted after the answer and preferences changed since; a removal
-  or Clear all made before the account's data arrived applies here only.
+  saves stamped in the book since the answer (by hand or by Import; the
+  store's own save time is not read) and preferences changed since; a
+  removal or Clear all made before the account's data arrived applies here
+  only.
   Everything else of this browser's (saves, counts, scores) is gone from
   it, and on a first sign-in it was never in the account.
 - After an account switch the old account keeps what it had: nothing

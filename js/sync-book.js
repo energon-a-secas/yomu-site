@@ -16,8 +16,9 @@
 //   joined    when this browser joined that account (ms): when the join was
 //             settled (begin() decided it, or the learner answered), or one
 //             past the account's Clear all when a clock ahead of this one
-//             made it (with Use, a save counted after it is the learner's
-//             own in the account, and the rest stays behind)
+//             made it (with Use, the time of the answer, which starts the
+//             book afresh: the saves stamped in `saves` since are the
+//             learner's own in the account, and the rest stays behind)
 //   brought   { kanji: { 天: ms }, phrases: { key: ms } }: each save this
 //             browser held when it joined, and when it counts as saved: no
 //             earlier than `joined`, and one past the account's removal of
