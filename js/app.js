@@ -22,6 +22,9 @@ function init() {
     });
     return;
   }
+  // Sign-in and sync (js/account.js): only with a Clerk key on the page, and
+  // never in an embed, which returned above and so imports none of it.
+  if (document.querySelector('meta[name="clerk-publishable-key"]')) import('./events-sync.js').then((m) => m.startAccounts()).catch((err) => console.warn('[yomu] accounts', err));
   // A link from another Neorgon site wins over what this browser kept. The
   // kept text is restored, not loaded anew: My kanji already counted it.
   const linked = takeFragmentText();

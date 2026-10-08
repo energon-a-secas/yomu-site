@@ -370,11 +370,18 @@ export function openKanji({ store = createStore({ key: KEY, version: VERSION }),
     return api;
   }
 
-  function commit(changed = true) {
+  // A listener hears what changed: { type: 'save', ch, at }, { type:
+  // 'unsave', ch, rec } (the record removed), { type: 'clear', at, saved,
+  // said } (every record removed; `said`, what the Clear all dialog said it
+  // does, when the clear came from it), { type: 'import', chars, texts } (the
+  // kanji a backup saved, the texts of its phrases), { type: 'sync' } for
+  // what sync itself wrote, or { type: 'change' }. js/sync-watch.js stamps
+  // the times.
+  function commit(changed = true, event = { type: 'change' }) {
     if (!changed) return false;
     writable = store.save(data);
     unsaved = false;
-    for (const fn of listeners) fn();
+    for (const fn of listeners) fn(event);
     return true;
   }
 
@@ -408,8 +415,11 @@ export function openKanji({ store = createStore({ key: KEY, version: VERSION }),
       commit(r.changed || moved);
       return r.counted;
     },
-    save: (ch, now) => commit(saveKanji(data, ch, now)),
-    unsave: (ch) => commit(unsaveKanji(data, ch)),
+    save: (ch, now) => commit(saveKanji(data, ch, now), { type: 'save', ch, at: +now }),
+    unsave(ch) {
+      const rec = data.saved[ch];
+      return commit(unsaveKanji(data, ch), { type: 'unsave', ch, rec });
+    },
     toggle(ch, now) { return data.saved[ch] ? (api.unsave(ch), false) : (api.save(ch, now), true); },
     answer(ch, ok, today) {
       if (!data.saved[ch]) return null;
@@ -422,16 +432,31 @@ export function openKanji({ store = createStore({ key: KEY, version: VERSION }),
     often: (limit) => oftenUnsaved(data, limit),
     lendPhrases(calls) { phrases = calls; },
     exportDoc: (today) => exportDoc(data, today, phrases ? phrases.out() : undefined),
+    /** Import: a backup's kanji, then its phrases (History's merge), then one event naming both. */
     merge(incoming) {
       const sum = mergeInto(data, incoming);
-      commit();
       if (phrases && incoming && incoming.phrases) sum.phrases = phrases.merge(incoming.phrases);
+      const texts = incoming && Array.isArray(incoming.phrases) ? incoming.phrases.map((p) => p.t) : [];
+      commit(true, { type: 'import', chars: Object.keys((incoming && incoming.saved) || {}), texts });
       return sum;
     },
-    clearAll(now) {
+    clearAll(now, said) {
+      const saved = data.saved;
       data = { saved: {}, seen: {}, session: startedAt({ id: data.session.id + 1, counted: [] }, now) };
       note = null;
-      return commit();
+      return commit(true, { type: 'clear', at: now, saved, said });
+    },
+    /**
+     * What sync decided (js/sync.js): per kanji a record, or null to remove
+     * it, read through this store's own validation; the session stays.
+     */
+    adopt({ saved = {}, seen = {} } = {}) {
+      const raw = { saved: { ...data.saved }, seen: { ...data.seen } };
+      for (const [part, changes] of [[raw.saved, saved], [raw.seen, seen]]) {
+        for (const [ch, rec] of Object.entries(changes)) { if (rec) part[ch] = rec; else delete part[ch]; }
+      }
+      data = { ...validate(raw).data, session: data.session };
+      return commit(true, { type: 'sync' });
     },
   };
   return api;

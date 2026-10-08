@@ -17,6 +17,7 @@ import { COLLECT_STRINGS } from '../js/strings-collect.js';
 import { PLAY_STRINGS } from '../js/strings-play.js';
 import { READER_STRINGS } from '../js/strings-reader.js';
 import { GAPS_STRINGS } from '../js/strings-gaps.js';
+import { SYNC_STRINGS } from '../js/strings-sync.js';
 
 const SITE = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const BANNED = /\b(powerful|seamless|leverages?|robust|utili[sz]e)\b/i;
@@ -42,8 +43,15 @@ test('the Gaps option\'s strings are in the table, none overridden, and no key i
   }
 });
 
+test('sign-in and sync\'s strings are in the table, none overridden, and no key is in another merged table', () => {
+  for (const [key, value] of Object.entries(SYNC_STRINGS)) {
+    assert.equal(STRINGS[key], value, key);
+    for (const other of [COLLECT_STRINGS, PLAY_STRINGS, READER_STRINGS]) assert.ok(!Object.hasOwn(other, key), `${key} is in two tables`);
+  }
+});
+
 test('every new string has English and neutral Spanish, the same placeholders, and none of the banned words', () => {
-  const tables = [COLLECT_STRINGS, PLAY_STRINGS, READER_STRINGS, GAPS_STRINGS];
+  const tables = [COLLECT_STRINGS, PLAY_STRINGS, READER_STRINGS, GAPS_STRINGS, SYNC_STRINGS];
   for (const [key, value] of tables.flatMap((x) => Object.entries(x))) {
     assert.equal(typeof value.en, 'string', `${key}.en`);
     assert.equal(typeof value.es, 'string', `${key}.es`);
@@ -65,7 +73,7 @@ test('every key the page names is in the table', () => {
     for (const m of src.matchAll(/\b(?:ui|withKanji|uiNodes)\('([A-Za-z][A-Za-z0-9]*)'/g)) named.add(m[1]);
   }
   const html = readFileSync(join(SITE, 'index.html'), 'utf8');
-  for (const m of html.matchAll(/data-ui(?:-label|-title)?="([A-Za-z][A-Za-z0-9]*)"/g)) named.add(m[1]);
+  for (const m of html.matchAll(/data-ui(?:-label|-title|-content)?="([A-Za-z][A-Za-z0-9]*)"/g)) named.add(m[1]);
   for (const g of [1, 2, 3, 4, 5, 6, 8]) named.add(`grade${g}`);
   assert.ok(named.size > 100, `only ${named.size} keys found`);
   const missing = [...named].filter((k) => !Object.hasOwn(STRINGS, k));

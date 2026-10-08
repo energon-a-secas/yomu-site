@@ -24,7 +24,7 @@ export const MAX_CHARS = 2000;
 /** Speech rates. Slow is slow enough to hear a long vowel as long. */
 export const RATE = Object.freeze({ normal: 1, slow: 0.6 });
 
-const ROMAJI = ['said', 'spelled', 'off'];
+export const ROMAJI = Object.freeze(['said', 'spelled', 'off']);
 /** The unsaved-kanji mark in the reading (My kanji): drawn, or not. */
 export const UNSAVED = Object.freeze(['mark', 'off']);
 /**
@@ -104,9 +104,19 @@ export function loadPrefs(s, loc = globalThis.location, nav = globalThis.navigat
   return s.prefs;
 }
 
+const prefsListeners = new Set();
+
+/** Hear every save of the preferences (js/account.js stamps the synced ones). Returns an unsubscribe. */
+export function onPrefsSaved(fn) {
+  prefsListeners.add(fn);
+  return () => prefsListeners.delete(fn);
+}
+
 /** false means this session works, but the preference could not be saved. */
 export function savePrefs(s) {
-  return prefsStore.save({ ...s.prefs });
+  const ok = prefsStore.save({ ...s.prefs });
+  for (const fn of prefsListeners) fn(s.prefs);
+  return ok;
 }
 
 export function rate(s) {

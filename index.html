@@ -6,10 +6,13 @@
        guard further down, so editing that script means re-hashing it (smoke check 29 reports a
        mismatch). Inline on*="" handlers never run; attach listeners from a script file. Add a
        source only when the page loads from it, as an exact host or a pinned path, never a whole
-       package CDN: a Convex deployment adds its https and wss URLs to connect-src, and sign-in
-       adds the CSP table in packages/neorgon-ui/auth/README.md. frame-ancestors, report-uri and
-       sandbox are ignored in a meta tag, so they are left out. -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-na6phygP/tfoCIp4oBeQgGJJpQsZob/udrLum+20QTI=' https://gc.zgo.at https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://cdn.neorgon.org/v1.0.0/; img-src 'self' data: https://neorgon.goatcounter.com; font-src 'self'; connect-src 'self' https://neorgon.goatcounter.com https://cloudflareinsights.com; manifest-src 'self'; frame-src 'none'; worker-src 'none'; object-src 'none'; base-uri 'none'; form-action 'self'">
+       package CDN. Sign-in adds the table in packages/neorgon-ui/auth/README.md (clerk.neorgon.com,
+       Turnstile, img.clerk.com, blob: workers). Sync adds the Convex client at one pinned esm.sh
+       path and the deployment's https URL in connect-src (js/account.js CONVEX_URL; the HTTP
+       client opens no websocket, so no wss); tests/sync-account.test.mjs fails when the two
+       disagree. frame-ancestors, report-uri and sandbox are ignored in a meta tag, so they are
+       left out. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-na6phygP/tfoCIp4oBeQgGJJpQsZob/udrLum+20QTI=' https://gc.zgo.at https://static.cloudflareinsights.com https://clerk.neorgon.com https://challenges.cloudflare.com https://esm.sh/convex@1.46.0/; style-src 'self' 'unsafe-inline' https://cdn.neorgon.org/v1.0.0/; img-src 'self' data: https://neorgon.goatcounter.com https://img.clerk.com; font-src 'self'; connect-src 'self' https://neorgon.goatcounter.com https://cloudflareinsights.com https://clerk.neorgon.com https://jovial-mouse-131.convex.cloud; manifest-src 'self'; frame-src https://challenges.cloudflare.com; worker-src blob:; object-src 'none'; base-uri 'none'; form-action 'self'">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="icon" type="image/x-icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
@@ -53,6 +56,14 @@
   <meta name="neo-repo" content="https://github.com/energon-a-secas/yomu-site">
   <link rel="stylesheet" href="css/neorgon-footer.css">
   <script defer src="js/neorgon-footer.js"></script>
+  <!-- Neorgon Auth Kit (vendored): one Neorgon account, and only if the learner wants one.
+       js/account.js starts it, never in an embed; with no session on neorgon.com nothing is
+       fetched from Clerk, Convex or esm.sh until someone presses Sign in. The reason is
+       relabelled on a language switch (data-ui-content). See packages/neorgon-ui/auth/README.md. -->
+  <meta name="clerk-publishable-key" content="pk_live_Y2xlcmsubmVvcmdvbi5jb20k">
+  <meta name="neo-auth-site" content="Yomu">
+  <meta name="neo-auth-reason" content="Sign in to keep your kanji, saved phrases and scores on every device. With no account, everything stays in this browser." data-ui-content="authReason">
+  <link rel="stylesheet" href="css/neorgon-auth.css">
   <!-- Neorgon Beacon Kit (vendored). Bottom-left correction reporter: it
        carries page context to balise.neorgon.com in a URL fragment and the
        visitor writes there. No form on this page and no request from it.
@@ -111,6 +122,9 @@
              is on and what a press switches to. render-chrome.js rewrites both. -->
         <button class="btn btn--ghost btn--sm" type="button" id="lang-toggle" data-act="lang" data-lang="en" aria-label="Language: English. Switch to Spanish" title="Language: English. Switch to Spanish"><span class="lang-code lang-code--on" data-lang-code="en">EN</span> / <span class="lang-code" data-lang-code="es">ES</span></button>
       </div>
+
+      <!-- The Auth Kit's slot: Sign in, or the account menu. Hidden until the kit decides. -->
+      <div class="neo-auth" data-neo-auth data-keep-mobile hidden></div>
 
       <a class="header-home" href="https://neorgon.com/" title="neorgon.com" aria-label="Neorgon home">
         <svg class="nh-hub-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -286,7 +300,10 @@
     <section class="mk" id="mykanji" aria-labelledby="mk-title" hidden>
       <button class="text-link mk-back" type="button" id="mk-back" data-act="kanji-back"><span aria-hidden="true">← </span><span id="mk-back-label">Back to the reader</span></button>
       <h2 class="mk-title" id="mk-title" tabindex="-1" data-ui="myKanji">My kanji</h2>
-      <p class="quiet mk-lead" id="mk-lead" data-ui="myKanjiLead">Kanji you save, and every kanji you have read here. They stay in this browser.</p>
+      <p class="quiet mk-lead" id="mk-lead" data-ui="myKanjiLead">Kanji you save, and every kanji you have read here.</p>
+      <!-- Where they are kept: this browser, or this browser and an account
+           (js/render-sync.js). An embed, which starts no sign-in, keeps this. -->
+      <p class="quiet mk-sync" id="mk-sync"><span data-ui="syncLocal">Kept in this browser.</span></p>
       <nav class="mk-nav" id="mk-nav" aria-label="My kanji sections" data-ui-label="navLabel">
         <a class="mk-tab" href="#/kanji" data-tab="list" data-ui="navReview">Review</a>
         <a class="mk-tab" href="#/kanji/collection" data-tab="collection" data-ui="navCollection">Collection</a>
@@ -359,6 +376,24 @@
       </div>
     </dialog>
 
+    <!-- Asked when an account signs in on a browser that synced with another
+         one (js/render-sync.js askAccount): nothing is merged without an answer. -->
+    <dialog class="dialog" id="sync-dialog" aria-labelledby="sync-title" aria-describedby="sync-body">
+      <div class="dialog__header">
+        <h2 id="sync-title" data-ui="syncAskTitle">This browser synced with another account</h2>
+      </div>
+      <div class="dialog__body">
+        <p id="sync-body"></p>
+        <p id="sync-counts"></p>
+        <p class="quiet" id="sync-how" data-ui="syncAskHow">Adding keeps both: this browser's data joins the account that just signed in. Using the account's data replaces what this browser holds with that account's. Either way, the account this browser synced with before keeps what it already had, and nothing more: what changed in this browser since its last sync with that account (kanji and phrases saved or unsaved, reviews, scores, display settings) is not sent to it. If you use the account's data, those changes are gone from this browser too.</p>
+        <div class="mk-confirm">
+          <button class="btn btn--ghost btn--sm" type="button" data-dialog-close data-ui="syncNotNow">Not now</button>
+          <button class="btn btn--secondary btn--sm" type="button" data-sync="use" data-ui="syncUse">Use the account's data</button>
+          <button class="btn btn--primary btn--sm" type="button" data-sync="add" data-ui="syncAdd">Add this browser's data</button>
+        </div>
+      </div>
+    </dialog>
+
     <dialog class="dialog dialog--wide" id="phrases-dialog" aria-labelledby="phrases-title">
       <div class="dialog__header">
         <h2 id="phrases-title" data-ui="phrasesTitle">Phrases</h2>
@@ -382,9 +417,10 @@
       <p><strong>Tatoeba.</strong> Word frequency bands are counted over the Tatoeba Project's Japanese sentences, and the spelling shown for a name written in katakana is the one their English translations use most, used under the Creative Commons Attribution 2.0 France licence. No sentence is included. <a href="https://tatoeba.org/en/downloads" target="_blank" rel="noopener noreferrer">tatoeba.org</a></p>
       <p><strong>Written here.</strong> The notes on sounds and grammar, the phrase library and the dialogues, and Play's hints, example words, look-alike rules and the lines with katakana compounds were written for Yomu and are in the public domain. Where the words of a line part, in the Gaps view and in Where are the spaces?, is Yomu's own reading of it over JMdict and JMnedict. Which kanji look alike is chosen from KanjiVG's parts and KANJIDIC's stroke counts.</p>
       <p><strong>Your text.</strong> What you paste is read in this browser. It is kept in this browser's local storage so a reload does not lose it, and Clear forgets it. It is never put in the address bar or sent anywhere, unless you click DeepL, Google Translate or Jisho, which open that site in a new tab with the text or the word.</p>
-      <p><strong>My kanji.</strong> The kanji you save, their review dates, how many texts you met each kanji in, what kind of text each was last met in, and up to eight dictionary words per kanji are kept in this browser's local storage too. The text itself is not. Export writes them to a file on your device; nothing is sent anywhere.</p>
+      <p><strong>My kanji.</strong> The kanji you save, their review dates, how many texts you met each kanji in, what kind of text each was last met in, and up to eight dictionary words per kanji are kept in this browser's local storage too. The text itself is not. Export writes them to a file on your device.</p>
       <p><strong>Play.</strong> Each game's best score, how many rounds you played, and how often you mixed up each pair of characters are kept in this browser's local storage. No text is.</p>
-      <p><strong>History.</strong> Only if you turn on Remember, the texts you read are kept in this browser's local storage too, up to 300 of them, for History, for "You read this before" and for the sentence each kanji was last seen in. Turning it off forgets them. A text you save with the bookmark is kept there whatever Remember says, up to 500 of them, until you unsave it, and Export in My kanji writes the saved ones to your backup file. They are never sent anywhere.</p>
+      <p><strong>History.</strong> Only if you turn on Remember, the texts you read are kept in this browser's local storage too, up to 300 of them, for History, for "You read this before" and for the sentence each kanji was last seen in. Turning it off forgets them. A text you save with the bookmark is kept there whatever Remember says, up to 500 of them, until you unsave it, and Export in My kanji writes the saved ones to your backup file.</p>
+      <p><strong>Your account, only if you sign in.</strong> Signing in is optional; without it, everything above stays in this browser and nothing is sent. Signed in with a Neorgon account, Yomu keeps a copy of My kanji (the saved kanji with their review dates, and every kanji count with its words), your saved phrases (the text of each one you saved with the bookmark), Play's scores and mix-ups, and your display choices (language, furigana, romaji, highlights, the unsaved-kanji mark, slow speech) in that account, on Convex, so every device you sign in on has them. A kanji or phrase you unsave, and Clear all, reach the other devices too; the account keeps only the removal, never the text of an unsaved phrase. What is never sent: the text in the box, the texts in History you did not save, the Remember and translation choices, and the reading on screen. Signing out stops syncing and keeps everything in this browser.</p>
     </template>
   </footer>
 

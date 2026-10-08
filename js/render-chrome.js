@@ -22,6 +22,8 @@ function applyStrings(root) {
   for (const el of root.querySelectorAll('[data-ui]')) el.textContent = ui(el.dataset.ui);
   for (const el of root.querySelectorAll('[data-ui-title]')) el.title = ui(el.dataset.uiTitle);
   for (const el of root.querySelectorAll('[data-ui-label]')) el.setAttribute('aria-label', ui(el.dataset.uiLabel));
+  // A <meta> has no text: the sign-in dialog's lede is its content attribute.
+  for (const el of root.querySelectorAll('meta[data-ui-content]')) el.setAttribute('content', ui(el.dataset.uiContent));
 }
 
 function prefValue(prefs, name) {

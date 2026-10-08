@@ -1,0 +1,3 @@
+# Convex writes these from the schema and the function signatures on every
+# push, as runcible-site and rappel-site leave them out too.
+_generated/

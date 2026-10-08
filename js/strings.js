@@ -8,11 +8,13 @@
 // controls, the empty state, the errors, and the words for parts of speech.
 // Spanish is neutral: no vosotros, no regional words. History's strings are in
 // strings-collect.js, Play's in strings-play.js, the Translation's in
-// strings-reader.js, the Gaps option's in strings-gaps.js, all one table.
+// strings-reader.js, the Gaps option's in strings-gaps.js, sign-in and sync's
+// in strings-sync.js, all one table.
 import { COLLECT_STRINGS } from './strings-collect.js';
 import { PLAY_STRINGS } from './strings-play.js';
 import { READER_STRINGS } from './strings-reader.js';
 import { GAPS_STRINGS } from './strings-gaps.js';
+import { SYNC_STRINGS } from './strings-sync.js';
 
 export const LANGS = Object.freeze(['en', 'es']);
 
@@ -53,6 +55,7 @@ export const STRINGS = Object.freeze({
   ...PLAY_STRINGS,
   ...READER_STRINGS,
   ...GAPS_STRINGS,
+  ...SYNC_STRINGS,
   pageTitle: { en: 'Yomu | Read Japanese word by word', es: 'Yomu | Lee japonés palabra por palabra' },
   subtitle: { en: 'Read Japanese word by word', es: 'Lee japonés palabra por palabra' },
   skip: { en: 'Skip to content', es: 'Saltar al contenido' },
@@ -243,10 +246,7 @@ export const STRINGS = Object.freeze({
   tomorrow: { en: 'tomorrow', es: 'mañana' },
 
   backToReader: { en: 'Back to the reader', es: 'Volver al lector' },
-  myKanjiLead: {
-    en: 'Kanji you save, and every kanji you have read here. They stay in this browser.',
-    es: 'Los kanji que guardas y todos los que leíste aquí. Se quedan en este navegador.',
-  },
+  myKanjiLead: { en: 'Kanji you save, and every kanji you have read here.', es: 'Los kanji que guardas y todos los que leíste aquí.' },
   loadingKanji: { en: 'Loading the kanji details', es: 'Cargando los detalles de los kanji' },
   kanjiInfoFailed: { en: 'Could not load the kanji details ({detail}).', es: 'No se pudieron cargar los detalles de los kanji ({detail}).' },
   storeDamaged: {

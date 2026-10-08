@@ -5,5 +5,8 @@
   "description": "Paste Japanese, see each word read, spelled and explained",
   "scripts": {
     "test": "node --test tests/*.test.mjs"
+  },
+  "dependencies": {
+    "convex": "^1.46.0"
   }
 }

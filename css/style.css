@@ -754,6 +754,9 @@ a.mk-open[aria-current="page"], a.pl-open[aria-current="page"] { background: rgb
 .mk-lead { margin-top: var(--space-1); }
 .mk-note { margin-top: var(--space-3); font-size: var(--text-sm); line-height: 1.5; color: var(--text-secondary); }
 .mk-note:empty { display: none; }
+/* Where My kanji is kept (js/render-sync.js): under the lead, and gone with it in a review. */
+.mk-sync { margin-top: var(--space-2); display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); }
+.mk-lead[hidden] + .mk-sync { display: none; }
 .mk-sec { margin-top: var(--space-8); }
 .mk-sec + .mk-sec { padding-top: var(--space-6); border-top: 1px solid var(--border-subtle); }
 .mk-sec-title { font-size: var(--text-base); font-weight: 600; margin-bottom: var(--space-2); }
@@ -1095,6 +1098,7 @@ html[data-embed="1"] body:has(> .neo-footer) { min-height: 0; }
   .col-tile { min-width: 44px; min-height: 44px; }
   .text-link.mk-open, .text-link.pl-open { display: inline-flex; align-items: center; min-height: 44px; }
   .seen-before .text-link, .embed-bar .text-link { display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; }
+  .mk-sync .btn { min-height: 44px; }
   /* A touch screen has no keys to press, so the key hints go. */
   .rv-kbd, .rv-keys { display: none; }
   .word-notes .text-link, .word-out .text-link { display: inline-flex; align-items: center; min-height: 44px; }
