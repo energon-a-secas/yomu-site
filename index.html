@@ -97,9 +97,10 @@
 
   <!-- Neorgon Header Kit contract (packages/neorgon-ui/header/README.md). App mode:
        Yomu is a tool someone uses with a sentence in hand, so the header stays slim
-       and gets out of the way on scroll. Phrases and My kanji are the controls kept
-       on a phone; Play and the language toggle move into the kit's overflow menu
-       there (with Play kept too, the Spanish header ran 2px past a 390px screen).
+       and gets out of the way on scroll. My kanji is the one control kept on a
+       phone, beside Sign in; Phrases, Play and the language toggle move into the
+       kit's overflow menu there (with Phrases kept too, the menu covered 11px of
+       Sign in at 360px and 30 at 320, and took its taps).
        My kanji is a link, because it is a place (#/kanji): it carries the number of
        reviews due, drawn by js/render-save.js. Play (#/play) is a place too. -->
   <header class="header-bar" data-header-mode="app">
@@ -115,7 +116,7 @@
 
     <div class="header-right">
       <div class="header-actions">
-        <button class="btn btn--ghost btn--sm" type="button" id="phrases-open" data-act="phrases" aria-haspopup="dialog" data-keep-mobile data-ui="phrases">Phrases</button>
+        <button class="btn btn--ghost btn--sm" type="button" id="phrases-open" data-act="phrases" aria-haspopup="dialog" data-ui="phrases">Phrases</button>
         <a class="btn btn--ghost btn--sm mk-open" href="#/kanji" id="mykanji-open" data-keep-mobile><span data-ui="myKanji">My kanji</span><span class="mk-due" data-due-count hidden></span></a>
         <a class="btn btn--ghost btn--sm pl-open" href="#/play" id="play-open"><span data-ui="play">Play</span></a>
         <!-- The current language is the bold one; the accessible name says which

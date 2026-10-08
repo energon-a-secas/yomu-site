@@ -362,23 +362,27 @@ copyrighted.
 `tests/mobile.browser.mjs` is the check, and npm test does not run it (it
 needs Playwright's browsers and a server): serve the site, then `node
 tests/mobile.browser.mjs`, with `--base=`, `--shots=DIR`,
-`--browsers=webkit,chromium`, `--devices=se,15,pixel` and `--langs=en,es` to
+`--browsers=webkit,chromium`, `--devices=se,15,pixel,s24,se1` and `--langs=en,es` to
 narrow it, and `PLAYWRIGHT_MODULE` naming Playwright's `index.mjs` when the
 monorepo's `node_modules` is not three directories up (a worktree kept
 elsewhere). It walks every screen (the empty page, a reading, the word, kanji
 and notes panels, Phrases, the header's menu, My kanji with its sync line, a
 review, the Collection and a tile, History, Clear all, Sign in, all five games
-to their result, Retry after a failed shard) at 375x667, 393x852 and 412x915
-with each device's touch and user agent, the reader on its side too, in both
-languages, and fails on what is Yomu's: focus in the text box after a tap,
-the first word below the fold, the switches unfolded on a phone, horizontal
-scroll, a control under 44px, a field under 16px, something focused or chosen
-under the header or the word sheet, a dialog that does not fit, a header that
-does not hold Phrases, My kanji and Sign in, a console error. What belongs to
-a fleet kit it prints as a note. `tests/mobile.test.mjs` holds the markup and
-stylesheet half under npm test. Run the browser check after a change to the
-reader's markup, a phone block of `style.css`, a header control or a dialog;
-it took 2.5 minutes on 2026-10-08.
+to their result, Retry after a failed shard) at 375x667, 393x852, 412x915,
+360x780 and 320x568 with each device's touch and user agent, the reader on its
+side too, the header alone with no review due and with 128, in both
+languages, and fails on what is Yomu's: focus in the text box after a tap, a
+focus ring on the header button a tap closed a dialog back to, the first word
+below the fold, the switches unfolded on a phone, horizontal scroll, a
+control under 44px, a field under 16px, something focused or chosen under the
+header or the word sheet, a dialog that does not fit, a header that does not
+hold My kanji and Sign in (with Phrases in its ⋯ menu on a phone), two of its
+controls or the due count overlapping, a tap at a control's edge that lands
+on another, a console error.
+What belongs to a fleet kit it prints as a note. `tests/mobile.test.mjs`
+holds the markup and stylesheet half under npm test. Run the browser check
+after a change to the reader's markup, a phone block of `style.css`, a header
+control or a dialog; it took 5.5 minutes on 2026-10-08.
 
 **A tap never leaves focus in the text box.** On an iPhone, focus in the box
 during a tap raises the keyboard over the reading the tap just loaded (the
@@ -392,7 +396,13 @@ keyboard types there too. `openDialog` focuses its opener before
 focus back on close to what had it at `showModal()`, before the close listener
 runs, and Safari focuses no button a tap presses: choosing a phrase closed the
 dialog into the box. Clear still focuses the box; a learner who clears is
-about to type.
+about to type. After a touch or a pen, the focus a dialog gives back carries
+no ring (`dialogs.js focusBack`, `focus({ focusVisible: false })`, which
+Chromium, WebKit and Firefox read): script focus takes its ring from what had
+focus before, a text box always has one, and real iOS showed the box's ring on
+Frases after Leerla. A control in the header kit's closed ⋯ menu (Phrases, on
+a phone) cannot take focus, so a dialog it opened gives focus to the ⋯ button
+instead; it fell to `<body>`.
 
 **The reading starts under one row of tools.** On a phone (under 600px wide,
 or 480px tall on its side) the five display switches fold behind
@@ -404,17 +414,27 @@ just above the Translation that points at them, and the hint's arrow-key line
 reading: 972px down a 375x667 screen (1045 in Spanish) before, 429 after; on
 its side, 717 before and 408 after, still under a 375px fold.
 
-**The phone header is at its budget.** At 375px the title, Phrases, My kanji,
-the menu, Sign in and the hub mark leave 4px. Yomu's two kept controls take
-6px of side padding under 420px (the kit owns a control's height, the gaps,
-the menu and the Sign in slot; a labelled control's padding is the site's
-`.btn`), and under 700px the reviews-due count rides on My kanji's corner: as
-a part of the label it widened the button by 30px and put the menu over Sign
-in on every phone, 412px included. Before both, the menu covered 20px of Sign
-in at 375 (14 in Spanish) and took its taps. A longer label, a third kept
-control or a wider badge brings that back, and the check fails on any overlap
-in the bar. The fleet's `scripts/check_site_shell.py` allows one kept action
-beside auth and home, and fails Yomu's two, as it did before Sign in came.
+**The phone header keeps one control beside Sign in.** Under the kit's
+700px, My kanji is the one `data-keep-mobile` action, and Phrases, Play and
+the language toggle are in the ⋯ menu. With Phrases kept too, the menu
+covered 11px of Sign in at 360px (6 in Spanish) and 30 at 320, and a tap on
+Sign in's left edge opened the menu. The bar now has 40px to spare at 360 and
+13 at 320, where My kanji takes 6px of side padding (under 360px; the kit
+owns a control's height, the gaps, the menu and the Sign in slot, and a
+labelled control's padding is the site's `.btn`). Past 700px every control
+is in the bar, and the kit does not fold what does not fit: in Spanish the
+language toggle ran 46px under Iniciar sesión at 734 (an iPhone 15 on its
+side) and 12 at 768, so up to 900px the four labelled controls take 5px of
+side padding. Spanish fits from 725px; from 701 to 724 the toggle still runs
+under Sign in, which only a kit that folds an overflowing bar can fix. Under
+900px the reviews-due count rides on My kanji's corner: as a part of the
+label it widened the button by 30px. The check measures the bar at every
+phone's width, upright and on its side, in both languages, with no review due
+and with 128, and fails on any overlap or a tap at a control's edge that
+lands on another. The fleet's `scripts/check_site_shell.py` allows one kept
+action beside auth and home, and Yomu passes it. When a phone turns past
+700px the kit puts the menu's controls back after My kanji, so it reads My
+kanji, Phrases, Play: the kit's order, not the page's.
 
 **What scrolls into view stops below the header and above the sheet.** `html`
 has `scroll-padding-top` for the header kit's bar, which comes back on every

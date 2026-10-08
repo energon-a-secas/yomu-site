@@ -5,26 +5,31 @@
 // Serve the site root (make serve), then:
 //
 //   node tests/mobile.browser.mjs [--base=http://localhost:8895/] [--shots=DIR]
-//     [--browsers=webkit,chromium] [--devices=se,15,pixel] [--langs=en,es]
+//     [--browsers=webkit,chromium] [--devices=se,15,pixel,s24,se1] [--langs=en,es]
 //
 // PLAYWRIGHT_MODULE names Playwright's index.mjs when the monorepo root's
 // node_modules is not three directories up (a worktree kept elsewhere).
 //
-// Portrait at 375x667 (iPhone SE), 393x852 (iPhone 15) and 412x915 (Pixel 7)
-// with each device's touch, user agent and isMobile, the reader in landscape
-// too, in English and Spanish. It fails on what is Yomu's:
+// Portrait at 375x667 (iPhone SE), 393x852 (iPhone 15), 412x915 (Pixel 7),
+// 360x780 (Galaxy S24) and 320x568 (the first iPhone SE) with each device's
+// touch, user agent and isMobile, the reader in landscape too, in English and
+// Spanish. It fails on what is Yomu's:
 //   - focus in the text box after a tap on an example, a phrase or Retry
 //     (an on-screen keyboard rises over the reading), or out of it after the
-//     same press made with keys on a computer;
-//   - the first word of a reading below the fold at 375x667 or 393x852, the
-//     Display switches drawn on a phone (under 600px wide, or on its side)
-//     before the Display button opens them, or folded at 1280x800, the
-//     Remember card above the reading, Speak all or the translate links hidden;
+//     same press made with keys on a computer; a focus ring on the header
+//     button a tap closed a dialog back to, or none after a key did;
+//   - the first word of a reading below the fold on the phones that mark it,
+//     the Display switches drawn on a phone (under 600px wide, or on its
+//     side) before the Display button opens them, or folded at 1280x800, the
+//     Remember card above the reading, Speak all or the translate links
+//     hidden;
 //   - horizontal scroll, a control of Yomu's under 44px (a link inside a
 //     sentence is listed, not failed), a text field under 16px (iOS zooms),
 //     a focused element or the chosen word under the sticky header or the
 //     word sheet, a dialog that does not fit, a header that does not hold
-//     Phrases, My kanji and Sign in, and any console error.
+//     My kanji and Sign in (with Phrases in its ⋯ menu on a phone), two of
+//     its controls or the due count overlapping, a tap at either edge of one
+//     landing on another, and any console error.
 // What belongs to a fleet kit (the header's control height, the Beacon, the
 // footer, the Auth Kit's dialog) is printed as a note and does not fail.
 
@@ -44,9 +49,12 @@ const PHONES = {
   se: { name: 'iPhone SE (3rd gen)', viewport: { width: 375, height: 667 }, land: 'iPhone SE (3rd gen) landscape', fold: true },
   15: { name: 'iPhone 15', viewport: { width: 393, height: 852 }, land: 'iPhone 15 landscape', fold: true },
   pixel: { name: 'Pixel 7', viewport: { width: 412, height: 915 }, land: 'Pixel 7 landscape' },
+  // The narrow end: at 360 the ⋯ menu covered 11px of Sign in, at 320 30px.
+  s24: { name: 'Galaxy S24', viewport: { width: 360, height: 780 }, land: 'Galaxy S24 landscape', fold: true },
+  se1: { name: 'iPhone SE', viewport: { width: 320, height: 568 }, land: 'iPhone SE landscape' },
 };
 const browsers = arg('browsers', 'webkit,chromium').split(',');
-const phones = arg('devices', 'se,15,pixel').split(',');
+const phones = arg('devices', 'se,15,pixel,s24,se1').split(',');
 const langs = arg('langs', 'en,es').split(',');
 const KANJI = 2;          // EXAMPLES[2], 今日は雨が降っています。
 
@@ -102,19 +110,42 @@ function inspect({ chosen = true } = {}) {
     const b = bar.getBoundingClientRect();
     headerBottom = Math.max(0, b.bottom);
     if (bar.scrollWidth > bar.clientWidth + 1) out.header.push(`the bar scrolls (${bar.scrollWidth} > ${bar.clientWidth})`);
-    const parts = [['Phrases', '#phrases-open'], ['My kanji', '#mykanji-open'], ['Sign in', '.neo-auth:not([hidden]) button'], ['menu', '.header-overflow-toggle'], ['home', '.header-home']];
+    // On a phone (the kit's 700px) the bar keeps My kanji and Sign in, and
+    // Phrases is in the ⋯ menu: kept as well, at 360px the menu covered 11px
+    // of Sign in and took its taps.
+    const phrases = document.querySelector('#phrases-open');
+    const inMenu = !!phrases && !!phrases.closest('.header-overflow-menu');
+    if (!phrases) out.header.push('Phrases is gone');
+    else if (vw <= 700 && !inMenu) out.header.push('Phrases is kept in the bar on a phone, where the ⋯ menu has room for it');
+    else if (vw > 700 && inMenu) out.header.push('Phrases is in the ⋯ menu on a wide screen');
+    // [label, selector, must be shown, a tap at either edge must land on it]
+    const parts = [
+      ['Phrases', '#phrases-open', !inMenu, true], ['My kanji', '#mykanji-open', true, true],
+      ['the due count', '#mykanji-open .mk-due:not([hidden])', false, false], ['Play', '#play-open', false, true],
+      ['the language', '#lang-toggle', false, true], ['Sign in', '.neo-auth:not([hidden]) button', true, true],
+      ['menu', '.header-overflow-toggle', false, true], ['home', '.header-home', true, true],
+    ].filter(([label]) => label !== 'Phrases' || !inMenu);
+    const onScreen = b.top >= -1;
     const rects = [];
-    for (const [label, sel] of parts) {
+    for (const [label, sel, needed, hit] of parts) {
       const el = document.querySelector(sel);
-      if (!el || !shown(el)) { if (label !== 'menu') out.header.push(`${label} is not shown`); continue; }
+      if (!el || !shown(el)) { if (needed) out.header.push(`${label} is not shown`); continue; }
+      if (el.closest('.header-overflow-menu')) continue;  // in the open ⋯ menu, under the bar
       const r = el.getBoundingClientRect();
       if (r.left < -1 || r.right > vw + 1) out.header.push(`${label} runs off the screen (${Math.round(r.left)} to ${Math.round(r.right)} of ${vw})`);
       for (const [other, o] of rects) {
+        // The due count rides on My kanji's own corner.
+        if ([label, other].includes('the due count') && [label, other].includes('My kanji')) continue;
         const x = Math.min(r.right, o.right) - Math.max(r.left, o.left);
         const y = Math.min(r.bottom, o.bottom) - Math.max(r.top, o.top);
         if (x > 1 && y > 1) out.header.push(`${label} overlaps ${other} by ${Math.round(x)}px`);
       }
       rects.push([label, r]);
+      if (!hit || !onScreen) continue;
+      for (const [edge, x] of [['left', r.left + 3], ['right', r.right - 3]]) {
+        const got = document.elementFromPoint(x, (r.top + r.bottom) / 2);
+        if (got && !el.contains(got)) out.header.push(`a tap at ${label}'s ${edge} edge lands on ${name(got)}`);
+      }
     }
   }
 
@@ -215,6 +246,15 @@ async function step(where, label, fn) {
   }
 }
 
+/** Phrases is in the header kit's ⋯ menu on a phone, and in the bar above 700px. */
+async function openPhrases(page) {
+  if (await page.locator('.header-overflow-menu #phrases-open').count()) {
+    await tap(page, '.header-overflow-toggle');
+    await page.waitForSelector('.header-overflow-menu.open #phrases-open');
+  }
+  await tap(page, '#phrases-open');
+}
+
 async function readExample(page, ix) {
   await tap(page, `.example[data-ex="${ix}"]`);
   await page.waitForSelector('#reading-body .tok');
@@ -294,25 +334,41 @@ async function reader(browser, phone, lang) {
   });
 
   // Safari focuses no button a tap presses, so the box can still hold focus
-  // when Phrases opens: the second opening here is made that way.
+  // when Phrases opens: the second opening here is made that way, and the
+  // text box's focus ring then rode onto the header button the dialog gave
+  // focus back to (real iOS 26.5, Frases, then Leerla).
   await step(where, 'Phrases', async () => {
     await page.evaluate(() => scrollTo(0, 0));
-    await tap(page, '#phrases-open');
+    await openPhrases(page);
     await page.waitForSelector('#phrases-dialog [data-act="read-phrase"]');
     await audit(page, where, 'phrases');
     await page.locator('#phrases-dialog [data-dialog-close]').first().tap();
-    await page.evaluate(() => { document.getElementById('yomu-text').focus(); document.getElementById('phrases-open').click(); });
+    await page.evaluate(() => {
+      document.getElementById('yomu-text').focus();
+      // The kit's menu opens with focus on its first item, moved there by script.
+      const menu = document.querySelector('.header-overflow-menu #phrases-open') && document.querySelector('.header-overflow-toggle');
+      if (menu) menu.click();
+      document.getElementById('phrases-open').click();
+    });
     await page.waitForSelector('#phrases-dialog [data-act="read-phrase"]');
     await watchBox(page);
     await tap(page, '#phrases-dialog [data-act="read-phrase"]');
     await page.waitForTimeout(300);
     await expectNoKeyboard(page, where, 'a tap on a phrase');
+    const back = await page.evaluate(() => {
+      const a = document.activeElement;
+      return { on: a ? (a.id || a.className || a.tagName) : null, header: !!a && !!a.closest('.header-bar'), ring: !!a && a.matches(':focus-visible') };
+    });
+    if (!back.header) fail(where, `Phrases closed with focus on ${back.on}, not on the header button that opened it`);
+    if (back.ring) fail(where, `a tap closed Phrases and ${back.on} shows a focus ring`);
   });
 
   await step(where, 'the header menu', async () => {
     if (!(await page.locator('.header-overflow-toggle').count())) return;
+    await page.evaluate(() => scrollTo(0, 0));
     await tap(page, '.header-overflow-toggle');
     await page.waitForTimeout(150);
+    if (!(await page.locator('.header-overflow-menu.open #phrases-open').isVisible())) fail(where, 'Phrases is not in the open ⋯ menu');
     await audit(page, where, 'header-menu');
     await page.keyboard.press('Escape');
   });
@@ -463,6 +519,41 @@ async function arrows(browser, phone, lang) {
   await ctx.close();
 }
 
+/**
+ * The header alone, at the phone's width upright and on its side, in this
+ * language, with no review due and with 128 due (a three-digit count on My
+ * kanji's corner): nothing in the bar overlaps, and a tap at either edge of a
+ * control lands on it. On its side an iPhone 15 is 734px wide, past the kit's
+ * 700px, where every control is in the bar.
+ */
+async function header(browser, phone, lang) {
+  for (const [due, side] of [[0, false], [128, false], [0, true], [128, true]]) {
+    const where = `${browser.engine} ${phone.key}${side ? '-landscape' : ''} ${lang} ${due ? `${due}-due` : 'none-due'}`;
+    const { ctx, page } = side ? await context(browser, phone.land, lang) : await context(browser, phone.name, lang, { viewport: phone.viewport, screen: phone.viewport });
+    await step(where, 'the header', async () => {
+      if (due) await page.addInitScript((n) => {
+        const saved = {};
+        for (let i = 0; i < n; i += 1) saved[String.fromCodePoint(0x4e00 + i * 7)] = { at: Date.now() - 864e5, box: 0, due: '2026-01-01', reviews: 0, lapses: 0 };
+        if (!localStorage.getItem('yomu-site:kanji')) localStorage.setItem('yomu-site:kanji', JSON.stringify({ __v: 1, data: { saved, seen: {}, session: { id: 1, counted: [] } } }));
+      }, due);
+      await page.goto(BASE);
+      await page.waitForSelector('.example');
+      await page.waitForSelector('.neo-auth:not([hidden]) button');
+      await page.waitForTimeout(200);
+      const shown = await page.evaluate(() => {
+        const b = document.querySelector('#mykanji-open .mk-due');
+        return b && !b.hidden && b.getClientRects().length ? b.textContent.replace(/\D+/g, ' ').trim().split(' ')[0] : null;
+      });
+      if (due && shown !== String(due)) fail(where, `My kanji shows ${shown === null ? 'no due count' : `a due count of ${shown}`}, not ${due}`);
+      if (!due && shown !== null) fail(where, `My kanji shows a due count of ${shown} with none due`);
+      measured.push(`${where}: header at ${await page.evaluate(() => innerWidth)}px, due count ${shown === null ? 'hidden' : shown}`);
+      await audit(page, where, 'header');
+    });
+    for (const e of page.errors) fail(where, `console: ${e.slice(0, 160)}`);
+    await ctx.close();
+  }
+}
+
 async function landscape(browser, phone, lang) {
   const where = `${browser.engine} ${phone.key}-landscape ${lang}`;
   const { ctx, page } = await context(browser, phone.land, lang);
@@ -501,6 +592,20 @@ async function keys(browser) {
     const wide = await page.evaluate(`({ toggle: ${shown('#display-toggle')}, panel: ${shown('#display-panel')} })`);
     if (wide.toggle || !wide.panel) fail(where, `at 1280px the switches show and the Display button does not (button ${wide.toggle}, switches ${wide.panel})`);
   });
+  // A key that closes Phrases gives its button focus back with a ring.
+  await step(where, 'Escape from Phrases', async () => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    // The kit brings Phrases back out of the ⋯ menu on the next frame.
+    await page.waitForSelector('.header-actions > #phrases-open');
+    await page.evaluate(() => scrollTo(0, 0));
+    await page.focus('#phrases-open');
+    await page.keyboard.press('Enter');
+    await page.waitForSelector('#phrases-dialog[open]');
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(150);
+    const back = await page.evaluate(() => { const a = document.activeElement; return { on: a && (a.id || a.tagName), ring: !!a && a.matches(':focus-visible') }; });
+    if (back.on !== 'phrases-open' || !back.ring) fail(where, `Escape closed Phrases with focus on ${back.on}, ring ${back.ring}: a keyboard user needs both`);
+  });
   await ctx.close();
 }
 
@@ -511,6 +616,7 @@ await Promise.all(browsers.map(async (engine) => {
   for (const key of phones) {
     const phone = { key, ...PHONES[key] };
     for (const lang of langs) {
+      await header(browser, phone, lang);
       await reader(browser, phone, lang);
       await retry(browser, phone, lang);
       await arrows(browser, phone, lang);

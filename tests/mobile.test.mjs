@@ -149,3 +149,25 @@ test('focusHome and the dialogs read the press, so no tap lands focus in the box
   const events = readFileSync(join(SITE, 'js/events.js'), 'utf8');
   assert.match(events, /watchPress\(\);/);
 });
+
+test('on a phone the bar keeps one action, My kanji, beside Sign in; Phrases goes into the ⋯ menu', () => {
+  const actions = element('class="header-actions"');
+  const kept = [...actions.matchAll(/<(button|a)\b[^>]*>/g)].map((m) => m[0]).filter((tag) => /\sdata-keep-mobile[\s>]/.test(tag));
+  assert.equal(kept.length, 1, 'one kept action (scripts/check_site_shell.py allows one beside auth and home)');
+  assert.match(kept[0], /id="mykanji-open"/);
+  assert.doesNotMatch(element('id="phrases-open"'), /data-keep-mobile/);
+  assert.match(element('id="mykanji-open"'), /data-due-count/, 'the due count still rides on My kanji');
+  const narrow = blocks(esc('@media (max-width: 359.98px)')).join('\n');
+  assert.match(narrow, /#mykanji-open\s*\{\s*padding/);
+  assert.doesNotMatch(narrow, /#phrases-open/, 'no phone padding for a control the menu holds');
+  // Past the kit's 700px every control is in the bar, which does not fold.
+  assert.match(blocks(esc('@media (min-width: 700.02px) and (max-width: 899.98px)')).join('\n'), /#lang-toggle\s*\{\s*padding/);
+  assert.match(blocks(esc('@media (max-width: 899.98px)')).join('\n'), /#mykanji-open \.mk-due\s*\{\s*position:\s*absolute/);
+});
+
+test('after a touch, a dialog gives focus back with no ring, and to the ⋯ button for a control in its menu', () => {
+  const dialogs = readFileSync(join(SITE, 'js/dialogs.js'), 'utf8');
+  assert.match(dialogs, /focusVisible: false/);
+  assert.match(dialogs, /closest\('\.header-overflow'\)/);
+  assert.match(dialogs, /querySelector\('\.header-overflow-toggle'\)/);
+});
