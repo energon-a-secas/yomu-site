@@ -27,7 +27,10 @@ push carries it):
   1)`. A copy whose `s` is not newer than `removed` is dead.
 - Clear all (My kanji only): one tombstone for every kanji, the account's
   `clear`, stamped `max(now, newest kanji save known + 1)`. It kills every
-  save not newer than it and every count made under an older clear.
+  save not newer than it and every count made under an older clear. Made
+  before the account's data has arrived here (a join pending: a first
+  sign-in, Add or Use), it is an unsave of each kanji it emptied here
+  instead, and no clear, so the account's other rows stay.
 - Import: each kanji and phrase it brings back counts as saved now, one past
   any removal or Clear all known.
 - Counts and Play keep no time: they join by the higher number. A
@@ -54,8 +57,9 @@ unasked. Not now syncs nothing and asks again later.
 
 - Add: this browser's data joins the account, saves counted as made at the
   answer, so one older than the account's removal or Clear all comes back
-  everywhere. Removals, Clear all and changes made after signing in (a
-  first sign-in) or after the answer (an account switch) reach the account.
+  everywhere. Removals, Clear all (the unsaves above, before the account's
+  data arrived) and changes made after signing in (a first sign-in) or
+  after the answer (an account switch) reach the account.
 - Use: this browser takes the account's data. Of its own it keeps only
   saves counted after the answer and preferences changed since; a removal
   or Clear all made before the account's data arrived applies here only.

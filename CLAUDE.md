@@ -658,7 +658,18 @@ time.** The owner's `clear` kills every save not newer than it and every
 seen record counted under an older clear (`e`, the clear its device knew).
 So a device that counted kanji after the clear, before it heard of it,
 loses those counts at its next sync; a push answers with the server's
-clear, and a newer one makes the client pull at once.
+clear, and a newer one makes the client pull at once. That is a Clear all
+made once the account's data has arrived here. One made before (the book
+`pending`: a first sign-in, an Add or a Use whose sync has not applied the
+pull) is an unsave of each kanji it emptied here, stamped as one, and no
+clear (`sync-watch.js cleared`): Add carries those removals, Use drops
+them, and the account's other rows stay. A review found it kept as the
+account's clear, which emptied every device of kanji this browser never
+showed while the dialog said "in this browser" (`tests/sync-account.test.mjs`,
+`tests/sync-first.test.mjs`). The dialog has three wordings, by
+`account.js` `clears`: this browser (no book, or a pending Use), the kanji
+held here (a pending first sign-in or Add, `clearBodyJoining`), the account
+(joined, `clearBodySynced`).
 
 **A browser that never synced is asked before its data meets an
 account's.** On a first sign-in `sync.js begin()` writes the join into the
@@ -765,19 +776,20 @@ sync. It used to live only in the page: after Use a save made before the
 retry was wiped by it, and after Add an unsave, a Clear all or a
 preference change went into the old account's book and was dropped
 (`tests/sync-account.test.mjs`). Add joins as above, from the time of the
-answer (`joined`, `brought`), and carries every removal and Clear all made
-since. Use takes the account's data and, of this browser's own, only what
-the learner did after answering: a save counted after `joined` (the time
-of the answer) and a preference changed since (`sync-local.js
-sinceAnswer`). A removal or a Clear all made under a pending Use before
-the account's data has arrived here applies here only, never to the
-account (`sync.js joinBook`): the learner could not have seen the
-account's rows, and carrying it cleared kanji of the account's this
-browser never showed. Once the data has arrived (the sync that finishes
-the answer applied it), removals go to the account as usual; the Clear all
-dialog says this browser only until then. What it held at the answer stays
-behind, with its counts and Play's scores, and the old account's removals
-not yet pushed are dropped with that account.
+answer (`joined`, `brought`), and carries every removal made since (a
+Clear all before the account's data arrived as the removals of the kanji
+it emptied here). Use takes the account's data and, of this browser's
+own, only what the learner did after answering: a save counted after
+`joined` (the time of the answer) and a preference changed since
+(`sync-local.js sinceAnswer`). A removal or a Clear all made under a pending
+Use before the account's data has arrived here applies here only, never to
+the account (`sync.js joinBook`): the learner could not have seen the
+account's rows, and carrying it cleared kanji of the account's this browser
+never showed. Once the data has arrived (the sync that finishes the answer
+applied it), removals and a Clear all go to the account as usual; the Clear
+all dialog says this browser only until then. What it held at the answer
+stays behind, with its counts and Play's scores, and the old account's
+removals not yet pushed are dropped with that account.
 The old account keeps what it already had and nothing more: what changed
 here since its last sync with it is never sent to it, and with Use it is
 gone from this browser too. The dialog says exactly that, and when that

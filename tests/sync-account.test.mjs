@@ -592,18 +592,26 @@ test('after Add fails at its pull, an unsave and a preference made before the re
   assert.equal(p.server.rowsOf('user_b').prefs[0].values.lang.v, 'es');
 });
 
-test('after Add fails at its pull, a Clear all made before the retry clears the new account too', async () => {
-  const p = await answeredThenFailed('add', ['雪'], ['月']);
-  const at = p.clock.t;
-  p.kanji.clearAll(at);
+test('after Add fails at its pull, a Clear all made before the retry removes the kanji held here from the new account, and only those', async () => {
+  // This said the Clear all cleared the new account too, until a review
+  // found it emptying, on every device, kanji of the account's this
+  // browser never showed, while the dialog spoke of this browser's data:
+  // before the account's data arrives, a Clear all is a removal of each
+  // kanji it emptied here.
+  const p = await answeredThenFailed('add', ['雪', '月'], ['月', '星']);
+  assert.equal(p.last().clears, 'joining', 'the dialog says only the kanji held here leave the account');
+  p.kanji.clearAll(p.clock.t);
+  assert.equal(p.bookStore.raw && JSON.parse(p.bookStore.raw).epoch, 0, 'no Clear all of the account is kept');
   await retried(p);
-  assert.deepEqual(Object.keys(p.kanji.data.saved), [], 'nothing came back here');
-  assert.ok(p.server.rowsOf('user_b').clears.some((c) => c.at >= at), 'the account holds the Clear all');
+  assert.deepEqual(p.server.rowsOf('user_b').clears, [], 'the account was not cleared');
+  assert.deepEqual(savedIn(p.server, 'user_b'), ['雪'], 'it keeps 雪, which this browser never held, and loses 月');
+  assert.deepEqual(Object.keys(p.kanji.data.saved), ['雪'], 'and 雪 reaches this browser');
+  assert.equal(p.last().clears, 'account', 'from here a Clear all empties the account');
   const other = page({ server: p.server, subject: 'user_b', book: newBook('user_b', 1, {}) });
   await other.account.ready;
   other.kit.become(signedIn('user_b', 'Ben'));
   await until(() => other.last().phase === 'synced', 'another device\'s sync');
-  assert.deepEqual(Object.keys(other.kanji.data.saved), [], 'another device of the account sees it cleared');
+  assert.deepEqual(Object.keys(other.kanji.data.saved), ['雪'], 'another device of the account agrees');
 });
 
 // Under Use, the learner could not have seen the account's rows before
@@ -692,6 +700,68 @@ test('a first sign-in whose pull fails: an unsave and a preference made before t
   assert.deepEqual(savedIn(p.server, 'user_a'), [], 'and removed the account\'s copy');
   assert.equal(p.prefs.lang, 'es', 'the preference changed here stands');
   assert.equal(p.server.rowsOf('user_a').prefs[0].values.lang.v, 'es');
+});
+
+// A Clear all made before the account's data has arrived here clears only
+// what this browser held. A review found one made while a first sign-in
+// waited (its pull lost) clearing the whole account on every device, kanji
+// this browser never showed included, while the dialog said "in this
+// browser"; Not now, Clear all, then Add did the same.
+
+test('a first sign-in whose pull fails: a Clear all made before the retry removes the kanji held here, and the account keeps the rest', async () => {
+  const server = fakeDb();
+  await fakeClient(server, 'user_a').mutation('sync:push', { kanji: [kanjiRow('一', 5), kanjiRow('二', 5)] });
+  const p = page({ server, fail: offline('sync:pullKanji') });
+  p.kanji.save('一', 2);
+  p.kanji.save('三', 2);
+  await p.account.ready;
+  p.kit.become(signedIn('user_a'));
+  await until(() => p.last().phase === 'error', 'the first pull failing');
+  assert.equal(JSON.parse(p.bookStore.raw).pending, 'first');
+  assert.equal(p.last().clears, 'joining', 'the dialog says only the kanji held here leave the account');
+  p.clock.t += 60_000;
+  p.kanji.clearAll(p.clock.t);
+  const book = JSON.parse(p.bookStore.raw);
+  assert.deepEqual([book.epoch, Object.keys(book.removed.kanji).sort()], [0, ['一', '三']], 'a removal of each kanji it emptied, and no clear');
+  await retried(p);
+  assert.equal(p.asked.length, 0, 'nothing saved here any more, so nothing is asked');
+  assert.deepEqual(server.rowsOf('user_a').clears, [], 'the account was not cleared');
+  assert.deepEqual(savedIn(server, 'user_a'), ['二'], 'it keeps 二, which this browser never held, and loses 一, which it did');
+  assert.deepEqual(savedHere(p), ['二']);
+  assert.equal(p.last().clears, 'account');
+});
+
+test('the Clear all dialog\'s words follow what a Clear all does: this browser, the kanji held here, or the whole account', async () => {
+  const { clearBodyKey } = await import('../js/render-sync.js');
+  const { STRINGS } = await import('../js/strings.js');
+  const server = fakeDb();
+  await fakeClient(server, 'user_b').mutation('sync:push', { kanji: [kanjiRow('雪', 5)] });
+  const p = page({ server, subject: 'user_b', book: newBook('user_a', 1, {}) });
+  const seen = [];
+  const note = () => { const s = p.last(); seen.push(s.clears); return clearBodyKey(s); };
+  p.kanji.save('月', 2);
+  await p.account.ready;
+  assert.equal(note(), 'clearBodySynced', 'signed out, a joined book still carries a Clear all to its account');
+  p.kit.become(signedIn('user_b', 'Ben'));
+  await until(() => p.asked.length === 1 && p.last().phase === 'paused', 'the question');
+  p.failing.on = offline('sync:pullMeta');
+  p.answers.push('use');
+  await p.account.choose(null);
+  await until(() => p.last().phase === 'error', 'Use, failed at its pull');
+  assert.equal(note(), 'clearBody', 'under a pending Use, a Clear all stays here');
+  await retried(p);
+  assert.equal(note(), 'clearBodySynced');
+  const anon = page();
+  await anon.account.ready;
+  assert.equal(clearBodyKey(anon.last()), 'clearBody', 'no account at all');
+  const joining = page({ fail: offline('sync:pullKanji') });
+  await joining.account.ready;
+  joining.kit.become(signedIn('user_a'));
+  await until(() => joining.last().phase === 'error', 'a first pull failing');
+  assert.equal(clearBodyKey(joining.last()), 'clearBodyJoining', 'a first sign-in waiting for the account\'s data');
+  assert.deepEqual(seen, ['account', 'here', 'account']);
+  for (const key of ['clearBody', 'clearBodyJoining', 'clearBodySynced']) assert.ok(Object.hasOwn(STRINGS, key), key);
+  assert.equal(clearBodyKey({}), 'clearBody', 'a status from before it said, read as this browser only');
 });
 
 test('a push that fails after the pull wrote the book is finished by an ordinary sync', async () => {

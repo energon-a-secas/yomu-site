@@ -198,3 +198,37 @@ test('a first sign-in not settled is never run as an ordinary sync: it is decide
   assert.equal(x.books.read().pending, FIRST);
   assert.equal((await x.signIn({ answer: null })).first, true, 'begin() asks again');
 });
+
+// A Clear all made while a first sign-in waits for its answer (Not now)
+// empties this browser, which is what its dialog says. A review found it
+// kept as a Clear all of the account, so Add then emptied the account on
+// every device, kanji this browser never showed included. Until the
+// account's data arrives, a Clear all is a removal of each kanji it emptied
+// here: Add carries those, as it carries an unsave, and Use drops them.
+
+for (const answer of ['adopt', 'replace']) {
+  test(`Not now, Clear all, then ${answer === 'adopt' ? 'Add' : 'Use'}: the account keeps the kanji this browser never held`, async () => {
+    const server = fakeDb();
+    const y = device(server, 'user_a', { at: 0 });
+    for (const ch of ['一', '二']) y.kanji.save(ch, y.now());
+    await y.signIn();
+    const x = device(server, 'user_a', { at: 5 });
+    x.kanji.save('一', x.now());
+    x.kanji.save('三', x.now());
+    x.saveText('雨がふる。');
+    assert.equal((await x.signIn({ answer: null })).first, true, 'asked, and Not now');
+    x.tick(1);
+    x.kanji.clearAll(x.now());
+    const book = x.books.read();
+    assert.equal(book.epoch, 0, 'no Clear all of the account is kept');
+    assert.deepEqual(Object.keys(book.removed.kanji).sort(), ['一', '三'], 'a removal of each kanji it emptied');
+    x.tick(1);
+    await x.signIn({ answer });
+    assert.deepEqual(server.rowsOf('user_a').clears, [], 'the account was not cleared');
+    const kept = answer === 'adopt' ? ['二'] : ['一', '二'];
+    assert.deepEqual(savedOn(server), kept, answer === 'adopt' ? 'Add carries the removal of 一, which it held' : 'Use leaves the account as it was');
+    assert.deepEqual(savedHere(x), kept);
+    await y.sync.sync('same');
+    assert.deepEqual(savedHere(y), kept, 'another device agrees');
+  });
+}

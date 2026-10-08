@@ -71,7 +71,7 @@ export function startAccount(deps) {
 
   const local = storesAdapter({ kanji, history, play, prefs, remembering });
   const kept = books.read();
-  const status = { available: false, signedIn: false, label: '', phase: 'idle', at: kept ? kept.at : 0, synced: false, error: null };
+  const status = { available: false, signedIn: false, label: '', phase: 'idle', at: kept ? kept.at : 0, synced: false, clears: 'here', error: null };
   let kit = null;
   let client = null;
   let engine = null;
@@ -95,14 +95,27 @@ export function startAccount(deps) {
 
   /**
    * Whether what the learner changes here reaches an account (`synced`,
-   * which words the Clear all dialog and Play's lead): a book that joined
-   * one, or a join that will carry it (Add). A first sign-in that has not
-   * settled its way carries nothing yet, and under Use a Clear all made
-   * before the account's data arrives applies here only.
+   * which words Play's lead): a book that joined one, or a join that will
+   * carry it (Add). A first sign-in that has not settled its way carries
+   * nothing yet, and under Use what was here before stays behind.
    */
-  const carries = () => { const b = books.read(); return !!b && b.pending !== 'first' && b.pending !== 'replace'; };
+  const carries = (b) => !!b && b.pending !== 'first' && b.pending !== 'replace';
+  /**
+   * What a Clear all does (`clears`, which words its dialog): 'account'
+   * once a join has brought the account's data here, which empties the
+   * account on every device; 'joining' while a first sign-in or an Add
+   * waits for it, when only the kanji held here are removed, and reach the
+   * account if this browser's data is added (sync-watch.js); 'here' with no
+   * account, or under a pending Use, whose removals stay in this browser.
+   */
+  const clears = (b) => {
+    if (!b || b.pending === 'replace') return 'here';
+    return b.pending ? 'joining' : 'account';
+  };
   const paint = () => {
-    status.synced = carries();
+    const b = books.read();
+    status.synced = carries(b);
+    status.clears = clears(b);
     try { ui.paint({ ...status }); } catch (err) { console.error('[yomu] sync line', err); }
   };
   const live = () => status.signedIn && status.phase !== 'paused';

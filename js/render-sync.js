@@ -2,7 +2,8 @@
 // question asked when another account signs in, or when a first sign-in
 // finds data on both sides, and the two texts that say
 // where things are kept (the Clear all dialog's body, Play's lead), which
-// read differently once this browser syncs with an account.
+// read differently once this browser syncs with an account, and the Clear
+// all dialog differently again while a join waits for the account's data.
 //
 // Text nodes only. The account's name is the Auth Kit's label (a username,
 // a first name, or the part of an email before the @) and goes nowhere but
@@ -56,6 +57,14 @@ function relabel(el, key) {
   el.textContent = ui(key);
 }
 
+/**
+ * The Clear all dialog's words for what a Clear all does now (account.js
+ * `clears`): the whole account, only the kanji held here while a join waits
+ * for the account's data, or this browser alone.
+ */
+const CLEAR_BODY = Object.freeze({ account: 'clearBodySynced', joining: 'clearBodyJoining', here: 'clearBody' });
+export const clearBodyKey = (status) => (Object.hasOwn(CLEAR_BODY, status.clears) ? CLEAR_BODY[status.clears] : CLEAR_BODY.here);
+
 export function paintSync(status) {
   const line = $('mk-sync');
   if (line) {
@@ -66,7 +75,7 @@ export function paintSync(status) {
       p.act ? h('button', { type: 'button', class: 'btn btn--secondary btn--sm', 'data-sync': p.act }, p.label) : null,
     ].filter(Boolean));
   }
-  relabel($('mk-clear-body'), status.synced ? 'clearBodySynced' : 'clearBody');
+  relabel($('mk-clear-body'), clearBodyKey(status));
   relabel($('pl-lead'), status.signedIn && status.synced ? 'playLeadSynced' : 'playLead');
 }
 

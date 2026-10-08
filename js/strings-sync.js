@@ -94,6 +94,13 @@ export const SYNC_STRINGS = Object.freeze({
     en: 'This forgets every saved kanji, its review schedule and every count of the kanji you met, in this browser and in the account it syncs with, so every device signed in to that account empties too when it next syncs. History is not touched. Export first to keep a copy.',
     es: 'Esto olvida cada kanji guardado, su calendario de repaso y cada conteo de los kanji que viste, en este navegador y en la cuenta con la que se sincroniza, así que cada dispositivo con esa cuenta también queda vacío al sincronizarse. El historial no se toca. Exporta antes para guardar una copia.',
   },
+  // While a join waits for the account's data (a first sign-in, or Add):
+  // a Clear all removes the kanji held here, one by one, and clears nothing
+  // of the account's (js/sync-watch.js).
+  clearBodyJoining: {
+    en: 'This forgets every saved kanji, its review schedule and every count of the kanji you met, in this browser. Your account\'s kanji have not reached this browser yet, so your account keeps its counts and the kanji it saved, except the ones saved here: those are removed from it too, if this browser\'s data is added to it. History is not touched. Export first to keep a copy.',
+    es: 'Esto olvida en este navegador cada kanji guardado, su calendario de repaso y cada conteo de los kanji que viste. Los kanji de tu cuenta aún no llegan a este navegador, así que tu cuenta conserva sus conteos y los kanji que guardó, salvo los guardados aquí: esos también se quitan de ella, si los datos de este navegador se añaden a tu cuenta. El historial no se toca. Exporta antes para guardar una copia.',
+  },
   playLeadSynced: {
     en: 'Four short games with the characters that look alike. Your best scores are kept in this browser and in your account.',
     es: 'Cuatro juegos cortos con los caracteres que se parecen. Tus mejores puntajes se guardan en este navegador y en tu cuenta.',
