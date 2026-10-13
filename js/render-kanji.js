@@ -74,7 +74,8 @@ function row(ch, kid, info, here, pinned, mine) {
   const readings = (here || []).map((x) => (x.run ? `${x.ruby} (${x.run})` : x.ruby));
   const meaning = info && Array.isArray(info.m) && info.m.length ? info.m.join(', ') : '';
   const strokes = info && Number.isInteger(info.s) ? ui('strokes', { n: info.s }) : '';
-  const parts = info && Array.isArray(info.parts) ? info.parts.filter((p) => p && p !== ch) : [];
+  // KanjiVG names a few parts by a code (原 has CDP-8BC4): only characters are listed.
+  const parts = info && Array.isArray(info.parts) ? info.parts.filter((p) => p && p !== ch && [...p].length === 1) : [];
   const seen = seenText(mine.seenOf(ch) && mine.seenOf(ch).n);
   return h('li', { class: 'kj-entry' }, [h('button', {
     type: 'button',
