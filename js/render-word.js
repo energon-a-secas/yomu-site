@@ -14,6 +14,8 @@ import { noteTitle, noteGist, tokenNotes, humanize } from './render-notes.js';
 import { saveToggle, seenText } from './render-save.js';
 import { NAME_LINE_TYPES } from './name-types.js';
 import { gapsPart } from './render-gaps.js';
+import { conjPart } from './render-conj.js';
+import { conjugateToken } from './conjugate.js';
 
 /** A token's beats with the romaji each one is spelled with. */
 export function tokenBeats(token) {
@@ -296,6 +298,7 @@ export function wordNode(token, {
     originPart(token),
     kanjiPart(token, { kidOf, kanjiOf }),
     chainPart(token, noteOf),
+    conjPart(conjugateToken(token), canSpeak),
     notesPart(token, noteOf),
     h('p', { class: 'word-out' }, h('a', {
       class: 'text-link',

@@ -692,6 +692,48 @@ rt .snd { border-bottom: 0; padding-bottom: 0; }
 .chain-step { line-height: 1.5; }
 .chain-step + .chain-step::before { content: "↓ "; color: var(--text-muted); }
 .chain-step--base [lang="ja"], .chain-step--surface { font-size: 1.125rem; }
+/* All forms (render-conj.js): folded under one summary, a row per form. */
+.conj { border-top: 1px solid var(--border-subtle); }
+.conj-sum {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-1) var(--space-3);
+  min-height: 44px;
+  padding: var(--space-2) 0;
+  cursor: pointer;
+  list-style: none;
+}
+.conj-sum::-webkit-details-marker { display: none; }
+.conj-sum::before {
+  content: '';
+  align-self: center;
+  width: 0.45rem; height: 0.45rem;
+  margin: 0 var(--space-1);
+  border-right: 2px solid var(--text-muted); border-bottom: 2px solid var(--text-muted);
+  transform: rotate(-45deg);
+  transition: transform var(--dur);
+}
+.conj[open] > .conj-sum::before { transform: rotate(45deg); }
+.conj-title { font-size: var(--text-sm); font-weight: 600; }
+.conj-count, .conj-here { font-size: var(--text-xs); color: var(--text-muted); }
+.word-part .conj-lead { margin-bottom: var(--space-2); }
+.conj-group + .conj-group { margin-top: var(--space-4); }
+.conj-list { list-style: none; display: flex; flex-direction: column; border-top: 1px solid var(--border-subtle); }
+.conj-row {
+  display: grid; grid-template-columns: minmax(0, 9rem) minmax(0, 1fr) auto; align-items: center;
+  gap: var(--space-1) var(--space-3);
+  padding: var(--space-1) 0;
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: var(--text-sm);
+}
+.conj-row--here { background: var(--accent-wash); }
+.conj-name { justify-self: start; text-align: left; color: var(--text-secondary); line-height: 1.35; }
+.conj-form { display: flex; flex-direction: column; min-width: 0; }
+.conj-ja { font-size: 1.125rem; line-height: 1.9; overflow-wrap: anywhere; }
+.conj-ja rt { font-size: 0.55em; }
+.conj-romaji { font-size: var(--text-xs); color: var(--text-secondary); overflow-wrap: anywhere; }
+@media (max-width: 420px) {
+  .conj-row { grid-template-columns: minmax(0, 1fr) auto; }
+  .conj-name { grid-column: 1 / -1; }
+}
 .word-notes { list-style: none; display: flex; flex-direction: column; gap: var(--space-3); font-size: var(--text-sm); line-height: 1.5; }
 .word-notes li { display: flex; flex-direction: column; align-items: flex-start; }
 .word-part .word-gist { color: var(--text-muted); margin-top: 0; }
@@ -1171,6 +1213,7 @@ html[data-embed="1"] body:has(> .neo-footer) { min-height: 0; }
   .rv-kbd, .rv-keys, .key-hint { display: none; }
   /* A note's title can be short: the Spanish の: de was 39px wide. */
   .word-notes .text-link, .word-out .text-link { display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; }
+  .conj-name.text-link, .conj-say { display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; }
 }
 
 /* ── Narrow ────────────────────────────────────────────────── */

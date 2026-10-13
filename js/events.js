@@ -29,6 +29,7 @@ import { PLAY_ACTIONS, bindPlay } from './events-play.js';
 import { bindGaps, gapsToggled } from './events-gaps.js';
 import { watchPress, isField } from './press.js';
 import { bindLayout } from './layout.js';
+import { conjugateToken } from './conjugate.js';
 
 export { analyzeNow, loadText };
 
@@ -288,6 +289,13 @@ function sayWord() {
   if (token) speak(sayable(token), { rate: rate(state) });
 }
 
+/** One row of the Word panel's All forms, found by its id, said by its reading. */
+function sayForm(b) {
+  const table = conjugateToken(selectedToken(state));
+  const row = table && table.rows.find((r) => r.id === b.dataset.form);
+  if (row) speak(row.reading, { rate: rate(state) });
+}
+
 // ── Phrases ───────────────────────────────────────────────────────────────
 
 let library = null;
@@ -421,6 +429,7 @@ const ACTIONS = {
   kanji: (b) => pinKanji(Number(b.dataset.kid)),
   'sound-out': (b) => speechOk(b) && soundOut(),
   'say-word': (b) => speechOk(b) && sayWord(),
+  'say-form': (b) => speechOk(b) && sayForm(b),
   lang: () => {
     state.prefs.lang = currentLang() === 'en' ? 'es' : 'en';
     savePrefs(state);

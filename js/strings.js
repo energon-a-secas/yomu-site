@@ -3,18 +3,16 @@
 // Resolution follows Runcible's rule: a bare string is legal (a proper name, a Japanese
 // example), English is the fallback, then Spanish, then ''. undefined never reaches the DOM.
 //
-// Notes about sounds and grammar do not live here. They belong to notes.js,
-// which the analyzer's ids point into; this file is the page's own copy: the
-// controls, the empty state, the errors, and the words for parts of speech.
-// Spanish is neutral: no vosotros, no regional words. History's strings are in
-// strings-collect.js, Play's in strings-play.js, the Translation's in
-// strings-reader.js, the Gaps option's in strings-gaps.js, sign-in and sync's
-// in strings-sync.js, all one table.
+// Notes about sounds and grammar live in notes.js, which the analyzer's ids
+// point into; this file is the page's own copy (controls, errors, parts of speech).
+// Spanish is neutral: no vosotros, no regional words. Merged into this table:
+// strings-collect, -play, -reader, -gaps, -sync, and -more (later features).
 import { COLLECT_STRINGS } from './strings-collect.js';
 import { PLAY_STRINGS } from './strings-play.js';
 import { READER_STRINGS } from './strings-reader.js';
 import { GAPS_STRINGS } from './strings-gaps.js';
 import { SYNC_STRINGS } from './strings-sync.js';
+import { MORE_STRINGS } from './strings-more.js';
 
 export const LANGS = Object.freeze(['en', 'es']);
 
@@ -56,6 +54,7 @@ export const STRINGS = Object.freeze({
   ...READER_STRINGS,
   ...GAPS_STRINGS,
   ...SYNC_STRINGS,
+  ...MORE_STRINGS,
   pageTitle: { en: 'Yomu | Read Japanese word by word', es: 'Yomu | Lee japonés palabra por palabra' },
   subtitle: { en: 'Read Japanese word by word', es: 'Lee japonés palabra por palabra' },
   skip: { en: 'Skip to content', es: 'Saltar al contenido' },
