@@ -18,6 +18,8 @@ import { paintSavedMarks } from './render-save.js';
 import { syncTranslation } from './render-translate.js';
 import { gapsOf } from './gaps.js';
 import { hideTip } from './render-gaps.js';
+import { pageForms } from './other-forms.js';
+import { baseReading } from './conjugate.js';
 
 export { paintChrome, paintStatus, paintSpeech, paintSavedMarks };
 
@@ -35,6 +37,10 @@ function emptyNode() {
   return [
     h('p', { class: 'empty-title' }, ui('emptyTitle')),
     h('p', { class: 'quiet' }, ui('emptyLead')),
+    // Search from the empty page, where a learner has nothing to read yet.
+    h('a', { class: 'empty-search', href: '#/search' }, [searchIcon(), h('span', null, ui('emptySearch'))]),
+    // The kanji of the day, filled on idle by events-daily.js (afterEmpty).
+    h('section', { class: 'daily', id: 'daily', 'aria-labelledby': 'daily-title', hidden: true }),
     h('ul', { class: 'examples', role: 'list' }, EXAMPLES.map((ex, i) => h('li', null, h('button', {
       type: 'button',
       class: 'example',
@@ -44,9 +50,21 @@ function emptyNode() {
       h('span', { class: 'example-ja', lang: 'ja' }, ex.ja),
       h('span', { class: 'example-tr' }, t(ex)),
     ])))),
-    // The kanji of the day, filled on idle by events-daily.js (afterEmpty).
-    h('section', { class: 'daily', id: 'daily', 'aria-labelledby': 'daily-title', hidden: true }),
   ];
+}
+
+function searchIcon() {
+  const NS = 'http://www.w3.org/2000/svg';
+  const el = document.createElementNS(NS, 'svg');
+  el.setAttribute('viewBox', '0 0 24 24');
+  el.setAttribute('class', 'search-icon');
+  el.setAttribute('aria-hidden', 'true');
+  const ring = document.createElementNS(NS, 'circle');
+  for (const [k, v] of [['cx', '10.5'], ['cy', '10.5'], ['r', '6']]) ring.setAttribute(k, v);
+  const handle = document.createElementNS(NS, 'path');
+  handle.setAttribute('d', 'm15 15 5 5');
+  el.append(ring, handle);
+  return el;
 }
 
 const emptied = [];
@@ -151,6 +169,18 @@ export function paintSide(state) {
   if (kanji) fill(kanji, kanjiNode(a, a.order || [], state.pinnedKanji, myKanji()));
 }
 
+/** A word's other spellings, or undefined while they load (paintWord runs again when they arrive). */
+function formsFor(state, token) {
+  if (!token || !token.entry || !['word', 'inflected'].includes(token.kind)) return null;
+  const otherForms = pageForms();
+  const key = token.base || token.surface;
+  const forms = otherForms.formsOf(key, baseReading(token));
+  if (forms === undefined) {
+    otherForms.need([key]).then(() => { if (selectedToken(state) === token) paintWord(state); }).catch(() => {});
+  }
+  return forms;
+}
+
 export function paintWord(state) {
   const word = $('word-body');
   if (!word) return;
@@ -163,6 +193,9 @@ export function paintWord(state) {
     kanjiOf: (ch) => ({ info: info.get(ch), saved: mine.isSaved(ch), n: mine.seenOf(ch) ? mine.seenOf(ch).n : 0 }),
     gaps: state.prefs.gaps && state.analysis ? state.analysis.gaps : null,
     tokens: state.analysis ? state.analysis.tokens : [],
+    forms: formsFor(state, selectedToken(state)),
+    // All forms keeps its register and its open state across repaints of the same word.
+    conj: state.conj && state.conj.token === selectedToken(state) ? state.conj : null,
   }));
 }
 

@@ -9,9 +9,12 @@ import { $, fill, h, debounce } from './utils.js';
 import { ui } from './strings.js';
 import { fetchJson, kanjiInfo, sharedDict } from './reader.js';
 import { createSearch, byParts, queryKind } from './search.js';
-import { resultNodes, partsNodes, PARTS_MEANT } from './render-search.js';
+import {
+  resultNodes, partsNodes, byWord, shownWord, PARTS_MEANT,
+} from './render-search.js';
 import { kanaChartNodes, countersNodes } from './render-learn.js';
 import { afterPaintAll } from './render.js';
+import { pageForms } from './other-forms.js';
 import { openKanjiPage } from './events-kanji-page.js';
 import { onRoute, openReader } from './events-kanji.js';
 import { loadText } from './events-read.js';
@@ -21,6 +24,7 @@ const TABS = Object.freeze(['words', 'parts', 'kana', 'counters']);
 const sr = {
   tab: 'words',
   script: 'hiragana',
+  counter: 3,
   kanaKept: [],
   query: '',
   token: 0,
@@ -54,7 +58,7 @@ async function run() {
   const out = $('sr-results');
   if (!out) return;
   if (queryKind(q) === 'empty') {
-    fill(out, []);
+    fill(out, tryNodes());
     setStatus('');
     return;
   }
@@ -62,9 +66,14 @@ async function run() {
   try {
     const found = await (await searcher()).search(q);
     const chars = [...new Set([...found.kanji, ...found.words.flatMap((w) => [...w.key])])];
-    const infos = await kanjiInfo(chars);
+    const forms = pageForms();
+    const [infos] = await Promise.all([
+      kanjiInfo(chars),
+      // The other spellings are a nicety: a shard that fails leaves them out.
+      forms.need(byWord(found.words).map((w) => shownWord(w).written)).catch(() => {}),
+    ]);
     if (token !== sr.token) return;
-    const { nodes, kept, status } = resultNodes(found, infos);
+    const { nodes, kept, status } = resultNodes(found, infos, q, (key, reading) => forms.formsOf(key, reading));
     sr.kept = kept;
     fill(out, nodes);
     setStatus(status);
@@ -77,6 +86,16 @@ async function run() {
 }
 
 const runSoon = debounce(run, 220);
+
+/** Queries to try, one of each kind, on an empty field. */
+const TRIES = Object.freeze(['eat', '食べた', 'sake']);
+
+function tryNodes() {
+  return h('p', { class: 'sr-tries' }, [
+    h('span', { class: 'quiet' }, ui('searchTry')),
+    ...TRIES.map((q, i) => h('button', { type: 'button', class: 'sr-try', 'data-act': 'sr-try', 'data-ix': i }, h('span', { lang: /[a-z]/.test(q) ? 'en' : 'ja' }, q))),
+  ]);
+}
 
 async function paintParts() {
   const body = $('sr-parts-body');
@@ -110,7 +129,7 @@ function showTab(tab, { focus = false } = {}) {
   for (const id of TABS) if ($(`sr-${id}`)) $(`sr-${id}`).hidden = sr.tab !== id;
   if (sr.tab === 'parts') paintParts();
   if (sr.tab === 'kana') paintKana();
-  if (sr.tab === 'counters') fill($('sr-counters'), countersNodes());
+  if (sr.tab === 'counters') fill($('sr-counters'), countersNodes(sr.counter));
   if (sr.tab === 'words' && focus) $('sr-input')?.focus();
 }
 
@@ -122,6 +141,20 @@ function focusPart(p) {
 }
 
 export const SEARCH_ACTIONS = {
+  'cn-pick': (b) => {
+    sr.counter = Number(b.dataset.ix) || 0;
+    fill($('sr-counters'), countersNodes(sr.counter));
+    document.querySelector(`#sr-counters [data-act="cn-pick"][data-ix="${sr.counter}"]`)?.focus({ preventScroll: true });
+  },
+  'sr-try': (b) => {
+    const q = TRIES[Number(b.dataset.ix)];
+    const input = $('sr-input');
+    if (!q || !input) return;
+    input.value = q;
+    sr.query = q;
+    run();
+    input.focus({ preventScroll: true });
+  },
   'kc-kana': (b) => { const ch = sr.kanaKept[Number(b.dataset.ix)]; if (ch) openKanjiPage(ch, b); },
   'kc-script': (b) => {
     sr.script = b.dataset.script === 'katakana' ? 'katakana' : 'hiragana';
@@ -171,6 +204,7 @@ export function bindSearch() {
   onRoute((next, prev, { boot = false } = {}) => {
     if (next !== 'search') return;
     showTab(sr.tab);
+    if (sr.tab === 'words' && !sr.query.trim()) run();
     if (boot) return;
     if (sr.tab === 'words' && input) input.focus({ preventScroll: true });
     else $('sr-title')?.focus({ preventScroll: true });

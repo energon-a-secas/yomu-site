@@ -7,7 +7,8 @@
 // on by `data-ix`, its place in a list this paint kept: no Japanese is
 // written into an attribute.
 
-import { h } from './utils.js';
+import { h, withJa } from './utils.js';
+import { glossWords } from './search.js';
 import { ui, t, posWord } from './strings.js';
 import { said, isKanji } from './kana.js';
 import { wordRuby, withKanji } from './render-save.js';
@@ -20,6 +21,20 @@ const SHOWN = 3;
 export const PARTS_SHOWN = 60;
 /** Results this short carry their meanings; longer ones are characters alone, so the picker stays near. */
 export const PARTS_MEANT = 24;
+
+/**
+ * One card per word: a kana key whose records are different words (さけ is
+ * 酒 and 鮭) gives one result per record, each written its own way.
+ */
+export function byWord(results) {
+  return results.flatMap((res) => {
+    const kana = ![...res.key].some(isKanji);
+    if (res.via === 'name' || !kana || res.recs.length < 2) return [res];
+    const spelled = res.recs.map((r) => (Array.isArray(r.k) && r.k.length && !r.u ? r.k[0] : res.key));
+    if (new Set(spelled).size < 2) return [res];
+    return res.recs.map((r) => Object.freeze({ ...res, recs: [r] }));
+  });
+}
 
 /** How a result is written and read, and what it means, from its key and records. */
 export function shownWord(res) {
@@ -38,7 +53,28 @@ export function shownWord(res) {
   };
 }
 
-const VIA = Object.freeze({ form: 'searchViaForm', rare: 'searchViaRare', name: 'searchViaName' });
+/** How a result was reached, in words: "Dictionary form of 食べた", "English: eat", "Romaji: さけ". */
+function viaText(res, q) {
+  if (res.via === 'form') return ui('searchViaFormOf', { q: res.romaji || q });
+  if (res.via === 'english') return ui('searchViaEnglish', { w: glossWords(q).join(' ') });
+  if (res.via === 'rare') return ui('searchViaRare');
+  if (res.via === 'name') return ui('searchViaName');
+  if (res.romaji) return ui('searchViaRomaji', { kana: res.romaji });
+  return '';
+}
+
+/** "Also written 鮨 · 鮓 (rare)", from other-forms.js, or nothing. */
+function formsLine(forms) {
+  if (!Array.isArray(forms) || !forms.length) return null;
+  return h('p', { class: 'sr-forms' }, [
+    h('span', { class: 'quiet' }, `${ui('alsoWritten')} `),
+    ...forms.slice(0, 4).flatMap((f, i) => [
+      i ? ' · ' : null,
+      h('span', { lang: 'ja' }, f.written),
+      f.tag ? h('span', { class: 'quiet' }, ` (${ui(`spell_${f.tag}`)})`) : null,
+    ]).filter(Boolean),
+  ]);
+}
 
 function kanjiTile(ch, kept, meaning) {
   const ix = kept.kanji.push(ch) - 1;
@@ -49,23 +85,26 @@ function kanjiTile(ch, kept, meaning) {
   ]);
 }
 
-function wordItem(res, kept, infos) {
+function wordItem(res, kept, infos, q, formsOf) {
   const w = shownWord(res);
   const ix = kept.words.push(w.written) - 1;
   const chars = [...new Set([...w.written].filter(isKanji))];
-  const tag = VIA[res.via];
+  const via = viaText(res, q);
   return h('li', { class: 'sr-item' }, [
     h('div', { class: 'sr-head' }, [
       h('span', { class: 'sr-word' }, wordRuby([w.written, w.reading])),
       h('span', { class: 'sr-romaji', lang: 'ja-Latn' }, said(w.reading)),
-      tag ? h('span', { class: 'word-tag' }, ui(tag)) : null,
+      w.pos.length ? h('span', { class: 'sr-pos' }, w.pos[0]) : null,
     ]),
-    w.pos.length ? h('p', { class: 'sr-pos' }, w.pos.join('; ')) : null,
-    w.glosses.length ? h('ol', { class: 'sr-glosses', lang: 'en' }, w.glosses.map((g) => h('li', null, g))) : null,
-    w.more ? h('p', { class: 'quiet sr-more' }, ui('searchMore', { n: w.more })) : null,
+    w.glosses.length ? h('p', { class: 'sr-gloss', lang: 'en' }, [
+      w.glosses.join('; '),
+      w.more ? h('span', { class: 'quiet' }, ` ${ui('searchMore', { n: w.more })}`) : null,
+    ]) : null,
+    via ? h('p', { class: 'sr-via' }, withJa(via)) : null,
+    res.via === 'name' ? null : formsLine((formsOf(w.written, w.reading) || []).filter((f) => f.written !== w.written)),
     h('div', { class: 'sr-actions' }, [
-      ...chars.map((ch) => kanjiTile(ch, kept, meaningText(infos.get(ch), 1))),
-      h('button', { type: 'button', class: 'btn btn--secondary btn--sm sr-read', 'data-act': 'sr-read', 'data-ix': ix }, [
+      ...chars.map((ch) => kanjiTile(ch, kept, null)),
+      h('button', { type: 'button', class: 'btn btn--primary btn--sm sr-read', 'data-act': 'sr-read', 'data-ix': ix }, [
         h('span', { 'aria-hidden': 'true' }, ui('searchRead')),
         h('span', { class: 'sr-only' }, ui('searchReadLabel', { w: w.written })),
       ]),
@@ -79,7 +118,7 @@ function wordItem(res, kept, infos) {
  * @param {Map} infos  kanjiInfo() of the kanji shown
  * @returns {{ nodes: Node[], kept: { words: string[], kanji: string[] }, status: string }}
  */
-export function resultNodes(found, infos) {
+export function resultNodes(found, infos, q = '', formsOf = () => null) {
   const kept = { words: [], kanji: [] };
   const nodes = [];
   if (found.kanji.length) {
@@ -88,16 +127,19 @@ export function resultNodes(found, infos) {
       h('div', { class: 'kp-tiles' }, found.kanji.map((ch) => kanjiTile(ch, kept, meaningText(infos.get(ch), 1)))),
     ]));
   }
-  if (found.words.length) nodes.push(h('ul', { class: 'sr-list', role: 'list' }, found.words.map((r) => wordItem(r, kept, infos))));
-  const n = found.words.length;
+  const words = byWord(found.words);
+  if (words.length) nodes.push(h('ul', { class: 'sr-list', role: 'list' }, words.map((r) => wordItem(r, kept, infos, q, formsOf))));
+  const n = words.length;
   const status = n ? (n === 1 ? ui('searchOne') : ui('searchMany', { n })) : (found.kanji.length ? '' : ui('searchNone'));
   return { nodes, kept, status };
 }
 
 /**
- * The parts pane: what is chosen, the kanji they lead to, and the picker,
- * grouped by stroke count. A part that leads nowhere with the chosen ones is
- * aria-disabled, not removed, so the grid does not move under a finger.
+ * The parts pane: the picker, grouped by stroke count, and under it a tray
+ * pinned to the bottom of the screen with what is chosen and the kanji it
+ * leads to, so a pick never moves the picker away from the finger. A part
+ * that leads nowhere with the chosen ones is aria-disabled, not removed, so
+ * the grid does not move either.
  * @param {{ list: [string, number|null][] }} data  loadParts()
  * @param {Set<string>} chosen
  * @param {{ kanji: string[], open: Set<string>|null }} found  byParts()
@@ -127,30 +169,31 @@ export function partsNodes(data, chosen, found, infos) {
   const order = [...groups.keys()].sort((a, b) => (a || 99) - (b || 99));
   const shown = found.kanji.slice(0, PARTS_SHOWN);
   const meant = shown.length <= PARTS_MEANT;
+  const tray = h('div', { class: 'sr-tray' }, [
+    h('div', { class: 'sr-tray-head' }, [
+      h('p', { class: 'sr-tray-status', role: 'status', 'aria-live': 'polite' }, chosen.size
+        ? [ui('partsResults', { n: found.kanji.length }), found.kanji.length > shown.length ? `, ${ui('partsShown', { n: shown.length })}` : '']
+        : ui('partsNoneChosen')),
+      chosen.size ? h('span', { class: 'sr-chosen-list', lang: 'ja' }, [...chosen].join(' ')) : null,
+      chosen.size ? h('button', { type: 'button', class: 'btn btn--ghost btn--sm', 'data-act': 'sr-parts-clear' }, ui('partsClear')) : null,
+    ]),
+    shown.length ? h('div', { class: 'kp-strip sr-part-results' }, shown.map((ch) => {
+      const ix = kept.kanji.push(ch) - 1;
+      return h('button', { type: 'button', class: 'kp-go', 'data-act': 'sr-part-kanji', 'data-ix': ix }, [
+        h('span', { class: 'kp-go-char', lang: 'ja' }, ch),
+        meant && meaningText(infos.get(ch), 1) ? h('span', { class: 'kp-go-mean', lang: 'en' }, meaningText(infos.get(ch), 1)) : null,
+        h('span', { class: 'sr-only' }, withKanji('openKanjiPage', ch)),
+      ]);
+    })) : null,
+  ]);
   return {
     kept,
     nodes: [
-      h('div', { class: 'sr-chosen' }, [
-        h('span', { class: 'kj-key' }, ui('partsChosen')), ' ',
-        chosen.size ? h('span', { class: 'sr-chosen-list', lang: 'ja' }, [...chosen].join(' ')) : h('span', { class: 'quiet' }, ui('partsNoneChosen')),
-        chosen.size ? h('button', { type: 'button', class: 'btn btn--ghost btn--sm', 'data-act': 'sr-parts-clear' }, ui('partsClear')) : null,
-      ]),
-      chosen.size ? h('p', { class: 'status', role: 'status', 'aria-live': 'polite' }, [
-        ui('partsResults', { n: found.kanji.length }),
-        found.kanji.length > shown.length ? `, ${ui('partsShown', { n: shown.length })}` : '',
-      ]) : null,
-      shown.length ? h('div', { class: 'kp-tiles sr-part-results' }, shown.map((ch) => {
-        const ix = kept.kanji.push(ch) - 1;
-        return h('button', { type: 'button', class: 'kp-go', 'data-act': 'sr-part-kanji', 'data-ix': ix }, [
-          h('span', { class: 'kp-go-char', lang: 'ja' }, ch),
-          meant && meaningText(infos.get(ch), 1) ? h('span', { class: 'kp-go-mean', lang: 'en' }, meaningText(infos.get(ch), 1)) : null,
-          h('span', { class: 'sr-only' }, withKanji('openKanjiPage', ch)),
-        ]);
-      })) : null,
-      ...order.map((n) => h('section', { class: 'sr-group' }, [
-        h('h3', { class: 'word-sub' }, n ? ui('partsStrokes', { n }) : ui('partsOther')),
+      h('div', { class: 'sr-picker-all' }, order.map((n) => h('section', { class: 'sr-group', 'aria-label': n ? ui('partsStrokes', { n }) : ui('partsOther') }, [
+        h('span', { class: 'sr-group-n', 'aria-hidden': 'true' }, n ? String(n) : '…'),
         h('div', { class: 'sr-picker' }, groups.get(n).map(pick)),
-      ])),
+      ]))),
+      tray,
     ],
   };
 }

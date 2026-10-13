@@ -7,10 +7,6 @@ export const CONJ_STRINGS = Object.freeze({
   conjTitle: { en: 'All forms', es: 'Todas las formas' },
   conjCount: { en: '{n} forms', es: '{n} formas' },
   conjHere: { en: 'In the text: {form}', es: 'En el texto: {form}' },
-  conjLead: {
-    en: 'Built from the dictionary form. A form with a note opens it.',
-    es: 'Formadas desde la forma de diccionario. Una forma con nota la abre.',
-  },
   conjLeadNa: {
     en: 'The word stays the same; the copula after it changes.',
     es: 'La palabra no cambia; cambia la cópula que la sigue.',
@@ -20,6 +16,15 @@ export const CONJ_STRINGS = Object.freeze({
   conjGroupMore: { en: 'More forms', es: 'Más formas' },
   conjSay: { en: 'Say {form}', es: 'Decir {form}' },
   speakShort: { en: 'Say', es: 'Decir' },
+  conjRegister: { en: 'Register', es: 'Registro' },
+  conjPlain: { en: 'Plain', es: 'Llana' },
+  conjPolite: { en: 'Polite', es: 'Cortés' },
+  conjDoes: { en: 'Does', es: 'Sí' },
+  conjDoesnt: { en: "Doesn't", es: 'No' },
+  conjNow: { en: 'Now', es: 'Ahora' },
+  conjPast: { en: 'Past', es: 'Pasado' },
+  conjInText: { en: 'in the text', es: 'en el texto' },
+  conjAbout: { en: 'Notes:', es: 'Notas:' },
 });
 
 /** Each form's name, { en, es }. */

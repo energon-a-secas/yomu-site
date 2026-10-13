@@ -58,6 +58,8 @@
  *     words are made of, in order, with a reason js/gaps.js knows, and no
  *     text or id twice. Whether the gaps are the analyzer's is
  *     tests/spaces.test.mjs's to say, since that needs the analyzer
+ *   - other spellings (data/spell/) held to the range rule, a spelling
+ *     that is the key itself, or a tag JMdict does not give
  *   - search's English index (data/search/) held to the range rule, a word
  *     that is not lower-case English, a key the first tier does not hold,
  *     and a parts picker (data/search/parts.json) out of its shape
@@ -281,6 +283,8 @@ const FORMATS = {
   'yomu-kpage-index/1': null,
   'yomu-kpage/1': checkKpage,
   'yomu-daily/1': checkDaily,
+  'yomu-spell-index/1': null,
+  'yomu-spell/1': checkSpell,
   'yomu-search-index/1': null,
   'yomu-search/1': checkSearchShard,
   'yomu-parts/1': checkParts,
@@ -578,14 +582,14 @@ function checkStrokes(rel, doc) {
 /** A kanji page shard: `w` [written, reading, gloss] rows, `p` part to kanji, `u` kanji. */
 function checkKpage(rel, doc) {
   for (const [ch, e] of Object.entries(doc.entries || {})) {
-    const extra = Object.keys(e).filter((k) => !['w', 'p', 'u'].includes(k));
+    const extra = Object.keys(e).filter((k) => !['w', 'p', 'u', 'v'].includes(k));
     if (extra.length) fail(rel, `${JSON.stringify(ch)} has unknown fields ${extra.join(' ')}`);
     if (e.w && !(Array.isArray(e.w) && e.w.length <= 10 && e.w.every((r) => Array.isArray(r) && r.length === 3 && r.every((x) => typeof x === 'string' && x)))) {
       fail(rel, `${JSON.stringify(ch)} has a malformed w`);
     }
     // A kanji's words are written with it; a kana's start with its sound.
     if (e.w && e.w.some((r) => !r[0].includes(ch) && !r[1].startsWith(ch))) fail(rel, `${JSON.stringify(ch)} lists a word without it`);
-    for (const list of [...Object.values(e.p || {}), e.u || '']) {
+    for (const list of [...Object.values(e.p || {}), e.u || '', e.v || '']) {
       if (typeof list !== 'string' || [...list].includes(ch)) fail(rel, `${JSON.stringify(ch)} has a malformed neighbour list`);
     }
   }
@@ -601,6 +605,16 @@ function checkDaily(rel, doc) {
       fail(rel, `row ${JSON.stringify(r)} is not [kanji, meaning, a word with it, reading, gloss], once`);
     }
     seen.add(r[0]);
+  }
+}
+
+/** Other spellings (tools/build-spellings.mjs): [reading, [[written, tag]]], never the key itself. */
+const SPELL_TAGS = new Set(['', 'oK', 'rK', 'iK', 'io', 'ateji', 'sK']);
+function checkSpell(rel, doc) {
+  for (const [key, rows] of Object.entries(doc.entries || {})) {
+    const ok = Array.isArray(rows) && rows.length && rows.every((r) => Array.isArray(r) && r.length === 2 && typeof r[0] === 'string' && r[0]
+      && Array.isArray(r[1]) && r[1].length && r[1].every((f) => Array.isArray(f) && f.length === 2 && typeof f[0] === 'string' && f[0] && f[0] !== key && SPELL_TAGS.has(f[1])));
+    if (!ok) fail(rel, `${JSON.stringify(key)} is not a list of [reading, [[another spelling, a tag]]]`);
   }
 }
 
@@ -686,6 +700,7 @@ function main() {
   checkRangeIndex(docs, 'data/strokes/index.json', 'yomu-strokes/1');
   checkRangeIndex(docs, 'data/kpage/index.json', 'yomu-kpage/1');
   checkRangeIndex(docs, 'data/search/index.json', 'yomu-search/1');
+  checkRangeIndex(docs, 'data/spell/index.json', 'yomu-spell/1');
   checkSearchKeys(docs);
   checkPopular(docs);
   checkLikeIndex(docs);

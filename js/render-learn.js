@@ -6,9 +6,10 @@
 // kept. A combined sound (きゃ) is two characters and has no page of its own.
 // Romaji is kana.js's, the same the reader spells with.
 //
-// The counters are counters.js's rows, whose readings are numbers.js's: a
-// reading that bends (いっぽん, not いちほん) is marked, in words for a screen
-// reader as well as by its look.
+// The counters are a chip per counter and the chosen one's card, its rows
+// counters.js's, whose readings are numbers.js's: a reading that bends
+// (いっぽん, not いちほん) is marked, in words for a screen reader as well as
+// by its look, and one line says where the sound changes.
 
 import { h } from './utils.js';
 import { ui, t } from './strings.js';
@@ -77,24 +78,40 @@ function countCell(n, reading, changed) {
   ]);
 }
 
-/** Every counter in COUNTER_LIST, each with what it counts and its eleven readings. */
-export function countersNodes() {
+/** "The sound changes at 1, 3, 6, 8, 10, and after 何", or that it never does. */
+function bendLine(row) {
+  const at = row.cells.filter((x) => x.changed).map((x) => x.n);
+  if (!at.length && !(row.question && row.question.changed)) return ui('counterNoBend', { c: row.plain });
+  if (!at.length) return ui('counterBendsQuestion');
+  return ui(row.question && row.question.changed ? 'counterBendsAtQ' : 'counterBendsAt', { list: at.join(', ') });
+}
+
+/**
+ * The counters: one chip per counter in COUNTER_LIST, and the chosen one's
+ * card, with what it counts, where its sound changes, and its eleven readings.
+ * A chip finds its counter by `data-ix`, its place in the list.
+ * @param {number} chosen  the chosen counter's place in COUNTER_LIST
+ */
+export function countersNodes(chosen = 0) {
+  const at = COUNTER_LIST[chosen] ? chosen : 0;
+  const { c, what } = COUNTER_LIST[at];
+  const row = counterRow(c);
   return [
     h('p', { class: 'quiet' }, ui('countersLead')),
-    h('ul', { class: 'cn-list', role: 'list' }, COUNTER_LIST.map(({ c, what }) => {
-      const row = counterRow(c);
-      if (!row) return null;
-      return h('li', { class: 'cn-item' }, [
-        h('div', { class: 'cn-head' }, [
-          h('span', { class: 'cn-counter', lang: 'ja' }, c),
-          h('span', { class: 'cn-plain', lang: 'ja' }, row.plain),
-          h('span', { class: 'cn-what' }, t(what)),
-        ]),
-        h('ol', { class: 'cn-cells', role: 'list' }, [
-          ...row.cells.map((x) => countCell(String(x.n), x.reading, x.changed)),
-          row.question ? countCell('何', row.question.reading, row.question.changed) : null,
-        ]),
-      ]);
-    })),
+    h('div', { class: 'cn-chips', role: 'group', 'aria-label': ui('counterPick') }, COUNTER_LIST.map((x, i) => h('button', {
+      type: 'button', class: 'cn-chip', 'data-act': 'cn-pick', 'data-ix': i, 'aria-pressed': String(i === at),
+    }, [h('span', { lang: 'ja', 'aria-hidden': 'true' }, x.c), h('span', { class: 'sr-only' }, [h('span', { lang: 'ja' }, x.c), `, ${t(x.what)}`])]))),
+    h('section', { class: 'cn-card', 'aria-labelledby': 'cn-title' }, [
+      h('h3', { class: 'cn-head', id: 'cn-title' }, [
+        h('span', { class: 'cn-counter', lang: 'ja' }, c),
+        row.plain !== c ? h('span', { class: 'cn-plain', lang: 'ja' }, row.plain) : null,
+      ]),
+      h('p', { class: 'cn-what' }, ui('counterCounts', { what: t(what) })),
+      h('p', { class: 'cn-bends' }, bendLine(row)),
+      h('ol', { class: 'cn-cells', role: 'list' }, [
+        ...row.cells.map((x) => countCell(String(x.n), x.reading, x.changed)),
+        row.question ? countCell('何', row.question.reading, row.question.changed) : null,
+      ]),
+    ]),
   ];
 }

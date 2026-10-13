@@ -1,0 +1,20 @@
+{
+"_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826"],"generated_by":"tools/build-spellings.mjs","generated_at":"2026-10-01"},
+"format": "yomu-spell-index/1",
+"keys": 22533,
+"maxKey": 22,
+"shards": [
+{"src":"data/spell/s00.json","first":"〇"},
+{"src":"data/spell/s01.json","first":"おとなになる"},
+{"src":"data/spell/s02.json","first":"きょうかつ"},
+{"src":"data/spell/s03.json","first":"ごうぎ"},
+{"src":"data/spell/s04.json","first":"しんぽ"},
+{"src":"data/spell/s05.json","first":"たいちょうふりょう"},
+{"src":"data/spell/s06.json","first":"となりあう"},
+{"src":"data/spell/s07.json","first":"ひこうし"},
+{"src":"data/spell/s08.json","first":"みにつける"},
+{"src":"data/spell/s09.json","first":"タン"},
+{"src":"data/spell/s10.json","first":"巫女"},
+{"src":"data/spell/s11.json","first":"祈祷"}
+]
+}

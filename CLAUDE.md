@@ -16,7 +16,7 @@ the display preferences to their account (Accounts and sync, below).
 ```bash
 make serve       # http://localhost:8895
 make validate    # node tools/check-data.mjs, then npm test
-make data        # rebuild data/dict, data/kanji, data/names, data/like, data/play, data/strokes, data/kpage and data/search from the pinned upstreams (manual)
+make data        # rebuild data/dict, data/kanji, data/names, data/like, data/play, data/strokes, data/kpage, data/search and data/spell from the pinned upstreams (manual)
 npm test         # node --test tests/*.test.mjs
 node tests/mobile.browser.mjs [--base=http://localhost:8895/] [--shots=DIR]   # every screen on five phones, WebKit and Chromium (On a phone, below)
 node tools/compare-readings.mjs <old data/> [data/]   # every token two builds read differently, over Tatoeba
@@ -264,13 +264,29 @@ a tap on a 12px gap to the word beside it (the pointerdown was on the gap), so
 `events-gaps.js` reads a tap from `touchend` and cancels its click; do not
 move that back to `click` alone.
 
+**Other written forms are shown with what JMdict or KANJIDIC says of them.**
+A word's other spellings (`data/spell/`, `tools/build-spellings.mjs`, per
+key and reading, since 方 read さま and read ほう are two words) show in the
+Word panel's "Also written" and on each Search card, each with JMdict's tag
+in words: old spelling, rare, irregular, ateji, or seldom seen for a
+search-only form (喰べる). They load from one shared loader
+(`other-forms.js pageForms`) with plain fetch, so they never count toward a
+read's progress, and the Word panel paints again when they arrive; All forms
+keeps its open state and register through that repaint (`state.conj`,
+`events-word.js`). A kanji's other shapes (国: 國 圀) are KANJIDIC's variants,
+resolved from JIS codes by `build-kanji-page.mjs` into `data/kpage/` `v`;
+KANJIDIC does not say which is older, so the page calls them other forms.
+Search shows a kana key whose records are different words as one card per
+word (さけ: 酒 and 鮭, `render-search.js byWord`).
+
 **A kanji page is a dialog, never an address.** `#kanji-dialog`
 (`events-kanji-page.js`) opens from the page button beside a kanji in the
 Kanji panel, the Word panel and the Collection's tile dialog, and holds the
 kanji it shows, and the ones Back returns to, in memory: a kanji is part of
 a reading, and the reading stays out of the URL. Its strokes are KanjiVG's
 paths (`data/strokes/`, kanji and kana) drawn with one dash each
-(`pathLength` 1); its words, the kanji sharing each part and the kanji built
+(`pathLength` 1), stepped with back, Draw (Pause while it runs) and next;
+its words (each with Read it), the kanji sharing each part and the kanji built
 on it are `data/kpage/` (`tools/build-kanji-page.mjs` says how each is
 chosen). KanjiVG and KANJIDIC disagree on nine jōyō stroke counts (the 2010
 additions such as 葛 and 遡, which KanjiVG draws in their printed form, and
@@ -1199,6 +1215,7 @@ session against it is checked on the live domain only.
 - `convex/_generated/`: written by `npx convex dev`, and gitignored.
 - `data/dict/**`, `data/kanji/**`, `data/names/**`: emitted by `tools/build-*.mjs` from the pins in `tools/lib/sources.mjs` (`build-names.mjs` after `build-dict.mjs`, which it reads, and it writes `data/names/popular.json` too; `data/kanji/joyo.json` by `build-joyo.mjs` from the committed shards, or by `build-kanji.mjs`). Rebuild, do not hand-edit.
 - `data/like/**`: emitted by `tools/build-sounds-like.mjs` from the committed `data/dict/` (after `build-dict.mjs`). Rebuild, do not hand-edit.
+- `data/spell/**`: emitted by `tools/build-spellings.mjs` from the pinned full JMdict and the committed first tier (after `build-dict.mjs`). Rebuild, do not hand-edit.
 - `data/search/**`: emitted by `tools/build-search.mjs` from the committed `data/dict/`, `data/kanji/` and `data/strokes/` (after `build-kanji-page.mjs`). Rebuild, do not hand-edit.
 - `data/strokes/**`, `data/kpage/**`: emitted by `tools/build-kanji-page.mjs` from KanjiVG (the pin in `tools/lib/sources.mjs`) and the committed `data/dict/` and `data/kanji/` (after `build-dict.mjs` and `build-kanji.mjs`). Rebuild, do not hand-edit.
 - `data/play/lookalikes.json`: emitted by `tools/build-lookalikes.mjs` from the committed `data/kanji/` (after `build-kanji.mjs` or `build-joyo.mjs`). Rebuild, do not hand-edit.

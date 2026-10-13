@@ -11,10 +11,8 @@
 
 import { h } from './utils.js';
 import { ui } from './strings.js';
-import {
-  saveToggle, seenText, wordRuby, withKanji,
-} from './render-save.js';
-import { readingsLine, meaningText } from './render-mykanji.js';
+import { seenText, wordRuby, withKanji } from './render-save.js';
+import { meaningText } from './render-mykanji.js';
 import { gradeName } from './render-remember.js';
 import {
   isKana, isHiragana, toHira, toKata, beatRomaji,
@@ -82,19 +80,91 @@ export function strokesTitle(ch, n) {
   return n === 1 ? ui('kpStrokesOne', { ch }) : ui('kpStrokesTitle', { ch, n });
 }
 
-/** The drawing and its three controls, or one line when KanjiVG has no file. */
+/** The bookmark the save toggle draws, at the size of a labelled button. */
+function bookmarkIcon() {
+  return svg('svg', {
+    class: 'kp-icon', viewBox: '0 0 24 24', 'aria-hidden': 'true', focusable: 'false',
+  }, [svg('path', { d: 'M7 3.5h10a1 1 0 0 1 1 1V20.5l-6-4.2-6 4.2V4.5a1 1 0 0 1 1-1Z' })]);
+}
+
+function speakerIcon() {
+  return svg('svg', {
+    class: 'kp-icon', viewBox: '0 0 24 24', 'aria-hidden': 'true', focusable: 'false',
+  }, [svg('path', { d: 'M11 5 6 9H3v6h3l5 4V5z' }), svg('path', { d: 'M15.5 8.5a5 5 0 0 1 0 7' })]);
+}
+
+function chevron(dir) {
+  return svg('svg', {
+    class: 'kp-icon', viewBox: '0 0 24 24', 'aria-hidden': 'true', focusable: 'false',
+  }, [svg('path', { d: dir === 'left' ? 'M15 5l-7 7 7 7' : 'M9 5l7 7-7 7' })]);
+}
+
+/**
+ * The page's two actions: the save toggle, labelled (a kana has none), and
+ * Say, which reads the kanji's first reading or the kana itself.
+ */
+function actionsPart(ch, mine, { save = true } = {}) {
+  return h('div', { class: 'kp-actions' }, [
+    save ? h('button', {
+      type: 'button', class: 'kp-save-btn', 'data-act': 'kp-save', 'aria-pressed': mine.saved ? 'true' : 'false',
+    }, [
+      bookmarkIcon(),
+      h('span', { 'aria-hidden': 'true' }, ui(mine.saved ? 'kpSaved' : 'kpSave')),
+      h('span', { class: 'sr-only' }, withKanji('saveKanji', ch)),
+    ]) : null,
+    h('button', { type: 'button', class: 'btn btn--secondary kp-say', 'data-act': 'kp-say', 'data-speak': '' }, [
+      speakerIcon(), h('span', null, ui('kpSay')),
+    ]),
+  ]);
+}
+
+/**
+ * The stroke player: the drawing, a tick per stroke, and back, Draw and
+ * next. events-kanji-page.js moves the step and writes the status line.
+ */
 export function strokesPart(ch, paths) {
   if (!paths || !paths.length) return h('p', { class: 'quiet kp-nostrokes' }, ui('kpNoStrokes'));
   const drawing = h('div', { class: 'kp-draw', id: 'kp-draw', 'data-step': paths.length });
   drawing.append(strokeSvg(ch, paths, strokesTitle(ch, paths.length)));
-  return h('div', { class: 'kp-strokes' }, [
-    drawing,
-    h('div', { class: 'kp-controls' }, [
-      h('button', { type: 'button', class: 'btn btn--secondary btn--sm', 'data-act': 'kp-draw' }, ui('kpDraw')),
-      h('button', { type: 'button', class: 'btn btn--ghost btn--sm', 'data-act': 'kp-next' }, ui('kpNext')),
-      h('button', { type: 'button', class: 'btn btn--ghost btn--sm', 'data-act': 'kp-all' }, ui('kpAll')),
+  return h('section', { class: 'kp-card kp-strokes', 'aria-labelledby': 'kp-strokes-title' }, [
+    h('div', { class: 'kp-card-head' }, [
+      h('h3', { class: 'word-sub', id: 'kp-strokes-title' }, ui('kpStrokeOrder')),
+      h('p', { class: 'kp-step', id: 'kp-step', role: 'status', 'aria-live': 'polite' }),
     ]),
-    h('p', { class: 'kp-step quiet', id: 'kp-step', role: 'status', 'aria-live': 'polite' }),
+    drawing,
+    h('div', { class: 'kp-ticks', 'aria-hidden': 'true' }, paths.map((d, i) => h('span', { class: 'kp-tick', 'data-stroke': i }))),
+    h('div', { class: 'kp-controls' }, [
+      h('button', { type: 'button', class: 'btn btn--secondary kp-nav', 'data-act': 'kp-prev' }, [chevron('left'), h('span', { class: 'sr-only' }, ui('kpPrev'))]),
+      h('button', { type: 'button', class: 'btn btn--primary kp-play', id: 'kp-play', 'data-act': 'kp-draw' }, ui('kpDraw')),
+      h('button', { type: 'button', class: 'btn btn--secondary kp-nav', 'data-act': 'kp-next' }, [chevron('right'), h('span', { class: 'sr-only' }, ui('kpNext'))]),
+    ]),
+  ]);
+}
+
+/** A row of kanji to go to, scrolling sideways on a phone. */
+function strip(chars, drawn) {
+  return h('div', { class: 'kp-strip' }, chars.map((c) => goTile(c, drawn, null)));
+}
+
+/** The common words, each with Read it, found by `data-ix` in `words`. */
+function wordsPart(titleKey, words, wordsKept) {
+  return h('section', { class: 'kp-sec' }, [
+    h('h3', { class: 'word-sub' }, ui(titleKey)),
+    words.length
+      ? h('ul', { class: 'kp-words', role: 'list' }, words.map((w) => {
+        const ix = wordsKept.push(w.written) - 1;
+        return h('li', { class: 'kp-word' }, [
+          h('span', { class: 'kp-word-text' }, [
+            wordRuby([w.written, w.reading]),
+            h('span', { class: 'kp-gloss', lang: 'en' }, w.gloss),
+          ]),
+          h('button', { type: 'button', class: 'btn btn--ghost btn--sm kp-read', 'data-act': 'kp-read', 'data-ix': ix }, [
+            h('span', { 'aria-hidden': 'true' }, ui('searchRead')),
+            h('span', { class: 'sr-only' }, ui('searchReadLabel', { w: w.written })),
+          ]),
+        ]);
+      }))
+      : h('p', { class: 'quiet' }, ui('kpWordsNone')),
   ]);
 }
 
@@ -121,36 +191,41 @@ function facts(info) {
   return out.length ? h('p', { class: 'mk-meta' }, out.join(' · ')) : null;
 }
 
+/** The top of a page: the character large, and beside it what it means and how it is read. */
+function hero(ch, lines) {
+  return h('div', { class: 'kp-hero' }, [
+    h('span', { class: 'kp-big', lang: 'ja', 'aria-hidden': 'true' }, ch),
+    h('div', { class: 'kp-hero-text' }, lines),
+  ]);
+}
+
+function chip(label, items) {
+  if (!Array.isArray(items) || !items.length) return null;
+  return h('span', { class: 'kp-chip' }, [label, ' ', h('span', { lang: 'ja' }, items.join(' · '))]);
+}
+
 /**
  * A kana's page: how it is drawn, how it is spelled in romaji, the same
  * sound in the other script, and common words that start with it.
  */
-function kanaPage(ch, paths, page, nodes, drawn) {
+function kanaPage(ch, paths, page, nodes, drawn, wordsKept, mine) {
   const hira = isHiragana(ch);
   const other = hira ? toKata(ch) : toHira(ch);
-  nodes.push(h('div', { class: 'kp-top' }, [
-    strokesPart(ch, paths),
-    h('div', { class: 'kp-facts' }, [
-      h('p', { class: 'cd-mean' }, [h('span', { class: 'kp-romaji', lang: 'ja-Latn' }, beatRomaji(ch) || '')]),
-      h('p', { class: 'mk-meta' }, ui(hira ? 'kpHiragana' : 'kpKatakana')),
-      other && other !== ch ? h('div', { class: 'kp-also' }, [
-        h('p', { class: 'kp-sub' }, ui(hira ? 'kpInKatakana' : 'kpInHiragana')),
-        h('div', { class: 'kp-tiles' }, goTile(other, drawn, null)),
-      ]) : null,
-    ]),
+  nodes.push(hero(ch, [
+    h('p', { class: 'kp-mean', lang: 'ja-Latn' }, beatRomaji(ch) || ''),
+    h('p', { class: 'mk-meta' }, ui(hira ? 'kpHiragana' : 'kpKatakana')),
   ]));
-  const words = page ? page.words : [];
-  nodes.push(h('section', { class: 'kp-sec' }, [
-    h('h3', { class: 'word-sub' }, ui('kpStartsWith')),
-    words.length
-      ? h('ul', { class: 'kp-words', role: 'list' }, words.map((w) => h('li', { class: 'kp-word' }, [
-        wordRuby([w.written, w.reading]),
-        h('span', { class: 'kp-gloss', lang: 'en' }, w.gloss),
-      ])))
-      : h('p', { class: 'quiet' }, ui('kpWordsNone')),
-  ]));
+  nodes.push(actionsPart(ch, mine, { save: false }));
+  nodes.push(strokesPart(ch, paths));
+  if (other && other !== ch) {
+    nodes.push(h('section', { class: 'kp-sec' }, [
+      h('h3', { class: 'word-sub' }, ui(hira ? 'kpInKatakana' : 'kpInHiragana')),
+      strip([other], drawn),
+    ]));
+  }
+  nodes.push(wordsPart('kpStartsWith', page ? page.words : [], wordsKept));
   nodes.push(h('p', { class: 'quiet kp-source' }, ui('kpSource')));
-  return { nodes, drawn };
+  return { nodes, drawn, words: wordsKept };
 }
 
 /**
@@ -161,16 +236,18 @@ function kanaPage(ch, paths, page, nodes, drawn) {
  * @param {object|null} p.info      kanjiInfo() of the kanji
  * @param {Map} p.infos             kanjiInfo() of its parts and neighbours
  * @param {string[]|null} p.paths   stroke paths, null when KanjiVG has none
- * @param {{ words, parts, used }|null} p.page  null while it loads
+ * @param {{ words, parts, used, variants }|null} p.page  null while it loads
  * @param {string|null} p.back      the kanji Back returns to
  * @param {{ saved: boolean, n: number }} p.mine
  * @param {string} [p.state]        'loading' | 'failed' | 'ready'
- * @returns {{ nodes: Node[], drawn: string[] }}
+ * @returns {{ nodes: Node[], drawn: string[], words: string[] }}
+ *   `drawn` the kanji its go buttons name, `words` the words Read it sends.
  */
 export function kanjiPageNodes({
   ch, info, infos, paths, page, back, mine, state = 'ready',
 }) {
   const drawn = [];
+  const wordsKept = [];
   const meanOf = (c) => meaningText(infos.get(c), 1);
   const nodes = [];
   if (back) {
@@ -178,32 +255,37 @@ export function kanjiPageNodes({
       h('span', { 'aria-hidden': 'true' }, '← '), ...withKanji('kpBack', back),
     ]));
   }
-  if (state === 'loading') return { nodes: [...nodes, h('p', { class: 'quiet', role: 'status' }, ui('kpLoading'))], drawn };
+  if (state === 'loading') return { nodes: [...nodes, h('p', { class: 'quiet', role: 'status' }, ui('kpLoading'))], drawn, words: wordsKept };
   if (state === 'failed') {
     return {
       nodes: [...nodes, h('p', { class: 'word-warn', role: 'alert' }, ui('kpFailed')),
         h('button', { type: 'button', class: 'btn btn--secondary btn--sm', 'data-act': 'kp-retry' }, ui('retry'))],
       drawn,
+      words: wordsKept,
     };
   }
-  if (isKana(ch)) return kanaPage(ch, paths, page, nodes, drawn);
+  if (isKana(ch)) return kanaPage(ch, paths, page, nodes, drawn, wordsKept, mine);
   const meaning = meaningText(info, 5);
-  nodes.push(h('div', { class: 'kp-top' }, [
-    strokesPart(ch, paths),
-    h('div', { class: 'kp-facts' }, [
-      meaning ? h('p', { class: 'cd-mean', lang: 'en' }, meaning) : null,
-      readingsLine(info),
-      facts(info),
-      paths && info && Number.isInteger(info.s) && info.s !== paths.length
-        ? h('p', { class: 'quiet kp-differs' }, ui('kpCountDiffers', { n: paths.length, s: info.s }))
-        : null,
-      h('p', { class: 'kp-save' }, [
-        saveToggle(ch, mine.saved, { 'data-act': 'kp-save' }),
-        h('span', { 'aria-hidden': 'true' }, ui(mine.saved ? 'dialogSaved' : 'dialogNotSaved')),
-      ]),
-      mine.n ? h('p', { class: 'mk-line' }, seenText(mine.n, true)) : null,
-    ]),
+  nodes.push(hero(ch, [
+    meaning ? h('p', { class: 'kp-mean', lang: 'en' }, meaning) : h('p', { class: 'quiet' }, ui('kanjiMissing')),
+    info ? h('p', { class: 'kp-chips' }, [chip(ui('onReading'), info.on), chip(ui('kunReading'), info.kun)]) : null,
+    facts(info),
+    mine.n ? h('p', { class: 'mk-meta' }, seenText(mine.n, true)) : null,
   ]));
+  nodes.push(actionsPart(ch, mine));
+  nodes.push(strokesPart(ch, paths));
+  if (paths && info && Number.isInteger(info.s) && info.s !== paths.length) {
+    nodes.push(h('p', { class: 'quiet kp-differs' }, ui('kpCountDiffers', { n: paths.length, s: info.s })));
+  }
+
+  const variants = page ? page.variants : [];
+  if (variants.length) {
+    nodes.push(h('section', { class: 'kp-sec' }, [
+      h('h3', { class: 'word-sub' }, ui('otherForms')),
+      h('div', { class: 'kp-strip' }, variants.map((c) => (infos.has(c) ? goTile(c, drawn, null) : h('span', { class: 'kp-go kp-go--plain' }, h('span', { class: 'kp-go-char', lang: 'ja' }, c))))),
+      h('p', { class: 'quiet kp-note' }, ui('otherFormsNote')),
+    ]));
+  }
 
   // KanjiVG names some parts by a code (CDP-8BC4) or a layout (⿱日隹): only characters are shown.
   const parts = info && Array.isArray(info.parts) ? info.parts.filter((x) => x && x !== ch && [...x].length === 1) : [];
@@ -215,8 +297,8 @@ export function kanjiPageNodes({
         : h('span', { class: 'kp-go kp-go--plain' }, h('span', { class: 'kp-go-char', lang: 'ja' }, part)),
       also.length ? h('div', { class: 'kp-also' }, [
         h('p', { class: 'kp-sub' }, withKanji('kpAlsoWith', part)),
-        h('div', { class: 'kp-tiles' }, also.map((c) => goTile(c, drawn, null))),
-      ]) : null,
+        strip(also, drawn),
+      ]) : h('p', { class: 'kp-sub' }, ui('kpOnlyHere')),
     ]);
   });
   nodes.push(h('section', { class: 'kp-sec' }, [
@@ -227,20 +309,11 @@ export function kanjiPageNodes({
   if (page && page.used.length) {
     nodes.push(h('section', { class: 'kp-sec' }, [
       h('h3', { class: 'word-sub' }, ui('kpUsedIn')),
-      h('div', { class: 'kp-tiles' }, page.used.map((c) => goTile(c, drawn, null))),
+      strip(page.used, drawn),
     ]));
   }
 
-  const words = page ? page.words : [];
-  nodes.push(h('section', { class: 'kp-sec' }, [
-    h('h3', { class: 'word-sub' }, ui('kpWords')),
-    words.length
-      ? h('ul', { class: 'kp-words', role: 'list' }, words.map((w) => h('li', { class: 'kp-word' }, [
-        wordRuby([w.written, w.reading]),
-        h('span', { class: 'kp-gloss', lang: 'en' }, w.gloss),
-      ])))
-      : h('p', { class: 'quiet' }, ui('kpWordsNone')),
-  ]));
+  nodes.push(wordsPart('kpWords', page ? page.words : [], wordsKept));
   nodes.push(h('p', { class: 'quiet kp-source' }, ui('kpSource')));
-  return { nodes, drawn };
+  return { nodes, drawn, words: wordsKept };
 }

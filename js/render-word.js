@@ -144,6 +144,19 @@ function partsPart(token) {
 }
 
 /**
+ * The other ways the word is written (other-forms.js), each with what
+ * JMdict says of it: 喰べる "seldom seen", 寿司 "ateji". Nothing while they
+ * load or where there is none.
+ */
+function formsPart(forms) {
+  if (!Array.isArray(forms) || !forms.length) return null;
+  return section('alsoWritten', h('ul', { class: 'forms-list', role: 'list' }, forms.map((f) => h('li', { class: 'forms-item' }, [
+    h('span', { class: 'forms-ja', lang: 'ja' }, f.written),
+    h('span', { class: 'forms-tag' }, ui(f.tag ? `spell_${f.tag}` : 'spellPlain')),
+  ]))));
+}
+
+/**
  * Where the word came from: the record's `ls` and `ws` (a compound's, part by
  * part), and a shortening the loanword rules found (loanwords.js).
  */
@@ -269,12 +282,12 @@ function kanjiPart(token, { kidOf, kanjiOf }) {
 
 /**
  * @param {object|null} token
- * @param {{ noteOf: Function, kidOf: Function, canSpeak: boolean, kanjiOf?: Function, gaps?: object[]|null, tokens?: object[] }} ctx
+ * @param {{ noteOf: Function, kidOf: Function, canSpeak: boolean, kanjiOf?: Function, gaps?: object[]|null, tokens?: object[], forms?: object[]|null }} ctx
  *   `gaps` is the analysis' gap list while the Gaps option is on, else null;
  *   `tokens` the analysis' tokens, which say what stands where no gap is.
  */
 export function wordNode(token, {
-  noteOf, kidOf, canSpeak, kanjiOf = null, gaps = null, tokens = [],
+  noteOf, kidOf, canSpeak, kanjiOf = null, gaps = null, tokens = [], forms = null, conj = null,
 }) {
   if (!token) return h('p', { class: 'side-empty' }, ui('wordEmpty'));
   const romaji = token.romaji || {};
@@ -297,10 +310,11 @@ export function wordNode(token, {
     kinds.length ? section('partOfSpeech', h('p', null, withJa(kinds.join('; ')))) : null,
     partsPart(token),
     meaningsPart(token),
+    formsPart(forms),
     originPart(token),
     kanjiPart(token, { kidOf, kanjiOf }),
     chainPart(token, noteOf),
-    conjPart(conjugateToken(token), canSpeak),
+    conjPart(conjugateToken(token), canSpeak, conj || {}),
     notesPart(token, noteOf),
     h('p', { class: 'word-out' }, h('a', {
       class: 'text-link',

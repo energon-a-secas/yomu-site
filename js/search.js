@@ -156,7 +156,9 @@ export function createSearch({ dict, fetchJson, base = 'data/' }) {
       const kana = toHiragana(String(q).trim().toLowerCase());
       const [ja, en] = await Promise.all([japanese(kana), inEnglish(q)]);
       const seen = new Set(ja.map((r) => r.key));
-      return { kind, words: [...ja, ...en.words.filter((r) => !seen.has(r.key))].slice(0, MAX_RESULTS), kanji: en.kanji };
+      // A word found through the romaji says the kana it was read as.
+      const read = ja.map((r) => Object.freeze({ ...r, romaji: kana }));
+      return { kind, words: [...read, ...en.words.filter((r) => !seen.has(r.key))].slice(0, MAX_RESULTS), kanji: en.kanji };
     }
     const en = await inEnglish(q);
     return { kind, ...en };

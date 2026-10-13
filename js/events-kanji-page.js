@@ -17,13 +17,17 @@ import { myKanji } from './kanji-store.js';
 import { createPageData } from './kanji-page-data.js';
 import { kanjiPageNodes } from './render-kanji-page.js';
 import { openDialog, bindDialog } from './dialogs.js';
-import { afterChange } from './events-kanji.js';
+import { afterChange, openReader } from './events-kanji.js';
+import { loadText } from './events-read.js';
+import { speak, canSpeak } from './speech.js';
+import { toHira, isKana, isHiragana } from './kana.js';
 
 const STEP_MS = 650;
 
 const kp = {
   stack: [],
   drawn: [],
+  words: [],
   paths: null,
   token: 0,
   timer: null,
@@ -48,28 +52,32 @@ function setStep(k, animate = false) {
   if (!box || !n) return;
   kp.step = Math.max(0, Math.min(k, n));
   box.dataset.step = String(kp.step);
-  for (const el of box.querySelectorAll('[data-stroke]')) {
+  for (const el of document.querySelectorAll('#kanji-dialog [data-stroke]')) {
     const i = Number(el.dataset.stroke);
     el.classList.toggle('is-done', i < kp.step - (animate ? 1 : 0));
-    el.classList.toggle('is-now', animate && i === kp.step - 1);
+    el.classList.toggle('is-now', (animate || kp.step < n) && i === kp.step - 1);
   }
   const status = $('kp-step');
-  if (status) status.textContent = kp.step && kp.step < n ? ui('kpStrokeOf', { k: kp.step, n }) : '';
+  if (status) status.textContent = kp.step >= n ? ui('kpAllStrokes', { n }) : ui('kpStrokeOf', { k: kp.step, n });
+  const play = $('kp-play');
+  if (play) play.textContent = ui(kp.timer ? 'kpPause' : kp.step >= n && n ? 'kpDrawAgain' : 'kpDraw');
 }
 
-/** Draw every stroke in order, one after the other; at once under reduced motion. */
+/** Draw the strokes in order from where the drawing stands (from the start once it is whole); Pause stops it. */
 function draw() {
-  stopDrawing();
+  if (kp.timer) { stopDrawing(); setStep(kp.step); return; }
   const n = kp.paths ? kp.paths.length : 0;
   if (!n) return;
-  if (prefersReducedMotion()) { setStep(n); return; }
-  setStep(0);
-  const tick = (k) => {
+  if (prefersReducedMotion()) { setStep(kp.step >= n ? 1 : kp.step + 1); return; }
+  let k = kp.step >= n ? 0 : kp.step;
+  const tick = () => {
+    k += 1;
+    if (k > n) { stopDrawing(); setStep(n); return; }
+    kp.timer = setTimeout(tick, STEP_MS);
     setStep(k, true);
-    if (k < n) kp.timer = setTimeout(() => tick(k + 1), STEP_MS);
-    else kp.timer = setTimeout(() => setStep(n), STEP_MS);
   };
-  tick(1);
+  kp.timer = setTimeout(tick, 0);
+  setStep(k);
 }
 
 function next() {
@@ -79,22 +87,40 @@ function next() {
   setStep(kp.step >= n ? 1 : kp.step + 1, !prefersReducedMotion());
 }
 
+function prev() {
+  stopDrawing();
+  const n = kp.paths ? kp.paths.length : 0;
+  if (!n) return;
+  setStep(kp.step <= 1 ? 0 : kp.step - 1);
+}
+
+/** Say a kanji by its first reading (on before kun), a kana as itself. */
+function say(b) {
+  const ch = current();
+  if (!ch || !canSpeak() || b.getAttribute('aria-disabled') === 'true') return;
+  const info = kp.last && kp.last.info;
+  const first = info ? [...(info.on || []), ...(info.kun || [])][0] : null;
+  speak(first ? toHira(String(first).replace(/[.-]/g, '')) : ch);
+}
+
 function paint(view) {
   kp.last = view;
   const ch = current();
   const title = $('kanji-dialog-title');
-  if (title) fill(title, h('span', { class: 'cd-char', lang: 'ja' }, ch));
+  // The hero draws the character large; the title names the page, with the character for a screen reader.
+  if (title) fill(title, [h('span', { class: 'sr-only', lang: 'ja' }, `${ch} `), ui(isKana(ch) ? (isHiragana(ch) ? 'kpHiragana' : 'kpKatakana') : 'kanjiPage')]);
   const body = $('kanji-dialog-body');
   if (!body) return;
   const mine = myKanji();
   const seen = mine.seenOf(ch);
-  const { nodes, drawn } = kanjiPageNodes({
+  const { nodes, drawn, words } = kanjiPageNodes({
     ch,
     back: kp.stack.length > 1 ? kp.stack[kp.stack.length - 2] : null,
     mine: { saved: mine.isSaved(ch), n: seen ? seen.n : 0 },
     ...view,
   });
   kp.drawn = drawn;
+  kp.words = words;
   fill(body, nodes);
   if (view.state === 'ready') setStep(kp.paths ? kp.paths.length : 0);
 }
@@ -112,7 +138,7 @@ async function show() {
     const [infos, strokes, page] = await Promise.all([kanjiInfo([ch]), store.strokesOf([ch]), store.pageOf(ch)]);
     const info = infos.get(ch) || null;
     const parts = info && Array.isArray(info.parts) ? info.parts : [];
-    const around = [...parts, ...Object.values(page.parts).flat(), ...page.used];
+    const around = [...parts, ...Object.values(page.parts).flat(), ...page.used, ...page.variants];
     const more = around.length ? await kanjiInfo(around) : new Map();
     if (token !== kp.token) return;
     kp.paths = strokes.get(ch) || null;
@@ -162,7 +188,15 @@ export const KANJI_PAGE_ACTIONS = {
   'kp-back': back,
   'kp-draw': draw,
   'kp-next': next,
-  'kp-all': () => { stopDrawing(); setStep(kp.paths ? kp.paths.length : 0); },
+  'kp-prev': prev,
+  'kp-say': say,
+  'kp-read': (b) => {
+    const w = kp.words[Number(b.dataset.ix)];
+    if (!w) return;
+    $('kanji-dialog')?.close();
+    openReader();
+    loadText(w, { source: 'typed' }).catch(() => {});
+  },
   'kp-retry': () => show(),
   'kp-save': () => {
     const ch = current();

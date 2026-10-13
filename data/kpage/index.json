@@ -1,17 +1,17 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","KanjiVG stroke order SVGs r20250816"],"inputs":[{"id":"kanjivg","source":"KanjiVG, Ulrich Apel","url":"http://kanjivg.tagaini.net","spdx":"CC-BY-SA-3.0","screen":"required","acknowledgement":"Attribution. You must attribute the work by stating your use of KanjiVG in your own copyright header and linking to KanjiVG's website (http://kanjivg.tagaini.net)","use":"parts, the named components under each character, and the kanji that share them"}],"generated_by":"tools/build-kanji-page.mjs","generated_at":"2026-10-01"},
 "format": "yomu-kpage-index/1",
-"keys": 6589,
+"keys": 7180,
 "maxKey": 2,
 "shards": [
 {"src":"data/kpage/p00.json","first":"あ"},
-{"src":"data/kpage/p01.json","first":"力"},
-{"src":"data/kpage/p02.json","first":"官"},
-{"src":"data/kpage/p03.json","first":"抹"},
-{"src":"data/kpage/p04.json","first":"殖"},
-{"src":"data/kpage/p05.json","first":"盛"},
-{"src":"data/kpage/p06.json","first":"腐"},
-{"src":"data/kpage/p07.json","first":"赤"},
-{"src":"data/kpage/p08.json","first":"首"}
+{"src":"data/kpage/p01.json","first":"割"},
+{"src":"data/kpage/p02.json","first":"季"},
+{"src":"data/kpage/p03.json","first":"払"},
+{"src":"data/kpage/p04.json","first":"欄"},
+{"src":"data/kpage/p05.json","first":"疾"},
+{"src":"data/kpage/p06.json","first":"耗"},
+{"src":"data/kpage/p07.json","first":"譲"},
+{"src":"data/kpage/p08.json","first":"霸"}
 ]
 }

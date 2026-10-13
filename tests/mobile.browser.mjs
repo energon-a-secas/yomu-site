@@ -339,7 +339,7 @@ async function reader(browser, phone, lang) {
     await page.waitForSelector('#kanji-body [data-act="save-kanji"]');
     await audit(page, where, 'kanji');
     await tap(page, '#kanji-body [data-act="kanji-page"]');
-    await page.waitForSelector('#kanji-dialog[open] .kp-top');
+    await page.waitForSelector('#kanji-dialog[open] .kp-hero');
     await audit(page, where, 'kanji-page');
     if (await page.locator('#kanji-dialog [data-act="kp-go"]').count()) {
       await tap(page, '#kanji-dialog [data-act="kp-go"]');
@@ -463,16 +463,20 @@ async function reader(browser, phone, lang) {
     await page.waitForSelector('#sr-parts-body [data-act="sr-part"]');
     await tap(page, '#sr-parts-body [data-act="sr-part"]');
     await page.waitForSelector('#sr-parts-body [data-act="sr-part-kanji"]');
+    // The tray with the results stays on screen, so a pick never sends them out of sight.
+    const tray = await page.evaluate(() => { const r = document.querySelector('.sr-tray').getBoundingClientRect(); return { top: Math.round(r.top), bottom: Math.round(r.bottom), vh: innerHeight }; });
+    if (!(tray.top < tray.vh && tray.bottom <= tray.vh + 1)) fail(where, `the parts tray is at ${tray.top} to ${tray.bottom}, off a ${tray.vh}px screen`);
     await audit(page, where, 'search-parts');
     await tap(page, '[data-act="sr-tab"][data-tab="kana"]');
     await page.waitForSelector('#sr-kana [data-act="kc-kana"]');
     await audit(page, where, 'kana');
     await tap(page, '#sr-kana [data-act="kc-kana"]');
-    await page.waitForSelector('#kanji-dialog[open] .kp-top');
+    await page.waitForSelector('#kanji-dialog[open] .kp-hero');
     await audit(page, where, 'kana-page');
     await page.locator('#kanji-dialog [data-dialog-close]').first().tap();
     await tap(page, '[data-act="sr-tab"][data-tab="counters"]');
-    await page.waitForSelector('#sr-counters .cn-item');
+    await page.waitForSelector('#sr-counters .cn-card');
+    await tap(page, '#sr-counters [data-act="cn-pick"][data-ix="0"]');
     await audit(page, where, 'counters');
     await tap(page, '#search [data-act="kanji-back"]');
   });

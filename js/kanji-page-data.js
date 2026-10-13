@@ -31,7 +31,7 @@ export function createPageData({ fetchJson, base = 'data/' }) {
     return new Map(list.map((ch) => [ch, strokes.get(ch) || null]));
   }
 
-  /** One kanji's page: { words, parts, used }, with empty lists where the data has none. */
+  /** One kanji's page: { words, parts, used, variants }, with empty lists where the data has none. */
   async function pageOf(ch) {
     await pages.need([ch]);
     const e = pages.get(ch) || {};
@@ -39,6 +39,7 @@ export function createPageData({ fetchJson, base = 'data/' }) {
       words: (e.w || []).map(([written, reading, gloss]) => Object.freeze({ written, reading, gloss })),
       parts: Object.freeze(Object.fromEntries(Object.entries(e.p || {}).map(([part, list]) => [part, [...list]]))),
       used: [...(e.u || '')],
+      variants: [...(e.v || '')],
     });
   }
 

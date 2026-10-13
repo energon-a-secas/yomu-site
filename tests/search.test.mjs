@@ -71,3 +71,11 @@ test('kanji by parts: every chosen part, at any depth, and only parts that still
   assert.ok([...both.open].every((p) => data.map.get(p).some((ch) => inResult.has(ch))));
   assert.deepEqual(byParts([], data), { kanji: [], open: null });
 });
+
+test('a kana key whose records are different words is one card per word', async () => {
+  const { byWord, shownWord } = await import('../js/render-search.js');
+  const sake = (await s.search('さけ')).words.filter((w) => w.key === 'さけ');
+  const cards = byWord(sake).map((w) => shownWord(w).written);
+  assert.ok(cards.includes('酒') && cards.includes('鮭'), cards.join(' '));
+  assert.equal(new Set(cards).size, cards.length);
+});

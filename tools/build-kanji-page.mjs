@@ -24,6 +24,7 @@
  *   p  for each of the kanji's parts (KanjiVG's, in data/kanji/), up to
  *      SIBLINGS listed kanji that have the same part, most frequent first.
  *   u  up to USED listed kanji that have this kanji as a part (日 is in 明).
+ *   v  its other shapes, KANJIDIC's variants (国: 國 圀), as one string.
  * A kana has `w` alone: up to KANA_WORDS common words that start with its
  * sound, one per reading (wordsByKana says how).
  * "Listed" is the kanji shards' frequency-ranked part (data/kanji/index.json
@@ -32,7 +33,7 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
-import { loadKanjiVgDir, upstream } from './lib/sources.mjs';
+import { loadKanjiVgDir, loadZippedJson, upstream } from './lib/sources.mjs';
 import { licenceBlock } from './lib/licence.mjs';
 import { shownMeanings } from '../js/reader.js';
 import {
@@ -184,8 +185,33 @@ function dailyRows(info, listed, pages) {
   return rows;
 }
 
+/**
+ * Each kanji's other shapes, from KANJIDIC: its `variants` name other
+ * characters by a JIS code (国 names 國 and 圀, 学 names 學), which the
+ * characters' own `codepoints` turn back into characters. KANJIDIC does not
+ * say which is older or simpler, so the page calls them other forms.
+ */
+function variantsOf() {
+  const kd = loadZippedJson('kanjidic');
+  const byCode = new Map();
+  for (const c of kd.characters) {
+    for (const cp of c.codepoints || []) if (cp.type !== 'ucs') byCode.set(`${cp.type}:${cp.value}`, c.literal);
+  }
+  const out = new Map();
+  for (const c of kd.characters) {
+    const v = [];
+    for (const x of (c.misc && c.misc.variants) || []) {
+      const ch = byCode.get(`${x.type}:${x.value}`);
+      if (ch && ch !== c.literal && !v.includes(ch)) v.push(ch);
+    }
+    if (v.length) out.set(c.literal, v.join(''));
+  }
+  return out;
+}
+
 function pageEntries() {
   const { info, listed } = kanjiTable();
+  const variants = variantsOf();
   const tier = firstTier();
   const words = wordsByKanji(tier);
   const withPart = new Map(); // part -> listed kanji that have it, most frequent first
@@ -200,6 +226,7 @@ function pageEntries() {
     const entry = {};
     const w = words.get(ch);
     if (w && w.length) entry.w = w;
+    if (variants.has(ch)) entry.v = variants.get(ch);
     const p = {};
     // KanjiVG names some parts by a code (CDP-8BC4) or a layout (⿱日隹): no page to go to.
     for (const part of (e.parts || []).filter((x) => [...x].length === 1)) {
