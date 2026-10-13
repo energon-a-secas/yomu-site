@@ -58,6 +58,9 @@
  *     words are made of, in order, with a reason js/gaps.js knows, and no
  *     text or id twice. Whether the gaps are the analyzer's is
  *     tests/spaces.test.mjs's to say, since that needs the analyzer
+ *   - the kanji page's files (data/strokes/, data/kpage/) held to the range
+ *     rule, a stroke that is not SVG path data, a page word that does not
+ *     contain its kanji, or a kanji listed among its own neighbours
  *
  * A new kind of data file gets its format id and a checker in FORMATS below,
  * in the same commit that adds the file.
@@ -270,6 +273,10 @@ const FORMATS = {
   'yomu-kanji/1': checkKanjiShard,
   'yomu-library/1': null,
   [JOYO_FORMAT]: checkJoyoDoc,
+  'yomu-strokes-index/1': null,
+  'yomu-strokes/1': checkStrokes,
+  'yomu-kpage-index/1': null,
+  'yomu-kpage/1': checkKpage,
   'yomu-like-index/1': null,
   'yomu-like/1': checkLikeGroup,
   [LOOKALIKES_FORMAT]: null,
@@ -549,6 +556,33 @@ function checkRangeIndex(docs, rel, format) {
   return total;
 }
 
+// ── The kanji page (tools/build-kanji-page.mjs) ──────────────────────────
+
+/** A stroke shard: one character per key, each a list of SVG path data. */
+function checkStrokes(rel, doc) {
+  for (const [ch, paths] of Object.entries(doc.entries || {})) {
+    if ([...ch].length !== 1) fail(rel, `${JSON.stringify(ch)} is not one character`);
+    if (!Array.isArray(paths) || !paths.length || !paths.every((d) => typeof d === 'string' && /^[Mm][\d.,\s\-+eEcCsSlLzZhHvVqQtTaA]+$/.test(d))) {
+      fail(rel, `${JSON.stringify(ch)} is not a list of path data`);
+    }
+  }
+}
+
+/** A kanji page shard: `w` [written, reading, gloss] rows, `p` part to kanji, `u` kanji. */
+function checkKpage(rel, doc) {
+  for (const [ch, e] of Object.entries(doc.entries || {})) {
+    const extra = Object.keys(e).filter((k) => !['w', 'p', 'u'].includes(k));
+    if (extra.length) fail(rel, `${JSON.stringify(ch)} has unknown fields ${extra.join(' ')}`);
+    if (e.w && !(Array.isArray(e.w) && e.w.length <= 10 && e.w.every((r) => Array.isArray(r) && r.length === 3 && r.every((x) => typeof x === 'string' && x)))) {
+      fail(rel, `${JSON.stringify(ch)} has a malformed w`);
+    }
+    if (e.w && e.w.some((r) => !r[0].includes(ch))) fail(rel, `${JSON.stringify(ch)} lists a word without it`);
+    for (const list of [...Object.values(e.p || {}), e.u || '']) {
+      if (typeof list !== 'string' || [...list].includes(ch)) fail(rel, `${JSON.stringify(ch)} has a malformed neighbour list`);
+    }
+  }
+}
+
 // ── Main ──────────────────────────────────────────────────────────────────
 
 function main() {
@@ -582,6 +616,8 @@ function main() {
   checkJoyo(docs);
   checkRangeIndex(docs, 'data/dict/rare.json', 'yomu-dict-rare/1');
   checkRangeIndex(docs, 'data/names/index.json', 'yomu-names/1');
+  checkRangeIndex(docs, 'data/strokes/index.json', 'yomu-strokes/1');
+  checkRangeIndex(docs, 'data/kpage/index.json', 'yomu-kpage/1');
   checkPopular(docs);
   checkLikeIndex(docs);
   checkLookalikes(docs);

@@ -210,6 +210,7 @@ export function paintKanjiDialog(ch, mine = myKanji()) {
       lastSeenLine(ch, seen, now),
       wordsLine(seen.words),
     ]) : h('p', { class: 'mk-line cd-seen' }, ui('notCollected')),
+    h('p', { class: 'cd-page' }, h('button', { type: 'button', class: 'btn btn--secondary btn--sm', 'data-act': 'col-page' }, ui('kpOpenFull'))),
     seen ? h('p', { class: 'cd-save' }, [
       saveToggle(ch, saved, { 'data-act': 'col-save' }),
       h('span', { 'aria-hidden': 'true' }, ui(saved ? 'dialogSaved' : 'dialogNotSaved')),

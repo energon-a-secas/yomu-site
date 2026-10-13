@@ -820,7 +820,7 @@ rt .snd { border-bottom: 0; padding-bottom: 0; }
 /* The Word panel's kanji, each with the same toggle. */
 .wk-list { list-style: none; display: flex; flex-direction: column; border-top: 1px solid var(--border-subtle); }
 .wk {
-  display: grid; grid-template-columns: 2.25rem minmax(0, 1fr) auto; align-items: center;
+  display: grid; grid-template-columns: 2.25rem minmax(0, 1fr) auto auto; align-items: center;
   gap: var(--space-3);
   padding: var(--space-1) 0;
   border-bottom: 1px solid var(--border-subtle);
@@ -829,6 +829,77 @@ rt .snd { border-bottom: 0; padding-bottom: 0; }
 .wk-main { display: flex; flex-direction: column; min-width: 0; font-size: var(--text-sm); line-height: 1.4; }
 .wk-mean { color: var(--text-secondary); overflow-wrap: anywhere; }
 .wk-seen { font-size: var(--text-xs); color: var(--text-muted); }
+
+/* The button that opens a kanji's page, the save toggle's twin. */
+.page-open {
+  flex: none;
+  display: inline-grid; place-items: center;
+  width: 36px; height: 36px;
+  border: 1px solid transparent; border-radius: var(--radius-sm);
+  background: transparent; color: var(--text-muted);
+  cursor: pointer;
+  transition: color var(--dur), background-color var(--dur);
+}
+@media (hover: hover) { .page-open:hover { color: var(--text-primary); background: var(--surface-2); } }
+.page-open:active { transform: none; }
+.page-open-icon { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; stroke-linecap: round; }
+.kj-entry > .page-open { margin-top: var(--space-2); }
+
+/* ── The kanji page (render-kanji-page.js) ─────────────────── */
+.kp-dialog .dialog__body { display: flex; flex-direction: column; gap: var(--space-6); }
+.kp-dialog h2:focus { outline: none; }
+.kp-top { display: grid; grid-template-columns: minmax(0, 11rem) minmax(0, 1fr); gap: var(--space-6); align-items: start; }
+.kp-facts { display: flex; flex-direction: column; gap: var(--space-2); min-width: 0; }
+.kp-save { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); color: var(--text-secondary); }
+.kp-strokes { display: flex; flex-direction: column; gap: var(--space-2); }
+.kp-draw { aspect-ratio: 1; border: 1px solid var(--border); border-radius: var(--radius-sm); }
+.kp-svg { display: block; width: 100%; height: 100%; }
+.kp-grid line { stroke: var(--border-subtle); stroke-width: 0.5; stroke-dasharray: 2 2; }
+.kp-ghost path { fill: none; stroke: var(--border); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.kp-ink path {
+  fill: none; stroke: var(--text-primary); stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round;
+  stroke-dasharray: 1; stroke-dashoffset: 1;
+}
+.kp-ink path.is-done { stroke-dashoffset: 0; }
+.kp-ink path.is-now { stroke: var(--accent-bright); animation: kp-stroke 0.55s ease-in-out forwards; }
+@keyframes kp-stroke { to { stroke-dashoffset: 0; } }
+.kp-nums text { font-size: 6px; fill: var(--text-muted); opacity: 0.45; }
+.kp-nums text.is-done, .kp-nums text.is-now { fill: var(--accent-bright); opacity: 1; }
+.kp-controls { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.kp-step { min-height: 1.4em; font-size: var(--text-xs); }
+.kp-sec { display: flex; flex-direction: column; }
+.kp-parts { list-style: none; display: flex; flex-direction: column; gap: var(--space-3); }
+.kp-part { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--space-3); align-items: start; }
+.kp-also { display: flex; flex-direction: column; gap: var(--space-1); min-width: 0; }
+.kp-sub { font-size: var(--text-xs); color: var(--text-muted); }
+.kp-tiles { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.kp-go {
+  display: inline-flex; flex-direction: column; align-items: center; justify-content: center;
+  min-width: 44px; min-height: 44px;
+  padding: 2px var(--space-2);
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  background: transparent; color: var(--text-primary);
+  cursor: pointer;
+}
+button.kp-go:hover, button.kp-go:focus-visible { background: var(--surface-2); border-color: var(--border-strong); }
+.kp-go--plain { cursor: default; color: var(--text-secondary); }
+.kp-go-char { font-size: 1.5rem; line-height: 1.2; }
+.kp-go-mean { font-size: var(--text-xs); color: var(--text-secondary); max-width: 6rem; overflow-wrap: anywhere; text-align: center; }
+.kp-words { list-style: none; display: flex; flex-direction: column; border-top: 1px solid var(--border-subtle); }
+.kp-word {
+  display: grid; grid-template-columns: minmax(0, 8rem) minmax(0, 1fr); gap: var(--space-3); align-items: baseline;
+  padding: var(--space-1) 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.kp-word .mk-word { font-size: 1.125rem; line-height: 1.9; }
+.kp-gloss { font-size: var(--text-sm); color: var(--text-secondary); overflow-wrap: anywhere; }
+.kp-back { align-self: flex-start; }
+.kp-source { font-size: var(--text-xs); }
+.cd-page { margin-top: var(--space-3); }
+@media (max-width: 520px) {
+  .kp-top { grid-template-columns: minmax(0, 1fr); }
+  .kp-draw { max-width: 14rem; }
+}
 
 /* ── My kanji ──────────────────────────────────────────────────
  * The header link and the embed bar's carry the number due, in plain ink:
@@ -1201,7 +1272,8 @@ html[data-embed="1"] body:has(> .neo-footer) { min-height: 0; }
   .seg-btn { min-height: 44px; min-width: 44px; }
   .tok { min-width: 44px; min-height: 44px; }
   .it-line, .kj-row { min-height: 44px; }
-  .save-toggle { width: 44px; height: 44px; }
+  .save-toggle, .page-open { width: 44px; height: 44px; }
+  .kp-back { display: inline-flex; align-items: center; min-height: 44px; }
   .mk-back, .mk-filter-input, .mk-tab { min-height: 44px; }
   /* iOS zooms the page into a field whose text is under 16px when it takes focus. */
   .mk-filter-input { font-size: 1rem; }

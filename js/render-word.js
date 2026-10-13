@@ -16,6 +16,7 @@ import { NAME_LINE_TYPES } from './name-types.js';
 import { gapsPart } from './render-gaps.js';
 import { conjPart } from './render-conj.js';
 import { conjugateToken } from './conjugate.js';
+import { pageOpener } from './render-kanji-page.js';
 
 /** A token's beats with the romaji each one is spelled with. */
 export function tokenBeats(token) {
@@ -259,6 +260,7 @@ function kanjiPart(token, { kidOf, kanjiOf }) {
         meaning ? h('span', { class: 'wk-mean', lang: 'en' }, meaning) : null,
         seen ? h('span', { class: 'wk-seen' }, seen) : null,
       ]),
+      pageOpener(ch, { 'data-act': 'kanji-page', 'data-kid': kid }),
       saveToggle(ch, saved, { 'data-act': 'save-kanji', 'data-kid': kid }),
     ]);
   }).filter(Boolean);

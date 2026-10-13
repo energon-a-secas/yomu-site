@@ -38,6 +38,7 @@ import {
 import { hist, paintHistoryList } from './render-history.js';
 import { notify, readText } from './render-remember.js';
 import { openDialog, bindDialog } from './dialogs.js';
+import { openKanjiPage } from './events-kanji-page.js';
 import {
   describe, loadText, focusHome, rememberNow, pointKanji,
 } from './events-read.js';
@@ -227,6 +228,14 @@ export const COLLECT_ACTIONS = {
     paintKanjiDialog(ch);
     openDialog($('col-dialog'), b);
     ensureInfo([ch]);
+  },
+  // The tile's dialog gives way to the kanji page, which returns focus to the tile.
+  'col-page': () => {
+    const ch = collect.dialog;
+    const dialog = $('col-dialog');
+    if (!ch || !dialog) return;
+    dialog.close();
+    openKanjiPage(ch, tileNow() || $('mk-title'));
   },
   'col-save': () => {
     const ch = collect.dialog;

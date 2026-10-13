@@ -30,6 +30,7 @@ import { bindGaps, gapsToggled } from './events-gaps.js';
 import { watchPress, isField } from './press.js';
 import { bindLayout } from './layout.js';
 import { conjugateToken } from './conjugate.js';
+import { KANJI_PAGE_ACTIONS, bindKanjiPage, openKanjiPage } from './events-kanji-page.js';
 
 export { analyzeNow, loadText };
 
@@ -445,7 +446,12 @@ const ACTIONS = {
   chunk: (b) => speechOk(b) && chunk(b),
   'translate-on': () => startTranslation(state),
   'translate-off': () => stopTranslation(state),
+  'kanji-page': (b) => {
+    const ch = state.analysis && state.analysis.order ? state.analysis.order[Number(b.dataset.kid)] : null;
+    if (ch) openKanjiPage(ch, b);
+  },
   ...KANJI_ACTIONS,
+  ...KANJI_PAGE_ACTIONS,
   ...COLLECT_ACTIONS,
   ...PLAY_ACTIONS,
 };
@@ -478,4 +484,5 @@ export function bindEvents() {
   bindCollect();
   bindPlay();
   bindKanji();
+  bindKanjiPage();
 }

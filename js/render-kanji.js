@@ -20,6 +20,7 @@ import { h } from './utils.js';
 import { ui } from './strings.js';
 import { isKanji } from './kana.js';
 import { saveToggle, seenText } from './render-save.js';
+import { pageOpener } from './render-kanji-page.js';
 
 /** Kanji characters in order of first appearance. */
 export function kanjiOrder(tokens) {
@@ -64,7 +65,11 @@ function list(label, items, lang) {
   ]);
 }
 
-/** One row. The row's button lights the kanji in the text; the bookmark beside it saves it. */
+/**
+ * One row. The row's button lights the kanji in the text; beside it, one
+ * button opens the kanji's page (strokes, parts, words) and the bookmark
+ * saves it.
+ */
 function row(ch, kid, info, here, pinned, mine) {
   const readings = (here || []).map((x) => (x.run ? `${x.ruby} (${x.run})` : x.ruby));
   const meaning = info && Array.isArray(info.m) && info.m.length ? info.m.join(', ') : '';
@@ -99,7 +104,7 @@ function row(ch, kid, info, here, pinned, mine) {
         typeof mine.isNew === 'function' && mine.isNew(ch) ? h('span', { class: 'kj-new' }, ui('newChip')) : null,
       ]) : null,
     ]),
-  ]), saveToggle(ch, mine.isSaved(ch), { 'data-act': 'save-kanji', 'data-kid': kid })]);
+  ]), pageOpener(ch, { 'data-act': 'kanji-page', 'data-kid': kid }), saveToggle(ch, mine.isSaved(ch), { 'data-act': 'save-kanji', 'data-kid': kid })]);
 }
 
 /**

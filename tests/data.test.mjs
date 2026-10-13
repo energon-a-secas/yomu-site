@@ -431,6 +431,19 @@ test('check-data fails each broken rule and names the file', async () => {
     ['a file over the cap', (rw) => rw('data/kanji/k02.json', (d) => {
       d.pad = 'x'.repeat(CAP);
     }), /k02\.json: .* over the/],
+    ['a stroke that is not path data', (rw) => rw('data/strokes/s20.json', (d) => {
+      Object.values(d.entries)[0][0] = '<script>';
+    }), /s20\.json: .* is not a list of path data/],
+    ['a stroke shard holding a character outside its range', (rw) => rw('data/strokes/s03.json', (d) => {
+      d.entries = { ...d.entries, 鿿: ['M1,1'] };
+    }), /s03\.json: "鿿" is outside/],
+    ['a kanji page word without its kanji', (rw) => rw('data/kpage/p02.json', (d) => {
+      Object.values(d.entries).find((e) => e.w).w[0] = ['猫', 'ねこ', 'cat'];
+    }), /p02\.json: .* lists a word without it/],
+    ['a kanji page listing itself as a neighbour', (rw) => rw('data/kpage/p03.json', (d) => {
+      const [ch, e] = Object.entries(d.entries).find(([, x]) => x.u);
+      e.u += ch;
+    }), /p03\.json: .* malformed neighbour list/],
   ];
   const second = [
     ['a rare key outside its range', (rw) => rw('data/dict/r010.json', (d) => {
