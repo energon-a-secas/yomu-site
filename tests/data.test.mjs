@@ -440,6 +440,12 @@ test('check-data fails each broken rule and names the file', async () => {
     ['a kanji page word without its kanji', (rw) => rw('data/kpage/p02.json', (d) => {
       Object.values(d.entries).find((e) => e.w).w[0] = ['猫', 'ねこ', 'cat'];
     }), /p02\.json: .* lists a word without it/],
+    ['a search word naming a key the dictionary does not hold', (rw) => rw('data/search/e02.json', (d) => {
+      Object.values(d.entries).find((e) => e.w).w.push('存在しない語');
+    }), /e02\.json: .* which the first tier does not hold/],
+    ['a parts picker row for a part it does not map', (rw) => rw('data/search/parts.json', (d) => {
+      d.list.push(['☃', 1]);
+    }), /parts\.json: list row/],
     ['a kanji page listing itself as a neighbour', (rw) => rw('data/kpage/p03.json', (d) => {
       const [ch, e] = Object.entries(d.entries).find(([, x]) => x.u);
       e.u += ch;

@@ -44,7 +44,16 @@ function emptyNode() {
       h('span', { class: 'example-ja', lang: 'ja' }, ex.ja),
       h('span', { class: 'example-tr' }, t(ex)),
     ])))),
+    // The kanji of the day, filled on idle by events-daily.js (afterEmpty).
+    h('section', { class: 'daily', id: 'daily', 'aria-labelledby': 'daily-title', hidden: true }),
   ];
+}
+
+const emptied = [];
+
+/** Runs after the empty state is drawn again, so the kanji of the day can fill its slot. */
+export function afterEmpty(fn) {
+  emptied.push(fn);
 }
 
 /**
@@ -56,7 +65,10 @@ export function paintEmpty(state) {
   const empty = $('empty');
   if (!empty) return;
   const isEmpty = !state.text.trim();
-  if (isEmpty && (empty.hidden || !empty.firstChild)) fill(empty, emptyNode());
+  if (isEmpty && (empty.hidden || !empty.firstChild)) {
+    fill(empty, emptyNode());
+    for (const fn of emptied) fn();
+  }
   empty.hidden = !isEmpty;
 }
 

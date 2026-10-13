@@ -42,7 +42,7 @@ import { openClearWords, clearScope } from './render-sync.js';
 import { downloadText } from './neorgon-dom.js';
 import { describe, loadText } from './events-read.js';
 import {
-  HASH, PARENT, PLAY_TITLE, routeOf, isPlay,
+  HASH, PARENT, SCREEN_TITLE, routeOf, sectionOf,
 } from './routes.js';
 
 export { routeOf };
@@ -165,20 +165,20 @@ async function loadInfo() {
 // ── Routes ────────────────────────────────────────────────────────────────
 
 function showRegions(next) {
+  const own = sectionOf(next);
   const reader = document.querySelector('.yomu');
   const screen = $('mykanji');
-  const play = $('play');
   if (reader) reader.hidden = next !== 'reader';
-  if (screen) screen.hidden = next === 'reader' || isPlay(next);
-  if (play) play.hidden = !isPlay(next);
-  for (const [sel, on] of [['a.mk-open', next !== 'reader' && !isPlay(next)], ['a.pl-open', isPlay(next)]]) {
+  if (screen) screen.hidden = next === 'reader' || !!own;
+  for (const id of ['play', 'search']) if ($(id)) $(id).hidden = own !== id;
+  for (const [sel, on] of [['a.mk-open', next !== 'reader' && !own], ['a.pl-open', own === 'play'], ['a.search-open', own === 'search']]) {
     for (const a of document.querySelectorAll(sel)) {
       if (on) a.setAttribute('aria-current', 'page');
       else a.removeAttribute('aria-current');
     }
   }
-  if (isPlay(next)) {
-    document.title = `${ui(PLAY_TITLE[next])} | Yomu`;
+  if (own) {
+    document.title = `${ui(SCREEN_TITLE[next])} | Yomu`;
     return;
   }
   const back = $('mk-back-label');
@@ -231,17 +231,17 @@ export function applyRoute({ boot = false, focus = true } = {}) {
   if (prev === 'reader') readerScroll = window.scrollY;
   view.note = '';
   showRegions(next);
-  if (next !== 'reader' && !isPlay(next)) seedInfo();
+  if (next !== 'reader' && !sectionOf(next)) seedInfo();
 
   if (next === 'reader') {
     for (const fn of hooks) fn(next, prev);
     window.scrollTo({ top: readerScroll, behavior: 'instant' });
     if (!focus) return;
-    const link = [...document.querySelectorAll(isPlay(prev) ? 'a.pl-open' : 'a.mk-open')].find((a) => a.getClientRects().length);
+    const link = [...document.querySelectorAll({ play: 'a.pl-open', search: 'a.search-open' }[sectionOf(prev)] || 'a.mk-open')].find((a) => a.getClientRects().length);
     (link || $('main')).focus({ preventScroll: true });
     return;
   }
-  if (isPlay(next)) {
+  if (sectionOf(next)) {
     if (!boot && prev === 'reader') window.scrollTo({ top: 0, behavior: 'instant' });
     for (const fn of hooks) fn(next, prev, { boot });
     return;
@@ -371,7 +371,7 @@ async function importFile(file) {
 
 /** Everything that shows the store, after it changed: the screen, the reader's marks and counts. */
 export function afterChange() {
-  if (route !== 'reader' && !isPlay(route)) {
+  if (route !== 'reader' && !sectionOf(route)) {
     seedInfo();
     repaint();
     loadInfo();             // a kanji that moved up into Seen often may be new to the screen
@@ -474,7 +474,7 @@ export function bindKanji() {
     afterChange();
   });
   afterPaintAll(() => {
-    if (route !== 'reader') { showRegions(route); if (!isPlay(route)) repaint(); }
+    if (route !== 'reader') { showRegions(route); if (!sectionOf(route)) repaint(); }
     paintDueCount();
   });
   // What is due moves at midnight, and a page left open past it said

@@ -58,6 +58,9 @@
  *     words are made of, in order, with a reason js/gaps.js knows, and no
  *     text or id twice. Whether the gaps are the analyzer's is
  *     tests/spaces.test.mjs's to say, since that needs the analyzer
+ *   - search's English index (data/search/) held to the range rule, a word
+ *     that is not lower-case English, a key the first tier does not hold,
+ *     and a parts picker (data/search/parts.json) out of its shape
  *   - the kanji page's files (data/strokes/, data/kpage/) held to the range
  *     rule, a stroke that is not SVG path data, a page word that does not
  *     contain its kanji, or a kanji listed among its own neighbours
@@ -277,6 +280,10 @@ const FORMATS = {
   'yomu-strokes/1': checkStrokes,
   'yomu-kpage-index/1': null,
   'yomu-kpage/1': checkKpage,
+  'yomu-daily/1': checkDaily,
+  'yomu-search-index/1': null,
+  'yomu-search/1': checkSearchShard,
+  'yomu-parts/1': checkParts,
   'yomu-like-index/1': null,
   'yomu-like/1': checkLikeGroup,
   [LOOKALIKES_FORMAT]: null,
@@ -576,9 +583,69 @@ function checkKpage(rel, doc) {
     if (e.w && !(Array.isArray(e.w) && e.w.length <= 10 && e.w.every((r) => Array.isArray(r) && r.length === 3 && r.every((x) => typeof x === 'string' && x)))) {
       fail(rel, `${JSON.stringify(ch)} has a malformed w`);
     }
-    if (e.w && e.w.some((r) => !r[0].includes(ch))) fail(rel, `${JSON.stringify(ch)} lists a word without it`);
+    // A kanji's words are written with it; a kana's start with its sound.
+    if (e.w && e.w.some((r) => !r[0].includes(ch) && !r[1].startsWith(ch))) fail(rel, `${JSON.stringify(ch)} lists a word without it`);
     for (const list of [...Object.values(e.p || {}), e.u || '']) {
       if (typeof list !== 'string' || [...list].includes(ch)) fail(rel, `${JSON.stringify(ch)} has a malformed neighbour list`);
+    }
+  }
+}
+
+/** The kanji of the day: [kanji, meaning, word with it, its reading, its gloss], each kanji once. */
+function checkDaily(rel, doc) {
+  const rows = Array.isArray(doc.rows) ? doc.rows : [];
+  if (!rows.length) fail(rel, 'has no rows');
+  const seen = new Set();
+  for (const r of rows) {
+    if (!Array.isArray(r) || r.length !== 5 || !r.every((x) => typeof x === 'string' && x) || !r[2].includes(r[0]) || seen.has(r[0])) {
+      fail(rel, `row ${JSON.stringify(r)} is not [kanji, meaning, a word with it, reading, gloss], once`);
+    }
+    seen.add(r[0]);
+  }
+}
+
+// ── Search (tools/build-search.mjs) ───────────────────────────────────────
+
+const IS_KANJI = /^[\p{Script=Han}々]$/u;
+
+/** An English shard: each lower-case word to `w` (keys) and `k` (kanji). */
+function checkSearchShard(rel, doc) {
+  for (const [word, e] of Object.entries(doc.entries || {})) {
+    if (!/^[a-z][a-z']*$/.test(word)) fail(rel, `${JSON.stringify(word)} is not a lower-case English word`);
+    const extra = Object.keys(e).filter((k) => k !== 'w' && k !== 'k');
+    if (extra.length) fail(rel, `${JSON.stringify(word)} has unknown fields ${extra.join(' ')}`);
+    if (e.w && !(Array.isArray(e.w) && e.w.length && e.w.every((k) => typeof k === 'string' && k))) fail(rel, `${JSON.stringify(word)} has a malformed w`);
+    if (e.k !== undefined && !(typeof e.k === 'string' && [...e.k].every((c) => IS_KANJI.test(c)))) fail(rel, `${JSON.stringify(word)} has a k that is not kanji`);
+  }
+}
+
+/** Every key the English index names is a first-tier key, or the page would show an empty result. */
+function checkSearchKeys(docs) {
+  const tier = new Set();
+  for (const [rel, doc] of docs) {
+    if (doc.format === 'yomu-dict/1' || doc.format === 'yomu-dict-core/1') for (const k of Object.keys(doc.entries || {})) tier.add(k);
+  }
+  if (!tier.size) return;
+  for (const rel of shardFiles(docs, 'yomu-search/1')) {
+    let missed = 0;
+    for (const [word, e] of Object.entries(docs.get(rel).entries || {})) {
+      for (const k of e.w || []) {
+        if (!tier.has(k) && (missed += 1) <= 3) fail(rel, `${JSON.stringify(word)} names ${JSON.stringify(k)}, which the first tier does not hold`);
+      }
+    }
+  }
+}
+
+/** The parts picker: `list` of [part, strokes or null], `parts` part to the kanji that have it. */
+function checkParts(rel, doc) {
+  const map = doc.parts || {};
+  for (const [part, chars] of Object.entries(map)) {
+    if ([...part].length !== 1) fail(rel, `${JSON.stringify(part)} is not one character`);
+    if (typeof chars !== 'string' || !chars || [...chars].includes(part)) fail(rel, `${JSON.stringify(part)} has a malformed kanji list`);
+  }
+  for (const row of doc.list || []) {
+    if (!Array.isArray(row) || row.length !== 2 || !Object.hasOwn(map, row[0]) || !(row[1] === null || Number.isInteger(row[1]))) {
+      fail(rel, `list row ${JSON.stringify(row)} is not [a part it maps, a stroke count or null]`);
     }
   }
 }
@@ -618,6 +685,8 @@ function main() {
   checkRangeIndex(docs, 'data/names/index.json', 'yomu-names/1');
   checkRangeIndex(docs, 'data/strokes/index.json', 'yomu-strokes/1');
   checkRangeIndex(docs, 'data/kpage/index.json', 'yomu-kpage/1');
+  checkRangeIndex(docs, 'data/search/index.json', 'yomu-search/1');
+  checkSearchKeys(docs);
   checkPopular(docs);
   checkLikeIndex(docs);
   checkLookalikes(docs);

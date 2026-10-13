@@ -7,7 +7,7 @@
 // My kanji: the list (#/kanji), a review, the Collection and History; the
 // parent of each of the last three is the list, and the list's is the reader.
 // Play: the five games (#/play) and one route per game, whose parent is
-// #/play. Back is history.back() when the history entry before this one is
+// #/play. Search (#/search), whose parent is the reader. Back is history.back() when the history entry before this one is
 // the parent route, otherwise a replaceState to it (events-kanji.js leave).
 
 export const ROUTES = Object.freeze({
@@ -21,6 +21,7 @@ export const ROUTES = Object.freeze({
   '#/play/twins': 'play-twins',
   '#/play/names': 'play-names',
   '#/play/spaces': 'play-spaces',
+  '#/search': 'search',
 });
 
 export const HASH = Object.freeze({
@@ -35,6 +36,7 @@ export const HASH = Object.freeze({
   'play-twins': '#/play/twins',
   'play-names': '#/play/names',
   'play-spaces': '#/play/spaces',
+  search: '#/search',
 });
 
 export const PARENT = Object.freeze({
@@ -49,12 +51,16 @@ export const PARENT = Object.freeze({
   'play-twins': 'play',
   'play-names': 'play',
   'play-spaces': 'play',
+  search: 'reader',
 });
 
 /** The string each of Play's routes is titled with (strings-play.js). */
 export const PLAY_TITLE = Object.freeze({
   play: 'play', 'play-which': 'gameWhich', 'play-odd': 'gameOdd', 'play-twins': 'gameTwins', 'play-names': 'gameNames', 'play-spaces': 'gameSpaces',
 });
+
+/** The title of each route that draws a section of its own (sectionOf). */
+export const SCREEN_TITLE = Object.freeze({ ...PLAY_TITLE, search: 'searchTitle' });
 
 /** The games, by route; each route is 'play-' and the game's id. */
 export const GAMES = Object.freeze(['which', 'odd', 'twins', 'names', 'spaces']);
@@ -67,6 +73,16 @@ export function routeOf(hash) {
 /** Is this route Play's: the five games, or one of them. */
 export function isPlay(route) {
   return route === 'play' || String(route).startsWith('play-');
+}
+
+/**
+ * The section a route draws by itself, through its own onRoute hook: `play`
+ * for Play's routes, `search` for Search, null for the reader and My kanji's
+ * places (which events-kanji.js draws).
+ */
+export function sectionOf(route) {
+  if (isPlay(route)) return 'play';
+  return route === 'search' ? 'search' : null;
 }
 
 /** The game a route shows, or null on #/play and everywhere else. */

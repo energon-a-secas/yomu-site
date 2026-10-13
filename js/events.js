@@ -31,6 +31,8 @@ import { watchPress, isField } from './press.js';
 import { bindLayout } from './layout.js';
 import { conjugateToken } from './conjugate.js';
 import { KANJI_PAGE_ACTIONS, bindKanjiPage, openKanjiPage } from './events-kanji-page.js';
+import { SEARCH_ACTIONS, bindSearch } from './events-search.js';
+import { DAILY_ACTIONS, bindDaily } from './events-daily.js';
 
 export { analyzeNow, loadText };
 
@@ -452,6 +454,8 @@ const ACTIONS = {
   },
   ...KANJI_ACTIONS,
   ...KANJI_PAGE_ACTIONS,
+  ...SEARCH_ACTIONS,
+  ...DAILY_ACTIONS,
   ...COLLECT_ACTIONS,
   ...PLAY_ACTIONS,
 };
@@ -483,6 +487,8 @@ export function bindEvents() {
   // Collection's and Play's hooks have to be there to hear it.
   bindCollect();
   bindPlay();
+  bindSearch();
   bindKanji();
+  bindDaily();
   bindKanjiPage();
 }

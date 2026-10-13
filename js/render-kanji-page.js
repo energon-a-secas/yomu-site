@@ -16,6 +16,9 @@ import {
 } from './render-save.js';
 import { readingsLine, meaningText } from './render-mykanji.js';
 import { gradeName } from './render-remember.js';
+import {
+  isKana, isHiragana, toHira, toKata, beatRomaji,
+} from './kana.js';
 
 const SVG = 'http://www.w3.org/2000/svg';
 
@@ -119,6 +122,38 @@ function facts(info) {
 }
 
 /**
+ * A kana's page: how it is drawn, how it is spelled in romaji, the same
+ * sound in the other script, and common words that start with it.
+ */
+function kanaPage(ch, paths, page, nodes, drawn) {
+  const hira = isHiragana(ch);
+  const other = hira ? toKata(ch) : toHira(ch);
+  nodes.push(h('div', { class: 'kp-top' }, [
+    strokesPart(ch, paths),
+    h('div', { class: 'kp-facts' }, [
+      h('p', { class: 'cd-mean' }, [h('span', { class: 'kp-romaji', lang: 'ja-Latn' }, beatRomaji(ch) || '')]),
+      h('p', { class: 'mk-meta' }, ui(hira ? 'kpHiragana' : 'kpKatakana')),
+      other && other !== ch ? h('div', { class: 'kp-also' }, [
+        h('p', { class: 'kp-sub' }, ui(hira ? 'kpInKatakana' : 'kpInHiragana')),
+        h('div', { class: 'kp-tiles' }, goTile(other, drawn, null)),
+      ]) : null,
+    ]),
+  ]));
+  const words = page ? page.words : [];
+  nodes.push(h('section', { class: 'kp-sec' }, [
+    h('h3', { class: 'word-sub' }, ui('kpStartsWith')),
+    words.length
+      ? h('ul', { class: 'kp-words', role: 'list' }, words.map((w) => h('li', { class: 'kp-word' }, [
+        wordRuby([w.written, w.reading]),
+        h('span', { class: 'kp-gloss', lang: 'en' }, w.gloss),
+      ])))
+      : h('p', { class: 'quiet' }, ui('kpWordsNone')),
+  ]));
+  nodes.push(h('p', { class: 'quiet kp-source' }, ui('kpSource')));
+  return { nodes, drawn };
+}
+
+/**
  * The page's body.
  *
  * @param {object} p
@@ -151,6 +186,7 @@ export function kanjiPageNodes({
       drawn,
     };
   }
+  if (isKana(ch)) return kanaPage(ch, paths, page, nodes, drawn);
   const meaning = meaningText(info, 5);
   nodes.push(h('div', { class: 'kp-top' }, [
     strokesPart(ch, paths),
@@ -169,7 +205,8 @@ export function kanjiPageNodes({
     ]),
   ]));
 
-  const parts = info && Array.isArray(info.parts) ? info.parts.filter((x) => x && x !== ch) : [];
+  // KanjiVG names some parts by a code (CDP-8BC4) or a layout (⿱日隹): only characters are shown.
+  const parts = info && Array.isArray(info.parts) ? info.parts.filter((x) => x && x !== ch && [...x].length === 1) : [];
   const partRows = parts.map((part) => {
     const also = (page && page.parts[part]) || [];
     return h('li', { class: 'kp-part' }, [

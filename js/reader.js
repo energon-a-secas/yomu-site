@@ -122,6 +122,17 @@ export async function kanjiInfo(chars) {
   return out;
 }
 
+/**
+ * The dictionary every read uses, made on first call, so Search reads the
+ * shards a reading already loaded. A Retry forgets it (resetDictionary), so
+ * a caller asks again rather than keeping the one it got.
+ */
+export async function sharedDict() {
+  const m = await modules();
+  if (!dict && typeof m.createDict === 'function') dict = m.createDict({ fetchJson });
+  return dict;
+}
+
 /** Forget the dictionary, so a Retry refetches a shard that failed rather than replaying it. */
 export function resetDictionary() {
   dict = null;

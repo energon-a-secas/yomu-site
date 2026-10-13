@@ -116,6 +116,7 @@
 
     <div class="header-right">
       <div class="header-actions">
+        <a class="btn btn--ghost btn--sm search-open" href="#/search" id="search-open" data-ui-label="search" aria-label="Search"><svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="10.5" cy="10.5" r="6"/><path d="m15 15 5 5"/></svg></a>
         <button class="btn btn--ghost btn--sm" type="button" id="phrases-open" data-act="phrases" aria-haspopup="dialog" data-ui="phrases">Phrases</button>
         <a class="btn btn--ghost btn--sm mk-open" href="#/kanji" id="mykanji-open" data-keep-mobile><span data-ui="myKanji">My kanji</span><span class="mk-due" data-due-count hidden></span></a>
         <a class="btn btn--ghost btn--sm pl-open" href="#/play" id="play-open"><span data-ui="play">Play</span></a>
@@ -163,6 +164,8 @@
                    read that found Japanese (js/render-remember.js), handled in
                    js/events-collect.js. Its name is text nodes, never the text. -->
               <button class="save-toggle" type="button" id="save-text" data-act="save-text" aria-pressed="false" hidden><svg class="save-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 3.5h10a1 1 0 0 1 1 1V20.5l-6-4.2-6 4.2V4.5a1 1 0 0 1 1-1Z"/></svg><span class="sr-only" data-ui="saveText">Save this text</span></button>
+              <!-- Search, where the header has no room for it (701 to 759px, style.css). -->
+              <a class="page-open input-search" href="#/search" data-ui-label="search" aria-label="Search"><svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="10.5" cy="10.5" r="6"/><path d="m15 15 5 5"/></svg></a>
               <button class="btn btn--ghost btn--sm" type="button" data-act="clear" data-ui="clear">Clear</button>
             </div>
           </div>
@@ -340,6 +343,37 @@
       <p class="quiet mk-lead" id="pl-lead" data-ui="playLead">Five short games: the characters that look alike, and where one word ends and the next begins. Your best scores stay in this browser.</p>
       <p class="mk-note" id="pl-note" role="status" aria-live="polite"></p>
       <div class="mk-body" id="pl-body"></div>
+    </section>
+
+    <!-- Search (events-search.js): a route of its own, drawn by its own hook,
+         with the kana chart and the counters as its reference tabs. The query
+         is held in the field and in memory, never in the address. -->
+    <section class="mk sr" id="search" aria-labelledby="sr-title" hidden>
+      <button class="text-link mk-back" type="button" data-act="kanji-back"><span aria-hidden="true">← </span><span data-ui="backToReader">Back to the reader</span></button>
+      <h2 class="mk-title" id="sr-title" tabindex="-1" data-ui="searchTitle">Search</h2>
+      <p class="quiet mk-lead" data-ui="searchLead">Look up a word in Japanese, romaji or English, find a kanji by the parts you can see in it, or browse the kana and the counters. Nothing you type leaves this page.</p>
+      <div class="mk-nav sr-nav" role="group" aria-labelledby="sr-nav-label">
+        <span class="sr-only" id="sr-nav-label" data-ui="searchNav">Search by</span>
+        <button class="mk-tab" type="button" data-act="sr-tab" data-tab="words" aria-pressed="true" data-ui="searchWords">Words</button>
+        <button class="mk-tab" type="button" data-act="sr-tab" data-tab="parts" aria-pressed="false" data-ui="searchParts">Kanji by parts</button>
+        <button class="mk-tab" type="button" data-act="sr-tab" data-tab="kana" aria-pressed="false" data-ui="searchKana">Kana</button>
+        <button class="mk-tab" type="button" data-act="sr-tab" data-tab="counters" aria-pressed="false" data-ui="searchCounters">Counters</button>
+      </div>
+      <div class="sr-pane" id="sr-words">
+        <div class="sr-field">
+          <label class="input-label" for="sr-input" data-ui="searchLabel">Word, reading or meaning</label>
+          <input class="mk-filter-input sr-input" id="sr-input" type="search" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" aria-describedby="sr-hint">
+          <p class="field__hint" id="sr-hint" data-ui="searchHint">For example 食べた, taberu or eat. English meanings are the dictionary's.</p>
+        </div>
+        <p class="status sr-status" id="sr-status" role="status" aria-live="polite"></p>
+        <div id="sr-results"></div>
+      </div>
+      <div class="sr-pane" id="sr-parts" hidden>
+        <p class="quiet" data-ui="partsLead">Choose the parts you see. Only parts that still lead to a kanji stay open.</p>
+        <div id="sr-parts-body"></div>
+      </div>
+      <div class="sr-pane" id="sr-kana" hidden></div>
+      <div class="sr-pane" id="sr-counters" hidden></div>
     </section>
 
     <dialog class="dialog" id="mk-clear-dialog" aria-labelledby="mk-clear-title" aria-describedby="mk-clear-body">

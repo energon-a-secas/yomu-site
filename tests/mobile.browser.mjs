@@ -331,9 +331,22 @@ async function reader(browser, phone, lang) {
     await page.waitForSelector('#side[data-sheet] #word-body *');
     await page.waitForTimeout(300);
     await audit(page, where, 'word');
+    if (await page.locator('#word-conj summary').count()) {
+      await tap(page, '#word-conj summary');
+      await audit(page, where, 'word-forms');
+    }
     await tap(page, '.side-tab[data-tab="kanji"]');
     await page.waitForSelector('#kanji-body [data-act="save-kanji"]');
     await audit(page, where, 'kanji');
+    await tap(page, '#kanji-body [data-act="kanji-page"]');
+    await page.waitForSelector('#kanji-dialog[open] .kp-top');
+    await audit(page, where, 'kanji-page');
+    if (await page.locator('#kanji-dialog [data-act="kp-go"]').count()) {
+      await tap(page, '#kanji-dialog [data-act="kp-go"]');
+      await page.waitForSelector('#kanji-dialog[open] [data-act="kp-back"]');
+      await audit(page, where, 'kanji-page-moved');
+    }
+    await page.locator('#kanji-dialog [data-dialog-close]').first().tap();
     await tap(page, '#kanji-body [data-act="save-kanji"]');
     await tap(page, '.side-tab[data-tab="notes"]');
     await audit(page, where, 'notes-tab');
@@ -438,6 +451,30 @@ async function reader(browser, phone, lang) {
     await page.waitForSelector('#mk-clear-dialog[open]');
     await audit(page, where, 'clear-dialog');
     await page.locator('#mk-clear-dialog [data-dialog-close]').first().tap();
+  });
+
+  await step(where, 'Search, its tabs and a kana page', async () => {
+    await page.evaluate(() => { location.hash = '#/search'; });
+    await page.waitForSelector('#search:not([hidden]) #sr-input');
+    await page.fill('#sr-input', 'eat');
+    await page.waitForSelector('#sr-results .sr-item');
+    await audit(page, where, 'search');
+    await tap(page, '[data-act="sr-tab"][data-tab="parts"]');
+    await page.waitForSelector('#sr-parts-body [data-act="sr-part"]');
+    await tap(page, '#sr-parts-body [data-act="sr-part"]');
+    await page.waitForSelector('#sr-parts-body [data-act="sr-part-kanji"]');
+    await audit(page, where, 'search-parts');
+    await tap(page, '[data-act="sr-tab"][data-tab="kana"]');
+    await page.waitForSelector('#sr-kana [data-act="kc-kana"]');
+    await audit(page, where, 'kana');
+    await tap(page, '#sr-kana [data-act="kc-kana"]');
+    await page.waitForSelector('#kanji-dialog[open] .kp-top');
+    await audit(page, where, 'kana-page');
+    await page.locator('#kanji-dialog [data-dialog-close]').first().tap();
+    await tap(page, '[data-act="sr-tab"][data-tab="counters"]');
+    await page.waitForSelector('#sr-counters .cn-item');
+    await audit(page, where, 'counters');
+    await tap(page, '#search [data-act="kanji-back"]');
   });
 
   // On localhost the kit says the key only works on neorgon.com: expected.

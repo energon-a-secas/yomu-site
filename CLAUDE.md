@@ -16,7 +16,7 @@ the display preferences to their account (Accounts and sync, below).
 ```bash
 make serve       # http://localhost:8895
 make validate    # node tools/check-data.mjs, then npm test
-make data        # rebuild data/dict, data/kanji, data/names, data/like, data/play, data/strokes and data/kpage from the pinned upstreams (manual)
+make data        # rebuild data/dict, data/kanji, data/names, data/like, data/play, data/strokes, data/kpage and data/search from the pinned upstreams (manual)
 npm test         # node --test tests/*.test.mjs
 node tests/mobile.browser.mjs [--base=http://localhost:8895/] [--shots=DIR]   # every screen on five phones, WebKit and Chromium (On a phone, below)
 node tools/compare-readings.mjs <old data/> [data/]   # every token two builds read differently, over Tatoeba
@@ -277,6 +277,20 @@ additions such as 葛 and 遡, which KanjiVG draws in their printed form, and
 牙); the page says so beside the drawing, and `tests/kanji-page.test.mjs`
 names the nine, so a rebuild that changes them fails.
 
+**Search keeps its query in the field, never in the address.** `#/search`
+(`events-search.js`, a route that draws its own section like Play's,
+`routes.js sectionOf`) reads Japanese the way the reader does (the key in
+both scripts and every dictionary form `deinflect.js` finds, then the rare
+words and the names), romaji as kana and as English, and English through
+`data/search/`, an index of the first tier's gloss words to keys; the builder
+and the page split words with the same `search.js glossWords`. One word is
+one result, filed under the spelling the dictionary marks usual (`u`), so
+eat finds 食べる once, not たべる too. Kanji by parts follows KanjiVG's parts
+to their own parts (語 is 言 and 吾, 吾 has 口), and a part that leads
+nowhere with the chosen ones is disabled, not removed. KanjiVG names some
+parts by a code (CDP-8BC4) or a layout (⿱日隹); neither is offered, here or
+on the kanji page. Read it sends a word to the reader as a new text.
+
 **The Word panel's All forms is built forward and checked backward.**
 `conjugate.js` makes every form of a verb or adjective from its dictionary
 form and part of speech; `tests/conjugate.test.mjs` reads every form of every
@@ -387,9 +401,11 @@ tests/mobile.browser.mjs`, with `--base=`, `--shots=DIR`,
 `--browsers=webkit,chromium`, `--devices=se,15,pixel,s24,se1` and `--langs=en,es` to
 narrow it, and `PLAYWRIGHT_MODULE` naming Playwright's `index.mjs` when the
 monorepo's `node_modules` is not three directories up (a worktree kept
-elsewhere). It walks every screen (the empty page, a reading, the word, kanji
-and notes panels, Phrases, the header's menu, My kanji with its sync line, a
-review, the Collection and a tile, History, Clear all, Sign in, all five games
+elsewhere). It walks every screen (the empty page, a reading, the word (with All
+forms open), kanji and notes panels, a kanji page and a move inside it,
+Phrases, the header's menu, My kanji with its sync line, a
+review, the Collection and a tile, History, Clear all, Search with each of its tabs and a
+kana's page, Sign in, all five games
 to their result, Retry after a failed shard) at 375x667, 393x852, 412x915,
 360x780 and 320x568 with each device's touch and user agent, the reader on its
 side too, the header alone with no review due and with 128 and at eight
@@ -461,8 +477,10 @@ labelled control's padding is the site's `.btn`). Past 700px every control
 is in the bar, and the kit does not fold what does not fit: in Spanish the
 language toggle ran 46px under Iniciar sesión at 734 (an iPhone 15 on its
 side) and 12 at 768, so up to 900px the four labelled controls take 5px of
-side padding. Spanish fits from 725px; from 701 to 724 the toggle still runs
-under Sign in, which only a kit that folds an overflowing bar can fix. Under
+side padding, and the language toggle shows only the code it switches to.
+Search, an icon in the bar, put Sign in over the toggle again in Spanish
+(28px at 701, 4 at 768, 3 at 852): from 701 to 759px Search leaves the bar
+and its twin beside Clear (`.input-search`) stands in on the reader. Under
 900px the reviews-due count rides on My kanji's corner: as a part of the
 label it widened the button by 30px. The check measures the bar at every
 phone's width, upright and on its side, in both languages, with no review due
@@ -1181,6 +1199,7 @@ session against it is checked on the live domain only.
 - `convex/_generated/`: written by `npx convex dev`, and gitignored.
 - `data/dict/**`, `data/kanji/**`, `data/names/**`: emitted by `tools/build-*.mjs` from the pins in `tools/lib/sources.mjs` (`build-names.mjs` after `build-dict.mjs`, which it reads, and it writes `data/names/popular.json` too; `data/kanji/joyo.json` by `build-joyo.mjs` from the committed shards, or by `build-kanji.mjs`). Rebuild, do not hand-edit.
 - `data/like/**`: emitted by `tools/build-sounds-like.mjs` from the committed `data/dict/` (after `build-dict.mjs`). Rebuild, do not hand-edit.
+- `data/search/**`: emitted by `tools/build-search.mjs` from the committed `data/dict/`, `data/kanji/` and `data/strokes/` (after `build-kanji-page.mjs`). Rebuild, do not hand-edit.
 - `data/strokes/**`, `data/kpage/**`: emitted by `tools/build-kanji-page.mjs` from KanjiVG (the pin in `tools/lib/sources.mjs`) and the committed `data/dict/` and `data/kanji/` (after `build-dict.mjs` and `build-kanji.mjs`). Rebuild, do not hand-edit.
 - `data/play/lookalikes.json`: emitted by `tools/build-lookalikes.mjs` from the committed `data/kanji/` (after `build-kanji.mjs` or `build-joyo.mjs`). Rebuild, do not hand-edit.
 - `data/play/spaces.json`: emitted by `tools/build-spaces.mjs` from the phrase library, `tools/lib/compound-lines.mjs` and the analyzer over the committed `data/` (after any change to `js/`'s analyzer, the dictionary or the library). Rebuild, do not hand-edit.

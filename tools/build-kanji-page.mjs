@@ -24,6 +24,8 @@
  *   p  for each of the kanji's parts (KanjiVG's, in data/kanji/), up to
  *      SIBLINGS listed kanji that have the same part, most frequent first.
  *   u  up to USED listed kanji that have this kanji as a part (日 is in 明).
+ * A kana has `w` alone: up to KANA_WORDS common words that start with its
+ * sound, one per reading (wordsByKana says how).
  * "Listed" is the kanji shards' frequency-ranked part (data/kanji/index.json
  * names their characters), so the neighbours a page offers are ones a reader
  * meets; a kanji page that leads to 鬱 from 林 helps nobody.
@@ -32,6 +34,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { loadKanjiVgDir, upstream } from './lib/sources.mjs';
 import { licenceBlock } from './lib/licence.mjs';
+import { shownMeanings } from '../js/reader.js';
 import {
   writeJson, serialize, MAX_BYTES, SITE, fmtBytes, pruneStale,
 } from './lib/emit.mjs';
@@ -41,6 +44,9 @@ const DATA = path.join(SITE, 'data');
 const WORDS = 10;
 const SIBLINGS = 8;
 const USED = 12;
+const KANA_WORDS = 6;
+const DAILY = 1000;
+const CONTENT = / (n|v1|v5[a-z-]*|vk|vs-i|adj-i|adj-na|adv) /;
 
 const readJson = (rel) => JSON.parse(fs.readFileSync(path.join(DATA, rel), 'utf8'));
 const WRITTEN = /^[\u3041-\u309f\u30a0-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff々ー]+$/u;
@@ -118,12 +124,73 @@ function wordsByKanji(tier) {
   return by;
 }
 
+/**
+ * A kana's page lists words that start with its sound: hiragana by the
+ * reading (あ: 朝 あさ, 雨 あめ), katakana by a key written in katakana
+ * (ア: アメリカ), since that is where a learner meets katakana.
+ */
+function wordsByKana(tier) {
+  const by = new Map();
+  const hira = /^[\u3041-\u3096]$/;
+  const kata = /^[\u30a1-\u30fa]$/;
+  const keys = new Set(tier.map(([key]) => key));
+  for (const [key, recs] of tier) {
+    const rec = recs[0];
+    if (!rec || rec.x || rec.m || !Array.isArray(rec.g) || !rec.g.length || !WRITTEN.test(key)) continue;
+    // A word a learner pictures: a noun, a verb, an adjective or an adverb of
+    // two kana or more, not a particle, a suffix or an interjection (あっ, さえ).
+    if (!CONTENT.test(` ${rec.p || ''} `) || [...(Array.isArray(rec.r) && rec.r.length ? rec.r[0] : key)].length < 2) continue;
+    // きく is 聞く: a kana key stands aside for its kanji spelling, unless the word is usually kana.
+    if (Array.isArray(rec.k) && rec.k.some((k) => keys.has(k)) && !rec.u) continue;
+    const reading = Array.isArray(rec.r) && rec.r.length ? rec.r[0] : key;
+    const row = { key, reading, gloss: rec.g[0], q: rec.q || 6 };
+    const first = [...reading][0];
+    if (hira.test(first) && !/[ゃゅょぁぃぅぇぉ]/.test([...reading][1] || '')) {
+      if (!by.has(first)) by.set(first, []);
+      by.get(first).push(row);
+    }
+    const k = [...key][0];
+    if (kata.test(k) && key === reading && !/[ャュョァィゥェォ]/.test([...key][1] || '')) {
+      if (!by.has(k)) by.set(k, []);
+      by.get(k).push(row);
+    }
+  }
+  for (const [ch, rows] of by) {
+    // One spelling per reading: 朝 and あさ are one word.
+    const seen = new Set();
+    const kept = rows.sort((a, b) => a.q - b.q || a.reading.length - b.reading.length || (a.key < b.key ? -1 : 1))
+      .filter((r) => (seen.has(r.reading) ? false : seen.add(r.reading)));
+    by.set(ch, kept.slice(0, KANA_WORDS).map((r) => [r.key, r.reading, r.gloss]));
+  }
+  return by;
+}
+
+/**
+ * data/kpage/daily.json, `yomu-daily/1`: the kanji of the day, the DAILY
+ * most frequent listed kanji, each as [kanji, meaning, word, its reading,
+ * its gloss], the word the first on its page that is more than the kanji
+ * alone. One small file, so the empty page shows a kanji with one fetch.
+ * Its meanings leave out KANJIDIC's radical numbers, as the page does.
+ */
+function dailyRows(info, listed, pages) {
+  const rows = [];
+  for (const ch of listed) {
+    if (rows.length >= DAILY) break;
+    const e = info.get(ch);
+    const w = ((pages.get(ch) || {}).w || []).find((x) => x[0] !== ch);
+    if (!e || !Array.isArray(e.m) || !e.m.length || !w) continue;
+    rows.push([ch, shownMeanings(e.m).slice(0, 2).join(', '), ...w]);
+  }
+  return rows;
+}
+
 function pageEntries() {
   const { info, listed } = kanjiTable();
-  const words = wordsByKanji(firstTier());
+  const tier = firstTier();
+  const words = wordsByKanji(tier);
   const withPart = new Map(); // part -> listed kanji that have it, most frequent first
   for (const ch of listed) {
-    for (const p of info.get(ch).parts || []) {
+    for (const p of (info.get(ch).parts || []).filter((x) => [...x].length === 1)) {
       if (!withPart.has(p)) withPart.set(p, []);
       withPart.get(p).push(ch);
     }
@@ -134,7 +201,8 @@ function pageEntries() {
     const w = words.get(ch);
     if (w && w.length) entry.w = w;
     const p = {};
-    for (const part of e.parts || []) {
+    // KanjiVG names some parts by a code (CDP-8BC4) or a layout (⿱日隹): no page to go to.
+    for (const part of (e.parts || []).filter((x) => [...x].length === 1)) {
       const sib = (withPart.get(part) || []).filter((x) => x !== ch).slice(0, SIBLINGS);
       if (sib.length) p[part] = sib.join('');
     }
@@ -143,7 +211,8 @@ function pageEntries() {
     if (used.length) entry.u = used.join('');
     if (Object.keys(entry).length) out.set(ch, entry);
   }
-  return out;
+  for (const [ch, w] of wordsByKana(tier)) if (w.length) out.set(ch, { w });
+  return { out, daily: dailyRows(info, listed, out) };
 }
 
 // ── Packing ───────────────────────────────────────────────────────────────
@@ -199,9 +268,13 @@ function main() {
     upstream: [upstream('jmdictFull'), upstream('kanjidic'), upstream('kanjivg')],
     inputs: [['kanjivg', 'parts, the named components under each character, and the kanji that share them']],
   });
+  const pages = pageEntries();
   const lines = [
     emit('strokes', 's', pack(strokeMap, 'yomu-strokes/1', strokeLicence), 'yomu-strokes-index/1', strokeLicence),
-    emit('kpage', 'p', pack(pageEntries(), 'yomu-kpage/1', pageLicence), 'yomu-kpage-index/1', pageLicence),
+    emit('kpage', 'p', pack(pages.out, 'yomu-kpage/1', pageLicence), 'yomu-kpage-index/1', pageLicence),
+    `daily: ${pages.daily.length} kanji, ${fmtBytes(writeJson(path.join(DATA, 'kpage', 'daily.json'), {
+      _licence: pageLicence, format: 'yomu-daily/1', rows: pages.daily,
+    }, 'rows'))}`,
     `wall time ${((Date.now() - t0) / 1000).toFixed(1)} s`,
   ];
   process.stdout.write(`${lines.join('\n')}\n`);
