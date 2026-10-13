@@ -50,8 +50,10 @@ const DAILY = 1000;
 const CONTENT = / (n|v1|v5[a-z-]*|vk|vs-i|adj-i|adj-na|adv) /;
 
 const readJson = (rel) => JSON.parse(fs.readFileSync(path.join(DATA, rel), 'utf8'));
-const WRITTEN = /^[\u3041-\u309f\u30a0-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff々ー]+$/u;
-const isKanji = (ch) => /[㐀-䶿一-鿿豈-﫿]/.test(ch);
+// Kanji by script, not by block, so a word with a kanji outside the Basic
+// Plane (𠮟る) is kept: a code-point range kept only the common blocks.
+const WRITTEN = /^[\p{Script=Han}\u3041-\u309f\u30a0-\u30ff々ー]+$/u;
+const isKanji = (ch) => /\p{Script=Han}/u.test(ch);
 
 // ── Strokes ───────────────────────────────────────────────────────────────
 
