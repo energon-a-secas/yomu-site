@@ -351,13 +351,14 @@
     <section class="mk sr" id="search" aria-labelledby="sr-title" hidden>
       <button class="text-link mk-back" type="button" data-act="kanji-back"><span aria-hidden="true">← </span><span data-ui="backToReader">Back to the reader</span></button>
       <h2 class="mk-title" id="sr-title" tabindex="-1" data-ui="searchTitle">Search</h2>
-      <p class="quiet mk-lead" data-ui="searchLead">Look up a word in Japanese, romaji or English, find a kanji by the parts you can see in it, or browse the kana and the counters. Nothing you type leaves this page.</p>
+      <p class="quiet mk-lead" data-ui="searchLead">Look up a word in Japanese, romaji or English, find a kanji by the parts you can see in it, or browse the kana, the counters and the idioms. Nothing you type leaves this page.</p>
       <div class="mk-nav sr-nav" role="group" aria-labelledby="sr-nav-label">
         <span class="sr-only" id="sr-nav-label" data-ui="searchNav">Search by</span>
         <button class="mk-tab" type="button" data-act="sr-tab" data-tab="words" aria-pressed="true" data-ui="searchWords">Words</button>
         <button class="mk-tab" type="button" data-act="sr-tab" data-tab="parts" aria-pressed="false" data-ui="searchParts">Kanji by parts</button>
         <button class="mk-tab" type="button" data-act="sr-tab" data-tab="kana" aria-pressed="false" data-ui="searchKana">Kana</button>
         <button class="mk-tab" type="button" data-act="sr-tab" data-tab="counters" aria-pressed="false" data-ui="searchCounters">Counters</button>
+        <button class="mk-tab" type="button" data-act="sr-tab" data-tab="sets" aria-pressed="false" data-ui="searchSets">Idioms</button>
       </div>
       <div class="sr-pane" id="sr-words">
         <div class="sr-field">
@@ -374,6 +375,17 @@
       </div>
       <div class="sr-pane" id="sr-kana" hidden></div>
       <div class="sr-pane" id="sr-counters" hidden></div>
+      <div class="sr-pane" id="sr-sets" hidden>
+        <p class="quiet" data-ui="setsLead">Four-character idioms, proverbs and idiomatic phrases, as JMdict tags them. The common ones come first.</p>
+        <div id="sr-set-pick"></div>
+        <div class="sr-field sets-field">
+          <label class="input-label" for="sr-set-filter" data-ui="setsFilter">Filter</label>
+          <input class="mk-filter-input sr-input" id="sr-set-filter" type="search" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" aria-describedby="sr-set-hint">
+          <p class="field__hint" id="sr-set-hint" data-ui="setsFilterHint">Japanese, romaji or English, for example 鳥, ichi or stone.</p>
+        </div>
+        <p class="status sr-status" id="sr-set-status" role="status" aria-live="polite"></p>
+        <div id="sr-set-list"></div>
+      </div>
     </section>
 
     <dialog class="dialog" id="mk-clear-dialog" aria-labelledby="mk-clear-title" aria-describedby="mk-clear-body">

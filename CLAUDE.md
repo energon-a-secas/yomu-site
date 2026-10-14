@@ -16,7 +16,7 @@ the display preferences to their account (Accounts and sync, below).
 ```bash
 make serve       # http://localhost:8895
 make validate    # node tools/check-data.mjs, then npm test
-make data        # rebuild data/dict, data/kanji, data/names, data/like, data/play, data/strokes, data/kpage, data/search, data/spell and data/sent from the pinned upstreams (manual)
+make data        # rebuild data/dict, data/kanji, data/names, data/like, data/play, data/strokes, data/kpage, data/search, data/spell, data/sets and data/sent from the pinned upstreams (manual)
 npm test         # node --test tests/*.test.mjs
 node tests/mobile.browser.mjs [--base=http://localhost:8895/] [--shots=DIR]   # every screen on five phones, WebKit and Chromium (On a phone, below)
 node tools/compare-readings.mjs <old data/> [data/]   # every token two builds read differently, over Tatoeba
@@ -328,6 +328,20 @@ to their own parts (語 is 言 and 吾, 吾 has 口), and a part that leads
 nowhere with the chosen ones is disabled, not removed. KanjiVG names some
 parts by a code (CDP-8BC4) or a layout (⿱日隹); neither is offered, here or
 on the kanji page. Read it sends a word to the reader as a new text.
+
+**The idioms are JMdict's tags, and there are no JLPT or Kanken lists.**
+Search's Idioms tab (`events-sets.js`, `sets.js`, `render-sets.js`) browses
+`data/sets/`: every entry with a sense JMdict tags `yoji` (1,841), `proverb`
+(940) or `id` (1,293), built by `tools/build-sets.mjs` from the full JMdict,
+so the reader's dictionary and its readings are untouched. An idiom is a
+tagged sense that is also an expression (`exp`): JMdict tags single words
+used figuratively too (嵐, uproar), and they are not what a learner calls an
+idiom. A row's spelling and reading are the ones the tagged sense applies to
+(嚏's charm is くさめ, not くしゃみ). Common entries first, then by reading; a
+set loads whole (two files of at most 140 KB) and shows 50 rows at a time.
+Word lists by JLPT level and Kanken were asked for (queue #143) and are not
+here: neither upstream holds word levels, and KANJIDIC's JLPT field is the
+four levels the test dropped in 2010, which a learner would read as N-levels.
 
 **The Word panel's All forms is built forward and checked backward.**
 `conjugate.js` makes every form of a verb or adjective from its dictionary
@@ -1239,6 +1253,7 @@ session against it is checked on the live domain only.
 - `data/like/**`: emitted by `tools/build-sounds-like.mjs` from the committed `data/dict/` (after `build-dict.mjs`). Rebuild, do not hand-edit.
 - `data/sent/**`: emitted by `tools/build-sentences.mjs` from the pinned Tatoeba exports, read through the analyzer over the committed `data/` (after `build-dict.mjs`; about five minutes). Rebuild, do not hand-edit.
 - `data/spell/**`: emitted by `tools/build-spellings.mjs` from the pinned full JMdict and the committed first tier (after `build-dict.mjs`). Rebuild, do not hand-edit.
+- `data/sets/**`: emitted by `tools/build-sets.mjs` from the pinned full JMdict alone. Rebuild, do not hand-edit.
 - `data/search/**`: emitted by `tools/build-search.mjs` from the committed `data/dict/`, `data/kanji/` and `data/strokes/` (after `build-kanji-page.mjs`). Rebuild, do not hand-edit.
 - `data/strokes/**`, `data/kpage/**`: emitted by `tools/build-kanji-page.mjs` from KanjiVG (the pin in `tools/lib/sources.mjs`) and the committed `data/dict/` and `data/kanji/` (after `build-dict.mjs` and `build-kanji.mjs`). Rebuild, do not hand-edit.
 - `data/play/lookalikes.json`: emitted by `tools/build-lookalikes.mjs` from the committed `data/kanji/` (after `build-kanji.mjs` or `build-joyo.mjs`). Rebuild, do not hand-edit.

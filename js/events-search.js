@@ -1,5 +1,5 @@
 // Search's screen (#/search): the field, its results, the parts picker, the
-// kana chart and the counters, and what their buttons do. js/search.js is the logic, render-search.js draws.
+// kana chart, the counters and the collections (events-sets.js), and what their buttons do. js/search.js is the logic, render-search.js draws.
 //
 // The query lives in the field and in `sr.query`, never in the address or in
 // storage. A search that finishes after the learner typed on is dropped
@@ -19,8 +19,9 @@ import { pageExamples } from './examples.js';
 import { openKanjiPage } from './events-kanji-page.js';
 import { onRoute, openReader } from './events-kanji.js';
 import { loadText } from './events-read.js';
+import { paintSets } from './events-sets.js';
 
-const TABS = Object.freeze(['words', 'parts', 'kana', 'counters']);
+const TABS = Object.freeze(['words', 'parts', 'kana', 'counters', 'sets']);
 
 const sr = {
   tab: 'words',
@@ -134,6 +135,7 @@ function showTab(tab, { focus = false } = {}) {
   if (sr.tab === 'parts') paintParts();
   if (sr.tab === 'kana') paintKana();
   if (sr.tab === 'counters') fill($('sr-counters'), countersNodes(sr.counter));
+  if (sr.tab === 'sets') paintSets();
   if (sr.tab === 'words' && focus) $('sr-input')?.focus();
 }
 

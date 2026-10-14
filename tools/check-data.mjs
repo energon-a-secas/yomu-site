@@ -65,6 +65,8 @@
  *   - search's English index (data/search/) held to the range rule, a word
  *     that is not lower-case English, a key the first tier does not hold,
  *     and a parts picker (data/search/parts.json) out of its shape
+ *   - the collections (data/sets/): a row out of its shape, a set the index
+ *     does not list, or a count the files do not hold
  *   - the kanji page's files (data/strokes/, data/kpage/) held to the range
  *     rule, a stroke that is not SVG path data, a page word that does not
  *     contain its kanji, or a kanji listed among its own neighbours
@@ -294,6 +296,8 @@ const FORMATS = {
   'yomu-search-rare-index/1': null,
   'yomu-search-rare/1': checkSearchRare,
   'yomu-parts/1': checkParts,
+  'yomu-sets-index/1': null,
+  'yomu-set/1': checkSet,
   'yomu-like-index/1': null,
   'yomu-like/1': checkLikeGroup,
   [LOOKALIKES_FORMAT]: null,
@@ -701,6 +705,46 @@ function checkSearchRareKeys(docs) {
   }
 }
 
+// ── Collections (tools/build-sets.mjs) ───────────────────────────────────
+
+const SET_IDS = ['yoji', 'proverb', 'idiom'];
+
+/** A collection file: its set, and rows [written, reading, [glosses], 0 or 1]. */
+function checkSet(rel, doc) {
+  if (!SET_IDS.includes(doc.set)) fail(rel, `set ${JSON.stringify(doc.set)} is not one of ${SET_IDS.join(' ')}`);
+  if (!Array.isArray(doc.rows) || !doc.rows.length) { fail(rel, 'has no rows'); return; }
+  doc.rows.forEach((r, i) => {
+    const ok = Array.isArray(r) && r.length === 4 && typeof r[0] === 'string' && r[0]
+      && typeof r[1] === 'string' && r[1] !== r[0]
+      && Array.isArray(r[2]) && r[2].length && r[2].every((g) => typeof g === 'string' && g)
+      && (r[3] === 0 || r[3] === 1);
+    if (!ok) fail(rel, `row ${i} is not [written, reading, [glosses], 0 or 1]`);
+  });
+}
+
+/** The index names every collection once, with its files in order and its count right. */
+function checkSets(docs) {
+  const index = docs.get('data/sets/index.json');
+  if (!index) return;
+  const named = new Set();
+  const ids = (index.sets || []).map((s) => s.id);
+  if (ids.join(' ') !== SET_IDS.join(' ')) fail('data/sets/index.json', `sets are ${ids.join(' ')}, not ${SET_IDS.join(' ')}`);
+  for (const s of index.sets || []) {
+    let n = 0;
+    for (const src of s.files || []) {
+      named.add(src);
+      const doc = docs.get(src);
+      if (!doc) { fail('data/sets/index.json', `${s.id} lists ${src}, which is missing`); continue; }
+      if (doc.set !== s.id) fail(src, `is set ${doc.set}, the index files it under ${s.id}`);
+      n += (doc.rows || []).length;
+    }
+    if (n !== s.n) fail('data/sets/index.json', `${s.id} says ${s.n} rows, its files hold ${n}`);
+  }
+  for (const rel of docs.keys()) {
+    if (docs.get(rel).format === 'yomu-set/1' && !named.has(rel)) fail('data/sets/index.json', `does not list ${rel}`);
+  }
+}
+
 /** The parts picker: `list` of [part, strokes or null], `parts` part to the kanji that have it. */
 function checkParts(rel, doc) {
   const map = doc.parts || {};
@@ -756,6 +800,7 @@ function main() {
   checkRangeIndex(docs, 'data/search/rare.json', 'yomu-search-rare/1');
   checkSearchKeys(docs);
   checkSearchRareKeys(docs);
+  checkSets(docs);
   checkPopular(docs);
   checkLikeIndex(docs);
   checkLookalikes(docs);

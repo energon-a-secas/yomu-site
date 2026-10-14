@@ -49,6 +49,7 @@ data:
 	node tools/build-kanji-page.mjs
 	node tools/build-search.mjs
 	node tools/build-spellings.mjs
+	node tools/build-sets.mjs
 	node tools/build-sentences.mjs
 	node tools/build-spaces.mjs
 	node tools/check-data.mjs

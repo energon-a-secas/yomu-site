@@ -454,6 +454,12 @@ test('check-data fails each broken rule and names the file', async () => {
       const [k, rows] = Object.entries(d.entries)[0];
       rows[0][1].push([k, '']);
     }), /s03\.json: .* is not a list of \[reading/],
+    ['a collection row with no glosses', (rw) => rw('data/sets/proverb0.json', (d) => {
+      d.rows[2][2] = [];
+    }), /proverb0\.json: row 2 is not \[written/],
+    ['a collection count its files do not hold', (rw) => rw('data/sets/index.json', (d) => {
+      d.sets[0].n += 1;
+    }), /index\.json: yoji says \d+ rows, its files hold/],
     ['a parts picker row for a part it does not map', (rw) => rw('data/search/parts.json', (d) => {
       d.list.push(['☃', 1]);
     }), /parts\.json: list row/],

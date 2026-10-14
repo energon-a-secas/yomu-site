@@ -1087,6 +1087,8 @@ button.mk-tab { background: transparent; border-top: 0; border-left: 0; border-r
 .mk-nav.sr-nav { flex-wrap: nowrap; gap: 0 var(--space-4); overflow-x: auto; scrollbar-width: none; }
 .sr-nav .mk-tab { flex: none; }
 .kc-switch { margin-bottom: var(--space-3); }
+.sets-pick { margin: var(--space-3) 0; }
+.sets-more { margin-top: var(--space-3); min-height: 44px; }
 .kc-lead { margin-bottom: var(--space-3); }
 .sr-pane .word-sub { margin-top: var(--space-4); }
 .kc-grid { display: grid; gap: 4px; max-width: 30rem; }

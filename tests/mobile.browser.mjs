@@ -478,6 +478,13 @@ async function reader(browser, phone, lang) {
     await page.waitForSelector('#sr-counters .cn-card');
     await tap(page, '#sr-counters [data-act="cn-pick"][data-ix="0"]');
     await audit(page, where, 'counters');
+    await tap(page, '[data-act="sr-tab"][data-tab="sets"]');
+    await page.waitForSelector('#sr-set-list .sr-item');
+    await tap(page, '#sr-set-pick [data-set="proverb"]');
+    await page.fill('#sr-set-filter', 'monkey');
+    // The filter repaints after a pause: wait for the short list, not the first page still drawn.
+    await page.waitForFunction(() => { const n = document.querySelectorAll('#sr-set-list .sr-item').length; return n > 0 && n < 50; });
+    await audit(page, where, 'idioms');
     await tap(page, '#search [data-act="kanji-back"]');
   });
 
