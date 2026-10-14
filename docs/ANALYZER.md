@@ -114,7 +114,7 @@ same text and the same data give the same tokens.
 | `render*.js`, `events*.js`, `state.js` | the page | `analyze.js`, `notes.js`, `strings.js` |
 | `gaps.js` | where one word ends and the next begins, and the one reason for each edge, read from tokens the analyzer built (kinds, parts, confidence, the characters); the places, marks and score of "Where are the spaces?" | `kana.js` |
 | `conjugate.js` | every form of a verb or adjective from its dictionary form and part of speech, forward (the Word panel's All forms); held to `deinflect.js` by `tests/conjugate.test.mjs`, which reads each form of every first-tier word back | `kana.js` |
-| `search.js` | Search's logic: what a query is, the keys a Japanese query asks for, the English index (`data/search/`) and kanji by parts; `glossWords`, which the builder splits glosses with too | `range-store.js`, `kana.js`, `deinflect.js`, `vendor/wanakana.js` |
+| `search.js` | Search's logic: what a query is, the keys a Japanese query asks for, the English index (`data/search/`, the rare words' too when the common ones find few) and kanji by parts; `glossWords`, which the builder splits glosses with too | `range-store.js`, `kana.js`, `deinflect.js`, `vendor/wanakana.js` |
 | `examples.js` | a word's example sentences (`data/sent/`) by key and reading, and the page's one shared loader | `range-store.js`, `other-forms.js` |
 | `other-forms.js` | a word's other spellings (`data/spell/`) with JMdict's tags, and the page's one shared loader | `range-store.js` |
 | `kanji-page-data.js` | the kanji page's strokes (`data/strokes/`) and words and neighbours (`data/kpage/`) | `range-store.js` |

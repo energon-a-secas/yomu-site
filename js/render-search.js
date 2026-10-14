@@ -49,10 +49,15 @@ export function shownWord(res) {
   const reading = written === res.key ? (Array.isArray(rec.r) && rec.r[0]) || res.key : res.key;
   const glosses = res.recs.flatMap((r) => r.g || []);
   const pos = [...new Set(String(rec.p || '').split(/\s+/).filter(Boolean).map(posWord).filter(Boolean))];
+  // A rare word found by its English carries only its first meanings, and how many it left out.
+  const left = res.recs.reduce((n, r) => n + (r.more || 0), 0);
   return {
-    written, reading, glosses: glosses.slice(0, SHOWN), pos, more: Math.max(0, glosses.length - SHOWN),
+    written, reading, glosses: glosses.slice(0, SHOWN), pos, more: Math.max(0, glosses.length - SHOWN) + left,
   };
 }
+
+/** Whether a result is a first-tier word, the only kind data/spell and data/sent file. */
+export const firstTier = (res) => res.via !== 'name' && res.via !== 'rare';
 
 /** How a result was reached, in words: "Dictionary form of 食べた", "English: eat", "Romaji: さけ". */
 function viaText(res, q) {
@@ -108,8 +113,10 @@ function wordItem(res, kept, infos, q, formsOf, examplesOf) {
       w.more ? h('span', { class: 'quiet' }, ` ${ui('searchMore', { n: w.more })}`) : null,
     ]) : null,
     via ? h('p', { class: 'sr-via' }, withJa(via)) : null,
-    res.via === 'name' ? null : formsLine((formsOf(w.written, w.reading) || []).filter((f) => f.written !== w.written)),
-    res.via === 'name' ? null : exampleLine((examplesOf(w.written, w.reading) || [])[0]),
+    // Other spellings and examples are filed for the first tier: a rare ぶり
+    // (amberjack) would show the common ぶり's (振り, "after").
+    firstTier(res) ? formsLine((formsOf(w.written, w.reading) || []).filter((f) => f.written !== w.written)) : null,
+    firstTier(res) ? exampleLine((examplesOf(w.written, w.reading) || [])[0]) : null,
     h('div', { class: 'sr-actions' }, [
       ...chars.map((ch) => kanjiTile(ch, kept, null)),
       h('button', { type: 'button', class: 'btn btn--primary btn--sm sr-read', 'data-act': 'sr-read', 'data-ix': ix }, [

@@ -10,7 +10,7 @@ import { ui } from './strings.js';
 import { fetchJson, kanjiInfo, sharedDict } from './reader.js';
 import { createSearch, byParts, queryKind } from './search.js';
 import {
-  resultNodes, partsNodes, byWord, shownWord, PARTS_MEANT,
+  resultNodes, partsNodes, byWord, shownWord, firstTier, PARTS_MEANT,
 } from './render-search.js';
 import { kanaChartNodes, countersNodes } from './render-learn.js';
 import { afterPaintAll } from './render.js';
@@ -69,7 +69,7 @@ async function run() {
     const chars = [...new Set([...found.kanji, ...found.words.flatMap((w) => [...w.key])])];
     const forms = pageForms();
     const examples = pageExamples();
-    const written = byWord(found.words).map((w) => shownWord(w).written);
+    const written = byWord(found.words).filter(firstTier).map((w) => shownWord(w).written);
     const [infos] = await Promise.all([
       kanjiInfo(chars),
       // Other spellings and examples are a nicety: a shard that fails leaves them out.

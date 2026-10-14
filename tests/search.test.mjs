@@ -7,8 +7,9 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
-  createSearch, queryKind, byParts, glossWords, japaneseKeys,
+  createSearch, queryKind, byParts, glossWords, japaneseKeys, RARE_MAX,
 } from '../js/search.js';
+import { shownWord, firstTier } from '../js/render-search.js';
 import { dict, fetchJson, DATA } from './helpers/disk.mjs';
 
 const s = createSearch({ dict: dict(), fetchJson, base: `${DATA}/` });
@@ -58,6 +59,30 @@ test('English: the word a gloss leads with, first; several words keep what they 
   assert.equal(hot[0], '湯');
   assert.ok((await s.search('tree')).kanji.includes('木'));
   assert.deepEqual(await keys('qwxzv'), []);
+});
+
+test('English with few common words asks the rare words, drawn from their index rows alone', async () => {
+  const fetched = [];
+  const spy = createSearch({ dict: dict(), fetchJson: (p) => { fetched.push(p); return fetchJson(p); }, base: `${DATA}/` });
+  const eat = (await spy.search('eat')).words;
+  assert.ok(eat.every((w) => w.via === 'english'), 'eat has common words enough');
+  assert.ok(!fetched.some((p) => /search\/(rare|x\d+)\.json$/.test(p)), 'and never fetches the rare index');
+
+  fetched.length = 0;
+  const amberjack = (await spy.search('amberjack')).words;
+  assert.ok(amberjack.length && amberjack.length <= RARE_MAX);
+  assert.ok(amberjack.every((w) => w.via === 'rare'));
+  const buri = amberjack.find((w) => w.key === 'ぶり');
+  assert.ok(buri, 'ぶり, the Japanese amberjack');
+  assert.ok(!amberjack.some((w) => w.key === 'ブリ'), 'one word is one row, not its katakana too');
+  assert.match(shownWord(buri).glosses[0], /amberjack/);
+  assert.ok(!firstTier(buri), "a rare ぶり takes no other spellings or examples from the common ぶり's files");
+  assert.ok(!fetched.some((p) => /dict\/r\d+\.json$/.test(p)), 'no rare dictionary shard is fetched');
+
+  const abacus = await keys('abacus');
+  assert.ok(abacus.includes('そろばん') && abacus.includes('アバカス'), 'common first, then rare');
+  assert.ok(abacus.indexOf('そろばん') < abacus.indexOf('アバカス'));
+  assert.ok(!(abacus.includes('ご破算') && abacus.includes('御破算')), 'two spellings of one word are one row');
 });
 
 test('kanji by parts: every chosen part, at any depth, and only parts that still lead somewhere', async () => {

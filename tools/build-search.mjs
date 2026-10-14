@@ -19,9 +19,20 @@
  *      so the index carries keys only.
  *   k  up to KANJI listed kanji whose KANJIDIC meanings use the word, most
  *      frequent first.
- * Range shards by word, in plain JS string order. Only the first tier is
- * indexed: the rare words are 44 MB and a learner searching "eat" wants
- * 食べる, not 喰らう.
+ * Range shards by word, in plain JS string order.
+ *
+ * data/search/xNNN.json, `yomu-search-rare/1`: the same for the second tier,
+ *   each English word to up to RARE_WORDS rows [key, reading, glosses, part
+ *   of speech, more]. A rare word is drawn from its row alone: the rare
+ *   tier is 44 MB in 316 shards, so a card that fetched its own shard would
+ *   cost a search a megabyte. `reading` is '' when it is the key, `glosses`
+ *   the first GLOSSES meanings cut to GLOSS_CHARS, `more` how many it leaves
+ *   out. One word is one row: a kana key with a kanji spelling, a second spelling with the
+ *   same reading and first meaning, a kanji key
+ *   usually written in kana, a kana spelling of a common word (`e`) and an
+ *   other spelling of a first-tier word (data/spell) stand aside, so "eat"
+ *   never finds 喰べる twice over. The page reads it only when the first tier
+ *   finds few words (js/search.js RARE_WHEN): "eat" wants 食べる, not 喰らう.
  *
  * data/search/parts.json, `yomu-parts/1`: for each part (a KanjiVG component)
  * the kanji that contain it at any depth, most frequent first: 語 is 言 and
@@ -33,6 +44,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { licenceBlock } from './lib/licence.mjs';
 import { glossWords } from '../js/search.js';
+import { toHira } from '../js/kana.js';
 import { upstream } from './lib/sources.mjs';
 import {
   writeJson, serialize, MAX_BYTES, SITE, fmtBytes, pruneStale,
@@ -45,6 +57,9 @@ const WORDS = 24;
 const KANJI = 10;
 const MIN_PART = 6;
 const DEPTH = 4;
+const RARE_WORDS = 10;
+const GLOSSES = 2;
+const GLOSS_CHARS = 72;
 
 const readJson = (rel) => JSON.parse(fs.readFileSync(path.join(DATA, rel), 'utf8'));
 
@@ -126,6 +141,86 @@ function english(tier, info, listed) {
   return out;
 }
 
+// ── English, the rare words ───────────────────────────────────────────────
+
+function rareTier() {
+  const dir = path.join(DATA, 'dict');
+  const out = [];
+  for (const f of fs.readdirSync(dir).filter((x) => /^r\d+\.json$/.test(x)).sort()) {
+    for (const [key, recs] of Object.entries(readJson(`dict/${f}`).entries)) out.push([key, recs]);
+  }
+  return out;
+}
+
+/** Every other spelling data/spell lists for a first-tier word: those are found through that word. */
+function otherSpellings() {
+  const index = readJson('spell/index.json');
+  const out = new Set();
+  for (const s of index.shards) {
+    for (const rows of Object.values(JSON.parse(fs.readFileSync(path.join(SITE, s.src), 'utf8')).entries)) {
+      for (const [, forms] of rows) for (const [written] of forms) out.add(written);
+    }
+  }
+  return out;
+}
+
+/** A gloss no longer than GLOSS_CHARS, cut at a word. */
+function shortGloss(g) {
+  if (g.length <= GLOSS_CHARS) return g;
+  const cut = g.slice(0, GLOSS_CHARS - 1);
+  const at = cut.lastIndexOf(' ');
+  return `${(at > GLOSS_CHARS / 2 ? cut.slice(0, at) : cut).replace(/[\s,;:(]+$/, '')}\u2026`;
+}
+
+function rareEnglish(tier, common) {
+  const keys = new Set([...common, ...tier.map(([key]) => key)]);
+  const others = otherSpellings();
+  const by = new Map(); // word -> Map(key -> score)
+  const rows = new Map(); // key -> row
+  // One word is one row: ご破算 and 御破算, そろばん玉 and ソロバン玉, ぶり and
+  // ブリ share a reading and a first meaning. A kanji spelling stands for the
+  // word unless the word is usually written in kana; otherwise the first.
+  const wordOf = (key, recs) => {
+    const g = recs.flatMap((r) => r.g || [])[0];
+    return g ? `${toHira((Array.isArray(recs[0].r) && recs[0].r[0]) || key)}|${g}` : null;
+  };
+  const rank = (key, rec) => (/[㐀-鿿々]/.test(key) && !rec.u ? 1 : 0);
+  const listed = tier.filter(([key, recs]) => !recs[0].e && !others.has(key) && listedSpelling(key, recs[0], keys));
+  const chosen = new Map(); // word -> [key, rank]
+  for (const [key, recs] of listed) {
+    const word = wordOf(key, recs);
+    if (!word) continue;
+    const was = chosen.get(word);
+    if (!was || rank(key, recs[0]) > was[1]) chosen.set(word, [key, rank(key, recs[0])]);
+  }
+  for (const [key, recs] of listed) {
+    const rec = recs[0];
+    const word = wordOf(key, recs);
+    if (!word || chosen.get(word)[0] !== key) continue;
+    const glosses = recs.flatMap((r) => r.g || []);
+    const reading = Array.isArray(rec.r) && rec.r[0] && rec.r[0] !== key ? rec.r[0] : '';
+    rows.set(key, [key, reading, glosses.slice(0, GLOSSES).map(shortGloss), rec.p || '', Math.max(0, glosses.length - GLOSSES)]);
+    glosses.forEach((gloss, si) => {
+      const words = glossWords(gloss);
+      const alone = words.length === 1;
+      words.forEach((w, wi) => {
+        // No frequency to rank by: an early sense, an early word, a gloss
+        // that is the word alone, and a short key (a word, not a phrase).
+        const score = si * 3 + Math.min(wi, 4) + (alone ? 0 : 3) + Math.min([...key].length, 8);
+        if (!by.has(w)) by.set(w, new Map());
+        const m = by.get(w);
+        if (!m.has(key) || m.get(key) > score) m.set(key, score);
+      });
+    });
+  }
+  const out = new Map();
+  for (const [w, m] of by) {
+    out.set(w, [...m].sort((a, b) => a[1] - b[1] || a[0].length - b[0].length || (a[0] < b[0] ? -1 : 1))
+      .slice(0, RARE_WORDS).map(([k]) => rows.get(k)));
+  }
+  return out;
+}
+
 // ── Parts ─────────────────────────────────────────────────────────────────
 
 function strokeCounts() {
@@ -197,7 +292,8 @@ function main() {
     inputs: [['kanjivg', 'parts, the named components under each character, followed to their own parts']],
   });
   const { info, listed } = kanjiTable();
-  const docs = pack(english(firstTier(), info, listed), 'yomu-search/1', licence);
+  const tier = firstTier();
+  const docs = pack(english(tier, info, listed), 'yomu-search/1', licence);
   const written = [];
   const sizes = [];
   const shards = docs.map((doc, i) => {
@@ -216,12 +312,34 @@ function main() {
   const partBytes = writeJson(path.join(OUT, 'parts.json'), {
     _licence: licence, format: 'yomu-parts/1', list, parts: map,
   }, 'parts');
-  const gone = pruneStale(OUT, /^e\d+\.json$/, written);
+  const rareDocs = pack(rareEnglish(rareTier(), tier.map(([key]) => key)), 'yomu-search-rare/1', licence);
+  const rareSizes = [];
+  const rareShards = rareDocs.map((doc, i) => {
+    const name = `x${String(i).padStart(3, '0')}.json`;
+    const file = path.join(OUT, name);
+    rareSizes.push(writeJson(file, doc));
+    written.push(file);
+    return { src: `data/search/${name}`, first: doc.first };
+  });
+  const rareKeys = rareDocs.reduce((n, d) => n + Object.keys(d.entries).length, 0);
+  writeJson(path.join(OUT, 'rare.json'), {
+    _licence: licence,
+    format: 'yomu-search-rare-index/1',
+    keys: rareKeys,
+    maxKey: Math.max(...rareDocs.flatMap((d) => Object.keys(d.entries).map((k) => k.length))),
+    shards: rareShards,
+  }, 'shards');
+  const gone = [
+    ...pruneStale(OUT, /^e\d+\.json$/, written),
+    ...pruneStale(OUT, /^x\d+\.json$/, written),
+  ];
   process.stdout.write([
-    `english: ${keys} words in ${docs.length} shards, ${fmtBytes(sizes.reduce((a, b) => a + b, 0))}${gone.length ? `; removed ${gone.join(' ')}` : ''}`,
+    `english: ${keys} words in ${docs.length} shards, ${fmtBytes(sizes.reduce((a, b) => a + b, 0))}`,
+    `rare english: ${rareKeys} words in ${rareDocs.length} shards, ${fmtBytes(rareSizes.reduce((a, b) => a + b, 0))}`,
     `parts: ${Object.keys(map).length} parts, ${list.length} in the picker, ${fmtBytes(partBytes)}`,
+    gone.length ? `removed ${gone.join(' ')}` : null,
     `wall time ${((Date.now() - t0) / 1000).toFixed(1)} s`,
-  ].join('\n') + '\n');
+  ].filter(Boolean).join('\n') + '\n');
 }
 
 main();

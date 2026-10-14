@@ -291,6 +291,8 @@ const FORMATS = {
   'yomu-spell/1': checkSpell,
   'yomu-search-index/1': null,
   'yomu-search/1': checkSearchShard,
+  'yomu-search-rare-index/1': null,
+  'yomu-search-rare/1': checkSearchRare,
   'yomu-parts/1': checkParts,
   'yomu-like-index/1': null,
   'yomu-like/1': checkLikeGroup,
@@ -669,6 +671,36 @@ function checkSearchKeys(docs) {
   }
 }
 
+/** A rare words' English shard: each word to rows [key, reading, glosses, pos, more]. */
+function checkSearchRare(rel, doc) {
+  for (const [word, rows] of Object.entries(doc.entries || {})) {
+    if (!/^[a-z][a-z']*$/.test(word)) fail(rel, `${JSON.stringify(word)} is not a lower-case English word`);
+    const ok = Array.isArray(rows) && rows.length && rows.every((r) => Array.isArray(r) && r.length === 5
+      && typeof r[0] === 'string' && r[0] && typeof r[1] === 'string' && r[1] !== r[0]
+      && Array.isArray(r[2]) && r[2].length && r[2].every((g) => typeof g === 'string' && g)
+      && typeof r[3] === 'string' && Number.isInteger(r[4]) && r[4] >= 0)
+      && new Set(rows.map((r) => r[0])).size === rows.length;
+    if (!ok) fail(rel, `${JSON.stringify(word)} is not a list of distinct [key, reading, [glosses], pos, more]`);
+  }
+}
+
+/** Every key the rare words' index names is a rare key, or Read it would send a word the reader cannot find. */
+function checkSearchRareKeys(docs) {
+  const tier = new Set();
+  for (const doc of docs.values()) {
+    if (doc.format === 'yomu-dict-rare/1') for (const k of Object.keys(doc.entries || {})) tier.add(k);
+  }
+  if (!tier.size) return;
+  for (const rel of shardFiles(docs, 'yomu-search-rare/1')) {
+    let missed = 0;
+    for (const [word, rows] of Object.entries(docs.get(rel).entries || {})) {
+      for (const [k] of rows) {
+        if (!tier.has(k) && (missed += 1) <= 3) fail(rel, `${JSON.stringify(word)} names ${JSON.stringify(k)}, which the rare tier does not hold`);
+      }
+    }
+  }
+}
+
 /** The parts picker: `list` of [part, strokes or null], `parts` part to the kanji that have it. */
 function checkParts(rel, doc) {
   const map = doc.parts || {};
@@ -721,7 +753,9 @@ function main() {
   checkRangeIndex(docs, 'data/search/index.json', 'yomu-search/1');
   checkRangeIndex(docs, 'data/spell/index.json', 'yomu-spell/1');
   checkRangeIndex(docs, 'data/sent/index.json', 'yomu-sentences/1');
+  checkRangeIndex(docs, 'data/search/rare.json', 'yomu-search-rare/1');
   checkSearchKeys(docs);
+  checkSearchRareKeys(docs);
   checkPopular(docs);
   checkLikeIndex(docs);
   checkLookalikes(docs);

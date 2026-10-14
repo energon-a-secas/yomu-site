@@ -7,8 +7,11 @@
 // the names. Romaji is turned into kana and searched as Japanese. English
 // goes through data/search/ (tools/build-search.mjs): each word of the query
 // names the dictionary keys whose glosses use it, and a query of several
-// words keeps the keys every word names. A query that reads as both (sake,
-// kami) is searched both ways, the Japanese first.
+// words keeps the keys every word names. When the common words give fewer
+// than RARE_WHEN, the rare words' index (data/search/xNNN.json) adds up to
+// RARE_MAX more, each drawn from its index row, so no rare shard is fetched.
+// A query that reads as both (sake, kami) is searched both ways, the
+// Japanese first.
 //
 // The query is never stored and never put in the address.
 
@@ -34,6 +37,22 @@ export function glossWords(text) {
 
 /** At most this many words in one answer. */
 export const MAX_RESULTS = 40;
+/** English finding fewer common words than this asks the rare words too. */
+export const RARE_WHEN = 5;
+/** At most this many rare words in one English answer. */
+export const RARE_MAX = 10;
+
+/**
+ * A record drawn from a rare index row [key, reading, glosses, pos, more]:
+ * enough for a card, never a dictionary record (no furigana split, no tier
+ * fields the reader reads).
+ */
+export function rareRecord(row) {
+  const [, reading, g, p, more] = row;
+  return Object.freeze({
+    ...(reading ? { r: [reading] } : {}), g: [...g], p, tier: 2, more: more || 0,
+  });
+}
 
 /**
  * What a query is: `ja` (it has Japanese in it), `romaji` (Latin letters
@@ -69,6 +88,9 @@ export function createSearch({ dict, fetchJson, base = 'data/' }) {
   const resolve = (src) => (src.startsWith('data/') ? dir + src.slice(5) : src);
   const english = createRangeStore({
     fetchJson, resolve, indexPath: `${dir}search/index.json`, what: 'The search index',
+  });
+  const rareEnglish = createRangeStore({
+    fetchJson, resolve, indexPath: `${dir}search/rare.json`, what: 'The rare words\' search index',
   });
   let parts = null;
 
@@ -137,7 +159,17 @@ export function createSearch({ dict, fetchJson, base = 'data/' }) {
       const recs = dict.get(k);
       if (recs) out.push(result(k, recs, 'english'));
     }
+    if (out.length < RARE_WHEN) out.push(...await rareInEnglish(words));
     return { words: out, kanji };
+  }
+
+  /** The rare words every word of the query names, from their index rows. */
+  async function rareInEnglish(words) {
+    await rareEnglish.need(words);
+    const lists = words.map((w) => rareEnglish.get(w) || []).filter((l) => l.length);
+    const rows = new Map(lists.flat().map((row) => [row[0], row]));
+    return intersect(lists.map((l) => l.map((row) => row[0]))).slice(0, RARE_MAX)
+      .map((k) => result(k, [rareRecord(rows.get(k))], 'rare'));
   }
 
   /**

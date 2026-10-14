@@ -315,7 +315,15 @@ words and the names), romaji as kana and as English, and English through
 `data/search/`, an index of the first tier's gloss words to keys; the builder
 and the page split words with the same `search.js glossWords`. One word is
 one result, filed under the spelling the dictionary marks usual (`u`), so
-eat finds 食べる once, not たべる too. Kanji by parts follows KanjiVG's parts
+eat finds 食べる once, not たべる too. English that finds fewer than
+`RARE_WHEN` (5) common words asks the rare words too (`data/search/xNNN.json`,
+index `rare.json`), and each rare result is drawn from its index row (reading,
+the first two meanings, part of speech, how many more), never from
+`data/dict/rNNN`: the rare tier is 316 shards, and ten results fetching their
+own would cost a search a megabyte. "eat" fetches no rare file at all, and
+`tests/search.test.mjs` holds it to that. A rare word has no frequency, so its
+rows rank by sense, word place and key length; two spellings with one reading
+and first meaning are one row (ご破算, not 御破算 too). Kanji by parts follows KanjiVG's parts
 to their own parts (語 is 言 and 吾, 吾 has 口), and a part that leads
 nowhere with the chosen ones is disabled, not removed. KanjiVG names some
 parts by a code (CDP-8BC4) or a layout (⿱日隹); neither is offered, here or
