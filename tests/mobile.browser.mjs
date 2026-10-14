@@ -540,7 +540,7 @@ async function play(browser, phone, lang) {
     await page.waitForSelector('[data-act="pl-start"]');
   });
   for (const e of page.errors) {
-    // A static page learns a data file is missing only by asking (CLAUDE.md, Play).
+    // A static page learns a data file is missing only by asking (docs/PLAY.md).
     if (/404/.test(e) && /names/.test(e)) continue;
     fail(where, `console: ${e.slice(0, 160)}`);
   }

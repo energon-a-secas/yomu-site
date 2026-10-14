@@ -65,7 +65,7 @@ export function device(server, subject, { at = 0, remember = 'on', fail, storage
     /**
      * A sign-in, as js/account.js runs it. A browser that never joined an
      * account, holding saved kanji or phrases, is asked first when the
-     * account holds data too (CLAUDE.md); the learner's answer is `answer`,
+     * account holds data too (docs/SYNC.md); the learner's answer is `answer`,
      * Add by default, which is what every test written before that question
      * existed assumed. `answer: null` returns the question instead, as does
      * a sign-in to another account.

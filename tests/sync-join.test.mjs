@@ -1,6 +1,6 @@
 // What a join stamps. A browser joining an account with Add (answered, or a
 // first sign-in that is not asked) brings its own saves in as saved when it
-// joined, on purpose (CLAUDE.md).
+// joined, on purpose (docs/SYNC.md).
 // A review found the join stamping every save the stores held once the
 // merge was in, the ones it had just received from the account too, and
 // pushing them all back: a removal or a Clear all another device made

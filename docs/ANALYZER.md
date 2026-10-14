@@ -119,7 +119,7 @@ same text and the same data give the same tokens.
 | `examples.js` | a word's example sentences (`data/sent/`) by key and reading, and the page's one shared loader | `range-store.js`, `other-forms.js` |
 | `other-forms.js` | a word's other spellings (`data/spell/`) with JMdict's tags, and the page's one shared loader | `range-store.js` |
 | `kanji-page-data.js` | the kanji page's strokes (`data/strokes/`) and words and neighbours (`data/kpage/`) | `range-store.js` |
-| `play-*.js`, `routes.js` | Play's rounds, store, data and authored content, and the page's routes, with no DOM (CLAUDE.md, "Play") | `kana.js`, `reader.js` (`fetchJson`), `neorgon-persist.js` |
+| `play-*.js`, `routes.js` | Play's rounds, store, data and authored content, and the page's routes, with no DOM (docs/PLAY.md) | `kana.js`, `reader.js` (`fetchJson`), `neorgon-persist.js` |
 
 The analyzer modules (`kana` to `analyze`) never touch the DOM, so `npm test`
 runs them under plain node with the real shards read from disk.
@@ -418,7 +418,7 @@ analyzer either: it is Play's kanji look-alikes,
 jōyō kanji, its value at most five kanji that look like it, best first, a
 pair between two jōyō kanji listed both ways. `tools/lib/lookalikes.mjs`
 chooses them from the shards' `parts` (KanjiVG) and `s` (KANJIDIC) by the
-rules CLAUDE.md, "Play", measures, plus authored classic pairs;
+rules docs/PLAY.md measures, plus authored classic pairs;
 `tools/build-lookalikes.mjs` writes it from the committed shards, and
 `tools/check-data.mjs` rebuilds it and fails any difference, so it is
 rebuilt after the kanji shards are.

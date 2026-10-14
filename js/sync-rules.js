@@ -30,7 +30,7 @@
 // at once, the owner's `clear`: it kills every save not newer than it, and
 // every seen count made by a device that had not heard of it (a seen record
 // carries `e`, the clear its device knew), since a count has no time of its
-// own to compare. CLAUDE.md, "Accounts and sync", says what each means for
+// own to compare. docs/SYNC.md, says what each means for
 // the learner.
 
 import { textKey, MAX_TEXT } from './history-text.js';

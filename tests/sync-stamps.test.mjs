@@ -153,7 +153,7 @@ test('Import counts as saved now even against a Clear all this browser had not h
   await b.sync.sync('same');
   assert.ok(a.kanji.isSaved('天') && b.kanji.isSaved('天'), 'the save is restored everywhere');
   // A count has no time of its own: one this browser had counted, or brought
-  // back, under an older clear goes with the clear (CLAUDE.md, "Clear all").
+  // back, under an older clear goes with the clear (docs/SYNC.md, "Clear all").
   assert.equal(a.kanji.seenOf('天'), null);
 });
 
@@ -283,7 +283,7 @@ test('the device behind saves what the device ahead removed: the save stands', a
 // ── Joining an account whose clocks ran ahead ─────────────────────────────
 //
 // A browser that never synced brings all of its own data when it joins with
-// Add (CLAUDE.md). The join used to stamp `joined` at this clock's now, so
+// Add (docs/SYNC.md). The join used to stamp `joined` at this clock's now, so
 // a Clear all or a removal stamped by a device an hour ahead outranked
 // everything the joining browser brought, and its first sign-in emptied it
 // with nothing on screen to say why. `joined` is now one past the account's

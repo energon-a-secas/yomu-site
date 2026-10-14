@@ -131,7 +131,7 @@ test('the one grouping that differs: two saves made apart, merged before an olde
   // two meet first, then B's removal at T5 (B saw only A's save). The kanji
   // stays saved in every order, since C's save is newer than the removal;
   // which schedule it keeps depends on the order the server saw them in.
-  // CLAUDE.md, "Accounts and sync", names this case.
+  // docs/SYNC.md, names this case.
   const a = krow({ saved: saved(T(1), { box: 4, reviews: 7 }) });
   const c = krow({ saved: saved(T(9)) });
   const b = krow({ removed: T(5) });

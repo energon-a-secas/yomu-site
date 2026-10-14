@@ -40,9 +40,9 @@
  *   radical  the same first part but one other, the first part a TOP or
  *            ENCLOSURE one (雪 雲, 間 問). Not a left one: 記 討 訓 share
  *            言 and little else a glance would mistake, and 連 軒 share 車
- *            in two different layouts (the first measurement, CLAUDE.md).
+ *            in two different layouts (the first measurement, docs/PLAY.md).
  *
- * Measured on 60 pairs drawn at random from the output; CLAUDE.md, "Play",
+ * Measured on 60 pairs drawn at random from the output; docs/PLAY.md
  * has the share and what the rules still get wrong.
  */
 
