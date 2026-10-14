@@ -14,6 +14,7 @@ import { said, isKanji } from './kana.js';
 import { wordRuby, withKanji } from './render-save.js';
 import { NAME_TYPES } from './name-types.js';
 import { meaningText } from './render-mykanji.js';
+import { exampleJa } from './render-word.js';
 
 /** Glosses shown before "+n more meanings". */
 const SHOWN = 3;
@@ -63,6 +64,12 @@ function viaText(res, q) {
   return '';
 }
 
+/** The word's first example sentence, with its English, or nothing. */
+function exampleLine(e) {
+  if (!e) return null;
+  return h('p', { class: 'sr-ex' }, [exampleJa(e), h('span', { class: 'ex-en', lang: 'en' }, e.en)]);
+}
+
 /** "Also written 鮨 · 鮓 (rare)", from other-forms.js, or nothing. */
 function formsLine(forms) {
   if (!Array.isArray(forms) || !forms.length) return null;
@@ -85,7 +92,7 @@ function kanjiTile(ch, kept, meaning) {
   ]);
 }
 
-function wordItem(res, kept, infos, q, formsOf) {
+function wordItem(res, kept, infos, q, formsOf, examplesOf) {
   const w = shownWord(res);
   const ix = kept.words.push(w.written) - 1;
   const chars = [...new Set([...w.written].filter(isKanji))];
@@ -102,6 +109,7 @@ function wordItem(res, kept, infos, q, formsOf) {
     ]) : null,
     via ? h('p', { class: 'sr-via' }, withJa(via)) : null,
     res.via === 'name' ? null : formsLine((formsOf(w.written, w.reading) || []).filter((f) => f.written !== w.written)),
+    res.via === 'name' ? null : exampleLine((examplesOf(w.written, w.reading) || [])[0]),
     h('div', { class: 'sr-actions' }, [
       ...chars.map((ch) => kanjiTile(ch, kept, null)),
       h('button', { type: 'button', class: 'btn btn--primary btn--sm sr-read', 'data-act': 'sr-read', 'data-ix': ix }, [
@@ -118,7 +126,7 @@ function wordItem(res, kept, infos, q, formsOf) {
  * @param {Map} infos  kanjiInfo() of the kanji shown
  * @returns {{ nodes: Node[], kept: { words: string[], kanji: string[] }, status: string }}
  */
-export function resultNodes(found, infos, q = '', formsOf = () => null) {
+export function resultNodes(found, infos, q = '', formsOf = () => null, examplesOf = () => null) {
   const kept = { words: [], kanji: [] };
   const nodes = [];
   if (found.kanji.length) {
@@ -128,7 +136,7 @@ export function resultNodes(found, infos, q = '', formsOf = () => null) {
     ]));
   }
   const words = byWord(found.words);
-  if (words.length) nodes.push(h('ul', { class: 'sr-list', role: 'list' }, words.map((r) => wordItem(r, kept, infos, q, formsOf))));
+  if (words.length) nodes.push(h('ul', { class: 'sr-list', role: 'list' }, words.map((r) => wordItem(r, kept, infos, q, formsOf, examplesOf))));
   const n = words.length;
   const status = n ? (n === 1 ? ui('searchOne') : ui('searchMany', { n })) : (found.kanji.length ? '' : ui('searchNone'));
   return { nodes, kept, status };

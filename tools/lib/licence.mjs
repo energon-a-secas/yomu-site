@@ -74,11 +74,30 @@ export const LICENCES = {
     ],
     screen: 'required',
   },
-  // Tatoeba is counted, never shipped: no sentence, no fragment of one, and
-  // no sentence id reaches data/. What reaches the page is a band from 1 to 5
-  // per dictionary key. The credit still travels in the file header, because
-  // the band would not exist without the corpus, but nothing of the corpus is
-  // on screen for a screen credit to attach to.
+  // Here Tatoeba is counted, never shipped: no sentence, no fragment of one,
+  // and no sentence id reaches the files this block covers. The example
+  // sentences in data/sent/ are the one exception, under tatoebaSentences.
+  // What reaches the page from here is a band from 1 to 5 per dictionary key.
+  // The credit still travels in the file header, because the band would not
+  // exist without the corpus, but nothing of the corpus is on screen for a
+  // screen credit to attach to.
+  // The example sentences themselves (tools/build-sentences.mjs): unlike the
+  // bands above, these ship, so the credit is required on screen, and the
+  // page links each sentence to its own page on tatoeba.org.
+  tatoebaSentences: {
+    source: 'Tatoeba Project, Japanese and English sentences',
+    url: 'https://tatoeba.org/en/downloads',
+    spdx: 'CC-BY-2.0-FR',
+    derived: false,
+    id: 'tatoebaSentences',
+    acknowledgement:
+      'The example sentences and their English translations are from the Tatoeba Project (tatoeba.org), used under the Creative Commons Attribution 2.0 France licence. Each one links to its page on tatoeba.org.',
+    links: [
+      'https://tatoeba.org/en/downloads',
+      'https://creativecommons.org/licenses/by/2.0/fr/',
+    ],
+    screen: 'required',
+  },
   tatoeba: {
     source: 'Tatoeba Project, Japanese sentences',
     url: 'https://tatoeba.org/en/downloads',

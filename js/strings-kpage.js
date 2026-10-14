@@ -33,6 +33,11 @@ export const KPAGE_STRINGS = Object.freeze({
   kpWordsNone: { en: 'No common word in the dictionary is written with it.', es: 'Ninguna palabra común del diccionario se escribe con él.' },
   dailyTitle: { en: 'Kanji of the day', es: 'Kanji del día' },
   dailyOpen: { en: 'Strokes, parts and words', es: 'Trazos, partes y palabras' },
+  examples: { en: 'Examples', es: 'Ejemplos' },
+  exReadLabel: { en: 'Read this sentence', es: 'Leer esta oración' },
+  exSource: { en: 'Tatoeba', es: 'Tatoeba' },
+  exSourceLabel: { en: 'This sentence on tatoeba.org (opens a new tab)', es: 'Esta oración en tatoeba.org (se abre en una pestaña nueva)' },
+  exNote: { en: 'From the Tatoeba Project, written by volunteers.', es: 'Del proyecto Tatoeba, escritas por voluntarios.' },
   alsoWritten: { en: 'Also written', es: 'También se escribe' },
   otherForms: { en: 'Other forms', es: 'Otras formas' },
   otherFormsNote: {

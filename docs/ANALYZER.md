@@ -115,6 +115,7 @@ same text and the same data give the same tokens.
 | `gaps.js` | where one word ends and the next begins, and the one reason for each edge, read from tokens the analyzer built (kinds, parts, confidence, the characters); the places, marks and score of "Where are the spaces?" | `kana.js` |
 | `conjugate.js` | every form of a verb or adjective from its dictionary form and part of speech, forward (the Word panel's All forms); held to `deinflect.js` by `tests/conjugate.test.mjs`, which reads each form of every first-tier word back | `kana.js` |
 | `search.js` | Search's logic: what a query is, the keys a Japanese query asks for, the English index (`data/search/`) and kanji by parts; `glossWords`, which the builder splits glosses with too | `range-store.js`, `kana.js`, `deinflect.js`, `vendor/wanakana.js` |
+| `examples.js` | a word's example sentences (`data/sent/`) by key and reading, and the page's one shared loader | `range-store.js`, `other-forms.js` |
 | `other-forms.js` | a word's other spellings (`data/spell/`) with JMdict's tags, and the page's one shared loader | `range-store.js` |
 | `kanji-page-data.js` | the kanji page's strokes (`data/strokes/`) and words and neighbours (`data/kpage/`) | `range-store.js` |
 | `play-*.js`, `routes.js` | Play's rounds, store, data and authored content, and the page's routes, with no DOM (CLAUDE.md, "Play") | `kana.js`, `reader.js` (`fetchJson`), `neorgon-persist.js` |
@@ -1400,5 +1401,5 @@ analyzer moves an edge.
 - JMdict (jmdict-simplified's jmdict-eng) and KANJIDIC: Electronic Dictionary Research and Development Group, CC BY-SA 4.0. The acknowledgement is shown on the page whenever a gloss or a kanji reading is.
 - JMnedict (jmdict-simplified's jmnedict-all), for `data/names/`: the same Group and licence. Its acknowledgement (`tools/lib/licence.mjs`, the EDRDG's sample text with the names file named) must be on the page whenever a name from the names tier is.
 - KanjiVG: Ulrich Apel, CC BY-SA 3.0, for `parts`.
-- Tatoeba: CC BY 2.0 FR, used to rank keys, to choose and count names, and, through the English translations of its Japanese sentences, to choose which of a katakana name's JMnedict spellings is shown; no sentence ships.
+- Tatoeba: CC BY 2.0 FR, used to rank keys, to choose and count names, and, through the English translations of its Japanese sentences, to choose which of a katakana name's JMnedict spellings is shown; and, in data/sent/ only (tools/build-sentences.mjs), the example sentences themselves with their English, each linked to its page on tatoeba.org for the credit.
 - The phrase library, the compound lines of "Where are the spaces?" and every note are written here and are public domain. `data/play/spaces.json` carries JMdict's licence block, with JMnedict and the authored lines as inputs, because where its lines part is the analysis over both.

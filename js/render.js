@@ -19,6 +19,7 @@ import { syncTranslation } from './render-translate.js';
 import { gapsOf } from './gaps.js';
 import { hideTip } from './render-gaps.js';
 import { pageForms } from './other-forms.js';
+import { pageExamples } from './examples.js';
 import { baseReading } from './conjugate.js';
 
 export { paintChrome, paintStatus, paintSpeech, paintSavedMarks };
@@ -169,16 +170,23 @@ export function paintSide(state) {
   if (kanji) fill(kanji, kanjiNode(a, a.order || [], state.pinnedKanji, myKanji()));
 }
 
-/** A word's other spellings, or undefined while they load (paintWord runs again when they arrive). */
-function formsFor(state, token) {
-  if (!token || !token.entry || !['word', 'inflected'].includes(token.kind)) return null;
-  const otherForms = pageForms();
+/**
+ * What the Word panel loads for a word after it opens: its other spellings
+ * and its example sentences, each undefined while it loads. The panel paints
+ * again when either arrives, if the word is still the one chosen.
+ */
+function lateFor(state, token) {
+  if (!token || !token.entry || !['word', 'inflected'].includes(token.kind)) return { forms: null, examples: null };
   const key = token.base || token.surface;
-  const forms = otherForms.formsOf(key, baseReading(token));
-  if (forms === undefined) {
-    otherForms.need([key]).then(() => { if (selectedToken(state) === token) paintWord(state); }).catch(() => {});
+  const reading = baseReading(token);
+  const out = {};
+  for (const [name, store, read] of [['forms', pageForms(), 'formsOf'], ['examples', pageExamples(), 'examplesOf']]) {
+    out[name] = store[read](key, reading);
+    if (out[name] === undefined) {
+      store.need([key]).then(() => { if (selectedToken(state) === token) paintWord(state); }).catch(() => {});
+    }
   }
-  return forms;
+  return out;
 }
 
 export function paintWord(state) {
@@ -193,7 +201,7 @@ export function paintWord(state) {
     kanjiOf: (ch) => ({ info: info.get(ch), saved: mine.isSaved(ch), n: mine.seenOf(ch) ? mine.seenOf(ch).n : 0 }),
     gaps: state.prefs.gaps && state.analysis ? state.analysis.gaps : null,
     tokens: state.analysis ? state.analysis.tokens : [],
-    forms: formsFor(state, selectedToken(state)),
+    ...lateFor(state, selectedToken(state)),
     // All forms keeps its register and its open state across repaints of the same word.
     conj: state.conj && state.conj.token === selectedToken(state) ? state.conj : null,
   }));

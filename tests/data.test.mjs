@@ -443,6 +443,10 @@ test('check-data fails each broken rule and names the file', async () => {
     ['a search word naming a key the dictionary does not hold', (rw) => rw('data/search/e02.json', (d) => {
       Object.values(d.entries).find((e) => e.w).w.push('存在しない語');
     }), /e02\.json: .* which the first tier does not hold/],
+    ['an example whose span runs past its sentence', (rw) => rw('data/sent/s005.json', (d) => {
+      const [, rows] = Object.entries(d.entries)[0];
+      rows[0][1][0][4] = rows[0][1][0][1].length + 3;
+    }), /s005\.json: .* is not a list of \[reading, \[\[id/],
     ['another spelling that is the key itself', (rw) => rw('data/spell/s03.json', (d) => {
       const [k, rows] = Object.entries(d.entries)[0];
       rows[0][1].push([k, '']);

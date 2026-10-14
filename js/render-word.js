@@ -17,6 +17,7 @@ import { gapsPart } from './render-gaps.js';
 import { conjPart } from './render-conj.js';
 import { conjugateToken } from './conjugate.js';
 import { pageOpener } from './render-kanji-page.js';
+import { tatoebaUrl } from './examples.js';
 
 /** A token's beats with the romaji each one is spelled with. */
 export function tokenBeats(token) {
@@ -157,6 +158,41 @@ function formsPart(forms) {
 }
 
 /**
+ * A sentence with the word marked: the text before it, the word, the text after.
+ * Shared with Search's cards.
+ */
+export function exampleJa(e) {
+  return h('span', { class: 'ex-ja', lang: 'ja' }, [
+    e.ja.slice(0, e.start), h('mark', { class: 'ex-word' }, e.ja.slice(e.start, e.end)), e.ja.slice(e.end),
+  ]);
+}
+
+/**
+ * Up to three sentences from Tatoeba that use the word (examples.js), each
+ * with its English, Read it (found by `data-ix`), and a link to its page on
+ * tatoeba.org, which is the credit the licence asks for.
+ */
+function examplesPart(examples) {
+  if (!Array.isArray(examples) || !examples.length) return null;
+  return section('examples', [
+    h('ul', { class: 'ex-list', role: 'list' }, examples.map((e, i) => h('li', { class: 'ex-item' }, [
+      exampleJa(e),
+      h('span', { class: 'ex-en', lang: 'en' }, e.en),
+      h('span', { class: 'ex-actions' }, [
+        h('button', { type: 'button', class: 'btn btn--ghost btn--sm', 'data-act': 'ex-read', 'data-ix': i }, [
+          h('span', { 'aria-hidden': 'true' }, ui('searchRead')),
+          h('span', { class: 'sr-only' }, ui('exReadLabel')),
+        ]),
+        h('a', {
+          class: 'text-link ex-src', href: tatoebaUrl(e.id), target: '_blank', rel: 'noopener noreferrer',
+        }, [h('span', { 'aria-hidden': 'true' }, `${ui('exSource')} ↗`), h('span', { class: 'sr-only' }, ui('exSourceLabel'))]),
+      ]),
+    ]))),
+    h('p', { class: 'quiet ex-note' }, ui('exNote')),
+  ]);
+}
+
+/**
  * Where the word came from: the record's `ls` and `ws` (a compound's, part by
  * part), and a shortening the loanword rules found (loanwords.js).
  */
@@ -287,7 +323,7 @@ function kanjiPart(token, { kidOf, kanjiOf }) {
  *   `tokens` the analysis' tokens, which say what stands where no gap is.
  */
 export function wordNode(token, {
-  noteOf, kidOf, canSpeak, kanjiOf = null, gaps = null, tokens = [], forms = null, conj = null,
+  noteOf, kidOf, canSpeak, kanjiOf = null, gaps = null, tokens = [], forms = null, conj = null, examples = null,
 }) {
   if (!token) return h('p', { class: 'side-empty' }, ui('wordEmpty'));
   const romaji = token.romaji || {};
@@ -311,6 +347,7 @@ export function wordNode(token, {
     partsPart(token),
     meaningsPart(token),
     formsPart(forms),
+    examplesPart(examples),
     originPart(token),
     kanjiPart(token, { kidOf, kanjiOf }),
     chainPart(token, noteOf),

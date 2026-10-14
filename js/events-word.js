@@ -1,5 +1,5 @@
 // The Word panel's All forms (render-conj.js): saying a form, the plain or
-// polite switch, and whether the section is open. Both are kept in
+// polite switch, and whether the section is open; and Read it on an example. Both are kept in
 // `state.conj` for the word they were chosen on, because the panel repaints
 // under them (the word's other spellings arrive a moment after it opens).
 
@@ -7,6 +7,9 @@ import { state, rate } from './state.js';
 import { conjugateToken } from './conjugate.js';
 import { speak } from './speech.js';
 import { paintWord, selectedToken } from './render.js';
+import { pageExamples } from './examples.js';
+import { baseReading } from './conjugate.js';
+import { loadText } from './events-read.js';
 
 const speechOk = (b) => state.speech === 'ok' && b.getAttribute('aria-disabled') !== 'true';
 
@@ -24,6 +27,14 @@ export const WORD_ACTIONS = {
     const table = conjugateToken(selectedToken(state));
     const row = table && table.rows.find((r) => r.id === b.dataset.form);
     if (row) speak(row.reading, { rate: rate(state) });
+  },
+  // An example sentence, sent to the reader as a new text.
+  'ex-read': (b) => {
+    const token = selectedToken(state);
+    if (!token) return;
+    const list = pageExamples().examplesOf(token.base || token.surface, baseReading(token)) || [];
+    const e = list[Number(b.dataset.ix)];
+    if (e) loadText(e.ja, { source: 'typed' }).catch(() => {});
   },
   'conj-reg': (b) => {
     Object.assign(view(), { reg: b.dataset.reg, open: true });

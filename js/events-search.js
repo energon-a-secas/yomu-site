@@ -15,6 +15,7 @@ import {
 import { kanaChartNodes, countersNodes } from './render-learn.js';
 import { afterPaintAll } from './render.js';
 import { pageForms } from './other-forms.js';
+import { pageExamples } from './examples.js';
 import { openKanjiPage } from './events-kanji-page.js';
 import { onRoute, openReader } from './events-kanji.js';
 import { loadText } from './events-read.js';
@@ -67,13 +68,16 @@ async function run() {
     const found = await (await searcher()).search(q);
     const chars = [...new Set([...found.kanji, ...found.words.flatMap((w) => [...w.key])])];
     const forms = pageForms();
+    const examples = pageExamples();
+    const written = byWord(found.words).map((w) => shownWord(w).written);
     const [infos] = await Promise.all([
       kanjiInfo(chars),
-      // The other spellings are a nicety: a shard that fails leaves them out.
-      forms.need(byWord(found.words).map((w) => shownWord(w).written)).catch(() => {}),
+      // Other spellings and examples are a nicety: a shard that fails leaves them out.
+      forms.need(written).catch(() => {}),
+      examples.need(written).catch(() => {}),
     ]);
     if (token !== sr.token) return;
-    const { nodes, kept, status } = resultNodes(found, infos, q, (key, reading) => forms.formsOf(key, reading));
+    const { nodes, kept, status } = resultNodes(found, infos, q, (k, r) => forms.formsOf(k, r), (k, r) => examples.examplesOf(k, r));
     sr.kept = kept;
     fill(out, nodes);
     setStatus(status);

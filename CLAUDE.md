@@ -16,7 +16,7 @@ the display preferences to their account (Accounts and sync, below).
 ```bash
 make serve       # http://localhost:8895
 make validate    # node tools/check-data.mjs, then npm test
-make data        # rebuild data/dict, data/kanji, data/names, data/like, data/play, data/strokes, data/kpage, data/search and data/spell from the pinned upstreams (manual)
+make data        # rebuild data/dict, data/kanji, data/names, data/like, data/play, data/strokes, data/kpage, data/search, data/spell and data/sent from the pinned upstreams (manual)
 npm test         # node --test tests/*.test.mjs
 node tests/mobile.browser.mjs [--base=http://localhost:8895/] [--shots=DIR]   # every screen on five phones, WebKit and Chromium (On a phone, below)
 node tools/compare-readings.mjs <old data/> [data/]   # every token two builds read differently, over Tatoeba
@@ -278,6 +278,20 @@ resolved from JIS codes by `build-kanji-page.mjs` into `data/kpage/` `v`;
 KANJIDIC does not say which is older, so the page calls them other forms.
 Search shows a kana key whose records are different words as one card per
 word (さけ: 酒 and 鮭, `render-search.js byWord`).
+
+**An example sentence is filed by the analyzer, and ships with its credit.**
+`data/sent/` holds up to three Tatoeba sentences per word and reading, chosen
+by `tools/build-sentences.mjs` from every linked sentence of 30 characters or
+fewer, each read by the analyzer, so 食べました is an example of 食べる. A
+sentence with a guessed token is left out, and a token whose key has other
+records (`alts`) files nothing: the analyzer read 赤の方が好き as 方 かた, and an
+example must not teach a wrong reading (方 has none; 274 words in all). An
+English blocklist (`AVOID`) keeps out topics a dictionary should not show a
+reader of any age. These are the only Tatoeba sentences that ship: each links
+to its page on tatoeba.org (the CC BY 2.0 FR credit, `examples.js
+tatoebaUrl`), the Sources dialog says so, and their files carry the
+`tatoebaSentences` licence with the screen credit required. The Word panel
+shows them with Read it; a Search card shows the first.
 
 **A kanji page is a dialog, never an address.** `#kanji-dialog`
 (`events-kanji-page.js`) opens from the page button beside a kanji in the
@@ -1215,6 +1229,7 @@ session against it is checked on the live domain only.
 - `convex/_generated/`: written by `npx convex dev`, and gitignored.
 - `data/dict/**`, `data/kanji/**`, `data/names/**`: emitted by `tools/build-*.mjs` from the pins in `tools/lib/sources.mjs` (`build-names.mjs` after `build-dict.mjs`, which it reads, and it writes `data/names/popular.json` too; `data/kanji/joyo.json` by `build-joyo.mjs` from the committed shards, or by `build-kanji.mjs`). Rebuild, do not hand-edit.
 - `data/like/**`: emitted by `tools/build-sounds-like.mjs` from the committed `data/dict/` (after `build-dict.mjs`). Rebuild, do not hand-edit.
+- `data/sent/**`: emitted by `tools/build-sentences.mjs` from the pinned Tatoeba exports, read through the analyzer over the committed `data/` (after `build-dict.mjs`; about five minutes). Rebuild, do not hand-edit.
 - `data/spell/**`: emitted by `tools/build-spellings.mjs` from the pinned full JMdict and the committed first tier (after `build-dict.mjs`). Rebuild, do not hand-edit.
 - `data/search/**`: emitted by `tools/build-search.mjs` from the committed `data/dict/`, `data/kanji/` and `data/strokes/` (after `build-kanji-page.mjs`). Rebuild, do not hand-edit.
 - `data/strokes/**`, `data/kpage/**`: emitted by `tools/build-kanji-page.mjs` from KanjiVG (the pin in `tools/lib/sources.mjs`) and the committed `data/dict/` and `data/kanji/` (after `build-dict.mjs` and `build-kanji.mjs`). Rebuild, do not hand-edit.

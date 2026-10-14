@@ -701,6 +701,16 @@ rt .snd { border-bottom: 0; padding-bottom: 0; }
 .chain-step { line-height: 1.5; }
 .chain-step + .chain-step::before { content: "↓ "; color: var(--text-muted); }
 .chain-step--base [lang="ja"], .chain-step--surface { font-size: 1.125rem; }
+/* Examples (render-word.js examplesPart, and one on each Search card). */
+.ex-list { list-style: none; display: flex; flex-direction: column; border-top: 1px solid var(--border-subtle); }
+.ex-item { display: flex; flex-direction: column; gap: 2px; padding: var(--space-2) 0; border-bottom: 1px solid var(--border-subtle); }
+.ex-ja { font-size: 1.0625rem; line-height: 1.6; }
+.ex-word { background: var(--accent-wash); color: var(--text-primary); border-radius: 3px; padding: 0 2px; box-shadow: inset 0 -2px 0 var(--accent-bright); }
+.ex-en { font-size: var(--text-sm); color: var(--text-secondary); }
+.ex-actions { display: flex; align-items: center; gap: var(--space-3); margin-top: 2px; }
+.ex-src { font-size: var(--text-xs); }
+.word-part .ex-note { font-size: var(--text-xs); margin-top: var(--space-1); }
+
 /* Also written (render-word.js formsPart) and a kanji's other forms. */
 .forms-list { list-style: none; display: flex; flex-wrap: wrap; gap: 6px; }
 .forms-item {
@@ -1034,6 +1044,8 @@ button.mk-tab { background: transparent; border-top: 0; border-left: 0; border-r
 .sr-gloss { font-size: var(--text-base); line-height: 1.4; }
 .sr-via { font-size: var(--text-xs); color: var(--mark); }
 .sr-forms { font-size: var(--text-sm); }
+.sr-ex { display: flex; flex-direction: column; gap: 1px; padding: var(--space-2) var(--space-3); border-radius: var(--radius-sm); background: var(--surface-2); }
+.sr-ex .ex-ja { font-size: 1rem; }
 .sr-forms [lang="ja"] { font-size: 1rem; }
 .sr-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); margin-top: var(--space-1); }
 .sr-tries { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); margin-top: var(--space-3); font-size: var(--text-sm); }
@@ -1532,6 +1544,7 @@ html[data-embed="1"] body:has(> .neo-footer) { min-height: 0; }
   .rv-kbd, .rv-keys, .key-hint { display: none; }
   /* A note's title can be short: the Spanish の: de was 39px wide. */
   .word-notes .text-link, .word-out .text-link { display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; }
+  .ex-src { display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; }
   .daily-text .text-link { display: inline-flex; align-items: center; min-height: 44px; }
   .conj-name.text-link { display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; }
 }

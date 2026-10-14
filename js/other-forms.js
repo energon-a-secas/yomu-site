@@ -48,7 +48,7 @@ export function createOtherForms({ fetchJson, base = 'data/' }) {
 }
 
 /** Fetches a file the way a static page does; the spellings never count toward a read's progress. */
-const plainJson = (p) => fetch(new URL(p, document.baseURI)).then((r) => { if (!r.ok) throw new Error(`${p}: HTTP ${r.status}`); return r.json(); });
+export const plainJson = (p) => fetch(new URL(p, document.baseURI)).then((r) => { if (!r.ok) throw new Error(`${p}: HTTP ${r.status}`); return r.json(); });
 let shared = null;
 
 /** The one loader the page shares, so the Word panel and Search fetch a shard once. */

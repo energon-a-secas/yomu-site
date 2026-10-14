@@ -58,6 +58,8 @@
  *     words are made of, in order, with a reason js/gaps.js knows, and no
  *     text or id twice. Whether the gaps are the analyzer's is
  *     tests/spaces.test.mjs's to say, since that needs the analyzer
+ *   - example sentences (data/sent/) held to the range rule, more than three
+ *     to a reading, an id that is not a number, or a span outside its sentence
  *   - other spellings (data/spell/) held to the range rule, a spelling
  *     that is the key itself, or a tag JMdict does not give
  *   - search's English index (data/search/) held to the range rule, a word
@@ -283,6 +285,8 @@ const FORMATS = {
   'yomu-kpage-index/1': null,
   'yomu-kpage/1': checkKpage,
   'yomu-daily/1': checkDaily,
+  'yomu-sentences-index/1': null,
+  'yomu-sentences/1': checkSentences,
   'yomu-spell-index/1': null,
   'yomu-spell/1': checkSpell,
   'yomu-search-index/1': null,
@@ -608,6 +612,21 @@ function checkDaily(rel, doc) {
   }
 }
 
+/**
+ * Example sentences (tools/build-sentences.mjs): [reading, [[Tatoeba id,
+ * Japanese, English, start, end]]], at most three per reading, with the word's
+ * span inside the Japanese and the id a Tatoeba sentence number.
+ */
+function checkSentences(rel, doc) {
+  for (const [key, rows] of Object.entries(doc.entries || {})) {
+    const ok = Array.isArray(rows) && rows.length && rows.every((r) => Array.isArray(r) && r.length === 2 && typeof r[0] === 'string' && r[0]
+      && Array.isArray(r[1]) && r[1].length >= 1 && r[1].length <= 3 && r[1].every((x) => Array.isArray(x) && x.length === 5
+        && /^\d+$/.test(x[0]) && typeof x[1] === 'string' && typeof x[2] === 'string' && x[2]
+        && Number.isInteger(x[3]) && Number.isInteger(x[4]) && x[3] >= 0 && x[3] < x[4] && x[4] <= x[1].length));
+    if (!ok) fail(rel, `${JSON.stringify(key)} is not a list of [reading, [[id, Japanese, English, start, end]]]`);
+  }
+}
+
 /** Other spellings (tools/build-spellings.mjs): [reading, [[written, tag]]], never the key itself. */
 const SPELL_TAGS = new Set(['', 'oK', 'rK', 'iK', 'io', 'ateji', 'sK']);
 function checkSpell(rel, doc) {
@@ -701,6 +720,7 @@ function main() {
   checkRangeIndex(docs, 'data/kpage/index.json', 'yomu-kpage/1');
   checkRangeIndex(docs, 'data/search/index.json', 'yomu-search/1');
   checkRangeIndex(docs, 'data/spell/index.json', 'yomu-spell/1');
+  checkRangeIndex(docs, 'data/sent/index.json', 'yomu-sentences/1');
   checkSearchKeys(docs);
   checkPopular(docs);
   checkLikeIndex(docs);
