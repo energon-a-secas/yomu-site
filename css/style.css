@@ -436,6 +436,15 @@ dialog.dialog--wide { width: min(760px, calc(100% - 16px)); }
 .tok-plain--space { min-width: 0.4em; }
 
 #reading[data-furigana="off"] rt { display: none; }
+/* Not in My kanji: the reading stays in place, so a line does not jump when a kanji is saved. */
+#reading[data-furigana="saved"] ruby.is-known rt { visibility: hidden; }
+#reading[data-size="S"] .tok-surface { font-size: 1.4rem; }
+#reading[data-size="L"] .tok-surface { font-size: 2.25rem; }
+.reading-body .sent-off { display: none; }
+.sent-nav { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2); margin-top: var(--space-3); }
+.sent-nav[hidden] { display: none; }
+.sent-nav .btn { min-height: 44px; }
+.sent-where { font-size: var(--text-sm); color: var(--text-secondary); }
 
 /* A kanji not in My kanji yet: a small folded corner inside its top left,
    the dog-ear of a page not kept yet. A shape, so it reads without colour;

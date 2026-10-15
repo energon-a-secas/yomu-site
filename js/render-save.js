@@ -128,6 +128,11 @@ export function paintSavedMarks(state) {
     for (const el of body.querySelectorAll('.kj[data-kid]')) {
       el.classList.toggle('is-unsaved', saved[Number(el.dataset.kid)] === false);
     }
+    // Furigana's "Not in My kanji" hides a ruby whose kanji are all saved.
+    for (const ruby of body.querySelectorAll('ruby')) {
+      const kjs = [...ruby.querySelectorAll('.kj[data-kid]')];
+      ruby.classList.toggle('is-known', kjs.length > 0 && kjs.every((el) => saved[Number(el.dataset.kid)] === true));
+    }
   }
   for (const b of document.querySelectorAll('[data-act="save-kanji"][data-kid]')) {
     b.setAttribute('aria-pressed', String(!!saved[Number(b.dataset.kid)]));

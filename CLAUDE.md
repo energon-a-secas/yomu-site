@@ -355,6 +355,21 @@ when it is one. Word lists by JLPT level and Kanken were asked for (queue
 JLPT field is the four levels the test dropped in 2010, which a learner
 would read as N-levels (queue #146).
 
+**Furigana has three choices over two preferences, and only one of them syncs.**
+On, Not in My kanji and Off write `prefs.furigana` (synced, a boolean) and
+`prefs.furiSaved` (this browser's only); `render-chrome.js prefValue` reads
+them back as one value and sets `#reading[data-furigana]` to on, saved or
+off. Not in My kanji hides a ruby whose kanji are all saved
+(`render-save.js paintSavedMarks` toggles `ruby.is-known`), with `visibility`,
+so a save never moves the line. The size (S, M, L, `prefs.size`) is this
+browser's too: `sync-rules.js PREFS` keeps the six it had, and the server's
+validators would refuse a seventh. One sentence at a time (`reading-view.js`,
+`events-view.js`) numbers the reading's units by sentence after each paint
+(a unit ending in 。！？, or a new line, ends one) and puts the others away;
+the view lasts the visit. Choosing a word shows its sentence, and so does the
+arrow keys' roving focus (`events.js roveTo` calls `followFocus`), because
+focus cannot land on a word that is not drawn.
+
 **The Word panel's All forms is built forward and checked backward.**
 `conjugate.js` makes every form of a verb or adjective from its dictionary
 form and part of speech; `tests/conjugate.test.mjs` reads every form of every

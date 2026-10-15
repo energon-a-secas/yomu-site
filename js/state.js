@@ -34,13 +34,19 @@ export const UNSAVED = Object.freeze(['mark', 'off']);
 export const REMEMBER = Object.freeze(['ask', 'on', 'off']);
 /** The on-device translation under the reading (translate.js): off until the learner asks for it. */
 export const TRANSLATE = Object.freeze(['on', 'off']);
+export const SIZES = Object.freeze(['S', 'M', 'L']);
 
 export const state = {
   // `gaps` draws the edges between words (gaps.js), off until the learner
   // asks; `gapsSeen` is whether its one-line hint was shown once already.
   prefs: {
     lang: 'en', furigana: true, romaji: 'said', highlights: true, unsaved: 'mark', gaps: false, gapsSeen: false, slow: false, remember: 'ask', translate: 'off',
+    // This browser's only, never synced (sync-rules.js PREFS): furigana over
+    // saved kanji hidden, and the reading's size.
+    furiSaved: false, size: 'M',
   },
+  // One sentence at a time (reading-view.js): for this visit, never saved.
+  view: { one: false, sent: 0 },
   embed: false,
   text: '',
   truncated: false,
@@ -99,6 +105,8 @@ export function loadPrefs(s, loc = globalThis.location, nav = globalThis.navigat
   if (typeof p.gaps === 'boolean') s.prefs.gaps = p.gaps;
   if (typeof p.gapsSeen === 'boolean') s.prefs.gapsSeen = p.gapsSeen;
   if (typeof p.slow === 'boolean') s.prefs.slow = p.slow;
+  if (typeof p.furiSaved === 'boolean') s.prefs.furiSaved = p.furiSaved;
+  if (SIZES.includes(p.size)) s.prefs.size = p.size;
   if (REMEMBER.includes(p.remember)) s.prefs.remember = p.remember;
   if (TRANSLATE.includes(p.translate)) s.prefs.translate = p.translate;
   return s.prefs;

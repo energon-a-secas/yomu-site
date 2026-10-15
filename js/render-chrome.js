@@ -27,6 +27,8 @@ function applyStrings(root) {
 }
 
 function prefValue(prefs, name) {
+  // Furigana is two preferences, the synced on/off and this browser's furiSaved.
+  if (name === 'furigana') return !prefs.furigana ? 'off' : prefs.furiSaved ? 'saved' : 'on';
   const v = prefs[name];
   if (typeof v === 'boolean') return v ? 'on' : 'off';
   return String(v);
@@ -51,7 +53,8 @@ export function paintChrome(state) {
 
   const reading = $('reading');
   if (reading) {
-    reading.dataset.furigana = state.prefs.furigana ? 'on' : 'off';
+    reading.dataset.furigana = prefValue(state.prefs, 'furigana');
+    reading.dataset.size = state.prefs.size;
     reading.dataset.romaji = state.prefs.romaji;
     reading.dataset.highlights = state.prefs.highlights ? 'on' : 'off';
     reading.dataset.unsaved = state.prefs.unsaved;

@@ -35,6 +35,7 @@ import { SEARCH_ACTIONS, bindSearch } from './events-search.js';
 import { SETS_ACTIONS, bindSets } from './events-sets.js';
 import { PROGRESS_ACTIONS, bindProgress } from './events-progress.js';
 import { DAILY_ACTIONS, bindDaily } from './events-daily.js';
+import { VIEW_ACTIONS, followFocus } from './events-view.js';
 
 export { analyzeNow, loadText };
 
@@ -125,7 +126,7 @@ function reveal(panel, opener = null) {
 
 // ── Choosing a word, and the lights ───────────────────────────────────────
 
-function select(i, { reveal: show = true } = {}) {
+export function select(i, { reveal: show = true } = {}) {
   const token = state.analysis && state.analysis.tokens[i];
   if (!token || !selectable(token)) return;
   state.selected = i;
@@ -143,6 +144,7 @@ function roveTo(el) {
   if (!el) return;
   for (const b of document.querySelectorAll('#reading-body .tok[tabindex="0"]')) b.tabIndex = -1;
   el.tabIndex = 0;
+  followFocus(el);
   el.focus();
 }
 
@@ -389,10 +391,11 @@ function dropLangParam() {
 // ── One click handler ─────────────────────────────────────────────────────
 
 /** Preferences with more than two values keep the value itself; the rest are on and off. */
-const NAMED = new Set(['romaji', 'unsaved']);
+const NAMED = new Set(['romaji', 'unsaved', 'size']);
 
 function setPref(name, value) {
-  if (NAMED.has(name)) state.prefs[name] = value;
+  if (name === 'furigana') Object.assign(state.prefs, { furigana: value !== 'off', furiSaved: value === 'saved' });
+  else if (NAMED.has(name)) state.prefs[name] = value;
   else state.prefs[name] = value === 'on';
   savePrefs(state);
   paintChrome(state);
@@ -453,6 +456,7 @@ const ACTIONS = {
   ...SEARCH_ACTIONS,
   ...SETS_ACTIONS,
   ...PROGRESS_ACTIONS,
+  ...VIEW_ACTIONS,
   ...DAILY_ACTIONS,
   ...COLLECT_ACTIONS,
   ...PLAY_ACTIONS,

@@ -207,7 +207,19 @@
               <div class="seg" role="group" aria-labelledby="seg-furigana">
                 <span class="seg-label" id="seg-furigana" data-ui="furigana">Furigana</span>
                 <button class="seg-btn" type="button" data-act="set" data-pref="furigana" data-value="on" aria-pressed="true" data-ui="on">On</button>
+                <button class="seg-btn" type="button" data-act="set" data-pref="furigana" data-value="saved" aria-pressed="false" data-ui="furiNotSaved">Not in My kanji</button>
                 <button class="seg-btn" type="button" data-act="set" data-pref="furigana" data-value="off" aria-pressed="false" data-ui="off">Off</button>
+              </div>
+              <div class="seg" role="group" aria-labelledby="seg-size">
+                <span class="seg-label" id="seg-size" data-ui="textSize">Size</span>
+                <button class="seg-btn" type="button" data-act="set" data-pref="size" data-value="S" aria-pressed="false" data-ui-label="sizeS" aria-label="Small">S</button>
+                <button class="seg-btn" type="button" data-act="set" data-pref="size" data-value="M" aria-pressed="true" data-ui-label="sizeM" aria-label="Medium">M</button>
+                <button class="seg-btn" type="button" data-act="set" data-pref="size" data-value="L" aria-pressed="false" data-ui-label="sizeL" aria-label="Large">L</button>
+              </div>
+              <div class="seg" role="group" aria-labelledby="seg-view">
+                <span class="seg-label" id="seg-view" data-ui="readView">Show</span>
+                <button class="seg-btn" type="button" data-act="read-view" data-value="all" aria-pressed="true" data-ui="viewAll">All</button>
+                <button class="seg-btn" type="button" data-act="read-view" data-value="one" aria-pressed="false" data-ui="viewOne">One sentence</button>
               </div>
               <div class="seg" role="group" aria-labelledby="seg-romaji">
                 <span class="seg-label" id="seg-romaji" data-ui="romaji">Romaji</span>
@@ -242,6 +254,12 @@
                region that stays in the page: only its text changes. -->
           <p class="reading-hint gaps-hint" id="gaps-hint" role="status" aria-live="polite"></p>
           <div class="reading-body" id="reading-body" lang="ja"></div>
+          <!-- One sentence at a time (js/reading-view.js): shown only in that view. -->
+          <div class="sent-nav" id="sent-nav" hidden>
+            <button class="btn btn--secondary" type="button" data-act="sent-step" data-step="-1" data-ui="sentPrev">Previous sentence</button>
+            <span class="sent-where" id="sent-where" role="status" aria-live="polite"></span>
+            <button class="btn btn--primary" type="button" data-act="sent-step" data-step="1" data-ui="sentNext">Next sentence</button>
+          </div>
           <!-- A gap's reason, beside it, for a pointer (js/events-gaps.js). The same
                reason is in the Word panel, for a keyboard, a tap and a screen reader. -->
           <p class="gap-tip" id="gap-tip" hidden></p>

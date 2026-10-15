@@ -22,6 +22,7 @@ import { pageForms } from './other-forms.js';
 import { pageExamples } from './examples.js';
 import { pageSetWords } from './sets.js';
 import { baseReading } from './conjugate.js';
+import { markSentences, sentenceOf, paintSentence } from './reading-view.js';
 
 export { paintChrome, paintStatus, paintSpeech, paintSavedMarks };
 
@@ -111,6 +112,7 @@ export function paintReading(state) {
     if (show) {
       const { lines, stop } = readingNodes(a.tokens, { selected: state.selected, kidOf: (ch) => kidOf(state, ch), gaps: a.gaps });
       fill(body, lines);
+      markSentences(body);
       const holder = stop === null ? null : body.querySelector(`.tok[data-i="${stop}"]`);
       if (holder) holder.tabIndex = 0;
     } else {
@@ -123,6 +125,7 @@ export function paintReading(state) {
   if (inText) inText.hidden = !show;
   if (inTextBody && show) fill(inTextBody, inTextNode(summarize(a.tokens), noteOf, state.note));
   paintSelection(state);
+  paintSentence(state);
   paintSide(state);
   paintSavedMarks(state);
   syncTranslation(state);
@@ -139,6 +142,10 @@ export function paintSelection(state) {
   chosen.setAttribute('aria-pressed', 'true');
   for (const b of body.querySelectorAll('.tok[tabindex="0"]')) if (b !== chosen) b.tabIndex = -1;
   chosen.tabIndex = 0;
+  // In the one-sentence view the chosen word's sentence is the one shown.
+  const sent = sentenceOf(chosen);
+  if (state.view.one && sent !== null && sent !== state.view.sent) state.view.sent = sent;
+  paintSentence(state);
 }
 
 export function selectedToken(state) {
