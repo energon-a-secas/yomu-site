@@ -483,6 +483,10 @@ while Remember is `on`, or to save, unsave or count a saved phrase; a caller
 of `loadText` that is not new content passes `restore`, or a reload counts
 kanji again; the Collection is derived from the counts, never stored; and no
 kanji is written into an attribute.
+My progress (`#/kanji/progress`, `progress.js` pure, `render-progress.js`,
+`events-progress.js`) is derived the same way and stores nothing, its period
+included: reviews keep no dates, so it draws no reviews per day, and texts
+count only what History holds.
 
 ## Play
 

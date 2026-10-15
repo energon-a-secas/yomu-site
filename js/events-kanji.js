@@ -25,6 +25,7 @@
 // exports below.
 
 import { openKanjiPage } from './events-kanji-page.js';
+import { paintProgress } from './events-progress.js';
 import { state } from './state.js';
 import { $ } from './utils.js';
 import { ui } from './strings.js';
@@ -49,7 +50,7 @@ import {
 export { routeOf };
 
 /** The places the nav moves between, and the string each is titled with. */
-const TABS = Object.freeze({ list: 'myKanji', collection: 'navCollection', history: 'navHistory' });
+const TABS = Object.freeze({ list: 'myKanji', collection: 'navCollection', history: 'navHistory', progress: 'navProgress' });
 const hooks = [];
 
 let route = 'reader';
@@ -118,6 +119,7 @@ export function repaint() {
   else if (route === 'list') paintList();
   else if (route === 'collection') paintCollection();
   else if (route === 'history') paintHistory();
+  else if (route === 'progress') paintProgress();
   paintNote();
   if (key) refocus(key, null);
   const again = caret && $(caret[0]);
