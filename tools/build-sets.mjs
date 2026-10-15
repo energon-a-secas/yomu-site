@@ -12,7 +12,10 @@
  *   node tools/build-sets.mjs
  *
  * data/sets/<set>N.json, `yomu-set/1`: `rows`, each [written, reading,
- *   glosses, common]. An idiom is a tagged sense that is an expression
+ *   glosses, common, said]. `said` is the romaji the reader gives the row,
+ *   word by word (saru mo ki kara ochiru), from the analyzer over the
+ *   committed data/, or '' where it guessed a word or read the row another
+ *   way than JMdict, and the page spells the reading as one word. An idiom is a tagged sense that is an expression
  *   (`exp`): JMdict tags one word used figuratively (嵐, uproar) too.
  *   `written` is the entry's first kanji spelling JMdict
  *   does not mark rare, irregular, old or search-only (its first kana where
@@ -36,6 +39,9 @@ import path from 'node:path';
 import { loadZippedJson, upstream } from './lib/sources.mjs';
 import { licenceBlock, unshippable } from './lib/licence.mjs';
 import { AVOID_EXPLICIT } from './lib/avoid.mjs';
+import { createDict } from '../js/dict.js';
+import { analyze, normalize } from '../js/analyze.js';
+import { toHira } from '../js/kana.js';
 import {
   writeJson, serialize, MAX_BYTES, SITE, fmtBytes, pruneStale,
 } from './lib/emit.mjs';
@@ -74,6 +80,31 @@ function rowOf(w, tag) {
   if (unshippable(written) || unshippable(reading)) return null;
   const common = kanjis.some((k) => k.common) || kanas.some((k) => k.common) ? 1 : 0;
   return [written, reading, glosses, common];
+}
+
+/** The reader's romaji for a row, word by word, or '' where it would not teach the row's reading. */
+async function saidOf(dict, written, reading) {
+  const a = await analyze(normalize(written), { dict });
+  if (a.tokens.some((t) => t.confidence === 'guess' || t.kind === 'unknown')) return '';
+  const read = toHira(a.tokens.map((t) => t.reading || t.surface).join(''));
+  if (read !== toHira(reading || written)) return '';
+  // Punctuation joins the word before it: asayake wa ame, yuuyake wa hare.
+  return a.tokens.map((t) => (t.romaji && t.romaji.said) || '').filter(Boolean)
+    .reduce((s, w) => (!s ? w : /^[a-z']/.test(w) ? `${s} ${w}` : `${s}${w}`), '');
+}
+
+async function addSaid(sets) {
+  const dict = createDict({ fetchJson: async (p) => JSON.parse(fs.readFileSync(p, 'utf8')), base: `${path.join(SITE, 'data')}/` });
+  let found = 0;
+  let rows = 0;
+  for (const list of sets.values()) {
+    for (const row of list) {
+      row.push(await saidOf(dict, row[0], row[1]));
+      rows += 1;
+      if (row[4]) found += 1;
+    }
+  }
+  return `romaji: the reader agrees on ${found} of ${rows} rows`;
 }
 
 function collect() {
@@ -173,13 +204,14 @@ function pack(id, rows, licence) {
   return files.map((list) => ({ _licence: licence, format: 'yomu-set/1', set: id, rows: list }));
 }
 
-function main() {
+async function main() {
   const t0 = Date.now();
   const licence = licenceBlock('edrdg', TOOL, { upstream: [upstream('jmdictFull')] });
   const written = [];
   const sets = [];
   const lines = [];
   const all = collect();
+  lines.push(await addSaid(all));
   for (const [id, rows] of all) {
     const docs = pack(id, rows, licence);
     let bytes = 0;

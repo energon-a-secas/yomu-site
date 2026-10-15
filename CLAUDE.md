@@ -341,7 +341,12 @@ idiom. A row's spelling and reading are the ones the tagged sense applies to
 holds a word in `tools/lib/avoid.mjs AVOID_EXPLICIT`, is left out; not the full
 `AVOID` the example sentences use, which dropped 一石二鳥 for "killing".
 Common entries first, then by reading; a set loads whole (two files of at
-most 140 KB) and shows 50 rows at a time. `data/sets/wNN.json` (index
+most 140 KB) and shows 50 rows at a time. A row carries the reader's said
+romaji, word by word (saru mo ki kara ochiru), from the analyzer at build
+time, or '' where it guessed or read the row otherwise (about a quarter);
+the page then spells the reading as one word. Search opens on Look up
+(Words, Kanji by parts); Browse shows five shelves (Kana, Counters and the
+three collections), so nothing sits off screen in a row of tabs. `data/sets/wNN.json` (index
 `words.json`) files each first-tier key with a kanji to up to three rows that
 hold it, its own row first, then the best of each collection: the Word
 panel's "In idioms and proverbs", and the collection a Search result names

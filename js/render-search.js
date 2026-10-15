@@ -61,11 +61,13 @@ export const firstTier = (res) => res.via !== 'name' && res.via !== 'rare';
 
 /**
  * A reading's romaji both ways; #search[data-romaji] shows the one the
- * learner chose (Said, Spelled or Off), so a switch repaints nothing.
+ * learner chose (Said, Spelled or Off), so a switch repaints nothing. A
+ * phrase passes the reader's own said line (saru mo ki kara ochiru), which
+ * spelling the reading as one word cannot give.
  */
-export function romajiNodes(reading) {
+export function romajiNodes(reading, saidLine = '') {
   return [
-    h('span', { class: 'sr-romaji sr-romaji--said', lang: 'ja-Latn' }, said(reading)),
+    h('span', { class: 'sr-romaji sr-romaji--said', lang: 'ja-Latn' }, saidLine || said(reading)),
     h('span', { class: 'sr-romaji sr-romaji--spelled', lang: 'ja-Latn' }, spelled(reading)),
   ];
 }

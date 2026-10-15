@@ -6,7 +6,7 @@ import { $, fill, h, debounce } from './utils.js';
 import { ui } from './strings.js';
 import { fetchJson } from './reader.js';
 import { createSets, rowMatches, SET_IDS, SET_PAGE } from './sets.js';
-import { setPickNodes, setListNodes } from './render-sets.js';
+import { setListNodes } from './render-sets.js';
 import { openReader } from './events-kanji.js';
 import { loadText } from './events-read.js';
 
@@ -26,13 +26,20 @@ function setStatus(text) {
   if (el) el.textContent = text;
 }
 
-/** Draw the picker and the list; a paint that a newer one overtook draws nothing. */
+/** The collection a shelf chose: Browse's three idiom shelves share one pane. */
+export function chooseSet(id) {
+  if (!SET_IDS.includes(id) || id === st.set) return;
+  st.set = id;
+  st.shown = SET_PAGE;
+}
+
+export const currentSet = () => st.set;
+
+/** Draw the list; a paint that a newer one overtook draws nothing. */
 export async function paintSets() {
-  const pick = $('sr-set-pick');
   const list = $('sr-set-list');
-  if (!pick || !list) return;
+  if (!list) return;
   const token = ++st.token;
-  fill(pick, setPickNodes(st.set));
   setStatus(ui('setsLoading'));
   try {
     const rows = await sets().rows(st.set);
@@ -53,12 +60,6 @@ export async function paintSets() {
 const paintSoon = debounce(() => paintSets(), 180);
 
 export const SETS_ACTIONS = {
-  'set-pick': (b) => {
-    if (!SET_IDS.includes(b.dataset.set)) return;
-    st.set = b.dataset.set;
-    st.shown = SET_PAGE;
-    paintSets().then(() => document.querySelector(`#sr-set-pick [data-set="${st.set}"]`)?.focus({ preventScroll: true }));
-  },
   'set-more': () => {
     const from = st.shown;
     st.shown += SET_PAGE;

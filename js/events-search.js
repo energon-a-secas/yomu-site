@@ -20,12 +20,16 @@ import { pageSetWords } from './sets.js';
 import { openKanjiPage } from './events-kanji-page.js';
 import { onRoute, openReader } from './events-kanji.js';
 import { loadText } from './events-read.js';
-import { paintSets } from './events-sets.js';
+import { paintSets, chooseSet, currentSet } from './events-sets.js';
 
 const TABS = Object.freeze(['words', 'parts', 'kana', 'counters', 'sets']);
+/** Look up holds the field and the parts picker; Browse the shelves. */
+const LOOK = Object.freeze(['words', 'parts']);
+const groupOf = (tab) => (LOOK.includes(tab) ? 'look' : 'browse');
 
 const sr = {
   tab: 'words',
+  last: { look: 'words', browse: 'kana' },
   script: 'hiragana',
   counter: 3,
   kanaKept: [],
@@ -133,7 +137,17 @@ function paintKana() {
 
 function showTab(tab, { focus = false } = {}) {
   sr.tab = TABS.includes(tab) ? tab : 'words';
-  for (const b of document.querySelectorAll('#search [data-act="sr-tab"]')) b.setAttribute('aria-pressed', String(b.dataset.tab === sr.tab));
+  const group = groupOf(sr.tab);
+  sr.last[group] = sr.tab;
+  for (const b of document.querySelectorAll('#search [data-act="sr-group"]')) b.setAttribute('aria-pressed', String(b.dataset.group === group));
+  const look = document.querySelector('#search .sr-look');
+  if (look) look.hidden = group !== 'look';
+  const shelves = document.querySelector('#search .sr-shelves');
+  if (shelves) shelves.hidden = group !== 'browse';
+  for (const b of document.querySelectorAll('#search [data-act="sr-tab"]')) {
+    const on = b.dataset.tab === sr.tab && (!b.dataset.set || b.dataset.set === currentSet());
+    b.setAttribute('aria-pressed', String(on));
+  }
   for (const id of TABS) if ($(`sr-${id}`)) $(`sr-${id}`).hidden = sr.tab !== id;
   if (sr.tab === 'parts') paintParts();
   if (sr.tab === 'kana') paintKana();
@@ -170,7 +184,14 @@ export const SEARCH_ACTIONS = {
     paintKana();
     document.querySelector(`#sr-kana [data-act="kc-script"][data-script="${sr.script}"]`)?.focus();
   },
-  'sr-tab': (b) => showTab(b.dataset.tab, { focus: true }),
+  'sr-tab': (b) => {
+    if (b.dataset.set) chooseSet(b.dataset.set);
+    showTab(b.dataset.tab, { focus: true });
+  },
+  'sr-group': (b) => {
+    const group = b.dataset.group === 'browse' ? 'browse' : 'look';
+    showTab(sr.last[group], { focus: group === 'look' });
+  },
   'sr-kanji': (b) => { const ch = sr.kept.kanji[Number(b.dataset.ix)]; if (ch) openKanjiPage(ch, b); },
   'sr-part-kanji': (b) => { const ch = sr.partsKept.kanji[Number(b.dataset.ix)]; if (ch) openKanjiPage(ch, b); },
   'sr-read': (b) => {

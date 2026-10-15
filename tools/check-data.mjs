@@ -711,16 +711,16 @@ function checkSearchRareKeys(docs) {
 
 const SET_IDS = ['yoji', 'proverb', 'idiom'];
 
-/** A collection file: its set, and rows [written, reading, [glosses], 0 or 1]. */
+/** A collection file: its set, and rows [written, reading, [glosses], 0 or 1, said romaji or ''] . */
 function checkSet(rel, doc) {
   if (!SET_IDS.includes(doc.set)) fail(rel, `set ${JSON.stringify(doc.set)} is not one of ${SET_IDS.join(' ')}`);
   if (!Array.isArray(doc.rows) || !doc.rows.length) { fail(rel, 'has no rows'); return; }
   doc.rows.forEach((r, i) => {
-    const ok = Array.isArray(r) && r.length === 4 && typeof r[0] === 'string' && r[0]
+    const ok = Array.isArray(r) && r.length === 5 && typeof r[0] === 'string' && r[0]
       && typeof r[1] === 'string' && r[1] !== r[0]
       && Array.isArray(r[2]) && r[2].length && r[2].every((g) => typeof g === 'string' && g)
-      && (r[3] === 0 || r[3] === 1);
-    if (!ok) fail(rel, `row ${i} is not [written, reading, [glosses], 0 or 1]`);
+      && (r[3] === 0 || r[3] === 1) && typeof r[4] === 'string' && !/[^a-z' ,.!?-]/.test(r[4]) && !/ [,.!?]/.test(r[4]);
+    if (!ok) fail(rel, `row ${i} is not [written, reading, [glosses], 0 or 1, romaji]`);
   });
 }
 

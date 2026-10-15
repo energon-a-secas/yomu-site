@@ -1,4 +1,4 @@
-// The Collections tab (js/sets.js has the logic): which set, and its rows
+// The Idioms pane (js/sets.js has the logic): the chosen collection's rows
 // that answer the filter, SET_PAGE at a time. A row's Read it finds its
 // word by `data-ix`, its place in the list this paint kept, so no Japanese
 // is written into an attribute.
@@ -7,21 +7,14 @@ import { h } from './utils.js';
 import { ui } from './strings.js';
 import { wordRuby } from './render-save.js';
 import { romajiNodes } from './render-search.js';
-import { SET_IDS, SET_PAGE } from './sets.js';
+import { SET_PAGE } from './sets.js';
 
-/** The set picker: one pressed button per set. */
-export function setPickNodes(chosen) {
-  return h('div', { class: 'seg sets-pick', role: 'group', 'aria-label': ui('setsPick') }, SET_IDS.map((id) => h('button', {
-    type: 'button', class: 'seg-btn', 'data-act': 'set-pick', 'data-set': id, 'aria-pressed': String(id === chosen),
-  }, ui(`set_${id}`))));
-}
-
-function row([written, reading, glosses], kept) {
+function row([written, reading, glosses, , saidLine], kept) {
   const ix = kept.push(written) - 1;
   return h('li', { class: 'sr-item' }, [
     h('div', { class: 'sr-head' }, [
       h('span', { class: 'sr-word' }, wordRuby([written, reading || written])),
-      ...romajiNodes(reading || written),
+      ...romajiNodes(reading || written, saidLine),
     ]),
     h('p', { class: 'sr-gloss', lang: 'en' }, glosses.join(' · ')),
     h('div', { class: 'sr-actions' }, [

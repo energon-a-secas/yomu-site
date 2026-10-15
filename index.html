@@ -352,13 +352,23 @@
       <button class="text-link mk-back" type="button" data-act="kanji-back"><span aria-hidden="true">← </span><span data-ui="backToReader">Back to the reader</span></button>
       <h2 class="mk-title" id="sr-title" tabindex="-1" data-ui="searchTitle">Search</h2>
       <p class="quiet mk-lead" data-ui="searchLead">Look up a word in Japanese, romaji or English, find a kanji by the parts you can see in it, or browse the kana, the counters and the idioms. Nothing you type leaves this page.</p>
-      <div class="mk-nav sr-nav" role="group" aria-labelledby="sr-nav-label">
-        <span class="sr-only" id="sr-nav-label" data-ui="searchNav">Search by</span>
-        <button class="mk-tab" type="button" data-act="sr-tab" data-tab="words" aria-pressed="true" data-ui="searchWords">Words</button>
-        <button class="mk-tab" type="button" data-act="sr-tab" data-tab="parts" aria-pressed="false" data-ui="searchParts">Kanji by parts</button>
-        <button class="mk-tab" type="button" data-act="sr-tab" data-tab="kana" aria-pressed="false" data-ui="searchKana">Kana</button>
-        <button class="mk-tab" type="button" data-act="sr-tab" data-tab="counters" aria-pressed="false" data-ui="searchCounters">Counters</button>
-        <button class="mk-tab" type="button" data-act="sr-tab" data-tab="sets" aria-pressed="false" data-ui="searchSets">Idioms</button>
+      <div class="sr-nav">
+        <div class="seg sr-group" role="group" aria-labelledby="sr-nav-label">
+          <span class="sr-only" id="sr-nav-label" data-ui="searchNav">Search by</span>
+          <button class="seg-btn" type="button" data-act="sr-group" data-group="look" aria-pressed="true" data-ui="searchLookUp">Look up</button>
+          <button class="seg-btn" type="button" data-act="sr-group" data-group="browse" aria-pressed="false" data-ui="searchBrowse">Browse</button>
+        </div>
+        <div class="mk-nav sr-look" role="group" aria-labelledby="sr-nav-label">
+          <button class="mk-tab" type="button" data-act="sr-tab" data-tab="words" aria-pressed="true" data-ui="searchWords">Words</button>
+          <button class="mk-tab" type="button" data-act="sr-tab" data-tab="parts" aria-pressed="false" data-ui="searchParts">Kanji by parts</button>
+        </div>
+      </div>
+      <div class="sr-shelves" role="group" aria-label="Shelves" data-ui-label="searchShelves" hidden>
+        <button class="sr-shelf" type="button" data-act="sr-tab" data-tab="kana" aria-pressed="false"><span class="sr-shelf-glyph" lang="ja" aria-hidden="true">あ</span><span class="sr-shelf-name" data-ui="searchKana">Kana</span><span class="sr-shelf-line" data-ui="shelfKana">Hiragana and katakana, each to its page</span></button>
+        <button class="sr-shelf" type="button" data-act="sr-tab" data-tab="counters" aria-pressed="false"><span class="sr-shelf-glyph" lang="ja" aria-hidden="true">本</span><span class="sr-shelf-name" data-ui="searchCounters">Counters</span><span class="sr-shelf-line" data-ui="shelfCounters">Where the sound bends</span></button>
+        <button class="sr-shelf" type="button" data-act="sr-tab" data-tab="sets" data-set="yoji" aria-pressed="false"><span class="sr-shelf-glyph" lang="ja" aria-hidden="true">四</span><span class="sr-shelf-name" data-ui="set_yoji">Four kanji</span><span class="sr-shelf-line" data-ui="shelfYoji">Four-kanji idioms</span></button>
+        <button class="sr-shelf" type="button" data-act="sr-tab" data-tab="sets" data-set="proverb" aria-pressed="false"><span class="sr-shelf-glyph" lang="ja" aria-hidden="true">諺</span><span class="sr-shelf-name" data-ui="set_proverb">Proverbs</span><span class="sr-shelf-line" data-ui="shelfProverb">Sayings, filter in any script</span></button>
+        <button class="sr-shelf" type="button" data-act="sr-tab" data-tab="sets" data-set="idiom" aria-pressed="false"><span class="sr-shelf-glyph" lang="ja" aria-hidden="true">句</span><span class="sr-shelf-name" data-ui="set_idiom">Phrases</span><span class="sr-shelf-line" data-ui="shelfIdiom">Set expressions, like 足を洗う</span></button>
       </div>
       <div class="sr-pane" id="sr-words">
         <div class="sr-field">
@@ -383,7 +393,6 @@
       <div class="sr-pane" id="sr-counters" hidden></div>
       <div class="sr-pane" id="sr-sets" hidden>
         <p class="quiet" data-ui="setsLead">Four-character idioms, proverbs and idiomatic phrases, as JMdict tags them. The common ones come first.</p>
-        <div id="sr-set-pick"></div>
         <div class="sr-field sets-field">
           <label class="input-label" for="sr-set-filter" data-ui="setsFilter">Filter</label>
           <input class="mk-filter-input sr-input" id="sr-set-filter" type="search" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" aria-describedby="sr-set-hint">

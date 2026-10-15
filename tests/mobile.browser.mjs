@@ -467,6 +467,9 @@ async function reader(browser, phone, lang) {
     const tray = await page.evaluate(() => { const r = document.querySelector('.sr-tray').getBoundingClientRect(); return { top: Math.round(r.top), bottom: Math.round(r.bottom), vh: innerHeight }; });
     if (!(tray.top < tray.vh && tray.bottom <= tray.vh + 1)) fail(where, `the parts tray is at ${tray.top} to ${tray.bottom}, off a ${tray.vh}px screen`);
     await audit(page, where, 'search-parts');
+    await tap(page, '[data-act="sr-group"][data-group="browse"]');
+    await page.waitForSelector('#search .sr-shelves:not([hidden])');
+    await audit(page, where, 'search-shelves');
     await tap(page, '[data-act="sr-tab"][data-tab="kana"]');
     await page.waitForSelector('#sr-kana [data-act="kc-kana"]');
     await audit(page, where, 'kana');
@@ -478,9 +481,8 @@ async function reader(browser, phone, lang) {
     await page.waitForSelector('#sr-counters .cn-card');
     await tap(page, '#sr-counters [data-act="cn-pick"][data-ix="0"]');
     await audit(page, where, 'counters');
-    await tap(page, '[data-act="sr-tab"][data-tab="sets"]');
+    await tap(page, '[data-act="sr-tab"][data-tab="sets"][data-set="proverb"]');
     await page.waitForSelector('#sr-set-list .sr-item');
-    await tap(page, '#sr-set-pick [data-set="proverb"]');
     await page.fill('#sr-set-filter', 'monkey');
     // The filter repaints after a pause: wait for the short list, not the first page still drawn.
     await page.waitForFunction(() => { const n = document.querySelectorAll('#sr-set-list .sr-item').length; return n > 0 && n < 50; });

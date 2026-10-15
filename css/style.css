@@ -1090,10 +1090,23 @@ button.mk-tab { background: transparent; border-top: 0; border-left: 0; border-r
 /* The kana chart and the counters (render-learn.js), Search's reference tabs.
    The four tabs scroll sideways rather than wrap: at 320px Counters wrapped
    onto a row of its own. */
-.mk-nav.sr-nav { flex-wrap: nowrap; gap: 0 var(--space-4); overflow-x: auto; scrollbar-width: none; }
-.sr-nav .mk-tab { flex: none; }
+.sr-nav { display: flex; flex-direction: column; gap: var(--space-2); padding-top: var(--space-2); }
+.sr-group { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 24rem; }
+.sr-group .seg-btn { min-height: 44px; font-size: var(--text-base); }
+.sr-look { margin-top: 0; flex-wrap: nowrap; gap: 0 var(--space-4); }
+.sr-look .mk-tab { flex: none; }
+.sr-shelves { display: grid; grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr)); gap: var(--space-2); margin-bottom: var(--space-4); }
+.sr-shelf {
+  display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto auto; column-gap: var(--space-3); align-items: center;
+  min-height: 64px; padding: var(--space-2) var(--space-3); text-align: left;
+  border: 1px solid var(--border); border-radius: var(--radius-lg);
+  background: var(--surface-1); color: var(--text-primary); font: inherit; cursor: pointer;
+}
+.sr-shelf[aria-pressed="true"] { border-color: var(--mark); box-shadow: inset 0 0 0 1px var(--mark); }
+.sr-shelf-glyph { grid-row: 1 / 3; font-size: 1.6rem; line-height: 1; }
+.sr-shelf-name { font-weight: 600; font-size: var(--text-sm); }
+.sr-shelf-line { font-size: var(--text-xs); color: var(--text-secondary); }
 .kc-switch { margin-bottom: var(--space-3); }
-.sets-pick { margin: var(--space-3) 0; }
 .sets-more { margin-top: var(--space-3); min-height: 44px; }
 .kc-lead { margin-bottom: var(--space-3); }
 .sr-pane .word-sub { margin-top: var(--space-4); }
