@@ -13,4 +13,6 @@ export const READING_STRINGS = Object.freeze({
   sentPrev: { en: 'Previous sentence', es: 'Oración anterior' },
   sentNext: { en: 'Next sentence', es: 'Oración siguiente' },
   sentWhere: { en: 'Sentence {n} of {of}', es: 'Oración {n} de {of}' },
+  tabbarLabel: { en: 'Sections', es: 'Secciones' },
+  tabRead: { en: 'Read', es: 'Leer' },
 });

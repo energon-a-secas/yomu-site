@@ -1640,3 +1640,37 @@ html[data-embed="1"] body:has(> .neo-footer) { min-height: 0; }
 .pg-unmet { font-size: 1.4rem; letter-spacing: 0.3em; }
 .pg-note { font-size: var(--text-xs); }
 
+/* ── Phone tab bar (events-tabbar.js) ───────────────────────────
+   Under the header kit's 700px, where Play folds into the ⋯ menu. The bar
+   is fixed; everything that rides the bottom moves up by its height: the
+   body (so the footer stays above it), the word sheet, the toast, what
+   scrolls into view, and the Beacon (its own --beacon-offset token). A
+   phone on its side (under 480px tall) has no room for it under the word
+   sheet, and keeps the header's ⋯ menu alone. */
+.tabbar { display: none; }
+@media (max-width: 700px) and (min-height: 480px) {
+  html:not([data-embed="1"]) {
+    --tabbar-h: calc(60px + env(safe-area-inset-bottom, 0px));
+    --beacon-offset: calc(20px + var(--tabbar-h));
+  }
+  html:not([data-embed="1"]) body { padding-bottom: var(--tabbar-h); }
+  html:not([data-embed="1"]) .tabbar {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 100;
+    display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    background: var(--bg); border-top: 1px solid var(--border-strong);
+  }
+  html:not([data-embed="1"]) .side[data-sheet] { bottom: var(--tabbar-h); }
+  html:not([data-embed="1"]) .yomu:has(> .side[data-sheet]) :is(.tok, .it-line) { scroll-margin-bottom: calc(50dvh + var(--tabbar-h) + var(--space-4)); }
+  html:not([data-embed="1"]) .toast { bottom: calc(var(--space-4) + var(--tabbar-h)); }
+  html:not([data-embed="1"]) .sr-tray { bottom: var(--tabbar-h); }
+}
+.tabbar-item {
+  min-height: 60px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  border: 0; border-top: 2px solid transparent; background: transparent;
+  color: var(--text-secondary); font: inherit; font-size: var(--text-xs); text-decoration: none; cursor: pointer;
+}
+.tabbar-item[aria-current="page"] { color: var(--text-primary); border-top-color: var(--mark); }
+.tabbar-glyph { position: relative; font-size: 1.2rem; line-height: 1; }
+.tabbar-due { position: absolute; top: -8px; left: calc(100% - 4px); }
+

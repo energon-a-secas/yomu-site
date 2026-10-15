@@ -485,6 +485,18 @@ scrolls into view stops under the header and above the word sheet. What
 still overlaps (the Beacon, the footer's links, the header's 36px controls)
 belongs to a fleet kit, and the check prints it as a note.
 
+Under 700px wide and 480px tall a tab bar (`#tabbar`, `events-tabbar.js`) holds Read, Search, My
+kanji (with the due count, any `[data-due-count]`) and Play, never in an
+embed. It is fixed, so everything that rides the bottom moves up by
+`--tabbar-h`: the body's padding (the footer), the word sheet's and the parts
+tray's sticky `bottom`, the toast, and the Beacon through its own
+`--beacon-offset` token; the footer's back-to-top already steps aside over a
+control. Not `scroll-padding-bottom`: with it WebKit scrolled My kanji's title
+under the header when History took focus (320 and 375px), and the check finds
+nothing focused under the bar without it. A phone on its side (under 480px
+tall) shows no bar: under the word sheet it left the chosen word no room. The header is unchanged: My kanji stays its one kept action, so the
+fleet's shell check and the header tests hold as they were.
+
 ## My kanji
 
 The kanji a learner saves for review, the texts they met each kanji in, the

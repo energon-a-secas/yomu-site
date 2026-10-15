@@ -512,6 +512,16 @@
        comes from and where the text goes. The full acknowledgements, quoted as
        the licences ask (tools/lib/licence.mjs holds the same texts), sit in the
        kit's disclaimer modal. -->
+  <!-- The phone tab bar (js/events-tabbar.js): the four places, one tap from
+       anywhere, under 700px wide, where the header folds Play into its ⋯
+       menu. Never in an embed: Runcible's sheet has its own bar. -->
+  <nav class="tabbar" id="tabbar" aria-label="Sections" data-ui-label="tabbarLabel">
+    <button class="tabbar-item" type="button" data-act="tab-read" data-section="reader"><span class="tabbar-glyph" lang="ja" aria-hidden="true">読</span><span data-ui="tabRead">Read</span></button>
+    <a class="tabbar-item" href="#/search" data-section="search"><span class="tabbar-glyph" lang="ja" aria-hidden="true">探</span><span data-ui="search">Search</span></a>
+    <a class="tabbar-item" href="#/kanji" data-section="mykanji"><span class="tabbar-glyph" lang="ja" aria-hidden="true">漢<span class="mk-due tabbar-due" data-due-count hidden></span></span><span data-ui="myKanji">My kanji</span></a>
+    <a class="tabbar-item" href="#/play" data-section="play"><span class="tabbar-glyph" lang="ja" aria-hidden="true">遊</span><span data-ui="play">Play</span></a>
+  </nav>
+
   <footer class="neo-footer" data-footer-mode="minimal">
     <span data-ui="footerNote">Dictionary: JMdict, JMnedict and KANJIDIC, EDRDG, CC BY-SA 4.0. Your text stays in this browser.</span>
 

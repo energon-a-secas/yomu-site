@@ -257,7 +257,7 @@ export function applyRoute({ boot = false, focus = true } = {}) {
   if (next === 'list' || next === 'review') loadInfo();
   for (const fn of hooks) fn(next, prev);
   if (boot) return;
-  if (prev === 'reader') window.scrollTo({ top: 0, behavior: 'instant' });
+  if (prev === 'reader' || TABS[prev]) window.scrollTo({ top: 0, behavior: 'instant' }); // a new tab starts at its top
   if (next === 'review') reviewFocus(review)?.focus({ preventScroll: true });
   else if (prev === 'review') ($('mk-body').querySelector('[data-act="mk-start"]') || $('mk-title')).focus({ preventScroll: true });
   else if (!(fromNav && TABS[prev])) $('mk-title').focus({ preventScroll: true });

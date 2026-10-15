@@ -32,10 +32,9 @@ import { bindLayout } from './layout.js';
 import { WORD_ACTIONS, bindWord } from './events-word.js';
 import { KANJI_PAGE_ACTIONS, bindKanjiPage, openKanjiPage } from './events-kanji-page.js';
 import { SEARCH_ACTIONS, bindSearch } from './events-search.js';
-import { SETS_ACTIONS, bindSets } from './events-sets.js';
-import { PROGRESS_ACTIONS, bindProgress } from './events-progress.js';
+import { EXTRA_ACTIONS, bindExtra } from './events-extra.js';
 import { DAILY_ACTIONS, bindDaily } from './events-daily.js';
-import { VIEW_ACTIONS, followFocus } from './events-view.js';
+import { followFocus } from './events-view.js';
 
 export { analyzeNow, loadText };
 
@@ -454,9 +453,7 @@ const ACTIONS = {
   ...KANJI_PAGE_ACTIONS,
   ...WORD_ACTIONS,
   ...SEARCH_ACTIONS,
-  ...SETS_ACTIONS,
-  ...PROGRESS_ACTIONS,
-  ...VIEW_ACTIONS,
+  ...EXTRA_ACTIONS,
   ...DAILY_ACTIONS,
   ...COLLECT_ACTIONS,
   ...PLAY_ACTIONS,
@@ -490,8 +487,7 @@ export function bindEvents() {
   bindCollect();
   bindPlay();
   bindSearch();
-  bindSets();
-  bindProgress();
+  bindExtra();
   bindKanji();
   bindDaily();
   bindWord();
