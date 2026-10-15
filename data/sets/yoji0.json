@@ -252,7 +252,6 @@
 ["烏兎匆々","うとそうそう",["days and nights passing by quickly; months and years flying by; time flies"],0],
 ["海千山千","うみせんやません",["cunning and experienced in the ways of the world; crafty and worldly-wise; sly old (fox)"],0],
 ["紆余曲折","うよきょくせつ",["turns and twists; ups and downs; meandering; complications; vicissitudes"],0],
-["雲雨巫山","うんうふざん",["sexual liaison"],0],
 ["雲煙過眼","うんえんかがん",["not being obsessed with something very long (just as clouds and haze pass swiftly before one's eyes)"],0],
 ["雲煙万里","うんえんばんり",["limitless expanse of clouds and smoke"],0],
 ["雲煙飛動","うんえんひどう",["flying clouds and drifting haze"],0],
@@ -1049,7 +1048,6 @@
 ["清風明月","せいふうめいげつ",["refreshing breeze and the bright moon; a beautiful nocturnal scene with a full moon"],0],
 ["整理整頓","せいりせいとん",["keeping things tidy and in order"],0],
 ["政略結婚","せいりゃくけっこん",["marriage of convenience; marriage for political reasons"],0],
-["精力絶倫","せいりょくぜつりん",["being of unbounded energy; being with matchless vigor; having endless sexual stamina"],0],
 ["勢力伯仲","せいりょくはくちゅう",["(two sides) being evenly matched in influence or power"],0],
 ["精励恪勤","せいれいかっきん",["assiduousness; attending diligently to one's study or duties"],0],
 ["清廉潔白","せいれんけっぱく",["spotless integrity; absolute honesty; uprightness"],0],
@@ -1059,7 +1057,6 @@
 ["世態人情","せたいにんじょう",["(contemporary) customs and behavior; the picture of people's life in the contemporary world"],0],
 ["世代交代","せだいこうたい",["alternation of generations; heterogenesis","change of generations; emergence of a new generation"],0],
 ["切磋琢磨","せっさたくま",["diligent application (to work or study); cultivating one's character by studying hard","mutual encouragement (to improve); working hard together; friendly rivalry"],0],
-["切歯扼腕","せっしやくわん",["being enraged (indignant, impatient); gnashing the teeth and clenching the arms on the breast (in anger or regret)"],0],
 ["殺生禁断","せっしょうきんだん",["prohibition against hunting and fishing"],0],
 ["雪中送炭","せっちゅうそうたん",["helping someone in trouble; sending charcoal to someone in the snow"],0],
 ["雪泥鴻爪","せつでいのこうそう",["ephemeral nature of human deeds and events; evanescence of human affairs; leaving no trace; dust in the wind"],0],
@@ -1241,7 +1238,6 @@
 ["忠勇無双","ちゅうゆうむそう",["of peerless loyalty and bravery"],0],
 ["知勇兼備","ちゆうけんび",["having both wisdom and courage"],0],
 ["寵愛一身","ちょうあいいっしん",["standing highest in one's master's favor; monopolizing the affection (favor) of the lord; being the lord's favorite lady"],0],
-["朝雲暮雨","ちょううんぼう",["sexual liaison","morning clouds and evening rain"],0],
 ["朝三暮四","ちょうさんぼし",["being preoccupied with immediate (superficial) differences without realizing that there are no differences in substance; six of one and half a dozen of another"],0],
 ["張三李四","ちょうさんりし",["the common run of men; the average Joe; good-for-nothing (person)"],0],
 ["長身痩躯","ちょうしんそうく",["tall and lean figure; tall and slender figure"],0],
@@ -1270,6 +1266,11 @@
 ["九十九折","つづらおり",["winding; meandering; sinuous; zigzag"],0],
 ["低徊趣味","ていかいしゅみ",["disposition toward rejecting mundane affairs and enjoying nature and art"],0],
 ["亭主関白","ていしゅかんぱく",["domineering husband; hectoring husband; husband who rules the roost"],0],
-["低頭平身","ていとうへいしん",["prostrating oneself"],0]
+["低頭平身","ていとうへいしん",["prostrating oneself"],0],
+["丁寧懇切","ていねいこんせつ",["kind, careful, and thorough (of an explanation, advice, etc.); thoughtful and scrupulous"],0],
+["手枷足枷","てかせあしかせ",["manacles; shackles; fetters"],0],
+["適材適所","てきざいてきしょ",["the right person in the right place"],0],
+["適者生存","てきしゃせいぞん",["survival of the fittest"],0],
+["敵本主義","てきほんしゅぎ",["diversionary tactics; concealing one's true motives until the last moment"],0]
 ]
 }

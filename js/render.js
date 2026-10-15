@@ -20,6 +20,7 @@ import { gapsOf } from './gaps.js';
 import { hideTip } from './render-gaps.js';
 import { pageForms } from './other-forms.js';
 import { pageExamples } from './examples.js';
+import { pageSetWords } from './sets.js';
 import { baseReading } from './conjugate.js';
 
 export { paintChrome, paintStatus, paintSpeech, paintSavedMarks };
@@ -176,11 +177,11 @@ export function paintSide(state) {
  * again when either arrives, if the word is still the one chosen.
  */
 function lateFor(state, token) {
-  if (!token || !token.entry || !['word', 'inflected'].includes(token.kind)) return { forms: null, examples: null };
+  if (!token || !token.entry || !['word', 'inflected'].includes(token.kind)) return { forms: null, examples: null, idioms: null };
   const key = token.base || token.surface;
   const reading = baseReading(token);
   const out = {};
-  for (const [name, store, read] of [['forms', pageForms(), 'formsOf'], ['examples', pageExamples(), 'examplesOf']]) {
+  for (const [name, store, read] of [['forms', pageForms(), 'formsOf'], ['examples', pageExamples(), 'examplesOf'], ['idioms', pageSetWords(), 'inOf']]) {
     out[name] = store[read](key, reading);
     if (out[name] === undefined) {
       store.need([key]).then(() => { if (selectedToken(state) === token) paintWord(state); }).catch(() => {});

@@ -43,6 +43,7 @@ import {
   startSpaces, spacesRoundNow, spacesKey, lendPaint, SPACES_ACTIONS,
 } from './events-spaces.js';
 import { spacesScore, spacesTotal, spacesCounts, missedLines } from './play-spaces.js';
+import { openKanjiPage } from './events-kanji-page.js';
 
 let epoch = 0;              // a new round or a new route makes older async work stale
 
@@ -368,6 +369,7 @@ export const PLAY_ACTIONS = {
   'pl-clock': () => startClock(),
   'pl-cell': (b) => tapCell(Number(b.dataset.ix)),
   'pl-save': savedToggle,
+  'pl-page': (b) => { const ch = play.saveList[Number(b.dataset.ix)]; if (ch) openKanjiPage(ch, b); },
   ...SPACES_ACTIONS,
 };
 

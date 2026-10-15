@@ -5,8 +5,8 @@
 
 import { h } from './utils.js';
 import { ui } from './strings.js';
-import { said } from './kana.js';
 import { wordRuby } from './render-save.js';
+import { romajiNodes } from './render-search.js';
 import { SET_IDS, SET_PAGE } from './sets.js';
 
 /** The set picker: one pressed button per set. */
@@ -21,7 +21,7 @@ function row([written, reading, glosses], kept) {
   return h('li', { class: 'sr-item' }, [
     h('div', { class: 'sr-head' }, [
       h('span', { class: 'sr-word' }, wordRuby([written, reading || written])),
-      h('span', { class: 'sr-romaji', lang: 'ja-Latn' }, said(reading || written)),
+      ...romajiNodes(reading || written),
     ]),
     h('p', { class: 'sr-gloss', lang: 'en' }, glosses.join(' · ')),
     h('div', { class: 'sr-actions' }, [

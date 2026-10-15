@@ -457,6 +457,9 @@ test('check-data fails each broken rule and names the file', async () => {
     ['a collection row with no glosses', (rw) => rw('data/sets/proverb0.json', (d) => {
       d.rows[2][2] = [];
     }), /proverb0\.json: row 2 is not \[written/],
+    ['a word filed with an idiom that does not hold it', (rw) => rw('data/sets/w01.json', (d) => {
+      Object.values(d.entries)[0][0][1] = '猿も木から落ちる';
+    }), /w01\.json: .* is not one to three \[set, a written form holding it/],
     ['a collection count its files do not hold', (rw) => rw('data/sets/index.json', (d) => {
       d.sets[0].n += 1;
     }), /index\.json: yoji says \d+ rows, its files hold/],

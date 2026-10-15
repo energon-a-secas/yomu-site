@@ -707,6 +707,8 @@ rt .snd { border-bottom: 0; padding-bottom: 0; }
 .ex-ja { font-size: 1.0625rem; line-height: 1.6; }
 .ex-word { background: var(--accent-wash); color: var(--text-primary); border-radius: 3px; padding: 0 2px; box-shadow: inset 0 -2px 0 var(--accent-bright); }
 .ex-en { font-size: var(--text-sm); color: var(--text-secondary); }
+.idiom-ja .mk-word { font-size: 1.15rem; line-height: 1.8; }
+.idiom-set { color: var(--mark); }
 .ex-actions { display: flex; align-items: center; gap: var(--space-3); margin-top: 2px; }
 .ex-src { font-size: var(--text-xs); }
 .word-part .ex-note { font-size: var(--text-xs); margin-top: var(--space-1); }
@@ -1036,6 +1038,10 @@ button.mk-tab { background: transparent; border-top: 0; border-left: 0; border-r
 .sr-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-1) var(--space-3); }
 .sr-word .mk-word { font-size: 1.5rem; line-height: 1.7; }
 .sr-romaji { font-size: var(--text-sm); color: var(--text-secondary); }
+#search[data-romaji="said"] .sr-romaji--spelled,
+#search[data-romaji="spelled"] .sr-romaji--said,
+#search[data-romaji="off"] .sr-romaji { display: none; }
+.sr-romaji-switch { margin-top: var(--space-3); flex-wrap: wrap; }
 .sr-pos {
   margin-left: auto;
   padding: 1px 8px; border-radius: 999px; background: var(--surface-2);
@@ -1219,7 +1225,7 @@ a.mk-open[aria-current="page"], a.pl-open[aria-current="page"] { background: rgb
 
 .mk-list { list-style: none; border-top: 1px solid var(--border-subtle); }
 .mk-item {
-  display: grid; grid-template-columns: 3.25rem minmax(0, 1fr) auto; align-items: start;
+  display: grid; grid-template-columns: 3.25rem minmax(0, 1fr) auto auto; align-items: start;
   gap: var(--space-3);
   padding: var(--space-3) 0;
   border-bottom: 1px solid var(--border-subtle);
@@ -1560,7 +1566,7 @@ html[data-embed="1"] body:has(> .neo-footer) { min-height: 0; }
   .ph-actions { flex-direction: row; flex-wrap: wrap; }
   .dialog__header, .dialog__body { padding-left: var(--space-4); padding-right: var(--space-4); }
   .toast { left: var(--space-4); right: var(--space-4); max-width: none; }
-  .mk-item { grid-template-columns: 2.75rem minmax(0, 1fr) auto; gap: var(--space-2); }
+  .mk-item { grid-template-columns: 2.75rem minmax(0, 1fr) auto auto; gap: var(--space-2); }
   .mk-char { font-size: 1.875rem; }
   .mk-controls { gap: var(--space-2) var(--space-4); }
   .col-next { gap: var(--space-2); }

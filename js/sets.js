@@ -9,11 +9,15 @@
 // and a query that reads as both romaji and English (time) is both.
 
 import { queryKind, glossWords } from './search.js';
+import { createRangeStore } from './range-store.js';
+import { plainJson } from './other-forms.js';
 import { toHiragana } from './vendor/wanakana.js';
 import { toHira } from './kana.js';
 
 /** The sets the tab offers, in its order; their names are strings `set_<id>`. */
 export const SET_IDS = Object.freeze(['yoji', 'proverb', 'idiom']);
+
+const HAS_KANJI = /[\p{Script=Han}々]/u;
 
 /** Rows shown before "Show more", and how many more each press adds. */
 export const SET_PAGE = 50;
@@ -69,4 +73,42 @@ export function createSets({ fetchJson, base = 'data/' }) {
   }
 
   return Object.freeze({ sets, rows });
+}
+
+/**
+ * The idioms and proverbs that hold a word (data/sets/words.json, wNN):
+ * up to three rows [set, written, reading, gloss], the word's own row first.
+ * Loaded like the examples (one shard per word, plain fetch), only when the
+ * Word panel or Search asks.
+ */
+export function createSetWords({ fetchJson, base = 'data/' }) {
+  const dir = base.endsWith('/') ? base : `${base}/`;
+  const resolve = (src) => (src.startsWith('data/') ? dir + src.slice(5) : src);
+  const store = createRangeStore({
+    fetchJson, resolve, indexPath: `${dir}sets/words.json`, what: 'The idioms index',
+  });
+  const asked = new Set();
+  // Only keys with a kanji are filed: a kana word fetches nothing and holds none.
+  const filed = (k) => HAS_KANJI.test(k);
+  async function need(keys) {
+    await store.need(keys.filter(filed));
+    for (const k of keys) asked.add(k);
+  }
+  /** The rows holding `key`, [] for none, or undefined while its shard has not been asked for. */
+  function inOf(key) {
+    if (!filed(key)) return [];
+    if (!asked.has(key)) return undefined;
+    return (store.get(key) || []).map(([set, written, reading, gloss]) => Object.freeze({
+      set, written, reading, gloss,
+    }));
+  }
+  return Object.freeze({ need, inOf });
+}
+
+let shared = null;
+
+/** The one loader the page shares. */
+export function pageSetWords() {
+  if (!shared) shared = createSetWords({ fetchJson: plainJson });
+  return shared;
 }

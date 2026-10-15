@@ -10,6 +10,8 @@ import { paintWord, selectedToken } from './render.js';
 import { pageExamples } from './examples.js';
 import { baseReading } from './conjugate.js';
 import { loadText } from './events-read.js';
+import { pageSetWords } from './sets.js';
+import { searchFor } from './events-search.js';
 
 const speechOk = (b) => state.speech === 'ok' && b.getAttribute('aria-disabled') !== 'true';
 
@@ -35,6 +37,18 @@ export const WORD_ACTIONS = {
     const list = pageExamples().examplesOf(token.base || token.surface, baseReading(token)) || [];
     const e = list[Number(b.dataset.ix)];
     if (e) loadText(e.ja, { source: 'typed' }).catch(() => {});
+  },
+  // An idiom or proverb that holds the word, sent to the reader as a new text.
+  'idiom-read': (b) => {
+    const token = selectedToken(state);
+    if (!token) return;
+    const r = (pageSetWords().inOf(token.base || token.surface) || [])[Number(b.dataset.ix)];
+    if (r) loadText(r.written, { source: 'typed' }).catch(() => {});
+  },
+  // The word in Search, which says what else it is and what holds it.
+  'word-search': () => {
+    const token = selectedToken(state);
+    if (token) searchFor(token.base || token.surface);
   },
   'conj-reg': (b) => {
     Object.assign(view(), { reg: b.dataset.reg, open: true });

@@ -10,6 +10,7 @@ import {
   createSearch, queryKind, byParts, glossWords, japaneseKeys, RARE_MAX,
 } from '../js/search.js';
 import { shownWord, firstTier } from '../js/render-search.js';
+import { said, spelled } from '../js/kana.js';
 import { dict, fetchJson, DATA } from './helpers/disk.mjs';
 
 const s = createSearch({ dict: dict(), fetchJson, base: `${DATA}/` });
@@ -83,6 +84,16 @@ test('English with few common words asks the rare words, drawn from their index 
   assert.ok(abacus.includes('そろばん') && abacus.includes('アバカス'), 'common first, then rare');
   assert.ok(abacus.indexOf('そろばん') < abacus.indexOf('アバカス'));
   assert.ok(!(abacus.includes('ご破算') && abacus.includes('御破算')), 'two spellings of one word are one row');
+});
+
+test('a result carries its romaji both ways, and the Romaji switch shows one', async () => {
+  const html = await import('node:fs').then((fs) => fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8'));
+  const search = html.slice(html.indexOf('id="sr-words"'), html.indexOf('id="sr-results"'));
+  for (const v of ['said', 'spelled', 'off']) assert.match(search, new RegExp(`data-pref="romaji" data-value="${v}"`), v);
+  const css = await import('node:fs').then((fs) => fs.readFileSync(new URL('../css/style.css', import.meta.url), 'utf8'));
+  assert.match(css, /#search\[data-romaji="off"\] \.sr-romaji \{ display: none; \}/);
+  assert.equal(said('せんせい'), 'sensee');
+  assert.equal(spelled('せんせい'), 'se-n-se-i');
 });
 
 test('kanji by parts: every chosen part, at any depth, and only parts that still lead somewhere', async () => {

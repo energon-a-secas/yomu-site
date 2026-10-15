@@ -208,7 +208,6 @@
 ["蛙の子は蛙","かえるのこはかえる",["like father, like son; the apple doesn't fall far from the tree; the child of a frog is a frog"],0],
 ["垣堅くして犬入らず","かきかたくしていぬいらず",["a wholesome household can not be disturbed from the outside; a house divided against itself cannot stand; a firm fence keeps the dogs out"],0],
 ["各人に彼のものを","かくじんにかれのものを",["to each his own; may all get their due; suum cuique"],0],
-["陰裏の豆もはじけ時","かげうらのまめもはじけどき",["all girls eventually awaken to sex; even the seed growing in the shade will burst open"],0],
 ["陰になり日向になり","かげになりひなたになり",["openly and secretly; helping in all ways"],0],
 ["嘉肴ありと雖も食らわずんばその旨きを知らず","かこうありといえどもくらわずんばそのうまきをしらず",["one cannot understand even a holy man's teachings without study; one cannot know the abilities of a great man without putting him to use; one cannot know the delicious taste of fine food without eating it"],0],
 ["火事と喧嘩は江戸の華","かじとけんかはえどのはな",["fires and fistfights are the flowers of Edo"],0],
@@ -449,7 +448,6 @@
 ["小の虫を殺して大の虫を生かす","しょうのむしをころしてだいのむしをいかす",["to sacrifice something small in order to save something great; to lose a leg to save one's life; to kill a small bug and save a large one"],0],
 ["小の虫を殺して大の虫を助ける","しょうのむしをころしてだいのむしをたすける",["to sacrifice something small in order to save something great; to lose a leg to save one's life; to kill a small bug and help a large one"],0],
 ["勝負は時の運","しょうぶはときのうん",["victory depends on the turn of fortune; winning and losing are both down to luck"],0],
-["小便一町糞一里","しょうべんいっちょうくそいちり",["if you visit the toilet while traveling, you will fall behind your fellow travelers; one chō for a piss, one ri for a shit"],0],
 ["将を射んと欲すれば先ず馬を射よ","しょうをいんとほっすればまずうまをいよ",["do not shoot straight for the top; he that would the daughter win, must with the mother first begin; if you want to shoot the general, first shoot his horse"],0],
 ["初心忘るべからず","しょしんわするべからず",["we were all beginners once; never lose your humility; don't let success get to your head; don't forget where you came from"],0],
 ["知らぬ神より馴染みの鬼","しらぬかみよりなじみのおに",["better the devil you know than the devil you don't know; better the ogre you know than the god you don't"],0],
@@ -875,6 +873,9 @@
 ["安物買いの銭失い","やすものがいのぜにうしない",["you get what you pay for; wasting money on a cheap item"],0],
 ["安物は高物","やすものはたかもの",["buy nice or buy twice; you get what you pay for; cheap goods are (ultimately) expensive goods"],0],
 ["柳に雪折れなし","やなぎにゆきおれなし",["the soft may prove more durable than the hard; willow trees don't break under the weight of snow"],0],
-["柳の下にいつも泥鰌はいない","やなぎのしたにいつもどじょうはいない",["a fox is not taken twice in the same snare; there are no birds in last year's nest; there aren't always loach under the willow tree; good luck does not always repeat itself"],0]
+["柳の下にいつも泥鰌はいない","やなぎのしたにいつもどじょうはいない",["a fox is not taken twice in the same snare; there are no birds in last year's nest; there aren't always loach under the willow tree; good luck does not always repeat itself"],0],
+["柳の下にいつも泥鰌はおらぬ","やなぎのしたにいつもどじょうはおらぬ",["a fox is not taken twice in the same snare; there are no birds in last year's nest; there aren't always loaches under the willow tree"],0],
+["柳は緑、花は紅","やなぎはみどり、はなはくれない",["spring is beautiful","things are different by nature; all things have their characteristics"],0],
+["病は気から","やまいはきから",["sickness and health start with the mind"],0]
 ]
 }

@@ -16,6 +16,7 @@ import { kanaChartNodes, countersNodes } from './render-learn.js';
 import { afterPaintAll } from './render.js';
 import { pageForms } from './other-forms.js';
 import { pageExamples } from './examples.js';
+import { pageSetWords } from './sets.js';
 import { openKanjiPage } from './events-kanji-page.js';
 import { onRoute, openReader } from './events-kanji.js';
 import { loadText } from './events-read.js';
@@ -70,15 +71,17 @@ async function run() {
     const chars = [...new Set([...found.kanji, ...found.words.flatMap((w) => [...w.key])])];
     const forms = pageForms();
     const examples = pageExamples();
+    const setWords = pageSetWords();
     const written = byWord(found.words).filter(firstTier).map((w) => shownWord(w).written);
     const [infos] = await Promise.all([
       kanjiInfo(chars),
       // Other spellings and examples are a nicety: a shard that fails leaves them out.
       forms.need(written).catch(() => {}),
       examples.need(written).catch(() => {}),
+      setWords.need(written).catch(() => {}),
     ]);
     if (token !== sr.token) return;
-    const { nodes, kept, status } = resultNodes(found, infos, q, (k, r) => forms.formsOf(k, r), (k, r) => examples.examplesOf(k, r));
+    const { nodes, kept, status } = resultNodes(found, infos, q, (k, r) => forms.formsOf(k, r), (k, r) => examples.examplesOf(k, r), (k) => setWords.inOf(k));
     sr.kept = kept;
     fill(out, nodes);
     setStatus(status);
@@ -188,6 +191,16 @@ export const SEARCH_ACTIONS = {
     paintParts().then(() => $('sr-title')?.focus({ preventScroll: true }));
   },
 };
+
+/** Open Search on the Words tab with `q` in the field, and search it now. */
+export function searchFor(q) {
+  const input = $('sr-input');
+  sr.query = String(q || '');
+  if (input) input.value = sr.query;
+  sr.tab = 'words';
+  location.hash = '#/search';
+  run();
+}
 
 export function bindSearch() {
   const input = $('sr-input');

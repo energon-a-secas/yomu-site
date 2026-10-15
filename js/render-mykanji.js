@@ -18,6 +18,7 @@ import { toHira } from './kana.js';
 import { toHiragana } from './vendor/wanakana.js';
 import { myKanji, dayOf } from './kanji-store.js';
 import { saveToggle, seenText, wordRuby, dayText, today, withKanji } from './render-save.js';
+import { pageOpener } from './render-kanji-page.js';
 import { lastSeenLine } from './render-remember.js';
 
 export const SORTS = Object.freeze(['recent', 'seen', 'due']);
@@ -135,6 +136,7 @@ function savedItem(ch, ix, mine, now) {
       lastSeenLine(ch, seen, now),
       wordsLine(seen && seen.words),
     ]),
+    pageOpener(ch, { 'data-act': 'mk-page', 'data-ix': ix }),
     h('button', { type: 'button', class: 'btn btn--ghost btn--sm mk-remove', 'data-act': 'mk-remove', 'data-ix': ix }, [
       h('span', { 'aria-hidden': 'true' }, ui('remove')),
       h('span', { class: 'sr-only' }, withKanji('removeKanji', ch)),
@@ -195,6 +197,7 @@ function oftenSection(mine) {
           h('p', { class: 'mk-meta' }, seenText(seen.n, true)),
           wordsLine(seen.words.slice(-3)),
         ]),
+        pageOpener(ch, { 'data-act': 'mk-often-page', 'data-ix': ix }),
         saveToggle(ch, false, { 'data-act': 'mk-save', 'data-ix': ix }),
       ]);
     }));

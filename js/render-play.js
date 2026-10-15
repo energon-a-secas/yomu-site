@@ -16,6 +16,7 @@ import { spelled, beats, toHira } from './kana.js';
 import { myKanji } from './kanji-store.js';
 import { view, meaningText } from './render-mykanji.js';
 import { saveToggle } from './render-save.js';
+import { pageOpener } from './render-kanji-page.js';
 import { myPlay, TOP } from './play-store.js';
 import { mixUps, ROUND } from './play-rounds.js';
 import { gameOf, GAMES } from './routes.js';
@@ -158,7 +159,7 @@ function mixedNodes(r) {
       h('span', { class: 'pl-mix-pair', lang: 'ja' }, `${a} ${b}`),
       h('span', { class: 'pl-mix-kanji' }, [a, b].filter((ch) => /\p{Script=Han}/u.test(ch)).map((ch) => {
         const ix = play.saveList.push(ch) - 1;
-        return h('span', { class: 'pl-mix-one' }, [kanjiLine(ch), saveToggle(ch, mine.isSaved(ch), { 'data-act': 'pl-save', 'data-ix': ix })]);
+        return h('span', { class: 'pl-mix-one' }, [kanjiLine(ch), pageOpener(ch, { 'data-act': 'pl-page', 'data-ix': ix }), saveToggle(ch, mine.isSaved(ch), { 'data-act': 'pl-save', 'data-ix': ix })]);
       })),
     ]))),
   ];

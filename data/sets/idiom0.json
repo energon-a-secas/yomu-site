@@ -414,7 +414,6 @@
 ["嚏","くさめ",["spoken twice in response to someone sneezing as a charm against an early death"],0],
 ["苦汁をなめる","くじゅうをなめる",["to have a bitter experience"],0],
 ["薬が効きすぎる","くすりがききすぎる",["to work too well (of a punishment, reprimand, etc.); to be too much (for someone); to have a stronger effect than intended"],0],
-["糞も味噌も一緒","くそもみそもいっしょ",["not distinguishing between what's good and bad; not knowing chalk from cheese; mixing good and bad together; shit and miso are the same"],0],
 ["管の穴から天を覗く","くだのあなからてんをのぞく",["to have a narrow view of things"],0],
 ["くだを巻く","くだをまく",["to babble in one's cups; to ramble drunkenly"],0],
 ["管を以て天を窺う","くだをもっててんをうかがう",["to have a narrow view of things; to look at the sky through a tube"],0],
@@ -926,7 +925,6 @@
 ["梯子を外される","はしごをはずされる",["to be left lonely at the top; to be left high and dry by one's friends; to be abandoned by one's supporters; to have the rug pulled from under one; to have the ladder pulled out from under one"],0],
 ["箸にも棒にもかからない","はしにもぼうにもかからない",["hopeless; incorrigible; beyond repair; good-for-nothing; terrible"],0],
 ["箸にも棒にも引っかからない","はしにもぼうにもひっかからない",["hopeless; incorrigible; beyond repair; good-for-nothing; terrible"],0],
-["裸の王様","はだかのおうさま",["person of high standing, with a warped view of reality; naked emperor"],0],
 ["裸の付き合い","はだかのつきあい",["completely honest relationship"],0],
 ["肌が合う","はだがあう",["to be compatible; to get along well"],0],
 ["裸足で逃げ出す","はだしでにげだす",["to be put to shame (of an expert); to be no match (for someone); to run away barefoot"],0],
@@ -1084,7 +1082,6 @@
 ["負け犬の遠吠え","まけいぬのとおぼえ",["backbiting of a coward; grumblings of a loser; the far-off bark of a retreating dog"],0],
 ["魔女の一撃","まじょのいちげき",["strained back; lower back pain"],0],
 ["股にかける","またにかける",["to travel all over; to be active in places widely apart"],0],
-["股を開く","またをひらく",["to agree to have sex (for a woman)"],0],
 ["末席を汚す","まっせきをけがす",["to have the honour of being present (at a meeting, etc.); to have the honour of being a member (of a society, etc.); to soil the lowest seat by one's presence"],0],
 ["まな板の上の鯉","まないたのうえのこい",["someone doomed to their fate; fish on the chopping board"],0],
 ["まな板の鯉","まないたのこい",["someone doomed to their fate; fish on the chopping board"],0],
@@ -1103,6 +1100,8 @@
 ["右に出る者はいない","みぎにでるものはいない",["being second to none; being in a league of one's own"],0],
 ["右に出るものはない","みぎにでるものはない",["being second to none; being in a league of one's own"],0],
 ["みこしを据える","みこしをすえる",["to ensconce oneself (e.g. in a chair); to settle oneself down; to plant oneself"],0],
-["水が合う","みずがあう",["to agree with one; to suit one; to feel comfortable (in, with); the water agrees with one"],0]
+["水が合う","みずがあう",["to agree with one; to suit one; to feel comfortable (in, with); the water agrees with one"],0],
+["水が合わない","みずがあわない",["not agreeing with one (of an environment, lifestyle, etc.); not suiting one; not feeling comfortable (in); not getting along (with); the water does not agree with one"],0],
+["水と油","みずとあぶら",["two incompatible things (or people); (going together like) oil and water"],0]
 ]
 }

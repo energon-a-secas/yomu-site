@@ -298,6 +298,8 @@ const FORMATS = {
   'yomu-parts/1': checkParts,
   'yomu-sets-index/1': null,
   'yomu-set/1': checkSet,
+  'yomu-sets-words-index/1': null,
+  'yomu-sets-words/1': checkSetWords,
   'yomu-like-index/1': null,
   'yomu-like/1': checkLikeGroup,
   [LOOKALIKES_FORMAT]: null,
@@ -722,6 +724,16 @@ function checkSet(rel, doc) {
   });
 }
 
+/** Each word to at most three rows [set, written, reading, gloss] whose written form holds it. */
+function checkSetWords(rel, doc) {
+  for (const [key, rows] of Object.entries(doc.entries || {})) {
+    const ok = Array.isArray(rows) && rows.length >= 1 && rows.length <= 3 && rows.every((r) => Array.isArray(r) && r.length === 4
+      && SET_IDS.includes(r[0]) && typeof r[1] === 'string' && r[1].includes(key)
+      && typeof r[2] === 'string' && typeof r[3] === 'string' && r[3]);
+    if (!ok) fail(rel, `${JSON.stringify(key)} is not one to three [set, a written form holding it, reading, gloss]`);
+  }
+}
+
 /** The index names every collection once, with its files in order and its count right. */
 function checkSets(docs) {
   const index = docs.get('data/sets/index.json');
@@ -801,6 +813,7 @@ function main() {
   checkSearchKeys(docs);
   checkSearchRareKeys(docs);
   checkSets(docs);
+  checkRangeIndex(docs, 'data/sets/words.json', 'yomu-sets-words/1');
   checkPopular(docs);
   checkLikeIndex(docs);
   checkLookalikes(docs);

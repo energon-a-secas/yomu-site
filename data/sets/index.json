@@ -2,8 +2,8 @@
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826"],"generated_by":"tools/build-sets.mjs","generated_at":"2026-10-01"},
 "format": "yomu-sets-index/1",
 "sets": [
-{"id":"yoji","n":1841,"files":["data/sets/yoji0.json","data/sets/yoji1.json"]},
-{"id":"proverb","n":940,"files":["data/sets/proverb0.json","data/sets/proverb1.json"]},
-{"id":"idiom","n":1293,"files":["data/sets/idiom0.json","data/sets/idiom1.json"]}
+{"id":"yoji","n":1836,"files":["data/sets/yoji0.json","data/sets/yoji1.json"]},
+{"id":"proverb","n":938,"files":["data/sets/proverb0.json","data/sets/proverb1.json"]},
+{"id":"idiom","n":1288,"files":["data/sets/idiom0.json","data/sets/idiom1.json"]}
 ]
 }

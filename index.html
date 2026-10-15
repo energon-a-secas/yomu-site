@@ -366,6 +366,12 @@
           <input class="mk-filter-input sr-input" id="sr-input" type="search" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" aria-describedby="sr-hint">
           <p class="field__hint" id="sr-hint" data-ui="searchHint">For example 食べた, taberu or eat. English meanings are the dictionary's.</p>
         </div>
+        <div class="seg sr-romaji-switch" role="group" aria-labelledby="seg-sr-romaji">
+          <span class="seg-label" id="seg-sr-romaji" data-ui="romaji">Romaji</span>
+          <button class="seg-btn" type="button" data-act="set" data-pref="romaji" data-value="said" aria-pressed="true" data-ui="said">Said</button>
+          <button class="seg-btn" type="button" data-act="set" data-pref="romaji" data-value="spelled" aria-pressed="false" data-ui="spelled">Spelled</button>
+          <button class="seg-btn" type="button" data-act="set" data-pref="romaji" data-value="off" aria-pressed="false" data-ui="off">Off</button>
+        </div>
         <p class="status sr-status" id="sr-status" role="status" aria-live="polite"></p>
         <div id="sr-results"></div>
       </div>

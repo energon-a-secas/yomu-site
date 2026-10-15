@@ -6,7 +6,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { createSets, rowMatches, SET_IDS } from '../js/sets.js';
+import { createSets, createSetWords, rowMatches, SET_IDS } from '../js/sets.js';
 import { fetchJson, DATA } from './helpers/disk.mjs';
 
 const sets = createSets({ fetchJson, base: `${DATA}/` });
@@ -39,4 +39,26 @@ test('the filter reads Japanese, romaji and English', () => {
   assert.ok(rowMatches(row, 'two bir'), 'every English word, as the start of a gloss word');
   assert.ok(!rowMatches(row, 'stone cat'));
   assert.ok(!rowMatches(row, '猫'));
+});
+
+test('a word finds the idioms and proverbs that hold it, its own row first, and a kana word fetches nothing', async () => {
+  const fetched = [];
+  const words = createSetWords({ fetchJson: (p) => { fetched.push(p); return fetchJson(p); }, base: `${DATA}/` });
+  await words.need(['猿', '一石二鳥', 'ねこ']);
+  const saru = words.inOf('猿');
+  assert.ok(saru.some((r) => r.written === '猿も木から落ちる' && r.set === 'proverb'));
+  assert.ok(saru.every((r) => r.written.includes('猿')));
+  assert.equal(new Set(saru.map((r) => r.set)).size, saru.length, 'one row from each collection before a second from any');
+  assert.deepEqual(words.inOf('一石二鳥')[0], { set: 'yoji', written: '一石二鳥', reading: 'いっせきにちょう', gloss: 'killing two birds with one stone' });
+  assert.deepEqual(words.inOf('ねこ'), []);
+  assert.equal(words.inOf('鳥居'), undefined, 'a key not asked for is not known yet');
+  const shards = fetched.filter((p) => /sets\/w\d+\.json$/.test(p));
+  assert.ok(shards.length >= 1 && shards.length <= 2, `fetched ${shards.join(' ')}`);
+});
+
+test('no row of a collection is about a topic a reader should not meet unasked', async () => {
+  const { AVOID_EXPLICIT: AVOID } = await import('../tools/lib/avoid.mjs');
+  for (const id of SET_IDS) {
+    for (const [w, , glosses] of await sets.rows(id)) assert.ok(!glosses.some((g) => AVOID.test(g)), `${id} ${w}`);
+  }
 });

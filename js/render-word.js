@@ -18,6 +18,7 @@ import { conjPart } from './render-conj.js';
 import { conjugateToken } from './conjugate.js';
 import { pageOpener } from './render-kanji-page.js';
 import { tatoebaUrl } from './examples.js';
+import { wordRuby } from './render-save.js';
 
 /** A token's beats with the romaji each one is spelled with. */
 export function tokenBeats(token) {
@@ -193,6 +194,22 @@ function examplesPart(examples) {
 }
 
 /**
+ * The idioms and proverbs that hold the word (sets.js pageSetWords), each
+ * with its collection, its first meaning and Read it, found by `data-ix`.
+ */
+function idiomsPart(idioms) {
+  if (!Array.isArray(idioms) || !idioms.length) return null;
+  return section('inIdioms', h('ul', { class: 'ex-list', role: 'list' }, idioms.map((r, i) => h('li', { class: 'ex-item' }, [
+    h('span', { class: 'idiom-ja' }, wordRuby([r.written, r.reading || r.written])),
+    h('span', { class: 'ex-en' }, [h('span', { class: 'idiom-set' }, `${ui(`setOne_${r.set}`)} · `), h('span', { lang: 'en' }, r.gloss)]),
+    h('span', { class: 'ex-actions' }, h('button', { type: 'button', class: 'btn btn--ghost btn--sm', 'data-act': 'idiom-read', 'data-ix': i }, [
+      h('span', { 'aria-hidden': 'true' }, ui('searchRead')),
+      h('span', { class: 'sr-only' }, ui('idiomReadLabel', { w: r.written })),
+    ])),
+  ]))));
+}
+
+/**
  * Where the word came from: the record's `ls` and `ws` (a compound's, part by
  * part), and a shortening the loanword rules found (loanwords.js).
  */
@@ -323,7 +340,7 @@ function kanjiPart(token, { kidOf, kanjiOf }) {
  *   `tokens` the analysis' tokens, which say what stands where no gap is.
  */
 export function wordNode(token, {
-  noteOf, kidOf, canSpeak, kanjiOf = null, gaps = null, tokens = [], forms = null, conj = null, examples = null,
+  noteOf, kidOf, canSpeak, kanjiOf = null, gaps = null, tokens = [], forms = null, conj = null, examples = null, idioms = null,
 }) {
   if (!token) return h('p', { class: 'side-empty' }, ui('wordEmpty'));
   const romaji = token.romaji || {};
@@ -348,17 +365,18 @@ export function wordNode(token, {
     meaningsPart(token),
     formsPart(forms),
     examplesPart(examples),
+    idiomsPart(idioms),
     originPart(token),
     kanjiPart(token, { kidOf, kanjiOf }),
     chainPart(token, noteOf),
     conjPart(conjugateToken(token), canSpeak, conj || {}),
     notesPart(token, noteOf),
-    h('p', { class: 'word-out' }, h('a', {
+    h('p', { class: 'word-out' }, [h('button', { type: 'button', class: 'btn btn--secondary btn--sm', 'data-act': 'word-search' }, ui('wordSearch')), ' ', h('a', {
       class: 'text-link',
       href: `https://jisho.org/search/${encodeURIComponent(lookup)}`,
       target: '_blank',
       rel: 'noopener noreferrer',
       title: ui('jishoTitle'),
-    }, `${ui('jisho')} ↗`)),
+    }, `${ui('jisho')} ↗`)]),
   ];
 }

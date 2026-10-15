@@ -331,17 +331,24 @@ on the kanji page. Read it sends a word to the reader as a new text.
 
 **The idioms are JMdict's tags, and there are no JLPT or Kanken lists.**
 Search's Idioms tab (`events-sets.js`, `sets.js`, `render-sets.js`) browses
-`data/sets/`: every entry with a sense JMdict tags `yoji` (1,841), `proverb`
-(940) or `id` (1,293), built by `tools/build-sets.mjs` from the full JMdict,
+`data/sets/`: every entry with a sense JMdict tags `yoji` (1,836), `proverb`
+(938) or `id` (1,288), built by `tools/build-sets.mjs` from the full JMdict,
 so the reader's dictionary and its readings are untouched. An idiom is a
 tagged sense that is also an expression (`exp`): JMdict tags single words
 used figuratively too (嵐, uproar), and they are not what a learner calls an
 idiom. A row's spelling and reading are the ones the tagged sense applies to
-(嚏's charm is くさめ, not くしゃみ). Common entries first, then by reading; a
-set loads whole (two files of at most 140 KB) and shows 50 rows at a time.
-Word lists by JLPT level and Kanken were asked for (queue #143) and are not
-here: neither upstream holds word levels, and KANJIDIC's JLPT field is the
-four levels the test dropped in 2010, which a learner would read as N-levels.
+(嚏's charm is くさめ, not くしゃみ). A row JMdict tags vulgar, or whose English
+holds a word in `tools/lib/avoid.mjs AVOID_EXPLICIT`, is left out; not the full
+`AVOID` the example sentences use, which dropped 一石二鳥 for "killing".
+Common entries first, then by reading; a set loads whole (two files of at
+most 140 KB) and shows 50 rows at a time. `data/sets/wNN.json` (index
+`words.json`) files each first-tier key with a kanji to up to three rows that
+hold it, its own row first, then the best of each collection: the Word
+panel's "In idioms and proverbs", and the collection a Search result names
+when it is one. Word lists by JLPT level and Kanken were asked for (queue
+#143) and are not here: neither upstream holds word levels, and KANJIDIC's
+JLPT field is the four levels the test dropped in 2010, which a learner
+would read as N-levels (queue #146).
 
 **The Word panel's All forms is built forward and checked backward.**
 `conjugate.js` makes every form of a verb or adjective from its dictionary

@@ -44,6 +44,7 @@ import {
 import { createDict } from '../js/dict.js';
 import { analyze, normalize } from '../js/analyze.js';
 import { baseReading } from '../js/conjugate.js';
+import { AVOID } from './lib/avoid.mjs';
 
 const TOOL = 'tools/build-sentences.mjs';
 const DATA = path.join(SITE, 'data');
@@ -55,13 +56,6 @@ const IDEAL_CHARS = 10;
 /** A sentence without its punctuation: 水をくれ! and 水をくれ。 are one example. */
 const bare = (t) => t.replace(/[\p{P}\s]/gu, '');
 export const PER_WORD = 3;
-
-/**
- * English that marks a sentence a reader of any age should not meet as a
- * dictionary's example. Tatoeba is written by volunteers, and the reader
- * does not choose what it is shown here.
- */
-const AVOID = /\b(sex\w*|kill\w*|murder\w*|suicide|rape\w*|naked|nude|drugs?|cocaine|heroin|porn\w*|penis|vagina|breasts?|whore|slut|bitch|fuck\w*|shit\w*|damn|nazi\w*|hitler|terroris\w*|bomb\w*|gun\w*|shoot\w*|corpse|blood\w*)\b/i;
 
 const LEXICAL = new Set(['word', 'inflected']);
 

@@ -14,6 +14,7 @@ import { myKanji } from './kanji-store.js';
 import { current, finished, isRepeat, position, summary } from './review.js';
 import { view, readingsLine, meaningText, wordsLine } from './render-mykanji.js';
 import { dayText, today } from './render-save.js';
+import { pageOpener } from './render-kanji-page.js';
 
 function keyButton(act, label, key, cls) {
   return h('button', { type: 'button', class: `btn ${cls} rv-btn`, 'data-act': act, 'aria-keyshortcuts': key === 'Space' ? 'Space' : key }, [
@@ -33,6 +34,7 @@ function answerNodes(ch) {
     parts.length ? h('p', { class: 'mk-reads' }, [h('span', { class: 'kj-key' }, ui('parts')), ' ', h('span', { lang: 'ja' }, parts.join('、'))]) : null,
     !info && view.infoState !== 'loading' ? h('p', { class: 'quiet' }, ui('noInfo')) : null,
     wordsLine(seen && seen.words),
+    h('p', { class: 'rv-page' }, pageOpener(ch, { 'data-act': 'rv-page' })),
   ]);
 }
 

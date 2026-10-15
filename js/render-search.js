@@ -10,7 +10,7 @@
 import { h, withJa } from './utils.js';
 import { glossWords } from './search.js';
 import { ui, t, posWord } from './strings.js';
-import { said, isKanji } from './kana.js';
+import { said, spelled, isKanji } from './kana.js';
 import { wordRuby, withKanji } from './render-save.js';
 import { NAME_TYPES } from './name-types.js';
 import { meaningText } from './render-mykanji.js';
@@ -59,6 +59,17 @@ export function shownWord(res) {
 /** Whether a result is a first-tier word, the only kind data/spell and data/sent file. */
 export const firstTier = (res) => res.via !== 'name' && res.via !== 'rare';
 
+/**
+ * A reading's romaji both ways; #search[data-romaji] shows the one the
+ * learner chose (Said, Spelled or Off), so a switch repaints nothing.
+ */
+export function romajiNodes(reading) {
+  return [
+    h('span', { class: 'sr-romaji sr-romaji--said', lang: 'ja-Latn' }, said(reading)),
+    h('span', { class: 'sr-romaji sr-romaji--spelled', lang: 'ja-Latn' }, spelled(reading)),
+  ];
+}
+
 /** How a result was reached, in words: "Dictionary form of 食べた", "English: eat", "Romaji: さけ". */
 function viaText(res, q) {
   if (res.via === 'form') return ui('searchViaFormOf', { q: res.romaji || q });
@@ -97,15 +108,17 @@ function kanjiTile(ch, kept, meaning) {
   ]);
 }
 
-function wordItem(res, kept, infos, q, formsOf, examplesOf) {
+function wordItem(res, kept, infos, q, formsOf, examplesOf, setsOf) {
   const w = shownWord(res);
   const ix = kept.words.push(w.written) - 1;
   const chars = [...new Set([...w.written].filter(isKanji))];
   const via = viaText(res, q);
+  // A word that is itself an idiom or proverb says which collection holds it.
+  const own = firstTier(res) ? (setsOf(w.written) || []).find((r) => r.written === w.written) : null;
   return h('li', { class: 'sr-item' }, [
     h('div', { class: 'sr-head' }, [
       h('span', { class: 'sr-word' }, wordRuby([w.written, w.reading])),
-      h('span', { class: 'sr-romaji', lang: 'ja-Latn' }, said(w.reading)),
+      ...romajiNodes(w.reading),
       w.pos.length ? h('span', { class: 'sr-pos' }, w.pos[0]) : null,
     ]),
     w.glosses.length ? h('p', { class: 'sr-gloss', lang: 'en' }, [
@@ -113,6 +126,7 @@ function wordItem(res, kept, infos, q, formsOf, examplesOf) {
       w.more ? h('span', { class: 'quiet' }, ` ${ui('searchMore', { n: w.more })}`) : null,
     ]) : null,
     via ? h('p', { class: 'sr-via' }, withJa(via)) : null,
+    own ? h('p', { class: 'sr-via sr-set' }, ui(`setOne_${own.set}`)) : null,
     // Other spellings and examples are filed for the first tier: a rare ぶり
     // (amberjack) would show the common ぶり's (振り, "after").
     firstTier(res) ? formsLine((formsOf(w.written, w.reading) || []).filter((f) => f.written !== w.written)) : null,
@@ -133,7 +147,7 @@ function wordItem(res, kept, infos, q, formsOf, examplesOf) {
  * @param {Map} infos  kanjiInfo() of the kanji shown
  * @returns {{ nodes: Node[], kept: { words: string[], kanji: string[] }, status: string }}
  */
-export function resultNodes(found, infos, q = '', formsOf = () => null, examplesOf = () => null) {
+export function resultNodes(found, infos, q = '', formsOf = () => null, examplesOf = () => null, setsOf = () => null) {
   const kept = { words: [], kanji: [] };
   const nodes = [];
   if (found.kanji.length) {
@@ -143,7 +157,7 @@ export function resultNodes(found, infos, q = '', formsOf = () => null, examples
     ]));
   }
   const words = byWord(found.words);
-  if (words.length) nodes.push(h('ul', { class: 'sr-list', role: 'list' }, words.map((r) => wordItem(r, kept, infos, q, formsOf, examplesOf))));
+  if (words.length) nodes.push(h('ul', { class: 'sr-list', role: 'list' }, words.map((r) => wordItem(r, kept, infos, q, formsOf, examplesOf, setsOf))));
   const n = words.length;
   const status = n ? (n === 1 ? ui('searchOne') : ui('searchMany', { n })) : (found.kanji.length ? '' : ui('searchNone'));
   return { nodes, kept, status };

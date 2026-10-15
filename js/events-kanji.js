@@ -24,13 +24,14 @@
 // live in events-collect.js, which hooks in through onRoute() and the
 // exports below.
 
+import { openKanjiPage } from './events-kanji-page.js';
 import { state } from './state.js';
 import { $ } from './utils.js';
 import { ui } from './strings.js';
 import { kanjiInfo } from './reader.js';
 import { myKanji, KEY } from './kanji-store.js';
 import { MAX_IMPORT_BYTES, parseImport, importNote } from './kanji-backup.js';
-import { createReview, show, answer, finished } from './review.js';
+import { createReview, show, answer, finished, current } from './review.js';
 import { view, paintList, paintSavedList, paintNote, OFTEN_LIMIT } from './render-mykanji.js';
 import { paintReview, reviewFocus } from './render-review.js';
 import { paintCollection } from './render-collection.js';
@@ -416,6 +417,9 @@ export const KANJI_ACTIONS = {
     afterChange();
     if (!document.querySelector('#mk-body [data-act="mk-save"]')) $('mk-often-h').focus();
   },
+  'mk-page': (b) => { const ch = kanjiAt(view.saved, b); if (ch) openKanjiPage(ch, b); },
+  'mk-often-page': (b) => { const ch = kanjiAt(view.often, b); if (ch) openKanjiPage(ch, b); },
+  'rv-page': (b) => { const ch = review && current(review); if (ch) openKanjiPage(ch, b); },
   'mk-export': exportAll,
   'mk-import': () => { const input = $('mk-file'); if (input) input.click(); },
   'mk-clear': (b) => { openClearWords(); openDialog($('mk-clear-dialog'), b); },
