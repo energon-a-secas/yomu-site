@@ -3,6 +3,12 @@
 
 export const PROGRESS_STRINGS = Object.freeze({
   navProgress: { en: 'Progress', es: 'Progreso' },
+  practice: { en: 'Practice', es: 'Práctica' },
+  practiceDone: { en: 'Practice done', es: 'Práctica terminada' },
+  practiceMissed: { en: 'Missed:', es: 'Fallaste:' },
+  practiceNote: { en: 'A practice moves no review dates.', es: 'Una práctica no cambia las fechas de repaso.' },
+  practiceSaveMissed: { en: 'Save the {n} you missed to My kanji', es: 'Guardar en Mis kanji los {n} que fallaste' },
+  practiceSaveOne: { en: 'Save the one you missed to My kanji', es: 'Guardar en Mis kanji el que fallaste' },
   pgTitle: { en: 'What you have read', es: 'Lo que has leído' },
   pgLead: {
     en: 'Counted from what My kanji and History keep in this browser: nothing new is stored.',

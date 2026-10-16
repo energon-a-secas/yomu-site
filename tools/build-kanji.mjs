@@ -45,7 +45,7 @@ import {
 import {
   JOYO_GRADES, readingsOfType, selection, theRest,
 } from './lib/kanjidic.mjs';
-import { joyoDoc } from './lib/joyo.mjs';
+import { joyoDoc, jinmeiyoDoc } from './lib/joyo.mjs';
 
 const TOOL = 'tools/build-kanji.mjs';
 const OUT = path.join(SITE, 'data', 'kanji');
@@ -214,6 +214,7 @@ function main() {
     shards,
   }, 'shards');
   const joyoBytes = writeJson(path.join(OUT, 'joyo.json'), joyoDoc(entries, licence), 'grades');
+  writeJson(path.join(OUT, 'jinmeiyo.json'), jinmeiyoDoc(entries, licence));
   const gone = pruneStale(OUT, /^k\d+\.json$/, written);
 
   const joyo = chosen.filter((c) => JOYO_GRADES.has(c.misc.grade)).length;

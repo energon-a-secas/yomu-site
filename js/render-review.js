@@ -43,7 +43,7 @@ function cardNodes(r) {
   const pos = position(r);
   return [
     h('h3', { class: 'mk-sec-title rv-title', id: 'rv-title' }, [
-      ui('review'), ' ',
+      ui(r.practice ? 'practice' : 'review'), ' ',
       h('span', { class: 'mk-count' }, ui('reviewOf', pos)),
       isRepeat(r) ? h('span', { class: 'rv-tag' }, ` · ${ui('reviewAgainTag')}`) : null,
     ]),
@@ -60,11 +60,15 @@ function summaryNodes(r) {
   const s = summary(r);
   const now = today();
   const next = myKanji().nextDue(now);
+  // A practice (a level, events-levels.js) moved no dates; it offers to save what was missed.
+  const unsaved = r.practice ? s.again.filter((ch) => !myKanji().isSaved(ch)) : [];
   return [
-    h('h3', { class: 'mk-sec-title', id: 'rv-done', tabindex: '-1' }, ui('reviewDone')),
+    h('h3', { class: 'mk-sec-title', id: 'rv-done', tabindex: '-1' }, ui(r.practice ? 'practiceDone' : 'reviewDone')),
     h('p', { class: 'mk-line' }, ui('reviewSummary', { n: s.reviewed, got: s.got, again: s.again.length })),
-    s.again.length ? h('p', { class: 'mk-line' }, [ui('reviewAgainList'), ' ', h('span', { class: 'rv-list', lang: 'ja' }, s.again.join(' '))]) : null,
-    next ? h('p', { class: 'mk-line' }, ui('nextReview', { day: dayText(next.day, now), n: next.n })) : null,
+    s.again.length ? h('p', { class: 'mk-line' }, [ui(r.practice ? 'practiceMissed' : 'reviewAgainList'), ' ', h('span', { class: 'rv-list', lang: 'ja' }, s.again.join(' '))]) : null,
+    r.practice ? h('p', { class: 'mk-line quiet' }, ui('practiceNote')) : null,
+    unsaved.length ? h('p', { class: 'mk-actions' }, h('button', { type: 'button', class: 'btn btn--primary btn--sm', 'data-act': 'rv-save-missed' }, ui(unsaved.length === 1 ? 'practiceSaveOne' : 'practiceSaveMissed', { n: unsaved.length }))) : null,
+    next && !r.practice ? h('p', { class: 'mk-line' }, ui('nextReview', { day: dayText(next.day, now), n: next.n })) : null,
     h('p', { class: 'mk-actions' }, h('button', { type: 'button', class: 'btn btn--secondary btn--sm', 'data-act': 'rv-back' }, ui('backToMyKanji'))),
   ];
 }

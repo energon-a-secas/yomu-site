@@ -18,6 +18,20 @@ export const SEARCH_STRINGS = Object.freeze({
   shelfCounters: { en: 'Where the sound bends', es: 'Dónde cambia el sonido' },
   shelfYoji: { en: 'Four-kanji idioms', es: 'Expresiones de cuatro kanji' },
   shelfProverb: { en: 'Sayings, filter in any script', es: 'Dichos, filtra en cualquier escritura' },
+  shelfLevels: { en: 'Kanji by level', es: 'Kanji por nivel' },
+  shelfLevelsLine: { en: 'School years and name kanji', es: 'Años escolares y kanji para nombres' },
+  levelsLead: {
+    en: 'The jōyō kanji by the school year Japanese children learn them in, and the kanji allowed in names. The commonest come first.',
+    es: 'Los kanji jōyō según el año escolar en que los aprenden los niños japoneses, y los kanji permitidos en nombres. Primero los más comunes.',
+  },
+  levelPick: { en: 'Level', es: 'Nivel' },
+  levelNames: { en: 'Name kanji (jinmeiyō)', es: 'Kanji para nombres (jinmeiyō)' },
+  levelCount: { en: '{n} kanji', es: '{n} kanji' },
+  levelPractise: { en: 'Practise {n}', es: 'Practicar {n}' },
+  levelPractiseNote: {
+    en: 'Practise starts with the kanji not in My kanji yet, and moves no review dates.',
+    es: 'Practicar empieza por los kanji que aún no están en Mis kanji, y no cambia las fechas de repaso.',
+  },
   shelfIdiom: { en: 'Set expressions, like 足を洗う', es: 'Expresiones fijas, como 足を洗う' },
   setsLead: {
     en: 'Four-character idioms, proverbs and idiomatic phrases, as JMdict tags them. The common ones come first.',

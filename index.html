@@ -385,6 +385,7 @@
       <div class="sr-shelves" role="group" aria-label="Shelves" data-ui-label="searchShelves" hidden>
         <button class="sr-shelf" type="button" data-act="sr-tab" data-tab="kana" aria-pressed="false"><span class="sr-shelf-glyph" lang="ja" aria-hidden="true">あ</span><span class="sr-shelf-name" data-ui="searchKana">Kana</span><span class="sr-shelf-line" data-ui="shelfKana">Hiragana and katakana, each to its page</span></button>
         <button class="sr-shelf" type="button" data-act="sr-tab" data-tab="counters" aria-pressed="false"><span class="sr-shelf-glyph" lang="ja" aria-hidden="true">本</span><span class="sr-shelf-name" data-ui="searchCounters">Counters</span><span class="sr-shelf-line" data-ui="shelfCounters">Where the sound bends</span></button>
+        <button class="sr-shelf" type="button" data-act="sr-tab" data-tab="levels" aria-pressed="false"><span class="sr-shelf-glyph" lang="ja" aria-hidden="true">級</span><span class="sr-shelf-name" data-ui="shelfLevels">Kanji by level</span><span class="sr-shelf-line" data-ui="shelfLevelsLine">School years and name kanji</span></button>
         <button class="sr-shelf" type="button" data-act="sr-tab" data-tab="sets" data-set="yoji" aria-pressed="false"><span class="sr-shelf-glyph" lang="ja" aria-hidden="true">四</span><span class="sr-shelf-name" data-ui="set_yoji">Four kanji</span><span class="sr-shelf-line" data-ui="shelfYoji">Four-kanji idioms</span></button>
         <button class="sr-shelf" type="button" data-act="sr-tab" data-tab="sets" data-set="proverb" aria-pressed="false"><span class="sr-shelf-glyph" lang="ja" aria-hidden="true">諺</span><span class="sr-shelf-name" data-ui="set_proverb">Proverbs</span><span class="sr-shelf-line" data-ui="shelfProverb">Sayings, filter in any script</span></button>
         <button class="sr-shelf" type="button" data-act="sr-tab" data-tab="sets" data-set="idiom" aria-pressed="false"><span class="sr-shelf-glyph" lang="ja" aria-hidden="true">句</span><span class="sr-shelf-name" data-ui="set_idiom">Phrases</span><span class="sr-shelf-line" data-ui="shelfIdiom">Set expressions, like 足を洗う</span></button>
@@ -410,6 +411,10 @@
       </div>
       <div class="sr-pane" id="sr-kana" hidden></div>
       <div class="sr-pane" id="sr-counters" hidden></div>
+      <div class="sr-pane" id="sr-levels" hidden>
+        <p class="quiet" data-ui="levelsLead">The jōyō kanji by the school year Japanese children learn them in, and the kanji allowed in names. The commonest come first.</p>
+        <div id="sr-levels-body"></div>
+      </div>
       <div class="sr-pane" id="sr-sets" hidden>
         <p class="quiet" data-ui="setsLead">Four-character idioms, proverbs and idiomatic phrases, as JMdict tags them. The common ones come first.</p>
         <div class="sr-field sets-field">

@@ -1695,3 +1695,18 @@ html[data-embed="1"] body:has(> .neo-footer) { min-height: 0; }
 .tabbar-glyph { position: relative; font-size: 1.2rem; line-height: 1; }
 .tabbar-due { position: absolute; top: -8px; left: calc(100% - 4px); }
 
+/* ── Kanji by level (render-levels.js) ─────────────────────── */
+.lv-pick { display: flex; flex-wrap: wrap; gap: var(--space-2); margin: var(--space-3) 0; }
+.lv-chip { font-family: inherit; font-size: var(--text-sm); }
+.lv-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2); }
+.lv-head .btn { min-height: 44px; }
+.lv-count { font-size: var(--text-sm); color: var(--text-secondary); }
+.lv-note { font-size: var(--text-xs); margin-top: var(--space-1); }
+.lv-list { list-style: none; margin-top: var(--space-3); border-top: 1px solid var(--border-subtle); }
+.lv-item {
+  display: grid; grid-template-columns: 3rem minmax(0, 1fr) auto auto; gap: var(--space-2); align-items: start;
+  padding: var(--space-3) 0; border-bottom: 1px solid var(--border-subtle);
+}
+.lv-char { font-size: 2rem; line-height: 1.1; text-align: center; }
+.lv-main { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+

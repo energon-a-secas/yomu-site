@@ -61,3 +61,22 @@ export function gradeSizes(doc) {
   for (const [grade, chars] of Object.entries((doc && doc.grades) || {})) out[grade] = [...String(chars)].length;
   return out;
 }
+
+// ── Name kanji ────────────────────────────────────────────────────────────
+
+export const JINMEIYO_FORMAT = 'yomu-jinmeiyo/1';
+
+/** KANJIDIC's grades of the kanji for names: 9 outside the jōyō list, 10 a jōyō kanji's variant. */
+export const JINMEIYO_GRADES = Object.freeze([9, 10]);
+
+/**
+ * The yomu-jinmeiyo/1 document: every kanji KANJIDIC files under grade 9 or
+ * 10, in newspaper frequency order (most have none, and follow by code
+ * point), as one string. Search's Kanji by level offers it beside the
+ * school years (js/levels.js).
+ */
+export function jinmeiyoDoc(entries, licence) {
+  const list = entries instanceof Map ? [...entries] : Object.entries(entries || {});
+  const chars = list.filter(([, e]) => e && JINMEIYO_GRADES.includes(e.g)).sort(byRank).map(([ch]) => ch);
+  return { _licence: licence, format: JINMEIYO_FORMAT, count: chars.length, kanji: chars.join('') };
+}

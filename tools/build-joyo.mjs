@@ -18,7 +18,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { writeJson, SITE, fmtBytes } from './lib/emit.mjs';
 import {
-  joyoDoc, gradeSizes, JOYO_SIZES, JOYO_TOTAL,
+  joyoDoc, gradeSizes, JOYO_SIZES, JOYO_TOTAL, jinmeiyoDoc,
 } from './lib/joyo.mjs';
 
 const DIR = path.join(SITE, 'data', 'kanji');
@@ -41,6 +41,9 @@ function main() {
   }
   const bytes = writeJson(path.join(DIR, 'joyo.json'), doc, 'grades');
   process.stdout.write(`joyo ${doc.count} kanji from ${index.shards.length} shards: ${Object.entries(sizes).map(([g, n]) => `${g}:${n}`).join(' ')}; ${fmtBytes(bytes)}\n`);
+  const names = jinmeiyoDoc(entries, licence);
+  const nameBytes = writeJson(path.join(DIR, 'jinmeiyo.json'), names);
+  process.stdout.write(`jinmeiyo ${names.count} kanji; ${fmtBytes(nameBytes)}\n`);
 }
 
 main();

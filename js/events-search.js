@@ -21,8 +21,9 @@ import { openKanjiPage } from './events-kanji-page.js';
 import { onRoute, openReader } from './events-kanji.js';
 import { loadText } from './events-read.js';
 import { paintSets, chooseSet, currentSet } from './events-sets.js';
+import { paintLevels } from './events-levels.js';
 
-const TABS = Object.freeze(['words', 'parts', 'kana', 'counters', 'sets']);
+const TABS = Object.freeze(['words', 'parts', 'kana', 'counters', 'sets', 'levels']);
 /** Look up holds the field and the parts picker; Browse the shelves. */
 const LOOK = Object.freeze(['words', 'parts']);
 const groupOf = (tab) => (LOOK.includes(tab) ? 'look' : 'browse');
@@ -153,6 +154,7 @@ function showTab(tab, { focus = false } = {}) {
   if (sr.tab === 'kana') paintKana();
   if (sr.tab === 'counters') fill($('sr-counters'), countersNodes(sr.counter));
   if (sr.tab === 'sets') paintSets();
+  if (sr.tab === 'levels') paintLevels();
   if (sr.tab === 'words' && focus) $('sr-input')?.focus();
 }
 

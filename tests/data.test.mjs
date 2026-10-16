@@ -454,6 +454,10 @@ test('check-data fails each broken rule and names the file', async () => {
       const [k, rows] = Object.entries(d.entries)[0];
       rows[0][1].push([k, '']);
     }), /s03\.json: .* is not a list of \[reading/],
+    ['a name kanji list edited by hand', (rw) => rw('data/kanji/jinmeiyo.json', (d) => {
+      d.kanji = d.kanji.slice(1);
+      d.count -= 1;
+    }), /jinmeiyo\.json: is not what the shards give/],
     ['a collection row with no glosses', (rw) => rw('data/sets/proverb0.json', (d) => {
       d.rows[2][2] = [];
     }), /proverb0\.json: row 2 is not \[written/],

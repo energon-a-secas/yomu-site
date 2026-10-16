@@ -31,8 +31,8 @@ import { $ } from './utils.js';
 import { ui } from './strings.js';
 import { kanjiInfo } from './reader.js';
 import { myKanji, KEY } from './kanji-store.js';
-import { MAX_IMPORT_BYTES, parseImport, importNote } from './kanji-backup.js';
-import { createReview, show, answer, finished, current } from './review.js';
+import { exportAll, importFile } from './events-backup.js';
+import { createReview, show, answer, finished, current, summary } from './review.js';
 import { view, paintList, paintSavedList, paintNote, OFTEN_LIMIT } from './render-mykanji.js';
 import { paintReview, reviewFocus } from './render-review.js';
 import { paintCollection } from './render-collection.js';
@@ -41,7 +41,6 @@ import { paintSavedMarks, paintDueCount, today } from './render-save.js';
 import { paintSide, afterPaintAll } from './render.js';
 import { openDialog, bindDialog } from './dialogs.js';
 import { openClearWords, clearScope } from './render-sync.js';
-import { downloadText } from './neorgon-dom.js';
 import { describe, loadText } from './events-read.js';
 import {
   HASH, PARENT, SCREEN_TITLE, routeOf, sectionOf,
@@ -57,6 +56,7 @@ let route = 'reader';
 const entries = new Map();   // yomuIx -> the route that history entry showed
 let here = null;             // yomuIx of the entry on screen
 let review = null;
+let practise = null;        // kanji a level's Practise asked for (events-levels.js), until the review route takes them
 let readerScroll = 0;
 let infoSeq = 0;
 let clearedJustNow = false;
@@ -249,7 +249,8 @@ export function applyRoute({ boot = false, focus = true } = {}) {
     for (const fn of hooks) fn(next, prev, { boot });
     return;
   }
-  if (next === 'review') review = createReview(myKanji().due(today()));
+  if (next === 'review') review = Object.assign(createReview(practise || myKanji().due(today())), { practice: !!practise });
+  if (next === 'review') practise = null;
   view.mode = next;
   // The nav's link keeps focus when it moved between the three places.
   const fromNav = !!(document.activeElement && document.activeElement.closest && document.activeElement.closest('#mk-nav'));
@@ -296,6 +297,13 @@ export function hostLoad(text) {
 }
 
 /** Go up one route: from a review to the list, from a game to Play, from either to the reader. */
+/** Practise `chars` the way a review goes, without moving any schedule. */
+export function startPractice(chars) {
+  practise = [...chars];
+  location.hash = HASH.review;
+  applyRoute();
+}
+
 export function leave() {
   const target = PARENT[route];
   if (target === route) return;
@@ -324,7 +332,8 @@ function reveal() {
 function give(ok) {
   if (!review || !review.shown) return;
   const now = today();
-  answer(review, ok, (ch, good) => myKanji().answer(ch, good, now));
+  // A practice (a level, events-levels.js) moves no schedule: its kanji may not even be saved.
+  answer(review, ok, review.practice ? null : (ch, good) => myKanji().answer(ch, good, now));
   paintCard();
   paintDueCount();
 }
@@ -342,34 +351,6 @@ function onKey(e) {
   if ((e.key === ' ' || e.key === 'Spacebar') && !review.shown) { e.preventDefault(); reveal(); return; }
   if (e.key === '1' && review.shown) { e.preventDefault(); give(false); return; }
   if (e.key === '2' && review.shown) { e.preventDefault(); give(true); }
-}
-
-// ── Backup ────────────────────────────────────────────────────────────────
-
-function say(msg) {
-  view.note = msg;
-  paintNote();
-}
-
-function exportAll() {
-  const day = today();
-  const file = `yomu-kanji-${day}.json`;
-  downloadText(`${JSON.stringify(myKanji().exportDoc(day), null, 1)}\n`, file, 'application/json');
-  say(ui('exported', { file }));
-}
-
-async function importFile(file) {
-  if (!file) return;
-  if (file.size > MAX_IMPORT_BYTES) { say(ui('importSize')); return; }
-  let text;
-  try { text = await file.text(); } catch { say(ui('importRead')); return; }
-  const r = parseImport(text);
-  if (!r.ok) {
-    say(ui({ json: 'importJson', format: 'importFormat', empty: 'importEmpty' }[r.reason] || 'importFormat'));
-    return;
-  }
-  view.note = importNote(myKanji().merge(r.data), r.dropped);
-  afterChange();
 }
 
 /** Everything that shows the store, after it changed: the screen, the reader's marks and counts. */
@@ -437,6 +418,13 @@ export const KANJI_ACTIONS = {
   'rv-again': () => give(false),
   'rv-got': () => give(true),
   'rv-back': () => leave(),
+  'rv-save-missed': () => {
+    if (!review || !review.practice) return;
+    const now = new Date();
+    for (const ch of summary(review).again) if (!myKanji().isSaved(ch)) myKanji().save(ch, now);
+    afterChange();
+    $('rv-done')?.focus();
+  },
 };
 
 /** Bind once, from bindEvents, then show the route the page was opened at. */

@@ -81,7 +81,7 @@ import { MAX_BYTES, SITE, fmtBytes } from './lib/emit.mjs';
 import { readFilter } from '../js/bloom.js';
 import { isKanji, isHiragana } from '../js/kana.js';
 import {
-  joyoDoc, JOYO_FORMAT, JOYO_GRADES, JOYO_SIZES, JOYO_TOTAL,
+  joyoDoc, JOYO_FORMAT, JOYO_GRADES, JOYO_SIZES, JOYO_TOTAL, jinmeiyoDoc, JINMEIYO_FORMAT,
 } from './lib/joyo.mjs';
 import { groupsOfWord } from '../js/sounds-like.js';
 import { BANNED_WORDS } from './lib/licence.mjs';
@@ -282,6 +282,7 @@ const FORMATS = {
   'yomu-kanji/1': checkKanjiShard,
   'yomu-library/1': null,
   [JOYO_FORMAT]: checkJoyoDoc,
+  [JINMEIYO_FORMAT]: null,
   'yomu-strokes-index/1': null,
   'yomu-strokes/1': checkStrokes,
   'yomu-kpage-index/1': null,
@@ -437,6 +438,20 @@ function checkJoyo(docs) {
     if (built.grades[grade] !== doc.grades[grade]) {
       fail(rel, `grade ${grade} is not what the shards give; run node tools/build-joyo.mjs`);
     }
+  }
+}
+
+/** The name kanji: the shards' grades 9 and 10, in the builder's order, nothing else. */
+function checkJinmeiyo(docs) {
+  const rel = 'data/kanji/jinmeiyo.json';
+  const doc = docs.get(rel);
+  const shards = shardFiles(docs, 'yomu-kanji/1');
+  if (!doc) { if (shards.length) fail(rel, 'missing, but kanji shards exist'); return; }
+  const entries = new Map();
+  for (const src of shards) for (const [ch, e] of Object.entries(docs.get(src).entries || {})) entries.set(ch, e);
+  const built = jinmeiyoDoc(entries, doc._licence);
+  if (typeof doc.kanji !== 'string' || doc.kanji !== built.kanji || doc.count !== built.count) {
+    fail(rel, `is not what the shards give (${built.count} kanji of grades 9 and 10); run node tools/build-joyo.mjs`);
   }
 }
 
@@ -802,6 +817,7 @@ function main() {
   checkDictIndex(docs);
   checkKanjiIndex(docs);
   checkJoyo(docs);
+  checkJinmeiyo(docs);
   checkRangeIndex(docs, 'data/dict/rare.json', 'yomu-dict-rare/1');
   checkRangeIndex(docs, 'data/names/index.json', 'yomu-names/1');
   checkRangeIndex(docs, 'data/strokes/index.json', 'yomu-strokes/1');
