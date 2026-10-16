@@ -470,8 +470,10 @@ test('a long run of kanji with no kana is read in time that grows with its lengt
   const long = unit.repeat(100).slice(0, 2000);
   const ms = await time(long);
   // Measured at about 0.4 s where it had been 21 s; the bound is loose so a
-  // slow machine passes and a scan that went quadratic again does not.
-  assert.ok(ms < 5000, `${ms.toFixed(0)} ms for 2,000 kanji`);
+  // slow machine passes and a scan that went quadratic again does not. It was
+  // 5 s until 2026-10-16, when npm test's files running side by side took
+  // 6.8 s for the same scan (0.8 s alone): a busy machine is no regression.
+  assert.ok(ms < 10000, `${ms.toFixed(0)} ms for 2,000 kanji`);
   const r = await analyze(long, { dict: d });
   assert.equal(r.tokens.map((t) => t.surface).join(''), long);
 });
