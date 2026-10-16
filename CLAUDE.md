@@ -392,8 +392,9 @@ validators would refuse a seventh. One sentence at a time (`reading-view.js`,
 (a unit ending in 。！？, or a new line, ends one) and puts the others away;
 the view lasts the visit. Choosing a word shows its sentence, and so does the
 arrow keys' roving focus (`events.js roveTo` calls `followFocus`), because
-focus cannot land on a word that is not drawn. Read along (`read-along.js`, the button beside
-Slow) says the text sentence by sentence in that view, from each word's
+focus cannot land on a word that is not drawn. Read along (`read-along.js`, beside Slow on a
+wider screen and after the reading on a phone, `docs/PHONE.md`) says the text sentence by
+sentence in that view, from each word's
 reading (`speech.js sayable`), lighting each word on a timing estimated
 from its beats (`read-along-time.js`) and learned from how long each
 sentence took; a browser's boundary events only move the light forward and

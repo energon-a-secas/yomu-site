@@ -343,10 +343,13 @@ dialog.dialog--wide { width: min(760px, calc(100% - 16px)); }
 }
 .display-toggle[aria-expanded="true"] .display-chevron { transform: rotate(180deg); }
 
-/* The send links. On a phone, after the reading and before its Translation;
-   on a wider screen js/layout.js moves the block into the row of Speak all
-   and Slow, where they were before phones: the links on that row, and their
-   note on a line of its own under it. */
+/* Read along and the send links (js/layout.js). On a phone both come after
+   the reading, Read along with the sentence bar and the links before the
+   Translation; on a wider screen Read along and Repeat after me join the row
+   of Speak all and Slow, and the links take the row under it, their note on
+   a line of its own under them. */
+.listen-block { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); margin-top: var(--space-3); }
+.tools-bar > .listen-block { display: contents; }
 .send-block {
   display: flex; flex-direction: column; gap: var(--space-2);
   margin-top: var(--space-2);
@@ -354,7 +357,7 @@ dialog.dialog--wide { width: min(760px, calc(100% - 16px)); }
   border-top: 1px solid var(--border-subtle);
 }
 .tools-bar > .send-block { display: contents; }
-.tools-bar > .send-block > .send { margin-left: var(--space-4); }
+.tools-bar > .send-block > .send,
 .tools-bar > .send-block > .tools-note { flex-basis: 100%; }
 
 .seg { display: inline-flex; align-items: center; }
@@ -455,7 +458,19 @@ dialog.dialog--wide { width: min(760px, calc(100% - 16px)); }
 .sent-where { font-size: var(--text-sm); color: var(--text-secondary); }
 .ra-status { min-height: 1.4em; margin-top: var(--space-2); font-size: var(--text-sm); color: var(--mark); }
 .reading-body .tok.is-reading .tok-surface { background: var(--accent-lit); border-radius: 4px; box-shadow: 0 0 0 2px var(--accent-lit); }
-.kanji-select { min-height: 36px; padding: 0 8px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); background: var(--surface-1); color: var(--text-primary); font: inherit; font-size: var(--text-sm); }
+/* Drawn by the page, not the platform: WebKit's own menu list ignores a
+   height, and on a phone it was 24px tall. The chevron is two gradients in
+   currentColor, so it follows the theme. */
+.kanji-select {
+  -webkit-appearance: none; appearance: none;
+  min-height: 36px; padding: 0 28px 0 8px;
+  border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
+  background-color: var(--surface-1); color: var(--text-primary);
+  background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position: calc(100% - 15px) 50%, calc(100% - 10px) 50%;
+  background-size: 5px 5px; background-repeat: no-repeat;
+  font: inherit; font-size: var(--text-sm);
+}
 
 /* A kanji not in My kanji yet: a small folded corner inside its top left,
    the dog-ear of a page not kept yet. A shape, so it reads without colour;
@@ -1602,7 +1617,8 @@ html[data-embed="1"] body:has(> .neo-footer) { min-height: 0; }
   /* A short tab name (Kana) was 36px wide. */
   .mk-tab { min-width: 44px; justify-content: center; }
   /* iOS zooms the page into a field whose text is under 16px when it takes focus. */
-  .mk-filter-input { font-size: 1rem; }
+  .mk-filter-input, .kanji-select { font-size: 1rem; }
+  .kanji-select { min-height: 44px; }
   .col-tile, .sr-part, .sr-try { min-width: 44px; min-height: 44px; }
   .text-link.mk-open, .text-link.pl-open { display: inline-flex; align-items: center; min-height: 44px; }
   .seen-before .text-link, .embed-bar .text-link { display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; }

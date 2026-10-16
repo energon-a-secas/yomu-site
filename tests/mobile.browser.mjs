@@ -23,8 +23,9 @@
 //     side) before the Display button opens them, or folded at 1280x800, the
 //     Remember card above the reading, Speak all or the translate links
 //     hidden;
-//   - the send links above the reading on a phone, or anywhere but the row
-//     of Speak all on a wider screen;
+//   - the send links or Read along above the reading on a phone, or the
+//     tools above it on two rows there; on a wider screen, Read along off
+//     Speak all's row, or the send links anywhere but the row under it;
 //   - a romaji line wider than the reading, and a Word panel note button
 //     under 44px wide however short its title;
 //   - the chosen word out of sight, or under the header or the word sheet,
@@ -306,6 +307,7 @@ async function reader(browser, phone, lang) {
         toggle: vis('#display-toggle'), expanded: document.querySelector('#display-toggle')?.getAttribute('aria-expanded'),
         panel: vis('#display-panel'), speak: vis('#speak-all'), deepl: vis('[data-translate="deepl"]'), google: vis('[data-translate="google"]'),
         keyHint: vis('.key-hint'), deeplAt: top('[data-translate="deepl"]'), bodyEnd: bottom('#reading-body'),
+        speakAt: top('#speak-all'), toggleAt: top('#display-toggle'), alongAt: top('#read-along'),
       };
     });
     measured.push(`${where}: first word at ${lay.word}px of a ${lay.vh}px screen, Remember card at ${lay.ask}`);
@@ -315,6 +317,9 @@ async function reader(browser, phone, lang) {
     if (!lay.speak || !lay.deepl || !lay.google) fail(where, `Speak all ${lay.speak}, DeepL ${lay.deepl}, Google ${lay.google}: all should be reachable without Display`);
     if (lay.keyHint) fail(where, 'the arrow-key hint is drawn on a touch screen');
     if (lay.deeplAt !== null && lay.deeplAt < lay.bodyEnd) fail(where, `on a phone the send links (${lay.deeplAt}) come after the reading (${lay.bodyEnd})`);
+    // The tools above the reading are one row: Speak all, Slow and Display.
+    if (Math.abs(lay.speakAt - lay.toggleAt) > 8) fail(where, `on a phone the tools above the reading take two rows (Speak all at ${lay.speakAt}, Display at ${lay.toggleAt})`);
+    if (lay.alongAt === null || lay.alongAt < lay.bodyEnd) fail(where, `on a phone Read along (${lay.alongAt}) comes after the reading (${lay.bodyEnd})`);
     await audit(page, where, 'reading');
   });
 
@@ -470,8 +475,12 @@ async function reader(browser, phone, lang) {
     await tap(page, '[data-act="sr-group"][data-group="browse"]');
     await page.waitForSelector('#search .sr-shelves:not([hidden])');
     await audit(page, where, 'search-shelves');
+    await tap(page, '[data-act="sr-tab"][data-tab="levels"]');
+    await page.waitForSelector('#sr-levels-body .lv-item');
+    await audit(page, where, 'levels');
     await tap(page, '[data-act="sr-tab"][data-tab="kana"]');
     await page.waitForSelector('#sr-kana [data-act="kc-kana"]');
+    await tap(page, '#sr-kana [data-act="kc-row"][data-ix="0"]');
     await audit(page, where, 'kana');
     await tap(page, '#sr-kana [data-act="kc-kana"]');
     await page.waitForSelector('#kanji-dialog[open] .kp-hero');
@@ -782,10 +791,12 @@ async function landscape(browser, phone, lang) {
       h: innerHeight, word: Math.round(document.querySelector('#reading-body .tok').getBoundingClientRect().top + scrollY),
       toggle: !!document.querySelector('#display-toggle')?.getClientRects().length, panel: !!document.querySelector('#display-panel')?.getClientRects().length,
       deepl: Math.round(document.querySelector('[data-translate="deepl"]').getBoundingClientRect().top), bodyEnd: Math.round(document.querySelector('#reading-body').getBoundingClientRect().bottom),
+      along: Math.round(document.querySelector('#read-along').getBoundingClientRect().top),
     }));
     measured.push(`${where}: first word at ${lay.word}px of a ${lay.h}px screen`);
     if (lay.h <= 480 && (!lay.toggle || lay.panel)) fail(where, `${lay.h}px tall: the switches should fold behind Display (button ${lay.toggle}, switches ${lay.panel})`);
     if (lay.h <= 480 && lay.deepl < lay.bodyEnd) fail(where, `on its side a phone keeps the send links (${lay.deepl}) after the reading (${lay.bodyEnd})`);
+    if (lay.h <= 480 && lay.along < lay.bodyEnd) fail(where, `on its side a phone keeps Read along (${lay.along}) after the reading (${lay.bodyEnd})`);
     await audit(page, where, 'reading');
     await tap(page, '#reading-body .tok');
     await page.waitForSelector('#side[data-sheet] #word-body *');
@@ -813,17 +824,23 @@ async function keys(browser) {
     const wide = await page.evaluate(`({ toggle: ${shown('#display-toggle')}, panel: ${shown('#display-panel')} })`);
     if (wide.toggle || !wide.panel) fail(where, `at 1280px the switches show and the Display button does not (button ${wide.toggle}, switches ${wide.panel})`);
   });
-  // On a wider screen the send links are where they were before phones moved
-  // them: on Speak all's row, above the reading, with their note under it.
+  // On a wider screen Read along and Repeat after me are on Speak all's row,
+  // and the send links on the row under it, above the reading, with their
+  // note under them.
   for (const size of [{ width: 1280, height: 800 }, { width: 768, height: 1024 }, { width: 600, height: 900 }]) await step(where, `the send links at ${size.width}px`, async () => {
     await page.setViewportSize(size);
     await page.waitForTimeout(200);
     const at = await page.evaluate(() => {
       const r = (sel) => document.querySelector(sel).getBoundingClientRect();
-      return { deepl: Math.round(r('[data-translate="deepl"]').top), speak: Math.round(r('#speak-all').top), word: Math.round(r('#reading-body .tok').top), hint: Math.round(r('#send-hint').top), panel: Math.round(r('#display-panel').top) };
+      return {
+        deepl: Math.round(r('[data-translate="deepl"]').top), speak: Math.round(r('#speak-all').top), speakEnd: Math.round(r('#speak-all').bottom),
+        along: Math.round(r('#read-along').top), repeat: Math.round(r('#read-repeat').top),
+        word: Math.round(r('#reading-body .tok').top), hint: Math.round(r('#send-hint').top), panel: Math.round(r('#display-panel').top),
+      };
     });
     if (!(at.deepl < at.word)) fail(where, `at ${size.width}px the send links (${at.deepl}) are not above the reading (${at.word})`);
-    if (Math.abs(at.deepl - at.speak) > 8) fail(where, `at ${size.width}px the send links (${at.deepl}) are not on Speak all's row (${at.speak})`);
+    if (Math.abs(at.along - at.speak) > 8 || Math.abs(at.repeat - at.speak) > 8) fail(where, `at ${size.width}px Read along (${at.along}) and Repeat after me (${at.repeat}) are not on Speak all's row (${at.speak})`);
+    if (!(at.deepl >= at.speakEnd && at.deepl - at.speakEnd < 24)) fail(where, `at ${size.width}px the send links (${at.deepl}) are not on the row under Speak all's (which ends at ${at.speakEnd})`);
     if (!(at.hint > at.deepl && at.hint < at.panel)) fail(where, `at ${size.width}px the send note (${at.hint}) is not between the links (${at.deepl}) and the switches (${at.panel})`);
   });
   // A key that closes Phrases gives its button focus back with a ring.

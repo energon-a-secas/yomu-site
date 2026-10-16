@@ -105,10 +105,13 @@ test('the switches fold only on a phone: under 600px wide or 480px tall', () => 
 test('on a touch screen: the arrow-key hint goes, and no text field is under 16px', () => {
   const touch = blocks(esc('@media (pointer: coarse)')).join('\n');
   assert.match(touch, /\.key-hint[^{]*\{\s*display:\s*none/);
-  const filter = touch.match(/\.mk-filter-input\s*\{[^}]*font-size:\s*([\d.]+)(rem|px)/);
-  assert.ok(filter, 'the filter field has a touch font size');
-  const px = filter[2] === 'rem' ? Number(filter[1]) * 16 : Number(filter[1]);
-  assert.ok(px >= 16, `the filter field is ${px}px`);
+  // Every field a phone can focus: My kanji's filter and the Display row's Kanji select.
+  for (const field of ['.mk-filter-input', '.kanji-select']) {
+    const rule = touch.match(new RegExp(`${esc(field)}(?:\\s*,[^{]*)?\\s*\\{[^}]*font-size:\\s*([\\d.]+)(rem|px)`));
+    assert.ok(rule, `${field} has a touch font size`);
+    const px = rule[2] === 'rem' ? Number(rule[1]) * 16 : Number(rule[1]);
+    assert.ok(px >= 16, `${field} is ${px}px`);
+  }
   assert.match(blocks(esc('.yomu-text'))[0], /font-size:\s*1\.25rem/, 'the text box is 20px');
 });
 
