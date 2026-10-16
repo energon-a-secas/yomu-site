@@ -46,3 +46,21 @@ test('nothing is known before its shard is asked for, and each links to its Tato
   assert.equal(createExamples({ fetchJson, base: `${DATA}/` }).examplesOf('猫', 'ねこ'), undefined);
   assert.equal(tatoebaUrl('8858176'), 'https://tatoeba.org/en/sentences/show/8858176');
 });
+
+test('More holds up to seven after the three, none of them shown already, and loads only when asked', async () => {
+  const fetched = [];
+  const fresh = createExamples({ fetchJson: (p) => { fetched.push(p); return fetchJson(p); }, base: `${DATA}/` });
+  await fresh.need(['食べる']);
+  const n = fresh.moreCountOf('食べる', 'たべる');
+  assert.ok(n >= 1 && n <= 7, `食べる has ${n} more`);
+  assert.equal(fresh.moreOf('食べる', 'たべる'), undefined, 'nothing behind More before it is asked for');
+  assert.ok(!fetched.some((p) => p.includes('sent/more/')), 'and its files are not fetched with the three');
+  await fresh.needMore(['食べる']);
+  const more = fresh.moreOf('食べる', 'たべる');
+  assert.equal(more.length, n);
+  const shown = new Set(fresh.examplesOf('食べる', 'たべる').map((e) => e.id));
+  assert.ok(more.every((e) => !shown.has(e.id) && e.ja.slice(e.start, e.end).startsWith('食べ')));
+  // a word with three or fewer has no More, and asking for it costs nothing wrong
+  await fresh.need(['方']);
+  assert.equal(fresh.moreCountOf('方', 'ほう'), 0);
+});

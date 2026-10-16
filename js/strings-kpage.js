@@ -46,6 +46,8 @@ export const KPAGE_STRINGS = Object.freeze({
   exSource: { en: 'Tatoeba', es: 'Tatoeba' },
   exSourceLabel: { en: 'This sentence on tatoeba.org (opens a new tab)', es: 'Esta oración en tatoeba.org (se abre en una pestaña nueva)' },
   exNote: { en: 'From the Tatoeba Project, written by volunteers.', es: 'Del proyecto Tatoeba, escritas por voluntarios.' },
+  exMore: { en: 'More examples ({n})', es: 'Más ejemplos ({n})' },
+  exMoreLoading: { en: 'Loading more examples.', es: 'Cargando más ejemplos.' },
   alsoWritten: { en: 'Also written', es: 'También se escribe' },
   otherForms: { en: 'Other forms', es: 'Otras formas' },
   otherFormsNote: {

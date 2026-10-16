@@ -201,7 +201,22 @@ function lateFor(state, token) {
       store.need([key]).then(() => { if (selectedToken(state) === token) paintWord(state); }).catch(() => {});
     }
   }
-  return out;
+  return { ...out, ...moreFor(state, token, key, reading) };
+}
+
+/**
+ * The examples behind More, once the learner opened them for this word
+ * (`state.exMore`, events-word.js): `exMore` is how many wait behind the
+ * button, `examples` grows by them, `exLoading` while their shard loads.
+ */
+function moreFor(state, token, key, reading) {
+  const ex = pageExamples();
+  const count = ex.moreCountOf(key, reading);
+  if (!count || !state.exMore || state.exMore.token !== token) return { exMore: count };
+  const more = ex.moreOf(key, reading);
+  if (more === undefined) return { exMore: count, exLoading: true };
+  const shown = ex.examplesOf(key, reading) || [];
+  return { examples: [...shown, ...more], exMore: 0 };
 }
 
 export function paintWord(state) {

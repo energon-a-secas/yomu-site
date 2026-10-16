@@ -2,7 +2,9 @@
 /**
  * data/sent/sNN.json, `yomu-sentences/1`: up to PER_WORD example sentences
  * for each first-tier word, from the Tatoeba Project, each with its English
- * translation and where the word sits in it.
+ * translation and where the word sits in it; and data/sent/more/mNN.json,
+ * `yomu-sentences-more/1`, up to MORE after those, which the Word panel
+ * fetches only when the learner asks for more examples.
  *
  * THIS IS A MANUAL DATA STEP, NOT A BUILD.
  * Run it by hand, commit the output, never wire it into CI or `make serve`:
@@ -30,7 +32,15 @@
  * offsets) are where the word is in it. The page links every sentence to its
  * page on tatoeba.org, which is the attribution CC BY 2.0 FR asks for.
  *
- * Keyed like data/spell: each key maps to [[reading, sentences], ...].
+ * Keyed like data/spell: each key maps to [[reading, sentences, more?], ...],
+ * `more` how many sentences data/sent/more/ holds for that reading, left out
+ * when it holds none. The more shards map a key to [[reading, sentences], ...]
+ * for the readings that have them. The first PER_WORD are chosen exactly as
+ * they were before the more shards existed; the rest come from what is left,
+ * a form of the word not shown yet first. Measured 2026-10-16 at ten: 8,425
+ * of 13,475 rows had more than three sentences to offer, and the shards grew
+ * from 3,846 KB to 8,747 KB, which every Word panel would then fetch from at
+ * half the keys a shard; behind More, a panel fetches what it did before.
  * Range shards by key, in plain JS string order.
  */
 import fs from 'node:fs';
@@ -56,8 +66,62 @@ const IDEAL_CHARS = 10;
 /** A sentence without its punctuation: 水をくれ! and 水をくれ。 are one example. */
 const bare = (t) => t.replace(/[\p{P}\s]/gu, '');
 export const PER_WORD = 3;
+export const MORE = 7;
 
 const LEXICAL = new Set(['word', 'inflected']);
+
+const cells = (c) => [c.id, c.text, c.en, c.start, c.end];
+
+/**
+ * Up to `n` of `list` (sorted easiest first) not in `taken`: a form of the
+ * word not shown yet first, then the easiest of what is left, never two that
+ * differ only in punctuation, easiest first. With nothing taken this is the
+ * choice the shards made before the more shards existed.
+ */
+function pick(list, n, taken) {
+  const picked = [];
+  const forms = new Set(taken.map((c) => c.surface));
+  const twin = (c) => [...taken, ...picked].some((p) => bare(p.text) === bare(c.text));
+  for (const c of list) {
+    if (picked.length >= n) break;
+    if (!taken.includes(c) && !forms.has(c.surface) && !twin(c)) { picked.push(c); forms.add(c.surface); }
+  }
+  for (const c of list) {
+    if (picked.length >= n) break;
+    if (!taken.includes(c) && !picked.includes(c) && !twin(c)) picked.push(c);
+  }
+  return picked.sort((x, y) => x.score - y.score);
+}
+
+/** Range shards of `map` under `dir` (`${prefix}NNN.json`) and their index; returns the counts. */
+function writeShards(dir, published, prefix, format, map, licence) {
+  const keys = [...map.keys()].sort();
+  const header = Buffer.byteLength(serialize({ _licence: licence, format: `${format}/1`, first: keys[0], entries: {} }));
+  const groups = [];
+  let cur = [];
+  let size = header;
+  for (const k of keys) {
+    const n = Buffer.byteLength(`${JSON.stringify(k)}: ${JSON.stringify(map.get(k))},\n`);
+    if (cur.length && size + n > MAX_BYTES - 64) { groups.push(cur); cur = []; size = header; }
+    cur.push(k);
+    size += n;
+  }
+  if (cur.length) groups.push(cur);
+  const written = [];
+  let bytes = 0;
+  const shards = groups.map((list, i) => {
+    const name = `${prefix}${String(i).padStart(3, '0')}.json`;
+    const doc = { _licence: licence, format: `${format}/1`, first: list[0], entries: Object.fromEntries(list.map((k) => [k, map.get(k)])) };
+    bytes += writeJson(path.join(dir, name), doc);
+    written.push(path.join(dir, name));
+    return { src: `${published}/${name}`, first: list[0] };
+  });
+  writeJson(path.join(dir, 'index.json'), {
+    _licence: licence, format: `${format}-index/1`, keys: keys.length, maxKey: Math.max(...keys.map((k) => k.length)), shards,
+  }, 'shards');
+  const gone = pruneStale(dir, new RegExp(`^${prefix}\\d+\\.json$`), written);
+  return { keys: keys.length, shards: shards.length, bytes, gone: gone.length };
+}
 
 function englishFor(ids, links, englishTsv) {
   const linked = new Map();
@@ -124,58 +188,41 @@ async function main() {
   }
 
   const out = new Map();
+  const more = new Map();
+  // How many different sentences each word and reading had to choose from
+  const offered = new Map();
   for (const [key, readings] of by) {
     const rows = [];
+    const extra = [];
     for (const [reading, list] of readings) {
+      const n = new Set(list.map((c) => bare(c.text))).size;
+      const bucket = n >= 10 ? '10+' : String(n);
+      offered.set(bucket, (offered.get(bucket) || 0) + 1);
       list.sort((x, y) => x.score - y.score || Number(x.id) - Number(y.id));
-      const picked = [];
-      const forms = new Set();
-      // A different form first, then the easiest of whatever is left.
-      for (const c of list) {
-        if (picked.length >= PER_WORD) break;
-        if (!forms.has(c.surface) && !picked.some((p) => bare(p.text) === bare(c.text))) { picked.push(c); forms.add(c.surface); }
+      const shown = pick(list, PER_WORD, []);
+      const after = pick(list, MORE, shown);
+      const row = [reading, shown.map(cells)];
+      if (after.length) {
+        row.push(after.length);
+        extra.push([reading, after.map(cells)]);
       }
-      for (const c of list) {
-        if (picked.length >= PER_WORD) break;
-        if (!picked.includes(c) && !picked.some((p) => bare(p.text) === bare(c.text))) picked.push(c);
-      }
-      picked.sort((x, y) => x.score - y.score);
-      rows.push([reading, picked.map((c) => [c.id, c.text, c.en, c.start, c.end])]);
+      rows.push(row);
     }
     out.set(key, rows);
+    if (extra.length) more.set(key, extra);
   }
 
   const licence = licenceBlock('tatoebaSentences', TOOL, {
     upstream: [upstream('tatoebaJpn'), upstream('tatoebaEng'), upstream('tatoebaJpnEng')],
   });
-  const keys = [...out.keys()].sort();
-  const header = Buffer.byteLength(serialize({ _licence: licence, format: 'yomu-sentences/1', first: keys[0], entries: {} }));
-  const groups = [];
-  let cur = [];
-  let size = header;
-  for (const k of keys) {
-    const n = Buffer.byteLength(`${JSON.stringify(k)}: ${JSON.stringify(out.get(k))},\n`);
-    if (cur.length && size + n > MAX_BYTES - 64) { groups.push(cur); cur = []; size = header; }
-    cur.push(k);
-    size += n;
-  }
-  if (cur.length) groups.push(cur);
-  const written = [];
-  const sizes = [];
-  const shards = groups.map((list, i) => {
-    const name = `s${String(i).padStart(3, '0')}.json`;
-    const doc = { _licence: licence, format: 'yomu-sentences/1', first: list[0], entries: Object.fromEntries(list.map((k) => [k, out.get(k)])) };
-    sizes.push(writeJson(path.join(OUT, name), doc));
-    written.push(path.join(OUT, name));
-    return { src: `data/sent/${name}`, first: list[0] };
-  });
-  writeJson(path.join(OUT, 'index.json'), {
-    _licence: licence, format: 'yomu-sentences-index/1', keys: keys.length, maxKey: Math.max(...keys.map((k) => k.length)), shards,
-  }, 'shards');
-  const gone = pruneStale(OUT, /^s\d+\.json$/, written);
+  const main = writeShards(OUT, 'data/sent', 's', 'yomu-sentences', out, licence);
+  fs.mkdirSync(path.join(OUT, 'more'), { recursive: true });
+  const extra = writeShards(path.join(OUT, 'more'), 'data/sent/more', 'm', 'yomu-sentences-more', more, licence);
   process.stdout.write([
     `sentences: ${japanese.length} short sentences, ${stats.read} read, ${stats.guessed} left out for a guess, ${stats.avoided} for their topic`,
-    `words: ${keys.length} keys in ${shards.length} shards, ${fmtBytes(sizes.reduce((x, y) => x + y, 0))}${gone.length ? `; removed ${gone.length} stale` : ''}`,
+    `words: ${main.keys} keys in ${main.shards} shards, ${fmtBytes(main.bytes)}${main.gone ? `; removed ${main.gone} stale` : ''}`,
+    `more: ${extra.keys} keys in ${extra.shards} shards, ${fmtBytes(extra.bytes)}${extra.gone ? `; removed ${extra.gone} stale` : ''}`,
+    `up to ${PER_WORD} a word and reading, then up to ${MORE} behind More; rows by the sentences offered: ${[...offered].sort((a, b) => parseInt(a[0], 10) - parseInt(b[0], 10)).map(([k, v]) => `${k}: ${v}`).join(', ')}`,
     `wall time ${((Date.now() - t0) / 1000).toFixed(1)} s`,
   ].join('\n') + '\n');
 }

@@ -171,10 +171,14 @@ export function exampleJa(e) {
 /**
  * Up to three sentences from Tatoeba that use the word (examples.js), each
  * with its English, Read it (found by `data-ix`), and a link to its page on
- * tatoeba.org, which is the credit the licence asks for.
+ * tatoeba.org, which is the credit the licence asks for; then More examples
+ * while `more` wait behind it (up to seven), or a line while they load.
  */
-function examplesPart(examples) {
+function examplesPart(examples, more = 0, loading = false) {
   if (!Array.isArray(examples) || !examples.length) return null;
+  const moreNode = loading
+    ? h('p', { class: 'quiet ex-note', role: 'status' }, ui('exMoreLoading'))
+    : more ? h('button', { type: 'button', class: 'btn btn--ghost btn--sm ex-more', 'data-act': 'ex-more' }, ui('exMore', { n: more })) : null;
   return section('examples', [
     h('ul', { class: 'ex-list', role: 'list' }, examples.map((e, i) => h('li', { class: 'ex-item' }, [
       exampleJa(e),
@@ -189,6 +193,7 @@ function examplesPart(examples) {
         }, [h('span', { 'aria-hidden': 'true' }, `${ui('exSource')} ↗`), h('span', { class: 'sr-only' }, ui('exSourceLabel'))]),
       ]),
     ]))),
+    moreNode,
     h('p', { class: 'quiet ex-note' }, ui('exNote')),
   ]);
 }
@@ -341,6 +346,7 @@ function kanjiPart(token, { kidOf, kanjiOf }) {
  */
 export function wordNode(token, {
   noteOf, kidOf, canSpeak, kanjiOf = null, gaps = null, tokens = [], forms = null, conj = null, examples = null, idioms = null,
+  exMore = 0, exLoading = false,
 }) {
   if (!token) return h('p', { class: 'side-empty' }, ui('wordEmpty'));
   const romaji = token.romaji || {};
@@ -364,7 +370,7 @@ export function wordNode(token, {
     partsPart(token),
     meaningsPart(token),
     formsPart(forms),
-    examplesPart(examples),
+    examplesPart(examples, exMore, exLoading),
     idiomsPart(idioms),
     originPart(token),
     kanjiPart(token, { kidOf, kanjiOf }),

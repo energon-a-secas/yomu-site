@@ -2,6 +2,7 @@
 // polite switch, and whether the section is open; and Read it on an example. Both are kept in
 // `state.conj` for the word they were chosen on, because the panel repaints
 // under them (the word's other spellings arrive a moment after it opens).
+// More examples is kept the same way, in `state.exMore`.
 
 import { state, rate } from './state.js';
 import { conjugateToken } from './conjugate.js';
@@ -30,13 +31,38 @@ export const WORD_ACTIONS = {
     const row = table && table.rows.find((r) => r.id === b.dataset.form);
     if (row) speak(row.reading, { rate: rate(state) });
   },
-  // An example sentence, sent to the reader as a new text.
+  // An example sentence, sent to the reader as a new text: one of the
+  // three, or of those More added (data-ix counts on past the three).
   'ex-read': (b) => {
     const token = selectedToken(state);
     if (!token) return;
-    const list = pageExamples().examplesOf(token.base || token.surface, baseReading(token)) || [];
+    const key = token.base || token.surface;
+    const reading = baseReading(token);
+    const ex = pageExamples();
+    const opened = state.exMore && state.exMore.token === token;
+    const list = [...(ex.examplesOf(key, reading) || []), ...((opened && ex.moreOf(key, reading)) || [])];
     const e = list[Number(b.dataset.ix)];
     if (e) loadText(e.ja, { source: 'typed' }).catch(() => {});
+  },
+  // The examples behind More, for this word until another is chosen; focus
+  // goes to the first one they add, where reading goes on.
+  'ex-more': () => {
+    const token = selectedToken(state);
+    if (!token) return;
+    const key = token.base || token.surface;
+    const first = (pageExamples().examplesOf(key, baseReading(token)) || []).length;
+    state.exMore = { token };
+    paintWord(state);
+    pageExamples().needMore([key]).then(() => {
+      if (selectedToken(state) !== token) return;
+      paintWord(state);
+      document.querySelector(`#word-body [data-act="ex-read"][data-ix="${first}"]`)?.focus();
+    }).catch(() => {
+      if (selectedToken(state) !== token) return;
+      state.exMore = null;
+      paintWord(state);
+      document.querySelector('#word-body [data-act="ex-more"]')?.focus();
+    });
   },
   // An idiom or proverb that holds the word, sent to the reader as a new text.
   'idiom-read': (b) => {

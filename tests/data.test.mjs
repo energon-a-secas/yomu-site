@@ -461,6 +461,18 @@ test('check-data fails each broken rule and names the file', async () => {
       d.kanji = d.kanji.slice(1);
       d.count -= 1;
     }), /jinmeiyo\.json: is not what the shards give/],
+    ['a row that counts more examples than the more shards hold', (rw) => rw('data/sent/s005.json', (d) => {
+      const row = Object.values(d.entries).flat().find((r) => r[2]);
+      row[2] = row[2] === 7 ? 6 : row[2] + 1;
+    }), /s005\.json: .* says \d+ more, the more shards hold \d+/],
+    ['a more example that is shown already', (rw) => rw('data/sent/more/m005.json', (d) => {
+      // the first key here, and the sentences shown for it, from its main shard
+      const [k, rows] = Object.entries(d.entries)[0];
+      const index = read('data/sent/index.json');
+      const src = index.shards.filter((x) => x.first <= k).pop().src;
+      const shown = read(src).entries[k].find(([r]) => r === rows[0][0])[1];
+      rows[0][1][0] = shown[0].slice();
+    }), /shows a sentence the more shards hold too/],
     ['a JLPT level one kanji short', (rw) => rw('data/kanji/jlpt.json', (d) => {
       d.levels.n5 = d.levels.n5.slice(1);
       d.count -= 1;

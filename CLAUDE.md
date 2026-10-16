@@ -288,7 +288,12 @@ Search shows a kana key whose records are different words as one card per
 word (さけ: 酒 and 鮭, `render-search.js byWord`).
 
 **An example sentence is filed by the analyzer, and ships with its credit.**
-`data/sent/` holds up to three Tatoeba sentences per word and reading, chosen
+`data/sent/` holds up to three Tatoeba sentences per word and reading, and
+`data/sent/more/` up to seven after them, which the Word panel fetches only
+on More examples (`state.exMore`, `events-word.js`): at ten a shard the
+panel's one fetch would have held half the words. The three are chosen as
+they were before More existed, and the checker holds each row's count of
+more to the more shards. Both are chosen
 by `tools/build-sentences.mjs` from every linked sentence of 30 characters or
 fewer, each read by the analyzer, so 食べました is an example of 食べる. A
 sentence with a guessed token is left out, and a token whose key has other
@@ -603,7 +608,7 @@ refuses it.
 - `convex/_generated/`: written by `npx convex dev`, and gitignored.
 - `data/dict/**`, `data/kanji/**`, `data/names/**`: emitted by `tools/build-*.mjs` from the pins in `tools/lib/sources.mjs` (`build-names.mjs` after `build-dict.mjs`, which it reads, and it writes `data/names/popular.json` too; `data/kanji/joyo.json` by `build-joyo.mjs` from the committed shards, or by `build-kanji.mjs`). Rebuild, do not hand-edit.
 - `data/like/**`: emitted by `tools/build-sounds-like.mjs` from the committed `data/dict/` (after `build-dict.mjs`). Rebuild, do not hand-edit.
-- `data/sent/**`: emitted by `tools/build-sentences.mjs` from the pinned Tatoeba exports, read through the analyzer over the committed `data/` (after `build-dict.mjs`; about five minutes). Rebuild, do not hand-edit.
+- `data/sent/**` (and `data/sent/more/`): emitted by `tools/build-sentences.mjs` from the pinned Tatoeba exports, read through the analyzer over the committed `data/` (after `build-dict.mjs`; about five minutes). Rebuild, do not hand-edit.
 - `data/spell/**`: emitted by `tools/build-spellings.mjs` from the pinned full JMdict and the committed first tier (after `build-dict.mjs`). Rebuild, do not hand-edit.
 - `data/sets/**`: emitted by `tools/build-sets.mjs` from the pinned full JMdict alone. Rebuild, do not hand-edit.
 - `data/search/**`: emitted by `tools/build-search.mjs` from the committed `data/dict/`, `data/kanji/` and `data/strokes/` (after `build-kanji-page.mjs`). Rebuild, do not hand-edit.

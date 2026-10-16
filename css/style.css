@@ -739,6 +739,7 @@ rt .snd { border-bottom: 0; padding-bottom: 0; }
 /* Examples (render-word.js examplesPart, and one on each Search card). */
 .ex-list { list-style: none; display: flex; flex-direction: column; border-top: 1px solid var(--border-subtle); }
 .ex-item { display: flex; flex-direction: column; gap: 2px; padding: var(--space-2) 0; border-bottom: 1px solid var(--border-subtle); }
+.ex-more { align-self: flex-start; margin-top: var(--space-2); }
 .ex-ja { font-size: 1.0625rem; line-height: 1.6; }
 .ex-word { background: var(--accent-wash); color: var(--text-primary); border-radius: 3px; padding: 0 2px; box-shadow: inset 0 -2px 0 var(--accent-bright); }
 .ex-en { font-size: var(--text-sm); color: var(--text-secondary); }

@@ -292,6 +292,8 @@ const FORMATS = {
   'yomu-daily/1': checkDaily,
   'yomu-sentences-index/1': null,
   'yomu-sentences/1': checkSentences,
+  'yomu-sentences-more-index/1': null,
+  'yomu-sentences-more/1': checkSentencesMore,
   'yomu-spell-index/1': null,
   'yomu-spell/1': checkSpell,
   'yomu-search-index/1': null,
@@ -653,14 +655,53 @@ function checkDaily(rel, doc) {
  * Japanese, English, start, end]]], at most three per reading, with the word's
  * span inside the Japanese and the id a Tatoeba sentence number.
  */
+/** One example sentence: [Tatoeba id, Japanese, English, start, end], the span inside the Japanese. */
+const isExample = (x) => Array.isArray(x) && x.length === 5
+  && /^\d+$/.test(x[0]) && typeof x[1] === 'string' && typeof x[2] === 'string' && x[2]
+  && Number.isInteger(x[3]) && Number.isInteger(x[4]) && x[3] >= 0 && x[3] < x[4] && x[4] <= x[1].length;
+
+/** The examples shown: [reading, one to three sentences, how many more behind More (1 to 7), left out for none]. */
 function checkSentences(rel, doc) {
   for (const [key, rows] of Object.entries(doc.entries || {})) {
+    const ok = Array.isArray(rows) && rows.length && rows.every((r) => Array.isArray(r) && (r.length === 2 || r.length === 3) && typeof r[0] === 'string' && r[0]
+      && Array.isArray(r[1]) && r[1].length >= 1 && r[1].length <= 3 && r[1].every(isExample)
+      && (r.length === 2 || (Number.isInteger(r[2]) && r[2] >= 1 && r[2] <= 7)));
+    if (!ok) fail(rel, `${JSON.stringify(key)} is not a list of [reading, [[id, Japanese, English, start, end]], more?]`);
+  }
+}
+
+/** The examples behind More: [reading, one to seven sentences]. */
+function checkSentencesMore(rel, doc) {
+  for (const [key, rows] of Object.entries(doc.entries || {})) {
     const ok = Array.isArray(rows) && rows.length && rows.every((r) => Array.isArray(r) && r.length === 2 && typeof r[0] === 'string' && r[0]
-      && Array.isArray(r[1]) && r[1].length >= 1 && r[1].length <= 3 && r[1].every((x) => Array.isArray(x) && x.length === 5
-        && /^\d+$/.test(x[0]) && typeof x[1] === 'string' && typeof x[2] === 'string' && x[2]
-        && Number.isInteger(x[3]) && Number.isInteger(x[4]) && x[3] >= 0 && x[3] < x[4] && x[4] <= x[1].length));
+      && Array.isArray(r[1]) && r[1].length >= 1 && r[1].length <= 7 && r[1].every(isExample));
     if (!ok) fail(rel, `${JSON.stringify(key)} is not a list of [reading, [[id, Japanese, English, start, end]]]`);
   }
+}
+
+/**
+ * A row's count of more examples is what the more shards hold for that key
+ * and reading, and no sentence is both shown and behind More.
+ */
+function checkMoreCounts(docs) {
+  const more = new Map();
+  for (const src of shardFiles(docs, 'yomu-sentences-more/1')) {
+    for (const [key, rows] of Object.entries(docs.get(src).entries || {})) for (const [r, list] of rows) more.set(`${key}\u0000${r}`, list);
+  }
+  const seen = new Set();
+  for (const src of shardFiles(docs, 'yomu-sentences/1')) {
+    for (const [key, rows] of Object.entries(docs.get(src).entries || {})) {
+      for (const [r, shown, n = 0] of rows) {
+        const id = `${key}\u0000${r}`;
+        const behind = more.get(id) || [];
+        if (behind.length !== n) fail(src, `${JSON.stringify(key)} read ${r} says ${n} more, the more shards hold ${behind.length}`);
+        const ids = new Set(shown.map((x) => x[0]));
+        if (behind.some((x) => ids.has(x[0]))) fail(src, `${JSON.stringify(key)} read ${r} shows a sentence the more shards hold too`);
+        seen.add(id);
+      }
+    }
+  }
+  for (const id of more.keys()) if (!seen.has(id)) fail('data/sent/more', `${JSON.stringify(id.split('\u0000')[0])} has more examples and no row that shows its first`);
 }
 
 /** Other spellings (tools/build-spellings.mjs): [reading, [[written, tag]]], never the key itself. */
@@ -832,6 +873,7 @@ function main() {
   checkJoyo(docs);
   checkJinmeiyo(docs);
   checkJlpt(docs);
+  checkMoreCounts(docs);
   checkRangeIndex(docs, 'data/dict/rare.json', 'yomu-dict-rare/1');
   checkRangeIndex(docs, 'data/names/index.json', 'yomu-names/1');
   checkRangeIndex(docs, 'data/strokes/index.json', 'yomu-strokes/1');
