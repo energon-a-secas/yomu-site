@@ -1316,6 +1316,19 @@ a.mk-open[aria-current="page"], a.pl-open[aria-current="page"] { background: rgb
   border-bottom: 1px solid var(--border-subtle);
 }
 .mk-char { font-size: 2.25rem; line-height: 1.1; text-align: center; }
+
+/* My words (render-words.js): a row is the word with its reading, meaning and
+   due day, then Read it and the bookmark, as the kanji list's rows are. */
+.wd-list { list-style: none; border-top: 1px solid var(--border-subtle); }
+.wd-item {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center;
+  gap: var(--space-3); padding: var(--space-3) 0; border-bottom: 1px solid var(--border-subtle);
+}
+.wd-main { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.wd-word { font-size: 1.75rem; line-height: 1.2; overflow-wrap: anywhere; }
+/* A word on a review card is longer than a kanji: it wraps, never runs off. */
+.rv-char--word { font-size: clamp(2.5rem, 12vw, 4.5rem); overflow-wrap: anywhere; }
+.word-head .word-save { margin-left: auto; align-self: center; }
 .mk-char--sm { font-size: 1.75rem; }
 .mk-main { display: flex; flex-direction: column; gap: 2px; min-width: 0; font-size: var(--text-sm); line-height: 1.5; }
 .mk-mean { color: var(--text-primary); overflow-wrap: anywhere; }

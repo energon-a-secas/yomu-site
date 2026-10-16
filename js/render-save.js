@@ -14,6 +14,7 @@ import { $, h } from './utils.js';
 import { ui, currentLang } from './strings.js';
 import { align } from './furigana.js';
 import { myKanji, dayOf, addDays } from './kanji-store.js';
+import { myWords } from './word-store.js';
 
 const SVG = 'http://www.w3.org/2000/svg';
 
@@ -25,7 +26,8 @@ export function withKanji(key, ch, vars) {
   return [raw.slice(0, at), h('span', { lang: 'ja' }, ch), raw.slice(at + 4)].filter((x) => x !== '');
 }
 
-function bookmark() {
+/** The bookmark icon every save toggle draws. */
+export function bookmark() {
   const svg = document.createElementNS(SVG, 'svg');
   svg.setAttribute('viewBox', '0 0 24 24');
   svg.setAttribute('aria-hidden', 'true');
@@ -104,7 +106,8 @@ export function dayText(day, now = today()) {
  * shown as a number and said in words.
  */
 export function paintDueCount() {
-  const n = myKanji().due(today()).length;
+  const day = today();
+  const n = myKanji().due(day).length + myWords().due(day).length;
   for (const el of document.querySelectorAll('[data-due-count]')) {
     el.hidden = n === 0;
     el.replaceChildren(

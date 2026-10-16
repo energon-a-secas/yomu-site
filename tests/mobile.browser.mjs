@@ -336,6 +336,12 @@ async function reader(browser, phone, lang) {
     await page.waitForSelector('#side[data-sheet] #word-body *');
     await page.waitForTimeout(300);
     await audit(page, where, 'word');
+    // Save the word, so the review and My words below hold one.
+    if (await page.locator('#word-body [data-act="word-save"][aria-pressed="false"]').count()) {
+      await tap(page, '#word-body [data-act="word-save"]');
+      await page.waitForTimeout(150);
+      await audit(page, where, 'word-saved');
+    }
     if (await page.locator('#word-conj summary').count()) {
       await tap(page, '#word-conj summary');
       await audit(page, where, 'word-forms');
@@ -442,6 +448,12 @@ async function reader(browser, phone, lang) {
     await page.waitForTimeout(200);
     await audit(page, where, 'tile-dialog');
     await page.locator('#col-dialog [data-dialog-close]').first().tap();
+  });
+
+  await step(where, 'My words', async () => {
+    await tap(page, '.mk-tab[data-tab="words"]');
+    await page.waitForSelector('#mk-body #wd-h');
+    await audit(page, where, 'words');
   });
 
   await step(where, 'History', async () => {

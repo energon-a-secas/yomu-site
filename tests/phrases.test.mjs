@@ -394,3 +394,18 @@ test('the Import note counts one saved phrase in the singular, in both languages
     useLang('en');
   }
 });
+
+test('a backup carries the saved words: a file of words alone imports, and the note counts them', async () => {
+  const { importNote } = await import('../js/kanji-backup.js');
+  const words = [{ w: '食べる', r: 'たべる', g: 'to eat', at: 1, box: 0, due: '2026-10-16', reviews: 0, lapses: 0 }];
+  const only = parseImport(JSON.stringify({ format: EXPORT_FORMAT, saved: {}, seen: {}, words }));
+  assert.equal(only.ok, true, 'words alone are no empty backup');
+  assert.deepEqual(only.words, words);
+  assert.equal(parseImport(JSON.stringify({ format: EXPORT_FORMAT, saved: {}, seen: {} })).reason, 'empty');
+  const doc = exportDoc({ saved: {}, seen: {} }, '2026-10-16', [], words);
+  assert.deepEqual(doc.words, words);
+  assert.equal(exportDoc({ saved: {}, seen: {} }, '2026-10-16', [], []).words, undefined, 'no words, no field');
+  const note = importNote({ savedAdded: 0, seenAdded: 0, seenUpdated: 0, words: { added: 1, updated: 0, full: 0 } });
+  assert.match(note, /1 saved word added or updated\./);
+  assert.match(importNote({ savedAdded: 0, seenAdded: 0, seenUpdated: 0, words: { added: 2, updated: 1, full: 0 } }), /3 saved words added or updated\./);
+});

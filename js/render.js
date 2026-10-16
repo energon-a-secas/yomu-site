@@ -24,6 +24,7 @@ import { pageSetWords } from './sets.js';
 import { baseReading } from './conjugate.js';
 import { markSentences, sentenceOf, paintSentence } from './reading-view.js';
 import { isReadingAlong, stopReadAlong } from './read-along.js';
+import { myWords } from './word-store.js';
 
 /** The analysis the last paint drew, so a new one can end a read along. */
 let readAlongText = null;
@@ -219,9 +220,23 @@ function moreFor(state, token, key, reading) {
   return { examples: [...shown, ...more], exMore: 0 };
 }
 
+/**
+ * The word the Word panel's bookmark saves: the chosen token's dictionary
+ * form and reading, and its first meaning for the review card; null for one
+ * that is no dictionary word (a particle, a number, a name, a guess).
+ */
+export function savableWord(token) {
+  if (!token || !token.entry || !['word', 'inflected'].includes(token.kind) || token.confidence === 'guess') return null;
+  const g = Array.isArray(token.entry.g) ? token.entry.g[0] : '';
+  const w = token.base || token.surface;
+  const r = baseReading(token);
+  return w && r && g ? { w, r, g } : null;
+}
+
 export function paintWord(state) {
   const word = $('word-body');
   if (!word) return;
+  const savable = savableWord(selectedToken(state));
   const mine = myKanji();
   const info = (state.analysis && state.analysis.info) || new Map();
   fill(word, wordNode(selectedToken(state), {
@@ -234,6 +249,7 @@ export function paintWord(state) {
     ...lateFor(state, selectedToken(state)),
     // All forms keeps its register and its open state across repaints of the same word.
     conj: state.conj && state.conj.token === selectedToken(state) ? state.conj : null,
+    wordSaved: savable ? myWords().isSaved(savable.w, savable.r) : null,
   }));
 }
 

@@ -11,7 +11,7 @@ import { ui, t, posWords, currentLang, originWords } from './strings.js';
 import { beats as splitBeats, beatRomaji } from './kana.js';
 import { surfaceNode } from './render-reading.js';
 import { noteTitle, noteGist, tokenNotes, humanize } from './render-notes.js';
-import { saveToggle, seenText } from './render-save.js';
+import { saveToggle, seenText, bookmark, withKanji } from './render-save.js';
 import { NAME_LINE_TYPES } from './name-types.js';
 import { gapsPart } from './render-gaps.js';
 import { conjPart } from './render-conj.js';
@@ -165,6 +165,14 @@ function formsPart(forms) {
 export function exampleJa(e) {
   return h('span', { class: 'ex-ja', lang: 'ja' }, [
     e.ja.slice(0, e.start), h('mark', { class: 'ex-word' }, e.ja.slice(e.start, e.end)), e.ja.slice(e.end),
+  ]);
+}
+
+/** The bookmark that saves the word, named "Save 食べる to My words" in text nodes. */
+function wordToggle(w, saved) {
+  return h('button', { type: 'button', class: 'save-toggle word-save', 'data-act': 'word-save', 'aria-pressed': saved ? 'true' : 'false' }, [
+    bookmark(),
+    h('span', { class: 'sr-only' }, withKanji('saveWord', w)),
   ]);
 }
 
@@ -346,7 +354,7 @@ function kanjiPart(token, { kidOf, kanjiOf }) {
  */
 export function wordNode(token, {
   noteOf, kidOf, canSpeak, kanjiOf = null, gaps = null, tokens = [], forms = null, conj = null, examples = null, idioms = null,
-  exMore = 0, exLoading = false,
+  exMore = 0, exLoading = false, wordSaved = null,
 }) {
   if (!token) return h('p', { class: 'side-empty' }, ui('wordEmpty'));
   const romaji = token.romaji || {};
@@ -358,6 +366,8 @@ export function wordNode(token, {
       token.reading && token.reading !== token.surface
         ? h('p', { class: 'word-reading', lang: 'ja' }, token.reading)
         : null,
+      // Save the word itself for review (word-store.js), as its dictionary form.
+      wordSaved === null ? null : wordToggle(lookup, wordSaved),
     ]),
     h('dl', { class: 'word-romaji' }, [
       h('div', null, [h('dt', null, ui('saidLine')), h('dd', { lang: 'ja-Latn' }, romaji.said || '')]),

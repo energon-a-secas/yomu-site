@@ -162,6 +162,29 @@ seen in 3 texts"). History's rows are found the same way, and their buttons
 are described by the row's text through `aria-describedby`, an id. Meanings and readings come from `reader.js kanjiInfo()`
 (the dictionary's kanji shards), never from the store.
 
+**My words is a store of its own, reviewed with the kanji.** The Word
+panel's bookmark (`word-save`, beside the word) saves the chosen token as its
+dictionary form and reading, 食べました as 食べる たべる, with its first
+meaning cut to one line of at most 120 characters; a particle, a number, a
+name and a guess have no bookmark (`render.js savableWord`).
+`localStorage['yomu-site:words']`, Persist kit version 1:
+`{ saved: { id: { w, r, g, at, box, due, reviews, lapses } } }`, `id` the
+cyrb53 of written form and reading in base36 (`wordId`), so 方 read かた and
+方 read ほう are two words and a key is ASCII, which sync needs. Read field by
+field like the kanji store; a value the kit cannot read is kept aside as
+`yomu-site:words:damaged`, and nothing is written for a first visit. At most
+2,000 (`MAX_SAVED_WORDS`): the next is refused with a note. The schedule is
+the kanji's (`kanji-store.js schedule`). A review takes the due kanji, then
+the due words (`dueAll`); a word sits in the review's queue as `w:` and its
+id, which no one-character kanji can be, its card shows the word, then its
+reading with romaji and its meaning, and `answerAny` moves the schedule of
+whichever it is. The list's due line, the header's due count and the
+summary's next review name kanji, words or both. `#/kanji/words` lists them,
+the most recently saved first, with Read it and the bookmark that unsaves;
+the backup carries them as `words` (only when there is one), merged on
+Import by more reviews, the earlier save and the higher lapses
+(`mergeWords`).
+
 **Review schedule:** saved is box 0, due that day; Got it moves up one box,
 due in 1, 2, 4, 8, 16 days (top box repeats 16); Again is box 1, due tomorrow,
 and comes round again in the same review as practice that does not move the

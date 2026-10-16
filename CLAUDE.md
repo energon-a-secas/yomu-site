@@ -596,6 +596,15 @@ My progress (`#/kanji/progress`, `progress.js` pure, `render-progress.js`,
 `events-progress.js`) is derived the same way and stores nothing, its period
 included: reviews keep no dates, so it draws no reviews per day, and texts
 count only what History holds.
+My words (`#/kanji/words`, `word-store.js`, `render-words.js`,
+`events-words.js`) are the words saved with the Word panel's bookmark, each
+its dictionary form and reading (`render.js savableWord`: a word or an
+inflected form with a meaning, never a particle, number, name or guess), its
+first meaning for the card and a saved kanji's schedule, in
+`localStorage['yomu-site:words']` under a cyrb53 id of the two (`wordId`,
+ASCII, for sync), at most 2,000. One review holds both: `dueAll` is the due
+kanji then the due words, a word's place in the queue `w:` and its id, and
+`answerAny` moves the right schedule. The backup carries them as `words`.
 
 ## Play
 

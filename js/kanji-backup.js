@@ -29,9 +29,11 @@ export const EXPORT_FORMAT = 'yomu-kanji-export/1';
 export const MAX_IMPORT_BYTES = 5 * 1024 * 1024;
 
 /** What Export writes: the saved and seen maps and any saved phrases, never the session. */
-export function exportDoc(data, today, phrases) {
+export function exportDoc(data, today, phrases, words) {
   const doc = { format: EXPORT_FORMAT, exported: today, site: 'https://yomu.neorgon.com/', saved: data.saved, seen: data.seen };
   if (Array.isArray(phrases) && phrases.length) doc.phrases = phrases;
+  // The saved words (word-store.js), only when there is one, as the phrases are.
+  if (Array.isArray(words) && words.length) doc.words = words;
   return doc;
 }
 
@@ -50,8 +52,10 @@ export function parseImport(text) {
   const p = cleanPhrases(doc.phrases);
   const dropped = bad + p.dropped;
   if (p.phrases.length) data.phrases = p.phrases;
-  if (!Object.keys(data.saved).length && !Object.keys(data.seen).length && !p.phrases.length) return { ok: false, reason: 'empty', dropped };
-  return { ok: true, data, dropped };
+  // The saved words go to their own store, which checks them (word-store.js mergeWords).
+  const words = Array.isArray(doc.words) ? doc.words : [];
+  if (!Object.keys(data.saved).length && !Object.keys(data.seen).length && !p.phrases.length && !words.length) return { ok: false, reason: 'empty', dropped };
+  return { ok: true, data, dropped, words };
 }
 
 /**
@@ -91,10 +95,12 @@ export function mergeInto(data, incoming) {
  */
 export function importNote(sum, dropped = 0) {
   const p = sum.phrases;
+  const w = sum.words;
   const count = (n, one, many) => (n === 1 ? ui(one) : ui(many, { n }));
   const parts = [ui('imported', { saved: sum.savedAdded, seen: sum.seenAdded + sum.seenUpdated })];
   if (p && p.added + p.updated) parts.push(count(p.added + p.updated, 'importedPhrasesOne', 'importedPhrasesMany'));
   if (p && p.full) parts.push(count(p.full, 'importPhrasesFullOne', 'importPhrasesFullMany'));
+  if (w && w.added + w.updated) parts.push(count(w.added + w.updated, 'importedWordsOne', 'importedWordsMany'));
   if (dropped) parts.push(ui('importDropped', { n: dropped }));
   return parts.join(' ');
 }

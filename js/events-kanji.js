@@ -26,6 +26,8 @@
 
 import { openKanjiPage } from './events-kanji-page.js';
 import { paintProgress } from './events-progress.js';
+import { dueAll, answerAny } from './word-store.js';
+import { paintWords } from './render-words.js';
 import { state } from './state.js';
 import { $ } from './utils.js';
 import { ui } from './strings.js';
@@ -49,7 +51,7 @@ import {
 export { routeOf };
 
 /** The places the nav moves between, and the string each is titled with. */
-const TABS = Object.freeze({ list: 'myKanji', collection: 'navCollection', history: 'navHistory', progress: 'navProgress' });
+const TABS = Object.freeze({ list: 'myKanji', words: 'navWords', collection: 'navCollection', history: 'navHistory', progress: 'navProgress' });
 const hooks = [];
 
 let route = 'reader';
@@ -120,6 +122,7 @@ export function repaint() {
   else if (route === 'collection') paintCollection();
   else if (route === 'history') paintHistory();
   else if (route === 'progress') paintProgress();
+  else if (route === 'words') paintWords();
   paintNote();
   if (key) refocus(key, null);
   const again = caret && $(caret[0]);
@@ -249,7 +252,8 @@ export function applyRoute({ boot = false, focus = true } = {}) {
     for (const fn of hooks) fn(next, prev, { boot });
     return;
   }
-  if (next === 'review') review = Object.assign(createReview(practise || myKanji().due(today())), { practice: !!practise });
+  // A review holds the saved kanji and words due today (word-store.js dueAll).
+  if (next === 'review') review = Object.assign(createReview(practise || dueAll(today())), { practice: !!practise });
   if (next === 'review') practise = null;
   view.mode = next;
   // The nav's link keeps focus when it moved between the three places.
@@ -333,7 +337,7 @@ function give(ok) {
   if (!review || !review.shown) return;
   const now = today();
   // A practice (a level, events-levels.js) moves no schedule: its kanji may not even be saved.
-  answer(review, ok, review.practice ? null : (ch, good) => myKanji().answer(ch, good, now));
+  answer(review, ok, review.practice ? null : (rid, good) => answerAny(rid, good, now));
   paintCard();
   paintDueCount();
 }

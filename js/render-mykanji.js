@@ -17,6 +17,7 @@ import { ui, currentLang } from './strings.js';
 import { toHira } from './kana.js';
 import { toHiragana } from './vendor/wanakana.js';
 import { myKanji, dayOf } from './kanji-store.js';
+import { myWords, nextDueAll } from './word-store.js';
 import { saveToggle, seenText, wordRuby, dayText, today, withKanji } from './render-save.js';
 import { pageOpener } from './render-kanji-page.js';
 import { readingRomajiPair } from './render-romaji.js';
@@ -105,13 +106,26 @@ function sectionHead(id, key, count) {
   ]);
 }
 
+/** "1 word" or "3 words", for a line that counts words. */
+export const wordsText = (n) => ui(n === 1 ? 'wordOne' : 'wordMany', { n });
+
+/** What is due: kanji, words or both, in one line. */
+function dueLine(k, w) {
+  if (k && w) return ui('dueBoth', { k, w: wordsText(w) });
+  if (w) return ui('dueWordsOnly', { w: wordsText(w) });
+  return ui(k === 1 ? 'dueOne' : 'dueMany', { n: k });
+}
+
 function dueSection(mine, now) {
-  const due = mine.due(now).length;
-  const saved = Object.keys(mine.data.saved).length;
+  const words = myWords();
+  const dueKanji = mine.due(now).length;
+  const dueWords = words.due(now).length;
+  const due = dueKanji + dueWords;
+  const saved = Object.keys(mine.data.saved).length + words.size;
   let line;
-  if (due) line = ui(due === 1 ? 'dueOne' : 'dueMany', { n: due });
+  if (due) line = dueLine(dueKanji, dueWords);
   else if (saved) {
-    const next = mine.nextDue(now);
+    const next = nextDueAll(now, mine, words);
     line = next ? ui('dueNone', { day: dayText(next.day, now) }) : ui('reviewNothing');
   } else line = ui('dueEmpty');
   return h('section', { class: 'mk-sec', 'aria-labelledby': 'mk-due-h' }, [

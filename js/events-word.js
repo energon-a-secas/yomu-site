@@ -7,7 +7,11 @@
 import { state, rate } from './state.js';
 import { conjugateToken } from './conjugate.js';
 import { speak } from './speech.js';
-import { paintWord, selectedToken } from './render.js';
+import { paintWord, selectedToken, savableWord } from './render.js';
+import { myWords, MAX_SAVED_WORDS } from './word-store.js';
+import { paintDueCount } from './render-save.js';
+import { notify } from './render-remember.js';
+import { ui } from './strings.js';
 import { pageExamples } from './examples.js';
 import { baseReading } from './conjugate.js';
 import { loadText } from './events-read.js';
@@ -70,6 +74,18 @@ export const WORD_ACTIONS = {
     if (!token) return;
     const r = (pageSetWords().inOf(token.base || token.surface) || [])[Number(b.dataset.ix)];
     if (r) loadText(r.written, { source: 'typed' }).catch(() => {});
+  },
+  // Save the chosen word for review, as its dictionary form, or unsave it.
+  'word-save': () => {
+    const word = savableWord(selectedToken(state));
+    if (!word) return;
+    const words = myWords();
+    const was = words.isSaved(word.w, word.r);
+    const now = words.toggle(word, new Date());
+    if (!was && !now && words.size >= MAX_SAVED_WORDS) notify(ui('wordsFull', { n: MAX_SAVED_WORDS }));
+    paintWord(state);
+    paintDueCount();
+    document.querySelector('#word-body [data-act="word-save"]')?.focus({ preventScroll: true });
   },
   // The word in Search, which says what else it is and what holds it.
   'word-search': () => {

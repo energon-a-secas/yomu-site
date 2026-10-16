@@ -4,8 +4,9 @@
 // can both read them and both stay under the 500-line rule. A route is a
 // place, never a text: takeFragmentText in state.js reads only #t=.
 //
-// My kanji: the list (#/kanji), a review, the Collection and History; the
-// parent of each of the last three is the list, and the list's is the reader.
+// My kanji: the list (#/kanji), a review, My words, the Collection, History
+// and Progress; the parent of each of those is the list, and the list's is
+// the reader.
 // Play: the five games (#/play) and one route per game, whose parent is
 // #/play. Search (#/search), whose parent is the reader. Back is history.back() when the history entry before this one is
 // the parent route, otherwise a replaceState to it (events-kanji.js leave).
@@ -16,6 +17,7 @@ export const ROUTES = Object.freeze({
   '#/kanji/collection': 'collection',
   '#/kanji/history': 'history',
   '#/kanji/progress': 'progress',
+  '#/kanji/words': 'words',
   '#/play': 'play',
   '#/play/which': 'play-which',
   '#/play/odd': 'play-odd',
@@ -32,6 +34,7 @@ export const HASH = Object.freeze({
   collection: '#/kanji/collection',
   history: '#/kanji/history',
   progress: '#/kanji/progress',
+  words: '#/kanji/words',
   play: '#/play',
   'play-which': '#/play/which',
   'play-odd': '#/play/odd',
@@ -46,6 +49,7 @@ export const PARENT = Object.freeze({
   collection: 'list',
   history: 'list',
   progress: 'list',
+  words: 'list',
   list: 'reader',
   reader: 'reader',
   play: 'reader',
