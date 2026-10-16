@@ -200,6 +200,8 @@
             <div class="tools-row tools-bar">
               <button class="btn btn--secondary btn--sm" type="button" id="speak-all" data-act="speak-all" data-speak aria-pressed="false"><span data-speak-label>Speak all</span></button>
               <button class="btn btn--ghost btn--sm" type="button" id="slow-toggle" data-act="slow" data-speak aria-pressed="false" data-ui="slow">Slow</button>
+              <button class="btn btn--secondary btn--sm" type="button" id="read-along" data-act="read-along" data-speak aria-pressed="false"><span data-ra-label>Read along</span></button>
+              <button class="btn btn--ghost btn--sm" type="button" id="read-repeat" data-act="read-repeat" data-speak aria-pressed="false" data-ui="raRepeat">Repeat after me</button>
               <button class="btn btn--ghost btn--sm display-toggle" type="button" id="display-toggle" data-act="display" aria-expanded="false" aria-controls="display-panel"><span data-ui="display">Display</span><svg class="display-chevron" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></button>
             </div>
             <div class="tools-row display-panel" id="display-panel" role="group" aria-labelledby="display-label" data-folded>
@@ -273,6 +275,7 @@
             <span class="sent-where" id="sent-where" role="status" aria-live="polite"></span>
             <button class="btn btn--primary" type="button" data-act="sent-step" data-step="1" data-ui="sentNext">Next sentence</button>
           </div>
+          <p class="ra-status" id="read-along-status" role="status" aria-live="polite"></p>
           <!-- A gap's reason, beside it, for a pointer (js/events-gaps.js). The same
                reason is in the Word panel, for a keyboard, a tap and a screen reader. -->
           <p class="gap-tip" id="gap-tip" hidden></p>

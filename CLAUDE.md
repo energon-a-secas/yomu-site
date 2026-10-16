@@ -392,7 +392,16 @@ validators would refuse a seventh. One sentence at a time (`reading-view.js`,
 (a unit ending in 。！？, or a new line, ends one) and puts the others away;
 the view lasts the visit. Choosing a word shows its sentence, and so does the
 arrow keys' roving focus (`events.js roveTo` calls `followFocus`), because
-focus cannot land on a word that is not drawn.
+focus cannot land on a word that is not drawn. Read along (`read-along.js`, the button beside
+Slow) says the text sentence by sentence in that view, from each word's
+reading (`speech.js sayable`), lighting each word on a timing estimated
+from its beats (`read-along-time.js`) and learned from how long each
+sentence took; a browser's boundary events only move the light forward and
+only once their word is nearly due (`believe`), because Chromium on macOS
+sends them all 90 ms in. Repeat after me pauses as long as the sentence took
+after each one; no microphone. A run stops on Stop, a new text
+(`render.js paintReading`), leaving the reader, or a voice someone else
+cancelled (Speak all), which it then leaves speaking (`keepVoice`).
 
 **The Word panel's All forms is built forward and checked backward.**
 `conjugate.js` makes every form of a verb or adjective from its dictionary

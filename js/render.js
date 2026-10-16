@@ -23,6 +23,10 @@ import { pageExamples } from './examples.js';
 import { pageSetWords } from './sets.js';
 import { baseReading } from './conjugate.js';
 import { markSentences, sentenceOf, paintSentence } from './reading-view.js';
+import { isReadingAlong, stopReadAlong } from './read-along.js';
+
+/** The analysis the last paint drew, so a new one can end a read along. */
+let readAlongText = null;
 
 export { paintChrome, paintStatus, paintSpeech, paintSavedMarks };
 
@@ -108,6 +112,9 @@ export function paintReading(state) {
   // A gap's reason belongs to a gap this repaint replaces: put it away, or a
   // pinned one stays over the new text naming a word that is gone.
   hideTip();
+  // A new text ends a read along begun on the old one.
+  if (isReadingAlong() && state.analysis !== readAlongText) stopReadAlong();
+  readAlongText = state.analysis;
   if (body) {
     if (show) {
       const { lines, stop } = readingNodes(a.tokens, { selected: state.selected, kidOf: (ch) => kidOf(state, ch), gaps: a.gaps });

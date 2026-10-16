@@ -22,6 +22,12 @@ export const READING_STRINGS = Object.freeze({
   sentPrev: { en: 'Previous sentence', es: 'Oración anterior' },
   sentNext: { en: 'Next sentence', es: 'Oración siguiente' },
   sentWhere: { en: 'Sentence {n} of {of}', es: 'Oración {n} de {of}' },
+  raStart: { en: 'Read along', es: 'Leer al ritmo' },
+  raStop: { en: 'Stop', es: 'Parar' },
+  raRepeat: { en: 'Repeat after me', es: 'Repite conmigo' },
+  raSaying: { en: 'Reading sentence {n} of {of}.', es: 'Leyendo la oración {n} de {of}.' },
+  raYourTurn: { en: 'Your turn: say it back.', es: 'Tu turno: repítela.' },
+  raDone: { en: 'Done. Read along again starts from the first sentence.', es: 'Listo. Leer al ritmo de nuevo empieza por la primera oración.' },
   tabbarLabel: { en: 'Sections', es: 'Secciones' },
   tabRead: { en: 'Read', es: 'Leer' },
 });

@@ -453,6 +453,8 @@ dialog.dialog--wide { width: min(760px, calc(100% - 16px)); }
 .sent-nav[hidden] { display: none; }
 .sent-nav .btn { min-height: 44px; }
 .sent-where { font-size: var(--text-sm); color: var(--text-secondary); }
+.ra-status { min-height: 1.4em; margin-top: var(--space-2); font-size: var(--text-sm); color: var(--mark); }
+.reading-body .tok.is-reading .tok-surface { background: var(--accent-lit); border-radius: 4px; box-shadow: 0 0 0 2px var(--accent-lit); }
 .kanji-select { min-height: 36px; padding: 0 8px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); background: var(--surface-1); color: var(--text-primary); font: inherit; font-size: var(--text-sm); }
 
 /* A kanji not in My kanji yet: a small folded corner inside its top left,

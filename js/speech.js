@@ -81,9 +81,12 @@ export function canSpeak() {
 /**
  * Say one piece of text. Resolves true when it finished, false when it could
  * not start, was cancelled, or failed. Never rejects: a learner pressing Stop
- * is a normal outcome.
+ * is a normal outcome. `onStart` hears the voice begin, and `onBoundary` its
+ * word boundaries (a character index into `text`) on a browser that sends
+ * them: Android sends none, and others are uneven for Japanese, so read
+ * along only lets them correct its estimate (read-along.js).
  */
-export function speak(text, { rate = 1 } = {}) {
+export function speak(text, { rate = 1, onStart = null, onBoundary = null } = {}) {
   const words = String(text || '').trim();
   if (!canSpeak() || !words) return Promise.resolve(false);
   const synth = globalThis.speechSynthesis;
@@ -106,6 +109,8 @@ export function speak(text, { rate = 1 } = {}) {
     const timer = setTimeout(() => finish(false), 2500 + (words.length * 450) / Math.max(rate, 0.1));
     u.addEventListener('end', () => finish(true));
     u.addEventListener('error', () => finish(false));
+    if (onStart) u.addEventListener('start', () => onStart());
+    if (onBoundary) u.addEventListener('boundary', (e) => onBoundary(e.charIndex, e.name));
     synth.speak(u);
   });
 }

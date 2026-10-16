@@ -9,8 +9,17 @@ import { paintSavedMarks } from './render-save.js';
 import { paintSentence, firstWordOf, sentenceOf } from './reading-view.js';
 import { select } from './events.js';
 import { $ } from './utils.js';
+import { toggleReadAlong, stopReadAlong, paintReadAlong } from './read-along.js';
+import { onRoute } from './events-kanji.js';
+import { afterPaintAll } from './render.js';
 
 export const VIEW_ACTIONS = {
+  'read-along': (b) => { if (b.getAttribute('aria-disabled') !== 'true') toggleReadAlong(); },
+  'read-repeat': (b) => {
+    if (b.getAttribute('aria-disabled') === 'true') return;
+    state.view.repeat = !state.view.repeat;
+    paintReadAlong();
+  },
   'read-view': (b) => {
     state.view.one = b.dataset.value === 'one';
     if (state.view.one) {
@@ -40,6 +49,10 @@ export function followFocus(el) {
 
 /** The Kanji select of the Display row: which kanji stay kanji, the rest in kana. */
 export function bindView() {
+  // Read along belongs to the reader and to the text it started on.
+  onRoute((next) => { if (next !== 'reader') stopReadAlong(); });
+  afterPaintAll(() => paintReadAlong());
+  paintReadAlong();
   const select = $('kanji-shown');
   if (!select) return;
   select.addEventListener('change', () => {
