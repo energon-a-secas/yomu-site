@@ -1,9 +1,14 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "みずのとうし",
-"last": "みをおく",
+"first": "みずのつら",
+"last": "みをあやまる",
 "entries": {
+"みずのつら": [{"g":["surface of the water"],"p":"n","k":["水の面"]}],
+"みずのて": [{"g":["water used for firefighting","channel supplying firefighting water","drinking-water source (of a castle or fort)"],"p":"n","k":["水の手"]}],
+"みずのと": [{"g":["10th in rank"],"p":"n","k":["癸"]}],
+"みずのとい": [{"g":["Water Boar…"],"p":"n","k":["癸亥"]}],
+"みずのとう": [{"g":["Water Rabbit…"],"p":"n","k":["癸卯"]}],
 "みずのとうし": [{"g":["Water Ox (50th term of the sexagenary cycle, e.g. 1913…"],"p":"n","k":["癸丑"]}],
 "みずのととり": [{"g":["Water Rooster…"],"p":"n","k":["癸酉"]}],
 "みずのとひつじ": [{"g":["Water Sheep…"],"p":"n","k":["癸未"]}],
@@ -1412,10 +1417,6 @@
 "みわたし": [{"g":["viewing"],"p":"n","k":["見渡し"]}],
 "みわたすかぎり": [{"g":["as far as the eye can see"],"p":"exp adj-no","k":["見渡す限り"]}],
 "みわたせる": [{"g":["to look out over"],"p":"v1 vt","k":["見渡せる"]}],
-"みをあやまる": [{"g":["to err"],"p":"exp v5r","k":["身を誤る"]}],
-"みをあんじる": [{"g":["to be worried about"],"p":"exp v1","k":["身を案じる"]}],
-"みをいとう": [{"g":["to take good care of oneself"],"p":"exp v5u","k":["身を厭う"]}],
-"みをいれる": [{"g":["to put one's heart (into)"],"p":"exp v1","k":["身を入れる"]}],
-"みをおく": [{"g":["to put oneself in (situation, environment, etc.)"],"p":"exp v5k","k":["身を置く"]}]
+"みをあやまる": [{"g":["to err"],"p":"exp v5r","k":["身を誤る"]}]
 }
 }

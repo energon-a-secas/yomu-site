@@ -1,9 +1,13 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "蒼蒼",
-"last": "虚辞",
+"first": "蒼竜",
+"last": "虚言",
 "entries": {
+"蒼竜": [{"r":["そうりょう","そうりゅう"],"g":["blue dragon","Azure Dragon (god said to rule over the eastern heavens)","seven mansions (Chinese constellations) of the eastern…"],"p":"n","f":"そう|りょう"}],
+"蒼紅": [{"r":["そうこう"],"g":["blue and red"],"p":"n adj-no","f":"そう|こう"}],
+"蒼翠": [{"r":["そうすい"],"g":["blue-green","lush growth"],"p":"adj-na n","f":"そう|すい"}],
+"蒼茫": [{"r":["そうぼう"],"g":["vast and blue (e.g. ocean)","dusky"],"p":"adj-t adv-to","f":"そう|ぼう"}],
 "蒼蒼": [{"r":["そうそう"],"g":["blue (sky, ocean, etc.)","fresh and green (of vegetation)","greying (hair)"],"p":"adj-t adv-to","f":"そう|そう"},{"r":["あおあお"],"g":["vividly green"],"p":"adv adv-to vs","f":"あお|あお","t":1}],
 "蒼蝿": [{"r":["あおばえ"],"g":["bluebottle fly","little pest"],"p":"n","f":"あお|ばえ"}],
 "蒼蠅": [{"r":["あおばえ"],"g":["bluebottle fly","little pest"],"p":"n","f":"あお|ばえ"}],
@@ -1274,12 +1278,6 @@
 "虚血": [{"r":["きょけつ"],"g":["ischemia"],"p":"n","f":"きょ|けつ"}],
 "虚血性": [{"r":["きょけつせい"],"g":["ischemic"],"p":"adj-no","f":"きょ|けつ|せい"}],
 "虚血性心疾患": [{"r":["きょけつせいしんしっかん"],"g":["ischemic heart disease"],"p":"n","f":"きょ|けつ|せい|しん|しっ|かん"}],
-"虚言": [{"r":["きょげん","きょごん"],"g":["falsehood"],"p":"n","f":"きょ|げん"},{"r":["そらごと","むなこと"],"g":["falsehood"],"p":"n","f":"*","t":1}],
-"虚言症": [{"r":["きょげんしょう"],"g":["mythomania"],"p":"n","f":"きょ|げん|しょう"}],
-"虚言癖": [{"r":["きょげんへき"],"g":["mythomania"],"p":"n","f":"きょ|げん|へき"}],
-"虚誕": [{"r":["きょたん"],"g":["exaggerated talk"],"p":"n","f":"きょ|たん"}],
-"虚語": [{"r":["きょご"],"g":["lie"],"p":"n","f":"きょ|ご"}],
-"虚説": [{"r":["きょせつ"],"g":["groundless rumor"],"p":"n","f":"きょ|せつ"}],
-"虚辞": [{"r":["きょじ"],"g":["falsehood","syntactic expletive"],"p":"n","f":"きょ|じ"}]
+"虚言": [{"r":["きょげん","きょごん"],"g":["falsehood"],"p":"n","f":"きょ|げん"},{"r":["そらごと","むなこと"],"g":["falsehood"],"p":"n","f":"*","t":1}]
 }
 }

@@ -1,9 +1,17 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "立ち並ぶ",
-"last": "第二の性",
+"first": "立ちんぼう",
+"last": "第三Ｑ",
 "entries": {
+"立ちんぼう": [{"r":["たちんぼ"],"g":["streetwalker","being kept standing (without doing anything)","beggar"],"p":"n"}],
+"立ちん坊": [{"r":["たちんぼ","たちんぼう"],"g":["streetwalker","being kept standing (without doing anything)","beggar"],"p":"n"}],
+"立ちション": [{"r":["たちション"],"g":["urinating outdoors"],"p":"n vs"}],
+"立ちバック": [{"r":["たちバック"],"g":["standing sex from behind"],"p":"n"}],
+"立ち上げ": [{"r":["たちあげ"],"g":["starting up (e.g. business, computer)"],"p":"n"}],
+"立ち上り": [{"r":["たちあがり"],"g":["start","how well a pitcher pitches at the start of the game"],"p":"n"}],
+"立ち上る": [{"r":["たちのぼる"],"g":["to rise (of smoke, steam, etc.)"],"p":"v5r vi"}],
+"立ち下がり": [{"r":["たちさがり"],"g":["decay (e.g. charge, signal)"],"p":"n adj-no"}],
 "立ち並ぶ": [{"r":["たちならぶ"],"g":["to stand in a row (e.g. shops on a street)","to be equal to"],"p":"v5b vi"}],
 "立ち交じる": [{"r":["たちまじる"],"g":["to join (a group)"],"p":"v5r vi"}],
 "立ち交る": [{"r":["たちまじる"],"g":["to join (a group)"],"p":"v5r vi"}],
@@ -1225,12 +1233,6 @@
 "第三趾": [{"r":["だいさんし"],"g":["middle toe"],"p":"n","f":"だい|さん|し"}],
 "第三部長": [{"r":["だいさんぶちょう"],"g":["assistant chief of staff, g3"],"p":"n","f":"だい|さん|ぶ|ちょう"}],
 "第三階級": [{"r":["だいさんかいきゅう"],"g":["the third estate"],"p":"n","f":"だい|さん|かい|きゅう"}],
-"第三Ｑ": [{"r":["だいさんキュー"],"g":["third quarter (of a year)"],"p":"n","f":"だい|さん"}],
-"第九": [{"r":["だいく"],"g":["ninth","Beethoven's Ninth Symphony"],"p":"n adj-no","f":"だい|く"}],
-"第二のふるさと": [{"r":["だいにのふるさと"],"g":["one's second home"],"p":"exp n","f":"だい|に"}],
-"第二のわが家": [{"r":["だいにのわがや"],"g":["(place that is like a) second home"],"p":"exp n","f":"だい|に;や"}],
-"第二の人生": [{"r":["だいにのじんせい"],"g":["new life (esp. after retirement)"],"p":"exp n","f":"だい|に;じん|せい"}],
-"第二の天性": [{"r":["だいにのてんせい"],"g":["second nature"],"p":"exp n","f":"だい|に;てん|せい"}],
-"第二の性": [{"r":["だいにのせい"],"g":["The Second Sex (book by Simone de Beauvoir)"],"p":"n","f":"だい|に;せい"}]
+"第三Ｑ": [{"r":["だいさんキュー"],"g":["third quarter (of a year)"],"p":"n","f":"だい|さん"}]
 }
 }

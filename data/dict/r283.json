@@ -1,9 +1,15 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "虚部",
-"last": "血繁吹き",
+"first": "虚言症",
+"last": "血続き",
 "entries": {
+"虚言症": [{"r":["きょげんしょう"],"g":["mythomania"],"p":"n","f":"きょ|げん|しょう"}],
+"虚言癖": [{"r":["きょげんへき"],"g":["mythomania"],"p":"n","f":"きょ|げん|へき"}],
+"虚誕": [{"r":["きょたん"],"g":["exaggerated talk"],"p":"n","f":"きょ|たん"}],
+"虚語": [{"r":["きょご"],"g":["lie"],"p":"n","f":"きょ|ご"}],
+"虚説": [{"r":["きょせつ"],"g":["groundless rumor"],"p":"n","f":"きょ|せつ"}],
+"虚辞": [{"r":["きょじ"],"g":["falsehood","syntactic expletive"],"p":"n","f":"きょ|じ"}],
 "虚部": [{"r":["きょぶ"],"g":["imaginary part (of complex number)"],"p":"n","f":"きょ|ぶ"}],
 "虚静": [{"r":["きょせい"],"g":["calm and free of ambition or care"],"p":"n","f":"きょ|せい"}],
 "虚飾": [{"r":["きょしょく"],"g":["ostentation"],"p":"n adj-no","f":"きょ|しょく"}],
@@ -1274,11 +1280,6 @@
 "血統": [{"r":["けっとう"],"g":["lineage"],"p":"n","f":"けっ|とう"}],
 "血統主義": [{"r":["けっとうしゅぎ"],"g":["jus sanguinis"],"p":"n","f":"けっ|とう|しゅ|ぎ"}],
 "血統書": [{"r":["けっとうしょ"],"g":["pedigree document (for animals)"],"p":"n","f":"けっ|とう|しょ"}],
-"血続き": [{"r":["ちつづき"],"g":["blood relation"],"p":"n","f":"ち|つづ"}],
-"血縁淘汰": [{"r":["けつえんとうた"],"g":["kin selection"],"p":"n","f":"けつ|えん|とう|た"}],
-"血縁者": [{"r":["けつえんしゃ"],"g":["blood relative"],"p":"n","f":"けつ|えん|しゃ"}],
-"血縁関係": [{"r":["けつえんかんけい"],"g":["blood relationship"],"p":"n adj-no","f":"けつ|えん|かん|けい"}],
-"血縁集団": [{"r":["けつえんしゅうだん"],"g":["consanguineous group"],"p":"n","f":"けつ|えん|しゅう|だん"}],
-"血繁吹き": [{"r":["ちしぶき"],"g":["blood spray (caused by a weapon)"],"p":"n","f":"*"}]
+"血続き": [{"r":["ちつづき"],"g":["blood relation"],"p":"n","f":"ち|つづ"}]
 }
 }

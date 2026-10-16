@@ -1,10 +1,8 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826"],"generated_by":"tools/build-sets.mjs","generated_at":"2026-10-01"},
 "format": "yomu-sets-words/1",
-"first": "懸命",
+"first": "成る",
 "entries": {
-"懸命": [["yoji","一生懸命","いっしょうけんめい","very hard; with utmost effort; as hard as one can; with all one's might; for dear life…"],["yoji","一所懸命","いっしょけんめい","very hard; with utmost effort; as hard as one can; with all one's might; for dear life…"]],
-"成す": [["proverb","桃李もの言わざれども下自ら蹊を成す","とうりものいわざれどもしたおのずからみちをなす","a man of virtue will naturally attract admirers; good wine speaks for itself"]],
 "成る": [["proverb","為せば成る","なせばなる","if you have a mind to do something, you can do it"],["proverb","成るように成る","なるようになる","whatever will be, will be; things happen the way they happen; let nature take its course"],["proverb","志ある者は事ついに成る","こころざしあるものはことついになる","where there's a will, there's a way; with ambition one can achieve anything"]],
 "成功": [["proverb","失敗は成功の母","しっぱいはせいこうのはは","failure is the mother of success"],["proverb","失敗は成功のもと","しっぱいはせいこうのもと","failure teaches success; failure is a stepping-stone to success"]],
 "成就": [["yoji","大願成就","たいがんじょうじゅ","realization of a great ambition; realisation of a great ambition"],["yoji","心願成就","しんがんじょうじゅ","earnest prayers being answered; realization of one's earnest wishes"]],
@@ -597,6 +595,9 @@
 "猟師": [["proverb","窮鳥懐に入れば猟師も殺さず","きゅうちょうふところにいればりょうしもころさず","even the hunter will refrain from killing the bird that has flown to him for shelter"],["proverb","窮鳥懐に入れば猟師もこれを殺さず","きゅうちょうふところにいればりょうしもこれをころさず","even the hunter will refrain from killing the bird that has flown to him for shelter"]],
 "猪": [["yoji","猪突猛進","ちょとつもうしん","headlong rush; rushing recklessly"],["proverb","山より大きな猪は出ぬ","やまよりおおきないのししはでぬ","things cannot be larger than the things that contain them; there are no boars larger than…"],["idiom","お猪口になる","おちょこになる","to be blown inside out (of an umbrella); to become (the shape of) a sake cup"]],
 "猫": [["yoji","窮鼠噛猫","きゅうそごうびょう","a cornered rat will bite the cat; one who is cornered will fight like a devil"],["proverb","窮鼠猫を噛む","きゅうそねこをかむ","a cornered rat will bite a cat; despair gives courage to a coward"],["idiom","猫の目","ねこのめ","(something) fickle; (something) very changeable; (something) kaleidoscopic; (something)…"]],
-"猿": [["yoji","心猿意馬","しんえんいば","(being unable to control) one's worldly desires and passions"],["proverb","猿も木から落ちる","さるもきからおちる","even monkeys fall from trees; anyone can make a mistake; pride comes before a fall; even…"],["idiom","犬猿の仲","けんえんのなか","like cats and dogs; (on) very bad terms; relationship of dogs and monkeys"]]
+"猿": [["yoji","心猿意馬","しんえんいば","(being unable to control) one's worldly desires and passions"],["proverb","猿も木から落ちる","さるもきからおちる","even monkeys fall from trees; anyone can make a mistake; pride comes before a fall; even…"],["idiom","犬猿の仲","けんえんのなか","like cats and dogs; (on) very bad terms; relationship of dogs and monkeys"]],
+"獅子": [["yoji","獅子奮迅","ししふんじん","furious (energy, battle, etc.); frenzied (work, activity, etc.); ferocious"],["proverb","獅子は我が子を千尋の谷に落とす","ししはわがこをせんじんのたににおとす","make your dear ones face trials so that they may grow; spare the rod, spoil the child…"],["idiom","獅子に鰭","ししにひれ","making something strong even stronger; (giving) fins to a lion"]],
+"獣": [["yoji","人面獣心","じんめんじゅうしん","beast in human form"]],
+"率": [["yoji","率先垂範","そっせんすいはん","set an example worth following; take the initiative in doing something thereby setting an…"],["yoji","率先躬行","そっせんきゅうこう","taking a lead in (doing); setting an example of (doing)"],["yoji","短慮軽率","たんりょけいそつ","impulsive and imprudent; rash and unthinking"]]
 }
 }

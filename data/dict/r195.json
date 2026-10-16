@@ -1,9 +1,17 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "員に備わるのみ",
-"last": "嘴太烏",
+"first": "哄然",
+"last": "嘴を入れる",
 "entries": {
+"哄然": [{"r":["こうぜん"],"g":["(laugh) broadly"],"p":"adv-to adj-t","f":"こう|ぜん"}],
+"哄笑": [{"r":["こうしょう"],"g":["loud laughter (esp. by a group of people)"],"p":"n","f":"こう|しょう"}],
+"哈密瓜": [{"r":["ハミうり"],"g":["Hami melon (Cucumis melo var. inodorus)"],"p":"n","f":"*","u":1}],
+"哈日族": [{"r":["ハーリーズー","ハーリーぞく"],"g":["Taiwanese Japanophiles"],"p":"n","f":"*"}],
+"哈爾浜": [{"r":["ハルビン","ハルピン"],"g":["Harbin (China)"],"p":"n","f":"*","u":1}],
+"哈爾浜工業大学": [{"r":["ハルビンこうぎょうだいがく"],"g":["Harbin Institute of Technology"],"p":"n","f":"*"}],
+"哈爾賓": [{"r":["ハルビン","ハルピン"],"g":["Harbin (China)"],"p":"n","f":"*","u":1}],
+"哉": [{"r":["かな"],"g":["how!"],"p":"prt","u":1}],
 "員に備わるのみ": [{"r":["いんにそなわるのみ"],"g":["being a member of staff but useless as a worker"],"p":"exp"}],
 "員名": [{"r":["いんめい"],"g":["member name"],"p":"n","f":"いん|めい"}],
 "員外": [{"r":["いんがい"],"g":["non-membership"],"p":"n","f":"いん|がい"}],
@@ -1266,12 +1274,6 @@
 "嘴が黄色い": [{"r":["くちばしがきいろい"],"g":["fledgling"],"p":"exp adj-i","f":"くちばし;き|いろ"}],
 "嘴をいれる": [{"r":["くちばしをいれる"],"g":["to meddle (e.g. in a conversation)"],"p":"exp v1"}],
 "嘴をはさむ": [{"r":["くちばしをはさむ"],"g":["to stick one's nose into (someone else's business)"],"p":"exp v5m"}],
-"嘴を入れる": [{"r":["くちばしをいれる"],"g":["to meddle (e.g. in a conversation)"],"p":"exp v1"}],
-"嘴を容れる": [{"r":["くちばしをいれる"],"g":["to meddle (e.g. in a conversation)"],"p":"exp v1"}],
-"嘴を挟む": [{"r":["くちばしをはさむ","くちばしをさしはさむ"],"g":["to stick one's nose into (someone else's business)"],"p":"exp v5m"}],
-"嘴太ペンギン": [{"r":["はしぶとペンギン"],"g":["Snares penguin (Eudyptes robustus)"],"p":"n","f":"はし|ぶと","u":1}],
-"嘴太機織": [{"r":["はしぶとはたおり"],"g":["grosbeak weaver (Amblyospiza albifrons)"],"p":"n","f":"はし|ぶと|はた|おり","u":1}],
-"嘴太海烏": [{"r":["はしぶとうみがらす"],"g":["thick-billed murre (Uria lomvia)"],"p":"n","f":"はし|ぶと|うみ|がらす","u":1}],
-"嘴太烏": [{"r":["はしぶとがらす"],"g":["large-billed crow (Corvus macrorhynchos)"],"p":"n","f":"はし|ぶと|がらす","u":1}]
+"嘴を入れる": [{"r":["くちばしをいれる"],"g":["to meddle (e.g. in a conversation)"],"p":"exp v1"}]
 }
 }

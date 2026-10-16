@@ -1,9 +1,16 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "米処",
-"last": "約まる",
+"first": "米作り",
+"last": "紀年",
 "entries": {
+"米作り": [{"r":["こめづくり","こめつくり"],"g":["rice cultivation"],"p":"n","f":"こめ|づく"}],
+"米価審議会": [{"r":["べいかしんぎかい"],"g":["Rice Price Deliberative Council"],"p":"n","f":"べい|か|しん|ぎ|かい"}],
+"米俗": [{"r":["べいぞく"],"g":["American English colloquialism"],"p":"n","f":"べい|ぞく"}],
+"米俵": [{"r":["こめだわら"],"g":["bag of rice"],"p":"n","f":"こめ|だわら"}],
+"米偏": [{"r":["こめへん"],"g":["kanji \"rice\" radical at left"],"p":"n","f":"こめ|へん"}],
+"米側": [{"r":["べいがわ"],"g":["American position"],"p":"n","f":"べい|がわ"}],
+"米兵": [{"r":["べいへい"],"g":["American soldier"],"p":"n","f":"べい|へい"}],
 "米処": [{"r":["こめどころ"],"g":["rice-producing region","rice seller","restaurant serving or specializing in rice dishes"],"p":"n","f":"こめ|どころ"}],
 "米利堅": [{"r":["メリケン"],"g":["America","fist"],"p":"n adj-f","f":"め|り|けん","u":1,"ls":["eng","American"]}],
 "米刺": [{"r":["こめさし"],"g":["grain thief"],"p":"n","f":"こめ|さし"}],
@@ -1207,14 +1214,6 @@
 "紀州犬": [{"r":["きしゅうけん","きしゅういぬ"],"g":["Kishu (Japanese dog breed)"],"p":"n","f":"き|しゅう|けん"}],
 "紀州蜜柑": [{"r":["きしゅうみかん"],"g":["Citrus kinokuni (species of mandarin orange)"],"p":"n","f":"*"}],
 "紀州鉄道株式会社": [{"r":["きしゅうてつどうかぶしきがいしゃ"],"g":["Kishu Railway"],"p":"n","f":"き|しゅう|てつ|どう|かぶ|しき|がい|しゃ"}],
-"紀年": [{"r":["きねん"],"g":["years (since the start of an era)"],"p":"n","f":"き|ねん"}],
-"紀年法": [{"r":["きねんほう"],"g":["calendar era"],"p":"n","f":"き|ねん|ほう"}],
-"紀律": [{"r":["きりつ"],"g":["order","rules"],"p":"n","f":"き|りつ"}],
-"紀念": [{"r":["きねん"],"g":["commemoration","memento"],"p":"n vs vt","f":"き|ねん"}],
-"紀行文": [{"r":["きこうぶん"],"g":["travel writing"],"p":"n","f":"き|こう|ぶん"}],
-"紀要": [{"r":["きよう"],"g":["bulletin"],"p":"n","f":"き|よう"}],
-"約しい": [{"r":["つましい"],"g":["thrifty"],"p":"adj-i","u":1}],
-"約する": [{"r":["やくする"],"g":["to promise","to abridge","to reduce"],"p":"vs-s vt"}],
-"約まる": [{"r":["つづまる"],"g":["to compress","to become simpler"],"p":"v5r vi"}]
+"紀年": [{"r":["きねん"],"g":["years (since the start of an era)"],"p":"n","f":"き|ねん"}]
 }
 }

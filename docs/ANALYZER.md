@@ -267,6 +267,28 @@ is a names-tier name most texts mean (`S` below) read another way than every
 entry it would ship for is no evidence for them (2026-10-03, one spelling:
 上野). It stays out of the first tier, and the second phase reads it.
 
+Nor is a match that runs on into okurigana (2026-10-16, `runsIntoOkurigana`,
+queue #148): the match ends in a kanji, and the whole spelling or its last
+kanji, with the hiragana after it, is a common verb or adjective as written
+or conjugated, so the analyzer reads that word there. The corpus has 雨降 35
+times, every one casual 雨降ってる, 雨降るかも or the proverb; counted as
+evidence, 雨降 "sea hare" (usually アメフラシ) shipped and read 雨降って地固まる as
+雨降|って. A middle part is not tried (寝心地よい holds 心地よい, and 寝心地 is
+the noun), a spelling that ends in kana is left alone (積み上げた is read as
+the verb already, and 積み上げ is the noun's key), and after an entry that
+takes する, hiragana opening with し, す, さ or せ is that する (退出した, 決壊し).
+Measured with the rule off and on over the same corpus: 28 spellings leave,
+all met only inside a verb or another word (年老 in 年老いた, 傘持 in 傘持って,
+目指 in 目指す, 今生 in 今生まれた, 夢見 in 夢見た, ３年生 one short of five once
+３年生まれ "born in year 3" stopped counting), 2 mixed keys join, and over
+all 248,924 sentences 49 read differently: 44 better (年老いた is 年|老いた,
+傘持って is 傘|持って, 目指すべき is 目指す|べき, 居合道 one word), 2 worse (一声
+聞く is いっせい, ひとこえ before; a classical poem's 花の香 loses its word), 3
+wrong either way and now a dashed name guess (傘持ってった, 女口説く,
+超年老いた). The names tier's attested test applies it too: 378 names
+leave (素晴 すばる from 素晴らしい, 金持 かなじ from 金持ち), and none of the
+2,445 corpus sentences holding one reads differently without them.
+
 A record from outside the common set whose spelling the corpus never matched
 is priced as having no evidence (band 8), so it wins only where the context
 asks for it. Its key's band is set on the common keys' scale, which moves no

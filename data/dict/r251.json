@@ -1,9 +1,22 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "灯台下暗し",
-"last": "無業",
+"first": "灯ともしごろ",
+"last": "無条件解約",
 "entries": {
+"灯ともしごろ": [{"r":["ひともしごろ"],"g":["early evening"],"p":"n"}],
+"灯ともし頃": [{"r":["ひともしごろ"],"g":["early evening"],"p":"n"}],
+"灯りを消す": [{"r":["あかりをけす"],"g":["to turn the lights off"],"p":"exp v5s"}],
+"灯る": [{"r":["ともる","とぼる"],"g":["to be lit (e.g. candle, lamp, light bulb)"],"p":"v5r vi"}],
+"灯ろう": [{"r":["とうろう"],"g":["garden lantern"],"p":"n"}],
+"灯をつける": [{"r":["ひをつける"],"g":["to turn on the light"],"p":"exp v1"}],
+"灯を付ける": [{"r":["ひをつける"],"g":["to turn on the light"],"p":"exp v1"}],
+"灯を点ける": [{"r":["ひをつける"],"g":["to turn on the light"],"p":"exp v1"}],
+"灯下": [{"r":["とうか"],"g":["place by the lamp"],"p":"n","f":"とう|か"}],
+"灯体": [{"r":["とうたい"],"g":["theatrical light"],"p":"n","f":"とう|たい"}],
+"灯光": [{"r":["とうこう"],"g":["lamplight"],"p":"n","f":"とう|こう"}],
+"灯台つつじ": [{"r":["どうだんつつじ"],"g":["Enkianthus perulatus (species of flowering plant)"],"p":"n","f":"*","u":1}],
+"灯台もと暗し": [{"r":["とうだいもとくらし"],"g":["it is darkest under the lamp post"],"p":"exp","f":"とう|だい;くら"}],
 "灯台下暗し": [{"r":["とうだいもとくらし"],"g":["it is darkest under the lamp post"],"p":"exp","f":"とう|だい|もと|くら"}],
 "灯台守": [{"r":["とうだいもり"],"g":["lighthouse keeper"],"p":"n","f":"とう|だい|もり"}],
 "灯台草": [{"r":["とうだいぐさ"],"g":["wartweed (Euphorbia helioscopia)"],"p":"n","f":"とう|だい|ぐさ"}],
@@ -1266,16 +1279,6 @@
 "無条件分岐": [{"r":["むじょうけんぶんき"],"g":["unconditional branch"],"p":"n","f":"む|じょう|けん|ぶん|き"}],
 "無条件反射": [{"r":["むじょうけんはんしゃ"],"g":["unconditioned reflex"],"p":"n","f":"む|じょう|けん|はん|しゃ"}],
 "無条件文": [{"r":["むじょうけんぶん"],"g":["imperative statement"],"p":"n","f":"む|じょう|けん|ぶん"}],
-"無条件解約": [{"r":["むじょうけんかいやく"],"g":["unconditional cancellation of a contract"],"p":"n","f":"む|じょう|けん|かい|やく"}],
-"無条件降伏": [{"r":["むじょうけんこうふく"],"g":["unconditional surrender"],"p":"n","f":"む|じょう|けん|こう|ふく"}],
-"無条件飛越し命令": [{"r":["むじょうけんとびこしめいれい"],"g":["unconditional jump instruction"],"p":"n","f":"む|じょう|けん|とび|こ;めい|れい"}],
-"無東西": [{"r":["むとうざい"],"g":["not knowing one's bearings","itinerant monk"],"p":"n","f":"む|とう|ざい"}],
-"無果汁": [{"r":["むかじゅう"],"g":["containing no fruit juice"],"p":"adj-no n","f":"む|か|じゅう"}],
-"無柄": [{"r":["むへい"],"g":["sessile"],"p":"adj-no","f":"む|へい"}],
-"無根": [{"r":["むこん"],"g":["groundless"],"p":"adj-na n","f":"む|こん"}],
-"無根拠": [{"r":["むこんきょ"],"g":["baseless"],"p":"adj-na n","f":"む|こん|きょ"}],
-"無格好": [{"r":["ぶかっこう"],"g":["unshapely","awkward"],"p":"adj-na","f":"ぶ|かっ|こう"}],
-"無格社": [{"r":["むかくしゃ"],"g":["unranked shrine"],"p":"n","f":"む|かく|しゃ"}],
-"無業": [{"r":["むぎょう"],"g":["without an occupation"],"p":"n adj-no","f":"む|ぎょう"}]
+"無条件解約": [{"r":["むじょうけんかいやく"],"g":["unconditional cancellation of a contract"],"p":"n","f":"む|じょう|けん|かい|やく"}]
 }
 }

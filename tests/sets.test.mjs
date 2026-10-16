@@ -28,6 +28,14 @@ test('each set holds what its name says, common entries first', async () => {
   assert.ok(!idioms.some(([w]) => w === '嵐'), 'one word used figuratively is no idiom');
 });
 
+test('a row\'s romaji keeps JMdict\'s reading: a one-kanji word takes its key\'s other record where the row reads it so', async () => {
+  const proverbs = await sets.rows('proverb');
+  const row = proverbs.find(([w]) => w === '雨降って地固まる');
+  // 地 is ち in the first tier; the row reads it じ, a rare record of the key
+  assert.equal(row[4], 'ame futte ji katamaru');
+  assert.equal(proverbs.find(([w]) => w === '猿も木から落ちる')[4], 'saru mo ki kara ochiru');
+});
+
 test('the filter reads Japanese, romaji and English', () => {
   const row = ['一石二鳥', 'いっせきにちょう', ['killing two birds with one stone'], 1];
   assert.ok(rowMatches(row, ''));

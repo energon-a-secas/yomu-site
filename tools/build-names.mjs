@@ -64,6 +64,7 @@ import {
   knownGivenName, POPULAR_FORMAT, POPULAR_MAX,
 } from './lib/popular.mjs';
 import { NAME_CLASSES, authoredClass } from './lib/name-classes.mjs';
+import { runsIntoOkurigana, RULES_OFF } from './lib/extra.mjs';
 import {
   chooseOriginal, englishFor, linkedSentences, sentenceRows,
 } from './lib/original.mjs';
@@ -77,15 +78,17 @@ const FORMAT = 'yomu-names/1';
 const INDEX_FORMAT = 'yomu-names-index/1';
 const BITS_PER_KEY = 16;
 
-/** Every first-tier key, read from the committed shards the page reads. */
-function firstTierKeys() {
+/** The first tier's keys, read from the committed shards the page reads, each with the parts of speech of its records, space separated. */
+function firstTierPos() {
   const dir = path.join(SITE, 'data', 'dict');
   const index = JSON.parse(fs.readFileSync(path.join(dir, 'index.json'), 'utf8'));
-  const keys = new Set();
+  const pos = new Map();
   for (const src of [index.core.src, ...index.shards.map((s) => s.src)]) {
-    for (const k of Object.keys(JSON.parse(fs.readFileSync(path.join(SITE, src), 'utf8')).entries)) keys.add(k);
+    for (const [k, recs] of Object.entries(JSON.parse(fs.readFileSync(path.join(SITE, src), 'utf8')).entries)) {
+      pos.set(k, ` ${recs.map((r) => r.p || '').join(' ')}`);
+    }
   }
-  return keys;
+  return pos;
 }
 
 /** Contiguous key ranges of at most MAX_BYTES, as the dictionary is cut. */
@@ -117,12 +120,14 @@ async function main() {
   const japanese = loadBz2Text('tatoebaJpn');
   const sentences = sentencesOf(japanese);
   const table = readingTable(kanjidic);
-  const first = firstTierKeys();
+  const first = firstTierPos();
 
   const cands = candidates(jmnedict);
   countExtensions(jmnedict, cands, surnames(jmnedict));
   const open = new Set([...cands.keys()].filter((k) => !first.has(k)));
-  const seen = attested(sentences, open);
+  // An occurrence that runs on into okurigana is the word there, not a name:
+  // 雨降 in 雨降って is 雨 and 降る (tools/lib/extra.mjs runsIntoOkurigana).
+  const seen = attested(sentences, open, RULES_OFF.has('okurigana') ? null : (s, text, end) => !runsIntoOkurigana(s, text, end, first));
   const stats = {
     attested: 0, strongOnly: 0, decoded: 0, kanji: 0, katakana: 0, original: 0, person: 0, strong: 0, sure: 0, star: 0, untyped: 0,
     byEvidence: 0, changed: 0, linked: 0, unseen: 0, changes: [],

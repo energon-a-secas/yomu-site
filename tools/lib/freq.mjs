@@ -24,8 +24,12 @@ export const BANDS = [
   [4, 20000],
 ];
 
-/** Count greedy longest matches of `keys` over every sentence. */
-export function countKeys(sentences, keys) {
+/**
+ * Count greedy longest matches of `keys` over every sentence. `accept(key,
+ * text, end)`, when given, can turn a match down: the position then tries
+ * the next shorter key, as if the longer one were not there.
+ */
+export function countKeys(sentences, keys, accept = null) {
   // Lengths that exist per first character, longest first, so a position
   // tries only the lengths some key starting with that character has.
   const byFirst = new Map();
@@ -45,7 +49,8 @@ export function countKeys(sentences, keys) {
       let hit = 0;
       if (ls) {
         for (const n of ls) {
-          if (i + n <= text.length && keys.has(text.slice(i, i + n))) { hit = n; break; }
+          if (i + n <= text.length && keys.has(text.slice(i, i + n))
+            && (!accept || accept(text.slice(i, i + n), text, i + n))) { hit = n; break; }
         }
       }
       if (hit) {

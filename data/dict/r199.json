@@ -1,9 +1,16 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "地虫",
-"last": "塩化アンチモン",
+"first": "地蔵堂",
+"last": "塩井",
 "entries": {
+"地蔵堂": [{"r":["じぞうどう"],"g":["temple hall with a Kshitigarbha (Jizō) image"],"p":"n","f":"じ|ぞう|どう"}],
+"地蔵尊": [{"r":["じぞうそん"],"g":["Jizō (guardian deity of children)"],"p":"n","f":"じ|ぞう|そん"}],
+"地蔵盆": [{"r":["じぞうぼん"],"g":["Jizō Festival"],"p":"n","f":"じ|ぞう|ぼん"}],
+"地蔵菩薩": [{"r":["じぞうぼさつ"],"g":["Kshitigarbha…"],"p":"n","f":"じ|ぞう|ぼ|さつ"}],
+"地蔵菩薩本願経": [{"r":["じぞうぼさつほんがんきょう"],"g":["Sutra of the Original Vows of Ksitigarbha Bodhisattva"],"p":"n","f":"じ|ぞう|ぼ|さつ|ほん|がん|きょう"}],
+"地蔵顔": [{"r":["じぞうがお"],"g":["gentle and round face"],"p":"n","f":"じ|ぞう|がお"}],
+"地薄": [{"r":["じうす"],"g":["thin (fabric, cloth, paper)"],"p":"adj-na","f":"じ|うす"}],
 "地虫": [{"r":["じむし"],"g":["scarabaeid beetle grub","any insect (or worm, etc.) that lives in soil"],"p":"n","f":"じ|むし"}],
 "地蛍": [{"r":["つちぼたる"],"g":["glowworm"],"p":"n","f":"*"}],
 "地蜂": [{"r":["じばち"],"g":["Vespula flaviceps (species of yellowjacket)"],"p":"n","f":"じ|ばち"}],
@@ -1299,14 +1306,6 @@
 "塩ビ": [{"r":["えんビ"],"g":["(poly) vinyl chloride"],"p":"n"}],
 "塩ビ管": [{"r":["えんビかん"],"g":["polyvinyl chloride pipe"],"p":"n"}],
 "塩ラーメン": [{"r":["しおラーメン"],"g":["shio ramen"],"p":"n"}],
-"塩井": [{"r":["えんせい"],"g":["salt well"],"p":"n","f":"えん|せい"}],
-"塩入れ": [{"r":["しおいれ"],"g":["salt shaker"],"p":"n","f":"しお|い"}],
-"塩出し": [{"r":["しおだし"],"g":["desalinating with water"],"p":"n vs","f":"しお|だ"}],
-"塩分濃度": [{"r":["えんぶんのうど"],"g":["salinity"],"p":"n","f":"えん|ぶん|のう|ど"}],
-"塩分濃度差発電": [{"r":["えんぶんのうどさはつでん"],"g":["osmotic power"],"p":"n","f":"えん|ぶん|のう|ど|さ|はつ|でん"}],
-"塩加減": [{"r":["しおかげん"],"g":["seasoning with salt"],"p":"n","f":"しお|か|げん"}],
-"塩化アセチル": [{"r":["えんかアセチル"],"g":["acetyl chloride"],"p":"n","f":"えん|か"}],
-"塩化アルミニウム": [{"r":["えんかアルミニウム"],"g":["aluminum chloride"],"p":"n","f":"えん|か"}],
-"塩化アンチモン": [{"r":["えんかアンチモン"],"g":["antimony chloride"],"p":"n","f":"えん|か"}]
+"塩井": [{"r":["えんせい"],"g":["salt well"],"p":"n","f":"えん|せい"}]
 }
 }

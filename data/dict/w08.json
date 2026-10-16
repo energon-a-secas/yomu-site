@@ -1,11 +1,9 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict/1",
-"first": "とりくち",
-"last": "はなみち",
+"first": "とりくむ",
+"last": "はなや",
 "entries": {
-"とりくち": [{"g":["technique"],"p":"n","k":["取り口","取口"]}],
-"とりくみ": [{"g":["effort","bout (in sports, etc.)"],"p":"n","k":["取り組み","取組"]}],
 "とりくむ": [{"g":["to grapple with","to tackle (e.g. a problem)"],"p":"v5m vi","k":["取り組む","取組む"]}],
 "とりけし": [{"g":["cancellation"],"p":"n","k":["取り消し","取消し"]}],
 "とりけす": [{"g":["to cancel"],"p":"v5s vt","k":["取り消す","取消す"]}],
@@ -1413,6 +1411,8 @@
 "はなびら": [{"g":["petal"],"p":"n","k":["花びら","花弁"]}],
 "はなみ": [{"g":["cherry blossom viewing"],"p":"n vs","k":["花見"]}],
 "はなみず": [{"g":["nasal mucus"],"p":"n","k":["鼻水","はな水"]}],
-"はなみち": [{"g":["elevated walkway through the audience to the stage","honourable end to a career"],"p":"n","k":["花道"]}]
+"はなみち": [{"g":["elevated walkway through the audience to the stage","honourable end to a career"],"p":"n","k":["花道"]}],
+"はなむこ": [{"g":["bridegroom"],"p":"n","k":["花婿","花聟"]}],
+"はなや": [{"g":["florist"],"p":"n","k":["花屋"],"q":4}]
 }
 }

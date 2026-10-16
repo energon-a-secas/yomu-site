@@ -1,9 +1,14 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "編集部",
-"last": "美容外科",
+"first": "編集局長",
+"last": "美女桜",
 "entries": {
+"編集局長": [{"r":["へんしゅうきょくちょう"],"g":["managing editor"],"p":"n","f":"へん|しゅう|きょく|ちょう"}],
+"編集権": [{"r":["へんしゅうけん"],"g":["right to editorial freedom"],"p":"n","f":"へん|しゅう|けん"}],
+"編集機能": [{"r":["へんしゅうきのう"],"g":["editing capability","editor function"],"p":"n","f":"へん|しゅう|き|のう"}],
+"編集版": [{"r":["へんしゅうばん"],"g":["edited edition"],"p":"n","f":"へん|しゅう|ばん"}],
+"編集用文字": [{"r":["へんしゅうようもじ"],"g":["editing character"],"p":"n","f":"へん|しゅう|よう|も|じ"}],
 "編集部": [{"r":["へんしゅうぶ"],"g":["editorial department"],"p":"n","f":"へん|しゅう|ぶ"}],
 "編集長": [{"r":["へんしゅうちょう"],"g":["editor-in-chief"],"p":"n","f":"へん|しゅう|ちょう"}],
 "緩々": [{"r":["かんかん"],"g":["looking cool and collect"],"p":"adv adj-t","f":"かん|かん"},{"r":["ゆるゆる"],"g":["very loose"],"p":"adj-na adv","f":"ゆる|ゆる","u":1,"t":1}],
@@ -1331,13 +1336,6 @@
 "美大": [{"r":["びだい"],"g":["college of the arts"],"p":"n","f":"び|だい"}],
 "美女": [{"r":["びんじょ"],"g":["beautiful woman","lady attendant"],"p":"n","f":"*"}],
 "美女と野獣": [{"r":["びじょとやじゅう"],"g":["Beauty and the Beast (fairy tale)"],"p":"n","f":"び|じょ;や|じゅう"}],
-"美女桜": [{"r":["びじょざくら"],"g":["verbena"],"p":"n","f":"び|じょ|ざくら"}],
-"美妓": [{"r":["びぎ"],"g":["beautiful maiko or geisha"],"p":"n","f":"び|ぎ"}],
-"美妙": [{"r":["びみょう"],"g":["elegant"],"p":"adj-na n","f":"び|みょう"}],
-"美姫": [{"r":["びき"],"g":["beautiful maiden"],"p":"n","f":"び|き"}],
-"美婦": [{"r":["びふ"],"g":["beautiful woman"],"p":"n","f":"び|ふ"}],
-"美学的": [{"r":["びがくてき"],"g":["aesthetic"],"p":"adj-na","f":"び|がく|てき"}],
-"美容体操": [{"r":["びようたいそう"],"g":["calisthenics"],"p":"n","f":"び|よう|たい|そう"}],
-"美容外科": [{"r":["びようげか"],"g":["cosmetic surgery"],"p":"n","f":"び|よう|げ|か"}]
+"美女桜": [{"r":["びじょざくら"],"g":["verbena"],"p":"n","f":"び|じょ|ざくら"}]
 }
 }

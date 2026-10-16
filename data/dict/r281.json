@@ -1,9 +1,14 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "草連玉",
-"last": "蒼茫",
+"first": "草蜉蝣",
+"last": "蒼空",
 "entries": {
+"草蜉蝣": [{"r":["くさかげろう"],"g":["green lacewing (esp. species Chrysopa intima)"],"p":"n","f":"*","u":1}],
+"草蜘蛛": [{"r":["くさぐも"],"g":["Agelena limbata (species of araneomorph funnel-web spider)"],"p":"n","f":"*","u":1}],
+"草蜻蛉": [{"r":["くさかげろう"],"g":["green lacewing (esp. species Chrysopa intima)"],"p":"n","f":"*","u":1}],
+"草蝦": [{"r":["てながえび"],"g":["freshwater prawn…"],"p":"n","f":"*"}],
+"草質": [{"r":["そうしつ"],"g":["herbaceous"],"p":"adj-no","f":"そう|しつ"}],
 "草連玉": [{"r":["くされだま"],"g":["yellow loosestrife (Lysimachia vulgaris)"],"p":"n","f":"くさ|れ|だま","u":1}],
 "草野球": [{"r":["くさやきゅう"],"g":["amateur baseball"],"p":"n","f":"くさ|や|きゅう"}],
 "草鎌": [{"r":["くさがま"],"g":["grass sickle"],"p":"n","f":"くさ|がま"}],
@@ -1298,10 +1303,6 @@
 "蒼白い": [{"r":["あおじろい"],"g":["pale","bluish-white"],"p":"adj-i","f":"あお|じろ"}],
 "蒼白色": [{"r":["そうはくしょく"],"g":["pale"],"p":"adj-na","f":"そう|はく|しょく"}],
 "蒼穹": [{"r":["そうきゅう"],"g":["blue sky"],"p":"n","f":"そう|きゅう"}],
-"蒼空": [{"r":["そうくう"],"g":["blue sky"],"p":"n","f":"そう|くう"}],
-"蒼竜": [{"r":["そうりょう","そうりゅう"],"g":["blue dragon","Azure Dragon (god said to rule over the eastern heavens)","seven mansions (Chinese constellations) of the eastern…"],"p":"n","f":"そう|りょう"}],
-"蒼紅": [{"r":["そうこう"],"g":["blue and red"],"p":"n adj-no","f":"そう|こう"}],
-"蒼翠": [{"r":["そうすい"],"g":["blue-green","lush growth"],"p":"adj-na n","f":"そう|すい"}],
-"蒼茫": [{"r":["そうぼう"],"g":["vast and blue (e.g. ocean)","dusky"],"p":"adj-t adv-to","f":"そう|ぼう"}]
+"蒼空": [{"r":["そうくう"],"g":["blue sky"],"p":"n","f":"そう|くう"}]
 }
 }

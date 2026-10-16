@@ -1,11 +1,8 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826"],"generated_by":"tools/build-sets.mjs","generated_at":"2026-10-01"},
 "format": "yomu-sets-words/1",
-"first": "獅子",
+"first": "率先",
 "entries": {
-"獅子": [["yoji","獅子奮迅","ししふんじん","furious (energy, battle, etc.); frenzied (work, activity, etc.); ferocious"],["proverb","獅子は我が子を千尋の谷に落とす","ししはわがこをせんじんのたににおとす","make your dear ones face trials so that they may grow; spare the rod, spoil the child…"],["idiom","獅子に鰭","ししにひれ","making something strong even stronger; (giving) fins to a lion"]],
-"獣": [["yoji","人面獣心","じんめんじゅうしん","beast in human form"]],
-"率": [["yoji","率先垂範","そっせんすいはん","set an example worth following; take the initiative in doing something thereby setting an…"],["yoji","率先躬行","そっせんきゅうこう","taking a lead in (doing); setting an example of (doing)"],["yoji","短慮軽率","たんりょけいそつ","impulsive and imprudent; rash and unthinking"]],
 "率先": [["yoji","率先垂範","そっせんすいはん","set an example worth following; take the initiative in doing something thereby setting an…"],["yoji","率先躬行","そっせんきゅうこう","taking a lead in (doing); setting an example of (doing)"]],
 "玉": [["yoji","玉石混交","ぎょくせきこんこう","mixed bag; mixture of good and bad; jumble of wheat and chaff; mixture of precious gems…"],["proverb","艱難汝を玉にす","かんなんなんじをたまにす","hardship makes the man"],["idiom","玉に瑕","たまにきず","fly in the ointment; small flaw in otherwise perfect object; only trouble; only fault"]],
 "王": [["yoji","勤王攘夷","きんのうじょうい","loyalty to the emperor and expulsion of the foreigners"],["proverb","学問に王道なし","がくもんにおうどうなし","there are no shortcuts in learning"],["idiom","王手をかける","おうてをかける","to threaten (someone's position, etc.); to close in (on someone)"]],
@@ -417,7 +414,6 @@
 "芝生": [["proverb","隣の芝生は青い","となりのしばふはあおい","the grass is always greener on the other side of the fence"]],
 "芯": [["idiom","芯を食う","しんをくう","to get to the heart of the matter; to get to the core"]],
 "花": [["yoji","借花献仏","しゃっかけんぶつ","winning favor or influence using someone else's property; plagiarism; presenting the…"],["proverb","見ぬが花","みぬがはな","reality can not compete with imagination; prospect is often better than possession"],["idiom","両手に花","りょうてにはな","two blessings at once; flanked by two beautiful women"]],
-"花の香": [["proverb","遠きは花の香近きは糞の香","とおきははなのかちかきはくそのか","blue are the hills that are far away; the grass is always greener on the other side of…"]],
 "花鳥": [["yoji","花鳥諷詠","かちょうふうえい","the beauties of nature and the harmony that exists between it and man (as the key poetic…"],["yoji","花鳥風月","かちょうふうげつ","beauties of nature; the traditional themes of natural beauty in Japanese aesthetics"]],
 "芸": [["yoji","一芸一能","いちげいいちのう","(excelling in) one area or skill; (being skilled or gifted in) one certain area"],["proverb","多芸は無芸","たげいはむげい","a jack of all trades is a master of none"],["yoji","文芸復興","ぶんげいふっこう","Renaissance"]],
 "芸術": [["proverb","芸術は長く人生は短し","げいじゅつはながくじんせいはみじかし","art is long, life is short; ars longa, vita brevis"]],
@@ -569,6 +565,11 @@
 "話し上手": [["proverb","話し上手は聞き上手","はなしじょうずはききじょうず","good talkers make good listeners"]],
 "誇大": [["yoji","誇大妄想","こだいもうそう","megalomania; delusions of grandeur"]],
 "語": [["yoji","一語一句","いちごいっく","every single word and phrase; each and every word"],["proverb","敗軍の将は兵を語らず","はいぐんのしょうはへいをかたらず","don't be a sore loser; don't make excuses for your failures; a defeated general should…"],["idiom","犬に論語","いぬにろんご","wasting one's breath (trying to explain something); (reading) the Analects of Confucius…"]],
-"語る": [["proverb","井蛙は以って海を語る可からず","せいあはもってうみをかたるべからず","a narrow-minded person cannot understand the ways of the world; a frog in the well cannot…"],["idiom","背中で語る","せなかでかたる","to let one's actions do the talking; to lead by example; to walk the talk"]]
+"語る": [["proverb","井蛙は以って海を語る可からず","せいあはもってうみをかたるべからず","a narrow-minded person cannot understand the ways of the world; a frog in the well cannot…"],["idiom","背中で語る","せなかでかたる","to let one's actions do the talking; to lead by example; to walk the talk"]],
+"誠": [["yoji","誠心誠意","せいしんせいい","in all sincerity; with one's whole heart; whole-hearted devotion"],["proverb","至誠天に通ず","しせいてんにつうず","sincerity can move heaven"],["proverb","巧詐は拙誠に如かず","こうさはせっせいにしかず","better shoddy and sincere than clever and deceptive"]],
+"誠に": [["proverb","巧詐は拙誠に如かず","こうさはせっせいにしかず","better shoddy and sincere than clever and deceptive"]],
+"誠意": [["yoji","誠心誠意","せいしんせいい","in all sincerity; with one's whole heart; whole-hearted devotion"]],
+"誤り": [["proverb","弘法も筆の誤り","こうぼうもふでのあやまり","anyone can make a mistake; Homer sometimes nods; even Kōbō Daishi's handwriting contains…"],["proverb","弘法にも筆の誤り","こうぼうにもふでのあやまり","anyone can make a mistake; Homer sometimes nods; even Kōbō Daishi's handwriting contains…"]],
+"説": [["yoji","名論卓説","めいろんたくせつ","excellent opinions and theories"],["proverb","人を見て法を説け","ひとをみてほうをとけ","suit your speech to the audience"],["idiom","釈迦に説法","しゃかにせっぽう","teaching your grandmother to suck eggs; teaching something to someone who knows more than…"]]
 }
 }

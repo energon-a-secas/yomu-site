@@ -8,7 +8,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { selectMixed } from '../tools/lib/extra.mjs';
+import { selectMixed, selectExtra } from '../tools/lib/extra.mjs';
 
 /** One JMdict entry in jmdict-simplified's shape: spellings as `text` or `text:tag`. */
 function word(kanji, kana, gloss) {
@@ -57,4 +57,43 @@ test('with no corpus evidence for either entry, every entry the test chose keeps
   assert.deepEqual(keysOf(none.extras, 3), ['かん水']);
   assert.deepEqual(keysOf(none.extras, 1), ['つき物']);
   assert.deepEqual(none.stats.claimed, []);
+});
+
+// ── evidence: a match that runs on into okurigana (queue #148) ─────────────
+
+/** A common entry: every spelling common, with its parts of speech. */
+function common(kanji, kana, pos, gloss) {
+  return {
+    kanji: kanji.map((text) => ({ text, common: true, tags: [] })),
+    kana: kana.map((text) => ({ text, common: true, tags: [], appliesToKanji: ['*'] })),
+    sense: [{ partOfSpeech: pos, misc: [], gloss: [{ lang: 'eng', text: gloss }] }],
+  };
+}
+
+test('a spelling the corpus meets only running on into a verb is no evidence: 雨降 in 雨降ってる, while 退出した and 積み上げた still count', () => {
+  const rare = (kanji, kana, pos, gloss) => ({ ...word(kanji, kana, gloss), sense: [{ partOfSpeech: pos, misc: [], gloss: [{ lang: 'eng', text: gloss }] }] });
+  const dict = {
+    words: [
+      common(['雨'], ['あめ'], ['n'], 'rain'),
+      common(['降る'], ['ふる'], ['v5r', 'vi'], 'to fall'),
+      common(['出す'], ['だす'], ['v5s', 'vt'], 'to take out'),
+      common(['上げる'], ['あげる'], ['v1', 'vt'], 'to raise'),
+      rare(['雨降'], ['あめふらし'], ['n'], 'sea hare'),
+      rare(['退出'], ['たいしゅつ'], ['n', 'vs', 'vi'], 'leaving'),
+      rare(['積み上げ'], ['つみあげ'], ['n'], 'piling up'),
+    ],
+  };
+  const corpus = [
+    ...Array(6).fill('雨降ってる。'), '雨降るかも。',
+    ...Array(5).fill('会議を退出した。'),
+    ...Array(5).fill('本を積み上げた。'),
+  ];
+  const { extras } = selectExtra(dict, corpus, { characters: [] }, new Set());
+  const keys = (i) => [...(extras.get(i) || [])];
+  // 雨降 ends in a kanji, and 降 with って is 降る: the analyzer reads 雨|降って
+  assert.deepEqual(keys(4), [], '雨降 does not ship');
+  // after an entry that takes する, した is that する, not 出す's okurigana
+  assert.deepEqual(keys(5), ['退出']);
+  // a spelling that ends in kana is left alone: 積み上げた is the verb, the key the noun
+  assert.deepEqual(keys(6), ['積み上げ']);
 });

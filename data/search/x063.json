@@ -1,8 +1,13 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","KanjiVG stroke order SVGs r20250816"],"inputs":[{"id":"kanjivg","source":"KanjiVG, Ulrich Apel","url":"http://kanjivg.tagaini.net","spdx":"CC-BY-SA-3.0","screen":"required","acknowledgement":"Attribution. You must attribute the work by stating your use of KanjiVG in your own copyright header and linking to KanjiVG's website (http://kanjivg.tagaini.net)","use":"parts, the named components under each character, followed to their own parts"}],"generated_by":"tools/build-search.mjs","generated_at":"2026-10-01"},
 "format": "yomu-search-rare/1",
-"first": "pei",
+"first": "pegboard",
 "entries": {
+"pegboard": [["ハンガーボード","",["pegboard"],"n",0],["ハンガー・ボード","",["pegboard"],"n",0]],
+"pegbox": [["糸倉","いとぐら",["pegbox (of a shamisen, etc.)"],"n",0]],
+"pegged": [["停止価格","ていしかかく",["pegged price"],"n",0]],
+"pegging": [["ペギング","",["pegging"],"n",0]],
+"pegmatite": [["ペグマタイト","",["pegmatite"],"n",0]],
 "pei": [["シャーペイ","",["Shar Pei (dog breed)"],"n",0],["シャー・ペイ","",["Shar Pei (dog breed)"],"n",0]],
 "pejerrey": [["ペヘレイ","",["pejerrey (Odontesthes bonariensis)"],"n",0]],
 "pejorative": [["侮蔑語","ぶべつご",["pejorative term"],"n",0],["卑罵語","ひばご",["pejorative term"],"n",0],["軽蔑語","けいべつご",["pejorative term"],"n",0]],
@@ -615,10 +620,6 @@
 "phoenix": [["不死鳥","ふしちょう",["phoenix"],"n",0],["火の鳥","ひのとり",["phoenix (esp. fenghuang, the Chinese phoenix)"],"n",0],["鵬翼","ほうよく",["phoenix wings"],"n",0],["白鳳","はくほう",["white Chinese phoenix"],"n",0],["鳳凰文","ほうおうもん",["Chinese phoenix pattern"],"n",0],["宛雛","えんすう",["mythical Chinese bird similar to the Chinese phoenix"],"n",0]],
 "pholcid": [["ゆうれいぐも","",["pholcid spider…","harvestman"],"n",0]],
 "pholidota": [["有鱗目","ゆうりんもく",["Squamata","Pholidota (order of pangolins)"],"n",0]],
-"phon": [["ホン","",["phon (unit of loudness)"],"n",0],["フォン","",["phon (unit of loudness)","fond"],"n",1],["ホーン","",["hone (tool)","phon (unit of loudness)"],"n",1]],
-"phone": [["フォーン","",["phone"],"n",0],["架電","かでん",["making a phone call"],"n vs vi",0],["終話","しゅうわ",["ending a phone conversation"],"n vs vi",0],["逆探知","ぎゃくたんち",["phone trace"],"n vs vt",0],["電リク","でんリク",["phone in request…"],"n",0],["電話番","でんわばん",["phone duty"],"n",0],["鬼電","おにでん",["calling someone over the phone many times"],"n vs",0],["ガラホ","",["(Japanese) mobile phone with the form of a feature phone…"],"n",0],["ケー番","けいばん",["mobile phone number"],"n",0],["怪電話","かいでんわ",["suspicious phone call"],"n",0]],
-"phoneme": [["音素","おんそ",["phoneme"],"n",0],["音韻","おんいん",["phoneme","vocal sound"],"n",1],["フォニーム","",["phoneme"],"n",0],["フォネーム","",["phoneme"],"n",0]],
-"phonemic": [["音素体系","おんそたいけい",["phonemic system"],"n",0]],
-"phonemics": [["音素論","おんそろん",["phonemics"],"n",0]]
+"phon": [["ホン","",["phon (unit of loudness)"],"n",0],["フォン","",["phon (unit of loudness)","fond"],"n",1],["ホーン","",["hone (tool)","phon (unit of loudness)"],"n",1]]
 }
 }

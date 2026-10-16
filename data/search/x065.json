@@ -1,8 +1,13 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","KanjiVG stroke order SVGs r20250816"],"inputs":[{"id":"kanjivg","source":"KanjiVG, Ulrich Apel","url":"http://kanjivg.tagaini.net","spdx":"CC-BY-SA-3.0","screen":"required","acknowledgement":"Attribution. You must attribute the work by stating your use of KanjiVG in your own copyright header and linking to KanjiVG's website (http://kanjivg.tagaini.net)","use":"parts, the named components under each character, followed to their own parts"}],"generated_by":"tools/build-search.mjs","generated_at":"2026-10-01"},
 "format": "yomu-search-rare/1",
-"first": "plateau",
+"first": "plata",
 "entries": {
+"plata": [["ラプラタカワイルカ","",["La Plata dolphin (Pontoporia blainvillei)"],"n",0]],
+"platanifolium": [["うりのき","",["Alangium platanifolium var. trilobum"],"n",0]],
+"platanthera": [["水千鳥","みずちどり",["Platanthera hologlottis (species of orchid)"],"n",0],["たかねさぎそう","",["Platanthera maximowicziana (species of orchid)"],"n",0]],
+"platax": [["ツバメウオ属","ツバメウオぞく",["Platax (genus Indo-Pacific batfishes)"],"n",0]],
+"plate": [["お皿","おさら",["plate"],"n",0],["検版","けんぱん",["plate check"],"n",0],["版代","はんだい",["(printing, etc.) plate cost"],"n",0],["丸皿","まるざら",["round plate"],"n",0],["側板","そくばん",["lateral plate","pleuron"],"n",2],["凹版","おうはん",["intaglio plate"],"n",0],["刷版","さっぱん",["machine plate"],"n",0],["大皿","おおざら",["large plate"],"n",0],["定盤","じょうばん",["surface plate"],"n",0],["木皿","きざら",["wooden plate"],"n",0]],
 "plateau": [["海台","かいだい",["plateau"],"n",0],["停滞期","ていたいき",["plateau (e.g. in weight loss)"],"n",0],["プラトー","",["plateau"],"n",0],["溶岩台地","ようがんだいち",["lava plateau"],"n",0],["開析台地","かいせきだいち",["dissected plateau"],"n",0]],
 "plated": [["銀面","ぎんめん",["silver-plated chamfron"],"n",0],["銀着せ","ぎんきせ",["silver-plated"],"n adj-no",0]],
 "platelet": [["血小板","けっしょうばん",["platelet"],"n",0],["小実","こざね",["armor platelet"],"n",0],["血小板凝集","けっしょうばんぎょうしゅう",["platelet aggregation"],"n",0]],
@@ -586,8 +591,6 @@
 "porpoise": [["すなめり","",["black finless porpoise (Neophocaena phocaenoides)"],"n",0],["いしいるか","",["Dall's porpoise (Phocoenoides dalli)"],"n",0],["こはりいるか","",["Burmeister's porpoise (Phocoena spinipinnis)"],"n",0],["ねずみいるか","",["harbor porpoise (Phocoena phocoena)"],"n",0],["めがねいるか","",["spectacled porpoise (Phocoena dioptrica)"],"n",0]],
 "porridge": [["ポリッジ","",["porridge"],"n",0],["粥占","かゆうら",["rice porridge divination"],"n",0],["お粥","おかゆ",["thin rice porridge"],"n",0],["パン粥","パンがゆ",["bread porridge"],"n",0],["白かゆ","しらかゆ",["unflavored rice porridge"],"n",0],["白がゆ","しらがゆ",["unflavored rice porridge"],"n",0],["粥かき棒","かゆかきぼう",["wooden ladle or rod used to stir the rice porridge used in…"],"n",0]],
 "porringer": [["ポリンジャー","",["porringer"],"n",0]],
-"porsche": [["ポルシェ","",["Porsche","Porsche"],"n",0]],
-"port": [["左舷","さげん",["port (left side of vessel)"],"n adj-no",0],["取りかじ","とりかじ",["port (side of a ship)"],"n",0],["港則","こうそく",["port regulations"],"n",0],["港市","こうし",["port city"],"n",0],["港町","みなとまち",["port city"],"n",0],["港都","こうと",["port town"],"n",0],["ポートイン","",["port-in"],"n vs",0],["入津","にゅうしん",["entering a port"],"n vs",0],["出船","でふね",["departure from port","outgoing ship"],"n",1],["帰港","きこう",["returning to port"],"n vs vi",0]],
-"portability": [["可搬性","かはんせい",["portability"],"n",0],["携帯性","けいたいせい",["portability"],"n",0],["移植性","いしょくせい",["portability"],"n",0],["移行性","いこうせい",["portability","transitional"],"n adj-na",0],["移植可能性","いしょくかのうせい",["(code) portability"],"n",0],["ポータビリティ","",["portability"],"n",0],["ＭＮＰ","エム・エヌ・ピー",["mobile number portability"],"n",0],["ポータビリティー","",["portability"],"n",0],["番号継続制","ばんごうけいぞくせい",["(mobile phone) number portability…"],"n",0],["ナンバーポータビリティー","",["(mobile phone) number portability"],"n",0]]
+"porsche": [["ポルシェ","",["Porsche","Porsche"],"n",0]]
 }
 }

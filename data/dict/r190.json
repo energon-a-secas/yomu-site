@@ -1,9 +1,17 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "厳罰化",
-"last": "取引業者",
+"first": "厳正科学",
+"last": "取引区分",
 "entries": {
+"厳正科学": [{"r":["げんせいかがく"],"g":["exact science"],"p":"n","f":"げん|せい|か|がく"}],
+"厳然": [{"r":["げんぜん"],"g":["grave"],"p":"adj-t adv-to","f":"げん|ぜん"}],
+"厳父": [{"r":["げんぷ"],"g":["your honored father"],"p":"n","f":"げん|ぷ"}],
+"厳瓫": [{"r":["いつへ"],"g":["sacred jar"],"p":"n","f":"*"}],
+"厳瓮": [{"r":["いつへ"],"g":["sacred jar"],"p":"n","f":"*"}],
+"厳科": [{"r":["げんか"],"g":["severe punishment"],"p":"n","f":"げん|か"}],
+"厳秘": [{"r":["げんぴ"],"g":["strict secret"],"p":"n adj-no","f":"げん|ぴ"}],
+"厳罰主義": [{"r":["げんばつしゅぎ"],"g":["severe punishment policy"],"p":"n","f":"げん|ばつ|しゅ|ぎ"}],
 "厳罰化": [{"r":["げんばつか"],"g":["toughening the law"],"p":"n vs","f":"げん|ばつ|か"}],
 "厳美渓": [{"r":["げんびけい"],"g":["Genbi Gorge (Ichinoseki-shi, Iwate-ken)"],"p":"n","f":"げん|び|けい"}],
 "厳訓": [{"r":["げんくん"],"g":["strict instruction"],"p":"n","f":"げん|くん"}],
@@ -1253,12 +1261,6 @@
 "取廻し": [{"r":["とりまわし"],"g":["(ease of) handling","arrangement (of pipes, wires, etc.)","wrestler's belt used in a bout"],"p":"n","f":"とり|まわ"}],
 "取引き": [{"r":["とりひき"],"g":["transactions"],"p":"n vs vt","f":"とり|ひ"}],
 "取引制限": [{"r":["とりひきせいげん"],"g":["restraint of trade"],"p":"n","f":"とり|ひき|せい|げん"}],
-"取引区分": [{"r":["とりひきくぶん"],"g":["transaction classification"],"p":"n","f":"とり|ひき|く|ぶん"}],
-"取引所": [{"r":["とりひきじょ"],"g":["(a stock) exchange"],"p":"n","f":"とり|ひき|じょ"}],
-"取引所税": [{"r":["とりひきじょぜい"],"g":["exchange tax"],"p":"n","f":"とり|ひき|じょ|ぜい"}],
-"取引日": [{"r":["とりひきひ"],"g":["trading day"],"p":"n","f":"とり|ひき|ひ"}],
-"取引材料": [{"r":["とりひきざいりょう"],"g":["bargaining chip"],"p":"n","f":"とり|ひき|ざい|りょう"}],
-"取引条件": [{"r":["とりひきじょうけん"],"g":["terms and conditions (e.g. of a purchase or trade)"],"p":"n","f":"とり|ひき|じょう|けん"}],
-"取引業者": [{"r":["とりひきぎょうしゃ"],"g":["broker"],"p":"n","f":"とり|ひき|ぎょう|しゃ"}]
+"取引区分": [{"r":["とりひきくぶん"],"g":["transaction classification"],"p":"n","f":"とり|ひき|く|ぶん"}]
 }
 }

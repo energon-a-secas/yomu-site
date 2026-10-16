@@ -1,9 +1,13 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "みをおこす",
-"last": "むびょうそくさい",
+"first": "みをあんじる",
+"last": "むひょうじょう",
 "entries": {
+"みをあんじる": [{"g":["to be worried about"],"p":"exp v1","k":["身を案じる"]}],
+"みをいとう": [{"g":["to take good care of oneself"],"p":"exp v5u","k":["身を厭う"]}],
+"みをいれる": [{"g":["to put one's heart (into)"],"p":"exp v1","k":["身を入れる"]}],
+"みをおく": [{"g":["to put oneself in (situation, environment, etc.)"],"p":"exp v5k","k":["身を置く"]}],
 "みをおこす": [{"g":["to get up (e.g. from bed)","to make one's way in the world"],"p":"exp v5s","k":["身を起こす"]}],
 "みをおさめる": [{"g":["to order one's life"],"p":"exp v1","k":["身を修める"]}],
 "みをおとす": [{"g":["to descend"],"p":"exp v5s","k":["身を落とす"]}],
@@ -1464,12 +1468,6 @@
 "むひつ": [{"g":["illiteracy"],"p":"n","k":["無筆"]}],
 "むひはん": [{"g":["uncritical"],"p":"adj-na n","k":["無批判"]}],
 "むひょう": [{"g":["rime"],"p":"n","k":["霧氷"]},{"g":["unmarked"],"p":"adj-no n","k":["無標"],"t":1}],
-"むひょうじょう": [{"g":["lack of expression"],"p":"n adj-na","k":["無表情"]}],
-"むひょうはく": [{"g":["unbleached (e.g. flour)"],"p":"adj-no","k":["無漂白"]}],
-"むび": [{"g":["asleep"],"p":"n vs","k":["夢寐"]}],
-"むびもく": [{"g":["Anura"],"p":"n","k":["無尾目"]}],
-"むびゅう": [{"g":["infallibility"],"p":"n adj-no","k":["無謬"]}],
-"むびょう": [{"g":["in sound health"],"p":"adj-na n","k":["無病"]}],
-"むびょうそくさい": [{"g":["sound health"],"p":"n","k":["無病息災"]}]
+"むひょうじょう": [{"g":["lack of expression"],"p":"n adj-na","k":["無表情"]}]
 }
 }

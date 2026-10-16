@@ -1,9 +1,14 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "十進表記",
-"last": "単相交流",
+"first": "十進小数点",
+"last": "単発",
 "entries": {
+"十進小数点": [{"r":["じっしんしょうすうてん"],"g":["decimal point"],"p":"n","f":"じっ|しん|しょう|すう|てん"}],
+"十進数": [{"r":["じっしんすう"],"g":["decimal"],"p":"n","f":"じっ|しん|すう"}],
+"十進法": [{"r":["じっしんほう","じゅっしんほう"],"g":["decimal system"],"p":"n","f":"じっ|しん|ほう"}],
+"十進演算": [{"r":["じっしんえんざん"],"g":["decimal arithmetic"],"p":"n","f":"じっ|しん|えん|ざん"}],
+"十進演算子": [{"r":["じっしんえんざんし"],"g":["decimal operator"],"p":"n","f":"じっ|しん|えん|ざん|し"}],
 "十進表記": [{"r":["じっしんひょうき"],"g":["decimal notation"],"p":"n","f":"じっ|しん|ひょう|き"}],
 "十部門分類法": [{"r":["じゅうぶもんぶんるいほう"],"g":["Dewey Decimal System"],"p":"n","f":"じゅう|ぶ|もん|ぶん|るい|ほう"}],
 "十重": [{"r":["とえ"],"g":["tenfold"],"p":"n adj-no","f":"と|え"}],
@@ -1174,12 +1179,6 @@
 "単独飛行": [{"r":["たんどくひこう"],"g":["solo flight"],"p":"n","f":"たん|どく|ひ|こう"}],
 "単球": [{"r":["たんきゅう"],"g":["monocyte"],"p":"n adj-no","f":"たん|きゅう"}],
 "単瓣": [{"r":["たんべん"],"g":["monopetalous","univalve"],"p":"adj-no n","f":"たん|べん"}],
-"単発": [{"r":["たんぱつ"],"g":["firing one shot at a time","having only one engine","one-shot (e.g. story)"],"p":"n adj-no","f":"たん|ぱつ"}],
-"単発性": [{"r":["たんぱつせい"],"g":["single"],"p":"adj-f adj-no","f":"たん|ぱつ|せい"}],
-"単発機": [{"r":["たんぱつき"],"g":["single-engine plane"],"p":"n","f":"たん|ぱつ|き"}],
-"単発銃": [{"r":["たんぱつじゅう"],"g":["single shot gun"],"p":"n","f":"たん|ぱつ|じゅう"}],
-"単皮": [{"r":["たび"],"g":["tabi"],"p":"n","f":"*"}],
-"単相": [{"r":["たんそう"],"g":["single-phase alternating current","haploid phase (of an organism, cell, etc.)"],"p":"n","f":"たん|そう"}],
-"単相交流": [{"r":["たんそうこうりゅう"],"g":["single-phase alternating current"],"p":"n","f":"たん|そう|こう|りゅう"}]
+"単発": [{"r":["たんぱつ"],"g":["firing one shot at a time","having only one engine","one-shot (e.g. story)"],"p":"n adj-no","f":"たん|ぱつ"}]
 }
 }

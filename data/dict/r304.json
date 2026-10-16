@@ -1,9 +1,14 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "隱忍",
-"last": "雲切れ",
+"first": "隨分",
+"last": "雲中",
 "entries": {
+"隨分": [{"r":["ずいぶん"],"g":["very","terrible","remarkable"],"p":"adv adv-to adj-na","f":"ずい|ぶん","u":1}],
+"隨筆": [{"r":["ずいひつ"],"g":["essays"],"p":"n","f":"ずい|ひつ"}],
+"隨筆家": [{"r":["ずいひつか"],"g":["essayist"],"p":"n","f":"ずい|ひつ|か"}],
+"隨筆集": [{"r":["ずいひつしゅう"],"g":["collection of essays…"],"p":"n","f":"ずい|ひつ|しゅう"}],
+"隱す": [{"r":["かくす"],"g":["to hide"],"p":"v5s vt"}],
 "隱忍": [{"r":["いんにん"],"g":["patience","undercover ninja"],"p":"n vs vi","f":"いん|にん"}],
 "隱語": [{"r":["いんご"],"g":["secret language"],"p":"n","f":"いん|ご"}],
 "隴を得て蜀を望む": [{"r":["ろうをえてしょくをのぞむ"],"g":["never being satisfied with what one gets, and always…"],"p":"exp v5m"}],
@@ -966,6 +971,7 @@
 "雨避け": [{"r":["あまよけ"],"g":["rain cover","taking shelter from rain"],"p":"n","f":"あま|よ"}],
 "雨量計": [{"r":["うりょうけい"],"g":["rain gauge"],"p":"n","f":"う|りょう|けい"}],
 "雨間": [{"r":["あまあい"],"g":["break in the rain"],"p":"n","f":"あま|あい"}],
+"雨降": [{"r":["あめふらし"],"g":["sea hare (esp. species Aplysia kurodai)"],"p":"n","f":"*","u":1}],
 "雨降って地固まる": [{"r":["あめふってじかたまる"],"g":["adversity strengthens the foundations"],"p":"exp v5r","f":"あめ|ふ;じ|かた"}],
 "雨降らし": [{"r":["あめふらし"],"g":["sea hare (esp. species Aplysia kurodai)"],"p":"n","f":"あめ|ふ","u":1}],
 "雨降り星": [{"r":["あめふりぼし"],"g":["Chinese \"Net\" constellation (one of the 28 mansions)"],"p":"n","f":"あめ|ふ;ぼし"}],
@@ -1253,11 +1259,6 @@
 "雲一つ無い": [{"r":["くもひとつない"],"g":["cloudless (sky)"],"p":"exp adj-i","f":"くも|ひと;な"}],
 "雲上": [{"r":["うんじょう"],"g":["above the clouds"],"p":"n","f":"うん|じょう"}],
 "雲上人": [{"r":["うんじょうびと"],"g":["the nobility"],"p":"n","f":"うん|じょう|びと"}],
-"雲中": [{"r":["うんちゅう"],"g":["in the clouds"],"p":"n","f":"うん|ちゅう"}],
-"雲丹": [{"r":["うに"],"g":["sea urchin","seasoned sea urchin eggs"],"p":"n","f":"*","u":1}],
-"雲井": [{"r":["くもい"],"g":["sky","cloud","distant place"],"p":"n","f":"くも|い"}],
-"雲伝神道": [{"r":["うんでんしんとう"],"g":["Unden Shinto…"],"p":"n","f":"うん|でん|しん|とう"}],
-"雲伯方言": [{"r":["うんぱくほうげん"],"g":["dialects of Japanese spoken in Western Tottori prefecture…"],"p":"n","f":"うん|ぱく|ほう|げん"}],
-"雲切れ": [{"r":["くもぎれ"],"g":["gap between the clouds"],"p":"n","f":"くも|ぎ"}]
+"雲中": [{"r":["うんちゅう"],"g":["in the clouds"],"p":"n","f":"うん|ちゅう"}]
 }
 }

@@ -1,9 +1,16 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "真丹",
-"last": "短機関銃",
+"first": "真・三國無双",
+"last": "短期的",
 "entries": {
+"真・三國無双": [{"r":["しんさんごくぶそう"],"g":["Dynasty Warriors (video game series)"],"p":"n","f":"しん;*"}],
+"真・女神転生": [{"r":["しん・めがみてんせい"],"g":["Shin Megami Tensei…"],"p":"n","f":"しん;め|がみ|てん|せい"}],
+"真一文字": [{"r":["まいちもんじ"],"g":["straight line"],"p":"n adj-na","f":"ま|いち|もん|じ"}],
+"真三国無双": [{"r":["しんさんごくぶそう"],"g":["Dynasty Warriors (video game series)"],"p":"n","f":"しん|さん|ごく|ぶ|そう"}],
+"真三國無双": [{"r":["しんさんごくぶそう"],"g":["Dynasty Warriors (video game series)"],"p":"n","f":"しん|さん|ごく|ぶ|そう"}],
+"真下": [{"r":["ました"],"g":["right under"],"p":"n adj-no","f":"ま|した"}],
+"真中分け": [{"r":["まんなかわけ"],"g":["center part","center-parted bangs","hair intakes"],"p":"n","f":"*"}],
 "真丹": [{"r":["しんたん"],"g":["China"],"p":"n","f":"しん|たん"}],
 "真二つに": [{"r":["まふたつに"],"g":["right in half"],"p":"adv","f":"ま|ふた"}],
 "真人": [{"r":["しんじん"],"g":["true man"],"p":"n","f":"しん|じん"},{"r":["まひと","まうと","もうと"],"g":["Mahito (highest of the eight hereditary titles)","you"],"p":"n pn","f":"ま|ひと","t":1}],
@@ -1261,14 +1268,6 @@
 "短期決戦": [{"r":["たんきけっせん"],"g":["decisive battle of brief duration"],"p":"n","f":"たん|き|けっ|せん"}],
 "短期滞在": [{"r":["たんきたいざい"],"g":["short-term stay"],"p":"n vs","f":"たん|き|たい|ざい"}],
 "短期滞在者": [{"r":["たんきたいざいしゃ"],"g":["temporary visitor (to a country or region)"],"p":"n","f":"たん|き|たい|ざい|しゃ"}],
-"短期的": [{"r":["たんきてき"],"g":["short-term"],"p":"adj-na","f":"たん|き|てき"}],
-"短期計画": [{"r":["たんきけいかく"],"g":["short-term plan"],"p":"n","f":"たん|き|けい|かく"}],
-"短期記憶": [{"r":["たんききおく"],"g":["short-term memory"],"p":"n","f":"たん|き|き|おく"}],
-"短期貸付": [{"r":["たんきかしつけ"],"g":["short-term loan"],"p":"n","f":"たん|き|かし|つけ"}],
-"短期金利": [{"r":["たんききんり"],"g":["short-term rate of interest"],"p":"n","f":"たん|き|きん|り"}],
-"短期集中講座": [{"r":["たんきしゅうちゅうこうざ"],"g":["short, intensive course"],"p":"n","f":"たん|き|しゅう|ちゅう|こう|ざ"}],
-"短柑": [{"r":["たんかん"],"g":["tankan orange (Citrus tankan)"],"p":"n","f":"たん|かん","u":1}],
-"短槍": [{"r":["たんそう"],"g":["short spear"],"p":"n","f":"たん|そう"}],
-"短機関銃": [{"r":["たんきかんじゅう"],"g":["submachine gun"],"p":"n","f":"たん|き|かん|じゅう"}]
+"短期的": [{"r":["たんきてき"],"g":["short-term"],"p":"adj-na","f":"たん|き|てき"}]
 }
 }

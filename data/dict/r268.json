@@ -1,9 +1,15 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "第二の我が家",
-"last": "米兵",
+"first": "第九",
+"last": "米作",
 "entries": {
+"第九": [{"r":["だいく"],"g":["ninth","Beethoven's Ninth Symphony"],"p":"n adj-no","f":"だい|く"}],
+"第二のふるさと": [{"r":["だいにのふるさと"],"g":["one's second home"],"p":"exp n","f":"だい|に"}],
+"第二のわが家": [{"r":["だいにのわがや"],"g":["(place that is like a) second home"],"p":"exp n","f":"だい|に;や"}],
+"第二の人生": [{"r":["だいにのじんせい"],"g":["new life (esp. after retirement)"],"p":"exp n","f":"だい|に;じん|せい"}],
+"第二の天性": [{"r":["だいにのてんせい"],"g":["second nature"],"p":"exp n","f":"だい|に;てん|せい"}],
+"第二の性": [{"r":["だいにのせい"],"g":["The Second Sex (book by Simone de Beauvoir)"],"p":"n","f":"だい|に;せい"}],
 "第二の我が家": [{"r":["だいにのわがや"],"g":["(place that is like a) second home"],"p":"exp n","f":"だい|に;わ;や"}],
 "第二の故郷": [{"r":["だいにのこきょう","だいにのふるさと"],"g":["one's second home"],"p":"exp n","f":"だい|に;こ|きょう"}],
 "第二バイオリン": [{"r":["だいにバイオリン"],"g":["second violin"],"p":"n","f":"だい|に"}],
@@ -1251,13 +1257,6 @@
 "米上院": [{"r":["べいじょういん"],"g":["US Senate"],"p":"n","f":"べい|じょう|いん"}],
 "米中": [{"r":["べいちゅう"],"g":["United States and China"],"p":"n","f":"べい|ちゅう"}],
 "米仏": [{"r":["べいふつ"],"g":["United States and France"],"p":"n","f":"べい|ふつ"}],
-"米作": [{"r":["べいさく"],"g":["rice crop"],"p":"n","f":"べい|さく"}],
-"米作り": [{"r":["こめづくり","こめつくり"],"g":["rice cultivation"],"p":"n","f":"こめ|づく"}],
-"米価審議会": [{"r":["べいかしんぎかい"],"g":["Rice Price Deliberative Council"],"p":"n","f":"べい|か|しん|ぎ|かい"}],
-"米俗": [{"r":["べいぞく"],"g":["American English colloquialism"],"p":"n","f":"べい|ぞく"}],
-"米俵": [{"r":["こめだわら"],"g":["bag of rice"],"p":"n","f":"こめ|だわら"}],
-"米偏": [{"r":["こめへん"],"g":["kanji \"rice\" radical at left"],"p":"n","f":"こめ|へん"}],
-"米側": [{"r":["べいがわ"],"g":["American position"],"p":"n","f":"べい|がわ"}],
-"米兵": [{"r":["べいへい"],"g":["American soldier"],"p":"n","f":"べい|へい"}]
+"米作": [{"r":["べいさく"],"g":["rice crop"],"p":"n","f":"べい|さく"}]
 }
 }

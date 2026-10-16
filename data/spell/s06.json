@@ -1,9 +1,8 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826"],"generated_by":"tools/build-spellings.mjs","generated_at":"2026-10-01"},
 "format": "yomu-spell/1",
-"first": "となりあう",
+"first": "となりあわせ",
 "entries": {
-"となりあう": [["となりあう",[["隣り合う",""],["隣合う","io"],["隣りあう","sK"],["となり合う","sK"]]]],
 "となりあわせ": [["となりあわせ",[["隣り合わせ",""],["隣合わせ",""],["隣りあわせ","sK"],["隣あわせ","sK"],["となり合わせ","sK"],["隣合せ","sK"]]]],
 "となる": [["となる",[["隣る",""]]]],
 "とにかく": [["とにかく",[["兎に角","rK"],["左右","rK"]]]],
@@ -1855,6 +1854,8 @@
 "ひげき": [["ひげき",[["悲劇",""]]]],
 "ひこう": [["ひこう",[["非行",""],["飛行",""],["披講",""],["跛行",""],["肥厚",""],["飛蝗",""]]]],
 "ひこうかい": [["ひこうかい",[["非公開",""]]]],
-"ひこうき": [["ひこうき",[["飛行機",""]]]]
+"ひこうき": [["ひこうき",[["飛行機",""]]]],
+"ひこうし": [["ひこうし",[["飛行士",""]]]],
+"ひこうしき": [["ひこうしき",[["非公式",""]]]]
 }
 }

@@ -1,9 +1,16 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "生命保険協会",
-"last": "男メシ",
+"first": "生受領",
+"last": "男やもめ",
 "entries": {
+"生受領": [{"r":["なまずりょう"],"g":["inexperienced provincial governor (ritsuryō period)"],"p":"n","f":"*"}],
+"生口": [{"r":["せいこう"],"g":["prisoner of war (Yayoi period)","slaves"],"p":"n","f":"せい|こう"}],
+"生合成": [{"r":["せいごうせい"],"g":["biosynthesis"],"p":"n vs","f":"せい|ごう|せい"}],
+"生命の水": [{"r":["いのちのみず"],"g":["water of life","distilled liquor (brandy, whisky, etc.)","semen"],"p":"exp n","f":"*;みず"}],
+"生命の起源": [{"r":["せいめいのきげん"],"g":["origin of life"],"p":"exp n","f":"せい|めい;き|げん"}],
+"生命体": [{"r":["せいめいたい"],"g":["life form"],"p":"n","f":"せい|めい|たい"}],
+"生命保険会社": [{"r":["せいめいほけんがいしゃ"],"g":["life insurance company"],"p":"n","f":"せい|めい|ほ|けん|がい|しゃ"}],
 "生命保険協会": [{"r":["せいめいほけんきょうかい"],"g":["Life Insurance Association of Japan"],"p":"n","f":"せい|めい|ほ|けん|きょう|かい"}],
 "生命保険文化センター": [{"r":["せいめいほけんぶんかセンター"],"g":["Japan Institute of Life Insurance"],"p":"n","f":"せい|めい|ほ|けん|ぶん|か"}],
 "生命保険証書": [{"r":["せいめいほけんしょうしょ"],"g":["life insurance policy"],"p":"n","f":"せい|めい|ほ|けん|しょう|しょ"}],
@@ -1190,15 +1197,6 @@
 "男まえ": [{"r":["おとこまえ"],"g":["handsome man","manliness"],"p":"n"}],
 "男まさり": [{"r":["おとこまさり"],"g":["(of a woman) strong-minded"],"p":"adj-na adj-no n"}],
 "男めし": [{"r":["おとこめし"],"g":["dude food"],"p":"n"}],
-"男やもめ": [{"r":["おとこやもめ"],"g":["widower","(long-term) bachelor"],"p":"n"}],
-"男やもめにうじがわく": [{"r":["おとこやもめにうじがわく"],"g":["widowers are untidy"],"p":"exp v5k"}],
-"男やもめに蛆がわく": [{"r":["おとこやもめにうじがわく"],"g":["widowers are untidy"],"p":"exp v5k"}],
-"男を売る": [{"r":["おとこをうる"],"g":["to make a name for oneself through chivalrous deeds"],"p":"exp v5r"}],
-"男を知る": [{"r":["おとこをしる"],"g":["to lose one's virginity (of a woman)"],"p":"exp v5r"}],
-"男を見せる": [{"r":["おとこをみせる"],"g":["to show off one's manliness"],"p":"exp v1"}],
-"男アナ": [{"r":["おとこアナ"],"g":["male TV announcer"],"p":"n"}],
-"男バス": [{"r":["だんバス"],"g":["men's basketball"],"p":"n"}],
-"男バレ": [{"r":["だんバレ"],"g":["men's volleyball"],"p":"n"}],
-"男メシ": [{"r":["おとこめし"],"g":["dude food"],"p":"n"}]
+"男やもめ": [{"r":["おとこやもめ"],"g":["widower","(long-term) bachelor"],"p":"n"}]
 }
 }

@@ -1,9 +1,17 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "現地払い",
-"last": "生命保険会社",
+"first": "現在進行形",
+"last": "生原稿",
 "entries": {
+"現在進行形": [{"r":["げんざいしんこうけい"],"g":["present continuous tense","ongoing"],"p":"n adj-no","f":"げん|ざい|しん|こう|けい"}],
+"現在高": [{"r":["げんざいだか"],"g":["amount on hand"],"p":"n","f":"げん|ざい|だか"}],
+"現地人": [{"r":["げんちじん"],"g":["native"],"p":"n","f":"げん|ち|じん"}],
+"現地到着": [{"r":["げんちとうちゃく"],"g":["arrival on location"],"p":"n vs","f":"げん|ち|とう|ちゃく"}],
+"現地化": [{"r":["げんちか"],"g":["localization"],"p":"n","f":"げん|ち|か"}],
+"現地報告": [{"r":["げんちほうこく"],"g":["on-the-spot report"],"p":"n","f":"げん|ち|ほう|こく"}],
+"現地妻": [{"r":["げんちづま"],"g":["local woman treated as a spouse by an already-married…"],"p":"n","f":"げん|ち|づま"}],
+"現地払": [{"r":["げんちばらい"],"g":["paying upon checking in…"],"p":"n","f":"げん|ち|ばらい"}],
 "現地払い": [{"r":["げんちばらい"],"g":["paying upon checking in…"],"p":"n","f":"げん|ち|ばら"}],
 "現地採用": [{"r":["げんちさいよう"],"g":["hiring locally"],"p":"n adj-no vs","f":"げん|ち|さい|よう"}],
 "現地時間": [{"r":["げんちじかん"],"g":["local time"],"p":"n","f":"げん|ち|じ|かん"}],
@@ -1207,13 +1215,6 @@
 "生半": [{"r":["なまなか"],"g":["halfway-done","half-heartedly"],"p":"adj-na adv","f":"なま|なか"}],
 "生半可": [{"r":["なまはんか"],"g":["superficial"],"p":"adj-na n","f":"なま|はん|か"}],
 "生卵": [{"r":["なまたまご"],"g":["raw egg"],"p":"n","f":"なま|たまご"}],
-"生原稿": [{"r":["なまげんこう"],"g":["handwritten manuscript"],"p":"n","f":"なま|げん|こう"}],
-"生受領": [{"r":["なまずりょう"],"g":["inexperienced provincial governor (ritsuryō period)"],"p":"n","f":"*"}],
-"生口": [{"r":["せいこう"],"g":["prisoner of war (Yayoi period)","slaves"],"p":"n","f":"せい|こう"}],
-"生合成": [{"r":["せいごうせい"],"g":["biosynthesis"],"p":"n vs","f":"せい|ごう|せい"}],
-"生命の水": [{"r":["いのちのみず"],"g":["water of life","distilled liquor (brandy, whisky, etc.)","semen"],"p":"exp n","f":"*;みず"}],
-"生命の起源": [{"r":["せいめいのきげん"],"g":["origin of life"],"p":"exp n","f":"せい|めい;き|げん"}],
-"生命体": [{"r":["せいめいたい"],"g":["life form"],"p":"n","f":"せい|めい|たい"}],
-"生命保険会社": [{"r":["せいめいほけんがいしゃ"],"g":["life insurance company"],"p":"n","f":"せい|めい|ほ|けん|がい|しゃ"}]
+"生原稿": [{"r":["なまげんこう"],"g":["handwritten manuscript"],"p":"n","f":"なま|げん|こう"}]
 }
 }

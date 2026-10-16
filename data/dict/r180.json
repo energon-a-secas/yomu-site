@@ -1,9 +1,11 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "全文検索",
-"last": "共同提出",
+"first": "全数",
+"last": "共同持ち株会社",
 "entries": {
+"全数": [{"r":["ぜんすう"],"g":["total number","diploid number"],"p":"n","f":"ぜん|すう"}],
+"全数調査": [{"r":["ぜんすうちょうさ"],"g":["full-count survey"],"p":"n","f":"ぜん|すう|ちょう|さ"}],
 "全文検索": [{"r":["ぜんぶんけんさく"],"g":["full-text search"],"p":"n","f":"ぜん|ぶん|けん|さく"}],
 "全方位": [{"r":["ぜんほうい"],"g":["every direction"],"p":"n","f":"ぜん|ほう|い"}],
 "全方位外交": [{"r":["ぜんほういがいこう"],"g":["(Japanese) omnidirectional foreign policy"],"p":"n","f":"ぜん|ほう|い|がい|こう"}],
@@ -1109,8 +1111,6 @@
 "共同幻想": [{"r":["きょうどうげんそう"],"g":["collective illusion"],"p":"n","f":"きょう|どう|げん|そう"}],
 "共同性": [{"r":["きょうどうせい"],"g":["cooperation"],"p":"n","f":"きょう|どう|せい"}],
 "共同戦線": [{"r":["きょうどうせんせん"],"g":["common front"],"p":"n","f":"きょう|どう|せん|せん"}],
-"共同持ち株会社": [{"r":["きょうどうもちかぶがいしゃ"],"g":["joint holding company"],"p":"n","f":"きょう|どう|も;かぶ|がい|しゃ"}],
-"共同捜査": [{"r":["きょうどうそうさ"],"g":["joint investigation"],"p":"n","f":"きょう|どう|そう|さ"}],
-"共同提出": [{"r":["きょうどうていしゅつ"],"g":["joint sponsorship (of a bill, etc.)"],"p":"n vs","f":"きょう|どう|てい|しゅつ"}]
+"共同持ち株会社": [{"r":["きょうどうもちかぶがいしゃ"],"g":["joint holding company"],"p":"n","f":"きょう|どう|も;かぶ|がい|しゃ"}]
 }
 }

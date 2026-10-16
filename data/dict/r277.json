@@ -1,9 +1,13 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "脳裏に浮かぶ",
-"last": "自助論",
+"first": "脳血管",
+"last": "自力更正",
 "entries": {
+"脳血管": [{"r":["のうけっかん"],"g":["cerebral blood vessel"],"p":"n adj-no","f":"のう|けっ|かん"}],
+"脳血管性認知症": [{"r":["のうけっかんせいにんちしょう"],"g":["vascular dementia"],"p":"n","f":"のう|けっ|かん|せい|にん|ち|しょう"}],
+"脳血管疾患": [{"r":["のうけっかんしっかん"],"g":["cerebrovascular disease"],"p":"n","f":"のう|けっ|かん|しっ|かん"}],
+"脳血管障害": [{"r":["のうけっかんしょうがい"],"g":["cerebrovascular disease"],"p":"n","f":"のう|けっ|かん|しょう|がい"}],
 "脳裏に浮かぶ": [{"r":["のうりにうかぶ"],"g":["to cross one's mind"],"p":"exp v5b","f":"のう|り;う"}],
 "脳裏をよぎる": [{"r":["のうりをよぎる"],"g":["to cross one's mind"],"p":"exp v5r","f":"のう|り"}],
 "脳裏を過ぎる": [{"r":["のうりをよぎる"],"g":["to cross one's mind"],"p":"exp v5r","f":"のう|り;よ"}],
@@ -1306,11 +1310,6 @@
 "自前主義": [{"r":["じまえしゅぎ"],"g":["(principle of) self-sufficiency"],"p":"n","f":"じ|まえ|しゅ|ぎ"}],
 "自力回向": [{"r":["じりきえこう"],"g":["attempting to reach enlightenment only through merit one…"],"p":"n","f":"じ|りき|え|こう"}],
 "自力救済": [{"r":["じりききゅうさい","じりょくきゅうさい"],"g":["self-help"],"p":"n","f":"じ|りき|きゅう|さい"}],
-"自力更正": [{"r":["じりきこうせい"],"g":["working out one's salvation by own efforts"],"p":"n vs","f":"じ|りき|こう|せい"}],
-"自力更生": [{"r":["じりきこうせい"],"g":["working out one's salvation by own efforts"],"p":"n vs","f":"じ|りき|こう|せい"}],
-"自力本願": [{"r":["じりきほんがん"],"g":["salvation by one's own efforts"],"p":"n adj-no","f":"じ|りき|ほん|がん"}],
-"自助具": [{"r":["じじょぐ"],"g":["self-help device"],"p":"n","f":"じ|じょ|ぐ"}],
-"自助努力": [{"r":["じじょどりょく"],"g":["self-help efforts"],"p":"n vs","f":"じ|じょ|ど|りょく"}],
-"自助論": [{"r":["じじょろん"],"g":["Self-Help (1859 book by Samuel Smiles)"],"p":"n","f":"じ|じょ|ろん"}]
+"自力更正": [{"r":["じりきこうせい"],"g":["working out one's salvation by own efforts"],"p":"n vs","f":"じ|りき|こう|せい"}]
 }
 }

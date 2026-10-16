@@ -1,9 +1,15 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "青文字系",
-"last": "韓国産業安全公団",
+"first": "青心社",
+"last": "韓国標準時",
 "entries": {
+"青心社": [{"r":["せいしんしゃ"],"g":["Seinshinsha (publisher)"],"p":"n","f":"せい|しん|しゃ"}],
+"青息": [{"r":["あおいき"],"g":["anxious or pained sigh"],"p":"n","f":"あお|いき"}],
+"青息吐息": [{"r":["あおいきといき"],"g":["deep distress"],"p":"n","f":"あお|いき|と|いき"}],
+"青懸巣": [{"r":["あおかけす"],"g":["blue jay (Cyanocitta cristata)"],"p":"n","f":"あお|かけ|す","u":1}],
+"青房": [{"r":["あおぶさ"],"g":["green tassel hung above the northeast corner of the ring"],"p":"n","f":"あお|ぶさ"}],
+"青文字": [{"r":["あおもじ"],"g":["Litsea cubeba"],"p":"n","f":"あお|も|じ"}],
 "青文字系": [{"r":["あおもじけい"],"g":["blue letter style"],"p":"n","f":"あお|も|じ|けい"}],
 "青斑核": [{"r":["せいはんかく"],"g":["locus coeruleus"],"p":"n","f":"せい|はん|かく"}],
 "青斑猫": [{"r":["あおはんみょう"],"g":["Spanish fly (Lytta vesicatoria)"],"p":"n","f":"*"}],
@@ -1186,9 +1192,6 @@
 "韓国学": [{"r":["かんこくがく"],"g":["Korean studies"],"p":"n","f":"かん|こく|がく"}],
 "韓国料理": [{"r":["かんこくりょうり"],"g":["(South) Korean cooking"],"p":"n","f":"かん|こく|りょう|り"}],
 "韓国標準協会": [{"r":["かんこくひょうじゅんきょうかい"],"g":["Korean Standards Association"],"p":"n","f":"かん|こく|ひょう|じゅん|きょう|かい"}],
-"韓国標準時": [{"r":["かんこくひょうじゅんじ"],"g":["Korea Standard Time"],"p":"n","f":"かん|こく|ひょう|じゅん|じ"}],
-"韓国海苔": [{"r":["かんこくのり"],"g":["gim"],"p":"n","f":"*"}],
-"韓国生命工学研究所": [{"r":["かんこくせいめいこうがくけんきゅうじょ"],"g":["Korea Research Institute of Bioscience and Biotechnology"],"p":"n","f":"かん|こく|せい|めい|こう|がく|けん|きゅう|じょ"}],
-"韓国産業安全公団": [{"r":["かんこくさんぎょうあんぜんこうだん"],"g":["Korea Industrial Safety Corporation"],"p":"n","f":"かん|こく|さん|ぎょう|あん|ぜん|こう|だん"}]
+"韓国標準時": [{"r":["かんこくひょうじゅんじ"],"g":["Korea Standard Time"],"p":"n","f":"かん|こく|ひょう|じゅん|じ"}]
 }
 }

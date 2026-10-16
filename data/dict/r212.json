@@ -1,9 +1,21 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "峰蘇芳",
-"last": "巻起す",
+"first": "峨峨",
+"last": "巻繊",
 "entries": {
+"峨峨": [{"r":["がが"],"g":["rugged (mountains)"],"p":"adj-t adv-to","f":"が|が"}],
+"峭刻": [{"r":["しょうこく"],"g":["very rigorous"],"p":"adj-t adv-to","f":"しょう|こく"}],
+"峯": [{"r":["みね"],"g":["peak","back of a blade"],"p":"n"}],
+"峰々": [{"r":["みねみね"],"g":["peaks"],"p":"n","f":"みね|みね"}],
+"峰不二子": [{"r":["みねふじこ"],"g":["Fujiko Mine (Lupin III)"],"p":"n","f":"みね|ふ|じ|こ"}],
+"峰伝い": [{"r":["みねづたい"],"g":["along the ridges"],"p":"n","f":"みね|づた"}],
+"峰峰": [{"r":["みねみね"],"g":["peaks"],"p":"n","f":"みね|みね"}],
+"峰巒": [{"r":["ほうらん"],"g":["(mountain) peak"],"p":"n","f":"ほう|らん"}],
+"峰打ち": [{"r":["みねうち"],"g":["striking with the back of the sword"],"p":"n","f":"みね|う"}],
+"峰桜": [{"r":["みねざくら"],"g":["Japanese alpine cherry (Prunus nipponica)"],"p":"n","f":"みね|ざくら","u":1}],
+"峰楓": [{"r":["みねかえで"],"g":["butterfly maple (Acer tschonoskii)"],"p":"n","f":"みね|かえで","u":1}],
+"峰続き": [{"r":["みねつづき"],"g":["succession of peaks"],"p":"n","f":"みね|つづ"}],
 "峰蘇芳": [{"r":["みねずおう"],"g":["alpine azalea (Kalmia procumbens)"],"p":"n","f":"*","u":1}],
 "峰頭": [{"r":["ほうとう"],"g":["summit of a peak"],"p":"n","f":"ほう|とう"}],
 "島": [{"r":["とう"],"g":["Island","insula"],"p":"suf n-suf n"}],
@@ -1277,17 +1289,6 @@
 "巻網": [{"r":["まきあみ"],"g":["round haul net"],"p":"n","f":"まき|あみ"}],
 "巻線": [{"r":["まきせん"],"g":["winding (coil, armature, etc.)"],"p":"n","f":"まき|せん"}],
 "巻縮": [{"r":["けんしゅく"],"g":["crimp"],"p":"n","f":"けん|しゅく"}],
-"巻繊": [{"r":["けんちん","けんちゃん","けんちぇん"],"g":["fried finely minced daikon, great burdock, carrot and…","Japanese tofu and vegetable chowder","black soybean sprouts fried in sesame seed oil wrapped in…"],"p":"n","f":"*"}],
-"巻繊汁": [{"r":["けんちんじる"],"g":["Japanese tofu and vegetable chowder"],"p":"n","f":"*"}],
-"巻纓": [{"r":["けんえい","かんえい","まきえい"],"g":["rolled tail (of a traditional Japanese hat)"],"p":"n","f":"けん|えい"}],
-"巻耳": [{"r":["おなもみ"],"g":["cocklebur (Xanthium strumarium)"],"p":"n","f":"*","u":1}],
-"巻脚絆": [{"r":["まききゃはん"],"g":["puttee"],"p":"n","f":"まき|きゃ|はん"}],
-"巻舌": [{"r":["まきじた"],"g":["speaking with a trill"],"p":"n","f":"まき|じた"}],
-"巻藁": [{"r":["まきわら"],"g":["straw post for training sword strikes, karate punches and…"],"p":"n","f":"まき|わら"}],
-"巻藁矢": [{"r":["まきわらや"],"g":["close-range fletched practice arrow"],"p":"n","f":"まき|わら|や"}],
-"巻貝": [{"r":["まきがい"],"g":["snail"],"p":"n","f":"まき|がい"}],
-"巻起こす": [{"r":["まきおこす"],"g":["to create (a sensation)","to raise (a cloud of dust)"],"p":"v5s vt","f":"まき|お"}],
-"巻起こる": [{"r":["まきおこる"],"g":["to arise"],"p":"v5r vi","f":"まき|お"}],
-"巻起す": [{"r":["まきおこす"],"g":["to create (a sensation)","to raise (a cloud of dust)"],"p":"v5s vt","f":"まき|おこ"}]
+"巻繊": [{"r":["けんちん","けんちゃん","けんちぇん"],"g":["fried finely minced daikon, great burdock, carrot and…","Japanese tofu and vegetable chowder","black soybean sprouts fried in sesame seed oil wrapped in…"],"p":"n","f":"*"}]
 }
 }

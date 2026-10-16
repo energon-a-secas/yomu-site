@@ -1,9 +1,14 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "雲助",
-"last": "青文字",
+"first": "雲丹",
+"last": "青底翳",
 "entries": {
+"雲丹": [{"r":["うに"],"g":["sea urchin","seasoned sea urchin eggs"],"p":"n","f":"*","u":1}],
+"雲井": [{"r":["くもい"],"g":["sky","cloud","distant place"],"p":"n","f":"くも|い"}],
+"雲伝神道": [{"r":["うんでんしんとう"],"g":["Unden Shinto…"],"p":"n","f":"うん|でん|しん|とう"}],
+"雲伯方言": [{"r":["うんぱくほうげん"],"g":["dialects of Japanese spoken in Western Tottori prefecture…"],"p":"n","f":"うん|ぱく|ほう|げん"}],
+"雲切れ": [{"r":["くもぎれ"],"g":["gap between the clouds"],"p":"n","f":"くも|ぎ"}],
 "雲助": [{"r":["くもすけ"],"g":["ruffian palanquin bearer (Edo period)","thug"],"p":"n","f":"くも|すけ"}],
 "雲助根性": [{"r":["くもすけこんじょう"],"g":["predatory nature"],"p":"n","f":"くも|すけ|こん|じょう"}],
 "雲助運転手": [{"r":["くもすけうんてんしゅ"],"g":["dishonest taxi driver"],"p":"n","f":"くも|すけ|うん|てん|しゅ"}],
@@ -1217,12 +1222,6 @@
 "青年時代": [{"r":["せいねんじだい"],"g":["(one's) youth"],"p":"n","f":"せい|ねん|じ|だい"}],
 "青年期": [{"r":["せいねんき"],"g":["youth"],"p":"n","f":"せい|ねん|き"}],
 "青年輩": [{"r":["せいねんはい"],"g":["young people"],"p":"n","f":"せい|ねん|はい"}],
-"青底翳": [{"r":["あおそこひ"],"g":["glaucoma"],"p":"n","f":"*"}],
-"青心社": [{"r":["せいしんしゃ"],"g":["Seinshinsha (publisher)"],"p":"n","f":"せい|しん|しゃ"}],
-"青息": [{"r":["あおいき"],"g":["anxious or pained sigh"],"p":"n","f":"あお|いき"}],
-"青息吐息": [{"r":["あおいきといき"],"g":["deep distress"],"p":"n","f":"あお|いき|と|いき"}],
-"青懸巣": [{"r":["あおかけす"],"g":["blue jay (Cyanocitta cristata)"],"p":"n","f":"あお|かけ|す","u":1}],
-"青房": [{"r":["あおぶさ"],"g":["green tassel hung above the northeast corner of the ring"],"p":"n","f":"あお|ぶさ"}],
-"青文字": [{"r":["あおもじ"],"g":["Litsea cubeba"],"p":"n","f":"あお|も|じ"}]
+"青底翳": [{"r":["あおそこひ"],"g":["glaucoma"],"p":"n","f":"*"}]
 }
 }

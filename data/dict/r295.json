@@ -1,9 +1,15 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "追って書き",
-"last": "速力を落とす",
+"first": "追い鰹",
+"last": "速乾",
 "entries": {
+"追い鰹": [{"r":["おいがつお"],"g":["rich bonito broth"],"p":"n"}],
+"追いＬＩＮＥ": [{"r":["おいライン"],"g":["sending a follow-up message (on LINE) before receiving a…"],"p":"n"}],
+"追ける": [{"r":["つける"],"g":["to follow (someone)"],"p":"v1 vt"}],
+"追っかけリーチ": [{"r":["おっかけリーチ"],"g":["rīchi called after another player's rīchi"],"p":"n"}],
+"追っつく": [{"r":["おっつく"],"g":["to catch up (with)","to be compensated"],"p":"v5k vi"}],
+"追って": [{"r":["おって"],"g":["later on","P.S."],"p":"adv conj"}],
 "追って書き": [{"r":["おってがき"],"g":["postscript"],"p":"n"}],
 "追っぱらう": [{"r":["おっぱらう"],"g":["to chase away"],"p":"v5u vt"}],
 "追っ付く": [{"r":["おっつく"],"g":["to catch up (with)","to be compensated"],"p":"v5k vi"}],
@@ -1252,11 +1258,6 @@
 "速め": [{"r":["はやめ"],"g":["early","a little faster than usual"],"p":"adj-no adj-na n"}],
 "速めに": [{"r":["はやめに"],"g":["a little early","rather quickly"],"p":"adv"}],
 "速わかり": [{"r":["はやわかり"],"g":["quick understanding","(beginner's) guide"],"p":"n vs"}],
-"速乾": [{"r":["そっかん"],"g":["drying quickly"],"p":"n","f":"そっ|かん"}],
-"速乾性": [{"r":["そっかんせい"],"g":["quick-drying property (of clothing, etc.)"],"p":"n adj-no","f":"そっ|かん|せい"}],
-"速修": [{"r":["そくしゅう"],"g":["speed learning"],"p":"n vs","f":"そく|しゅう"}],
-"速写": [{"r":["そくしゃ"],"g":["snapshot"],"p":"n vs vt","f":"そく|しゃ"}],
-"速分かり": [{"r":["はやわかり"],"g":["quick understanding","(beginner's) guide"],"p":"n vs","f":"はや|わ"}],
-"速力を落とす": [{"r":["そくりょくをおとす"],"g":["to slow down"],"p":"exp v5s","f":"そく|りょく;お"}]
+"速乾": [{"r":["そっかん"],"g":["drying quickly"],"p":"n","f":"そっ|かん"}]
 }
 }

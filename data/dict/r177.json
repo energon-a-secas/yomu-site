@@ -1,9 +1,12 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "保険付",
-"last": "側溝",
+"first": "保険レディ",
+"last": "側桁",
 "entries": {
+"保険レディ": [{"r":["ほけんレディ"],"g":["insurance saleswoman"],"p":"n","f":"ほ|けん"}],
+"保険レディー": [{"r":["ほけんレディー"],"g":["insurance saleswoman"],"p":"n","f":"ほ|けん"}],
+"保険事故": [{"r":["ほけんじこ"],"g":["event insured against"],"p":"n","f":"ほ|けん|じ|こ"}],
 "保険付": [{"r":["ほけんつき","ほけんづき"],"g":["guaranteed"],"p":"adj-no","f":"ほ|けん|つき"}],
 "保険付き": [{"r":["ほけんつき","ほけんづき"],"g":["guaranteed"],"p":"adj-no","f":"ほ|けん|つ"}],
 "保険代理店": [{"r":["ほけんだいりてん"],"g":["insurance agent"],"p":"n","f":"ほ|けん|だい|り|てん"}],
@@ -1244,9 +1247,6 @@
 "側杖": [{"r":["そばづえ"],"g":["blow received by a bystander"],"p":"n","f":"そば|づえ"}],
 "側板": [{"r":["そくばん"],"g":["lateral plate","pleuron"],"p":"n","f":"そく|ばん"},{"r":["がわいた","かわいた"],"g":["stringer","side plate"],"p":"n","f":"がわ|いた","t":1}],
 "側根": [{"r":["そっこん"],"g":["lateral root"],"p":"n","f":"そっ|こん"}],
-"側桁": [{"r":["がわげた","かわげた"],"g":["stringer"],"p":"n","f":"がわ|げた"}],
-"側泳": [{"r":["そばえい"],"g":["side stroke"],"p":"n","f":"そば|えい"}],
-"側湾症": [{"r":["そくわんしょう"],"g":["scoliosis"],"p":"n","f":"そく|わん|しょう"}],
-"側溝": [{"r":["そっこう"],"g":["gutter"],"p":"n","f":"そっ|こう"}]
+"側桁": [{"r":["がわげた","かわげた"],"g":["stringer"],"p":"n","f":"がわ|げた"}]
 }
 }

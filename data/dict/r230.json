@@ -1,9 +1,22 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "文付ける",
-"last": "新潟大学",
+"first": "文を付ける",
+"last": "新涼灯火",
 "entries": {
+"文を付ける": [{"r":["あやをつける"],"g":["to make a false accusation"],"p":"exp v1","u":1}],
+"文を以て立つ": [{"r":["ぶんをもってたつ"],"g":["to live by the pen"],"p":"exp v5t"}],
+"文を組み立てる": [{"r":["ぶんをくみたてる"],"g":["to construct a sentence"],"p":"exp v1"}],
+"文キーワード": [{"r":["ぶんキーワード"],"g":["statement keyword"],"p":"n"}],
+"文ラベル": [{"r":["ぶんラベル"],"g":["statement label"],"p":"n"}],
+"文久": [{"r":["ぶんきゅう"],"g":["Bunkyū era (1861.2.19-1864.2.20)"],"p":"n","f":"ぶん|きゅう"}],
+"文亀": [{"r":["ぶんき"],"g":["Bunki era (1501.2.29-1504.2.30)"],"p":"n","f":"ぶん|き"}],
+"文事": [{"r":["ぶんじ"],"g":["literary matters"],"p":"n","f":"ぶん|じ"}],
+"文京女子大学": [{"r":["ぶんきょうじょしだいがく"],"g":["Bunkyō Women's University"],"p":"n","f":"ぶん|きょう|じょ|し|だい|がく"}],
+"文京学院大学": [{"r":["ぶんきょうがくいんだいがく"],"g":["Bunkyo Gakuin University"],"p":"n","f":"ぶん|きょう|がく|いん|だい|がく"}],
+"文人": [{"r":["ぶんじん"],"g":["person of letters"],"p":"n","f":"ぶん|じん"},{"r":["ふみびと"],"g":["person of letters"],"p":"n","f":"ふみ|びと","t":1}],
+"文人墨客": [{"r":["ぶんじんぼっかく","ぶんじんぼっきゃく"],"g":["writers and artists"],"p":"n","f":"ぶん|じん|ぼっ|かく"}],
+"文人画": [{"r":["ぶんじんが"],"g":["style of Southern Chinese painting"],"p":"n","f":"ぶん|じん|が"}],
 "文付ける": [{"r":["あやつける"],"g":["to make a false accusation"],"p":"exp v1","f":"あや|つ","u":1}],
 "文体論": [{"r":["ぶんたいろん"],"g":["stylistics"],"p":"n","f":"ぶん|たい|ろん"}],
 "文例": [{"r":["ぶんれい"],"g":["sample sentence"],"p":"n","f":"ぶん|れい"}],
@@ -1179,15 +1192,6 @@
 "新浪漫主義": [{"r":["しんろうまんしゅぎ"],"g":["neo-romanticism"],"p":"n","f":"しん|ろう|まん|しゅ|ぎ"}],
 "新海苔": [{"r":["しんのり"],"g":["first dried nori after the winter"],"p":"n","f":"*"}],
 "新涼": [{"r":["しんりょう"],"g":["coolness of autumn"],"p":"n","f":"しん|りょう"}],
-"新涼灯火": [{"r":["しんりょうとうか"],"g":["the coolness of early autumn is suitable for reading"],"p":"exp","f":"しん|りょう|とう|か"}],
-"新渡戸文化短期大学": [{"r":["にとべぶんかたんきだいがく"],"g":["Nitobe Bunka College"],"p":"n","f":"に|と|べ|ぶん|か|たん|き|だい|がく"}],
-"新湯": [{"r":["あらゆ","さらゆ","しんゆ"],"g":["clean, freshly poured bath"],"p":"n","f":"あら|ゆ"}],
-"新漬": [{"r":["しんづけ"],"g":["freshly pickled vegetables"],"p":"n","f":"しん|づけ"}],
-"新漬け": [{"r":["しんづけ"],"g":["freshly pickled vegetables"],"p":"n","f":"しん|づ"}],
-"新潟リハビリテーション大学": [{"r":["にいがたリハビリテーションだいがく"],"g":["Niigata University of Rehabilitation"],"p":"n","f":"にい|がた;だい|がく"}],
-"新潟中央銀行": [{"r":["にいがたちゅうおうぎんこう"],"g":["Niigata Chuo Bank, Limited"],"p":"n","f":"にい|がた|ちゅう|おう|ぎん|こう"}],
-"新潟医療福祉大学": [{"r":["にいがたいりょうふくしだいがく"],"g":["Niigata University of Health and Welfare"],"p":"n","f":"にい|がた|い|りょう|ふく|し|だい|がく"}],
-"新潟国際情報大学": [{"r":["にいがたこくさいじょうほうだいがく"],"g":["Niigata University of International and Information Studies"],"p":"n","f":"にい|がた|こく|さい|じょう|ほう|だい|がく"}],
-"新潟大学": [{"r":["にいがただいがく"],"g":["Niigata University"],"p":"n","f":"にい|がた|だい|がく"}]
+"新涼灯火": [{"r":["しんりょうとうか"],"g":["the coolness of early autumn is suitable for reading"],"p":"exp","f":"しん|りょう|とう|か"}]
 }
 }

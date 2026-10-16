@@ -2,7 +2,7 @@
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
 "first": "たいれい",
-"last": "たてごとあざらし",
+"last": "たてごと",
 "entries": {
 "たいれい": [{"g":["state ceremony (esp. an enthronement)","important ceremony (in one's life, e.g. wedding, funeral)"],"p":"n","k":["大礼"]},{"g":["declining years"],"p":"n","k":["頽齢"],"t":1},{"g":["embryonic age"],"p":"n","k":["胎齢"],"t":2}],
 "たいれいふく": [{"g":["court dress"],"p":"n","k":["大礼服"]}],
@@ -1097,6 +1097,7 @@
 "ただ券": [{"r":["ただけん"],"g":["free ticket"],"p":"n"}],
 "ただ取り": [{"r":["ただどり","ただとり"],"g":["getting something for nothing"],"p":"n vs vt"}],
 "ただ者": [{"r":["ただもの"],"g":["ordinary person"],"p":"n"}],
+"ただ見": [{"r":["ただみ"],"g":["watching without paying (a film, play, etc.)"],"p":"n"}],
 "ただ酒": [{"r":["ただざけ"],"g":["free alcohol"],"p":"n"}],
 "ただ食い": [{"r":["ただぐい"],"g":["eating without paying"],"p":"n vs"}],
 "ただ飯": [{"r":["ただめし"],"g":["free food"],"p":"n"}],
@@ -1393,7 +1394,6 @@
 "たてこもる": [{"g":["to shut oneself in (one's house, room, etc.)","to barricade oneself (in a building)"],"p":"v5r vi","k":["立てこもる","立て篭もる"]}],
 "たてご": [{"g":["lattice"],"p":"n","k":["竪子"]}],
 "たてごうし": [{"g":["vertical bars"],"p":"n","k":["縦格子","竪格子"]}],
-"たてごと": [{"g":["harp"],"p":"n","k":["竪琴"]},{"g":["koto erected in one's yard as decoration during the…"],"p":"n","k":["立琴"],"t":1}],
-"たてごとあざらし": [{"g":["harp seal (Phoca groenlandica)"],"p":"n","k":["竪琴海豹"],"u":1}]
+"たてごと": [{"g":["harp"],"p":"n","k":["竪琴"]},{"g":["koto erected in one's yard as decoration during the…"],"p":"n","k":["立琴"],"t":1}]
 }
 }

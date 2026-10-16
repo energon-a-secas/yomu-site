@@ -1,10 +1,8 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","KanjiVG stroke order SVGs r20250816"],"inputs":[{"id":"kanjivg","source":"KanjiVG, Ulrich Apel","url":"http://kanjivg.tagaini.net","spdx":"CC-BY-SA-3.0","screen":"required","acknowledgement":"Attribution. You must attribute the work by stating your use of KanjiVG in your own copyright header and linking to KanjiVG's website (http://kanjivg.tagaini.net)","use":"parts, the named components under each character, followed to their own parts"}],"generated_by":"tools/build-search.mjs","generated_at":"2026-10-01"},
 "format": "yomu-search-rare/1",
-"first": "emerged",
+"first": "emergencies",
 "entries": {
-"emerged": [["ポピュリスム","",["populism (French literary movement that emerged in the…","populism (political philosophy)"],"n",0]],
-"emergence": [["創発","そうはつ",["emergence (in evolutionary theory, systems theory, etc.)"],"n",0],["羽化","うか",["emergence (of insects)"],"n vs vi",0],["爆誕","ばくたん",["sudden emergence"],"n vs",0],["再ブレイク","さいブレイク",["re-emergence (of a singer, actor, etc.)"],"n vs vi",0]],
 "emergencies": [["有事立法","ゆうじりっぽう",["legislation to deal with emergencies"],"n",0]],
 "emergency": [["急場","きゅうば",["emergency","urgent move…"],"n",0],["焦眉","しょうび",["emergency"],"n",0],["緊急時","きんきゅうじ",["(time of) emergency"],"n",0],["仮泊","かはく",["emergency anchoring"],"n vs vi",0],["もしもの時","もしものとき",["(in an) emergency"],"exp",0],["備荒食","びこうしょく",["emergency food"],"n",0],["応急策","おうきゅうさく",["emergency or temporary measure"],"n",0],["急病人","きゅうびょうにん",["emergency case"],"n",0],["救急科","きゅうきゅうか",["emergency department (of a hospital)"],"n",0],["誘導灯","ゆうどうとう",["emergency exit light"],"n",0]],
 "emergent": [["抽水植物","ちゅうすいしょくぶつ",["emergent plant"],"n",0],["離水海岸","りすいかいがん",["emergent coastline"],"n",0]],
@@ -524,6 +522,7 @@
 "epicurean": [["エピキュリアン","",["epicurean"],"n",0],["エピクロス学派","エピクロスがくは",["Epicurean school"],"n",0]],
 "epicureanism": [["享楽主義","きょうらくしゅぎ",["epicureanism"],"n",0],["エピクロス主義","エピクロスしゅぎ",["Epicureanism"],"n",0]],
 "epicurism": [["美食主義","びしょくしゅぎ",["epicurism"],"n",0]],
-"epicycle": [["周転円","しゅうてんえん",["epicycle"],"n",0]]
+"epicycle": [["周転円","しゅうてんえん",["epicycle"],"n",0]],
+"epidemic": [["悪疫","あくえき",["epidemic"],"n adj-no",0],["時疫","じえき",["epidemic"],"n",0],["疫癘","えきれい",["epidemic"],"n",0],["流行性","りゅうこうせい",["epidemic"],"adj-no n",0],["流行病","りゅうこうびょう",["epidemic","epidemic"],"n",0],["はやり病","はやりやまい",["epidemic"],"n",0],["病気の流行","びょうきのりゅうこう",["epidemic"],"exp n",0],["瘟疫","うんえき",["fever epidemic"],"n",0],["エピデミック","",["epidemic"],"n",0],["流行性肝炎","りゅうこうせいかんえん",["epidemic hepatitis"],"n",0]]
 }
 }

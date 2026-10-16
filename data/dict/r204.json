@@ -1,9 +1,18 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "天竺木綿",
-"last": "女流文学",
+"first": "天空の城ラピュタ",
+"last": "女武芸者",
 "entries": {
+"天空の城ラピュタ": [{"r":["てんくうのしろラピュタ"],"g":["Laputa: Castle in the Sky (1986 animated film)"],"p":"n","f":"てん|くう;しろ"}],
+"天空海濶": [{"r":["てんくうかいかつ"],"g":["the open sky and the serene sea"],"p":"n","f":"てん|くう|かい|かつ"}],
+"天空海闊": [{"r":["てんくうかいかつ"],"g":["the open sky and the serene sea"],"p":"n","f":"てん|くう|かい|かつ"}],
+"天窓": [{"r":["てんまど","てんそう"],"g":["skylight","head"],"p":"n","f":"てん|まど"}],
+"天竜": [{"r":["てんりゅう","てんりょう"],"g":["deva and naga","heavenly dragon"],"p":"n","f":"てん|りゅう"}],
+"天竜八部衆": [{"r":["てんりゅうはちぶしゅう"],"g":["the eight legions…"],"p":"n","f":"てん|りゅう|はち|ぶ|しゅう"}],
+"天童": [{"r":["てんどう"],"g":["cherub"],"p":"n","f":"てん|どう"}],
+"天端": [{"r":["てんば"],"g":["top of a dam or embankment (oft. used as a road)"],"p":"n","f":"てん|ば"}],
+"天竺": [{"r":["てんじく"],"g":["India","cotton sheeting","foreign"],"p":"n n-pref","f":"てん|じく"}],
 "天竺木綿": [{"r":["てんじくもめん"],"g":["cotton sheeting"],"p":"n","f":"てん|じく|も|めん"}],
 "天竺楽": [{"r":["てんじくがく"],"g":["gagaku of Indian origin"],"p":"n","f":"てん|じく|がく"}],
 "天竺浪人": [{"r":["てんじくろうにん"],"g":["wandering lordless samurai"],"p":"n","f":"てん|じく|ろう|にん"}],
@@ -1187,14 +1196,6 @@
 "女歌舞伎": [{"r":["おんなかぶき"],"g":["girls' kabuki"],"p":"n","f":"おんな|か|ぶ|き"}],
 "女正月": [{"r":["おんなしょうがつ"],"g":["15th day of the New Year…"],"p":"n","f":"おんな|しょう|がつ"}],
 "女武者": [{"r":["おんなむしゃ"],"g":["female warrior"],"p":"n","f":"おんな|む|しゃ"}],
-"女武芸者": [{"r":["おんなぶげいしゃ"],"g":["female warrior"],"p":"n","f":"おんな|ぶ|げい|しゃ"}],
-"女殺し": [{"r":["おんなごろし","おんなころし"],"g":["ladykiller","murder of a woman"],"p":"n","f":"おんな|ごろ"}],
-"女殺油地獄": [{"r":["おんなころしあぶらのじごく"],"g":["The Woman-Killer (bunraku play by Chikamatsu Monzaemon)"],"p":"n","f":"*"}],
-"女氏無くして玉の輿に乗る": [{"r":["おんなうじなくしてたまのこしにのる"],"g":["even a woman of low birth can gain status by marrying rich…"],"p":"exp v5r","f":"おんな|うじ|な;たま;こし;の"}],
-"女気": [{"r":["おんなけ"],"g":["female presence"],"p":"n","f":"おんな|け"},{"r":["おんなぎ"],"g":["feminine spirit"],"p":"n","f":"おんな|ぎ","t":1}],
-"女波": [{"r":["めなみ"],"g":["smaller waves"],"p":"n","f":"め|なみ"}],
-"女流作家": [{"r":["じょりゅうさっか"],"g":["woman writer"],"p":"n","f":"じょ|りゅう|さっ|か"}],
-"女流名人": [{"r":["じょりゅうめいじん"],"g":["female professional"],"p":"n","f":"じょ|りゅう|めい|じん"}],
-"女流文学": [{"r":["じょりゅうぶんがく"],"g":["women's writing"],"p":"n","f":"じょ|りゅう|ぶん|がく"}]
+"女武芸者": [{"r":["おんなぶげいしゃ"],"g":["female warrior"],"p":"n","f":"おんな|ぶ|げい|しゃ"}]
 }
 }

@@ -1,9 +1,14 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "附加刑",
-"last": "隱す",
+"first": "附与",
+"last": "隨う",
 "entries": {
+"附与": [{"r":["ふよ"],"g":["grant"],"p":"n vs vt","f":"ふ|よ"}],
+"附会": [{"r":["ふかい"],"g":["adding","drawing a forced inference"],"p":"n vs vt","f":"ふ|かい"}],
+"附則": [{"r":["ふそく"],"g":["additional rules"],"p":"n","f":"ふ|そく"}],
+"附加": [{"r":["ふか"],"g":["addition"],"p":"n vs vt adj-no","f":"ふ|か"}],
+"附加える": [{"r":["つけくわえる"],"g":["to add (one thing to another)"],"p":"v1 vt","f":"つけ|くわ"}],
 "附加刑": [{"r":["ふかけい"],"g":["supplementary punishment"],"p":"n","f":"ふ|か|けい"}],
 "附合": [{"r":["ふごう"],"g":["accession"],"p":"n","f":"ふ|ごう"}],
 "附和随行": [{"r":["ふわずいこう"],"g":["participating in something by merely following the leaders"],"p":"n vs","f":"ふ|わ|ずい|こう"}],
@@ -1275,11 +1280,6 @@
 "隣通し": [{"r":["となりどうし"],"g":["next-door neighbors"],"p":"n","f":"*"}],
 "隣邦": [{"r":["りんぽう"],"g":["neighboring country"],"p":"n","f":"りん|ぽう"}],
 "隧道": [{"r":["すいどう","ずいどう","ついどう"],"g":["tunnel"],"p":"n","f":"すい|どう"}],
-"隨う": [{"r":["したがう"],"g":["to obey (an order, law, etc.)","to follow (a person)","to go alongside (e.g. a river)"],"p":"v5u vi"}],
-"隨分": [{"r":["ずいぶん"],"g":["very","terrible","remarkable"],"p":"adv adv-to adj-na","f":"ずい|ぶん","u":1}],
-"隨筆": [{"r":["ずいひつ"],"g":["essays"],"p":"n","f":"ずい|ひつ"}],
-"隨筆家": [{"r":["ずいひつか"],"g":["essayist"],"p":"n","f":"ずい|ひつ|か"}],
-"隨筆集": [{"r":["ずいひつしゅう"],"g":["collection of essays…"],"p":"n","f":"ずい|ひつ|しゅう"}],
-"隱す": [{"r":["かくす"],"g":["to hide"],"p":"v5s vt"}]
+"隨う": [{"r":["したがう"],"g":["to obey (an order, law, etc.)","to follow (a person)","to go alongside (e.g. a river)"],"p":"v5u vi"}]
 }
 }

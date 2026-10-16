@@ -15,7 +15,7 @@
 "hina": [["男びな","おびな",["Emperor hina doll"],"n",0],["ひな人形","ひなにんぎょう",["hina doll"],"n",0],["ヒナプロジェクト","",["Hina Project"],"n",0]],
 "hinai": [["比内地鳥","ひないじどり",["cross between Hinai-dori and Rhode Island Red chickens"],"n",0]],
 "hinamatsuri": [["お雛さま","おひなさま",["display of dolls during Hinamatsuri","Hinamatsuri (March 3)"],"n",0]],
-"hinayana": [["小乗","しょうじょう",["Hinayana (Buddhism)"],"n",0],["声聞僧","しょうもんそう",["Hinayana monk"],"n",0],["小乗仏教","しょうじょうぶっきょう",["Hinayana Buddhism","Theravada Buddhism"],"n",0]],
+"hinayana": [["小乗","しょうじょう",["Hinayana (Buddhism)"],"n",0],["声聞僧","しょうもんそう",["Hinayana monk"],"n",0],["小乗仏教","しょうじょうぶっきょう",["Hinayana Buddhism","Theravada Buddhism"],"n",0],["声聞","しょうもん",["sravaka (disciple of Buddha)","adherent of Hinayana Buddhism"],"n",0]],
 "hind": [["後脚","あとあし",["hind legs"],"n",0],["うしろ足","うしろあし",["hind leg"],"n",0]],
 "hinder": [["さし障る","さしさわる",["to hinder"],"v5r vi",0],["水さす","みずをさす",["to pour water (into)","to hinder"],"exp v5s",0],["支障をきたす","ししょうをきたす",["to hinder"],"exp v5s",0],["害す","がいす",["to injure","to kill"],"v5s vs-c vt",1],["成長を阻む","せいちょうをはばむ",["to hinder the growth of (e.g. plants, someone)"],"exp v5m",0],["水をかける","みずをかける",["to sprinkle water on (something)","to hinder"],"exp v1",0]],
 "hindi": [["ヒンディー","",["Hindi"],"n",0],["ヒンディ語","ヒンディご",["Hindi (language)"],"n",0],["ヒンディー語","ヒンディーご",["Hindi (language)"],"n",0]],
@@ -561,7 +561,6 @@
 "hours": [["数刻","すうこく",["several hours"],"n",0],["暇々","ひまひま",["one's leisure hours"],"n adv",0],["時短","じたん",["reduction in working hours","time-saving"],"n adj-f",0],["時祷書","じとうしょ",["book of hours (devotional book popular in the Middle Ages)"],"n",0],["稼働時間","かどうじかん",["hours of operation (of a machine, etc.)"],"n",0],["遅早時間","ちそうじかん",["hours (of work) missed by arriving late or leaving early"],"n",0],["面接時間","めんせつじかん",["hours for interviews"],"n",0],["作業時間","さぎょうじかん",["working hours"],"n",0],["割引時間","わりびきじかん",["discounted hours"],"n",0],["労働時間","ろうどうじかん",["working hours"],"n",0]],
 "house": [["ち","",["'s house","wisdom"],"suf",15],["んち","",["'s house","nth day (of the month)"],"exp suf",1],["住家","じゅうか",["(residential) house","dwelling"],"n",1],["戸建","こだて",["(separate) house"],"n",0],["民居","みんきょ",["(private) house"],"n",0],["民屋","みんおく",["(private) house"],"n",0],["カーサ","",["house"],"n",0],["建ち家","たちいえ",["house"],"n",0],["院","いん",["house of parliament (congress, diet, etc.)","graduate school"],"n suf",1],["帑","かねぐら",["treasure house","financial supporter"],"n",0]],
 "houseboat": [["屋形船","やかたぶね",["houseboat"],"n",0]],
-"houseboy": [["家僕","かぼく",["houseboy"],"n",0]],
-"housebreaker": [["押し込み強盗","おしこみごうとう",["housebreaker"],"n",0]]
+"houseboy": [["家僕","かぼく",["houseboy"],"n",0]]
 }
 }

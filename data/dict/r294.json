@@ -1,9 +1,14 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "軽戦車",
-"last": "追って",
+"first": "軽度懸念",
+"last": "追い駆ける",
 "entries": {
+"軽度懸念": [{"r":["けいどけねん"],"g":["least concern (IUCN Red List category)"],"p":"adj-no n","f":"けい|ど|け|ねん"}],
+"軽度認識障害": [{"r":["けいどにんしきしょうがい"],"g":["mild cognitive impairment"],"p":"n","f":"けい|ど|にん|しき|しょう|がい"}],
+"軽微": [{"r":["けいび"],"g":["slight"],"p":"adj-na n","f":"けい|び"}],
+"軽忽": [{"r":["きょうこつ","けいこつ"],"g":["indiscreet","absurd","disdaining"],"p":"adj-na","f":"きょう|こつ"}],
+"軽愚": [{"r":["けいぐ"],"g":["moronity"],"p":"n","f":"けい|ぐ"}],
 "軽戦車": [{"r":["けいせんしゃ"],"g":["light tank"],"p":"n","f":"けい|せん|しゃ"}],
 "軽挙": [{"r":["けいきょ"],"g":["hasty act"],"p":"n vs vi","f":"けい|きょ"}],
 "軽挙妄動": [{"r":["けいきょもうどう"],"g":["rash and blind act"],"p":"n vs","f":"けい|きょ|もう|どう"}],
@@ -1262,12 +1267,6 @@
 "追い追い": [{"r":["おいおい"],"g":["gradually"],"p":"adv"}],
 "追い遣る": [{"r":["おいやる"],"g":["to drive away","to force into an unpleasant situation…"],"p":"v5r vt"}],
 "追い銭": [{"r":["おいせん"],"g":["money paid in addition"],"p":"n"}],
-"追い駆ける": [{"r":["おいかける"],"g":["to chase","subsequently"],"p":"v1 vt"}],
-"追い鰹": [{"r":["おいがつお"],"g":["rich bonito broth"],"p":"n"}],
-"追いＬＩＮＥ": [{"r":["おいライン"],"g":["sending a follow-up message (on LINE) before receiving a…"],"p":"n"}],
-"追ける": [{"r":["つける"],"g":["to follow (someone)"],"p":"v1 vt"}],
-"追っかけリーチ": [{"r":["おっかけリーチ"],"g":["rīchi called after another player's rīchi"],"p":"n"}],
-"追っつく": [{"r":["おっつく"],"g":["to catch up (with)","to be compensated"],"p":"v5k vi"}],
-"追って": [{"r":["おって"],"g":["later on","P.S."],"p":"adv conj"}]
+"追い駆ける": [{"r":["おいかける"],"g":["to chase","subsequently"],"p":"v1 vt"}]
 }
 }

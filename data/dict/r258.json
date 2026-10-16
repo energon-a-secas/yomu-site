@@ -1,9 +1,18 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "男一匹",
-"last": "病者の塗油",
+"first": "男やもめにうじがわく",
+"last": "病痾",
 "entries": {
+"男やもめにうじがわく": [{"r":["おとこやもめにうじがわく"],"g":["widowers are untidy"],"p":"exp v5k"}],
+"男やもめに蛆がわく": [{"r":["おとこやもめにうじがわく"],"g":["widowers are untidy"],"p":"exp v5k"}],
+"男を売る": [{"r":["おとこをうる"],"g":["to make a name for oneself through chivalrous deeds"],"p":"exp v5r"}],
+"男を知る": [{"r":["おとこをしる"],"g":["to lose one's virginity (of a woman)"],"p":"exp v5r"}],
+"男を見せる": [{"r":["おとこをみせる"],"g":["to show off one's manliness"],"p":"exp v1"}],
+"男アナ": [{"r":["おとこアナ"],"g":["male TV announcer"],"p":"n"}],
+"男バス": [{"r":["だんバス"],"g":["men's basketball"],"p":"n"}],
+"男バレ": [{"r":["だんバレ"],"g":["men's volleyball"],"p":"n"}],
+"男メシ": [{"r":["おとこめし"],"g":["dude food"],"p":"n"}],
 "男一匹": [{"r":["おとこいっぴき"],"g":["shining example of a man"],"p":"n","f":"おとこ|いっ|ぴき"}],
 "男主": [{"r":["おとこあるじ","おとこしゅう"],"g":["male head of a household"],"p":"n","f":"おとこ|あるじ"}],
 "男仮名": [{"r":["おとこがな"],"g":["kanji used as phonetic symbols"],"p":"n","f":"おとこ|が|な"}],
@@ -1281,14 +1290,6 @@
 "病理解剖": [{"r":["びょうりかいぼう"],"g":["clinical autopsy"],"p":"n","f":"びょう|り|かい|ぼう"}],
 "病理解剖学": [{"r":["びょうりかいぼうがく"],"g":["morbid anatomy"],"p":"n","f":"びょう|り|かい|ぼう|がく"}],
 "病症": [{"r":["びょうしょう"],"g":["nature of a disease"],"p":"n","f":"びょう|しょう"}],
-"病痾": [{"r":["びょうあ"],"g":["chronic disease"],"p":"n","f":"びょう|あ"}],
-"病癖": [{"r":["びょうへき"],"g":["bad habit"],"p":"n","f":"びょう|へき"}],
-"病的": [{"r":["びょうてき"],"g":["pathological"],"p":"adj-na adj-no","f":"びょう|てき"}],
-"病的放火": [{"r":["びょうてきほうか"],"g":["pyromania"],"p":"n","f":"びょう|てき|ほう|か"}],
-"病的科学": [{"r":["びょうてきかがく"],"g":["pathological science"],"p":"n","f":"びょう|てき|か|がく"}],
-"病相": [{"r":["びょうそう"],"g":["episode (of a mental illness)"],"p":"n","f":"びょう|そう"}],
-"病相期": [{"r":["びょうそうき"],"g":["active phase (of an illness)"],"p":"n","f":"びょう|そう|き"}],
-"病者": [{"r":["びょうしゃ","びょうじゃ"],"g":["sick person"],"p":"n","f":"びょう|しゃ"}],
-"病者の塗油": [{"r":["びょうしゃのとゆ"],"g":["Anointing of the Sick"],"p":"exp n","f":"びょう|しゃ;と|ゆ"}]
+"病痾": [{"r":["びょうあ"],"g":["chronic disease"],"p":"n","f":"びょう|あ"}]
 }
 }

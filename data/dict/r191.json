@@ -1,9 +1,15 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "取引者",
-"last": "句構造文法",
+"first": "取引所",
+"last": "句切",
 "entries": {
+"取引所": [{"r":["とりひきじょ"],"g":["(a stock) exchange"],"p":"n","f":"とり|ひき|じょ"}],
+"取引所税": [{"r":["とりひきじょぜい"],"g":["exchange tax"],"p":"n","f":"とり|ひき|じょ|ぜい"}],
+"取引日": [{"r":["とりひきひ"],"g":["trading day"],"p":"n","f":"とり|ひき|ひ"}],
+"取引材料": [{"r":["とりひきざいりょう"],"g":["bargaining chip"],"p":"n","f":"とり|ひき|ざい|りょう"}],
+"取引条件": [{"r":["とりひきじょうけん"],"g":["terms and conditions (e.g. of a purchase or trade)"],"p":"n","f":"とり|ひき|じょう|けん"}],
+"取引業者": [{"r":["とりひきぎょうしゃ"],"g":["broker"],"p":"n","f":"とり|ひき|ぎょう|しゃ"}],
 "取引者": [{"r":["とりひきしゃ"],"g":["transactor"],"p":"n","f":"とり|ひき|しゃ"}],
 "取引高": [{"r":["とりひきだか"],"g":["volume of business"],"p":"n","f":"とり|ひき|だか"}],
 "取得原価": [{"r":["しゅとくげんか"],"g":["cost of acquisition"],"p":"n","f":"しゅ|とく|げん|か"}],
@@ -811,6 +817,7 @@
 "口抜き": [{"r":["くちぬき"],"g":["corkscrew"],"p":"n","f":"くち|ぬ"}],
 "口拍子": [{"r":["くちびょうし"],"g":["counting time orally"],"p":"n","f":"くち|びょう|し"}],
 "口拭き": [{"r":["くちふき"],"g":["napkin"],"p":"n","f":"くち|ふ"}],
+"口振": [{"r":["こうふり"],"g":["direct debit"],"p":"n","f":"こう|ふり"}],
 "口振り": [{"r":["くちぶり"],"g":["way of speaking","intimation"],"p":"n","f":"くち|ぶ"}],
 "口授": [{"r":["くうじゅ","こうじゅ","くじゅ"],"g":["oral instruction or teaching or method"],"p":"n vs vt","f":"*"}],
 "口撃": [{"r":["こうげき"],"g":["verbal attack"],"p":"n vs vt","f":"こう|げき"}],
@@ -932,6 +939,7 @@
 "口語表現": [{"r":["こうごひょうげん"],"g":["colloquial expression"],"p":"n","f":"こう|ご|ひょう|げん"}],
 "口語訳": [{"r":["こうごやく"],"g":["colloquial translation"],"p":"n","f":"こう|ご|やく"}],
 "口誦": [{"r":["こうしょう"],"g":["recitation"],"p":"n vs vt","f":"こう|しょう"}],
+"口説": [{"r":["くぜつ"],"g":["lovers' tiff","chattering"],"p":"n","f":"く|ぜつ"}],
 "口説き": [{"r":["くどき"],"g":["entreaty","spoken portion of a song"],"p":"n vs","f":"く|ど"}],
 "口説き文句": [{"r":["くどきもんく"],"g":["chat-up line"],"p":"exp n","f":"く|ど;もん|く"}],
 "口説き落す": [{"r":["くどきおとす"],"g":["to persuade"],"p":"v5s vt","f":"く|ど;おと"}],
@@ -1283,14 +1291,6 @@
 "句会": [{"r":["くかい"],"g":["gathering of haiku poets"],"p":"n","f":"く|かい"}],
 "句作": [{"r":["くさく"],"g":["composing haiku poems"],"p":"n vs vi","f":"く|さく"}],
 "句例": [{"r":["くれい"],"g":["phrase example"],"p":"n","f":"く|れい"}],
-"句切": [{"r":["くぎり"],"g":["pause (in speech, writing, etc.)","break"],"p":"n","f":"く|ぎり"}],
-"句切り": [{"r":["くぎり"],"g":["pause (in speech, writing, etc.)","break"],"p":"n","f":"く|ぎ"}],
-"句切る": [{"r":["くぎる"],"g":["to divide","to punctuate"],"p":"v5r vt","f":"く|ぎ"}],
-"句動詞": [{"r":["くどうし"],"g":["phrasal verb"],"p":"n","f":"く|どう|し"}],
-"句句": [{"r":["くく"],"g":["every clause"],"p":"n","f":"く|く"}],
-"句形": [{"r":["くけい"],"g":["poetry form (esp. haiku)","grammatical structure in kanbun"],"p":"n","f":"く|けい"}],
-"句心": [{"r":["くごころ"],"g":["poetic instinct"],"p":"n","f":"く|ごころ"}],
-"句意": [{"r":["くい"],"g":["meaning of phrase"],"p":"n","f":"く|い"}],
-"句構造文法": [{"r":["くこうぞうぶんぽう"],"g":["phrase structure grammar"],"p":"n","f":"く|こう|ぞう|ぶん|ぽう"}]
+"句切": [{"r":["くぎり"],"g":["pause (in speech, writing, etc.)","break"],"p":"n","f":"く|ぎり"}]
 }
 }

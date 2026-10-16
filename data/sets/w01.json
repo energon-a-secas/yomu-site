@@ -1,9 +1,8 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826"],"generated_by":"tools/build-sets.mjs","generated_at":"2026-10-01"},
 "format": "yomu-sets-words/1",
-"first": "古い",
+"first": "古今",
 "entries": {
-"古い": [["idiom","古い革袋に新しい酒を盛る","ふるいかわぶくろにあたらしいさけをもる","to pour new wine into old wineskins; to give something unorthodox an orthodox presentation"],["idiom","新しい酒は古い革袋に入れる","あたらしいさけはふるいかわぶくろにいれる","to put new wine into old wineskins; to put new wine into old bottles"]],
 "古今": [["yoji","古今東西","ここんとうざい","all times and places; all ages and countries"],["yoji","古今無双","ここんむそう","unparalleled in history"],["yoji","古今独歩","ここんどっぽ","unmatched in history; unequaled in history"]],
 "古川": [["proverb","古川に水絶えず","ふるかわにみずたえず","a strong foundation can withstand any storm; an old river does not run out of water"]],
 "古来": [["yoji","往古来今","おうこらいこん","in all ages; since antiquity"]],
@@ -438,7 +437,6 @@
 "年功": [["yoji","年功序列","ねんこうじょれつ","seniority by length of service"],["yoji","年功加俸","ねんこうかほう","long service allowance; longevity pay"]],
 "年功序列": [["yoji","年功序列","ねんこうじょれつ","seniority by length of service"]],
 "年寄り": [["idiom","年寄りの冷や水","としよりのひやみず","an old man's indiscretions"]],
-"年老": [["proverb","少年老い易く学成り難し","しょうねんおいやすくがくなりがたし","study hard while you are young; boys grow old easily but getting learned is harder"]],
 "幸": [["yoji","幸災楽禍","こうさいらくか","delighting in the misfortune of others"],["proverb","無知は幸福","むちはこうふく","ignorance is bliss"],["idiom","不幸中の幸い","ふこうちゅうのさいわい","small mercy (from some misfortune); silver lining of a dark cloud; consolation in…"]],
 "幸い": [["idiom","不幸中の幸い","ふこうちゅうのさいわい","small mercy (from some misfortune); silver lining of a dark cloud; consolation in…"]],
 "幸せ": [["proverb","芸が身を助けるほどの不幸せ","げいがみをたすけるほどのふしあわせ","being able to live as an artist is no blessing"]],
@@ -589,6 +587,8 @@
 "憂い": [["proverb","備えあれば憂いなし","そなえあればうれいなし","if you are prepared you don't have to worry; it's good to have a shelter against every…"]],
 "憎い": [["proverb","坊主憎けりゃ袈裟まで憎い","ぼうずにくけりゃけさまでにくい","if you dislike someone, you will end up hating everything he stands for; hate a priest…"]],
 "懇切": [["yoji","丁寧懇切","ていねいこんせつ","kind, careful, and thorough (of an explanation, advice, etc.); thoughtful and scrupulous"],["yoji","懇切丁寧","こんせつていねい","kind, careful, and thorough (of an explanation, advice, etc.); thoughtful and scrupulous"]],
-"懐": [["yoji","虚心坦懐","きょしんたんかい","with an open and calm mind; with no preconceived notions; without reserve; frank; candid"],["proverb","窮鳥懐に入れば猟師も殺さず","きゅうちょうふところにいればりょうしもころさず","even the hunter will refrain from killing the bird that has flown to him for shelter"],["proverb","窮鳥懐に入れば猟師もこれを殺さず","きゅうちょうふところにいればりょうしもこれをころさず","even the hunter will refrain from killing the bird that has flown to him for shelter"]]
+"懐": [["yoji","虚心坦懐","きょしんたんかい","with an open and calm mind; with no preconceived notions; without reserve; frank; candid"],["proverb","窮鳥懐に入れば猟師も殺さず","きゅうちょうふところにいればりょうしもころさず","even the hunter will refrain from killing the bird that has flown to him for shelter"],["proverb","窮鳥懐に入れば猟師もこれを殺さず","きゅうちょうふところにいればりょうしもこれをころさず","even the hunter will refrain from killing the bird that has flown to him for shelter"]],
+"懸命": [["yoji","一生懸命","いっしょうけんめい","very hard; with utmost effort; as hard as one can; with all one's might; for dear life…"],["yoji","一所懸命","いっしょけんめい","very hard; with utmost effort; as hard as one can; with all one's might; for dear life…"]],
+"成す": [["proverb","桃李もの言わざれども下自ら蹊を成す","とうりものいわざれどもしたおのずからみちをなす","a man of virtue will naturally attract admirers; good wine speaks for itself"]]
 }
 }

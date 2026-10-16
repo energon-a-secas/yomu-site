@@ -1,9 +1,15 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "単眼",
-"last": "厳罰主義",
+"first": "単発性",
+"last": "厳正中立",
 "entries": {
+"単発性": [{"r":["たんぱつせい"],"g":["single"],"p":"adj-f adj-no","f":"たん|ぱつ|せい"}],
+"単発機": [{"r":["たんぱつき"],"g":["single-engine plane"],"p":"n","f":"たん|ぱつ|き"}],
+"単発銃": [{"r":["たんぱつじゅう"],"g":["single shot gun"],"p":"n","f":"たん|ぱつ|じゅう"}],
+"単皮": [{"r":["たび"],"g":["tabi"],"p":"n","f":"*"}],
+"単相": [{"r":["たんそう"],"g":["single-phase alternating current","haploid phase (of an organism, cell, etc.)"],"p":"n","f":"たん|そう"}],
+"単相交流": [{"r":["たんそうこうりゅう"],"g":["single-phase alternating current"],"p":"n","f":"たん|そう|こう|りゅう"}],
 "単眼": [{"r":["たんがん"],"g":["single eye","simple eye"],"p":"n","f":"たん|がん"}],
 "単眼症": [{"r":["たんがんしょう"],"g":["cyclopia"],"p":"n","f":"たん|がん|しょう"}],
 "単眼的": [{"r":["たんがんてき"],"g":["narrow-minded"],"p":"adj-na","f":"たん|がん|てき"}],
@@ -1233,14 +1239,6 @@
 "厳旨": [{"r":["げんし"],"g":["strict order"],"p":"n","f":"げん|し"}],
 "厳暑": [{"r":["げんしょ"],"g":["extreme heat"],"p":"n","f":"げん|しょ"}],
 "厳正": [{"r":["げんせい"],"g":["strict"],"p":"adj-na n","f":"げん|せい"}],
-"厳正中立": [{"r":["げんせいちゅうりつ"],"g":["strict neutrality"],"p":"n adj-no adj-na","f":"げん|せい|ちゅう|りつ"}],
-"厳正科学": [{"r":["げんせいかがく"],"g":["exact science"],"p":"n","f":"げん|せい|か|がく"}],
-"厳然": [{"r":["げんぜん"],"g":["grave"],"p":"adj-t adv-to","f":"げん|ぜん"}],
-"厳父": [{"r":["げんぷ"],"g":["your honored father"],"p":"n","f":"げん|ぷ"}],
-"厳瓫": [{"r":["いつへ"],"g":["sacred jar"],"p":"n","f":"*"}],
-"厳瓮": [{"r":["いつへ"],"g":["sacred jar"],"p":"n","f":"*"}],
-"厳科": [{"r":["げんか"],"g":["severe punishment"],"p":"n","f":"げん|か"}],
-"厳秘": [{"r":["げんぴ"],"g":["strict secret"],"p":"n adj-no","f":"げん|ぴ"}],
-"厳罰主義": [{"r":["げんばつしゅぎ"],"g":["severe punishment policy"],"p":"n","f":"げん|ばつ|しゅ|ぎ"}]
+"厳正中立": [{"r":["げんせいちゅうりつ"],"g":["strict neutrality"],"p":"n adj-no adj-na","f":"げん|せい|ちゅう|りつ"}]
 }
 }

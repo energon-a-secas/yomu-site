@@ -1,9 +1,20 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "嫌な思いをする",
-"last": "安全装置",
+"first": "嫌が応にも",
+"last": "安全確認",
 "entries": {
+"嫌が応にも": [{"r":["いやがおうにも"],"g":["whether one likes it or not"],"p":"exp"}],
+"嫌けがさす": [{"r":["いやけがさす"],"g":["to be tired of"],"p":"exp v5s"}],
+"嫌けが差す": [{"r":["いやけがさす"],"g":["to be tired of"],"p":"exp v5s"}],
+"嫌こと": [{"r":["いやこと"],"g":["unpleasant comment"],"p":"n"}],
+"嫌でも応でも": [{"r":["いやでもおうでも"],"g":["whether one likes it or not"],"p":"exp"}],
+"嫌というほど": [{"r":["いやというほど"],"g":["(more than) enough","bitterly"],"p":"exp n adv"}],
+"嫌という程": [{"r":["いやというほど"],"g":["(more than) enough","bitterly"],"p":"exp n adv"}],
+"嫌と言うほど": [{"r":["いやというほど"],"g":["(more than) enough","bitterly"],"p":"exp n adv"}],
+"嫌と言う程": [{"r":["いやというほど"],"g":["(more than) enough","bitterly"],"p":"exp n adv"}],
+"嫌なこった": [{"r":["やなこった"],"g":["no way!"],"p":"int","u":1}],
+"嫌な天気": [{"r":["いやなてんき"],"g":["bad weather"],"p":"exp n","f":"いや;てん|き"}],
 "嫌な思いをする": [{"r":["いやなおもいをする"],"g":["to feel uncomfortable"],"p":"exp vs-i"}],
 "嫌な気持ち": [{"r":["いやなきもち"],"g":["unpleasant feeling"],"p":"exp n","f":"いや;き|も"}],
 "嫌な目": [{"r":["いやなめ"],"g":["disapproving eyes","unpleasant experience"],"p":"exp n"}],
@@ -351,6 +362,7 @@
 "子忌": [{"r":["ねいみ"],"g":["collecting herbs and pulling out young pine trees by the…"],"p":"n","f":"ね|いみ"}],
 "子忌み": [{"r":["ねいみ"],"g":["collecting herbs and pulling out young pine trees by the…"],"p":"n","f":"ね|い"}],
 "子房": [{"r":["しぼう"],"g":["ovary"],"p":"n","f":"し|ぼう"}],
+"子持": [{"r":["こもち"],"g":["parenthood","(of a fish) containing roe (eggs)"],"p":"n","f":"こ|もち"}],
 "子持ち": [{"r":["こもち"],"g":["parenthood","(of a fish) containing roe (eggs)"],"p":"n","f":"こ|も"}],
 "子持ち様": [{"r":["こもちさま"],"g":["entitled parent"],"p":"n","f":"こ|も;さま"}],
 "子持ち甘藍": [{"r":["こもちかんらん"],"g":["Brussels sprout"],"p":"n","f":"こ|も;かん|らん"}],
@@ -1220,15 +1232,6 @@
 "安全率": [{"r":["あんぜんりつ"],"g":["safety factor"],"p":"n","f":"あん|ぜん|りつ"}],
 "安全瓣": [{"r":["あんぜんべん"],"g":["safety valve"],"p":"n","f":"あん|ぜん|べん"}],
 "安全確保": [{"r":["あんぜんかくほ"],"g":["guarantee of safety"],"p":"n","f":"あん|ぜん|かく|ほ"}],
-"安全確認": [{"r":["あんぜんかくにん"],"g":["safety confirmation"],"p":"n","f":"あん|ぜん|かく|にん"}],
-"安全神話": [{"r":["あんぜんしんわ"],"g":["safety myth"],"p":"n","f":"あん|ぜん|しん|わ"}],
-"安全第一": [{"r":["あんぜんだいいち"],"g":["safety first (principle)"],"p":"exp","f":"あん|ぜん|だい|いち"}],
-"安全策": [{"r":["あんぜんさく"],"g":["safe plan"],"p":"n","f":"あん|ぜん|さく"}],
-"安全管理": [{"r":["あんぜんかんり"],"g":["safety administration"],"p":"n","f":"あん|ぜん|かん|り"}],
-"安全管理者": [{"r":["あんぜんかんりしゃ"],"g":["safety officer"],"p":"n","f":"あん|ぜん|かん|り|しゃ"}],
-"安全網": [{"r":["あんぜんもう"],"g":["safety net"],"p":"n","f":"あん|ぜん|もう"}],
-"安全衛生協会": [{"r":["あんぜんえいせいきょうかい"],"g":["Institution of Occupational Safety and Health"],"p":"n","f":"あん|ぜん|えい|せい|きょう|かい"}],
-"安全衛生教育": [{"r":["あんぜんえいせいきょういく"],"g":["safety and health education"],"p":"n","f":"あん|ぜん|えい|せい|きょう|いく"}],
-"安全装置": [{"r":["あんぜんそうち"],"g":["safety device"],"p":"n","f":"あん|ぜん|そう|ち"}]
+"安全確認": [{"r":["あんぜんかくにん"],"g":["safety confirmation"],"p":"n","f":"あん|ぜん|かく|にん"}]
 }
 }

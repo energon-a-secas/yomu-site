@@ -1,9 +1,13 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "めんどりうたえばいえほろぶ",
-"last": "ももやま",
+"first": "めんどころ",
+"last": "ももとせ",
 "entries": {
+"めんどころ": [{"g":["noodle restaurant"],"p":"n","k":["麺処"]}],
+"めんどっちぃ": [{"g":["bothersome"],"p":"adj-i","k":["面倒っちい"],"u":1}],
+"めんどっちい": [{"g":["bothersome"],"p":"adj-i","k":["面倒っちい"],"u":1}],
+"めんどり": [{"g":["female bird","hen (female chicken)"],"p":"n","k":["雌鳥","雌鶏"],"u":1}],
 "めんどりうたえばいえほろぶ": [{"g":["women should not rule over men"],"p":"exp v5b","k":["雌鳥歌えば家滅ぶ","雌鶏歌えば家滅ぶ"]}],
 "めんど臭い": [{"r":["めんどくさい","めんどうくさい"],"g":["bothersome"],"p":"adj-i","u":1}],
 "めんば": [{"g":["abusing someone to his (her) face"],"p":"n vs vt","k":["面罵"]}],
@@ -1422,10 +1426,6 @@
 "ももだち": [{"g":["vents at the hips of a pair of hakama"],"p":"n","k":["股立","股立ち"]}],
 "ももち": [{"g":["a large number"],"p":"adj-no","k":["百千"]}],
 "ももちどり": [{"g":["many bird","plover","Japanese bush warbler"],"p":"n","k":["百千鳥"]}],
-"ももとせ": [{"g":["century"],"p":"n","k":["百年","百歳"]}],
-"ももにく": [{"g":["leg (meat)"],"p":"n","k":["もも肉","股肉"]}],
-"もものせっく": [{"g":["Doll's Festival (March 3)"],"p":"exp n","k":["桃の節句"]}],
-"ももひき": [{"g":["close fitting trousers"],"p":"n","k":["股引","股引き"]}],
-"ももやま": [{"g":["momoyama"],"p":"n","k":["桃山"]}]
+"ももとせ": [{"g":["century"],"p":"n","k":["百年","百歳"]}]
 }
 }

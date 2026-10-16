@@ -1,9 +1,13 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "駐支",
-"last": "鬼は外福は内",
+"first": "駐妻",
+"last": "鬼の矢幹",
 "entries": {
+"駐妻": [{"r":["ちゅうつま","ちゅうづま","ちゅうさい"],"g":["expat wife"],"p":"n","f":"ちゅう|つま"}],
+"駐屯地": [{"r":["ちゅうとんち"],"g":["garrison"],"p":"n","f":"ちゅう|とん|ち"}],
+"駐屯所": [{"r":["ちゅうとんじょ"],"g":["military station"],"p":"n","f":"ちゅう|とん|じょ"}],
+"駐屯軍": [{"r":["ちゅうとんぐん"],"g":["garrison"],"p":"n","f":"ちゅう|とん|ぐん"}],
 "駐支": [{"r":["ちゅうし"],"g":["resident in China"],"p":"adj-no","f":"ちゅう|し"}],
 "駐日大使": [{"r":["ちゅうにちたいし"],"g":["ambassador to Japan"],"p":"n","f":"ちゅう|にち|たい|し"}],
 "駐機場": [{"r":["ちゅうきじょう"],"g":["aircraft parking apron"],"p":"n","f":"ちゅう|き|じょう"}],
@@ -1225,9 +1229,6 @@
 "鬼の形相": [{"r":["おにのぎょうそう"],"g":["furious facial expression"],"p":"exp n","f":"おに;ぎょう|そう"}],
 "鬼の念仏": [{"r":["おにのねんぶつ"],"g":["demon's prayer…"],"p":"exp n","f":"おに;ねん|ぶつ"}],
 "鬼の目にも涙": [{"r":["おにのめにもなみだ"],"g":["even the hardest of hearts can be moved to tears"],"p":"exp"}],
-"鬼の矢幹": [{"r":["おにのやがら"],"g":["Gastrodia elata (species of saprophytic orchid)"],"p":"n","f":"おに;*","u":1}],
-"鬼の霍乱": [{"r":["おにのかくらん"],"g":["person of strong constitution unexpectedly falling ill"],"p":"exp n","f":"おに;かく|らん"}],
-"鬼の首を取ったよう": [{"r":["おにのくびをとったよう"],"g":["triumphant (over a mediocre achievement)"],"p":"exp adj-na"}],
-"鬼は外福は内": [{"r":["おにはそとふくはうち"],"g":["out with the demon, in with fortune"],"p":"exp","f":"おに;そと|ふく;うち"}]
+"鬼の矢幹": [{"r":["おにのやがら"],"g":["Gastrodia elata (species of saprophytic orchid)"],"p":"n","f":"おに;*","u":1}]
 }
 }

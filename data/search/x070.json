@@ -1,8 +1,14 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","KanjiVG stroke order SVGs r20250816"],"inputs":[{"id":"kanjivg","source":"KanjiVG, Ulrich Apel","url":"http://kanjivg.tagaini.net","spdx":"CC-BY-SA-3.0","screen":"required","acknowledgement":"Attribution. You must attribute the work by stating your use of KanjiVG in your own copyright header and linking to KanjiVG's website (http://kanjivg.tagaini.net)","use":"parts, the named components under each character, followed to their own parts"}],"generated_by":"tools/build-search.mjs","generated_at":"2026-10-01"},
 "format": "yomu-search-rare/1",
-"first": "rasa",
+"first": "raptor",
 "entries": {
+"raptor": [["猛きん","もうきん",["raptor"],"n",0]],
+"rapture": [["携挙","けいきょ",["rapture"],"n",0]],
+"rare": [["希世","きせい",["rare"],"n",0],["希有","けう",["rare"],"adj-na n",0],["希覯","きこう",["rare (book, manuscript, etc.)"],"adj-no n",0],["珍か","めずらか",["rare"],"adj-na",0],["不世出","ふせいしゅつ",["rare"],"n",0],["たぐい希","たぐいまれ",["rare"],"adj-na",0],["僻字","へきじ",["rare character"],"n",0],["奇石","きせき",["rare stone"],"n",0],["希書","きしょ",["rare book"],"n",0],["珍什","ちんじゅう",["rare article"],"n",0]],
+"rarely": [["たまさか","",["coincidentally","rarely"],"adv",0],["めったに見られない","めったにみられない",["rarely seen"],"exp adj-i",0]],
+"rarities": [["珍中の珍","ちんちゅうのちん",["rarity among rarities"],"exp n",0]],
+"rarity": [["レアリティ","",["rarity (esp. of collectables, trading cards, etc.)"],"n",0],["レアリティー","",["rarity (esp. of collectables, trading cards, etc.)"],"n",0],["珍中の珍","ちんちゅうのちん",["rarity among rarities"],"exp n",0]],
 "rasa": [["タブララサ","",["tabula rasa"],"n",0],["タブララーサ","",["tabula rasa"],"n",0],["タブラ・ラサ","",["tabula rasa"],"n",0],["タブラ・ラーサ","",["tabula rasa"],"n",0]],
 "rasbora": [["ラスボラ","",["rasbora (small minnow-like fish of genera Boraras…"],"n",0]],
 "rascal": [["悪徒","あくと",["rascal"],"n",0],["野風増","のふうぞう",["rascal"],"n",0],["ノフウゾ","",["rascal"],"n",0],["やんちゃ坊主","やんちゃぼうず",["rascal"],"n",0],["やんちゃ","",["naughty","rascal"],"adj-na n vs vi",1],["やんちゃん","",["naughty","rascal"],"adj-na n vs vi",1],["あらいぐまラスカル","",["Rascal the Raccoon (1977 TV anime series)"],"n",0]],
@@ -472,10 +478,6 @@
 "reflections": [["散乱反射","さんらんはんしゃ",["scatter reflections"],"n",0],["映り込み","うつりこみ",["background reflections (e.g. on a window)"],"n",0],["のか","",["endorsing and questioning the preceding statement","lamenting reflections on the preceding statement"],"prt",0]],
 "reflective": [["内省的","ないせいてき",["reflective"],"adj-na",0],["水鏡","みずかがみ",["reflective water surface"],"n",0],["反射能","はんしゃのう",["reflective power"],"n",0],["リフレクティブ","",["reflective"],"n",0],["反射テープ","はんしゃテープ",["reflective safety tape"],"n",0],["反射型カラー液晶ディスプレイ","はんしゃがたカラーえきしょうディスプレイ",["reflective color LCD"],"n",0]],
 "reflectivity": [["反射性","はんしゃせい",["reflectivity","reflexivity"],"n",0]],
-"reflector": [["反射板","はんしゃばん",["reflector"],"n",0],["反射鏡","はんしゃきょう",["reflector"],"n",0],["レフ","",["reflex camera","reflector"],"n",1],["リフレクタ","",["reflector"],"n",0],["レフレクタ","",["reflector"],"n",0],["レフ板","レフばん",["reflector board"],"n",0],["リフレクター","",["reflector"],"n",0],["レフレクター","",["reflector"],"n",0],["反射材","はんしゃざい",["safety reflector"],"n",0],["集音機","しゅうおんき",["parabolic reflector"],"n",0]],
-"reflex": [["レフ","",["reflex camera","reflector"],"n",1],["優角","ゆうかく",["reflex angle"],"n",0],["リフレックス","",["reflex"],"n",0],["レフレックス","",["reflex"],"n",0],["腱反射","けんはんしゃ",["tendon reflex"],"n",0],["反射作用","はんしゃさよう",["reflex action"],"n adj-no",0],["反射運動","はんしゃうんどう",["reflex action"],"n",0],["モロ反射","モロはんしゃ",["Moro reflex"],"n",0],["原始反射","げんしはんしゃ",["primitive reflex"],"n",0],["咽頭反射","いんとうはんしゃ",["gag reflex"],"n",0]],
-"reflexa": [["なつえびね","",["Calanthe reflexa (species of orchid)"],"n",0]],
-"reflexes": [["反射神経","はんしゃしんけい",["reflexes"],"n",0],["運痴","うんち",["having slow reflexes"],"n",0],["運動神経","うんどうしんけい",["motor nerve","reflexes"],"n",0],["運動おんち","うんどうおんち",["having slow reflexes"],"n",0]],
-"reflexive": [["再帰用法","さいきようほう",["(the) reflexive"],"n",0],["再帰的","さいきてき",["recursive","reflexive"],"adj-na",0],["再帰動詞","さいきどうし",["reflexive verb"],"n",0],["再帰代名詞","さいきだいめいし",["reflexive pronoun"],"n",0],["反射代名詞","はんしゃだいめいし",["reflexive pronoun (in Japanese grammar only)"],"n",0],["反照代名詞","はんしょうだいめいし",["reflexive pronoun (in Japanese grammar only)"],"n",0],["反射的半順序","はんしゃてきはんじゅんじょ",["reflexive partial ordering"],"n",0],["反射指示代名詞","はんしゃしじだいめいし",["reflexive pronoun"],"n",0]]
+"reflector": [["反射板","はんしゃばん",["reflector"],"n",0],["反射鏡","はんしゃきょう",["reflector"],"n",0],["レフ","",["reflex camera","reflector"],"n",1],["リフレクタ","",["reflector"],"n",0],["レフレクタ","",["reflector"],"n",0],["レフ板","レフばん",["reflector board"],"n",0],["リフレクター","",["reflector"],"n",0],["レフレクター","",["reflector"],"n",0],["反射材","はんしゃざい",["safety reflector"],"n",0],["集音機","しゅうおんき",["parabolic reflector"],"n",0]]
 }
 }

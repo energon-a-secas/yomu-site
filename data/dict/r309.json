@@ -1,9 +1,12 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "飯田女子短大",
-"last": "駐屯軍",
+"first": "飯櫃",
+"last": "駐在武官",
 "entries": {
+"飯櫃": [{"r":["めしびつ","いいびつ"],"g":["round, wooden container for cooked rice"],"p":"n","f":"めし|びつ"}],
+"飯炊き": [{"r":["めしたき"],"g":["cooking rice"],"p":"n","f":"めし|た"}],
+"飯炊き女": [{"r":["めしたきおんな"],"g":["female cook","woman who served both as a waitress and a prostitute in…"],"p":"n","f":"めし|た;おんな"}],
 "飯田女子短大": [{"r":["いいだじょしたんだい"],"g":["Iida Women's Junior College"],"p":"n","f":"いい|だ|じょ|し|たん|だい"}],
 "飯田産業": [{"r":["いいださんぎょう"],"g":["Iida Home Max Co., Ltd"],"p":"n","f":"いい|だ|さん|ぎょう"}],
 "飯盒": [{"r":["はんごう"],"g":["(soldier's) cooking utensils","outdoor (camping) cooking utensils"],"p":"n","f":"はん|ごう"}],
@@ -1075,6 +1078,7 @@
 "馴れ寿司": [{"r":["なれずし"],"g":["narezushi"],"p":"n","f":"な;ず|し","u":1}],
 "馴れ親しむ": [{"r":["なれしたしむ"],"g":["to become familiar with and cherish"],"p":"v5m vi"}],
 "馴化": [{"r":["じゅんか"],"g":["acclimatization"],"p":"n vs vi","f":"じゅん|か"}],
+"馴染": [{"r":["なじみ"],"g":["familiarity"],"p":"n adj-no","f":"な|じみ"}],
 "馴染ませる": [{"r":["なじませる"],"g":["to blend (something) in","to make (something or someone) used to…"],"p":"v1 vt","f":"な|じ","u":1}],
 "馴染み": [{"r":["なじみ"],"g":["familiarity"],"p":"n adj-no","f":"な|じ"}],
 "馴染み客": [{"r":["なじみきゃく"],"g":["regular (customer)","client who frequently visits the same prostitute"],"p":"n","f":"な|じ;きゃく"}],
@@ -1313,10 +1317,6 @@
 "駐兵": [{"r":["ちゅうへい"],"g":["stationing of troops"],"p":"n vs","f":"ちゅう|へい"}],
 "駐在員": [{"r":["ちゅうざいいん"],"g":["resident employee"],"p":"n","f":"ちゅう|ざい|いん"}],
 "駐在所": [{"r":["ちゅうざいしょ"],"g":["police substation"],"p":"n","f":"ちゅう|ざい|しょ"}],
-"駐在武官": [{"r":["ちゅうざいぶかん"],"g":["military attaché"],"p":"n","f":"ちゅう|ざい|ぶ|かん"}],
-"駐妻": [{"r":["ちゅうつま","ちゅうづま","ちゅうさい"],"g":["expat wife"],"p":"n","f":"ちゅう|つま"}],
-"駐屯地": [{"r":["ちゅうとんち"],"g":["garrison"],"p":"n","f":"ちゅう|とん|ち"}],
-"駐屯所": [{"r":["ちゅうとんじょ"],"g":["military station"],"p":"n","f":"ちゅう|とん|じょ"}],
-"駐屯軍": [{"r":["ちゅうとんぐん"],"g":["garrison"],"p":"n","f":"ちゅう|とん|ぐん"}]
+"駐在武官": [{"r":["ちゅうざいぶかん"],"g":["military attaché"],"p":"n","f":"ちゅう|ざい|ぶ|かん"}]
 }
 }

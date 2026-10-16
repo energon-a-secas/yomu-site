@@ -1,9 +1,18 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "独壇場",
-"last": "現地払",
+"first": "独和辞典",
+"last": "現在行番号",
 "entries": {
+"独和辞典": [{"r":["どくわじてん"],"g":["German-Japanese dictionary"],"p":"n","f":"どく|わ|じ|てん"}],
+"独唱会": [{"r":["どくしょうかい"],"g":["vocal recital"],"p":"n","f":"どく|しょう|かい"}],
+"独善": [{"r":["どくぜん"],"g":["self-righteousness"],"p":"n","f":"どく|ぜん"}],
+"独善主義": [{"r":["どくぜんしゅぎ"],"g":["self-righteousness"],"p":"n","f":"どく|ぜん|しゅ|ぎ"}],
+"独善的": [{"r":["どくぜんてき"],"g":["self-righteous"],"p":"adj-na","f":"どく|ぜん|てき"}],
+"独国": [{"r":["どくこく"],"g":["Germany"],"p":"n","f":"どく|こく"}],
+"独坐": [{"r":["どくざ"],"g":["sitting alone"],"p":"n vs vi","f":"どく|ざ"}],
+"独墺": [{"r":["どくおう"],"g":["Germany-Austria"],"p":"n","f":"どく|おう"}],
+"独墺伊": [{"r":["どくおうい"],"g":["Germany, Austria and Italy"],"p":"n","f":"どく|おう|い"}],
 "独壇場": [{"r":["どくだんじょう"],"g":["field in which one acts unchallenged"],"p":"n","f":"どく|だん|じょう"}],
 "独奏会": [{"r":["どくそうかい"],"g":["solo recital"],"p":"n","f":"どく|そう|かい"}],
 "独奏曲": [{"r":["どくそうきょく"],"g":["solo (musical work)"],"p":"n","f":"どく|そう|きょく"}],
@@ -1237,14 +1246,6 @@
 "現在時刻": [{"r":["げんざいじこく"],"g":["present time"],"p":"n","f":"げん|ざい|じ|こく"}],
 "現在点": [{"r":["げんざいてん"],"g":["current point"],"p":"n","f":"げん|ざい|てん"}],
 "現在状態": [{"r":["げんざいじょうたい"],"g":["current situation"],"p":"n","f":"げん|ざい|じょう|たい"}],
-"現在行番号": [{"r":["げんざいぎょうばんごう"],"g":["current line number"],"p":"n","f":"げん|ざい|ぎょう|ばん|ごう"}],
-"現在進行形": [{"r":["げんざいしんこうけい"],"g":["present continuous tense","ongoing"],"p":"n adj-no","f":"げん|ざい|しん|こう|けい"}],
-"現在高": [{"r":["げんざいだか"],"g":["amount on hand"],"p":"n","f":"げん|ざい|だか"}],
-"現地人": [{"r":["げんちじん"],"g":["native"],"p":"n","f":"げん|ち|じん"}],
-"現地到着": [{"r":["げんちとうちゃく"],"g":["arrival on location"],"p":"n vs","f":"げん|ち|とう|ちゃく"}],
-"現地化": [{"r":["げんちか"],"g":["localization"],"p":"n","f":"げん|ち|か"}],
-"現地報告": [{"r":["げんちほうこく"],"g":["on-the-spot report"],"p":"n","f":"げん|ち|ほう|こく"}],
-"現地妻": [{"r":["げんちづま"],"g":["local woman treated as a spouse by an already-married…"],"p":"n","f":"げん|ち|づま"}],
-"現地払": [{"r":["げんちばらい"],"g":["paying upon checking in…"],"p":"n","f":"げん|ち|ばらい"}]
+"現在行番号": [{"r":["げんざいぎょうばんごう"],"g":["current line number"],"p":"n","f":"げん|ざい|ぎょう|ばん|ごう"}]
 }
 }

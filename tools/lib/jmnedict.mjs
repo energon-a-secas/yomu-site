@@ -339,9 +339,9 @@ function creditGiven(chars, reading, cands, family) {
  * no evidence for katakana: アン is in every アンケート and パソ in every
  * パソコン, and a name found that way would carve a guessed run into pieces.
  */
-export function attested(sentences, spellings) {
+export function attested(sentences, spellings, accept = null) {
   const kanji = new Set([...spellings].filter((s) => !isKatakana(s[0])));
-  const seen = substrings(sentences, kanji);
+  const seen = substrings(sentences, kanji, accept);
   const runs = new Set();
   for (const text of sentences) for (const m of text.matchAll(KATAKANA_RUN)) runs.add(m[0]);
   for (const s of spellings) if (isKatakana(s[0]) && runs.has(s)) seen.add(s);
@@ -350,8 +350,11 @@ export function attested(sentences, spellings) {
 
 const KATAKANA_RUN = /[\u30a1-\u30faー\u30fd\u30fe]+/g;
 
-/** Every spelling that occurs in the corpus at least once, as a plain substring. */
-function substrings(sentences, spellings) {
+/**
+ * Every spelling that occurs in the corpus at least once, as a plain
+ * substring that `accept(spelling, text, end)`, when given, lets count.
+ */
+function substrings(sentences, spellings, accept = null) {
   // The lengths that exist per first character, so a position tries only those.
   const byFirst = new Map();
   for (const s of spellings) {
@@ -366,7 +369,7 @@ function substrings(sentences, spellings) {
       for (const n of lengths) {
         if (i + n > text.length) continue;
         const s = text.slice(i, i + n);
-        if (spellings.has(s)) seen.add(s);
+        if (spellings.has(s) && (!accept || accept(s, text, i + n))) seen.add(s);
       }
     }
   }

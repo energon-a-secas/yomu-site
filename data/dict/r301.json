@@ -1,9 +1,13 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "錆付く",
-"last": "開扉",
+"first": "錆びつく",
+"last": "開成中学校",
 "entries": {
+"錆びつく": [{"r":["さびつく"],"g":["to become rusted together","to rust","to become rusty (of a skill or ability)"],"p":"v5k vi"}],
+"錆び付く": [{"r":["さびつく"],"g":["to become rusted together","to rust","to become rusty (of a skill or ability)"],"p":"v5k vi"}],
+"錆び猫": [{"r":["さびねこ"],"g":["tortoiseshell cat"],"p":"n"}],
+"錆び錆び": [{"r":["さびさび"],"g":["rusted"],"p":"adj-no n","u":1}],
 "錆付く": [{"r":["さびつく"],"g":["to become rusted together","to rust","to become rusty (of a skill or ability)"],"p":"v5k vi","f":"さび|つ"}],
 "錆刀": [{"r":["さびがたな"],"g":["sword with rusted edge"],"p":"n","f":"さび|がたな"}],
 "錆止め": [{"r":["さびどめ"],"g":["rust-proofing"],"p":"n","f":"さび|ど"}],
@@ -1234,10 +1238,6 @@
 "開心術": [{"r":["かいしんじゅつ"],"g":["open-heart surgery"],"p":"n","f":"かい|しん|じゅつ"}],
 "開志専門職大学": [{"r":["かいしせんもんしょくだいがく"],"g":["Kaishi Professional University"],"p":"n","f":"かい|し|せん|もん|しょく|だい|がく"}],
 "開悟": [{"r":["かいご"],"g":["wisdom"],"p":"n vs","f":"かい|ご"}],
-"開成中学校": [{"r":["かいせいちゅうがっこう"],"g":["Kaisei Junior High School"],"p":"n","f":"かい|せい|ちゅう|がっ|こう"}],
-"開成所": [{"r":["かいせいじょ"],"g":["Kaiseijo (school of foreign studies set up by the…"],"p":"n","f":"かい|せい|じょ"}],
-"開戦派": [{"r":["かいせんは"],"g":["war party"],"p":"n","f":"かい|せん|は"}],
-"開所": [{"r":["かいしょ"],"g":["opening (of a new office, facility, etc.)"],"p":"n vs vt vi","f":"かい|しょ"}],
-"開扉": [{"r":["かいひ"],"g":["opening a door"],"p":"n vs vt vi","f":"かい|ひ"}]
+"開成中学校": [{"r":["かいせいちゅうがっこう"],"g":["Kaisei Junior High School"],"p":"n","f":"かい|せい|ちゅう|がっ|こう"}]
 }
 }

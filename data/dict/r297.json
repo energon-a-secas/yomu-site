@@ -1,9 +1,14 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "過ちては則ち改むるに憚ること勿れ",
-"last": "遺失物取り扱い所",
+"first": "過ぎ行く",
+"last": "遺失品",
 "entries": {
+"過ぎ行く": [{"r":["すぎゆく","すぎいく"],"g":["to pass"],"p":"v5k-s vi"}],
+"過ぎ越し": [{"r":["すぎこし"],"g":["Passover","Easter"],"p":"n"}],
+"過ぎ越しの祭": [{"r":["すぎこしのまつり"],"g":["Passover"],"p":"n"}],
+"過ぐ": [{"r":["すぐ"],"g":["to pass through","to pass (of time)","to have expired"],"p":"v2g-k vi"}],
+"過す": [{"r":["すごす"],"g":["to spend (time)","to overdo (esp. alcohol consumption)","to take care of"],"p":"v5s vt suf"}],
 "過ちては則ち改むるに憚ること勿れ": [{"r":["あやまちてはすなわちあらたむるにはばかることなかれ"],"g":["when you make a mistake, don't hesitate to correct it"],"p":"exp"}],
 "過ちて改めざるこれを過ちという": [{"r":["あやまちてあらためざるこれをあやまちという"],"g":["a man who has committed a mistake and doesn't correct it…"],"p":"exp"}],
 "過ちて改めざる是を過ちという": [{"r":["あやまちてあらためざるこれをあやまちという"],"g":["a man who has committed a mistake and doesn't correct it…"],"p":"exp"}],
@@ -1226,8 +1231,6 @@
 "遺址": [{"r":["いし"],"g":["(historic) ruins"],"p":"n","f":"い|し"}],
 "遺墨": [{"r":["いぼく"],"g":["autographs (brushwork) of departed person"],"p":"n","f":"い|ぼく"}],
 "遺失": [{"r":["いしつ"],"g":["loss"],"p":"n vs vt","f":"い|しつ"}],
-"遺失品": [{"r":["いしつひん"],"g":["lost article"],"p":"n","f":"い|しつ|ひん"}],
-"遺失届": [{"r":["いしつとどけ"],"g":["making a lost property report"],"p":"n","f":"い|しつ|とどけ"}],
-"遺失物取り扱い所": [{"r":["いしつぶつとりあつかいじょ","いしつぶつとりあつかいしょ"],"g":["lost and found office"],"p":"n","f":"い|しつ|ぶつ|と;あつか;じょ"}]
+"遺失品": [{"r":["いしつひん"],"g":["lost article"],"p":"n","f":"い|しつ|ひん"}]
 }
 }

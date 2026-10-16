@@ -1,9 +1,11 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "共同支配",
-"last": "円転滑脱",
+"first": "共同捜査",
+"last": "円買い介入",
 "entries": {
+"共同捜査": [{"r":["きょうどうそうさ"],"g":["joint investigation"],"p":"n","f":"きょう|どう|そう|さ"}],
+"共同提出": [{"r":["きょうどうていしゅつ"],"g":["joint sponsorship (of a bill, etc.)"],"p":"n vs","f":"きょう|どう|てい|しゅつ"}],
 "共同支配": [{"r":["きょうどうしはい"],"g":["joint control"],"p":"n","f":"きょう|どう|し|はい"}],
 "共同救済基金": [{"r":["きょうどうきゅうさいききん"],"g":["community chest"],"p":"n","f":"きょう|どう|きゅう|さい|き|きん"}],
 "共同文書": [{"r":["きょうどうぶんしょ"],"g":["joint communique"],"p":"n","f":"きょう|どう|ぶん|しょ"}],
@@ -1226,9 +1228,6 @@
 "円貨": [{"r":["えんか"],"g":["yen currency"],"p":"n","f":"えん|か"}],
 "円貨建": [{"r":["えんかだて"],"g":["yen-denominated (e.g. bond)"],"p":"adj-f","f":"えん|か|だて"}],
 "円貨建て": [{"r":["えんかだて"],"g":["yen-denominated (e.g. bond)"],"p":"adj-f","f":"えん|か|だ"}],
-"円買い介入": [{"r":["えんがいかいにゅう"],"g":["yen-buying intervention"],"p":"n","f":"えん|が;かい|にゅう"}],
-"円軌道": [{"r":["えんきどう"],"g":["circular orbit"],"p":"n","f":"えん|き|どう"}],
-"円転": [{"r":["えんてん"],"g":["orotund"],"p":"adj-t adv-to","f":"えん|てん"}],
-"円転滑脱": [{"r":["えんてんかつだつ"],"g":["suave","versatile"],"p":"adj-na","f":"えん|てん|かつ|だつ"}]
+"円買い介入": [{"r":["えんがいかいにゅう"],"g":["yen-buying intervention"],"p":"n","f":"えん|が;かい|にゅう"}]
 }
 }

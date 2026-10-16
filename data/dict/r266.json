@@ -1,9 +1,16 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "種籾",
-"last": "立ち下がり",
+"first": "種畜場",
+"last": "立ちんぼ",
 "entries": {
+"種畜場": [{"r":["しゅちくじょう"],"g":["stock breeding farm"],"p":"n","f":"しゅ|ちく|じょう"}],
+"種皮": [{"r":["しゅひ"],"g":["seed coat"],"p":"n","f":"しゅ|ひ"}],
+"種石": [{"r":["たねいし"],"g":["small pieces of stone used to make terrazzo, etc.","seed stone (othello)"],"p":"n","f":"たね|いし"}],
+"種種": [{"r":["しゅじゅ"],"g":["various"],"p":"adj-no adj-na adv n","f":"しゅ|じゅ"},{"r":["くさぐさ"],"g":["various"],"p":"adj-no","f":"くさ|ぐさ","u":1,"t":1}],
+"種種様様": [{"r":["しゅじゅさまざま"],"g":["a great variety of"],"p":"n","f":"しゅ|じゅ|さま|ざま"}],
+"種種相": [{"r":["しゅじゅそう"],"g":["various phases"],"p":"n","f":"しゅ|じゅ|そう"}],
+"種種雑多": [{"r":["しゅじゅざった"],"g":["all sorts of"],"p":"adj-na adj-no n","f":"しゅ|じゅ|ざっ|た"}],
 "種籾": [{"r":["たねもみ"],"g":["seed rice"],"p":"n","f":"たね|もみ"}],
 "種紙": [{"r":["たねがみ"],"g":["silkworm egg card"],"p":"n","f":"たね|がみ"}],
 "種芋": [{"r":["たねいも"],"g":["seed potato"],"p":"n","f":"たね|いも"}],
@@ -1276,14 +1283,6 @@
 "立ちむかう": [{"r":["たちむかう"],"g":["to fight against"],"p":"v5u vi"}],
 "立ちゆく": [{"r":["たちゆく"],"g":["to maintain itself"],"p":"v5k-s vi"}],
 "立ちよる": [{"r":["たちよる"],"g":["to drop by","to approach"],"p":"v5r vi"}],
-"立ちんぼ": [{"r":["たちんぼ"],"g":["streetwalker","being kept standing (without doing anything)","beggar"],"p":"n"}],
-"立ちんぼう": [{"r":["たちんぼ"],"g":["streetwalker","being kept standing (without doing anything)","beggar"],"p":"n"}],
-"立ちん坊": [{"r":["たちんぼ","たちんぼう"],"g":["streetwalker","being kept standing (without doing anything)","beggar"],"p":"n"}],
-"立ちション": [{"r":["たちション"],"g":["urinating outdoors"],"p":"n vs"}],
-"立ちバック": [{"r":["たちバック"],"g":["standing sex from behind"],"p":"n"}],
-"立ち上げ": [{"r":["たちあげ"],"g":["starting up (e.g. business, computer)"],"p":"n"}],
-"立ち上り": [{"r":["たちあがり"],"g":["start","how well a pitcher pitches at the start of the game"],"p":"n"}],
-"立ち上る": [{"r":["たちのぼる"],"g":["to rise (of smoke, steam, etc.)"],"p":"v5r vi"}],
-"立ち下がり": [{"r":["たちさがり"],"g":["decay (e.g. charge, signal)"],"p":"n adj-no"}]
+"立ちんぼ": [{"r":["たちんぼ"],"g":["streetwalker","being kept standing (without doing anything)","beggar"],"p":"n"}]
 }
 }

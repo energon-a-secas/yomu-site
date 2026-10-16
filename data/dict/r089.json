@@ -1,9 +1,13 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "びょうどうしゅぎ",
-"last": "ふくレコードキー",
+"first": "びょうとう",
+"last": "ふくアカ",
 "entries": {
+"びょうとう": [{"g":["end of winter"],"p":"n","k":["杪冬"]},{"g":["deflection (gunnery)"],"p":"n","k":["苗頭"],"t":1}],
+"びょうどう": [{"g":["mausoleum","imperial court"],"p":"n","k":["廟堂"]}],
+"びょうどうかん": [{"g":["viewing all things as undifferentiated and equal","contemplation of the equality of all things from the…"],"p":"n","k":["平等観"]}],
+"びょうどうけん": [{"g":["right of equality"],"p":"n","k":["平等権"]}],
 "びょうどうしゅぎ": [{"g":["principle of equality"],"p":"n adj-no","k":["平等主義"]}],
 "びょうどく": [{"g":["disease germ"],"p":"n","k":["病毒"]}],
 "びょうどけい": [{"g":["stop watch"],"p":"n","k":["秒時計"]}],
@@ -1419,11 +1423,6 @@
 "ふくをきる": [{"g":["to put on clothes","to be the personification of"],"p":"exp v1","k":["服を着る"]}],
 "ふくをよごす": [{"g":["to soil one's clothes"],"p":"exp v5s","k":["服を汚す"]}],
 "ふくん": [{"g":["(another's) husband"],"p":"n","k":["夫君"]},{"g":["father"],"p":"n","k":["父君"],"t":1}],
-"ふくアカ": [{"g":["multiple accounts (e.g. on social media)"],"p":"n","k":["複垢","複アカ"]},{"g":["secondary account (on social media, etc.)"],"p":"n","k":["副垢","副アカ"],"t":1}],
-"ふくプリズム": [{"g":["biprism"],"p":"n","k":["複プリズム"]}],
-"ふくプログラム": [{"g":["subprogram"],"p":"n","k":["副プログラム"]}],
-"ふくボリュームきじゅつし": [{"g":["SVD"],"p":"n","k":["副ボリューム記述子"]}],
-"ふくリーダー": [{"g":["deputy leader"],"p":"n","k":["副リーダー"]}],
-"ふくレコードキー": [{"g":["alternate record key"],"p":"n","k":["副レコードキー"]}]
+"ふくアカ": [{"g":["multiple accounts (e.g. on social media)"],"p":"n","k":["複垢","複アカ"]},{"g":["secondary account (on social media, etc.)"],"p":"n","k":["副垢","副アカ"],"t":1}]
 }
 }

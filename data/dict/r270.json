@@ -1,9 +1,17 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "約める",
-"last": "終末思想",
+"first": "紀年法",
+"last": "終映",
 "entries": {
+"紀年法": [{"r":["きねんほう"],"g":["calendar era"],"p":"n","f":"き|ねん|ほう"}],
+"紀律": [{"r":["きりつ"],"g":["order","rules"],"p":"n","f":"き|りつ"}],
+"紀念": [{"r":["きねん"],"g":["commemoration","memento"],"p":"n vs vt","f":"き|ねん"}],
+"紀行文": [{"r":["きこうぶん"],"g":["travel writing"],"p":"n","f":"き|こう|ぶん"}],
+"紀要": [{"r":["きよう"],"g":["bulletin"],"p":"n","f":"き|よう"}],
+"約しい": [{"r":["つましい"],"g":["thrifty"],"p":"adj-i","u":1}],
+"約する": [{"r":["やくする"],"g":["to promise","to abridge","to reduce"],"p":"vs-s vt"}],
+"約まる": [{"r":["つづまる"],"g":["to compress","to become simpler"],"p":"v5r vi"}],
 "約める": [{"r":["つづめる"],"g":["to abridge"],"p":"v1 vt","u":1}],
 "約やか": [{"r":["つづまやか"],"g":["concise","humble","modest"],"p":"adj-na"}],
 "約を交わす": [{"r":["やくをかわす"],"g":["to exchange promises"],"p":"exp v5s"}],
@@ -1253,12 +1261,6 @@
 "終戦記念日": [{"r":["しゅうせんきねんび"],"g":["anniversary of the end of a war…"],"p":"n","f":"しゅう|せん|き|ねん|び"}],
 "終日": [{"r":["ひねもす"],"g":["for the whole day"],"p":"adv","f":"*","u":1},{"r":["ひもすがら"],"g":["all day"],"p":"adv","f":"*","t":1}],
 "終日禁煙": [{"r":["しゅうじつきんえん"],"g":["no smoking at any time"],"p":"exp","f":"しゅう|じつ|きん|えん"}],
-"終映": [{"r":["しゅうえい"],"g":["end of a screening (at a movie theatre)"],"p":"n vs","f":"しゅう|えい"}],
-"終曲": [{"r":["しゅうきょく"],"g":["finale"],"p":"n","f":"しゅう|きょく"}],
-"終朝": [{"r":["しゅうちょう"],"g":["early morning (from dawn to breakfast)"],"p":"n","f":"しゅう|ちょう"}],
-"終期": [{"r":["しゅうき"],"g":["ending"],"p":"n","f":"しゅう|き"}],
-"終末処理場": [{"r":["しゅうまつしょりじょう"],"g":["sewage treatment plant"],"p":"n","f":"しゅう|まつ|しょ|り|じょう"}],
-"終末医療": [{"r":["しゅうまついりょう"],"g":["terminal care"],"p":"n","f":"しゅう|まつ|い|りょう"}],
-"終末思想": [{"r":["しゅうまつしそう"],"g":["eschatology"],"p":"n","f":"しゅう|まつ|し|そう"}]
+"終映": [{"r":["しゅうえい"],"g":["end of a screening (at a movie theatre)"],"p":"n vs","f":"しゅう|えい"}]
 }
 }

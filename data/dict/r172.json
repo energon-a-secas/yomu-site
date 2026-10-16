@@ -2,7 +2,7 @@
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
 "first": "京都情報大学院大学",
-"last": "今もって",
+"last": "今も",
 "entries": {
 "京都情報大学院大学": [{"r":["きょうとじょうほうだいがくいんだいがく"],"g":["The Kyoto College of Graduate Studies for Informatics"],"p":"n","f":"きょう|と|じょう|ほう|だい|がく|いん|だい|がく"}],
 "京都教育大学": [{"r":["きょうときょういくだいがく"],"g":["Kyoto University of Education"],"p":"n","f":"きょう|と|きょう|いく|だい|がく"}],
@@ -749,6 +749,7 @@
 "人相風体": [{"r":["にんそうふうてい","にんそうふうたい"],"g":["someone's looks and personal appearance"],"p":"n","f":"にん|そう|ふう|てい"}],
 "人真似": [{"r":["ひとまね"],"g":["mimicry"],"p":"n vs","f":"*"}],
 "人眼": [{"r":["ひとめ"],"g":["(public) notice"],"p":"n","f":"ひと|め"}],
+"人知": [{"r":["じんち"],"g":["human intellect"],"p":"n","f":"じん|ち"}],
 "人知れず": [{"r":["ひとしれず"],"g":["secretly"],"p":"exp adv","f":"ひと|し"}],
 "人知れぬ": [{"r":["ひとしれぬ"],"g":["secret"],"p":"adj-pn","f":"ひと|し"}],
 "人知を超えた": [{"r":["じんちをこえた"],"g":["beyond human understanding"],"p":"exp adj-f","f":"じん|ち;こ"}],
@@ -1166,7 +1167,6 @@
 "今まで通り": [{"r":["いままでどおり"],"g":["(in the same way) as before"],"p":"exp adv adj-no"}],
 "今めかしい": [{"r":["いまめかしい"],"g":["fashionable"],"p":"adj-i"}],
 "今めかす": [{"r":["いまめかす"],"g":["to modernize"],"p":"v5s"}],
-"今も": [{"r":["いまも"],"g":["still"],"p":"adv"}],
-"今もって": [{"r":["いまもって"],"g":["until now"],"p":"adv"}]
+"今も": [{"r":["いまも"],"g":["still"],"p":"adv"}]
 }
 }

@@ -1,9 +1,14 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "白頭",
-"last": "目旗魚",
+"first": "白雲石",
+"last": "目掛ける",
 "entries": {
+"白雲石": [{"r":["はくうんせき"],"g":["dolomite"],"p":"n","f":"はく|うん|せき"}],
+"白露": [{"r":["しらつゆ","はくろ"],"g":["glistening dew","\"white dew\" solar term (approx. September 8)"],"p":"n","f":"しら|つゆ"}],
+"白面": [{"r":["はくめん"],"g":["pale","inexperienced","face without makeup"],"p":"adj-no n","f":"はく|めん"},{"r":["しらふ"],"g":["sobriety","sober face"],"p":"n adj-no","f":"*","u":1,"t":1}],
+"白靴": [{"r":["しろぐつ"],"g":["white shoes (for use during the summer)"],"p":"n","f":"しろ|ぐつ"}],
+"白韲え": [{"r":["しらあえ"],"g":["salad dressed with tofu, white sesame, and white miso"],"p":"n","f":"しら|あ"}],
 "白頭": [{"r":["しろがしら"],"g":["white wig, worn by an actor playing a demon"],"p":"n","f":"しろ|がしら"},{"r":["はくとう"],"g":["head with grey hair (gray)"],"p":"n","f":"はく|とう","t":1}],
 "白頭ワシ": [{"r":["はくとうワシ"],"g":["bald eagle (Haliaeetus leucocephalus)"],"p":"n","f":"はく|とう","u":1}],
 "白頭翁": [{"r":["はくとうおう"],"g":["windflower","white-haired old man","grey starling (gray)"],"p":"n","f":"はく|とう|おう"}],
@@ -1260,17 +1265,10 @@
 "目抜": [{"r":["めぬけ"],"g":["any large, red, deep-water scorpionfish with big eyes","Matsubara's red rockfish (Sebastes matsubarae)"],"p":"n","f":"め|ぬけ","u":1}],
 "目抜き通り": [{"r":["めぬきどおり"],"g":["principal street"],"p":"n","f":"め|ぬ;どお"}],
 "目押し": [{"r":["めおし"],"g":["skill stop (slot machines)"],"p":"n vs vt","f":"め|お"}],
+"目指": [{"r":["めざし"],"g":["aim","look"],"p":"n","f":"め|ざし"}],
 "目指し": [{"r":["めざし"],"g":["aim","look"],"p":"n","f":"め|ざ"}],
 "目掛": [{"r":["めかけ"],"g":["mistress"],"p":"n","f":"め|かけ"}],
 "目掛け": [{"r":["めかけ"],"g":["mistress"],"p":"n","f":"め|か"}],
-"目掛ける": [{"r":["めがける"],"g":["to aim at"],"p":"v1 vt","f":"め|が","u":1}],
-"目撃情報": [{"r":["もくげきじょうほう"],"g":["eyewitness report"],"p":"n","f":"もく|げき|じょう|ほう"}],
-"目撃証言": [{"r":["もくげきしょうげん"],"g":["eyewitness testimony"],"p":"n","f":"もく|げき|しょう|げん"}],
-"目撃談": [{"r":["もくげきだん"],"g":["first-hand account"],"p":"n","f":"もく|げき|だん"}],
-"目撥": [{"r":["めばち"],"g":["bigeye tuna (Thunnus obesus)"],"p":"n","f":"め|ばち","u":1}],
-"目敏い": [{"r":["めざとい"],"g":["sharp-eyed","easily awakened"],"p":"adj-i","f":"*"}],
-"目数": [{"r":["めかず"],"g":["number of divisions"],"p":"n","f":"め|かず"}],
-"目新しい": [{"r":["めあたらしい"],"g":["original"],"p":"adj-i","f":"め|あたら"}],
-"目旗魚": [{"r":["めかじき"],"g":["swordfish (Xiphias gladius)"],"p":"n","f":"*","u":1}]
+"目掛ける": [{"r":["めがける"],"g":["to aim at"],"p":"v1 vt","f":"め|が","u":1}]
 }
 }

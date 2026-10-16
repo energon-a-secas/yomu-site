@@ -1,9 +1,12 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "余等",
-"last": "保険事故",
+"first": "余白注",
+"last": "保険ベッド",
 "entries": {
+"余白注": [{"r":["よはくちゅう"],"g":["marginal notes"],"p":"n","f":"よ|はく|ちゅう"}],
+"余白頁": [{"r":["よはくページ"],"g":["blank page"],"p":"n","f":"*"}],
+"余禄": [{"r":["よろく"],"g":["additional gain"],"p":"n","f":"よ|ろく"}],
 "余等": [{"r":["よら"],"g":["we"],"p":"pn","f":"よ|ら"}],
 "余罪": [{"r":["よざい"],"g":["other crimes"],"p":"n","f":"よ|ざい"}],
 "余習": [{"r":["よしゅう"],"g":["old remaining customs"],"p":"n","f":"よ|しゅう"}],
@@ -1316,9 +1319,6 @@
 "保険をかける": [{"r":["ほけんをかける"],"g":["to insure (something)","to come up with a back-up plan"],"p":"exp v1","f":"ほ|けん"}],
 "保険を掛ける": [{"r":["ほけんをかける"],"g":["to insure (something)","to come up with a back-up plan"],"p":"exp v1","f":"ほ|けん;か"}],
 "保険ベット": [{"r":["ほけんベッド"],"g":["hospital bed fully covered by national health insurance"],"p":"n","f":"*"}],
-"保険ベッド": [{"r":["ほけんベッド"],"g":["hospital bed fully covered by national health insurance"],"p":"n","f":"ほ|けん"}],
-"保険レディ": [{"r":["ほけんレディ"],"g":["insurance saleswoman"],"p":"n","f":"ほ|けん"}],
-"保険レディー": [{"r":["ほけんレディー"],"g":["insurance saleswoman"],"p":"n","f":"ほ|けん"}],
-"保険事故": [{"r":["ほけんじこ"],"g":["event insured against"],"p":"n","f":"ほ|けん|じ|こ"}]
+"保険ベッド": [{"r":["ほけんベッド"],"g":["hospital bed fully covered by national health insurance"],"p":"n","f":"ほ|けん"}]
 }
 }

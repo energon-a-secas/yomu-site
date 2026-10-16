@@ -1,9 +1,14 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "血肉",
-"last": "裁可",
+"first": "血縁淘汰",
+"last": "裁判所書記官",
 "entries": {
+"血縁淘汰": [{"r":["けつえんとうた"],"g":["kin selection"],"p":"n","f":"けつ|えん|とう|た"}],
+"血縁者": [{"r":["けつえんしゃ"],"g":["blood relative"],"p":"n","f":"けつ|えん|しゃ"}],
+"血縁関係": [{"r":["けつえんかんけい"],"g":["blood relationship"],"p":"n adj-no","f":"けつ|えん|かん|けい"}],
+"血縁集団": [{"r":["けつえんしゅうだん"],"g":["consanguineous group"],"p":"n","f":"けつ|えん|しゅう|だん"}],
+"血繁吹き": [{"r":["ちしぶき"],"g":["blood spray (caused by a weapon)"],"p":"n","f":"*"}],
 "血肉": [{"r":["けつにく","ちにく"],"g":["blood relative","flesh and blood"],"p":"n","f":"けつ|にく"}],
 "血肉の争い": [{"r":["けつにくのあらそい"],"g":["family quarrel"],"p":"exp","f":"けつ|にく;あらそ"}],
 "血肉化": [{"r":["けつにくか"],"g":["incorporation"],"p":"n vs","f":"けつ|にく|か"}],
@@ -204,6 +209,7 @@
 "行ってらあ": [{"r":["いってら"],"g":["have a good day"],"p":"int","u":1}],
 "行ってらー": [{"r":["いってら"],"g":["have a good day"],"p":"int","u":1}],
 "行って参ります": [{"r":["いってまいります"],"g":["good bye"],"p":"exp"}],
+"行って来": [{"r":["いってき"],"g":["bye"],"p":"int","u":1}],
 "行って来い": [{"r":["いってこい"],"g":["going back and forth"],"p":"exp n"}],
 "行って来る": [{"r":["いってくる"],"g":["I'm off (and will be back later)","to go (and then come back)"],"p":"exp int vk"}],
 "行ない": [{"r":["おこない"],"g":["deed","conduct","asceticism"],"p":"n"}],
@@ -1209,12 +1215,6 @@
 "裁判官訴追委員会": [{"r":["さいばんかんそついいいんかい"],"g":["Judge Indictment Committee"],"p":"n","f":"さい|ばん|かん|そ|つい|い|いん|かい"}],
 "裁判所命令": [{"r":["さいばんしょめいれい"],"g":["court injunction"],"p":"n","f":"さい|ばん|しょ|めい|れい"}],
 "裁判所庁舎": [{"r":["さいばんしょちょうしゃ"],"g":["courthouse"],"p":"n","f":"さい|ばん|しょ|ちょう|しゃ"}],
-"裁判所書記官": [{"r":["さいばんしょしょきかん"],"g":["clerk of court"],"p":"n","f":"さい|ばん|しょ|しょ|き|かん"}],
-"裁判所法": [{"r":["さいばんしょほう"],"g":["Court Act"],"p":"n","f":"さい|ばん|しょ|ほう"}],
-"裁判権": [{"r":["さいばんけん"],"g":["jurisdiction"],"p":"n","f":"さい|ばん|けん"}],
-"裁判沙汰": [{"r":["さいばんざた"],"g":["matter for the court"],"p":"n","f":"さい|ばん|ざ|た"}],
-"裁判記録": [{"r":["さいばんきろく"],"g":["court record"],"p":"n","f":"さい|ばん|き|ろく"}],
-"裁判長": [{"r":["さいばんちょう"],"g":["presiding judge"],"p":"n","f":"さい|ばん|ちょう"}],
-"裁可": [{"r":["さいか"],"g":["sanction"],"p":"n vs vt","f":"さい|か"}]
+"裁判所書記官": [{"r":["さいばんしょしょきかん"],"g":["clerk of court"],"p":"n","f":"さい|ばん|しょ|しょ|き|かん"}]
 }
 }

@@ -1,9 +1,18 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "東北関東大震災",
-"last": "校服",
+"first": "東北東",
+"last": "校医",
 "entries": {
+"東北東": [{"r":["とうほくとう"],"g":["east-northeast"],"p":"n","f":"とう|ほく|とう"}],
+"東北生活文化大学": [{"r":["とうほくせいかつぶんかだいがく"],"g":["Tohoku Seikatsu Bunka College"],"p":"n","f":"とう|ほく|せい|かつ|ぶん|か|だい|がく"}],
+"東北福祉大学": [{"r":["とうほくふくしだいがく"],"g":["Tohoku Fukushi University"],"p":"n","f":"とう|ほく|ふく|し|だい|がく"}],
+"東北自動車道": [{"r":["とうほくじどうしゃどう"],"g":["Tōhoku Expressway"],"p":"n","f":"とう|ほく|じ|どう|しゃ|どう"}],
+"東北芸術工科大学": [{"r":["とうほくげいじゅつこうかだいがく"],"g":["Tohoku University of Art & Design"],"p":"n","f":"とう|ほく|げい|じゅつ|こう|か|だい|がく"}],
+"東北英文学会": [{"r":["とうほくえいぶんがっかい"],"g":["Tōhoku English Literary Society"],"p":"n","f":"とう|ほく|えい|ぶん|がっ|かい"}],
+"東北薬科大学": [{"r":["とうほくやっかだいがく"],"g":["Tohoku Pharmaceutical University"],"p":"n","f":"とう|ほく|やっ|か|だい|がく"}],
+"東北農業大学": [{"r":["とうほくのうぎょうだいがく"],"g":["Northeast Agricultural University"],"p":"n","f":"とう|ほく|のう|ぎょう|だい|がく"}],
+"東北野兎": [{"r":["とうほくのうさぎ"],"g":["Lepus brachyurus lyoni (subspecies of Japanese hare)"],"p":"n","f":"とう|ほく|の|うさぎ","u":1}],
 "東北関東大震災": [{"r":["とうほくかんとうだいしんさい"],"g":["Tōhoku earthquake (March 11, 2011)"],"p":"n","f":"とう|ほく|かん|とう|だい|しん|さい"}],
 "東北電力": [{"r":["とうほくでんりょく"],"g":["Tōhoku Electric Power"],"p":"n","f":"とう|ほく|でん|りょく"}],
 "東北電力学院": [{"r":["とうほくでんりょくがくいん"],"g":["Northeast China Institute of Electric Power Engineering"],"p":"n","f":"とう|ほく|でん|りょく|がく|いん"}],
@@ -1216,21 +1225,6 @@
 "校務": [{"r":["こうむ"],"g":["school duties or affairs"],"p":"n","f":"こう|む"}],
 "校務員": [{"r":["こうむいん"],"g":["school janitor"],"p":"n","f":"こう|む|いん"}],
 "校区": [{"r":["こうく"],"g":["school district"],"p":"n","f":"こう|く"}],
-"校医": [{"r":["こうい"],"g":["school doctor"],"p":"n","f":"こう|い"}],
-"校友": [{"r":["こうゆう"],"g":["schoolmate"],"p":"n","f":"こう|ゆう"}],
-"校友会": [{"r":["こうゆうかい"],"g":["alumni association"],"p":"n","f":"こう|ゆう|かい"}],
-"校史": [{"r":["こうし"],"g":["school history"],"p":"n","f":"こう|し"}],
-"校合": [{"r":["きょうごう","こうごう"],"g":["collation"],"p":"n vs vt","f":"きょう|ごう"}],
-"校名": [{"r":["こうめい"],"g":["name of a school"],"p":"n","f":"こう|めい"}],
-"校地": [{"r":["こうち"],"g":["school grounds"],"p":"n","f":"こう|ち"}],
-"校売": [{"r":["こうばい"],"g":["school store"],"p":"n vs vt","f":"こう|ばい"}],
-"校外": [{"r":["こうがい"],"g":["out-of-school"],"p":"adj-no n","f":"こう|がい"}],
-"校外学習": [{"r":["こうがいがくしゅう"],"g":["field trip"],"p":"n","f":"こう|がい|がく|しゅう"}],
-"校定": [{"r":["こうてい"],"g":["revision"],"p":"n vs vt","f":"こう|てい"}],
-"校是": [{"r":["こうぜ"],"g":["school motto"],"p":"n","f":"こう|ぜ"}],
-"校時": [{"r":["こうじ"],"g":["counter for periods in a school day"],"p":"ctr","f":"こう|じ"}],
-"校書": [{"r":["きょうしょ","こうしょ"],"g":["collation","geisha"],"p":"n","f":"きょう|しょ"}],
-"校書殿": [{"r":["きょうしょでん","こうしょでん"],"g":["pavilion housing the historical archives (in Heian Palace)"],"p":"n","f":"きょう|しょ|でん"}],
-"校服": [{"r":["こうふく"],"g":["school uniform"],"p":"n","f":"こう|ふく"}]
+"校医": [{"r":["こうい"],"g":["school doctor"],"p":"n","f":"こう|い"}]
 }
 }

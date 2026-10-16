@@ -22,7 +22,9 @@
  *
  *   evidence  a kanji spelling of two or more characters that the corpus
  *             matches at least MIN_MATCHES times (tools/lib/freq.mjs counts
- *             it against every common key and every candidate at once), of
+ *             it against every common key and every candidate at once, and
+ *             a match that runs on into okurigana, 雨降 in 雨降って, is the
+ *             verb's, not the candidate's: runsIntoOkurigana), of
  *             an entry that is not an expression, and that the analyzer does
  *             not already read: no conjugation or verb or adjective stem of a
  *             common key, no common key with a particle, no honorific prefix
@@ -70,8 +72,9 @@ import { countKeys } from './freq.mjs';
 export const MIN_MATCHES = Number(process.env.YOMU_MIN_MATCHES || 5);
 
 /**
- * Rules switched off for a measuring run, by name: `mixed` (selectMixed) and
- * `asked` (何 and a counter on evidence), comma separated in YOMU_RULES_OFF.
+ * Rules switched off for a measuring run, by name: `mixed` (selectMixed),
+ * `asked` (何 and a counter on evidence) and `okurigana` (a match that runs
+ * on into okurigana is evidence too), comma separated in YOMU_RULES_OFF.
  * docs/ANALYZER.md measured each against the build without it; the committed
  * data is built with every rule on.
  */
@@ -181,6 +184,41 @@ function readsAsParts(s, reading, readings, memo = new Map()) {
   return ok;
 }
 
+const VERB_OR_ADJ = /(^|\s)(v[15]|vk|vs-|vz|adj-i)/;
+
+/**
+ * Whether a match of `s` ending at `end` in `text` runs on into okurigana:
+ * the match ends in a kanji, and the whole spelling or its last kanji, with
+ * the hiragana after it, is a common verb or adjective, as written or
+ * conjugated (降って, 降る, 降り after 雨降; 馴染んで after 馴染). The
+ * analyzer reads such a match as that word (雨|降って), so it is no evidence
+ * for `s` as a key. Counted, the 35 sentences of casual 雨降ってる and
+ * 雨降るかも shipped 雨降 "sea hare" (usually アメフラシ), which read
+ * 雨降って地固まる as 雨降|って (queue #148). Only those two: a middle part
+ * with what follows is a word of its own (寝心地よい holds 心地よい, and
+ * 寝心地 is still the noun). A spelling that ends in kana (積み上げ, then た)
+ * is left alone: the lattice already reads 積み上げた as the verb, and the
+ * key is the noun's. After an entry that takes する, hiragana that opens
+ * with し, す, さ or せ is that する (退出した, 決壊し), not the okurigana of
+ * 出す or 壊す.
+ */
+export function runsIntoOkurigana(s, text, end, pos, suru = false) {
+  const last = s.length - 1;
+  if (!isKanji(s[last])) return false;
+  let run = 0;
+  while (end + run < text.length && run < 8 && isHiragana(text[end + run])) run += 1;
+  if (!run) return false;
+  if (suru && /^[しすさせ]/.test(text[end])) return false;
+  const known = (d) => pos.has(d.base) && posMatches(d.type, pos.get(d.base), d.base, true);
+  for (const tail of last > 0 ? [s, s[last]] : [s]) {
+    for (let n = run; n >= 1; n -= 1) {
+      const form = tail + text.slice(end, end + n);
+      if (VERB_OR_ADJ.test(pos.get(form) || '') || deinflect(form).some(known) || deinflectStem(form).some(known)) return true;
+    }
+  }
+  return false;
+}
+
 /** The newspaper rank of the rarest kanji in `s`; Infinity when one is unranked. */
 function rarestKanji(s, freq) {
   let worst = 0;
@@ -242,7 +280,12 @@ export function selectExtra(jmdict, sentences, kanjidic, shipped, nameOf = () =>
     }
   });
   stats.candidates = cand.size;
-  const counts = countKeys(sentences, new Set([...pos.keys(), ...cand.keys()]));
+  // whether some entry a candidate spells takes する
+  const suruOf = (k) => cand.get(k).some(({ index }) => words[index].sense.some((x) => x.partOfSpeech.includes('vs')));
+  // A candidate's match that runs on into okurigana is the word the
+  // analyzer reads there, not the candidate (runsIntoOkurigana).
+  const counts = countKeys(sentences, new Set([...pos.keys(), ...cand.keys()]),
+    RULES_OFF.has('okurigana') ? null : (k, text, end) => !cand.has(k) || !runsIntoOkurigana(k, text, end, pos, suruOf(k)));
   for (const [s, list] of cand) {
     if ((counts.get(s) || 0) < MIN_MATCHES) continue;
     // The corpus counts a spelling, not a word: 上野 is matched for Ueno, the

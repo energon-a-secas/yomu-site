@@ -1,9 +1,17 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "短歌行",
-"last": "磁気共鳴血管造影",
+"first": "短期計画",
+"last": "磁気共鳴",
 "entries": {
+"短期計画": [{"r":["たんきけいかく"],"g":["short-term plan"],"p":"n","f":"たん|き|けい|かく"}],
+"短期記憶": [{"r":["たんききおく"],"g":["short-term memory"],"p":"n","f":"たん|き|き|おく"}],
+"短期貸付": [{"r":["たんきかしつけ"],"g":["short-term loan"],"p":"n","f":"たん|き|かし|つけ"}],
+"短期金利": [{"r":["たんききんり"],"g":["short-term rate of interest"],"p":"n","f":"たん|き|きん|り"}],
+"短期集中講座": [{"r":["たんきしゅうちゅうこうざ"],"g":["short, intensive course"],"p":"n","f":"たん|き|しゅう|ちゅう|こう|ざ"}],
+"短柑": [{"r":["たんかん"],"g":["tankan orange (Citrus tankan)"],"p":"n","f":"たん|かん","u":1}],
+"短槍": [{"r":["たんそう"],"g":["short spear"],"p":"n","f":"たん|そう"}],
+"短機関銃": [{"r":["たんきかんじゅう"],"g":["submachine gun"],"p":"n","f":"たん|き|かん|じゅう"}],
 "短歌行": [{"r":["たんかこう"],"g":["form of renku consisting of 24 verses"],"p":"n","f":"たん|か|こう"}],
 "短母音": [{"r":["たんぼいん","みじかぼいん"],"g":["short vowel"],"p":"n","f":"たん|ぼ|いん"}],
 "短毛": [{"r":["たんもう"],"g":["short hair"],"p":"n adj-no","f":"たん|もう"}],
@@ -1276,11 +1284,6 @@
 "磁気ワイヤー": [{"r":["じきワイヤー"],"g":["magnetic wire"],"p":"n","f":"じ|き"}],
 "磁気不良": [{"r":["じきふりょう"],"g":["magnetic strip malfunction (e.g. in a credit card)"],"p":"n","f":"じ|き|ふ|りょう"}],
 "磁気偏差": [{"r":["じきへんさ"],"g":["magnetic declination"],"p":"n","f":"じ|き|へん|さ"}],
-"磁気共鳴": [{"r":["じききょうめい"],"g":["magnetic resonance"],"p":"n","f":"じ|き|きょう|めい"}],
-"磁気共鳴断層撮影": [{"r":["じききょうめいだんそうさつえい"],"g":["magnetic resonance tomography"],"p":"n","f":"じ|き|きょう|めい|だん|そう|さつ|えい"}],
-"磁気共鳴映像法": [{"r":["じききょうめいえいぞうほう"],"g":["magnetic resonance imaging"],"p":"n","f":"じ|き|きょう|めい|えい|ぞう|ほう"}],
-"磁気共鳴画像": [{"r":["じききょうめいがぞう"],"g":["magnetic resonance imaging"],"p":"n","f":"じ|き|きょう|めい|が|ぞう"}],
-"磁気共鳴血管撮影": [{"r":["じききょうめいけっかんさつえい"],"g":["magnetic resonance angiography"],"p":"n","f":"じ|き|きょう|めい|けっ|かん|さつ|えい"}],
-"磁気共鳴血管造影": [{"r":["じききょうめいけっかんぞうえい"],"g":["magnetic resonance angiography"],"p":"n","f":"じ|き|きょう|めい|けっ|かん|ぞう|えい"}]
+"磁気共鳴": [{"r":["じききょうめい"],"g":["magnetic resonance"],"p":"n","f":"じ|き|きょう|めい"}]
 }
 }

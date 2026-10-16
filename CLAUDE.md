@@ -91,7 +91,15 @@ out of every meaning the page draws, while another meaning is left.
 measured (docs/ANALYZER.md). Lowering it is not free: at 3, 六百 became a
 word instead of a number, 清水 "spring water" instead of the surname, and six
 tests failed; filtering out only conjugations, the full release shipped
-verb stems and phrases (はし read 愛し, くじ read ９時). Rebuild with
+verb stems and phrases (はし read 愛し, くじ read ９時). A match that ends in
+a kanji and runs on into okurigana is the verb's, not the spelling's
+(`extra.mjs runsIntoOkurigana`): counted, 雨降 "sea hare" shipped on 35
+sentences of casual 雨降ってる and read 雨降って地固まる as 雨降|って (queue
+#148). Only the whole spelling or its last kanji is tried (寝心地よい holds
+心地よい, and 寝心地 is still the noun), a spelling ending in kana is left
+alone, and after an entry that takes する, し, す, さ or せ is that する
+(退出した). The names tier's "in the corpus at least once" applies the same
+test (`jmnedict.mjs attested`). Rebuild with
 `node tools/build-dict.mjs`, then compare the old data/ with the new over the
 corpus (`node tools/compare-readings.mjs`, a copy of the old tree as its first
 argument) and diff the sentence suites before changing it. The fourth rule,

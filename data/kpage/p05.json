@@ -896,7 +896,7 @@
 "翻": {"w":[["翻訳","ほんやく","translation"],["翻弄","ほんろう","having at one's mercy"],["翻訳家","ほんやくか","translator"],["翻訳者","ほんやくしゃ","translator"],["翻案","ほんあん","adaptation (of a novel, play, etc.)"],["翻す","ひるがえす","to turn over"],["翻る","ひるがえる","to flutter (in the wind)"],["翻意","ほんい","changing one's mind"]],"v":"飜","p":{"番":"審幡播旛蕃","羽":"習翌翼扇翔翁翠"}},
 "翼": {"w":[["翼","つばさ","wing"],["両翼","りょうよく","both wings"],["右翼","うよく","right wing"],["左翼","さよく","left wing"],["一翼","いちよく","one wing"]],"p":{"羽":"習翌翻扇翔翁翠","異":"戴糞"}},
 "耀": {"v":"燿","p":{"光":"輝晃洸","翟":"躍曜濯"}},
-"老": {"w":[["老人","ろうじん","old person"],["年老","としおい","old person"],["老い","おい","old age"],["老婆","ろうば","old woman"],["老婦","ろうふ","old woman"],["老後","ろうご","old age"],["老齢","ろうれい","old age"],["元老","げんろう","elder statesman"],["初老","しょろう","past middle age"],["敬老","けいろう","respect for the aged"]],"p":{"耂":"者考孝","匕":"化北死能疑比旨尼"}},
+"老": {"w":[["老人","ろうじん","old person"],["老い","おい","old age"],["老婆","ろうば","old woman"],["老婦","ろうふ","old woman"],["老後","ろうご","old age"],["老齢","ろうれい","old age"],["元老","げんろう","elder statesman"],["初老","しょろう","past middle age"],["敬老","けいろう","respect for the aged"],["海老","えび","prawn"]],"p":{"耂":"者考孝","匕":"化北死能疑比旨尼"}},
 "耂": {"p":{"土":"社地場在増基境域"},"u":"者考老孝"},
 "考": {"w":[["考え","かんがえ","thinking"],["考える","かんがえる","to think (about, of)"],["考慮","こうりょ","consideration"],["考え方","かんがえかた","way of thinking"],["参考","さんこう","reference"],["思考","しこう","thought"],["再考","さいこう","reconsideration"],["熟考","じゅっこう","careful consideration"],["考察","こうさつ","consideration"],["考案","こうあん","plan"]],"p":{"耂":"者老孝","丂":"巧朽"},"u":"拷"},
 "耄": {"p":{"毛":"尾毬耗"}},

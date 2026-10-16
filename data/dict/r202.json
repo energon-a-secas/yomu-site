@@ -1,9 +1,22 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "大きく水をあけて",
-"last": "大福もち",
+"first": "大いそがし",
+"last": "大票田",
 "entries": {
+"大いそがし": [{"r":["おおいそがし"],"g":["very busy"],"p":"adj-no adj-na"}],
+"大いそぎ": [{"r":["おおいそぎ"],"g":["great hurry"],"p":"n adj-no adj-na"}],
+"大いなる": [{"r":["おおいなる"],"g":["big"],"p":"adj-pn"}],
+"大いばり": [{"r":["おおいばり"],"g":["bragging"],"p":"n adj-na"}],
+"大いびき": [{"r":["おおいびき"],"g":["loud snore"],"p":"n"}],
+"大うけ": [{"r":["おおうけ"],"g":["big hit (with)"],"p":"n vs vi"}],
+"大うそ": [{"r":["おおうそ"],"g":["outrageous lie"],"p":"n"}],
+"大えび": [{"r":["おおえび"],"g":["large shrimp"],"p":"n"}],
+"大かがり火": [{"r":["おおかがりび"],"g":["bonfire"],"p":"n"}],
+"大かっこ": [{"r":["だいかっこ"],"g":["square brackets"],"p":"n"}],
+"大がかり": [{"r":["おおがかり"],"g":["large-scale"],"p":"adj-na n"}],
+"大き": [{"r":["おおき"],"g":["great","greater (of equal court ranks)","a great deal"],"p":"pref n adj-na"}],
+"大きく": [{"r":["おおきく"],"g":["in a big way"],"p":"adv"}],
 "大きく水をあけて": [{"r":["おおきくみずをあけて"],"g":["by a comfortable margin"],"p":"exp"}],
 "大きさ引継ぎ配列": [{"r":["おおきさひきつぎはいれつ"],"g":["assumed-size array"],"p":"n","f":"おお;ひき|つ;はい|れつ"}],
 "大きすぎる": [{"r":["おおきすぎる"],"g":["to be oversized (overloud, etc.)"],"p":"v1"}],
@@ -1166,13 +1179,6 @@
 "大神楽": [{"r":["だいかぐら"],"g":["grand kagura performance at Ise","type of performance including the lion dance and juggling","Camellia japonica 'Daikagura'…"],"p":"n","f":"だい|かぐ|ら"}],
 "大祥": [{"r":["だいしょう"],"g":["second anniversary of a person's death"],"p":"n","f":"だい|しょう"}],
 "大祥忌": [{"r":["だいしょうき","たいしょうき"],"g":["second anniversary of a person's death"],"p":"n","f":"だい|しょう|き"}],
-"大票田": [{"r":["だいひょうでん"],"g":["large constituency"],"p":"n","f":"だい|ひょう|でん"}],
-"大祭": [{"r":["たいさい"],"g":["grand festival"],"p":"n","f":"たい|さい"}],
-"大祭り": [{"r":["おおまつり"],"g":["grand festival"],"p":"n","f":"おお|まつ"}],
-"大祭司": [{"r":["だいさいし"],"g":["High Priest (of Israel)"],"p":"n","f":"だい|さい|し"}],
-"大禍時": [{"r":["おおまがとき"],"g":["twilight (traditionally regarded as a time when accidents…"],"p":"n","f":"*"}],
-"大禍津日神": [{"r":["おおまがつひのかみ"],"g":["the great evil god"],"p":"n","f":"*"}],
-"大福": [{"r":["だいふく"],"g":["great fortune","rice cake stuffed with bean jam"],"p":"n","f":"だい|ふく"},{"r":["おおぶく","だいぶく","たいふく"],"g":["swallowing a great amount of tea or medicine","tea prepared for the New Year with the first water of the…"],"p":"n","f":"おお|ぶく","t":1}],
-"大福もち": [{"r":["だいふくもち"],"g":["rice cake stuffed with sweet bean jam"],"p":"n","f":"だい|ふく"}]
+"大票田": [{"r":["だいひょうでん"],"g":["large constituency"],"p":"n","f":"だい|ひょう|でん"}]
 }
 }

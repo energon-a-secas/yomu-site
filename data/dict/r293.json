@@ -1,9 +1,14 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "蹉跌",
-"last": "軽愚",
+"first": "蹇",
+"last": "軽度",
 "entries": {
+"蹇": [{"r":["あしなえ"],"g":["lameness"],"p":"n","u":1}],
+"蹈襲": [{"r":["とうしゅう"],"g":["following (a precedent, former policy, etc.)"],"p":"n vs vt","f":"とう|しゅう"}],
+"蹈鞴": [{"r":["たたら"],"g":["foot-operated bellows","traditional Japanese clay furnace for smelting iron…"],"p":"n","f":"*","u":1}],
+"蹈鞴を踏む": [{"r":["たたらをふむ"],"g":["to stumble a step or two forward (when trying to stop)"],"p":"exp v5m","f":"*;ふ"}],
+"蹉だ": [{"r":["さだ"],"g":["setback","adversity"],"p":"n adv-to adj-t"}],
 "蹉跌": [{"r":["さてつ"],"g":["failure"],"p":"n vs vi","f":"さ|てつ"}],
 "蹉跎": [{"r":["さだ"],"g":["setback","adversity"],"p":"n adv-to adj-t","f":"さ|だ"}],
 "蹋木": [{"r":["まねき"],"g":["part of a loom"],"p":"n","f":"*"}],
@@ -1270,11 +1275,6 @@
 "軽少": [{"r":["けいしょう"],"g":["trifling"],"p":"adj-na n","f":"けい|しょう"}],
 "軽巡": [{"r":["けいじゅん"],"g":["light cruiser"],"p":"n","f":"けい|じゅん"}],
 "軽巡洋艦": [{"r":["けいじゅんようかん"],"g":["light cruiser"],"p":"n","f":"けい|じゅん|よう|かん"}],
-"軽度": [{"r":["けいど"],"g":["slight"],"p":"adj-no adj-na n","f":"けい|ど"}],
-"軽度懸念": [{"r":["けいどけねん"],"g":["least concern (IUCN Red List category)"],"p":"adj-no n","f":"けい|ど|け|ねん"}],
-"軽度認識障害": [{"r":["けいどにんしきしょうがい"],"g":["mild cognitive impairment"],"p":"n","f":"けい|ど|にん|しき|しょう|がい"}],
-"軽微": [{"r":["けいび"],"g":["slight"],"p":"adj-na n","f":"けい|び"}],
-"軽忽": [{"r":["きょうこつ","けいこつ"],"g":["indiscreet","absurd","disdaining"],"p":"adj-na","f":"きょう|こつ"}],
-"軽愚": [{"r":["けいぐ"],"g":["moronity"],"p":"n","f":"けい|ぐ"}]
+"軽度": [{"r":["けいど"],"g":["slight"],"p":"adj-no adj-na n","f":"けい|ど"}]
 }
 }

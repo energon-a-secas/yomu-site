@@ -72,8 +72,11 @@ test('the dictionary index counts what the core and the shards hold', () => {
   // matched it for Ueno, not for the province (tools/lib/extra.mjs). 39,358
   // until 2026-10-05, when the mixed rule added 808 spellings like あめ色 and
   // 704 katakana folds like アメ色, and 何 with a counter on evidence added
-  // 何個, 何番, 何ヶ月, 何階 and 何月 (tools/lib/extra.mjs, selectMixed)
-  assert.equal(dictIndex.keys, 40875);
+  // 何個, 何番, 何ヶ月, 何階 and 何月 (tools/lib/extra.mjs, selectMixed).
+  // 40,875 until 2026-10-16, when 28 spellings left whose corpus matches ran
+  // on into okurigana (雨降 "sea hare", met only in 雨降って and 雨降る; queue
+  // #148), and the mixed rule gained a spelling and its katakana fold
+  assert.equal(dictIndex.keys, 40849);
   assert.equal(dictIndex.maxKey, Math.max(...[...dict.keys()].map((k) => k.length)));
   assert.equal(dictIndex.core.keys, Object.keys(dictCore.entries).length);
   const ranged = dictShards.reduce((n, s) => n + Object.keys(s.doc.entries).length, 0);

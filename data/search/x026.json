@@ -1,11 +1,8 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","KanjiVG stroke order SVGs r20250816"],"inputs":[{"id":"kanjivg","source":"KanjiVG, Ulrich Apel","url":"http://kanjivg.tagaini.net","spdx":"CC-BY-SA-3.0","screen":"required","acknowledgement":"Attribution. You must attribute the work by stating your use of KanjiVG in your own copyright header and linking to KanjiVG's website (http://kanjivg.tagaini.net)","use":"parts, the named components under each character, followed to their own parts"}],"generated_by":"tools/build-search.mjs","generated_at":"2026-10-01"},
 "format": "yomu-search-rare/1",
-"first": "downhill",
+"first": "download",
 "entries": {
-"downhill": [["下坂","しもさか",["downhill"],"n",0],["滑降競技","かっこうきょうぎ",["downhill"],"n",0],["ダウンヒル","",["downhill"],"n",0],["打ち下ろし","うちおろし",["downhill (hole)"],"adj-no n",0],["下り道","くだりみち",["downhill road"],"n",0],["下り勾配","くだりこうばい",["downhill grade"],"n",0],["坂を下りる","さかをおりる",["to go downhill"],"exp v1",0],["左前になる","ひだりまえになる",["to go downhill (e.g. for one's business)"],"exp v5r",0],["つま先下がり","つまさきさがり",["downhill path"],"n",0],["さか落とし","さかおとし",["dropping (something) headfirst down a precipice","downhill rush"],"n",0]],
-"downlight": [["ダウンライト","",["downlight"],"n",0]],
-"downlink": [["ダウンリンク","",["downlink"],"n",0]],
 "download": [["ＤＬ","ディー・エル",["download"],"n",0],["パケ死","パケし",["racking up unmanageably large mobile data costs","being subjected to download speed restrictions…"],"n vs",0]],
 "downloadable": [["ＤＬＣ","ディー・エル・シー",["downloadable content","diamond-like carbon"],"n",0],["ダウンロード版","ダウンロードばん",["downloadable version"],"n",0],["ダウンロードコンテンツ","",["downloadable content"],"n",0],["ダウンロード・コンテンツ","",["downloadable content"],"n",0]],
 "downloader": [["ダウンローダ","",["downloader"],"n",0],["ダウンローダー","",["downloader"],"n",0]],
@@ -119,7 +116,7 @@
 "dreadlocks": [["ドレッドヘア","",["dreadlocks"],"n",0],["ドレッド・ヘア","",["dreadlocks"],"n",0],["ドレッドロックス","",["dreadlocks"],"n",0]],
 "dreadnought": [["弩級艦","どきゅうかん",["dreadnought"],"n",0],["弩級戦艦","どきゅうせんかん",["dreadnought (class of warships)"],"n",0],["ド級","ドきゅう",["dreadnought class (of warship)"],"n",0],["ドレッドノート","",["dreadnought"],"n",0]],
 "dreads": [["あつものに懲りてなますを吹く","あつものにこりてなますをふく",["a burnt child dreads the fire"],"exp v5k",0]],
-"dream": [["一夢","いちむ",["(a) dream"],"n",0],["夢みる","ゆめみる",["to dream (of)"],"v1 vt",0],["夢を見る","ゆめをみる",["to dream (i.e. while asleep)","to dream (of the future)"],"exp v1",1],["正夢","まさゆめ",["dream that comes true"],"n",0],["逆夢","さかゆめ",["a dream which is contradicted by reality"],"n",0],["吉夢","きちむ",["auspicious dream"],"n",0],["夢精","むせい",["wet dream"],"n vs vi",0],["残夢","ざんむ",["lingering dream"],"n",0],["淫夢","いんむ",["lewd dream"],"n",0],["瑞夢","ずいむ",["auspicious dream"],"n",0]],
+"dream": [["一夢","いちむ",["(a) dream"],"n",0],["夢みる","ゆめみる",["to dream (of)"],"v1 vt",0],["夢を見る","ゆめをみる",["to dream (i.e. while asleep)","to dream (of the future)"],"exp v1",1],["正夢","まさゆめ",["dream that comes true"],"n",0],["逆夢","さかゆめ",["a dream which is contradicted by reality"],"n",0],["吉夢","きちむ",["auspicious dream"],"n",0],["夢精","むせい",["wet dream"],"n vs vi",0],["夢見","ゆめみ",["having a dream"],"n",0],["残夢","ざんむ",["lingering dream"],"n",0],["淫夢","いんむ",["lewd dream"],"n",0]],
 "dreamcast": [["ドリキャス","",["Dreamcast (game console) (abbr)"],"n",0],["ドリームキャスト","",["(Sega) Dreamcast"],"n",0]],
 "dreamcatcher": [["ドリームキャッチャー","",["dreamcatcher"],"n",0]],
 "dreamer": [["夢想家","むそうか",["dreamer"],"n",0],["空想家","くうそうか",["dreamer"],"n",0],["ドリーマー","",["dreamer"],"n",0]],
@@ -517,6 +514,7 @@
 "earworm": [["イヤーワーム","",["earworm"],"n",0]],
 "ease": [["休め","やすめ",["(stand) at ease!"],"int",0],["安佚","あんいつ",["(idle) ease"],"n adj-na",0],["いせる","",["to ease (sewing garments)"],"v1 vt",0],["くつろぎ","",["ease"],"n adj-no",0],["使い心地","つかいごこち",["ease of use"],"exp n",0],["心休まる","こころやすまる",["to feel at ease"],"v5r vi",0],["社交上手","しゃこうじょうず",["social ease (facility, skills)"],"n adj-na",0],["膝を崩す","ひざをくずす",["to sit at ease"],"exp v5s",0],["使いかって","つかいかって",["ease of use"],"n",0],["使いがって","つかいがって",["ease of use"],"n",0]],
 "easel": [["イーゼル","",["easel"],"n",0]],
-"easement": [["地役権","ちえきけん",["easement"],"n",0]]
+"easement": [["地役権","ちえきけん",["easement"],"n",0]],
+"easier": [["旅は道連れ","たびはみちづれ",["having a companion makes the journey easier"],"exp",0],["人を怨むより身を怨め","ひとをうらむよりみをうらめ",["it is easier to blame than do better"],"exp",0],["言うは易く行うは難し","いうはやすくおこなうはかたし",["it's easier said than done"],"exp",0],["あんずるより産むがやすし","あんずるよりうむがやすし",["it is easier to do something than worry about it"],"exp",0]]
 }
 }

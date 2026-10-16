@@ -1,9 +1,13 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "切り分ける",
-"last": "制服制帽",
+"first": "切り入れる",
+"last": "制振",
 "entries": {
+"切り入れる": [{"r":["きりいれる"],"g":["to cut and insert"],"p":"v1"}],
+"切り出し": [{"r":["きりだし"],"g":["pointed knife","logging","(beef) scraps"],"p":"n"}],
+"切り出す": [{"r":["きりだす"],"g":["to quarry","to begin to talk","to start a fire…"],"p":"v5s vt"}],
+"切り分かつ": [{"r":["きりわかつ"],"g":["to cut up"],"p":"v5t"}],
 "切り分ける": [{"r":["きりわける"],"g":["to cut and divide","to distinguish (e.g. facets of a problem)"],"p":"v1 vt"}],
 "切り刻む": [{"r":["きりきざむ"],"g":["to hew"],"p":"v5m vt"}],
 "切り割く": [{"r":["きりさく"],"g":["to cut up"],"p":"v5k vt"}],
@@ -1303,9 +1307,6 @@
 "制御頭書き": [{"r":["せいぎょあたまがき"],"g":["control heading"],"p":"n","f":"せい|ぎょ|あたま|が"}],
 "制慾": [{"r":["せいよく"],"g":["control of passions"],"p":"n vs vi","f":"せい|よく"}],
 "制憲": [{"r":["せいけん"],"g":["establishment of a constitution"],"p":"n vs","f":"せい|けん"}],
-"制振": [{"r":["せいしん"],"g":["vibration control (in earthquake-resistant construction)"],"p":"n vs","f":"せい|しん"}],
-"制振構造": [{"r":["せいしんこうぞう"],"g":["seismic control structure"],"p":"n","f":"せい|しん|こう|ぞう"}],
-"制服デート": [{"r":["せいふくデート"],"g":["going on a date while wearing a school uniform"],"p":"exp n","f":"せい|ふく"}],
-"制服制帽": [{"r":["せいふくせいぼう"],"g":["cap and uniform"],"p":"n","f":"せい|ふく|せい|ぼう"}]
+"制振": [{"r":["せいしん"],"g":["vibration control (in earthquake-resistant construction)"],"p":"n vs","f":"せい|しん"}]
 }
 }

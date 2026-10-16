@@ -1,11 +1,8 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","KanjiVG stroke order SVGs r20250816"],"inputs":[{"id":"kanjivg","source":"KanjiVG, Ulrich Apel","url":"http://kanjivg.tagaini.net","spdx":"CC-BY-SA-3.0","screen":"required","acknowledgement":"Attribution. You must attribute the work by stating your use of KanjiVG in your own copyright header and linking to KanjiVG's website (http://kanjivg.tagaini.net)","use":"parts, the named components under each character, followed to their own parts"}],"generated_by":"tools/build-search.mjs","generated_at":"2026-10-01"},
 "format": "yomu-search-rare/1",
-"first": "fidgety",
+"first": "field",
 "entries": {
-"fidgety": [["桃尻","ももじり",["someone who is bad at horse-riding","fidgety, restless person"],"n",1]],
-"fief": [["旧封","きゅうほう",["former fief"],"n",0],["襲封","しゅうほう",["succession to a fief"],"n vs",0],["領民","りょうみん",["population of a fief"],"n",0],["知行","ちぎょう",["carrying out one's duties","ruling a fief"],"n vs",3],["封ずる","ふうずる",["to seal (letter)","to prevent"],"vz vt",1]],
-"fiefdom": [["レーエン","",["fiefdom"],"n",0]],
 "field": [["原頭","げんとう",["the field"],"n",0],["野ろ","のろ",["field"],"n",0],["野良","のら",["field","stray (dog, cat, etc.)"],"n n-pref",1],["野面","のづら",["(surface of) field","unworked surface of (quarried) stone"],"n",0],["絶","ぜつ",["starting field which contains the November and/or December…"],"n",0],["桐畑","きりばたけ",["field of paulownia trees"],"n",0],["界磁","かいじ",["(magnetic) field system"],"n",0],["白田","しろた",["snow-covered rice paddy","field"],"n",0],["目路","めじ",["field of vision"],"n",0],["篠原","しのはら",["field of bamboo grass"],"n",0]],
 "field's": [["青田うり","あおたうり",["pre-harvest estimate of a rice field's yield and selling…"],"n",0]],
 "fielded": [["刺客候補","しかくこうほ",["candidate fielded by a political party to oust an…"],"n",0]],

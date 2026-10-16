@@ -1,9 +1,14 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "赤鷽",
-"last": "蹉だ",
+"first": "赤鰭",
+"last": "蹄鉄工",
 "entries": {
+"赤鰭": [{"r":["あかひれ"],"g":["white cloud mountain minnow (Tanichthys albonubes)"],"p":"n","f":"あか|ひれ","u":1}],
+"赤鰯": [{"r":["あかいわし"],"g":["pickled sardines","rusty and blunt sword"],"p":"n","f":"あか|いわし","u":1}],
+"赤鱏": [{"r":["あかえい"],"g":["red stingray (Dasyatis akajei)"],"p":"n","f":"あか|えい","u":1}],
+"赤鱝": [{"r":["あかえい"],"g":["red stingray (Dasyatis akajei)"],"p":"n","f":"*","u":1}],
+"赤鳶": [{"r":["あかとび"],"g":["red kite (Milvus milvus)"],"p":"n","f":"あか|とび","u":1}],
 "赤鷽": [{"r":["あかうそ"],"g":["bullfinch (Pyrrhula pyrrhula rosacea)"],"p":"n","f":"あか|うそ","u":1}],
 "赤鹿": [{"r":["あかしか"],"g":["red deer (Cervus elaphus)"],"p":"n","f":"あか|しか","u":1}],
 "赤黄色": [{"r":["あかきいろ"],"g":["yellow with a tinge of red"],"p":"n adj-no","f":"あか|き|いろ"}],
@@ -1253,11 +1258,6 @@
 "蹄葉炎": [{"r":["ていようえん"],"g":["laminitis"],"p":"n","f":"てい|よう|えん"}],
 "蹄行性": [{"r":["ていこうせい"],"g":["unguligrade (walking on hooves)"],"p":"n adj-no","f":"てい|こう|せい"}],
 "蹄鉄": [{"r":["ていてつ"],"g":["horseshoe"],"p":"n","f":"てい|てつ"}],
-"蹄鉄工": [{"r":["ていてつこう"],"g":["farrier"],"p":"n","f":"てい|てつ|こう"}],
-"蹇": [{"r":["あしなえ"],"g":["lameness"],"p":"n","u":1}],
-"蹈襲": [{"r":["とうしゅう"],"g":["following (a precedent, former policy, etc.)"],"p":"n vs vt","f":"とう|しゅう"}],
-"蹈鞴": [{"r":["たたら"],"g":["foot-operated bellows","traditional Japanese clay furnace for smelting iron…"],"p":"n","f":"*","u":1}],
-"蹈鞴を踏む": [{"r":["たたらをふむ"],"g":["to stumble a step or two forward (when trying to stop)"],"p":"exp v5m","f":"*;ふ"}],
-"蹉だ": [{"r":["さだ"],"g":["setback","adversity"],"p":"n adv-to adj-t"}]
+"蹄鉄工": [{"r":["ていてつこう"],"g":["farrier"],"p":"n","f":"てい|てつ|こう"}]
 }
 }

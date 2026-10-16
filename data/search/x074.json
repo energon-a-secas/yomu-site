@@ -1,8 +1,11 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","KanjiVG stroke order SVGs r20250816"],"inputs":[{"id":"kanjivg","source":"KanjiVG, Ulrich Apel","url":"http://kanjivg.tagaini.net","spdx":"CC-BY-SA-3.0","screen":"required","acknowledgement":"Attribution. You must attribute the work by stating your use of KanjiVG in your own copyright header and linking to KanjiVG's website (http://kanjivg.tagaini.net)","use":"parts, the named components under each character, followed to their own parts"}],"generated_by":"tools/build-search.mjs","generated_at":"2026-10-01"},
 "format": "yomu-search-rare/1",
-"first": "rotating",
+"first": "rot",
 "entries": {
+"rot": [["朽ちる","くちる",["to rot","to die in obscurity"],"v1 vi",1],["水腐れ","みずくされ",["water rot (decay of crops due to excess water)"],"n",0],["軟腐病","なんぷびょう",["soft rot"],"n",0],["尻腐れ","しりぐされ",["blossom-end rot"],"n",0],["乾燥腐朽","かんそうふきゅう",["dry rot"],"n",0],["根ぐされ","ねぐされ",["root rot"],"n vs vi",0],["朽ち果てる","くちはてる",["to rot away","to die in obscurity"],"v1 vi",0],["ブレインロット","",["brain rot (low-quality digital media)"],"n",0],["貴腐ワイン","きふワイン",["wine made with grapes affected by noble rot"],"n",0],["ブレイン・ロット","",["brain rot (low-quality digital media)"],"n",0]],
+"rotary": [["回転翼","かいてんよく",["rotary wing (aircraft)"],"n",0],["輪転機","りんてんき",["rotary press"],"n",0],["黒電話","くろでんわ",["black rotary-dial telephone"],"n",0],["かつらむき","",["rotary cutting"],"n",0],["回転変流機","かいてんへんりゅうき",["rotary converter"],"n",0],["ロータリー車","ロータリーしゃ",["rotary snowplow"],"n",0],["回転型電動機","かいてんけいでんどうき",["rotary electric motor"],"n",0],["ロータリクラブ","",["Rotary Club"],"n",0],["ディスクカッター","",["rotary trimmer"],"n",0],["ロータリ・クラブ","",["Rotary Club"],"n",0]],
+"rotated": [["夏山冬里方式","なつやまふゆさとほうしき",["rotated grazing"],"n",0]],
 "rotating": [["輪蔵","りんぞう",["rotating shelf for sutras"],"n",0],["回転磁場","かいてんじば",["rotating field"],"n",0],["強盗返し","がんどうがえし",["rotating stage machinery, which rolls backwards 90 degrees…"],"n",0],["対向循環","たいこうじゅんかん",["counter-rotating"],"n",0],["パトライト","",["rotating warning light similar to the one on a patrol car"],"n",0],["パトランプ","",["rotating warning light (e.g. on a patrol car)"],"n",0],["パト・ランプ","",["rotating warning light (e.g. on a patrol car)"],"n",0],["強盗提灯","がんどうちょうちん",["flashlight-like lantern with a freely rotating candle that…"],"n",0],["龕灯","がんどう",["Buddhist altar light","flashlight-like lantern with a freely rotating candle that…"],"n",0],["どんでん返し","どんでんがえし",["(sudden) complete reversal (of plot)","rotating stage machinery, which rolls backwards 90 degrees…"],"n",0]],
 "rotation": [["輪転","りんてん",["rotation"],"n vs vi",0],["ローテ","",["rotation"],"n",0],["輪作","りんさく",["rotation of crops"],"n vs vt adj-no",0],["輪栽","りんさい",["rotation of crops"],"n vs",0],["外旋","がいせん",["external rotation…"],"n",0],["旋光","せんこう",["optical rotation"],"n",0],["正転","せいてん",["normal rotation (e.g. in machines)"],"n",0],["輪番制","りんばんせい",["rotation system"],"n",0],["右回り","みぎまわり",["clockwise rotation"],"n",0],["回転角","かいてんかく",["angle of rotation"],"n",0]],
 "rotational": [["自転軸","じてんじく",["rotational axis"],"n",0],["回転準位","かいてんじゅんい",["rotational level"],"n",0],["輪換放牧","りんかんほうぼく",["rotational grazing"],"n",0],["サーチ時間","サーチじかん",["rotational delay"],"n",0],["回転異性体","かいてんいせいたい",["rotational isomer"],"n",0],["回転位置感知","かいてんいちかんち",["rotational position sensing"],"n",0],["回転位置検出","かいてんいちけんしゅつ",["rotational position sensing"],"n",0],["回転待ち時間","かいてんまちじかん",["rotational delay time"],"n",0]],
@@ -550,17 +553,6 @@
 "san'ind": [["山陰道","さんいんどう",["San'indō (province roughly corresponding to the modern…"],"n",0]],
 "san'y": [["山陽道","さんようどう",["San'yōdō (province roughly corresponding to the modern…"],"n",0],["山陽地方","さんようちほう",["San'yō region"],"n",0],["山陽新幹線","さんようしんかんせん",["San'yō Shinkansen"],"n",0]],
 "san'yaku": [["返り三役","かえりさんやく",["former san'yaku-ranked wrestler returning to that rank"],"n",0],["三役格","さんやくかく",["referee officiating bouts of san'yaku ranked wrestlers"],"n",0],["新三役","しんさんやく",["wrestler newly promoted to a san'yaku rank"],"n",0]],
-"sana'a": [["サナア","",["Sana'a (Yemen)"],"n",0],["サヌア","",["Sana'a (Yemen)"],"n",0]],
-"sanada": [["六文銭","ろくもんせん",["crest of the Sanada clan…"],"n",0]],
-"sanaenomics": [["サナエノミクス","",["Sanaenomics"],"n",0]],
-"sanatorium": [["保養院","ほよういん",["sanatorium"],"n",0],["サナトリウム","",["sanatorium"],"n",0]],
-"sanbokan": [["三宝柑","さんぼうかん",["sanbokan sour orange (Citrus sulcata)"],"n",0],["サンポウカン","",["sanbokan sour orange (Citrus sulcata)"],"n",0]],
-"sanch": [["三鳥派","さんちょうは",["Sanchō Sect…"],"n",0]],
-"sanchin": [["さんちん","",["sanchin"],"n",0]],
-"sancita": [["順次業","じゅんじごう",["sancita karma"],"n",0],["順生業","じゅんしょうごう",["sancita karma"],"n",0]],
-"sanctification": [["聖化","せいか",["sanctification"],"n",0],["神聖化","しんせいか",["sanctification"],"n vs",0]],
-"sanction": [["裁許","さいきょ",["sanction"],"n vs vt",0],["勅許","ちょっきょ",["imperial sanction"],"n",0],["サンクション","",["sanction"],"n",0],["軍事制裁","ぐんじせいさい",["military sanction"],"n",0]],
-"sanctioned": [["青楼","せいろう",["officially sanctioned brothel (Edo-period)"],"n",0],["奉勅命令","ほうちょくめいれい",["command sanctioned by the emperor"],"n",0]],
-"sanctions": [["経済制裁","けいざいせいさい",["economic sanctions"],"n",0]]
+"sana'a": [["サナア","",["Sana'a (Yemen)"],"n",0],["サヌア","",["Sana'a (Yemen)"],"n",0]]
 }
 }

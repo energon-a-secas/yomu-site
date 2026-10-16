@@ -1,9 +1,20 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "巻起る",
-"last": "平家建",
+"first": "巻繊汁",
+"last": "平安将棋",
 "entries": {
+"巻繊汁": [{"r":["けんちんじる"],"g":["Japanese tofu and vegetable chowder"],"p":"n","f":"*"}],
+"巻纓": [{"r":["けんえい","かんえい","まきえい"],"g":["rolled tail (of a traditional Japanese hat)"],"p":"n","f":"けん|えい"}],
+"巻耳": [{"r":["おなもみ"],"g":["cocklebur (Xanthium strumarium)"],"p":"n","f":"*","u":1}],
+"巻脚絆": [{"r":["まききゃはん"],"g":["puttee"],"p":"n","f":"まき|きゃ|はん"}],
+"巻舌": [{"r":["まきじた"],"g":["speaking with a trill"],"p":"n","f":"まき|じた"}],
+"巻藁": [{"r":["まきわら"],"g":["straw post for training sword strikes, karate punches and…"],"p":"n","f":"まき|わら"}],
+"巻藁矢": [{"r":["まきわらや"],"g":["close-range fletched practice arrow"],"p":"n","f":"まき|わら|や"}],
+"巻貝": [{"r":["まきがい"],"g":["snail"],"p":"n","f":"まき|がい"}],
+"巻起こす": [{"r":["まきおこす"],"g":["to create (a sensation)","to raise (a cloud of dust)"],"p":"v5s vt","f":"まき|お"}],
+"巻起こる": [{"r":["まきおこる"],"g":["to arise"],"p":"v5r vi","f":"まき|お"}],
+"巻起す": [{"r":["まきおこす"],"g":["to create (a sensation)","to raise (a cloud of dust)"],"p":"v5s vt","f":"まき|おこ"}],
 "巻起る": [{"r":["まきおこる"],"g":["to arise"],"p":"v5r vi","f":"まき|おこ"}],
 "巻軸": [{"r":["かんじく"],"g":["(center portion of a) scroll (centre)"],"p":"n","f":"かん|じく"},{"r":["まきじく"],"g":["scroll roller"],"p":"n","f":"まき|じく","t":1}],
 "巻込み": [{"r":["まきこみ"],"g":["makikomi (judo throw)","vehicle accident involving a turn…"],"p":"n","f":"まき|こ"}],
@@ -1224,16 +1235,6 @@
 "平安京": [{"r":["へいあんきょう"],"g":["Heian-kyō"],"p":"n","f":"へい|あん|きょう"}],
 "平安女学院大学": [{"r":["へいあんじょがくいんだいがく"],"g":["Heian Jogakuin University"],"p":"n","f":"へい|あん|じょ|がく|いん|だい|がく"}],
 "平安宮": [{"r":["へいあんきゅう"],"g":["Heian Imperial Palace"],"p":"n","f":"へい|あん|きゅう"}],
-"平安将棋": [{"r":["へいあんしょうぎ"],"g":["Heian shogi (precursor to modern shogi)"],"p":"n","f":"へい|あん|しょう|ぎ"}],
-"平安後期": [{"r":["へいあんこうき"],"g":["late Heian period"],"p":"n","f":"へい|あん|こう|き"}],
-"平安時代": [{"r":["へいあんじだい"],"g":["Heian period (794-1185)"],"p":"n","f":"へい|あん|じ|だい"}],
-"平安朝": [{"r":["へいあんちょう"],"g":["Heian period (794-1185)","imperial court in the Heian period"],"p":"n","f":"へい|あん|ちょう"}],
-"平安無事": [{"r":["へいあんぶじ"],"g":["peace and quiet"],"p":"n adj-na","f":"へい|あん|ぶ|じ"}],
-"平定": [{"r":["へいてい"],"g":["suppression (of a rebellion, civil war, etc.)"],"p":"n vs vt","f":"へい|てい"}],
-"平実レモン": [{"r":["ひらみレモン"],"g":["Hirami lemon (Citrus depressa)"],"p":"n","f":"ひら|み","u":1}],
-"平実檸檬": [{"r":["ひらみレモン"],"g":["Hirami lemon (Citrus depressa)"],"p":"n","f":"*","u":1}],
-"平家": [{"r":["へいけ"],"g":["Heike family","The Tale of the Heike","chanting of the Heike Monogatari"],"p":"n","f":"へい|け"},{"r":["ひらや"],"g":["bungalow"],"p":"n","f":"ひら|や","t":1}],
-"平家の流れ": [{"r":["へいけのながれ"],"g":["the Heike line"],"p":"n","f":"へい|け;なが"}],
-"平家建": [{"r":["ひらやだて"],"g":["single-storied house"],"p":"n adj-no","f":"ひら|や|だて"}]
+"平安将棋": [{"r":["へいあんしょうぎ"],"g":["Heian shogi (precursor to modern shogi)"],"p":"n","f":"へい|あん|しょう|ぎ"}]
 }
 }

@@ -1,9 +1,17 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "病膏肓に入る",
-"last": "白韲え",
+"first": "病癖",
+"last": "白雲母",
 "entries": {
+"病癖": [{"r":["びょうへき"],"g":["bad habit"],"p":"n","f":"びょう|へき"}],
+"病的": [{"r":["びょうてき"],"g":["pathological"],"p":"adj-na adj-no","f":"びょう|てき"}],
+"病的放火": [{"r":["びょうてきほうか"],"g":["pyromania"],"p":"n","f":"びょう|てき|ほう|か"}],
+"病的科学": [{"r":["びょうてきかがく"],"g":["pathological science"],"p":"n","f":"びょう|てき|か|がく"}],
+"病相": [{"r":["びょうそう"],"g":["episode (of a mental illness)"],"p":"n","f":"びょう|そう"}],
+"病相期": [{"r":["びょうそうき"],"g":["active phase (of an illness)"],"p":"n","f":"びょう|そう|き"}],
+"病者": [{"r":["びょうしゃ","びょうじゃ"],"g":["sick person"],"p":"n","f":"びょう|しゃ"}],
+"病者の塗油": [{"r":["びょうしゃのとゆ"],"g":["Anointing of the Sick"],"p":"exp n","f":"びょう|しゃ;と|ゆ"}],
 "病膏肓に入る": [{"r":["やまいこうこうにいる"],"g":["to become seriously ill","to become a slave of a habit"],"p":"exp v5r","f":"やまい|こう|こう;い"}],
 "病臥": [{"r":["びょうが"],"g":["being ill in bed"],"p":"n vs vi","f":"びょう|が"}],
 "病舎": [{"r":["びょうしゃ"],"g":["hospital"],"p":"n","f":"びょう|しゃ"}],
@@ -1245,11 +1253,6 @@
 "白雪姫": [{"r":["しらゆきひめ"],"g":["Snow White"],"p":"n","f":"しら|ゆき|ひめ"}],
 "白雲": [{"r":["しらくも","はくうん"],"g":["white clouds"],"p":"n","f":"しら|くも"}],
 "白雲木": [{"r":["はくうんぼく"],"g":["fragrant styrax (Styrax obassia)"],"p":"n","f":"はく|うん|ぼく","u":1}],
-"白雲母": [{"r":["しろうんも","はくうんも"],"g":["muscovite"],"p":"n","f":"しろ|うん|も"}],
-"白雲石": [{"r":["はくうんせき"],"g":["dolomite"],"p":"n","f":"はく|うん|せき"}],
-"白露": [{"r":["しらつゆ","はくろ"],"g":["glistening dew","\"white dew\" solar term (approx. September 8)"],"p":"n","f":"しら|つゆ"}],
-"白面": [{"r":["はくめん"],"g":["pale","inexperienced","face without makeup"],"p":"adj-no n","f":"はく|めん"},{"r":["しらふ"],"g":["sobriety","sober face"],"p":"n adj-no","f":"*","u":1,"t":1}],
-"白靴": [{"r":["しろぐつ"],"g":["white shoes (for use during the summer)"],"p":"n","f":"しろ|ぐつ"}],
-"白韲え": [{"r":["しらあえ"],"g":["salad dressed with tofu, white sesame, and white miso"],"p":"n","f":"しら|あ"}]
+"白雲母": [{"r":["しろうんも","はくうんも"],"g":["muscovite"],"p":"n","f":"しろ|うん|も"}]
 }
 }

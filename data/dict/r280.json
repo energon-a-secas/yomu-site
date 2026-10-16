@@ -1,9 +1,14 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "花椒",
-"last": "草質",
+"first": "花柳病",
+"last": "草蘇鉄",
 "entries": {
+"花柳病": [{"r":["かりゅうびょう"],"g":["sexually transmitted disease"],"p":"n","f":"か|りゅう|びょう"}],
+"花柳街": [{"r":["かりゅうがい"],"g":["red-light district"],"p":"n","f":"か|りゅう|がい"}],
+"花梗": [{"r":["かこう"],"g":["flower stalk"],"p":"n adj-no","f":"か|こう"}],
+"花梨": [{"r":["かりん"],"g":["Burmese rosewood (Pterocarpus indicus)","flowering quince (of genus Chaenomeles)…","quince (Cydonia oblonga)"],"p":"n","f":"*","u":1}],
+"花植え": [{"r":["はなうえ"],"g":["flower planting"],"p":"n","f":"はな|う"}],
 "花椒": [{"r":["かしょう","ホワジャオ","ホアジャオ"],"g":["Chinese prickly-ash (Zanthoxylum bungeanum)"],"p":"n","f":"か|しょう"}],
 "花椒塩": [{"r":["ホワジャオイエン"],"g":["Sichuan pepper-salt"],"p":"n","f":"*","ls":["chi","huājiāoyán"]}],
 "花椰菜": [{"r":["はなやさい"],"g":["cauliflower"],"p":"n","f":"はな|や|さい"}],
@@ -1248,11 +1253,6 @@
 "草藁": [{"r":["くさわら"],"g":["grass and straw (as fodder for horses, etc.)"],"p":"n","f":"くさ|わら"}],
 "草藤": [{"r":["くさふじ"],"g":["tufted vetch (Vicia cracca)"],"p":"n","f":"くさ|ふじ","u":1}],
 "草藪": [{"r":["くさやぶ"],"g":["thicket"],"p":"n","f":"くさ|やぶ"}],
-"草蘇鉄": [{"r":["くさそてつ"],"g":["ostrich fern (Matteuccia struthiopteris)"],"p":"n","f":"くさ|そ|てつ","u":1}],
-"草蜉蝣": [{"r":["くさかげろう"],"g":["green lacewing (esp. species Chrysopa intima)"],"p":"n","f":"*","u":1}],
-"草蜘蛛": [{"r":["くさぐも"],"g":["Agelena limbata (species of araneomorph funnel-web spider)"],"p":"n","f":"*","u":1}],
-"草蜻蛉": [{"r":["くさかげろう"],"g":["green lacewing (esp. species Chrysopa intima)"],"p":"n","f":"*","u":1}],
-"草蝦": [{"r":["てながえび"],"g":["freshwater prawn…"],"p":"n","f":"*"}],
-"草質": [{"r":["そうしつ"],"g":["herbaceous"],"p":"adj-no","f":"そう|しつ"}]
+"草蘇鉄": [{"r":["くさそてつ"],"g":["ostrich fern (Matteuccia struthiopteris)"],"p":"n","f":"くさ|そ|てつ","u":1}]
 }
 }

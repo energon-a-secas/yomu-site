@@ -1,9 +1,18 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "客冬",
-"last": "寝待ちの月",
+"first": "客いじり",
+"last": "寝台券",
 "entries": {
+"客いじり": [{"r":["きゃくいじり"],"g":["involving the audience…"],"p":"n vs"}],
+"客を通す": [{"r":["きゃくをとおす"],"g":["to show a guest in"],"p":"exp v5s"}],
+"客人": [{"r":["きゃくじん"],"g":["caller"],"p":"n","f":"きゃく|じん"},{"r":["まろうど"],"g":["visitor from afar"],"p":"n","f":"*","t":1},{"r":["まれびと"],"g":["visitor from afar","joy-bringing spirit from the divine realms"],"p":"n","f":"*","t":2}],
+"客体": [{"r":["きゃくたい","かくたい"],"g":["object"],"p":"n","f":"きゃく|たい"}],
+"客体化": [{"r":["きゃくたいか","かくたいか"],"g":["objectification"],"p":"n vs","f":"きゃく|たい|か"}],
+"客僧": [{"r":["きゃくそう"],"g":["priest traveling as part of his training (travelling)"],"p":"n","f":"きゃく|そう"}],
+"客先": [{"r":["きゃくさき"],"g":["customer"],"p":"n","f":"きゃく|さき"}],
+"客先開発プログラム": [{"r":["きゃくさきかいはつプログラム"],"g":["field developed program"],"p":"n","f":"きゃく|さき|かい|はつ"}],
+"客入り": [{"r":["きゃくいり"],"g":["attendance"],"p":"n","f":"きゃく|い"}],
 "客冬": [{"r":["かくとう"],"g":["last winter"],"p":"n","f":"かく|とう"}],
 "客分": [{"r":["きゃくぶん"],"g":["treatment as a guest"],"p":"n","f":"きゃく|ぶん"}],
 "客前": [{"r":["きゃくぜん","きゃくまえ"],"g":["in front of the customer (guest, visitor, etc.)"],"p":"n","f":"きゃく|ぜん"}],
@@ -1247,17 +1256,6 @@
 "寝取られ": [{"r":["ねとられ"],"g":["cuckolding (esp. in pornography)"],"p":"n","f":"ね|と"}],
 "寝取る": [{"r":["ねとる"],"g":["to steal another's spouse"],"p":"v5r vt","f":"ね|と"}],
 "寝台列車": [{"r":["しんだいれっしゃ"],"g":["sleeper train"],"p":"n","f":"しん|だい|れっ|しゃ"}],
-"寝台券": [{"r":["しんだいけん"],"g":["ticket (sleeping car)"],"p":"n","f":"しん|だい|けん"}],
-"寝台料金": [{"r":["しんだいりょうきん"],"g":["berth charge"],"p":"n","f":"しん|だい|りょう|きん"}],
-"寝台船": [{"r":["しんだいせん"],"g":["sleeper ship (science fiction)"],"p":"n","f":"しん|だい|せん"}],
-"寝台虫": [{"r":["しんだいむし"],"g":["bedbug"],"p":"n","f":"しん|だい|むし"}],
-"寝台車": [{"r":["しんだいしゃ"],"g":["sleeping car"],"p":"n","f":"しん|だい|しゃ"}],
-"寝圧し": [{"r":["ねおし"],"g":["pressing clothes, etc. by placing them under the bedding…"],"p":"n vs vt","f":"ね|お"}],
-"寝坊助": [{"r":["ねぼすけ"],"g":["sleepyhead"],"p":"n","f":"*","u":1}],
-"寝場所": [{"r":["ねばしょ"],"g":["place to sleep"],"p":"n","f":"ね|ば|しょ"}],
-"寝姿": [{"r":["ねすがた"],"g":["one's figure during sleep"],"p":"n","f":"ね|すがた"}],
-"寝小便": [{"r":["ねしょうべん"],"g":["bed-wetting"],"p":"n","f":"ね|しょう|べん"}],
-"寝屋": [{"r":["ねや"],"g":["bedroom (esp. one used by a married couple)","inner room"],"p":"n","f":"ね|や"}],
-"寝待ちの月": [{"r":["ねまちづき"],"g":["moon of the 19th day of the lunar month"],"p":"n","f":"*;*"}]
+"寝台券": [{"r":["しんだいけん"],"g":["ticket (sleeping car)"],"p":"n","f":"しん|だい|けん"}]
 }
 }

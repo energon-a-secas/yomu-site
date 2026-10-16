@@ -1,9 +1,12 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "醜婦",
-"last": "金融引き締め",
+"first": "醜の御楯",
+"last": "金融家",
 "entries": {
+"醜の御楯": [{"r":["しこのみたて"],"g":["the humble shield of our Sovereign Lord"],"p":"exp","f":"しこ;み|たて"}],
+"醜体": [{"r":["しゅうたい"],"g":["disgraceful behavior"],"p":"n","f":"しゅう|たい"}],
+"醜名": [{"r":["しゅうめい"],"g":["scandal"],"p":"n","f":"しゅう|めい"},{"r":["しこな"],"g":["wrestler's stage name"],"p":"n","f":"しこ|な","u":1,"t":1}],
 "醜婦": [{"r":["しゅうふ"],"g":["ugly woman"],"p":"n","f":"しゅう|ふ"}],
 "醜形恐怖症": [{"r":["しゅうけいきょうふしょう"],"g":["dysmorphophobia"],"p":"n","f":"しゅう|けい|きょう|ふ|しょう"}],
 "醜怪": [{"r":["しゅうかい"],"g":["monstrously ugly"],"p":"adj-na n","f":"しゅう|かい"}],
@@ -1218,9 +1221,6 @@
 "金融商品": [{"r":["きんゆうしょうひん"],"g":["financial products"],"p":"n","f":"きん|ゆう|しょう|ひん"}],
 "金融商品仲介": [{"r":["きんゆうしょうひんちゅうかい"],"g":["financial instruments intermediary"],"p":"n","f":"きん|ゆう|しょう|ひん|ちゅう|かい"}],
 "金融商品取引法": [{"r":["きんゆうしょうひんとりひきほう"],"g":["Financial Instruments and Exchange Act"],"p":"n","f":"きん|ゆう|しょう|ひん|とり|ひき|ほう"}],
-"金融家": [{"r":["きんゆうか"],"g":["financier"],"p":"n","f":"きん|ゆう|か"}],
-"金融崩壊": [{"r":["きんゆうほうかい"],"g":["financial collapse"],"p":"n","f":"きん|ゆう|ほう|かい"}],
-"金融工学": [{"r":["きんゆうこうがく"],"g":["financial engineering"],"p":"n","f":"きん|ゆう|こう|がく"}],
-"金融引き締め": [{"r":["きんゆうひきしめ"],"g":["monetary tightening"],"p":"n","f":"きん|ゆう|ひ;し"}]
+"金融家": [{"r":["きんゆうか"],"g":["financier"],"p":"n","f":"きん|ゆう|か"}]
 }
 }

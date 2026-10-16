@@ -1,9 +1,19 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "熊出没注意",
-"last": "物わかりがいい",
+"first": "熇尾蛇",
+"last": "物ほしそう",
 "entries": {
+"熇尾蛇": [{"r":["ひばかり"],"g":["Asian keelback (Amphiesma vibakari)"],"p":"n","f":"*","u":1}],
+"熊さん八っつあん": [{"r":["くまさんはっつあん"],"g":["the average Joe"],"p":"n"}],
+"熊さん八つあん": [{"r":["くまさんはっつあん"],"g":["the average Joe"],"p":"n"}],
+"熊のい": [{"r":["くまのい"],"g":["dried bear's gallbladder…"],"p":"exp n"}],
+"熊の子貝": [{"r":["くまのこがい"],"g":["Chlorostoma xanthostigma (species of sea snail)"],"p":"n","f":"くま;こ|がい","u":1}],
+"熊の実": [{"r":["くまのみ"],"g":["clownfish…"],"p":"n","u":1}],
+"熊の胆": [{"r":["くまのい"],"g":["dried bear's gallbladder…"],"p":"exp n"}],
+"熊ん蜂": [{"r":["くまんばち"],"g":["Japanese carpenter bee (Xylocopa appendiculata circumvolans)","wasp"],"p":"n","u":1}],
+"熊之実": [{"r":["くまのみ"],"g":["clownfish…"],"p":"n","f":"くま|の|み","u":1}],
+"熊公八公": [{"r":["くまこうはちこう"],"g":["uncultured but well-intentioned person"],"p":"n","f":"くま|こう|はち|こう"}],
 "熊出没注意": [{"r":["くましゅつぼつちゅうい"],"g":["Beware of Bears"],"p":"exp","f":"くま|しゅつ|ぼつ|ちゅう|い"}],
 "熊啄木鳥": [{"r":["くまげら"],"g":["black woodpecker (Dryocopus martius)"],"p":"n","f":"*","u":1}],
 "熊四手": [{"r":["くましで"],"g":["Japanese hornbeam (Carpinus japonica)"],"p":"n","f":"くま|し|で","u":1}],
@@ -1279,15 +1289,6 @@
 "物は言いよう": [{"r":["ものはいいよう"],"g":["smooth words make smooth ways"],"p":"exp"}],
 "物は言い様": [{"r":["ものはいいよう"],"g":["smooth words make smooth ways"],"p":"exp"}],
 "物は試し": [{"r":["ものはためし"],"g":["the proof of the pudding is in the eating"],"p":"exp"}],
-"物ほしそう": [{"r":["ものほしそう"],"g":["wistful"],"p":"adj-na"}],
-"物まね": [{"r":["ものまね"],"g":["imitation (of someone, something)"],"p":"n vs vt","u":1}],
-"物めずらしい": [{"r":["ものめずらしい"],"g":["curious"],"p":"adj-i"}],
-"物もらい": [{"r":["ものもらい"],"g":["beggar","sty (on the eyelid)"],"p":"n","u":1}],
-"物も言いよう": [{"r":["ものもいいよう"],"g":["be careful what you say"],"p":"exp"}],
-"物も言いようで角が立つ": [{"r":["ものもいいようでかどがたつ"],"g":["harsh words make the going rough"],"p":"exp v5t"}],
-"物も言い様": [{"r":["ものもいいよう"],"g":["be careful what you say"],"p":"exp"}],
-"物も言い様で角が立つ": [{"r":["ものもいいようでかどがたつ"],"g":["harsh words make the going rough"],"p":"exp v5t"}],
-"物わかり": [{"r":["ものわかり"],"g":["understanding (of people's circumstances and feelings)"],"p":"n"}],
-"物わかりがいい": [{"r":["ものわかりがいい","ものわかりがよい"],"g":["sensible"],"p":"exp adj-ix"}]
+"物ほしそう": [{"r":["ものほしそう"],"g":["wistful"],"p":"adj-na"}]
 }
 }

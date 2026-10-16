@@ -1,8 +1,12 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","KanjiVG stroke order SVGs r20250816"],"inputs":[{"id":"kanjivg","source":"KanjiVG, Ulrich Apel","url":"http://kanjivg.tagaini.net","spdx":"CC-BY-SA-3.0","screen":"required","acknowledgement":"Attribution. You must attribute the work by stating your use of KanjiVG in your own copyright header and linking to KanjiVG's website (http://kanjivg.tagaini.net)","use":"parts, the named components under each character, followed to their own parts"}],"generated_by":"tools/build-search.mjs","generated_at":"2026-10-01"},
 "format": "yomu-search-rare/1",
-"first": "phones",
+"first": "phone",
 "entries": {
+"phone": [["フォーン","",["phone"],"n",0],["架電","かでん",["making a phone call"],"n vs vi",0],["終話","しゅうわ",["ending a phone conversation"],"n vs vi",0],["逆探知","ぎゃくたんち",["phone trace"],"n vs vt",0],["電リク","でんリク",["phone in request…"],"n",0],["電話番","でんわばん",["phone duty"],"n",0],["鬼電","おにでん",["calling someone over the phone many times"],"n vs",0],["ガラホ","",["(Japanese) mobile phone with the form of a feature phone…"],"n",0],["ケー番","けいばん",["mobile phone number"],"n",0],["怪電話","かいでんわ",["suspicious phone call"],"n",0]],
+"phoneme": [["音素","おんそ",["phoneme"],"n",0],["音韻","おんいん",["phoneme","vocal sound"],"n",1],["フォニーム","",["phoneme"],"n",0],["フォネーム","",["phoneme"],"n",0]],
+"phonemic": [["音素体系","おんそたいけい",["phonemic system"],"n",0]],
+"phonemics": [["音素論","おんそろん",["phonemics"],"n",0]],
 "phones": [["受信音","じゅしんおん",["ringtone (of mobile phones, portable phones, cellphones…"],"n",0],["ガラパゴス","",["Galapagos (island chain)","Sharp brand of e-readers and mobile phones"],"n",0]],
 "phonetic": [["表音","ひょうおん",["phonetic representation"],"n",0],["音価","おんか",["phonetic value","note value"],"n",0],["音図","おんず",["phonetic table (esp. that of Japanese)"],"n",0],["音標","おんぴょう",["phonetic sign"],"n",0],["通話表","つうわひょう",["phonetic alphabet (e.g. A for alpha, B for bravo, etc.)"],"n",0],["ＩＰＡ","アイ・ピー・エー",["International Phonetic Alphabet"],"n",0],["声音文字","せいおんもじ",["phonetic symbol"],"n",0],["発音記号","はつおんきごう",["phonetic symbol"],"n",0],["表音字母","ひょうおんじぼ",["phonetic alphabet"],"n",0],["表音文字","ひょうおんもじ",["phonetic symbol"],"n",0]],
 "phonetics": [["発音学","はつおんがく",["phonetics"],"n",0],["音声学","おんせいがく",["phonetics"],"n",0],["音韻学","おんいんがく",["phonetics"],"n",0],["フォネティックス","",["phonetics"],"n",0],["平声","ひょうしょう",["first tone in old Chinese phonetics","(of a Japanese accent) having a low, flat tone"],"n",0],["平上去入","ひょうじょうきょにゅう",["the four tones in old Chinese phonetics"],"n",0]],
@@ -628,11 +632,6 @@
 "plastometer": [["プラストメーター","",["plastometer"],"n",0]],
 "plastoquinone": [["プラストキノン","",["plastoquinone"],"n",0]],
 "plastron": [["プラストロン","",["plastron (of a dress)"],"n",0]],
-"plasty": [["形成術","けいせいじゅつ",["-plasty"],"n-suf",0]],
-"plata": [["ラプラタカワイルカ","",["La Plata dolphin (Pontoporia blainvillei)"],"n",0]],
-"platanifolium": [["うりのき","",["Alangium platanifolium var. trilobum"],"n",0]],
-"platanthera": [["水千鳥","みずちどり",["Platanthera hologlottis (species of orchid)"],"n",0],["たかねさぎそう","",["Platanthera maximowicziana (species of orchid)"],"n",0]],
-"platax": [["ツバメウオ属","ツバメウオぞく",["Platax (genus Indo-Pacific batfishes)"],"n",0]],
-"plate": [["お皿","おさら",["plate"],"n",0],["検版","けんぱん",["plate check"],"n",0],["版代","はんだい",["(printing, etc.) plate cost"],"n",0],["丸皿","まるざら",["round plate"],"n",0],["側板","そくばん",["lateral plate","pleuron"],"n",2],["凹版","おうはん",["intaglio plate"],"n",0],["刷版","さっぱん",["machine plate"],"n",0],["大皿","おおざら",["large plate"],"n",0],["定盤","じょうばん",["surface plate"],"n",0],["木皿","きざら",["wooden plate"],"n",0]]
+"plasty": [["形成術","けいせいじゅつ",["-plasty"],"n-suf",0]]
 }
 }

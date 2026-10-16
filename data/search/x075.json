@@ -1,8 +1,19 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","KanjiVG stroke order SVGs r20250816"],"inputs":[{"id":"kanjivg","source":"KanjiVG, Ulrich Apel","url":"http://kanjivg.tagaini.net","spdx":"CC-BY-SA-3.0","screen":"required","acknowledgement":"Attribution. You must attribute the work by stating your use of KanjiVG in your own copyright header and linking to KanjiVG's website (http://kanjivg.tagaini.net)","use":"parts, the named components under each character, followed to their own parts"}],"generated_by":"tools/build-search.mjs","generated_at":"2026-10-01"},
 "format": "yomu-search-rare/1",
-"first": "sanctuary",
+"first": "sanada",
 "entries": {
+"sanada": [["六文銭","ろくもんせん",["crest of the Sanada clan…"],"n",0]],
+"sanaenomics": [["サナエノミクス","",["Sanaenomics"],"n",0]],
+"sanatorium": [["保養院","ほよういん",["sanatorium"],"n",0],["サナトリウム","",["sanatorium"],"n",0]],
+"sanbokan": [["三宝柑","さんぼうかん",["sanbokan sour orange (Citrus sulcata)"],"n",0],["サンポウカン","",["sanbokan sour orange (Citrus sulcata)"],"n",0]],
+"sanch": [["三鳥派","さんちょうは",["Sanchō Sect…"],"n",0]],
+"sanchin": [["さんちん","",["sanchin"],"n",0]],
+"sancita": [["順次業","じゅんじごう",["sancita karma"],"n",0],["順生業","じゅんしょうごう",["sancita karma"],"n",0]],
+"sanctification": [["聖化","せいか",["sanctification"],"n",0],["神聖化","しんせいか",["sanctification"],"n vs",0]],
+"sanction": [["裁許","さいきょ",["sanction"],"n vs vt",0],["勅許","ちょっきょ",["imperial sanction"],"n",0],["サンクション","",["sanction"],"n",0],["軍事制裁","ぐんじせいさい",["military sanction"],"n",0]],
+"sanctioned": [["青楼","せいろう",["officially sanctioned brothel (Edo-period)"],"n",0],["奉勅命令","ほうちょくめいれい",["command sanctioned by the emperor"],"n",0]],
+"sanctions": [["経済制裁","けいざいせいさい",["economic sanctions"],"n",0]],
 "sanctuary": [["聖所","せいじょ",["sanctuary"],"n",0],["保護区","ほごく",["sanctuary"],"n",0],["賢所","かしこどころ",["palace sanctuary"],"n",0],["奥の院","おくのいん",["inner sanctuary"],"n",0],["宮中三殿","きゅうちゅうさんでん",["the palace sanctuary, shrine of imperial ancestors and…"],"n",0],["鳥獣保護区","ちょうじゅうほごく",["wildlife sanctuary"],"n",0],["バードサンクチュアリ","",["bird sanctuary"],"n",0],["バードサンクチュアリー","",["bird sanctuary"],"n",0],["バード・サンクチュアリ","",["bird sanctuary"],"n",0],["バード・サンクチュアリー","",["bird sanctuary"],"n",0]],
 "sanctum": [["内陣","ないじん",["inner sanctum"],"n",0],["昇殿","しょうでん",["entry into the sanctum of a shrine or temple","entry to the imperial court (in the Heian period)"],"n vs vi",0],["西序","せいじょ",["memorial rite involving the western sanctum"],"n",0]],
 "sanctums": [["結界","けっかい",["(fixing) boundaries for religious practices","prohibition…"],"n",1]],
@@ -608,7 +619,6 @@
 "scrape": [["こそぐ","",["to scrape off"],"v5g vt",0],["かき出す","かきだす",["to scrape out"],"v5s vt",0],["かき落す","かきおとす",["to scrape off","to chop off (someone's head)"],"v5s vt",1],["こそげる","",["to scrape off"],"v1 vt",0],["こそげ取る","こそげとる",["to scrape off"],"v5r vt",0],["こそげ落す","こそげおとす",["to scrape off"],"v5s vt",0],["糊する","のりする",["to paste","to scrape a living"],"vs-i vt",0],["けずり落とす","けずりおとす",["to scrape off"],"v5s vt",0],["こすり落とす","こすりおとす",["to scrape off"],"v5s",0],["じょりじょり","",["scrape-scrape"],"adv adv-to",0]],
 "scraped": [["赤むけ","あかむけ",["scraped skin"],"n",0]],
 "scraper": [["搔器","そうき",["(stone) scraper"],"n",0],["スクレイパ","",["scraper"],"n",0],["スクレーパ","",["scraper"],"n",0],["スクレイパー","",["scraper"],"n",0],["スクレッパー","",["scraper"],"n",0],["スクレーパー","",["scraper"],"n",0],["スケッパ","",["dough scraper"],"n",0],["ドレッジ","",["dough scraper"],"n",0],["泥おとし","どろおとし",["mud scraper"],"n",0],["スケッパー","",["dough scraper"],"n",0]],
-"scrapie": [["スクレピー","",["scrapie"],"n",0],["スクレイピー","",["scrapie"],"n",0],["スクレーピー","",["scrapie"],"n",0]],
-"scraping": [["削摩","さくま",["denudation","scraping"],"n",0],["がりっと","",["with a scraping sound","with a crunching sound (while eating)"],"adv",0],["ごりごり","",["with a scraping sound","with force"],"adv adv-to vs adj-na adj-no",1],["無理算段","むりさんだん",["scraping together (a sum of money)"],"n vs vi",0],["スクレイピング","",["(web) scraping","scraping (wax from a ski or snowboard)"],"n",0],["スクレーピング","",["(web) scraping","scraping (wax from a ski or snowboard)"],"n",0],["その日暮し","そのひぐらし",["financially scraping by","living one's life without plan"],"exp n",0],["Ｗｅｂスクレイピング","ウェブスクレイピング",["web scraping"],"n",0]]
+"scrapie": [["スクレピー","",["scrapie"],"n",0],["スクレイピー","",["scrapie"],"n",0],["スクレーピー","",["scrapie"],"n",0]]
 }
 }

@@ -1,9 +1,12 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "側火山",
-"last": "先様",
+"first": "側泳",
+"last": "先染",
 "entries": {
+"側泳": [{"r":["そばえい"],"g":["side stroke"],"p":"n","f":"そば|えい"}],
+"側湾症": [{"r":["そくわんしょう"],"g":["scoliosis"],"p":"n","f":"そく|わん|しょう"}],
+"側溝": [{"r":["そっこう"],"g":["gutter"],"p":"n","f":"そっ|こう"}],
 "側火山": [{"r":["そっかざん"],"g":["parasite volcano"],"p":"n","f":"そっ|か|ざん"}],
 "側生動物": [{"r":["そくせいどうぶつ"],"g":["parazoan (member of an ancestral subkingdom of animals…"],"p":"n","f":"そく|せい|どう|ぶつ"}],
 "側目": [{"r":["そばめ"],"g":["outsider's perspective"],"p":"n","f":"そば|め"}],
@@ -252,6 +255,7 @@
 "傘布": [{"r":["かさぬの"],"g":["(water-repellent) umbrella fabric"],"p":"n","f":"かさ|ぬの"}],
 "傘張り": [{"r":["かさはり"],"g":["making paper umbrellas","paper umbrella maker"],"p":"n","f":"かさ|は"}],
 "傘形碍子": [{"r":["かさがたがいし"],"g":["umbrella insulator"],"p":"n","f":"かさ|がた|がい|し"}],
+"傘持": [{"r":["かさもち"],"g":["umbrella carrier"],"p":"n","f":"かさ|もち"}],
 "傘持ち": [{"r":["かさもち"],"g":["umbrella carrier"],"p":"n","f":"かさ|も"}],
 "傘振り場": [{"r":["かさふりば"],"g":["stand for drying umbrellas"],"p":"n","f":"かさ|ふ;ば"}],
 "傘歯車": [{"r":["かさはぐるま"],"g":["bevel gear"],"p":"n","f":"かさ|は|ぐるま"}],
@@ -1297,9 +1301,6 @@
 "先日付": [{"r":["さきひづけ"],"g":["dating forward"],"p":"n","f":"さき|ひ|づけ"}],
 "先日付け": [{"r":["さきひづけ"],"g":["dating forward"],"p":"n","f":"さき|ひ|づ"}],
 "先晩": [{"r":["せんばん"],"g":["the other evening"],"p":"n adv","f":"せん|ばん"}],
-"先染": [{"r":["さきぞめ"],"g":["yarn dyeing"],"p":"n","f":"さき|ぞめ"}],
-"先染め": [{"r":["さきぞめ"],"g":["yarn dyeing"],"p":"n","f":"さき|ぞ"}],
-"先棒": [{"r":["さきぼう"],"g":["front palanquin bearer","flunky"],"p":"n","f":"さき|ぼう"}],
-"先様": [{"r":["さきさま"],"g":["the other party"],"p":"n","f":"さき|さま"}]
+"先染": [{"r":["さきぞめ"],"g":["yarn dyeing"],"p":"n","f":"さき|ぞめ"}]
 }
 }

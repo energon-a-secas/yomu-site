@@ -1,8 +1,9 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","KanjiVG stroke order SVGs r20250816"],"inputs":[{"id":"kanjivg","source":"KanjiVG, Ulrich Apel","url":"http://kanjivg.tagaini.net","spdx":"CC-BY-SA-3.0","screen":"required","acknowledgement":"Attribution. You must attribute the work by stating your use of KanjiVG in your own copyright header and linking to KanjiVG's website (http://kanjivg.tagaini.net)","use":"parts, the named components under each character, followed to their own parts"}],"generated_by":"tools/build-search.mjs","generated_at":"2026-10-01"},
 "format": "yomu-search-rare/1",
-"first": "pressing",
+"first": "pressed",
 "entries": {
+"pressed": [["窮す","きゅうす",["to be hard pressed","to become poor"],"v5s vi",0],["鯡粕","にしんかす",["dried and pressed boiled herring (used as fertilizer)"],"n",0],["おし花","おしばな",["pressed flower"],"n",0],["押し葉","おしば",["pressed leaves"],"n",0],["尻に火がつく","しりにひがつく",["to be pressed (by urgent business)"],"exp v5k",0],["ぽん酢","ぽんず",["juice pressed from a bitter orange","ponzu (Japanese sauce made primarily of soy sauce and…"],"n",0],["ポンス","",["juice pressed from a bitter orange","punch (drink)"],"n",0],["プレスハム","",["pressed ham"],"n",0],["押し割り麦","おしわりむぎ",["pressed barley"],"n",0],["昆布〆","こぶじめ",["salted or vinegared fish pressed between sheets of kombu"],"n",0]],
 "pressing": [["手詰め","てづめ",["pressing"],"n",0],["圧出","あっしゅつ",["pressing out"],"n vs",0],["急事","きゅうじ",["pressing matter"],"n",0],["哀求","あいきゅう",["making a pressing appeal"],"n vs",0],["天辺押","てっぺいおし",["pressing forward without giving a chance to explain"],"n adj-no",0],["寝圧し","ねおし",["pressing clothes, etc. by placing them under the bedding…"],"n vs vt",0],["プレッシング","",["pressing"],"n",0],["天秤押し","てんびんおし",["pressing the top of a pickle vat by hanging a weight on a…"],"n",0],["裏ごし","うらごし",["sieve (for reducing soft solids to a pulp)","pressing (food) through a sieve"],"n vs vt",0],["押し切り","おしきり",["straw cutter","pressing and cutting"],"n",0]],
 "pressingly": [["やいやい","",["pressingly","hey! hey!"],"adv adv-to int",0]],
 "pressman": [["印刷工","いんさつこう",["pressman"],"n",0]],
@@ -418,10 +419,6 @@
 "proposed": [["修正案","しゅうせいあん",["proposed amendment"],"n",0],["候補地","こうほち",["proposed site"],"n",0],["解決案","かいけつあん",["proposed solution"],"n",0],["提案クラス","ていあんクラス",["proposed class"],"n",0],["整備新幹線","せいびしんかんせん",["five Shinkansen route extensions proposed in 1973"],"n",0]],
 "proposer": [["建議者","けんぎしゃ",["proposer"],"n",0],["発案者","はつあんしゃ",["original proposer"],"n",0]],
 "proposes": [["人事を尽くして天命を待つ","じんじをつくしててんめいをまつ",["man proposes, God disposes"],"exp v5t",0]],
-"proposing": [["再提案","さいていあん",["proposing again"],"n",0]],
-"proposition": [["建議案","けんぎあん",["proposition"],"n",0],["逆命題","ぎゃくめいだい",["converse proposition"],"n",0],["否定命題","ひていめいだい",["negative proposition"],"n",0],["提供価値","ていきょうかち",["value proposition"],"n",0],["肯定命題","こうていめいだい",["affirmative proposition"],"n",0],["できない相談","できないそうだん",["impossible proposition"],"exp n",0]],
-"propositional": [["命題論理","めいだいろんり",["propositional logic"],"n",0],["命題関数","めいだいかんすう",["propositional (sentential) function"],"n",0],["命題論理学","めいだいろんりがく",["propositional logic"],"n",0]],
-"propping": [["立茎","りっけい",["propping up asparagus stems during cultivation"],"n vs vt",0],["内無双","うちむそう",["inner-thigh-propping twist down"],"n",0],["外無双","そとむそう",["outer-thigh-propping twist down"],"n",0]],
-"propria": [["固有肝動脈","こゆうかんどうみゃく",["arteria hepatica propria"],"n",0]]
+"proposing": [["再提案","さいていあん",["proposing again"],"n",0]]
 }
 }

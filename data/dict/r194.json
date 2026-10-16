@@ -1,9 +1,18 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "吹き通し",
-"last": "哉",
+"first": "吹き荒ぶ",
+"last": "哂う",
 "entries": {
+"吹き荒ぶ": [{"r":["ふきすさぶ"],"g":["to blow fiercely","to play (a flute, etc.) for fun"],"p":"v5b vi"}],
+"吹き荒む": [{"r":["ふきすさむ"],"g":["to blow violently"],"p":"v5m"}],
+"吹き荒れる": [{"r":["ふきあれる"],"g":["to blow violently"],"p":"v1 vi"}],
+"吹き落とす": [{"r":["ふきおとす"],"g":["to blow down (fruit)"],"p":"v5s"}],
+"吹き貫": [{"r":["ふきぬき"],"g":["stairwell","streamer"],"p":"n"}],
+"吹き貫き": [{"r":["ふきぬき"],"g":["stairwell","streamer"],"p":"n"}],
+"吹き込み": [{"r":["ふきこみ"],"g":["blowing in","recording (audio)"],"p":"n"}],
+"吹き返す": [{"r":["ふきかえす"],"g":["to blow in the opposite direction"],"p":"v5s vt"}],
+"吹き送る": [{"r":["ふきおくる"],"g":["to waft"],"p":"v5r"}],
 "吹き通し": [{"r":["ふきとおし","ふきどおし"],"g":["blowing through","blowing relentlessly","blowing hot air"],"p":"n"}],
 "吹き通す": [{"r":["ふきとおす"],"g":["to blow through"],"p":"v5s vt"}],
 "吹き遊ぶ": [{"r":["ふきすさぶ"],"g":["to blow fiercely","to play (a flute, etc.) for fun"],"p":"v5b vi"}],
@@ -1289,14 +1298,6 @@
 "品質評価": [{"r":["ひんしつひょうか"],"g":["quality evaluation"],"p":"n","f":"ひん|しつ|ひょう|か"}],
 "品部": [{"r":["しなべ","ともべ"],"g":["group of persons working at the imperial court…","various craftsmen and artisans under the ritsuryō system"],"p":"n","f":"しな|べ"}],
 "品題": [{"r":["ほんだい"],"g":["chapter title"],"p":"n","f":"ほん|だい"}],
-"哂う": [{"r":["わらう"],"g":["to laugh","to smile","to sneer"],"p":"v5u vi vt"}],
-"哄然": [{"r":["こうぜん"],"g":["(laugh) broadly"],"p":"adv-to adj-t","f":"こう|ぜん"}],
-"哄笑": [{"r":["こうしょう"],"g":["loud laughter (esp. by a group of people)"],"p":"n","f":"こう|しょう"}],
-"哈密瓜": [{"r":["ハミうり"],"g":["Hami melon (Cucumis melo var. inodorus)"],"p":"n","f":"*","u":1}],
-"哈日族": [{"r":["ハーリーズー","ハーリーぞく"],"g":["Taiwanese Japanophiles"],"p":"n","f":"*"}],
-"哈爾浜": [{"r":["ハルビン","ハルピン"],"g":["Harbin (China)"],"p":"n","f":"*","u":1}],
-"哈爾浜工業大学": [{"r":["ハルビンこうぎょうだいがく"],"g":["Harbin Institute of Technology"],"p":"n","f":"*"}],
-"哈爾賓": [{"r":["ハルビン","ハルピン"],"g":["Harbin (China)"],"p":"n","f":"*","u":1}],
-"哉": [{"r":["かな"],"g":["how!"],"p":"prt","u":1}]
+"哂う": [{"r":["わらう"],"g":["to laugh","to smile","to sneer"],"p":"v5u vi vt"}]
 }
 }

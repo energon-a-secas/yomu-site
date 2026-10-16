@@ -1,9 +1,17 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "ＣＮＮ",
-"last": "ｆｆ外失",
+"first": "ＣＩＳＣ",
+"last": "ｅコマース",
 "entries": {
+"ＣＩＳＣ": [{"r":["シスク"],"g":["complex instruction set computer"],"p":"n"}],
+"ＣＩＴＥＳ": [{"r":["サイテス"],"g":["Convention on International Trade in Endangered Species of…"],"p":"n"}],
+"ＣＫ": [{"r":["シー・ケー"],"g":["corner kick (soccer)"],"p":"n"}],
+"ＣＬＶ": [{"r":["シー・エル・ブイ"],"g":["constant linear velocity"],"p":"n"}],
+"ＣＭソング": [{"r":["シーエムソング"],"g":["advertising jingle"],"p":"n"}],
+"ＣＭＯＳ": [{"r":["シーモス"],"g":["CMOS"],"p":"n"}],
+"ＣＭＹＫ": [{"r":["シー・エム・ワイ・ケー"],"g":["cyan, magenta, yellow and key (black)"],"p":"n"}],
+"ＣＮＥＴ": [{"r":["シーネット"],"g":["CNET (technology media website)"],"p":"n"}],
 "ＣＮＮ": [{"r":["シーエヌエヌ"],"g":["CNN"],"p":"n"}],
 "ＣＯＢＯＬ": [{"r":["コボル"],"g":["COBOL (programming language)"],"p":"n"}],
 "ＣＯＤ": [{"r":["シー・オー・ディー"],"g":["chemical oxygen demand","cash on delivery"],"p":"n"}],
@@ -1391,14 +1399,6 @@
 "ｄｌ": [{"r":["ディー・エル"],"g":["decilitre"],"p":"n"}],
 "ｄｐｉ": [{"r":["ディー・ピー・アイ"],"g":["dots per inch"],"p":"n"}],
 "ｅ": [{"r":["イー"],"g":["E"],"p":"n"}],
-"ｅコマース": [{"r":["イーコマース"],"g":["e-commerce"],"p":"n"}],
-"ｅスポーツ": [{"r":["イースポーツ"],"g":["eSports (form of competition using video games)"],"p":"n"}],
-"ｅビジネス": [{"r":["イービジネス"],"g":["e-business"],"p":"n"}],
-"ｅラーニング": [{"r":["イーラーニング"],"g":["e-learning"],"p":"n"}],
-"ｅＶ": [{"r":["イー・ブイ"],"g":["electron volt"],"p":"n"}],
-"ｅｔｃ．": [{"r":["エトセトラ","エト・セトラ"],"g":["et cetera"],"p":"n","u":1,"ls":["lat",null]}],
-"ｆ": [{"r":["エフ"],"g":["F"],"p":"n suf"}],
-"ｆｆ外": [{"r":["エフエフがい"],"g":["(writing to someone on Twitter) without either person…"],"p":"exp"}],
-"ｆｆ外失": [{"r":["エフエフがいしつ"],"g":["apologies for tweeting to you without either of us…"],"p":"exp","f":"がい|しつ"}]
+"ｅコマース": [{"r":["イーコマース"],"g":["e-commerce"],"p":"n"}]
 }
 }

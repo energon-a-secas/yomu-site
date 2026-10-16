@@ -1,9 +1,14 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "貴霜朝",
-"last": "赤鳶",
+"first": "貴酬",
+"last": "赤鰈",
 "entries": {
+"貴酬": [{"r":["きしゅう"],"g":["reply (epistolary)"],"p":"n","f":"き|しゅう"}],
+"貴金属卸": [{"r":["ききんぞくおろし"],"g":["wholesale (wholesaler) in precious metals"],"p":"n","f":"き|きん|ぞく|おろし"}],
+"貴金属店": [{"r":["ききんぞくてん"],"g":["jewelry store"],"p":"n","f":"き|きん|ぞく|てん"}],
+"貴陽": [{"r":["きよう"],"g":["Guiyang (China)"],"p":"n","f":"き|よう"}],
+"貴霜": [{"r":["きそう"],"g":["Kushan (dynasty of India; approx. 60-375 CE)"],"p":"n","f":"き|そう"}],
 "貴霜朝": [{"r":["きそうちょう"],"g":["Kushan dynasty (of India; approx. 60-375 CE)"],"p":"n","f":"き|そう|ちょう"}],
 "貴顕": [{"r":["きけん"],"g":["distinguished person"],"p":"n","f":"き|けん"}],
 "貴顕紳士": [{"r":["きけんしんし"],"g":["gentlemen of (high) eminence"],"p":"n","f":"き|けん|しん|し"}],
@@ -1289,11 +1294,6 @@
 "赤魳": [{"r":["あかかます"],"g":["red barracuda (Sphyraena pinguis)"],"p":"n","f":"あか|かます","u":1}],
 "赤鯛": [{"r":["あかだい"],"g":["red sea bream (i.e. the tai, Pagrus major)","fish given to a tournament winner as congratulations"],"p":"n","f":"あか|だい"}],
 "赤鯥": [{"r":["あかむつ"],"g":["blackthroat seaperch (Doederleinia berycoides)"],"p":"n","f":"*","u":1}],
-"赤鰈": [{"r":["あかがれい"],"g":["flathead flounder (Hippoglossoides dubius)"],"p":"n","f":"あか|がれい","u":1}],
-"赤鰭": [{"r":["あかひれ"],"g":["white cloud mountain minnow (Tanichthys albonubes)"],"p":"n","f":"あか|ひれ","u":1}],
-"赤鰯": [{"r":["あかいわし"],"g":["pickled sardines","rusty and blunt sword"],"p":"n","f":"あか|いわし","u":1}],
-"赤鱏": [{"r":["あかえい"],"g":["red stingray (Dasyatis akajei)"],"p":"n","f":"あか|えい","u":1}],
-"赤鱝": [{"r":["あかえい"],"g":["red stingray (Dasyatis akajei)"],"p":"n","f":"*","u":1}],
-"赤鳶": [{"r":["あかとび"],"g":["red kite (Milvus milvus)"],"p":"n","f":"あか|とび","u":1}]
+"赤鰈": [{"r":["あかがれい"],"g":["flathead flounder (Hippoglossoides dubius)"],"p":"n","f":"あか|がれい","u":1}]
 }
 }

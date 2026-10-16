@@ -2,7 +2,7 @@
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict/1",
 "first": "ツル鋸",
-"last": "メン鉢",
+"last": "メン棒",
 "entries": {
 "ツル鋸": [{"r":["つるのこ"],"g":["hacksaw"],"p":"n"}],
 "ツル鍋": [{"r":["つるなべ"],"g":["pot with a bail for a handle"],"p":"n"}],
@@ -1730,6 +1730,7 @@
 "マスト": [{"g":["mast (of ship)"],"p":"n","q":4},{"g":["necessary"],"p":"adj-na n","ls":["eng","must"],"q":4,"t":1}],
 "マスメディア": [{"g":["mass media"],"p":"n","q":4}],
 "マゾ": [{"g":["masochist","masochism"],"p":"n"}],
+"マタ上": [{"r":["またがみ"],"g":["waist (the part of the pants located above the crotch)"],"p":"n"}],
 "マタ木": [{"r":["またぎ"],"g":["forked tree"],"p":"n"}],
 "マタ釘": [{"r":["またくぎ"],"g":["staple"],"p":"n"}],
 "マダム": [{"g":["madam","proprietress (of a bar, coffee shop, etc.)"],"p":"n","ls":["fre","madame"]}],
@@ -1985,7 +1986,6 @@
 "メンテナンス": [{"g":["maintenance"],"p":"n","q":4}],
 "メンバー": [{"g":["member"],"p":"n","q":2}],
 "メンフィス": [{"g":["Memphis"],"p":"n","q":4}],
-"メン棒": [{"r":["めんぼう"],"g":["rolling pin"],"p":"n"}],
-"メン鉢": [{"r":["めんばち"],"g":["bowl (suitable for noodles)"],"p":"n"}]
+"メン棒": [{"r":["めんぼう"],"g":["rolling pin"],"p":"n"}]
 }
 }

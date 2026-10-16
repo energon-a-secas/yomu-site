@@ -1,9 +1,12 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "要求側ＳＳ利用者",
-"last": "観音経",
+"first": "要求側",
+"last": "観閲式",
 "entries": {
+"要求側": [{"r":["ようきゅうがわ"],"g":["requester"],"p":"n","f":"よう|きゅう|がわ"}],
+"要求側アソシエーション制御プロトコル機械": [{"r":["ようきゅうがわアソシエーションせいぎょプロトコルきかい"],"g":["requesting Association Control Protocol Machine"],"p":"n","f":"よう|きゅう|がわ;せい|ぎょ;き|かい"}],
+"要求側遠隔操作プロトコル機械": [{"r":["ようきゅうがわえんかくそうさプロトコルきかい"],"g":["requesting-remote-operation-protocol-machine"],"p":"n","f":"よう|きゅう|がわ|えん|かく|そう|さ;き|かい"}],
 "要求側ＳＳ利用者": [{"r":["ようきゅうがわエスエスりようしゃ"],"g":["requester"],"p":"n","f":"よう|きゅう|がわ;り|よう|しゃ"}],
 "要求分析": [{"r":["ようきゅうぶんせき"],"g":["requirements analysis"],"p":"n","f":"よう|きゅう|ぶん|せき"}],
 "要求分解": [{"r":["ようきゅうぶんかい"],"g":["request decomposition"],"p":"n","f":"よう|きゅう|ぶん|かい"}],
@@ -576,6 +579,7 @@
 "見舞客": [{"r":["みまいきゃく"],"g":["visitor to a sick or distressed person"],"p":"n","f":"み|まい|きゃく"}],
 "見舞金": [{"r":["みまいきん"],"g":["(monetary) present to a person in distress"],"p":"n","f":"み|まい|きん"}],
 "見良い": [{"r":["みよい"],"g":["pleasant to look at","easy to see"],"p":"adj-i","f":"み|よ"}],
+"見落": [{"r":["みおとし"],"g":["oversight"],"p":"n","f":"み|おとし"}],
 "見落し": [{"r":["みおとし"],"g":["oversight"],"p":"n","f":"*"}],
 "見落す": [{"r":["みおとす"],"g":["to overlook"],"p":"v5s vt","f":"*"}],
 "見落とし": [{"r":["みおとし"],"g":["oversight"],"p":"n","f":"み|お"}],
@@ -1265,11 +1269,6 @@
 "観賞魚": [{"r":["かんしょうぎょ"],"g":["aquarium fish"],"p":"n","f":"かん|しょう|ぎょ"}],
 "観過": [{"r":["かんか"],"g":["overlooking"],"p":"n vs vt","f":"かん|か"}],
 "観閲": [{"r":["かんえつ"],"g":["inspection (of troops)"],"p":"n vs vt","f":"かん|えつ"}],
-"観閲式": [{"r":["かんえつしき"],"g":["military review"],"p":"n","f":"かん|えつ|しき"}],
-"観音さま": [{"r":["かんのんさま"],"g":["Avalokiteshvara (Bodhisattva)","clitoris"],"p":"n","f":"かん|のん"}],
-"観音堂": [{"r":["かんのんどう"],"g":["temple dedicated to Kannon"],"p":"n","f":"かん|のん|どう"}],
-"観音扉": [{"r":["かんのんとびら"],"g":["double doors (opening from the centre)"],"p":"n","f":"かん|のん|とびら"}],
-"観音様": [{"r":["かんのんさま"],"g":["Avalokiteshvara (Bodhisattva)","clitoris"],"p":"n","f":"かん|のん|さま"}],
-"観音経": [{"r":["かんのんぎょう"],"g":["Avalokitesvara Sutra"],"p":"n","f":"かん|のん|ぎょう"}]
+"観閲式": [{"r":["かんえつしき"],"g":["military review"],"p":"n","f":"かん|えつ|しき"}]
 }
 }

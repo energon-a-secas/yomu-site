@@ -1,15 +1,15 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","KanjiVG stroke order SVGs r20250816"],"inputs":[{"id":"kanjivg","source":"KanjiVG, Ulrich Apel","url":"http://kanjivg.tagaini.net","spdx":"CC-BY-SA-3.0","screen":"required","acknowledgement":"Attribution. You must attribute the work by stating your use of KanjiVG in your own copyright header and linking to KanjiVG's website (http://kanjivg.tagaini.net)","use":"parts, the named components under each character, followed to their own parts"}],"generated_by":"tools/build-search.mjs","generated_at":"2026-10-01"},
 "format": "yomu-search-index/1",
-"keys": 14410,
+"keys": 14401,
 "maxKey": 20,
 "shards": [
 {"src":"data/search/e00.json","first":"aaah"},
-{"src":"data/search/e01.json","first":"club"},
-{"src":"data/search/e02.json","first":"fancy"},
-{"src":"data/search/e03.json","first":"key"},
-{"src":"data/search/e04.json","first":"pattern"},
-{"src":"data/search/e05.json","first":"shelter"},
-{"src":"data/search/e06.json","first":"urgently"}
+{"src":"data/search/e01.json","first":"clump"},
+{"src":"data/search/e02.json","first":"fare"},
+{"src":"data/search/e03.json","first":"kidnap"},
+{"src":"data/search/e04.json","first":"payload"},
+{"src":"data/search/e05.json","first":"shingeki"},
+{"src":"data/search/e06.json","first":"user"}
 ]
 }

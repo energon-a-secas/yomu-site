@@ -1,9 +1,14 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "警報機",
-"last": "貴霜",
+"first": "警告状",
+"last": "貴輪時代",
 "entries": {
+"警告状": [{"r":["けいこくじょう"],"g":["warning letter (e.g. of infringement)"],"p":"n","f":"けい|こく|じょう"}],
+"警告色": [{"r":["けいこくしょく"],"g":["aposematic coloration (colouration)"],"p":"n","f":"けい|こく|しょく"}],
+"警告試合": [{"r":["けいこくじあい"],"g":["match where the umpire disqualifies the coach and one…"],"p":"n","f":"けい|こく|じ|あい"}],
+"警告音": [{"r":["けいこくおん"],"g":["warning sound"],"p":"n","f":"けい|こく|おん"}],
+"警固": [{"r":["けいご"],"g":["watching (esp. during an emergency)","guard"],"p":"n vs vt","f":"けい|ご"}],
 "警報機": [{"r":["けいほうき"],"g":["alarm (fire, burglar, railroad-crossing, etc.)"],"p":"n","f":"けい|ほう|き"}],
 "警報音": [{"r":["けいほうおん"],"g":["warning sound"],"p":"n","f":"けい|ほう|おん"}],
 "警官隊": [{"r":["けいかんたい"],"g":["(squad of) police"],"p":"n","f":"けい|かん|たい"}],
@@ -1274,11 +1279,6 @@
 "貴賤結婚": [{"r":["きせんけっこん"],"g":["morganatic marriage…"],"p":"n","f":"き|せん|けっ|こん"}],
 "貴賤貧富": [{"r":["きせんひんぷ"],"g":["high and low, and rich and poor"],"p":"n","f":"き|せん|ひん|ぷ"}],
 "貴輪": [{"r":["きりん"],"g":["era at the end of 1970s dominated by grand champion Wajima…"],"p":"n","f":"き|りん"}],
-"貴輪時代": [{"r":["きりんじだい"],"g":["era at the end of 1970s dominated by grand champion Wajima…"],"p":"n","f":"き|りん|じ|だい"}],
-"貴酬": [{"r":["きしゅう"],"g":["reply (epistolary)"],"p":"n","f":"き|しゅう"}],
-"貴金属卸": [{"r":["ききんぞくおろし"],"g":["wholesale (wholesaler) in precious metals"],"p":"n","f":"き|きん|ぞく|おろし"}],
-"貴金属店": [{"r":["ききんぞくてん"],"g":["jewelry store"],"p":"n","f":"き|きん|ぞく|てん"}],
-"貴陽": [{"r":["きよう"],"g":["Guiyang (China)"],"p":"n","f":"き|よう"}],
-"貴霜": [{"r":["きそう"],"g":["Kushan (dynasty of India; approx. 60-375 CE)"],"p":"n","f":"き|そう"}]
+"貴輪時代": [{"r":["きりんじだい"],"g":["era at the end of 1970s dominated by grand champion Wajima…"],"p":"n","f":"き|りん|じ|だい"}]
 }
 }

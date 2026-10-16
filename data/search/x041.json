@@ -1,8 +1,9 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","KanjiVG stroke order SVGs r20250816"],"inputs":[{"id":"kanjivg","source":"KanjiVG, Ulrich Apel","url":"http://kanjivg.tagaini.net","spdx":"CC-BY-SA-3.0","screen":"required","acknowledgement":"Attribution. You must attribute the work by stating your use of KanjiVG in your own copyright header and linking to KanjiVG's website (http://kanjivg.tagaini.net)","use":"parts, the named components under each character, followed to their own parts"}],"generated_by":"tools/build-search.mjs","generated_at":"2026-10-01"},
 "format": "yomu-search-rare/1",
-"first": "housecall",
+"first": "housebreaker",
 "entries": {
+"housebreaker": [["押し込み強盗","おしこみごうとう",["housebreaker"],"n",0]],
 "housecall": [["出張サービス","しゅっちょうサービス",["housecall (doctor, nurse)"],"n",0]],
 "housecleaning": [["ハウスクリーニング","",["housecleaning"],"n",0]],
 "housedress": [["家庭着","かていぎ",["housedress"],"n",0],["ハウスドレス","",["housedress"],"n",0]],
@@ -522,7 +523,7 @@
 "i've": [["しめた","",["I've got it!"],"int",0],["ということだ","",["I've heard that ...","it appears as if ..."],"exp",0],["我が事成れり","わがことなれり",["I've done my part"],"exp",0],["行かなくちゃ","いかなくちゃ",["I've got to be going"],"exp",0],["行かなくては","いかなくては",["I've got to be going"],"exp",0],["もういい","",["skip it","I've had enough (e.g. when offered something)"],"int",0],["もうよい","",["skip it","I've had enough (e.g. when offered something)"],"int",0],["ものは相談","ものはそうだん",["a wise man is he who listens to counsel","I've got something to ask you"],"exp",0],["聞くところによると","きくところによると",["from what I've heard"],"exp",0]],
 "iab": [["ＩＡＢ","アイエービー",["IAB"],"n",0]],
 "iade": [["プレイヤード","",["baby's play pen","La Pléiade (group of seven 16th-century French poets)"],"n",0]],
-"iai": [["居合い抜き","いあいぬき",["iai","iai sword-drawing performance…"],"n",0],["シャルティバルシチェイ","",["šaltibarščiai (cold beetroot soup)"],"n",0]],
+"iai": [["居合","いあい",["iai"],"n",0],["居合い抜き","いあいぬき",["iai","iai sword-drawing performance…"],"n",0],["シャルティバルシチェイ","",["šaltibarščiai (cold beetroot soup)"],"n",0]],
 "iaido": [["居合道","いあいどう",["iaido (art of drawing the Japanese sword)"],"n",0],["居合刀","いあいがたな",["practice sword used in iaido"],"n",0]],
 "iamb": [["抑揚格","よくようかく",["iamb (in poetry)"],"n",0],["イアンボス","",["iamb"],"n",0]],
 "iap": [["内蔵型アレイプロセッサー","ないぞうがたアレイプロセッサー",["IAP"],"n",0]],

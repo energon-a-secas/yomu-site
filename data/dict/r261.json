@@ -1,9 +1,17 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "目早い",
-"last": "真中分け",
+"first": "目撃情報",
+"last": "真・三国無双",
 "entries": {
+"目撃情報": [{"r":["もくげきじょうほう"],"g":["eyewitness report"],"p":"n","f":"もく|げき|じょう|ほう"}],
+"目撃証言": [{"r":["もくげきしょうげん"],"g":["eyewitness testimony"],"p":"n","f":"もく|げき|しょう|げん"}],
+"目撃談": [{"r":["もくげきだん"],"g":["first-hand account"],"p":"n","f":"もく|げき|だん"}],
+"目撥": [{"r":["めばち"],"g":["bigeye tuna (Thunnus obesus)"],"p":"n","f":"め|ばち","u":1}],
+"目敏い": [{"r":["めざとい"],"g":["sharp-eyed","easily awakened"],"p":"adj-i","f":"*"}],
+"目数": [{"r":["めかず"],"g":["number of divisions"],"p":"n","f":"め|かず"}],
+"目新しい": [{"r":["めあたらしい"],"g":["original"],"p":"adj-i","f":"め|あたら"}],
+"目旗魚": [{"r":["めかじき"],"g":["swordfish (Xiphias gladius)"],"p":"n","f":"*","u":1}],
 "目早い": [{"r":["めばやい"],"g":["sharp-eyed"],"p":"adj-i","f":"め|ばや"}],
 "目明": [{"r":["めあかし"],"g":["hired thief taker (Edo period)"],"p":"n","f":"め|あかし"}],
 "目明かし": [{"r":["めあかし"],"g":["hired thief taker (Edo period)"],"p":"n","f":"め|あ"}],
@@ -1200,13 +1208,6 @@
 "真ん前": [{"r":["まんまえ"],"g":["right in front"],"p":"adj-no adv"}],
 "真ん真ん中": [{"r":["まんまんなか"],"g":["dead center"],"p":"n"}],
 "真ダニ": [{"r":["まダニ"],"g":["hard tick"],"p":"n","u":1}],
-"真・三国無双": [{"r":["しんさんごくぶそう"],"g":["Dynasty Warriors (video game series)"],"p":"n","f":"しん;*"}],
-"真・三國無双": [{"r":["しんさんごくぶそう"],"g":["Dynasty Warriors (video game series)"],"p":"n","f":"しん;*"}],
-"真・女神転生": [{"r":["しん・めがみてんせい"],"g":["Shin Megami Tensei…"],"p":"n","f":"しん;め|がみ|てん|せい"}],
-"真一文字": [{"r":["まいちもんじ"],"g":["straight line"],"p":"n adj-na","f":"ま|いち|もん|じ"}],
-"真三国無双": [{"r":["しんさんごくぶそう"],"g":["Dynasty Warriors (video game series)"],"p":"n","f":"しん|さん|ごく|ぶ|そう"}],
-"真三國無双": [{"r":["しんさんごくぶそう"],"g":["Dynasty Warriors (video game series)"],"p":"n","f":"しん|さん|ごく|ぶ|そう"}],
-"真下": [{"r":["ました"],"g":["right under"],"p":"n adj-no","f":"ま|した"}],
-"真中分け": [{"r":["まんなかわけ"],"g":["center part","center-parted bangs","hair intakes"],"p":"n","f":"*"}]
+"真・三国無双": [{"r":["しんさんごくぶそう"],"g":["Dynasty Warriors (video game series)"],"p":"n","f":"しん;*"}]
 }
 }

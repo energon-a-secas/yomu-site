@@ -41,7 +41,7 @@ import { licenceBlock, unshippable } from './lib/licence.mjs';
 import { AVOID_EXPLICIT } from './lib/avoid.mjs';
 import { createDict } from '../js/dict.js';
 import { analyze, normalize } from '../js/analyze.js';
-import { toHira } from '../js/kana.js';
+import { toHira, said } from '../js/kana.js';
 import {
   writeJson, serialize, MAX_BYTES, SITE, fmtBytes, pruneStale,
 } from './lib/emit.mjs';
@@ -82,14 +82,51 @@ function rowOf(w, tag) {
   return [written, reading, glosses, common];
 }
 
+/**
+ * Each token's said romaji, where the tokens spell the row's reading `want`
+ * in order, or null. A one-kanji word the reader reads one way takes another
+ * record of its key, common or rare, where that record reads it the way
+ * JMdict reads the row: 地 is ち in the first tier, and じ, a rare record, in
+ * 雨降って地固まる (ame futte ji katamaru). One kanji only, because a longer
+ * word's romaji needs its own record's morpheme cuts (小売 is kouri), which
+ * the token was built from.
+ */
+function alignedSaid(tokens, want, dict) {
+  let at = 0;
+  const out = [];
+  for (const t of tokens) {
+    const own = toHira(t.reading || t.surface);
+    if (want.startsWith(own, at)) {
+      out.push((t.romaji && t.romaji.said) || '');
+      at += own.length;
+      continue;
+    }
+    if (t.kind !== 'word' || [...t.surface].length !== 1) return null;
+    const other = [...(dict.get(t.surface) || []), ...(dict.rare(t.surface) || [])]
+      .flatMap((rec) => rec.r || []).map(toHira)
+      .find((r) => r !== own && want.startsWith(r, at));
+    if (!other) return null;
+    out.push(said(other));
+    at += other.length;
+  }
+  return at === want.length ? out : null;
+}
+
 /** The reader's romaji for a row, word by word, or '' where it would not teach the row's reading. */
 async function saidOf(dict, written, reading) {
   const a = await analyze(normalize(written), { dict });
   if (a.tokens.some((t) => t.confidence === 'guess' || t.kind === 'unknown')) return '';
-  const read = toHira(a.tokens.map((t) => t.reading || t.surface).join(''));
-  if (read !== toHira(reading || written)) return '';
+  const want = toHira(reading || written);
+  let words = alignedSaid(a.tokens, want, dict);
+  if (!words) {
+    const single = a.tokens.filter((t) => t.kind === 'word' && [...t.surface].length === 1).map((t) => t.surface);
+    if (!single.length) return '';
+    await dict.needRare(single);
+    words = alignedSaid(a.tokens, want, dict);
+  }
+  if (!words) return '';
   // Punctuation joins the word before it: asayake wa ame, yuuyake wa hare.
-  return a.tokens.map((t) => (t.romaji && t.romaji.said) || '').filter(Boolean)
+  return words.filter(Boolean)
     .reduce((s, w) => (!s ? w : /^[a-z']/.test(w) ? `${s} ${w}` : `${s}${w}`), '');
 }
 

@@ -1,9 +1,14 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "速力度",
-"last": "過す",
+"first": "速乾性",
+"last": "過ぎ者",
 "entries": {
+"速乾性": [{"r":["そっかんせい"],"g":["quick-drying property (of clothing, etc.)"],"p":"n adj-no","f":"そっ|かん|せい"}],
+"速修": [{"r":["そくしゅう"],"g":["speed learning"],"p":"n vs","f":"そく|しゅう"}],
+"速写": [{"r":["そくしゃ"],"g":["snapshot"],"p":"n vs vt","f":"そく|しゃ"}],
+"速分かり": [{"r":["はやわかり"],"g":["quick understanding","(beginner's) guide"],"p":"n vs","f":"はや|わ"}],
+"速力を落とす": [{"r":["そくりょくをおとす"],"g":["to slow down"],"p":"exp v5s","f":"そく|りょく;お"}],
 "速力度": [{"r":["そくりょくど"],"g":["speed"],"p":"n","f":"そく|りょく|ど"}],
 "速効": [{"r":["そっこう"],"g":["speedy effect"],"p":"n","f":"そっ|こう"}],
 "速効性肥料": [{"r":["そっこうせいひりょう"],"g":["quick-acting fertilizer"],"p":"n","f":"そっ|こう|せい|ひ|りょう"}],
@@ -1217,11 +1222,6 @@
 "過ぎ去る": [{"r":["すぎさる"],"g":["to pass"],"p":"v5r vi"}],
 "過ぎ来し方": [{"r":["すぎこしかた"],"g":["the past","the course (route) one has come by"],"p":"exp"}],
 "過ぎ物": [{"r":["すぎもの"],"g":["someone (e.g. a woman) who is out of one's league"],"p":"n"}],
-"過ぎ者": [{"r":["すぎもの"],"g":["someone (e.g. a woman) who is out of one's league"],"p":"n"}],
-"過ぎ行く": [{"r":["すぎゆく","すぎいく"],"g":["to pass"],"p":"v5k-s vi"}],
-"過ぎ越し": [{"r":["すぎこし"],"g":["Passover","Easter"],"p":"n"}],
-"過ぎ越しの祭": [{"r":["すぎこしのまつり"],"g":["Passover"],"p":"n"}],
-"過ぐ": [{"r":["すぐ"],"g":["to pass through","to pass (of time)","to have expired"],"p":"v2g-k vi"}],
-"過す": [{"r":["すごす"],"g":["to spend (time)","to overdo (esp. alcohol consumption)","to take care of"],"p":"v5s vt suf"}]
+"過ぎ者": [{"r":["すぎもの"],"g":["someone (e.g. a woman) who is out of one's league"],"p":"n"}]
 }
 }

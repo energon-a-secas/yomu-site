@@ -1,9 +1,8 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826"],"generated_by":"tools/build-spellings.mjs","generated_at":"2026-10-01"},
 "format": "yomu-spell/1",
-"first": "みにつける",
+"first": "みね",
 "entries": {
-"みにつける": [["みにつける",[["身につける",""],["身に付ける",""],["身に着ける",""]]]],
 "みね": [["みね",[["峰",""],["嶺",""],["峯",""]]]],
 "みのう": [["みのう",[["未納",""]]]],
 "みのうえ": [["みのうえ",[["身の上",""]]]],
@@ -1934,6 +1933,7 @@
 "ソックス": [["ソックス",[["ＳＯｘ",""]]]],
 "ソビエト": [["ソビエト",[["蘇維埃","rK"]]]],
 "ソ連": [["ソれん",[["蘇連",""]]]],
-"タバコ": [["タバコ",[["煙草",""],["莨","rK"],["烟草","rK"]]]]
+"タバコ": [["タバコ",[["煙草",""],["莨","rK"],["烟草","rK"]]]],
+"タン": [["タン",[["湯",""]]]]
 }
 }

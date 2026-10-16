@@ -1,9 +1,12 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "鬼ばばあ",
-"last": "鷽",
+"first": "鬼の霍乱",
+"last": "鷺",
 "entries": {
+"鬼の霍乱": [{"r":["おにのかくらん"],"g":["person of strong constitution unexpectedly falling ill"],"p":"exp n","f":"おに;かく|らん"}],
+"鬼の首を取ったよう": [{"r":["おにのくびをとったよう"],"g":["triumphant (over a mediocre achievement)"],"p":"exp adj-na"}],
+"鬼は外福は内": [{"r":["おにはそとふくはうち"],"g":["out with the demon, in with fortune"],"p":"exp","f":"おに;そと|ふく;うち"}],
 "鬼ばばあ": [{"r":["おにばばあ"],"g":["hag"],"p":"n"}],
 "鬼みそ": [{"r":["おにみそ"],"g":["grilled miso mixed with chili peppers","person who acts tough but is actually timid"],"p":"n"}],
 "鬼も十八": [{"r":["おにもじゅうはち"],"g":["even homely girls look beautiful at the peak of their youth"],"p":"exp","f":"おに;じゅう|はち"}],
@@ -329,6 +332,7 @@
 "魚道": [{"r":["ぎょどう"],"g":["path taken by school of fish"],"p":"n","f":"ぎょ|どう"}],
 "魚醤": [{"r":["ぎょしょう"],"g":["fish sauce (made from fermented salted fish)"],"p":"n","f":"ぎょ|しょう"}],
 "魚醤油": [{"r":["うおじょうゆ","うおしょうゆ"],"g":["fish sauce (made from fermented salted fish)"],"p":"n","f":"うお|じょう|ゆ"}],
+"魚釣": [{"r":["さかなつり","うおつり"],"g":["fishing"],"p":"n","f":"さかな|つり"}],
 "魚釣り": [{"r":["さかなつり","うおつり"],"g":["fishing"],"p":"n","f":"さかな|つ"}],
 "魚鋤": [{"r":["うおすき"],"g":["seafood and vegetables cooked sukiyaki style"],"p":"n","f":"うお|すき"}],
 "魚雷発射管": [{"r":["ぎょらいはっしゃかん"],"g":["torpedo tube"],"p":"n","f":"ぎょ|らい|はっ|しゃ|かん"}],
@@ -1252,11 +1256,6 @@
 "鷹詞": [{"r":["たかことば"],"g":["falconry term"],"p":"n","f":"たか|ことば"}],
 "鷹野": [{"r":["たかの"],"g":["falconry"],"p":"n","f":"たか|の"}],
 "鷹隼": [{"r":["ようしゅん"],"g":["hawk and falcon"],"p":"n","f":"よう|しゅん"}],
-"鷺": [{"r":["さぎ"],"g":["heron (Ardeidae)"],"p":"n","u":1}],
-"鷺相撲": [{"r":["さぎずもう"],"g":["game in which two people hop on one foot and push each other"],"p":"n","f":"*"}],
-"鷺笛": [{"r":["さぎふえ"],"g":["longspine snipefish (Macroramphosus scolopax)"],"p":"n","f":"さぎ|ふえ","u":1}],
-"鷺苔": [{"r":["さぎごけ"],"g":["Miquel's mazus…"],"p":"n","f":"さぎ|ごけ","u":1}],
-"鷺草": [{"r":["さぎそう"],"g":["fringed orchid (Pecteilis radiata)"],"p":"n","f":"さぎ|そう","u":1}],
-"鷽": [{"r":["うそ"],"g":["Eurasian bullfinch (Pyrrhula pyrrhula)"],"p":"n","u":1}]
+"鷺": [{"r":["さぎ"],"g":["heron (Ardeidae)"],"p":"n","u":1}]
 }
 }

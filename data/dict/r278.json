@@ -1,9 +1,14 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "自動コンフィギュレーション",
-"last": "舌骨",
+"first": "自力更生",
+"last": "舌長",
 "entries": {
+"自力更生": [{"r":["じりきこうせい"],"g":["working out one's salvation by own efforts"],"p":"n vs","f":"じ|りき|こう|せい"}],
+"自力本願": [{"r":["じりきほんがん"],"g":["salvation by one's own efforts"],"p":"n adj-no","f":"じ|りき|ほん|がん"}],
+"自助具": [{"r":["じじょぐ"],"g":["self-help device"],"p":"n","f":"じ|じょ|ぐ"}],
+"自助努力": [{"r":["じじょどりょく"],"g":["self-help efforts"],"p":"n vs","f":"じ|じょ|ど|りょく"}],
+"自助論": [{"r":["じじょろん"],"g":["Self-Help (1859 book by Samuel Smiles)"],"p":"n","f":"じ|じょ|ろん"}],
 "自動コンフィギュレーション": [{"r":["じどうコンフィギュレーション"],"g":["automatic configuration"],"p":"n","f":"じ|どう"}],
 "自動コンフィグレーション": [{"r":["じどうコンフィグレーション"],"g":["automatic configuration"],"p":"n","f":"じ|どう"}],
 "自動システム保護": [{"r":["じどうシステムほご"],"g":["automatic system protection"],"p":"n","f":"じ|どう;ほ|ご"}],
@@ -1174,11 +1179,6 @@
 "舌足らず": [{"r":["したたらず"],"g":["unclear speech","poorly expressed"],"p":"n adj-na adj-no","f":"した|た"}],
 "舌鋒": [{"r":["ぜっぽう"],"g":["sharp tongue"],"p":"n","f":"ぜっ|ぽう"}],
 "舌鋒鋭い": [{"r":["ぜっぽうするどい"],"g":["sharp (tongue, criticism, etc.)"],"p":"adj-i","f":"ぜっ|ぽう|するど"}],
-"舌長": [{"r":["したなが"],"g":["boastful (language)"],"p":"adj-na","f":"した|なが"}],
-"舌革": [{"r":["したがわ"],"g":["tongue (of a shoe)"],"p":"n","f":"した|がわ"}],
-"舌音": [{"r":["ぜつおん"],"g":["lingual sound"],"p":"n adj-no","f":"ぜつ|おん"}],
-"舌頂音": [{"r":["ぜっちょうおん"],"g":["coronal"],"p":"n","f":"ぜっ|ちょう|おん"}],
-"舌頭": [{"r":["ぜっとう"],"g":["tip of the tongue"],"p":"n","f":"ぜっ|とう"}],
-"舌骨": [{"r":["ぜっこつ"],"g":["hyoid bone (of the skull)"],"p":"n adj-no","f":"ぜっ|こつ"}]
+"舌長": [{"r":["したなが"],"g":["boastful (language)"],"p":"adj-na","f":"した|なが"}]
 }
 }

@@ -1,9 +1,17 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "塩化アンモニウム",
-"last": "夕暮泣き",
+"first": "塩入れ",
+"last": "夕景",
 "entries": {
+"塩入れ": [{"r":["しおいれ"],"g":["salt shaker"],"p":"n","f":"しお|い"}],
+"塩出し": [{"r":["しおだし"],"g":["desalinating with water"],"p":"n vs","f":"しお|だ"}],
+"塩分濃度": [{"r":["えんぶんのうど"],"g":["salinity"],"p":"n","f":"えん|ぶん|のう|ど"}],
+"塩分濃度差発電": [{"r":["えんぶんのうどさはつでん"],"g":["osmotic power"],"p":"n","f":"えん|ぶん|のう|ど|さ|はつ|でん"}],
+"塩加減": [{"r":["しおかげん"],"g":["seasoning with salt"],"p":"n","f":"しお|か|げん"}],
+"塩化アセチル": [{"r":["えんかアセチル"],"g":["acetyl chloride"],"p":"n","f":"えん|か"}],
+"塩化アルミニウム": [{"r":["えんかアルミニウム"],"g":["aluminum chloride"],"p":"n","f":"えん|か"}],
+"塩化アンチモン": [{"r":["えんかアンチモン"],"g":["antimony chloride"],"p":"n","f":"えん|か"}],
 "塩化アンモニウム": [{"r":["えんかアンモニウム"],"g":["ammonium chloride"],"p":"n","f":"えん|か"}],
 "塩化エチル": [{"r":["えんかエチル"],"g":["ethyl chloride"],"p":"n","f":"えん|か"}],
 "塩化エチレン": [{"r":["えんかエチレン"],"g":["ethylene chloride"],"p":"n","f":"えん|か"}],
@@ -631,6 +639,7 @@
 "声無き声": [{"r":["こえなきこえ"],"g":["unvoiced opinion"],"p":"exp n","f":"こえ|な;こえ"}],
 "声符": [{"r":["しょうふ"],"g":["tone mark"],"p":"n","f":"しょう|ふ"},{"r":["せいふ"],"g":["verbal command (in dog training)","sound part of a semasio-phonetic kanji"],"p":"n","f":"せい|ふ","t":1}],
 "声紋": [{"r":["せいもん"],"g":["voiceprint"],"p":"n","f":"せい|もん"}],
+"声聞": [{"r":["しょうもん"],"g":["sravaka (disciple of Buddha)","adherent of Hinayana Buddhism"],"p":"n","f":"しょう|もん"}],
 "声聞僧": [{"r":["しょうもんそう"],"g":["Hinayana monk"],"p":"n","f":"しょう|もん|そう"}],
 "声色": [{"r":["せいしょく"],"g":["voice and countenance","song and women"],"p":"n","f":"せい|しょく"}],
 "声色を使う": [{"r":["こわいろをつかう"],"g":["to mimic someone's voice"],"p":"exp v5u","f":"こわ|いろ;つか"}],
@@ -1285,16 +1294,6 @@
 "夕拝": [{"r":["ゆうはい"],"g":["evening service"],"p":"n","f":"ゆう|はい"}],
 "夕明り": [{"r":["ゆうあかり"],"g":["lingering light of evening"],"p":"n","f":"ゆう|あか"}],
 "夕映え": [{"r":["ゆうばえ"],"g":["sunset glow"],"p":"n","f":"ゆう|ば"}],
-"夕景": [{"r":["ゆうけい"],"g":["evening","evening scene","light of the setting sun"],"p":"n","f":"ゆう|けい"}],
-"夕景色": [{"r":["ゆうげしき"],"g":["evening scene"],"p":"n","f":"*"}],
-"夕晴れ": [{"r":["ゆうばれ"],"g":["clearing up in the evening"],"p":"n","f":"ゆう|ば"}],
-"夕暉": [{"r":["せっき"],"g":["rays of the setting sun"],"p":"n","f":"せっ|き"}],
-"夕暮": [{"r":["ゆうぐれ"],"g":["evening"],"p":"n","f":"ゆう|ぐれ"}],
-"夕暮れどき": [{"r":["ゆうぐれどき"],"g":["time around sunset"],"p":"n","f":"ゆう|ぐ"}],
-"夕暮れ族": [{"r":["ゆうぐれぞく"],"g":["couple with older man and younger woman"],"p":"n","f":"ゆう|ぐ;ぞく"}],
-"夕暮れ時": [{"r":["ゆうぐれどき"],"g":["time around sunset"],"p":"n","f":"ゆう|ぐ;どき"}],
-"夕暮れ泣き": [{"r":["ゆうぐれなき"],"g":["baby colic"],"p":"n","f":"ゆう|ぐ;な"}],
-"夕暮時": [{"r":["ゆうぐれどき"],"g":["time around sunset"],"p":"n","f":"ゆう|ぐれ|どき"}],
-"夕暮泣き": [{"r":["ゆうぐれなき"],"g":["baby colic"],"p":"n","f":"ゆう|ぐれ|な"}]
+"夕景": [{"r":["ゆうけい"],"g":["evening","evening scene","light of the setting sun"],"p":"n","f":"ゆう|けい"}]
 }
 }

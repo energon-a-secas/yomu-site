@@ -1,9 +1,14 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "舌鮃",
-"last": "花植え",
+"first": "舌革",
+"last": "花柳界",
 "entries": {
+"舌革": [{"r":["したがわ"],"g":["tongue (of a shoe)"],"p":"n","f":"した|がわ"}],
+"舌音": [{"r":["ぜつおん"],"g":["lingual sound"],"p":"n adj-no","f":"ぜつ|おん"}],
+"舌頂音": [{"r":["ぜっちょうおん"],"g":["coronal"],"p":"n","f":"ぜっ|ちょう|おん"}],
+"舌頭": [{"r":["ぜっとう"],"g":["tip of the tongue"],"p":"n","f":"ぜっ|とう"}],
+"舌骨": [{"r":["ぜっこつ"],"g":["hyoid bone (of the skull)"],"p":"n adj-no","f":"ぜっ|こつ"}],
 "舌鮃": [{"r":["したびらめ"],"g":["sole (any fish of the families Cynoglossidae and Soleidae)","red tonguesole (Cynoglossus joyneri)"],"p":"n","f":"した|びらめ","u":1}],
 "舌鼓": [{"r":["したつづみ","したづつみ"],"g":["smacking one's lips (over food)"],"p":"n","f":"した|つづみ"}],
 "舌鼓をうつ": [{"r":["したつづみをうつ"],"g":["to smack one's lips (over a dish)"],"p":"exp v5t","f":"した|つづみ"}],
@@ -1148,6 +1153,7 @@
 "花の雫": [{"r":["はなのしずく"],"g":["dew that trickles down from a flower"],"p":"n"}],
 "花の顔": [{"r":["はなのかんばせ","はなのかお"],"g":["lovely face"],"p":"n"}],
 "花の顔ばせ": [{"r":["はなのかおばせ"],"g":["lovely face"],"p":"n"}],
+"花の香": [{"r":["はなのか"],"g":["fragrance of flowers"],"p":"n"}],
 "花はずかしい": [{"r":["はなはずかしい"],"g":["beauty such as to put a flower to shame"],"p":"adj-i"}],
 "花は桜木、人は武士": [{"r":["はなはさくらぎ、ひとはぶし"],"g":["the best flowers are the cherry blossoms, the best…"],"p":"exp","f":"はな;さくら|ぎ;ひと;ぶ|し"}],
 "花は桜木人は武士": [{"r":["はなはさくらぎ、ひとはぶし"],"g":["the best flowers are the cherry blossoms, the best…"],"p":"exp","f":"はな;*;ぶ|し"}],
@@ -1291,11 +1297,6 @@
 "花柄": [{"r":["はながら"],"g":["flower pattern"],"p":"n","f":"はな|がら"},{"r":["かへい"],"g":["peduncle"],"p":"n adj-no","f":"か|へい","t":1}],
 "花柱": [{"r":["かちゅう"],"g":["(flower's) style"],"p":"n","f":"か|ちゅう"}],
 "花柳": [{"r":["はなやぎ"],"g":["Hanayagi school of Japanese dancing"],"p":"n","f":"はな|やぎ"}],
-"花柳界": [{"r":["かりゅうかい"],"g":["red-light district"],"p":"n","f":"か|りゅう|かい"}],
-"花柳病": [{"r":["かりゅうびょう"],"g":["sexually transmitted disease"],"p":"n","f":"か|りゅう|びょう"}],
-"花柳街": [{"r":["かりゅうがい"],"g":["red-light district"],"p":"n","f":"か|りゅう|がい"}],
-"花梗": [{"r":["かこう"],"g":["flower stalk"],"p":"n adj-no","f":"か|こう"}],
-"花梨": [{"r":["かりん"],"g":["Burmese rosewood (Pterocarpus indicus)","flowering quince (of genus Chaenomeles)…","quince (Cydonia oblonga)"],"p":"n","f":"*","u":1}],
-"花植え": [{"r":["はなうえ"],"g":["flower planting"],"p":"n","f":"はな|う"}]
+"花柳界": [{"r":["かりゅうかい"],"g":["red-light district"],"p":"n","f":"か|りゅう|かい"}]
 }
 }

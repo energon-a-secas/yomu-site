@@ -1,9 +1,12 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "創傷学",
-"last": "勝点",
+"first": "創価女子短大",
+"last": "勝景",
 "entries": {
+"創価女子短大": [{"r":["そうかじょしたんだい"],"g":["Souka Women's Junior College"],"p":"n","f":"そう|か|じょ|し|たん|だい"}],
+"創価女子短期大学": [{"r":["そうかじょしたんきだいがく"],"g":["Sōka Women's College"],"p":"n","f":"そう|か|じょ|し|たん|き|だい|がく"}],
+"創傷": [{"r":["そうしょう"],"g":["wound"],"p":"n","f":"そう|しょう"}],
 "創傷学": [{"r":["そうしょうがく"],"g":["traumatology"],"p":"n","f":"そう|しょう|がく"}],
 "創元社": [{"r":["そうげんしゃ"],"g":["Sogensha, Inc. (publisher)"],"p":"n","f":"そう|げん|しゃ"}],
 "創党": [{"r":["そうとう"],"g":["founding of a (political) party"],"p":"n vs vt","f":"そう|とう"}],
@@ -1165,6 +1168,7 @@
 "勝ち取る": [{"r":["かちとる"],"g":["to win"],"p":"v5r vt"}],
 "勝ち名乗り": [{"r":["かちなのり"],"g":["being declared the winner of a bout"],"p":"n","f":"か;な|の"}],
 "勝ち味": [{"r":["かちみ"],"g":["sign of victory"],"p":"n"}],
+"勝ち得": [{"r":["かちどく"],"g":["win of a low-ranked wrestler in the extra eighth bout in…"],"p":"n"}],
 "勝ち得る": [{"r":["かちえる"],"g":["to achieve"],"p":"v1 vt"}],
 "勝ち戦": [{"r":["かちいくさ"],"g":["winning a battle"],"p":"n"}],
 "勝ち投手": [{"r":["かちとうしゅ"],"g":["winning pitcher"],"p":"n","f":"か;とう|しゅ"}],
@@ -1243,12 +1247,6 @@
 "勝抜く": [{"r":["かちぬく"],"g":["to win through (e.g. to the next round)","to achieve a final victory"],"p":"v5k vi","f":"かち|ぬ"}],
 "勝敗の数": [{"r":["しょうはいのすう"],"g":["issue of the battle"],"p":"n","f":"しょう|はい;すう"}],
 "勝敗の鍵を握る": [{"r":["しょうはいのかぎをにぎる"],"g":["to have the game in one's hands"],"p":"exp v5r","f":"しょう|はい;かぎ;にぎ"}],
-"勝景": [{"r":["しょうけい"],"g":["scenic view"],"p":"n","f":"しょう|けい"}],
-"勝栗": [{"r":["かちぐり"],"g":["dried chestnut"],"p":"n","f":"かち|ぐり"}],
-"勝楽": [{"r":["しょうらく"],"g":["Cakrasamvara"],"p":"n","f":"しょう|らく"}],
-"勝概": [{"r":["しょうがい"],"g":["beautiful scenery"],"p":"n","f":"しょう|がい"}],
-"勝機": [{"r":["しょうき"],"g":["chance to win"],"p":"n","f":"しょう|き"}],
-"勝気": [{"r":["かちき"],"g":["determined spirit"],"p":"adj-na n","f":"かち|き"}],
-"勝点": [{"r":["かちてん"],"g":["points (in a group tournament ranking system)"],"p":"n","f":"かち|てん"}]
+"勝景": [{"r":["しょうけい"],"g":["scenic view"],"p":"n","f":"しょう|けい"}]
 }
 }

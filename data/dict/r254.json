@@ -1,9 +1,18 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "物わかりがよい",
-"last": "独墺伊",
+"first": "物まね",
+"last": "独和",
 "entries": {
+"物まね": [{"r":["ものまね"],"g":["imitation (of someone, something)"],"p":"n vs vt","u":1}],
+"物めずらしい": [{"r":["ものめずらしい"],"g":["curious"],"p":"adj-i"}],
+"物もらい": [{"r":["ものもらい"],"g":["beggar","sty (on the eyelid)"],"p":"n","u":1}],
+"物も言いよう": [{"r":["ものもいいよう"],"g":["be careful what you say"],"p":"exp"}],
+"物も言いようで角が立つ": [{"r":["ものもいいようでかどがたつ"],"g":["harsh words make the going rough"],"p":"exp v5t"}],
+"物も言い様": [{"r":["ものもいいよう"],"g":["be careful what you say"],"p":"exp"}],
+"物も言い様で角が立つ": [{"r":["ものもいいようでかどがたつ"],"g":["harsh words make the going rough"],"p":"exp v5t"}],
+"物わかり": [{"r":["ものわかり"],"g":["understanding (of people's circumstances and feelings)"],"p":"n"}],
+"物わかりがいい": [{"r":["ものわかりがいい","ものわかりがよい"],"g":["sensible"],"p":"exp adj-ix"}],
 "物わかりがよい": [{"r":["ものわかりがいい","ものわかりがよい"],"g":["sensible"],"p":"exp adj-ix"}],
 "物わかりが悪い": [{"r":["ものわかりがわるい"],"g":["dense"],"p":"exp adj-i"}],
 "物わかりが良い": [{"r":["ものわかりがいい","ものわかりがよい"],"g":["sensible"],"p":"exp adj-ix"}],
@@ -1165,15 +1174,6 @@
 "独参湯": [{"r":["どくじんとう"],"g":["crowd-puller"],"p":"n","f":"どく|じん|とう"}],
 "独古": [{"r":["とっこ","どっこ"],"g":["single-pronged vajra","cloth of a tokko pattern"],"p":"n","f":"とっ|こ"}],
 "独吟": [{"r":["どくぎん"],"g":["vocal solo","solo recitation (of traditional poetry, noh verse, etc.)"],"p":"n vs vt","f":"どく|ぎん"}],
-"独和": [{"r":["どくわ"],"g":["German-Japanese"],"p":"n","f":"どく|わ"}],
-"独和辞典": [{"r":["どくわじてん"],"g":["German-Japanese dictionary"],"p":"n","f":"どく|わ|じ|てん"}],
-"独唱会": [{"r":["どくしょうかい"],"g":["vocal recital"],"p":"n","f":"どく|しょう|かい"}],
-"独善": [{"r":["どくぜん"],"g":["self-righteousness"],"p":"n","f":"どく|ぜん"}],
-"独善主義": [{"r":["どくぜんしゅぎ"],"g":["self-righteousness"],"p":"n","f":"どく|ぜん|しゅ|ぎ"}],
-"独善的": [{"r":["どくぜんてき"],"g":["self-righteous"],"p":"adj-na","f":"どく|ぜん|てき"}],
-"独国": [{"r":["どくこく"],"g":["Germany"],"p":"n","f":"どく|こく"}],
-"独坐": [{"r":["どくざ"],"g":["sitting alone"],"p":"n vs vi","f":"どく|ざ"}],
-"独墺": [{"r":["どくおう"],"g":["Germany-Austria"],"p":"n","f":"どく|おう"}],
-"独墺伊": [{"r":["どくおうい"],"g":["Germany, Austria and Italy"],"p":"n","f":"どく|おう|い"}]
+"独和": [{"r":["どくわ"],"g":["German-Japanese"],"p":"n","f":"どく|わ"}]
 }
 }

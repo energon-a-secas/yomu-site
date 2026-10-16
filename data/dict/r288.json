@@ -1,9 +1,15 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "記念誌",
-"last": "誤り制御ソフトウェア",
+"first": "記念撮影",
+"last": "誤りをおかす",
 "entries": {
+"記念撮影": [{"r":["きねんさつえい"],"g":["taking a commemorative photo"],"p":"n","f":"き|ねん|さつ|えい"}],
+"記念樹": [{"r":["きねんじゅ"],"g":["memorial tree"],"p":"n","f":"き|ねん|じゅ"}],
+"記念物": [{"r":["きねんぶつ"],"g":["souvenir"],"p":"n","f":"き|ねん|ぶつ"}],
+"記念硬貨": [{"r":["きねんこうか"],"g":["commemorative coin"],"p":"n","f":"き|ねん|こう|か"}],
+"記念碑的": [{"r":["きねんひてき"],"g":["monumental"],"p":"adj-na","f":"き|ねん|ひ|てき"}],
+"記念祭": [{"r":["きねんさい"],"g":["anniversary"],"p":"n","f":"き|ねん|さい"}],
 "記念誌": [{"r":["きねんし"],"g":["commemorative publication"],"p":"n","f":"き|ねん|し"}],
 "記念論文集": [{"r":["きねんろんぶんしゅう"],"g":["collection of essays contributed in celebration of something"],"p":"n","f":"き|ねん|ろん|ぶん|しゅう"}],
 "記念講演": [{"r":["きねんこうえん"],"g":["memorial lecture"],"p":"n","f":"き|ねん|こう|えん"}],
@@ -1307,12 +1313,6 @@
 "誤ち": [{"r":["あやまち"],"g":["fault"],"p":"n"}],
 "誤つ": [{"r":["あやまつ"],"g":["to make a mistake (in)","to mislead","to do accidentally"],"p":"v5t vt vi"}],
 "誤りに陥る": [{"r":["あやまりにおちいる"],"g":["to fall into error"],"p":"exp v5r"}],
-"誤りをおかす": [{"r":["あやまりをおかす"],"g":["to make a mistake"],"p":"exp v5s"}],
-"誤りを犯す": [{"r":["あやまりをおかす"],"g":["to make a mistake"],"p":"exp v5s"}],
-"誤りを直す": [{"r":["あやまりをなおす"],"g":["to correct an error"],"p":"exp v5s"}],
-"誤りを認める": [{"r":["あやまりをみとめる"],"g":["to admit to a mistake"],"p":"exp v1"}],
-"誤り伝える": [{"r":["あやまりつたえる"],"g":["to misrepresent"],"p":"v1 vt"}],
-"誤り制御": [{"r":["あやまりせいぎょ"],"g":["error control"],"p":"n","f":"あやま;せい|ぎょ"}],
-"誤り制御ソフトウェア": [{"r":["あやまりせいぎょソフトウェア"],"g":["error control software"],"p":"n","f":"あやま;せい|ぎょ"}]
+"誤りをおかす": [{"r":["あやまりをおかす"],"g":["to make a mistake"],"p":"exp v5s"}]
 }
 }

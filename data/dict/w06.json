@@ -2,7 +2,7 @@
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict/1",
 "first": "せかせか",
-"last": "ちえ",
+"last": "ちえん",
 "entries": {
 "せかせか": [{"g":["restlessly"],"p":"adv adv-to vs","q":4}],
 "せがたかい": [{"g":["tall (of a person)"],"p":"exp adj-i","k":["背が高い"]}],
@@ -952,7 +952,6 @@
 "ただす": [{"g":["to correct","to straighten (one's posture, collar, etc.)"],"p":"v5s vt","k":["正す"],"q":4,"b":4},{"g":["to ascertain"],"p":"v5s vt","k":["糺す","糾す"],"u":1,"q":4}],
 "ただちに": [{"g":["at once","directly (face, lead to, etc.)"],"p":"adv","k":["直ちに"],"q":3}],
 "ただよう": [{"g":["to drift","to waft (e.g. a scent)","to be in the air (e.g. a feeling or mood)"],"p":"v5u vi","k":["漂う"],"c":[3]}],
-"ただ見": [{"r":["ただみ"],"g":["watching without paying (a film, play, etc.)"],"p":"n","q":4}],
 "たちあい": [{"g":["presence (e.g. of an observer)","trading session (at an exchange)","rising from a crouch to charge"],"p":"n","k":["立会い","立ち会い"]}],
 "たちあがり": [{"g":["start","how well a pitcher pitches at the start of the game"],"p":"n","k":["立ち上がり","立上り"]}],
 "たちあがる": [{"g":["to stand up","to recover","to (stand up and) take action"],"p":"v5r vi","k":["立ち上がる"]}],
@@ -1368,6 +1367,7 @@
 "ちいさい": [{"g":["small","slight","low (e.g. sound)"],"p":"adj-i","k":["小さい"]}],
 "ちいさいころ": [{"g":["as a child"],"p":"exp n","k":["小さい頃","小さいころ"]}],
 "ちいさな": [{"g":["small"],"p":"adj-pn","k":["小さな"]}],
-"ちえ": [{"g":["wisdom","prajna (insight leading to enlightenment)"],"p":"n","k":["知恵","智恵"]}]
+"ちえ": [{"g":["wisdom","prajna (insight leading to enlightenment)"],"p":"n","k":["知恵","智恵"]}],
+"ちえん": [{"g":["delay"],"p":"n vs vi adj-no","k":["遅延"]}]
 }
 }

@@ -1,9 +1,18 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "安全設計要件",
-"last": "客入り",
+"first": "安全神話",
+"last": "客あしらい",
 "entries": {
+"安全神話": [{"r":["あんぜんしんわ"],"g":["safety myth"],"p":"n","f":"あん|ぜん|しん|わ"}],
+"安全第一": [{"r":["あんぜんだいいち"],"g":["safety first (principle)"],"p":"exp","f":"あん|ぜん|だい|いち"}],
+"安全策": [{"r":["あんぜんさく"],"g":["safe plan"],"p":"n","f":"あん|ぜん|さく"}],
+"安全管理": [{"r":["あんぜんかんり"],"g":["safety administration"],"p":"n","f":"あん|ぜん|かん|り"}],
+"安全管理者": [{"r":["あんぜんかんりしゃ"],"g":["safety officer"],"p":"n","f":"あん|ぜん|かん|り|しゃ"}],
+"安全網": [{"r":["あんぜんもう"],"g":["safety net"],"p":"n","f":"あん|ぜん|もう"}],
+"安全衛生協会": [{"r":["あんぜんえいせいきょうかい"],"g":["Institution of Occupational Safety and Health"],"p":"n","f":"あん|ぜん|えい|せい|きょう|かい"}],
+"安全衛生教育": [{"r":["あんぜんえいせいきょういく"],"g":["safety and health education"],"p":"n","f":"あん|ぜん|えい|せい|きょう|いく"}],
+"安全装置": [{"r":["あんぜんそうち"],"g":["safety device"],"p":"n","f":"あん|ぜん|そう|ち"}],
 "安全設計要件": [{"r":["あんぜんせっけいようけん"],"g":["safety design requirement"],"p":"n","f":"あん|ぜん|せっ|けい|よう|けん"}],
 "安全通行証": [{"r":["あんぜんつうこうしょう"],"g":["passport (guaranteeing safe passage)"],"p":"n","f":"あん|ぜん|つう|こう|しょう"}],
 "安全運転": [{"r":["あんぜんうんてん"],"g":["safe driving"],"p":"n vs","f":"あん|ぜん|うん|てん"}],
@@ -1165,15 +1174,6 @@
 "実験論": [{"r":["じっけんろん"],"g":["positivism","experimentalism"],"p":"n","f":"じっ|けん|ろん"}],
 "実１０進小数点": [{"r":["じつじっしんしょうすうてん"],"g":["actual decimal point"],"p":"n","f":"じつ;しん|しょう|すう|てん"}],
 "客": [{"r":["まれびと"],"g":["visitor from afar","joy-bringing spirit from the divine realms"],"p":"n"},{"r":["まろうど"],"g":["visitor from afar"],"p":"n","t":1}],
-"客あしらい": [{"r":["きゃくあしらい"],"g":["hospitality"],"p":"n"}],
-"客いじり": [{"r":["きゃくいじり"],"g":["involving the audience…"],"p":"n vs"}],
-"客を通す": [{"r":["きゃくをとおす"],"g":["to show a guest in"],"p":"exp v5s"}],
-"客人": [{"r":["きゃくじん"],"g":["caller"],"p":"n","f":"きゃく|じん"},{"r":["まろうど"],"g":["visitor from afar"],"p":"n","f":"*","t":1},{"r":["まれびと"],"g":["visitor from afar","joy-bringing spirit from the divine realms"],"p":"n","f":"*","t":2}],
-"客体": [{"r":["きゃくたい","かくたい"],"g":["object"],"p":"n","f":"きゃく|たい"}],
-"客体化": [{"r":["きゃくたいか","かくたいか"],"g":["objectification"],"p":"n vs","f":"きゃく|たい|か"}],
-"客僧": [{"r":["きゃくそう"],"g":["priest traveling as part of his training (travelling)"],"p":"n","f":"きゃく|そう"}],
-"客先": [{"r":["きゃくさき"],"g":["customer"],"p":"n","f":"きゃく|さき"}],
-"客先開発プログラム": [{"r":["きゃくさきかいはつプログラム"],"g":["field developed program"],"p":"n","f":"きゃく|さき|かい|はつ"}],
-"客入り": [{"r":["きゃくいり"],"g":["attendance"],"p":"n","f":"きゃく|い"}]
+"客あしらい": [{"r":["きゃくあしらい"],"g":["hospitality"],"p":"n"}]
 }
 }

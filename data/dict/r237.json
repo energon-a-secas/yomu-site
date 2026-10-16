@@ -1,9 +1,21 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "末法思想",
-"last": "東北野兎",
+"first": "末枯れ",
+"last": "東北日本",
 "entries": {
+"末枯れ": [{"r":["うらがれ"],"g":["dying of the little twigs and branches"],"p":"n","f":"うら|が"}],
+"末枯れる": [{"r":["うらがれる"],"g":["to die (esp. foliage as winter approaches)"],"p":"v1 vi","f":"うら|が"},{"r":["すがれる"],"g":["to wither (esp. plants as winter draws near)","to pass one's prime"],"p":"v1 vi","f":"*","u":1,"t":1}],
+"末梢": [{"r":["まっしょう"],"g":["tip of a twig","tip","trifles"],"p":"n","f":"まっ|しょう"}],
+"末梢性": [{"r":["まっしょうせい"],"g":["peripheral"],"p":"adj-no n","f":"まっ|しょう|せい"}],
+"末梢的": [{"r":["まっしょうてき"],"g":["trivial"],"p":"adj-na","f":"まっ|しょう|てき"}],
+"末梢神経": [{"r":["まっしょうしんけい"],"g":["peripheral nerve"],"p":"n","f":"まっ|しょう|しん|けい"}],
+"末梢神経系": [{"r":["まっしょうしんけいけい"],"g":["peripheral nervous system"],"p":"n","f":"まっ|しょう|しん|けい|けい"}],
+"末梢血管": [{"r":["まっしょうけっかん"],"g":["peripheral blood vessel"],"p":"n","f":"まっ|しょう|けっ|かん"}],
+"末段": [{"r":["まつだん"],"g":["final paragraph"],"p":"n","f":"まつ|だん"}],
+"末永い": [{"r":["すえながい"],"g":["permanent"],"p":"adj-i","f":"すえ|なが"}],
+"末永く": [{"r":["すえながく"],"g":["forever"],"p":"adv","f":"すえ|なが"}],
+"末法": [{"r":["まっぽう"],"g":["latter days of the law (one of the three ages of Buddhism)"],"p":"n","f":"まっ|ぽう"}],
 "末法思想": [{"r":["まっぽうしそう"],"g":["pessimism due to decadent-age theory"],"p":"n","f":"まっ|ぽう|し|そう"}],
 "末派": [{"r":["まっぱ"],"g":["sect"],"p":"n","f":"まっ|ぱ"}],
 "末流": [{"r":["ばつりゅう","まつりゅう"],"g":["descendants"],"p":"n","f":"ばつ|りゅう"}],
@@ -1133,15 +1145,6 @@
 "東北文化学園大学": [{"r":["とうほくぶんかがくえんだいがく"],"g":["Tohoku Bunka Gakuen University"],"p":"n","f":"とう|ほく|ぶん|か|がく|えん|だい|がく"}],
 "東北文教大学": [{"r":["とうほくぶんきょうだいがく"],"g":["Tohoku Bunkyo College"],"p":"n","f":"とう|ほく|ぶん|きょう|だい|がく"}],
 "東北新幹線": [{"r":["とうほくしんかんせん"],"g":["Tōhoku Shinkansen"],"p":"n","f":"とう|ほく|しん|かん|せん"}],
-"東北日本": [{"r":["とうほくにほん"],"g":["northeast Japan…"],"p":"n","f":"とう|ほく|に|ほん"}],
-"東北東": [{"r":["とうほくとう"],"g":["east-northeast"],"p":"n","f":"とう|ほく|とう"}],
-"東北生活文化大学": [{"r":["とうほくせいかつぶんかだいがく"],"g":["Tohoku Seikatsu Bunka College"],"p":"n","f":"とう|ほく|せい|かつ|ぶん|か|だい|がく"}],
-"東北福祉大学": [{"r":["とうほくふくしだいがく"],"g":["Tohoku Fukushi University"],"p":"n","f":"とう|ほく|ふく|し|だい|がく"}],
-"東北自動車道": [{"r":["とうほくじどうしゃどう"],"g":["Tōhoku Expressway"],"p":"n","f":"とう|ほく|じ|どう|しゃ|どう"}],
-"東北芸術工科大学": [{"r":["とうほくげいじゅつこうかだいがく"],"g":["Tohoku University of Art & Design"],"p":"n","f":"とう|ほく|げい|じゅつ|こう|か|だい|がく"}],
-"東北英文学会": [{"r":["とうほくえいぶんがっかい"],"g":["Tōhoku English Literary Society"],"p":"n","f":"とう|ほく|えい|ぶん|がっ|かい"}],
-"東北薬科大学": [{"r":["とうほくやっかだいがく"],"g":["Tohoku Pharmaceutical University"],"p":"n","f":"とう|ほく|やっ|か|だい|がく"}],
-"東北農業大学": [{"r":["とうほくのうぎょうだいがく"],"g":["Northeast Agricultural University"],"p":"n","f":"とう|ほく|のう|ぎょう|だい|がく"}],
-"東北野兎": [{"r":["とうほくのうさぎ"],"g":["Lepus brachyurus lyoni (subspecies of Japanese hare)"],"p":"n","f":"とう|ほく|の|うさぎ","u":1}]
+"東北日本": [{"r":["とうほくにほん"],"g":["northeast Japan…"],"p":"n","f":"とう|ほく|に|ほん"}]
 }
 }

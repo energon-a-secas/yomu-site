@@ -1,9 +1,19 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "無極",
-"last": "熊公八公",
+"first": "無条件降伏",
+"last": "熅れ",
 "entries": {
+"無条件降伏": [{"r":["むじょうけんこうふく"],"g":["unconditional surrender"],"p":"n","f":"む|じょう|けん|こう|ふく"}],
+"無条件飛越し命令": [{"r":["むじょうけんとびこしめいれい"],"g":["unconditional jump instruction"],"p":"n","f":"む|じょう|けん|とび|こ;めい|れい"}],
+"無東西": [{"r":["むとうざい"],"g":["not knowing one's bearings","itinerant monk"],"p":"n","f":"む|とう|ざい"}],
+"無果汁": [{"r":["むかじゅう"],"g":["containing no fruit juice"],"p":"adj-no n","f":"む|か|じゅう"}],
+"無柄": [{"r":["むへい"],"g":["sessile"],"p":"adj-no","f":"む|へい"}],
+"無根": [{"r":["むこん"],"g":["groundless"],"p":"adj-na n","f":"む|こん"}],
+"無根拠": [{"r":["むこんきょ"],"g":["baseless"],"p":"adj-na n","f":"む|こん|きょ"}],
+"無格好": [{"r":["ぶかっこう"],"g":["unshapely","awkward"],"p":"adj-na","f":"ぶ|かっ|こう"}],
+"無格社": [{"r":["むかくしゃ"],"g":["unranked shrine"],"p":"n","f":"む|かく|しゃ"}],
+"無業": [{"r":["むぎょう"],"g":["without an occupation"],"p":"n adj-no","f":"む|ぎょう"}],
 "無極": [{"r":["むきょく"],"g":["limitless","apolar","limitlessness of taiji"],"p":"n adj-na adj-no","f":"む|きょく"}],
 "無様": [{"r":["ぶざま"],"g":["unsightly"],"p":"adj-na n","f":"ぶ|ざま"}],
 "無標": [{"r":["むひょう"],"g":["unmarked"],"p":"adj-no n","f":"む|ひょう"}],
@@ -1331,16 +1341,6 @@
 "煽情": [{"r":["せんじょう"],"g":["stirring up strong emotions","excitement (of sexual desire)"],"p":"n vs vt vi","f":"せん|じょう"}],
 "煽情的": [{"r":["せんじょうてき"],"g":["sensational","(sexually) suggestive"],"p":"adj-na","f":"せん|じょう|てき"}],
 "熄む": [{"r":["やむ"],"g":["to cease"],"p":"v5m vi"}],
-"熅れ": [{"r":["いきれ"],"g":["steaminess"],"p":"n"}],
-"熇尾蛇": [{"r":["ひばかり"],"g":["Asian keelback (Amphiesma vibakari)"],"p":"n","f":"*","u":1}],
-"熊さん八っつあん": [{"r":["くまさんはっつあん"],"g":["the average Joe"],"p":"n"}],
-"熊さん八つあん": [{"r":["くまさんはっつあん"],"g":["the average Joe"],"p":"n"}],
-"熊のい": [{"r":["くまのい"],"g":["dried bear's gallbladder…"],"p":"exp n"}],
-"熊の子貝": [{"r":["くまのこがい"],"g":["Chlorostoma xanthostigma (species of sea snail)"],"p":"n","f":"くま;こ|がい","u":1}],
-"熊の実": [{"r":["くまのみ"],"g":["clownfish…"],"p":"n","u":1}],
-"熊の胆": [{"r":["くまのい"],"g":["dried bear's gallbladder…"],"p":"exp n"}],
-"熊ん蜂": [{"r":["くまんばち"],"g":["Japanese carpenter bee (Xylocopa appendiculata circumvolans)","wasp"],"p":"n","u":1}],
-"熊之実": [{"r":["くまのみ"],"g":["clownfish…"],"p":"n","f":"くま|の|み","u":1}],
-"熊公八公": [{"r":["くまこうはちこう"],"g":["uncultured but well-intentioned person"],"p":"n","f":"くま|こう|はち|こう"}]
+"熅れ": [{"r":["いきれ"],"g":["steaminess"],"p":"n"}]
 }
 }

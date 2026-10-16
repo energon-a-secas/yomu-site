@@ -1,9 +1,14 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "磁気共鳴診断装置",
-"last": "祭文",
+"first": "磁気共鳴断層撮影",
+"last": "祭場",
 "entries": {
+"磁気共鳴断層撮影": [{"r":["じききょうめいだんそうさつえい"],"g":["magnetic resonance tomography"],"p":"n","f":"じ|き|きょう|めい|だん|そう|さつ|えい"}],
+"磁気共鳴映像法": [{"r":["じききょうめいえいぞうほう"],"g":["magnetic resonance imaging"],"p":"n","f":"じ|き|きょう|めい|えい|ぞう|ほう"}],
+"磁気共鳴画像": [{"r":["じききょうめいがぞう"],"g":["magnetic resonance imaging"],"p":"n","f":"じ|き|きょう|めい|が|ぞう"}],
+"磁気共鳴血管撮影": [{"r":["じききょうめいけっかんさつえい"],"g":["magnetic resonance angiography"],"p":"n","f":"じ|き|きょう|めい|けっ|かん|さつ|えい"}],
+"磁気共鳴血管造影": [{"r":["じききょうめいけっかんぞうえい"],"g":["magnetic resonance angiography"],"p":"n","f":"じ|き|きょう|めい|けっ|かん|ぞう|えい"}],
 "磁気共鳴診断装置": [{"r":["じききょうめいしんだんそうち"],"g":["magnetic resonance imaging scanner"],"p":"n","f":"じ|き|きょう|めい|しん|だん|そう|ち"}],
 "磁気分極": [{"r":["じきぶんきょく"],"g":["magnetic polarization"],"p":"n","f":"じ|き|ぶん|きょく"}],
 "磁気力": [{"r":["じきりょく"],"g":["magnetic force"],"p":"n","f":"じ|き|りょく"}],
@@ -1194,14 +1199,6 @@
 "祭司": [{"r":["さいし"],"g":["priest"],"p":"n","f":"さい|し"}],
 "祭器": [{"r":["さいき"],"g":["equipment used in rituals"],"p":"n","f":"さい|き"}],
 "祭囃子": [{"r":["まつりばやし"],"g":["(traditional) festival music"],"p":"n","f":"まつり|ばや|し"}],
-"祭場": [{"r":["さいじょう"],"g":["ceremony site"],"p":"n","f":"さい|じょう"}],
-"祭壇座": [{"r":["さいだんざ"],"g":["Ara (constellation)"],"p":"n","f":"さい|だん|ざ"}],
-"祭壇画": [{"r":["さいだんが"],"g":["altarpiece"],"p":"n","f":"さい|だん|が"}],
-"祭官": [{"r":["さいかん"],"g":["official who arranges festival and rites"],"p":"n","f":"さい|かん"}],
-"祭式": [{"r":["さいしき"],"g":["rites"],"p":"n","f":"さい|しき"}],
-"祭政": [{"r":["さいせい"],"g":["church and state"],"p":"n","f":"さい|せい"}],
-"祭政一致": [{"r":["さいせいいっち"],"g":["unity of church and state"],"p":"n","f":"さい|せい|いっ|ち"}],
-"祭政分離": [{"r":["さいせいぶんり"],"g":["separation of church and state"],"p":"n","f":"さい|せい|ぶん|り"}],
-"祭文": [{"r":["さいぶん","さいもん"],"g":["address to the gods"],"p":"n","f":"さい|ぶん"}]
+"祭場": [{"r":["さいじょう"],"g":["ceremony site"],"p":"n","f":"さい|じょう"}]
 }
 }

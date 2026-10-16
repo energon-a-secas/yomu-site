@@ -1,9 +1,15 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "勝男武士",
-"last": "十進演算子",
+"first": "勝栗",
+"last": "十進小数",
 "entries": {
+"勝栗": [{"r":["かちぐり"],"g":["dried chestnut"],"p":"n","f":"かち|ぐり"}],
+"勝楽": [{"r":["しょうらく"],"g":["Cakrasamvara"],"p":"n","f":"しょう|らく"}],
+"勝概": [{"r":["しょうがい"],"g":["beautiful scenery"],"p":"n","f":"しょう|がい"}],
+"勝機": [{"r":["しょうき"],"g":["chance to win"],"p":"n","f":"しょう|き"}],
+"勝気": [{"r":["かちき"],"g":["determined spirit"],"p":"adj-na n","f":"かち|き"}],
+"勝点": [{"r":["かちてん"],"g":["points (in a group tournament ranking system)"],"p":"n","f":"かち|てん"}],
 "勝男武士": [{"r":["かつおぶし"],"g":["katsuobushi"],"p":"n","f":"かつ|お|ぶ|し"}],
 "勝着": [{"r":["しょうちゃく"],"g":["winning move (go, shogi)"],"p":"n","f":"しょう|ちゃく"}],
 "勝算": [{"r":["しょうさん"],"g":["prospects of victory"],"p":"n","f":"しょう|さん"}],
@@ -1177,11 +1183,6 @@
 "十進分類法": [{"r":["じっしんぶんるいほう"],"g":["decimal classification"],"p":"n","f":"じっ|しん|ぶん|るい|ほう"}],
 "十進制": [{"r":["じっしんせい"],"g":["decimal system"],"p":"n","f":"じっ|しん|せい"}],
 "十進基数": [{"r":["じっしんきすう"],"g":["decimal radix"],"p":"n","f":"じっ|しん|き|すう"}],
-"十進小数": [{"r":["じっしんしょうすう"],"g":["decimal fraction"],"p":"n","f":"じっ|しん|しょう|すう"}],
-"十進小数点": [{"r":["じっしんしょうすうてん"],"g":["decimal point"],"p":"n","f":"じっ|しん|しょう|すう|てん"}],
-"十進数": [{"r":["じっしんすう"],"g":["decimal"],"p":"n","f":"じっ|しん|すう"}],
-"十進法": [{"r":["じっしんほう","じゅっしんほう"],"g":["decimal system"],"p":"n","f":"じっ|しん|ほう"}],
-"十進演算": [{"r":["じっしんえんざん"],"g":["decimal arithmetic"],"p":"n","f":"じっ|しん|えん|ざん"}],
-"十進演算子": [{"r":["じっしんえんざんし"],"g":["decimal operator"],"p":"n","f":"じっ|しん|えん|ざん|し"}]
+"十進小数": [{"r":["じっしんしょうすう"],"g":["decimal fraction"],"p":"n","f":"じっ|しん|しょう|すう"}]
 }
 }

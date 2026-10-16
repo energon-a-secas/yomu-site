@@ -1,9 +1,14 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "鼻元",
-"last": "ＣＮＥＴ",
+"first": "鼻中隔",
+"last": "ＣＩＳ",
 "entries": {
+"鼻中隔": [{"r":["びちゅうかく"],"g":["nasal septum"],"p":"n","f":"び|ちゅう|かく"}],
+"鼻中隔彎曲症": [{"r":["びちゅうかくわんきょくしょう"],"g":["nasal septum deviation"],"p":"n","f":"び|ちゅう|かく|わん|きょく|しょう"}],
+"鼻中隔湾曲症": [{"r":["びちゅうかくわんきょくしょう"],"g":["nasal septum deviation"],"p":"n","f":"び|ちゅう|かく|わん|きょく|しょう"}],
+"鼻付け": [{"r":["はなづけ"],"g":["nose tesuji"],"p":"n","f":"はな|づ"}],
+"鼻偏": [{"r":["はなへん"],"g":["kanji \"nose\" radical at left"],"p":"n","f":"はな|へん"}],
 "鼻元": [{"r":["はなもと"],"g":["root of the nose"],"p":"n","f":"はな|もと"}],
 "鼻元思案": [{"r":["はなもとじあん","はなもとしあん"],"g":["superficial (shortsighted) way of thinking"],"p":"n","f":"はな|もと|じ|あん"}],
 "鼻先で笑う": [{"r":["はなさきでわらう"],"g":["to laugh scornfully"],"p":"exp v5u","f":"はな|さき;わら"}],
@@ -786,6 +791,7 @@
 "３尉": [{"r":["さんい"],"g":["second lieutenant (JGSDF)"],"p":"n"}],
 "３尻": [{"r":["さんけつ"],"g":["riding triple (on a bicycle, motorcycle, etc.)"],"p":"n"}],
 "３年": [{"r":["さんねん"],"g":["three years","third school year (e.g. of high school)"],"p":"n"}],
+"３年生": [{"r":["さんねんせい"],"g":["third-year student"],"p":"n","f":"ねん|せい"}],
 "３度": [{"r":["さんど"],"g":["three times","third (interval)"],"p":"n"}],
 "３度目の正直": [{"r":["さんどめのしょうじき"],"g":["third time lucky"],"p":"exp n","f":"ど|め;しょう|じき"}],
 "３徹": [{"r":["さんてつ"],"g":["staying up all night three nights in a row"],"p":"n vs"}],
@@ -1361,14 +1367,6 @@
 "ＣＩＡ": [{"r":["シー・アイ・エー"],"g":["Central Intelligence Agency (US)"],"p":"n"}],
 "ＣＩＥ": [{"r":["シー・アイ・イー"],"g":["Civil Information and Education Section…"],"p":"n"}],
 "ＣＩＯ": [{"r":["シー・アイ・オー"],"g":["chief information officer","chief investment officer"],"p":"n"}],
-"ＣＩＳ": [{"r":["シー・アイ・エス","シス"],"g":["Commonwealth of Independent States","critical incident stress"],"p":"n"}],
-"ＣＩＳＣ": [{"r":["シスク"],"g":["complex instruction set computer"],"p":"n"}],
-"ＣＩＴＥＳ": [{"r":["サイテス"],"g":["Convention on International Trade in Endangered Species of…"],"p":"n"}],
-"ＣＫ": [{"r":["シー・ケー"],"g":["corner kick (soccer)"],"p":"n"}],
-"ＣＬＶ": [{"r":["シー・エル・ブイ"],"g":["constant linear velocity"],"p":"n"}],
-"ＣＭソング": [{"r":["シーエムソング"],"g":["advertising jingle"],"p":"n"}],
-"ＣＭＯＳ": [{"r":["シーモス"],"g":["CMOS"],"p":"n"}],
-"ＣＭＹＫ": [{"r":["シー・エム・ワイ・ケー"],"g":["cyan, magenta, yellow and key (black)"],"p":"n"}],
-"ＣＮＥＴ": [{"r":["シーネット"],"g":["CNET (technology media website)"],"p":"n"}]
+"ＣＩＳ": [{"r":["シー・アイ・エス","シス"],"g":["Commonwealth of Independent States","critical incident stress"],"p":"n"}]
 }
 }

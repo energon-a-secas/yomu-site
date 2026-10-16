@@ -1,9 +1,8 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","KanjiVG stroke order SVGs r20250816"],"inputs":[{"id":"kanjivg","source":"KanjiVG, Ulrich Apel","url":"http://kanjivg.tagaini.net","spdx":"CC-BY-SA-3.0","screen":"required","acknowledgement":"Attribution. You must attribute the work by stating your use of KanjiVG in your own copyright header and linking to KanjiVG's website (http://kanjivg.tagaini.net)","use":"parts, the named components under each character, followed to their own parts"}],"generated_by":"tools/build-search.mjs","generated_at":"2026-10-01"},
 "format": "yomu-search-rare/1",
-"first": "epidemic",
+"first": "epidemics",
 "entries": {
-"epidemic": [["悪疫","あくえき",["epidemic"],"n adj-no",0],["時疫","じえき",["epidemic"],"n",0],["疫癘","えきれい",["epidemic"],"n",0],["流行性","りゅうこうせい",["epidemic"],"adj-no n",0],["流行病","りゅうこうびょう",["epidemic","epidemic"],"n",0],["はやり病","はやりやまい",["epidemic"],"n",0],["病気の流行","びょうきのりゅうこう",["epidemic"],"exp n",0],["瘟疫","うんえき",["fever epidemic"],"n",0],["エピデミック","",["epidemic"],"n",0],["流行性肝炎","りゅうこうせいかんえん",["epidemic hepatitis"],"n",0]],
 "epidemics": [["疫鬼","えきき",["gods or demons that cause epidemics"],"n",0]],
 "epidemiological": [["疫学調査","えきがくちょうさ",["epidemiological investigation"],"n",0]],
 "epidemiologist": [["疫学者","えきがくしゃ",["epidemiologist"],"n",0]],
@@ -576,6 +575,8 @@
 "exceeding": [["超え","ごえ",["exceeding ..."],"suf",0],["踰越","ゆえつ",["exceeding (a limit, scope, one's authority, etc.)","crossing over (a mountain, river, etc.)"],"n vs vi",0],["オーバ","",["overcoat","exceeding"],"n vs vt vi adj-na int",1],["越権行為","えっけんこうい",["exceeding one's authority"],"n",0],["キャパ越え","キャパごえ",["exceeding capacity"],"n",0],["スピード違反","スピードいはん",["exceeding the speed limit"],"n",0],["聞きしにまさる","ききしにまさる",["exceeding what one had heard"],"exp adj-f",0]],
 "exceedingly": [["千万","せんばん",["exceedingly","10,000,000"],"n suf adv",2],["こよなく","",["exceedingly"],"adv",0],["ことのほか","",["exceedingly","unexpectedly"],"adv",0],["重ね重ね","かさねがさね",["repeatedly","exceedingly"],"adv adj-no",0],["はなはだもって","",["exceedingly"],"exp adv",0],["つよつよ","",["strong","exceedingly strong"],"adj-f adv-to",0],["きゅうきゅう","",["squeaking","tightly (cram)"],"adv adv-to vs adj-na",5]],
 "excel": [["長ける","たける",["to excel at","to grow old"],"v1 vi",1],["エクセル","",["Excel (spreadsheet application developed by Microsoft)"],"n",0],["抜け出る","ぬけでる",["to slip out","to excel"],"v1 vi",0],["輝く女性","かがやくじょせい",["women who excel"],"exp n",0],["一芸に秀でる","いちげいにひいでる",["to excel in one thing"],"exp v1",0]],
-"excelan": [["エクセラン","",["Excelan"],"n",0]]
+"excelan": [["エクセラン","",["Excelan"],"n",0]],
+"excellence": [["俊逸","しゅんいつ",["excellence"],"n",0],["出群","しゅつぐん",["excellence"],"n",0],["卓出","たくしゅつ",["excellence"],"n vs vi",0],["卓抜","たくばつ",["excellence"],"adj-na n vs vi",0],["卓絶","たくぜつ",["excellence"],"n vs vi",0],["超邁","ちょうまい",["excellence"],"n",0],["勝絶","しょうせつ",["(in Japan) 4th note of the ancient chromatic scale…","excellence (of scenery, etc.)"],"n vs",0],["エクセレンス","",["excellence"],"n",0],["優秀賞","ゆうしゅうしょう",["award of excellence"],"n",0],["優良賞","ゆうりょうしょう",["prize for excellence"],"n",0]],
+"excellency": [["総統閣下","そうとうかっか",["His Excellency the Supreme Leader"],"n",0]]
 }
 }

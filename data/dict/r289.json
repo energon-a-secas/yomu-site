@@ -1,9 +1,15 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "誤り回復",
-"last": "警固",
+"first": "誤りを犯す",
+"last": "警告灯",
 "entries": {
+"誤りを犯す": [{"r":["あやまりをおかす"],"g":["to make a mistake"],"p":"exp v5s"}],
+"誤りを直す": [{"r":["あやまりをなおす"],"g":["to correct an error"],"p":"exp v5s"}],
+"誤りを認める": [{"r":["あやまりをみとめる"],"g":["to admit to a mistake"],"p":"exp v1"}],
+"誤り伝える": [{"r":["あやまりつたえる"],"g":["to misrepresent"],"p":"v1 vt"}],
+"誤り制御": [{"r":["あやまりせいぎょ"],"g":["error control"],"p":"n","f":"あやま;せい|ぎょ"}],
+"誤り制御ソフトウェア": [{"r":["あやまりせいぎょソフトウェア"],"g":["error control software"],"p":"n","f":"あやま;せい|ぎょ"}],
 "誤り回復": [{"r":["あやまりかいふく"],"g":["error recovery"],"p":"n","f":"あやま;かい|ふく"}],
 "誤り検出": [{"r":["あやまりけんしゅつ"],"g":["error detection"],"p":"n","f":"あやま;けん|しゅつ"}],
 "誤り検出符号": [{"r":["あやまりけんしゅつふごう"],"g":["error-detecting code"],"p":"n","f":"あやま;けん|しゅつ|ふ|ごう"}],
@@ -1289,11 +1295,6 @@
 "警告ダイアログ": [{"r":["けいこくダイアログ"],"g":["alert dialog (dialogue)"],"p":"n","f":"けい|こく"}],
 "警告メッセージ": [{"r":["けいこくメッセージ"],"g":["warning message"],"p":"n","f":"けい|こく"}],
 "警告射撃": [{"r":["けいこくしゃげき"],"g":["warning shot"],"p":"n","f":"けい|こく|しゃ|げき"}],
-"警告灯": [{"r":["けいこくとう"],"g":["warning light"],"p":"n","f":"けい|こく|とう"}],
-"警告状": [{"r":["けいこくじょう"],"g":["warning letter (e.g. of infringement)"],"p":"n","f":"けい|こく|じょう"}],
-"警告色": [{"r":["けいこくしょく"],"g":["aposematic coloration (colouration)"],"p":"n","f":"けい|こく|しょく"}],
-"警告試合": [{"r":["けいこくじあい"],"g":["match where the umpire disqualifies the coach and one…"],"p":"n","f":"けい|こく|じ|あい"}],
-"警告音": [{"r":["けいこくおん"],"g":["warning sound"],"p":"n","f":"けい|こく|おん"}],
-"警固": [{"r":["けいご"],"g":["watching (esp. during an emergency)","guard"],"p":"n vs vt","f":"けい|ご"}]
+"警告灯": [{"r":["けいこくとう"],"g":["warning light"],"p":"n","f":"けい|こく|とう"}]
 }
 }

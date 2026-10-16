@@ -1,9 +1,14 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "鷽替",
-"last": "鼻偏",
+"first": "鷺相撲",
+"last": "鼻下長",
 "entries": {
+"鷺相撲": [{"r":["さぎずもう"],"g":["game in which two people hop on one foot and push each other"],"p":"n","f":"*"}],
+"鷺笛": [{"r":["さぎふえ"],"g":["longspine snipefish (Macroramphosus scolopax)"],"p":"n","f":"さぎ|ふえ","u":1}],
+"鷺苔": [{"r":["さぎごけ"],"g":["Miquel's mazus…"],"p":"n","f":"さぎ|ごけ","u":1}],
+"鷺草": [{"r":["さぎそう"],"g":["fringed orchid (Pecteilis radiata)"],"p":"n","f":"さぎ|そう","u":1}],
+"鷽": [{"r":["うそ"],"g":["Eurasian bullfinch (Pyrrhula pyrrhula)"],"p":"n","u":1}],
 "鷽替": [{"r":["うそかえ"],"g":["annual religious ceremony that occurs in Tenmangu where…"],"p":"n","f":"うそ|かえ"}],
 "鸊鷉": [{"r":["かいつぶり"],"g":["little grebe (Tachybaptus ruficollis)","grebe (any waterbird of family Podicipedidae)"],"p":"n","f":"*","u":1}],
 "鸚哥": [{"r":["いんこ"],"g":["true parrot…"],"p":"n","f":"いん|こ","u":1}],
@@ -1273,11 +1278,6 @@
 "鼻マスク": [{"r":["はなマスク"],"g":["wearing a (surgical) mask below one's nose"],"p":"n vs vi"}],
 "鼻メガネ": [{"r":["はなめがね"],"g":["pince-nez (glasses)","Groucho glasses"],"p":"n"}],
 "鼻下": [{"r":["びか"],"g":["upper-lip","subnasal"],"p":"n adj-no","f":"び|か"}],
-"鼻下長": [{"r":["びかちょう"],"g":["amorous man"],"p":"n","f":"び|か|ちょう"}],
-"鼻中隔": [{"r":["びちゅうかく"],"g":["nasal septum"],"p":"n","f":"び|ちゅう|かく"}],
-"鼻中隔彎曲症": [{"r":["びちゅうかくわんきょくしょう"],"g":["nasal septum deviation"],"p":"n","f":"び|ちゅう|かく|わん|きょく|しょう"}],
-"鼻中隔湾曲症": [{"r":["びちゅうかくわんきょくしょう"],"g":["nasal septum deviation"],"p":"n","f":"び|ちゅう|かく|わん|きょく|しょう"}],
-"鼻付け": [{"r":["はなづけ"],"g":["nose tesuji"],"p":"n","f":"はな|づ"}],
-"鼻偏": [{"r":["はなへん"],"g":["kanji \"nose\" radical at left"],"p":"n","f":"はな|へん"}]
+"鼻下長": [{"r":["びかちょう"],"g":["amorous man"],"p":"n","f":"び|か|ちょう"}]
 }
 }

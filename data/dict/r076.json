@@ -1,9 +1,16 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "どんきしょう",
-"last": "なつほんばん",
+"first": "どんかつ",
+"last": "なつひめ",
 "entries": {
+"どんかつ": [{"g":["winning a match"],"p":"n vs","k":["ドン勝"]}],
+"どんかんおり": [{"g":["corrupt government official"],"p":"n","k":["貪官汚吏"]}],
+"どんかんりょく": [{"g":["The Power of Insensitivity (book by Junichi Watanabe)"],"p":"n","k":["鈍感力"]}],
+"どんが": [{"g":["bud"],"p":"n","k":["嫩芽"]}],
+"どんがめ": [{"g":["Chinese soft-shelled turtle (Pelodiscus sinensis)"],"p":"n","k":["団亀"]}],
+"どんがらじる": [{"g":["dongarajiru"],"p":"n","k":["どんがら汁"]}],
+"どんがら汁": [{"r":["どんがらじる"],"g":["dongarajiru"],"p":"n"}],
 "どんきしょう": [{"g":["aerophagia"],"p":"n","k":["呑気症"]}],
 "どんくさい": [{"g":["slow"],"p":"adj-i","k":["鈍くさい","鈍臭い"],"u":1}],
 "どんぐりかぼちゃ": [{"g":["acorn squash (Cucurbita pepo var. turbinata)"],"p":"n","k":["団栗南瓜"],"u":1}],
@@ -1427,12 +1434,6 @@
 "なつはづき": [{"g":["4th month of the lunar calendar"],"p":"n","k":["夏初月","夏端月"]}],
 "なつばおり": [{"g":["summer haori (coat)"],"p":"n","k":["夏羽織"]}],
 "なつばね": [{"g":["summer plumage"],"p":"n","k":["夏羽"]}],
-"なつひめ": [{"g":["cerrado pineapple (Ananas ananassoides)","natsuhime (variety of pear from Tottori prefecture)"],"p":"n"}],
-"なつび": [{"g":["hot summer day","day on which the temperature reaches at least 25°C"],"p":"n","k":["夏日"]}],
-"なつふく": [{"g":["summer clothes"],"p":"n","k":["夏服"]}],
-"なつふじ": [{"g":["Millettia japonica (species of flowering plant)"],"p":"n","k":["夏藤"]}],
-"なつぶとん": [{"g":["summer bedclothes"],"p":"n","k":["夏布団"]}],
-"なつへのとびら": [{"g":["The Door into Summer (1957 novel by Robert A. Heinlein)"],"p":"n","k":["夏への扉"]}],
-"なつほんばん": [{"g":["midsummer"],"p":"n adj-no","k":["夏本番"]}]
+"なつひめ": [{"g":["cerrado pineapple (Ananas ananassoides)","natsuhime (variety of pear from Tottori prefecture)"],"p":"n"}]
 }
 }

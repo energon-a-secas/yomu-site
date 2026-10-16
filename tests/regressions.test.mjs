@@ -767,3 +767,13 @@ test('a number and its counter that are a dictionary key keep its gloss: 何名,
   assert.equal(ten.reading, 'じゅっぷん');
   assert.equal(ten.entry, null, '十分 read じゅっぷん is not 十分 じゅうぶん, "enough"');
 });
+
+// ── Found on 2026-10-15, fixing #147 ──────────────────────────────────────
+
+test('雨降って地固まる is 雨|降って|地|固まる (was 雨降 "sea hare" and the particle って, queue #148)', async () => {
+  const d = diskDict();
+  const r = await analyze('雨降って地固まる', { dict: d });
+  assert.deepEqual(r.tokens.map((t) => t.surface), ['雨', '降って', '地', '固まる']);
+  assert.equal(tok(r, '降って').reading, 'ふって');
+  assert.equal(d.get('雨降'), undefined, '雨降 is not a first-tier key: the corpus met it only as 雨 and 降る');
+});

@@ -1,14 +1,9 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict/1",
-"first": "原野",
-"last": "壊れる",
+"first": "厳しさ",
+"last": "壮行",
 "entries": {
-"原野": [{"r":["げんや"],"g":["waste land"],"p":"n","f":"げん|や","q":4}],
-"厨房": [{"r":["ちゅうぼう"],"g":["kitchen","(Internet) troll"],"p":"n","f":"ちゅう|ぼう","q":4}],
-"厭らしい": [{"r":["いやらしい","やらしい"],"g":["unpleasant","lewd"],"p":"adj-i","u":1}],
-"厳か": [{"r":["おごそか"],"g":["solemn (ceremony, atmosphere, etc.)"],"p":"adj-na n","q":4}],
-"厳しい": [{"r":["きびしい"],"g":["severe","hard (to do)","intense (e.g. cold)"],"p":"adj-i","q":2}],
 "厳しさ": [{"r":["きびしさ"],"g":["severity"],"p":"n","q":4}],
 "厳守": [{"r":["げんしゅ"],"g":["strict observance"],"p":"n vs vt","f":"げん|しゅ","q":3}],
 "厳密": [{"r":["げんみつ"],"g":["strict"],"p":"adj-na","f":"げん|みつ","q":3}],
@@ -245,7 +240,6 @@
 "口座": [{"r":["こうざ"],"g":["account (e.g. bank)"],"p":"n","f":"こう|ざ","q":3}],
 "口座番号": [{"r":["こうざばんごう"],"g":["account number (bank, etc.)"],"p":"n","f":"こう|ざ|ばん|ごう","q":4}],
 "口径": [{"r":["こうけい"],"g":["aperture"],"p":"n","f":"こう|けい"}],
-"口振": [{"r":["こうふり"],"g":["direct debit"],"p":"n","f":"こう|ふり","q":4}],
 "口数": [{"r":["くちかず"],"g":["number of words a person speaks","number of dependents","number of shares, items, applications, etc."],"p":"n","f":"くち|かず","q":4}],
 "口止め": [{"r":["くちどめ"],"g":["forbidding mentioning (something to others)","hush money"],"p":"n vs vt","f":"くち|ど","q":4}],
 "口添え": [{"r":["くちぞえ"],"g":["recommendation"],"p":"n vs vi","f":"くち|ぞ","q":4}],
@@ -255,7 +249,6 @@
 "口答え": [{"r":["くちごたえ"],"g":["retort"],"p":"n vs vi","f":"くち|ごた","q":3}],
 "口紅": [{"r":["くちべに"],"g":["lipstick"],"p":"n adj-no","f":"くち|べに","q":3}],
 "口語": [{"r":["こうご"],"g":["spoken language","(modern) spoken Japanese"],"p":"n","f":"こう|ご","q":4}],
-"口説": [{"r":["くぜつ"],"g":["lovers' tiff","chattering"],"p":"n","f":"く|ぜつ","q":4}],
 "口調": [{"r":["くちょう"],"g":["tone (of voice)"],"p":"n","f":"く|ちょう","q":3}],
 "口論": [{"r":["こうろん"],"g":["quarrel"],"p":"n vs vt vi","f":"こう|ろん","q":3}],
 "口走る": [{"r":["くちばしる"],"g":["to blurt out"],"p":"v5r vt","f":"くち|ばし","q":4}],
@@ -877,7 +870,6 @@
 "回答": [{"r":["かいとう"],"g":["reply"],"p":"n vs vt vi","f":"かい|とう","q":3}],
 "回線": [{"r":["かいせん"],"g":["circuit"],"p":"n","f":"かい|せん","q":4}],
 "回覧": [{"r":["かいらん"],"g":["circulation (esp. of documents)"],"p":"n vs vt","f":"かい|らん","q":4}],
-"回読": [{"r":["かいどく"],"g":["read in turn"],"p":"n vs vt","f":"かい|どく","q":4}],
 "回路": [{"r":["かいろ"],"g":["circuit","cycle (e.g. Krebs cycle)","cycle"],"p":"n","f":"かい|ろ","q":4}],
 "回転": [{"r":["かいてん"],"g":["rotation","working (e.g. of one's mind)","turnover (of goods, funds, etc.)"],"p":"n vs vi","f":"かい|てん","q":3}],
 "回転ずし": [{"r":["かいてんずし"],"g":["conveyor belt sushi"],"p":"n","f":"かい|てん","m":1}],
@@ -1325,6 +1317,14 @@
 "壇": [{"r":["だん"],"g":["platform","(ceremonial) mound","world (of haiku, art, etc.)"],"p":"n n-suf","q":4}],
 "壇上": [{"r":["だんじょう"],"g":["on a stage"],"p":"n","f":"だん|じょう"}],
 "壊す": [{"r":["こわす"],"g":["to break","to wreck","to break (a bill, etc.)"],"p":"v5s vt","q":3}],
-"壊れる": [{"r":["こわれる"],"g":["to be broken","to break (down)","to fall through (of a plan, deal, etc.)"],"p":"v1 vi","q":4}]
+"壊れる": [{"r":["こわれる"],"g":["to be broken","to break (down)","to fall through (of a plan, deal, etc.)"],"p":"v1 vi","q":4}],
+"壊滅": [{"r":["かいめつ"],"g":["(complete) destruction"],"p":"n vs vi","f":"かい|めつ","q":3}],
+"壕": [{"r":["ごう"],"g":["moat","underground air-raid shelter"],"p":"n","q":4},{"r":["ほり"],"g":["moat","canal"],"p":"n","q":4,"o":3}],
+"士官": [{"r":["しかん"],"g":["officer"],"p":"n","f":"し|かん","q":4}],
+"士気": [{"r":["しき"],"g":["morale (of troops, team, etc.)"],"p":"n","f":"し|き","q":4}],
+"壮大": [{"r":["そうだい"],"g":["magnificent"],"p":"adj-na n","f":"そう|だい","q":4}],
+"壮年": [{"r":["そうねん"],"g":["prime of life"],"p":"n","f":"そう|ねん"}],
+"壮烈": [{"r":["そうれつ"],"g":["heroic"],"p":"adj-na n","f":"そう|れつ"}],
+"壮行": [{"r":["そうこう"],"g":["(rousing) send-off"],"p":"adj-f","f":"そう|こう","q":4}]
 }
 }

@@ -1,8 +1,9 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","KanjiVG stroke order SVGs r20250816"],"inputs":[{"id":"kanjivg","source":"KanjiVG, Ulrich Apel","url":"http://kanjivg.tagaini.net","spdx":"CC-BY-SA-3.0","screen":"required","acknowledgement":"Attribution. You must attribute the work by stating your use of KanjiVG in your own copyright header and linking to KanjiVG's website (http://kanjivg.tagaini.net)","use":"parts, the named components under each character, followed to their own parts"}],"generated_by":"tools/build-search.mjs","generated_at":"2026-10-01"},
 "format": "yomu-search-rare/1",
-"first": "paraphrase",
+"first": "paraphilia",
 "entries": {
+"paraphilia": [["性倒錯","せいとうさく",["paraphilia"],"n",0],["性的倒錯","せいてきとうさく",["paraphilia"],"n",0],["色情倒錯","しきじょうとうさく",["paraphilia"],"n",0],["パラフィリア","",["paraphilia"],"n",0]],
 "paraphrase": [["パラフレーズ","",["paraphrase","(musical) arrangement"],"n vs vt",0]],
 "paraphyletic": [["側系統","そくけいとう",["paraphyletic"],"n adj-no",0]],
 "paraphysics": [["超物理学","ちょうぶつりがく",["paraphysics"],"n",0]],
@@ -68,7 +69,7 @@
 "parenthesis": [["右小括弧","みぎしょうかっこ",["closing parenthesis"],"n",0],["左小括弧","ひだりしょうかっこ",["opening parenthesis"],"n",0]],
 "parenthetic": [["挿入文","そうにゅうぶん",["parenthetic sentence"],"n",0]],
 "parenthetical": [["挿入句","そうにゅうく",["parenthetical expression"],"n",0]],
-"parenthood": [["米国家族計画連盟","べいこくかぞくけいかくれんめい",["Planned Parenthood Federation of America"],"n",0]],
+"parenthood": [["子持","こもち",["parenthood","(of a fish) containing roe (eggs)"],"n",0],["米国家族計画連盟","べいこくかぞくけいかくれんめい",["Planned Parenthood Federation of America"],"n",0]],
 "parenting": [["親業","おやぎょう",["parenting"],"n",0],["共同育児","きょうどういくじ",["shared parenting"],"n",0],["共同養育","きょうどうよういく",["co-parenting"],"n",0]],
 "parentless": [["親なし","おやなし",["parentless","parentless child"],"adj-no n",0],["親なし子","おやなしご",["parentless child"],"n",0]],
 "parents": [["親御","おやご",["(another's) parents"],"n",0],["ご両親","ごりょうしん",["(someone else's) parents"],"n",0],["親御さん","おやごさん",["(another's) parents"],"n",0],["お里","おさと",["one's parents' home","one's origins"],"n",0],["舅姑","きゅうこ",["parents-in-law"],"n",0],["ペアレンツ","",["parents"],"n",0],["仮親","かりおや",["adopted parents"],"n",0],["双親","もろおや",["both parents"],"n",0],["反哺","はんぽ",["caring for one's parents in return"],"n",0],["所生","しょせい",["birth parents","child"],"n",0]],
@@ -516,11 +517,6 @@
 "peers": [["側の者","がわのもの",["(one's) peers"],"n",0],["仲間同士","なかまどうし",["peers"],"n",0],["貴族院","きぞくいん",["House of Peers (Japan, Meiji constitution)","House of Lords (UK)"],"n",0]],
 "peevish": [["すねる","",["to be peevish"],"v1 vi",0]],
 "peg": [["ペグ","",["peg"],"n",0],["ペッグ","",["peg"],"n",0],["掛け釘","かけくぎ",["peg"],"n",0],["木釘","きくぎ",["wooden peg"],"n",0],["櫓杭","ろぐい",["fulcrum peg…"],"n",0],["櫓臍","ろべそ",["fulcrum peg…"],"n",0],["円鑿方枘","えんさくほうぜい",["round peg in a square hole"],"n",0],["止めくぎ","とめくぎ",["stop peg"],"n",0],["天柱","てんちゅう",["pillars supporting heaven","tuning peg (on a biwa or shamisen)"],"n",0],["ドルペッグ","",["dollar peg"],"n",0]],
-"pegasus": [["ペガサス","",["Pegasus (star)","Pegasus (winged horse in Greek mythology)"],"n",0],["ペガスス","",["Pegasus (star)","Pegasus (winged horse in Greek mythology)"],"n",0],["ペガソス","",["Pegasus (star)","Pegasus (winged horse in Greek mythology)"],"n",0],["ペガスス座","ペガススざ",["Pegasus (constellation)"],"n",0],["ペーガソス","",["Pegasus (star)","Pegasus (winged horse in Greek mythology)"],"n",0]],
-"pegboard": [["ハンガーボード","",["pegboard"],"n",0],["ハンガー・ボード","",["pegboard"],"n",0]],
-"pegbox": [["糸倉","いとぐら",["pegbox (of a shamisen, etc.)"],"n",0]],
-"pegged": [["停止価格","ていしかかく",["pegged price"],"n",0]],
-"pegging": [["ペギング","",["pegging"],"n",0]],
-"pegmatite": [["ペグマタイト","",["pegmatite"],"n",0]]
+"pegasus": [["ペガサス","",["Pegasus (star)","Pegasus (winged horse in Greek mythology)"],"n",0],["ペガスス","",["Pegasus (star)","Pegasus (winged horse in Greek mythology)"],"n",0],["ペガソス","",["Pegasus (star)","Pegasus (winged horse in Greek mythology)"],"n",0],["ペガスス座","ペガススざ",["Pegasus (constellation)"],"n",0],["ペーガソス","",["Pegasus (star)","Pegasus (winged horse in Greek mythology)"],"n",0]]
 }
 }

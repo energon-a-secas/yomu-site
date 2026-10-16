@@ -1,9 +1,11 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "代金引替え",
-"last": "伸び上がる",
+"first": "代金引換え",
+"last": "伸びちぢみ",
 "entries": {
+"代金引換え": [{"r":["だいきんひきかえ"],"g":["cash on delivery"],"p":"n","f":"だい|きん|ひき|か"}],
+"代金引替": [{"r":["だいきんひきかえ"],"g":["cash on delivery"],"p":"n","f":"だい|きん|ひき|かえ"}],
 "代金引替え": [{"r":["だいきんひきかえ"],"g":["cash on delivery"],"p":"n","f":"だい|きん|ひき|か"}],
 "代願": [{"r":["だいがん"],"g":["praying by proxy"],"p":"n vs vi","f":"だい|がん"}],
 "代願人": [{"r":["だいがんにん"],"g":["one who offers prayer in place of another"],"p":"n","f":"だい|がん|にん"}],
@@ -1249,9 +1251,6 @@
 "伸びあがる": [{"r":["のびあがる"],"g":["to stretch"],"p":"v5r vi"}],
 "伸びざかり": [{"r":["のびざかり"],"g":["growth period"],"p":"n adj-no"}],
 "伸びしろ": [{"r":["のびしろ"],"g":["room for growth"],"p":"n"}],
-"伸びちぢみ": [{"r":["のびちぢみ"],"g":["expansion and contraction"],"p":"n vs vi"}],
-"伸びのび": [{"r":["のびのび"],"g":["comfortably","(growing) quickly"],"p":"adv adv-to vs","u":1}],
-"伸びをする": [{"r":["のびをする"],"g":["to stretch (one's body)"],"p":"exp vs-i"}],
-"伸び上がる": [{"r":["のびあがる"],"g":["to stretch"],"p":"v5r vi"}]
+"伸びちぢみ": [{"r":["のびちぢみ"],"g":["expansion and contraction"],"p":"n vs vi"}]
 }
 }

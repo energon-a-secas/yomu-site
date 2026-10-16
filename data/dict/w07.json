@@ -1,10 +1,9 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict/1",
-"first": "ちえん",
-"last": "とりきめる",
+"first": "ちか",
+"last": "とりくみ",
 "entries": {
-"ちえん": [{"g":["delay"],"p":"n vs vi adj-no","k":["遅延"]}],
 "ちか": [{"g":["underground","world of the dead","underground (activities, movement, etc.)"],"p":"n adj-no","k":["地下"],"q":4,"b":3},{"g":["the price of land"],"p":"n","k":["地価"],"q":4,"b":4}],
 "ちかい": [{"g":["near","close (in time)","close (relationship)"],"p":"adj-i","k":["近い"],"b":2},{"g":["oath"],"p":"n","k":["誓い"],"b":4}],
 "ちかう": [{"g":["to swear"],"p":"v5u vt","k":["誓う","盟う"]}],
@@ -347,7 +346,6 @@
 "ちょっけい": [{"g":["diameter"],"p":"n","k":["直径"],"b":3},{"g":["direct descent"],"p":"n adj-no","k":["直系"],"b":6}],
 "ちょっこう": [{"g":["going straight (to)","unwavering action","upright conduct"],"p":"n vs vi adj-no","k":["直行"]}],
 "ちょっこうびん": [{"g":["non-stop flight"],"p":"n","k":["直行便"]}],
-"ちょっと見": [{"r":["ちょっとみ"],"g":["look"],"p":"n adv","q":3}],
 "ちょっぴり": [{"g":["a tiny bit"],"p":"adv adv-to","q":3}],
 "ちょびっと": [{"g":["a little"],"p":"adv","q":4}],
 "ちょびと": [{"g":["a little"],"p":"adv"}],
@@ -1368,6 +1366,8 @@
 "とりかこむ": [{"g":["to surround"],"p":"v5m vt","k":["取り囲む","取囲む"]}],
 "とりかた": [{"g":["way of taking (e.g. photographs)"],"p":"n","k":["取り方","撮り方"]}],
 "とりきめ": [{"g":["decision"],"p":"n","k":["取り決め","取決め"]}],
-"とりきめる": [{"g":["to agree"],"p":"v1 vt","k":["取り決める","取り極める"]}]
+"とりきめる": [{"g":["to agree"],"p":"v1 vt","k":["取り決める","取り極める"]}],
+"とりくち": [{"g":["technique"],"p":"n","k":["取り口","取口"]}],
+"とりくみ": [{"g":["effort","bout (in sports, etc.)"],"p":"n","k":["取り組み","取組"]}]
 }
 }

@@ -237,7 +237,6 @@
 "人生": [["yoji","人生哲学","じんせいてつがく","philosophy of life"],["proverb","人生一度きり","じんせいいちどきり","you only live once; you only have one life"],["yoji","人生朝露","じんせいちょうろ","man's life vanishes like a dew; a person's life is as fleeting as a morning dew"]],
 "人目": [["proverb","盲千人目明き千人","めくらせんにんめあきせんにん","some are wise and some are otherwise; one thousand blind; one thousand with their eyes…"],["idiom","人目を盗む","ひとめをぬすむ","to do without being seen; to do behind others' backs; to do secretly; to do without the…"]],
 "人相": [["yoji","人相風体","にんそうふうてい","someone's looks and personal appearance"]],
-"人知": [["proverb","天知る、地知る、我知る、人知る","てんしる、ちしる、われしる、ひとしる","murder will out; truth will out; bad deeds will always be discovered; heaven will know…"]],
 "人道": [["yoji","人道主義","じんどうしゅぎ","humanism; humanitarianism"]],
 "人道主義": [["yoji","人道主義","じんどうしゅぎ","humanism; humanitarianism"]],
 "人間": [["proverb","人間は万物の霊長","にんげんはばんぶつのれいちょう","man is the crown of creation"],["idiom","人間ができている","にんげんができている","to be mature and kind; to be well-balanced; to be a good person"],["proverb","人間万事塞翁が馬","にんげんばんじさいおうがうま","inscrutable are the ways of heaven; fortune is unpredictable and changeable"]],
@@ -601,6 +600,7 @@
 "叙勲": [["yoji","叙位叙勲","じょいじょくん","conferment of Court ranks and decorations"]],
 "口": [["yoji","異口同音","いくどうおん","(saying) with one voice; unanimously; in chorus; in unison; as one"],["proverb","口は災いの元","くちはわざわいのもと","words can lead to disaster; the tongue is the root of calamities; the more you open your…"],["idiom","傷口に塩","きずぐちにしお","(rubbing) salt in the wound"]],
 "口火": [["idiom","口火を切る","くちびをきる","to start the debate; to get the ball rolling; to fire the first shot; to start a…"]],
-"古": [["yoji","万古不易","ばんこふえき","eternally unchanging"],["proverb","古川に水絶えず","ふるかわにみずたえず","a strong foundation can withstand any storm; an old river does not run out of water"],["idiom","河童の寒稽古","かっぱのかんげいこ","something that looks difficult but actually isn't; swimming in a cold lake during…"]]
+"古": [["yoji","万古不易","ばんこふえき","eternally unchanging"],["proverb","古川に水絶えず","ふるかわにみずたえず","a strong foundation can withstand any storm; an old river does not run out of water"],["idiom","河童の寒稽古","かっぱのかんげいこ","something that looks difficult but actually isn't; swimming in a cold lake during…"]],
+"古い": [["idiom","古い革袋に新しい酒を盛る","ふるいかわぶくろにあたらしいさけをもる","to pour new wine into old wineskins; to give something unorthodox an orthodox presentation"],["idiom","新しい酒は古い革袋に入れる","あたらしいさけはふるいかわぶくろにいれる","to put new wine into old wineskins; to put new wine into old bottles"]]
 }
 }

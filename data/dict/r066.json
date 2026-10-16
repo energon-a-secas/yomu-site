@@ -1,9 +1,11 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "ちどめ",
-"last": "ちゅうりゅうぐんようちとくべつそちほう",
+"first": "ちどうせつ",
+"last": "ちゅうりゅうぐん",
 "entries": {
+"ちどうせつ": [{"g":["heliocentric theory"],"p":"n","k":["地動説"]}],
+"ちどく": [{"g":["slow reading"],"p":"n","k":["遅読"]}],
 "ちどめ": [{"g":["styptic","stopping of bleeding"],"p":"n","k":["血止め","血止"]}],
 "ちどめぐさ": [{"g":["lawn marshpennywort (Hydrocotyle sibthorpioides)"],"p":"n","k":["血止め草","血止草"],"u":1}],
 "ちどりあし": [{"g":["tottering steps"],"p":"n","k":["千鳥足"]}],
@@ -1382,7 +1384,6 @@
 "ちゅうりつろうれん": [{"g":["Federation of Independent Unions of Japan (1956-1987) (abbr)"],"p":"n","k":["中立労連"]}],
 "ちゅうりゅういしき": [{"g":["identifying (oneself) with the middle class"],"p":"n","k":["中流意識"]}],
 "ちゅうりゅうかいきゅう": [{"g":["middle class"],"p":"n","k":["中流階級"]}],
-"ちゅうりゅうぐん": [{"g":["stationed troops"],"p":"n","k":["駐留軍"]}],
-"ちゅうりゅうぐんようちとくべつそちほう": [{"g":["Special Measures Law for USFJ Land Release (1952)"],"p":"n","k":["駐留軍用地特別措置法"]}]
+"ちゅうりゅうぐん": [{"g":["stationed troops"],"p":"n","k":["駐留軍"]}]
 }
 }

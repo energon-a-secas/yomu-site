@@ -1,9 +1,13 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "国際連合憲章",
-"last": "地薄",
+"first": "国際連合大学",
+"last": "地芝居",
 "entries": {
+"国際連合大学": [{"r":["こくさいれんごうだいがく"],"g":["United Nations University"],"p":"n","f":"こく|さい|れん|ごう|だい|がく"}],
+"国際連合大量破壊兵器廃棄特別委員会": [{"r":["こくさいれんごうたいりょうはかいへいきはいきとくべついいんかい"],"g":["United Nations Special Commission"],"p":"n","f":"こく|さい|れん|ごう|たい|りょう|は|かい|へい|き|はい|き|とく|べつ|い|いん|かい"}],
+"国際連合安全保障理事会": [{"r":["こくさいれんごうあんぜんほしょうりじかい"],"g":["United Nations Security Council"],"p":"n","f":"こく|さい|れん|ごう|あん|ぜん|ほ|しょう|り|じ|かい"}],
+"国際連合広報局": [{"r":["こくさいれんごうこうほうきょく"],"g":["United Nations Department of Global Communications"],"p":"n","f":"こく|さい|れん|ごう|こう|ほう|きょく"}],
 "国際連合憲章": [{"r":["こくさいれんごうけんしょう"],"g":["United Nations Charter"],"p":"n","f":"こく|さい|れん|ごう|けん|しょう"}],
 "国際連合教育科学文化機関": [{"r":["こくさいれんごうきょういくかがくぶんかきかん"],"g":["United Nations Educational, Scientific and Cultural…"],"p":"n","f":"こく|さい|れん|ごう|きょう|いく|か|がく|ぶん|か|き|かん"}],
 "国際連合条約": [{"r":["こくさいれんごうじょうやく"],"g":["United Nations convention"],"p":"n","f":"こく|さい|れん|ごう|じょう|やく"}],
@@ -1169,13 +1173,6 @@
 "地腫れ": [{"r":["じばれ"],"g":["swelling (around a wound)"],"p":"n vs","f":"じ|ば"}],
 "地膚": [{"r":["じはだ"],"g":["texture","one's skin (lacking makeup, etc.)","surface of the earth"],"p":"n","f":"じ|はだ"}],
 "地色": [{"r":["じいろ"],"g":["ground (color, colour)"],"p":"n","f":"じ|いろ"}],
-"地芝居": [{"r":["じしばい"],"g":["community performance (amateur theatricals, etc.)"],"p":"n","f":"じ|しば|い"}],
-"地蔵堂": [{"r":["じぞうどう"],"g":["temple hall with a Kshitigarbha (Jizō) image"],"p":"n","f":"じ|ぞう|どう"}],
-"地蔵尊": [{"r":["じぞうそん"],"g":["Jizō (guardian deity of children)"],"p":"n","f":"じ|ぞう|そん"}],
-"地蔵盆": [{"r":["じぞうぼん"],"g":["Jizō Festival"],"p":"n","f":"じ|ぞう|ぼん"}],
-"地蔵菩薩": [{"r":["じぞうぼさつ"],"g":["Kshitigarbha…"],"p":"n","f":"じ|ぞう|ぼ|さつ"}],
-"地蔵菩薩本願経": [{"r":["じぞうぼさつほんがんきょう"],"g":["Sutra of the Original Vows of Ksitigarbha Bodhisattva"],"p":"n","f":"じ|ぞう|ぼ|さつ|ほん|がん|きょう"}],
-"地蔵顔": [{"r":["じぞうがお"],"g":["gentle and round face"],"p":"n","f":"じ|ぞう|がお"}],
-"地薄": [{"r":["じうす"],"g":["thin (fabric, cloth, paper)"],"p":"adj-na","f":"じ|うす"}]
+"地芝居": [{"r":["じしばい"],"g":["community performance (amateur theatricals, etc.)"],"p":"n","f":"じ|しば|い"}]
 }
 }

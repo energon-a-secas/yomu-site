@@ -1,9 +1,15 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "嘴太鴉",
-"last": "固定観念",
+"first": "嘴を容れる",
+"last": "固定焦点カメラ",
 "entries": {
+"嘴を容れる": [{"r":["くちばしをいれる"],"g":["to meddle (e.g. in a conversation)"],"p":"exp v1"}],
+"嘴を挟む": [{"r":["くちばしをはさむ","くちばしをさしはさむ"],"g":["to stick one's nose into (someone else's business)"],"p":"exp v5m"}],
+"嘴太ペンギン": [{"r":["はしぶとペンギン"],"g":["Snares penguin (Eudyptes robustus)"],"p":"n","f":"はし|ぶと","u":1}],
+"嘴太機織": [{"r":["はしぶとはたおり"],"g":["grosbeak weaver (Amblyospiza albifrons)"],"p":"n","f":"はし|ぶと|はた|おり","u":1}],
+"嘴太海烏": [{"r":["はしぶとうみがらす"],"g":["thick-billed murre (Uria lomvia)"],"p":"n","f":"はし|ぶと|うみ|がらす","u":1}],
+"嘴太烏": [{"r":["はしぶとがらす"],"g":["large-billed crow (Corvus macrorhynchos)"],"p":"n","f":"はし|ぶと|がらす","u":1}],
 "嘴太鴉": [{"r":["はしぶとがらす"],"g":["large-billed crow (Corvus macrorhynchos)"],"p":"n","f":"はし|ぶと|がらす","u":1}],
 "嘴広鴨": [{"r":["はしびろがも"],"g":["northern shoveler (species of duck, Anas clypeata)"],"p":"n","f":"はし|びろ|がも","u":1}],
 "嘴広鸛": [{"r":["はしびろこう"],"g":["shoebill (Balaeniceps rex)"],"p":"n","f":"*","u":1}],
@@ -815,6 +821,7 @@
 "回覧板": [{"r":["かいらんばん"],"g":["circular notice…"],"p":"n","f":"かい|らん|ばん"}],
 "回訓": [{"r":["かいくん"],"g":["instructions sent in response to a question…"],"p":"n vs vi","f":"かい|くん"}],
 "回診": [{"r":["かいしん"],"g":["doctor's rounds (in a hospital)"],"p":"n vs vt vi","f":"かい|しん"}],
+"回読": [{"r":["かいどく"],"g":["read in turn"],"p":"n vs vt","f":"かい|どく"}],
 "回議": [{"r":["かいぎ"],"g":["consultation via a circular"],"p":"n vs vt","f":"かい|ぎ"}],
 "回路図": [{"r":["かいろず"],"g":["circuit diagram"],"p":"n","f":"かい|ろ|ず"}],
 "回路図記号": [{"r":["かいろずきごう"],"g":["schematic symbol"],"p":"n","f":"かい|ろ|ず|き|ごう"}],
@@ -1230,14 +1237,6 @@
 "固定残業": [{"r":["こていざんぎょう"],"g":["expected overtime (stipulated as a specific number of hours)"],"p":"n","f":"こ|てい|ざん|ぎょう"}],
 "固定残業代": [{"r":["こていざんぎょうだい"],"g":["fixed overtime pay"],"p":"n","f":"こ|てい|ざん|ぎょう|だい"}],
 "固定為替相場制": [{"r":["こていかわせそうばせい"],"g":["fixed exchange rate system"],"p":"n","f":"*"}],
-"固定焦点カメラ": [{"r":["こていしょうてんカメラ"],"g":["fixed-lens camera"],"p":"n","f":"こ|てい|しょう|てん"}],
-"固定相場": [{"r":["こていそうば"],"g":["fixed exchange rates"],"p":"n","f":"こ|てい|そう|ば"}],
-"固定相場制": [{"r":["こていそうばせい"],"g":["fixed exchange rate system"],"p":"n","f":"こ|てい|そう|ば|せい"}],
-"固定砲": [{"r":["こていほう"],"g":["fixed artillery"],"p":"n","f":"こ|てい|ほう"}],
-"固定票": [{"r":["こていひょう"],"g":["solid (an assured, a safe) vote"],"p":"n","f":"こ|てい|ひょう"}],
-"固定給": [{"r":["こていきゅう"],"g":["regular pay"],"p":"n","f":"こ|てい|きゅう"}],
-"固定翼": [{"r":["こていよく"],"g":["fixed wing (aircraft)"],"p":"n adj-no","f":"こ|てい|よく"}],
-"固定翼機": [{"r":["こていよくき"],"g":["fixed-wing aircraft"],"p":"n","f":"こ|てい|よく|き"}],
-"固定観念": [{"r":["こていかんねん"],"g":["fixed idea"],"p":"n","f":"こ|てい|かん|ねん"}]
+"固定焦点カメラ": [{"r":["こていしょうてんカメラ"],"g":["fixed-lens camera"],"p":"n","f":"こ|てい|しょう|てん"}]
 }
 }

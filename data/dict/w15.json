@@ -2,7 +2,7 @@
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict/1",
 "first": "争う",
-"last": "八",
+"last": "八つ当たり",
 "entries": {
 "争う": [{"r":["あらそう"],"g":["to compete","to quarrel","to deny (e.g. evidence)"],"p":"v5u vi","q":4}],
 "争奪": [{"r":["そうだつ"],"g":["struggle (for)"],"p":"n vs vt","f":"そう|だつ"}],
@@ -236,7 +236,6 @@
 "人的": [{"r":["じんてき"],"g":["human"],"p":"adj-na","f":"じん|てき"}],
 "人目": [{"r":["ひとめ","じんもく"],"g":["(public) notice"],"p":"n","f":"ひと|め","q":3}],
 "人相": [{"r":["にんそう"],"g":["looks","physiognomy"],"p":"n","f":"にん|そう","q":4}],
-"人知": [{"r":["じんち"],"g":["human intellect"],"p":"n","f":"じん|ち","q":4}],
 "人種": [{"r":["じんしゅ"],"g":["race (of people)","type of person"],"p":"n","f":"じん|しゅ","q":3}],
 "人脈": [{"r":["じんみゃく"],"g":["personal connections"],"p":"n","f":"じん|みゃく","q":4}],
 "人見知り": [{"r":["ひとみしり"],"g":["shyness"],"p":"n vs vi adj-na","f":"ひと|み|し","q":4}],
@@ -297,7 +296,6 @@
 "今月": [{"r":["こんげつ"],"g":["this month"],"p":"n adv","f":"こん|げつ","q":2}],
 "今朝": [{"r":["けさ","こんちょう"],"g":["this morning"],"p":"n adv","f":"*","q":1}],
 "今期": [{"r":["こんき"],"g":["the present term"],"p":"n adv","f":"こん|き","q":4}],
-"今生": [{"r":["こんじょう"],"g":["this life"],"p":"n","f":"こん|じょう","q":4}],
 "今秋": [{"r":["こんしゅう"],"g":["this autumn"],"p":"n adv","f":"こん|しゅう"}],
 "今週": [{"r":["こんしゅう"],"g":["this week"],"p":"n adv","f":"こん|しゅう","q":2}],
 "今週末": [{"r":["こんしゅうまつ"],"g":["this weekend"],"p":"n","f":"こん|しゅう|まつ","q":3}],
@@ -1014,7 +1012,6 @@
 "傑出": [{"r":["けっしゅつ"],"g":["being outstanding"],"p":"n vs vi","f":"けっ|しゅつ","q":4}],
 "傘": [{"r":["かさ"],"g":["umbrella","something shaped like an umbrella or a conical hat"],"p":"n","q":1}],
 "傘下": [{"r":["さんか"],"g":["affiliated with"],"p":"n","f":"さん|か","q":4}],
-"傘持": [{"r":["かさもち"],"g":["umbrella carrier"],"p":"n","f":"かさ|もち","q":3}],
 "備え": [{"r":["そなえ"],"g":["preparation","defenses","military formation"],"p":"n","q":2}],
 "備える": [{"r":["そなえる"],"g":["to furnish with","to prepare for","to possess (all that is needed)"],"p":"v1 vt","q":4}],
 "備え付ける": [{"r":["そなえつける"],"g":["to provide"],"p":"v1 vt","q":4}],
@@ -1320,6 +1317,8 @@
 "全面": [{"r":["ぜんめん"],"g":["whole surface"],"p":"n adj-no","f":"ぜん|めん","q":4}],
 "全面的": [{"r":["ぜんめんてき"],"g":["total"],"p":"adj-na","f":"ぜん|めん|てき","q":3}],
 "全額": [{"r":["ぜんがく"],"g":["total"],"p":"n","f":"ぜん|がく","q":4}],
-"八": [{"r":["はち","や"],"g":["eight"],"p":"num","q":2}]
+"八": [{"r":["はち","や"],"g":["eight"],"p":"num","q":2}],
+"八つ": [{"r":["やっつ","やつ"],"g":["eight","eight years of age","two o'clock (old time system)"],"p":"num n","q":4}],
+"八つ当たり": [{"r":["やつあたり"],"g":["venting one's anger (on someone or something)"],"p":"n vs vi","q":4}]
 }
 }

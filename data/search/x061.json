@@ -37,7 +37,7 @@
 "overgrown": [["蓊蔚","おううつ",["overgrown"],"adj-t adv-to",0],["育ちすぎる","そだちすぎる",["to be overgrown"],"v1",0]],
 "overgrowth": [["小腸内細菌異常増殖","しょうちょうないさいきんいじょうぞうしょく",["small intestinal bacterial overgrowth"],"n",0]],
 "overhand": [["順手","じゅんて",["overhand grip"],"n",0],["オーバーハンド","",["overhand"],"adj-no n",0],["オーバースロー","",["overhand throw"],"n",0],["オーバーハンドスロー","",["overhand throw"],"n",0],["オーバーハンド・スロー","",["overhand throw"],"n",0]],
-"overhang": [["オーバーハング","",["overhang"],"n",0]],
+"overhang": [["張り出","はりだし",["overhang","poster"],"n",1],["オーバーハング","",["overhang"],"n",0]],
 "overhanging": [["雪ぴ","せっぴ",["overhanging snow"],"n",0],["雲脚","くもあし",["cloud movements","overhanging clouds"],"n",0]],
 "overhaul": [["ＯＨ","オー・エイチ",["overhaul"],"n",0],["分解修理","ぶんかいしゅうり",["(complete) overhaul"],"n",0],["分解掃除","ぶんかいそうじ",["overhaul"],"n vs",0],["分解検査","ぶんかいけんさ",["overhaul"],"n",0],["オーバーホール","",["overhaul"],"n vs vt",0]],
 "overhead": [["間接費","かんせつひ",["overhead"],"n",0],["雲梯","うんてい",["overhead ladder","yunti (scaling ladder used for escalade in ancient China)"],"n",0],["高架線","こうかせん",["overhead wires","elevated railway"],"n",0],["オーバヘッド","",["overhead","overhead kick (in soccer)"],"n",0],["オーバーヘッド","",["overhead","overhead kick (in soccer)"],"n",0],["社会的間接資本","しゃかいてきかんせつしほん",["social overhead capital"],"n",0],["オーバヘッドタイム","",["overhead time"],"n",0],["オーバーハンドパス","",["overhead pass (in volleyball)"],"n",0],["オーバーヘッドパス","",["overhead pass (in basketball)"],"n",0],["オーバヘッド・タイム","",["overhead time"],"n",0]],
@@ -111,7 +111,7 @@
 "overshoes": [["上靴","うわぐつ",["hallway slippers","overshoes"],"n",0],["オーバーシューズ","",["overshoes (waterproof covers for shoes)"],"n",0],["オーバーシューツ","",["overshoes (waterproof covers for shoes)"],"n",0]],
 "overshoot": [["オーバーシュート","",["overshoot","explosive spread (of an infectious disease)"],"n",0]],
 "overshot": [["上掛け水車","うわがけすいしゃ",["overshot water wheel"],"n",0]],
-"oversight": [["手抜かり","てぬかり",["oversight"],"n",0],["抜けもれ","ぬけもれ",["oversight"],"n",0],["弁官","べんかん",["Oversight Department…"],"n",0],["左弁官","さべんかん",["Oversight Department of the Left…"],"n",0],["規制監督","きせいかんとく",["regulatory oversight"],"n",0],["財政再建団体","ざいせいさいけんだんたい",["local governmental body that requires federal oversight to…"],"n",0]],
+"oversight": [["見落","みおとし",["oversight"],"n",0],["手抜かり","てぬかり",["oversight"],"n",0],["抜けもれ","ぬけもれ",["oversight"],"n",0],["弁官","べんかん",["Oversight Department…"],"n",0],["左弁官","さべんかん",["Oversight Department of the Left…"],"n",0],["規制監督","きせいかんとく",["regulatory oversight"],"n",0],["財政再建団体","ざいせいさいけんだんたい",["local governmental body that requires federal oversight to…"],"n",0]],
 "oversize": [["オーバーサイズ","",["oversize"],"adj-no",0]],
 "oversized": [["がばがば","",["oversized (clothing)","rolling in (of money)"],"adj-no adj-na adv adv-to vs",1],["大きすぎる","おおきすぎる",["to be oversized (overloud, etc.)"],"v1",0],["特大荷物","とくだいにもつ",["oversized baggage"],"n",0]],
 "oversleep": [["寝すぎる","ねすぎる",["to oversleep"],"v1 vi",0],["寝忘れる","ねわすれる",["to oversleep"],"v1 vi",0]],
@@ -647,7 +647,6 @@
 "paranoia": [["パラノ","",["paranoia"],"n",0],["偏執病","へんしゅうびょう",["paranoia"],"n",0],["偏執症","へんしゅうしょう",["paranoia"],"n",0],["妄想狂","もうそうきょう",["paranoia"],"n",0],["妄想症","もうそうしょう",["paranoia"],"n",0],["パラノイア","",["paranoia"],"n",0],["パラノイヤ","",["paranoia"],"n",0],["妄想代理人","もうそうだいりにん",["Paranoia Agent (2004 anime series)"],"n",0]],
 "paranoid": [["偏執的","へんしゅうてき",["paranoid"],"adj-na",0],["偏執症患者","へんしつしょうかんじゃ",["paranoid (person)"],"n",0]],
 "parapatric": [["側所的種分化","そくしょてきしゅぶんか",["parapatric speciation"],"n",0]],
-"parapet": [["扶壁","ふへき",["parapet","buttress"],"n",0],["胸墻","きょうしょう",["parapet"],"n",0],["パラペット","",["parapet"],"n",0],["胸壁","きょうへき",["breastwork","fortress"],"n",1]],
-"paraphilia": [["性倒錯","せいとうさく",["paraphilia"],"n",0],["性的倒錯","せいてきとうさく",["paraphilia"],"n",0],["色情倒錯","しきじょうとうさく",["paraphilia"],"n",0],["パラフィリア","",["paraphilia"],"n",0]]
+"parapet": [["扶壁","ふへき",["parapet","buttress"],"n",0],["胸墻","きょうしょう",["parapet"],"n",0],["パラペット","",["parapet"],"n",0],["胸壁","きょうへき",["breastwork","fortress"],"n",1]]
 }
 }

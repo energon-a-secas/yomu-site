@@ -1,9 +1,16 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "どうしたもこうしたもない",
-"last": "どんがら汁",
+"first": "どうししゃだいがく",
+"last": "どんかくさんかくけい",
 "entries": {
+"どうししゃだいがく": [{"g":["Doshisha University"],"p":"n","k":["同志社大学"]}],
+"どうししょう": [{"g":["voyeurism"],"p":"n","k":["瞠視症"]}],
+"どうしじょうめいし": [{"g":["gerund"],"p":"n","k":["動詞状名詞"]}],
+"どうしせい": [{"g":["homodont"],"p":"adj-no n","k":["同歯性"]}],
+"どうした": [{"g":["somehow"],"p":"adj-pn","k":["如何した"],"u":1}],
+"どうしたかぜのふきまわしか": [{"g":["whatever brought that on?"],"p":"exp","k":["どうした風の吹き回しか"]}],
+"どうしたって": [{"g":["by all means"],"p":"adv"}],
 "どうしたもこうしたもない": [{"g":["for crying out loud!"],"p":"exp"}],
 "どうしたものか": [{"g":["what is to be done?"],"p":"exp"}],
 "どうしたもんか": [{"g":["what is to be done?"],"p":"exp"}],
@@ -1446,13 +1453,6 @@
 "どん": [{"g":["dull"],"p":"adj-na n","k":["鈍"]},{"g":["bang","noontime signal gun (carried out early Meiji to Taishō)","last round in a game of 12 rounds"],"p":"adv-to adv n pref suf","t":1},{"g":["porcelain bowl","donburi","front pocket in a haragake"],"p":"n","k":["丼"],"e":1,"t":2},{"g":["coveting","raga (desire)"],"p":"n","k":["貪"],"t":3}],
 "どんあい": [{"g":["attachment"],"p":"n vs","k":["貪愛"]}],
 "どんかく": [{"g":["obtuse angle"],"p":"n","k":["鈍角"]}],
-"どんかくさんかくけい": [{"g":["obtuse triangle"],"p":"n","k":["鈍角三角形"]}],
-"どんかつ": [{"g":["winning a match"],"p":"n vs","k":["ドン勝"]}],
-"どんかんおり": [{"g":["corrupt government official"],"p":"n","k":["貪官汚吏"]}],
-"どんかんりょく": [{"g":["The Power of Insensitivity (book by Junichi Watanabe)"],"p":"n","k":["鈍感力"]}],
-"どんが": [{"g":["bud"],"p":"n","k":["嫩芽"]}],
-"どんがめ": [{"g":["Chinese soft-shelled turtle (Pelodiscus sinensis)"],"p":"n","k":["団亀"]}],
-"どんがらじる": [{"g":["dongarajiru"],"p":"n","k":["どんがら汁"]}],
-"どんがら汁": [{"r":["どんがらじる"],"g":["dongarajiru"],"p":"n"}]
+"どんかくさんかくけい": [{"g":["obtuse triangle"],"p":"n","k":["鈍角三角形"]}]
 }
 }

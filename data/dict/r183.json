@@ -1,9 +1,12 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "凶状",
-"last": "切り分かつ",
+"first": "凶歉",
+"last": "切り入る",
 "entries": {
+"凶歉": [{"r":["きょうけん"],"g":["poor crops"],"p":"n","f":"きょう|けん"}],
+"凶歳": [{"r":["きょうさい"],"g":["poor crop year"],"p":"n","f":"きょう|さい"}],
+"凶漢": [{"r":["きょうかん"],"g":["villain"],"p":"n","f":"きょう|かん"}],
 "凶状": [{"r":["きょうじょう"],"g":["crime"],"p":"n","f":"きょう|じょう"}],
 "凶状持ち": [{"r":["きょうじょうもち"],"g":["person with a criminal record"],"p":"n","f":"きょう|じょう|も"}],
 "凶猛": [{"r":["きょうもう"],"g":["fierce"],"p":"adj-na n","f":"きょう|もう"}],
@@ -390,6 +393,7 @@
 "出払う": [{"r":["ではらう"],"g":["to be all out (e.g. of people)","to be sold out"],"p":"v5u vi","f":"で|はら"}],
 "出挙": [{"r":["すいこ","すいきょ","しゅっきょ"],"g":["loan with interest made to farmers"],"p":"n","f":"*"}],
 "出捐": [{"r":["しゅつえん"],"g":["contribution"],"p":"n vs vt","f":"しゅつ|えん"}],
+"出掛": [{"r":["でがけ","でかけ"],"g":["(on the) point of going out","just after leaving"],"p":"n","f":"で|がけ"}],
 "出掛かる": [{"r":["でかかる"],"g":["to just appear"],"p":"v5r vi","f":"で|か"}],
 "出掛け": [{"r":["でがけ","でかけ"],"g":["(on the) point of going out","just after leaving"],"p":"n","f":"で|が"}],
 "出掛る": [{"r":["でかかる"],"g":["to just appear"],"p":"v5r vi","f":"で|かか"}],
@@ -1256,10 +1260,6 @@
 "切り伏せる": [{"r":["きりふせる"],"g":["to slay"],"p":"v1 vt"}],
 "切り倒す": [{"r":["きりたおす"],"g":["to cut down"],"p":"v5s vt"}],
 "切り傷": [{"r":["きりきず"],"g":["cut"],"p":"n"}],
-"切り入る": [{"r":["きりいる"],"g":["to cut into"],"p":"v5r vt"}],
-"切り入れる": [{"r":["きりいれる"],"g":["to cut and insert"],"p":"v1"}],
-"切り出し": [{"r":["きりだし"],"g":["pointed knife","logging","(beef) scraps"],"p":"n"}],
-"切り出す": [{"r":["きりだす"],"g":["to quarry","to begin to talk","to start a fire…"],"p":"v5s vt"}],
-"切り分かつ": [{"r":["きりわかつ"],"g":["to cut up"],"p":"v5t"}]
+"切り入る": [{"r":["きりいる"],"g":["to cut into"],"p":"v5r vt"}]
 }
 }

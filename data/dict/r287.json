@@ -1,9 +1,14 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "観音菩薩",
-"last": "記念祭",
+"first": "観音さま",
+"last": "記念式典",
 "entries": {
+"観音さま": [{"r":["かんのんさま"],"g":["Avalokiteshvara (Bodhisattva)","clitoris"],"p":"n","f":"かん|のん"}],
+"観音堂": [{"r":["かんのんどう"],"g":["temple dedicated to Kannon"],"p":"n","f":"かん|のん|どう"}],
+"観音扉": [{"r":["かんのんとびら"],"g":["double doors (opening from the centre)"],"p":"n","f":"かん|のん|とびら"}],
+"観音様": [{"r":["かんのんさま"],"g":["Avalokiteshvara (Bodhisattva)","clitoris"],"p":"n","f":"かん|のん|さま"}],
+"観音経": [{"r":["かんのんぎょう"],"g":["Avalokitesvara Sutra"],"p":"n","f":"かん|のん|ぎょう"}],
 "観音菩薩": [{"r":["かんのんぼさつ"],"g":["Kannon (Bodhisattva)"],"p":"n","f":"かん|のん|ぼ|さつ"}],
 "観音開き": [{"r":["かんのんびらき"],"g":["double doors (opening from the centre)","double-opening from the centre…","filleting fish, chicken, etc. with a central cut and…"],"p":"n adj-no","f":"かん|のん|びら"}],
 "覺束ない": [{"r":["おぼつかない"],"g":["uncertain","unreliable","unclear"],"p":"adj-i","f":"おぼ|つか","u":1}],
@@ -1274,12 +1279,6 @@
 "記念受験": [{"r":["きねんじゅけん"],"g":["taking the entrance examination for a school without…"],"p":"n","f":"き|ねん|じゅ|けん"}],
 "記念品": [{"r":["きねんひん"],"g":["souvenir"],"p":"n","f":"き|ねん|ひん"}],
 "記念大会": [{"r":["きねんたいかい"],"g":["commemoration meeting"],"p":"n","f":"き|ねん|たい|かい"}],
-"記念式典": [{"r":["きねんしきてん"],"g":["memorial ceremony"],"p":"n","f":"き|ねん|しき|てん"}],
-"記念撮影": [{"r":["きねんさつえい"],"g":["taking a commemorative photo"],"p":"n","f":"き|ねん|さつ|えい"}],
-"記念樹": [{"r":["きねんじゅ"],"g":["memorial tree"],"p":"n","f":"き|ねん|じゅ"}],
-"記念物": [{"r":["きねんぶつ"],"g":["souvenir"],"p":"n","f":"き|ねん|ぶつ"}],
-"記念硬貨": [{"r":["きねんこうか"],"g":["commemorative coin"],"p":"n","f":"き|ねん|こう|か"}],
-"記念碑的": [{"r":["きねんひてき"],"g":["monumental"],"p":"adj-na","f":"き|ねん|ひ|てき"}],
-"記念祭": [{"r":["きねんさい"],"g":["anniversary"],"p":"n","f":"き|ねん|さい"}]
+"記念式典": [{"r":["きねんしきてん"],"g":["memorial ceremony"],"p":"n","f":"き|ねん|しき|てん"}]
 }
 }

@@ -1,9 +1,17 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "日本地方自治学会",
-"last": "旧例",
+"first": "日本国際貿易促進協会",
+"last": "旧主",
 "entries": {
+"日本国際貿易促進協会": [{"r":["にっぽんこくさいぼうえきそくしんきょうかい"],"g":["Association for the Promotion of International Trade, Japan"],"p":"n","f":"にっ|ぽん|こく|さい|ぼう|えき|そく|しん|きょう|かい"}],
+"日本國憲法": [{"r":["にほんこくけんぽう"],"g":["Constitution of Japan"],"p":"n","f":"に|ほん|こく|けん|ぽう"}],
+"日本土壌動物学会": [{"r":["にっぽんどじょうどうぶつがっかい"],"g":["Japanese Society of Soil Zoology"],"p":"n","f":"にっ|ぽん|ど|じょう|どう|ぶつ|がっ|かい"}],
+"日本土壌微生物学会": [{"r":["にっぽんどじょうびせいぶつがっかい"],"g":["Japanese Society of Soil Microbiology"],"p":"n","f":"にっ|ぽん|ど|じょう|び|せい|ぶつ|がっ|かい"}],
+"日本地ビール協会": [{"r":["にっぽんじビールきょうかい"],"g":["Japan Craft Beer Association"],"p":"n","f":"にっ|ぽん|じ;きょう|かい"}],
+"日本地図センター": [{"r":["にほんちずセンター"],"g":["Japan Map Centre"],"p":"n","f":"に|ほん|ち|ず"}],
+"日本地域福祉学会": [{"r":["にっぽんちいきふくしがっかい"],"g":["Japanese Research Association for Community Development"],"p":"n","f":"にっ|ぽん|ち|いき|ふく|し|がっ|かい"}],
+"日本地域経済学会": [{"r":["にっぽんちいきけいざいがっかい"],"g":["Japan Association for Regional Economic Studies"],"p":"n","f":"にっ|ぽん|ち|いき|けい|ざい|がっ|かい"}],
 "日本地方自治学会": [{"r":["にっぽんちほうじちがっかい"],"g":["Japan Association for the Study of Local Government"],"p":"n","f":"にっ|ぽん|ち|ほう|じ|ち|がっ|かい"}],
 "日本地方自治研究学会": [{"r":["にっぽんちほうじちけんきゅうがっかい"],"g":["Nippon Urban Management and Local Government Research…"],"p":"n","f":"にっ|ぽん|ち|ほう|じ|ち|けん|きゅう|がっ|かい"}],
 "日本地熱学会": [{"r":["にっぽんちねつがっかい"],"g":["Geothermal Research Society of Japan"],"p":"n","f":"にっ|ぽん|ち|ねつ|がっ|かい"}],
@@ -840,18 +848,6 @@
 "旧世代": [{"r":["きゅうせだい"],"g":["older generation"],"p":"n adj-no","f":"きゅう|せ|だい"}],
 "旧世界": [{"r":["きゅうせかい"],"g":["Old World (i.e. Asia, Africa, Europe)"],"p":"n","f":"きゅう|せ|かい"}],
 "旧世界猿": [{"r":["きゅうせかいざる"],"g":["Old World monkey (any monkey of family Cercopithecidae)"],"p":"n","f":"きゅう|せ|かい|ざる"}],
-"旧主": [{"r":["きゅうしゅ"],"g":["former lord"],"p":"n","f":"きゅう|しゅ"}],
-"旧主人": [{"r":["きゅうしゅじん"],"g":["former lord"],"p":"n","f":"きゅう|しゅ|じん"}],
-"旧事": [{"r":["きゅうじ","くじ"],"g":["past events"],"p":"n","f":"きゅう|じ"}],
-"旧交": [{"r":["きゅうこう"],"g":["old friendship"],"p":"n","f":"きゅう|こう"}],
-"旧交を温める": [{"r":["きゅうこうをあたためる"],"g":["to renew old friendship"],"p":"exp v1","f":"きゅう|こう;あたた"}],
-"旧人": [{"r":["ふるびと"],"g":["the deceased"],"p":"n","f":"ふる|びと"},{"r":["きゅうじん"],"g":["paleoanthropic man (e.g. Neanderthal)"],"p":"n adj-no","f":"きゅう|じん","t":1}],
-"旧仮名": [{"r":["きゅうかな"],"g":["old kana orthography (used before 1946 reform)"],"p":"n","f":"きゅう|か|な"}],
-"旧仮名使い": [{"r":["きゅうかなづかい"],"g":["old kana orthography (used before 1946 reform)"],"p":"n","f":"きゅう|か|な|づか"}],
-"旧仮名遣": [{"r":["きゅうかなづかい"],"g":["old kana orthography (used before 1946 reform)"],"p":"n","f":"きゅう|か|な|づかい"}],
-"旧仮名遣い": [{"r":["きゅうかなづかい"],"g":["old kana orthography (used before 1946 reform)"],"p":"n","f":"きゅう|か|な|づか"}],
-"旧体制": [{"r":["きゅうたいせい"],"g":["old regime"],"p":"n","f":"きゅう|たい|せい"}],
-"旧作": [{"r":["きゅうさく"],"g":["old work"],"p":"n","f":"きゅう|さく"}],
-"旧例": [{"r":["きゅうれい"],"g":["old custom"],"p":"n","f":"きゅう|れい"}]
+"旧主": [{"r":["きゅうしゅ"],"g":["former lord"],"p":"n","f":"きゅう|しゅ"}]
 }
 }

@@ -1,9 +1,12 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "伸び上る",
-"last": "余禄",
+"first": "伸びのび",
+"last": "余白",
 "entries": {
+"伸びのび": [{"r":["のびのび"],"g":["comfortably","(growing) quickly"],"p":"adv adv-to vs","u":1}],
+"伸びをする": [{"r":["のびをする"],"g":["to stretch (one's body)"],"p":"exp vs-i"}],
+"伸び上がる": [{"r":["のびあがる"],"g":["to stretch"],"p":"v5r vi"}],
 "伸び上る": [{"r":["のびあがる"],"g":["to stretch"],"p":"v5r vi"}],
 "伸び代": [{"r":["のびしろ"],"g":["room for growth"],"p":"n"}],
 "伸び広がる": [{"r":["のびひろがる"],"g":["to stretch out"],"p":"v5r"}],
@@ -1294,9 +1297,6 @@
 "余燼": [{"r":["よじん"],"g":["smouldering fire"],"p":"n","f":"よ|じん"}],
 "余猶": [{"r":["よゆう"],"g":["surplus","composure"],"p":"n","f":"よ|ゆう"}],
 "余病": [{"r":["よびょう"],"g":["secondary disease"],"p":"n","f":"よ|びょう"}],
-"余白": [{"r":["よはく"],"g":["blank space"],"p":"n","f":"よ|はく"}],
-"余白注": [{"r":["よはくちゅう"],"g":["marginal notes"],"p":"n","f":"よ|はく|ちゅう"}],
-"余白頁": [{"r":["よはくページ"],"g":["blank page"],"p":"n","f":"*"}],
-"余禄": [{"r":["よろく"],"g":["additional gain"],"p":"n","f":"よ|ろく"}]
+"余白": [{"r":["よはく"],"g":["blank space"],"p":"n","f":"よ|はく"}]
 }
 }

@@ -1,9 +1,11 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "やまがたけん",
-"last": "ゆうらく",
+"first": "やまが",
+"last": "ゆうよねん",
 "entries": {
+"やまが": [{"g":["mountain villa"],"p":"n","k":["山家"]}],
+"やまがあたる": [{"g":["to have one's predictions turn out exactly right"],"p":"exp v5r","k":["ヤマが当たる","山が当たる"]}],
 "やまがたけん": [{"g":["Yamagata Prefecture (Tōhoku area)"],"p":"n","k":["山形県"]}],
 "やまがたけんけい": [{"g":["Yamagata Prefectural Police (abbr)"],"p":"n","k":["山形県警"]}],
 "やまがたけんりつほけんいりょうだいがく": [{"g":["Yamagata Prefectural University of Health Sciences"],"p":"n","k":["山形県立保健医療大学"]}],
@@ -1396,7 +1398,6 @@
 "ゆうよきかん": [{"g":["grace period"],"p":"n","k":["猶予期間"]}],
 "ゆうよく": [{"g":["cruising"],"p":"n vs vi","k":["遊弋"]},{"g":["winged"],"p":"adj-no","k":["有翼"],"t":1}],
 "ゆうよなく": [{"g":["without delay"],"p":"adv","k":["猶予なく"]}],
-"ゆうよねん": [{"g":["more than ... years"],"p":"exp","k":["有余年"]}],
-"ゆうらく": [{"g":["amusement"],"p":"n vs vi","k":["遊楽"]},{"g":["hamlet"],"p":"n","k":["邑落"],"t":1}]
+"ゆうよねん": [{"g":["more than ... years"],"p":"exp","k":["有余年"]}]
 }
 }

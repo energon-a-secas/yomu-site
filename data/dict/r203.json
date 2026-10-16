@@ -1,9 +1,16 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "大福帳",
-"last": "天竺",
+"first": "大祭",
+"last": "天空",
 "entries": {
+"大祭": [{"r":["たいさい"],"g":["grand festival"],"p":"n","f":"たい|さい"}],
+"大祭り": [{"r":["おおまつり"],"g":["grand festival"],"p":"n","f":"おお|まつ"}],
+"大祭司": [{"r":["だいさいし"],"g":["High Priest (of Israel)"],"p":"n","f":"だい|さい|し"}],
+"大禍時": [{"r":["おおまがとき"],"g":["twilight (traditionally regarded as a time when accidents…"],"p":"n","f":"*"}],
+"大禍津日神": [{"r":["おおまがつひのかみ"],"g":["the great evil god"],"p":"n","f":"*"}],
+"大福": [{"r":["だいふく"],"g":["great fortune","rice cake stuffed with bean jam"],"p":"n","f":"だい|ふく"},{"r":["おおぶく","だいぶく","たいふく"],"g":["swallowing a great amount of tea or medicine","tea prepared for the New Year with the first water of the…"],"p":"n","f":"おお|ぶく","t":1}],
+"大福もち": [{"r":["だいふくもち"],"g":["rice cake stuffed with sweet bean jam"],"p":"n","f":"だい|ふく"}],
 "大福帳": [{"r":["だいふくちょう"],"g":["(Edo-period) account book"],"p":"n","f":"だい|ふく|ちょう"}],
 "大福茶": [{"r":["おおぶくちゃ","だいぶくちゃ","だいふくちゃ"],"g":["tea prepared for the New Year with the first water of the…"],"p":"n","f":"おお|ぶく|ちゃ"}],
 "大福餅": [{"r":["だいふくもち"],"g":["rice cake stuffed with sweet bean jam"],"p":"n","f":"だい|ふく|もち"}],
@@ -361,6 +368,7 @@
 "大量虐殺": [{"r":["たいりょうぎゃくさつ"],"g":["massacre"],"p":"n","f":"たい|りょう|ぎゃく|さつ"}],
 "大量退職": [{"r":["たいりょうたいしょく"],"g":["mass retirement (esp. that of the Japanese baby boomers)"],"p":"n","f":"たい|りょう|たい|しょく"}],
 "大量送信": [{"r":["たいりょうそうしん"],"g":["bulk mailing"],"p":"n","f":"たい|りょう|そう|しん"}],
+"大金持": [{"r":["おおがねもち","おおかねもち"],"g":["very rich person"],"p":"n","f":"おお|がね|もち"}],
 "大金持ち": [{"r":["おおがねもち","おおかねもち"],"g":["very rich person"],"p":"n","f":"おお|がね|も"}],
 "大金星": [{"r":["だいきんぼし"],"g":["surprise victory"],"p":"n","f":"だい|きん|ぼし"}],
 "大金鶏菊": [{"r":["おおきんけいぎく"],"g":["tickseed (Coreopsis lanceolata)"],"p":"n","f":"おお|きん|けい|ぎく","u":1}],
@@ -1102,15 +1110,6 @@
 "天秤棒": [{"r":["てんびんぼう"],"g":["carrying pole"],"p":"n","f":"てん|びん|ぼう"}],
 "天秤秤": [{"r":["てんびんばかり"],"g":["balance scale"],"p":"n","f":"てん|びん|ばかり"}],
 "天稟": [{"r":["てんぴん"],"g":["natural talents"],"p":"n","f":"てん|ぴん"}],
-"天空": [{"r":["てんくう"],"g":["sky"],"p":"n","f":"てん|くう"}],
-"天空の城ラピュタ": [{"r":["てんくうのしろラピュタ"],"g":["Laputa: Castle in the Sky (1986 animated film)"],"p":"n","f":"てん|くう;しろ"}],
-"天空海濶": [{"r":["てんくうかいかつ"],"g":["the open sky and the serene sea"],"p":"n","f":"てん|くう|かい|かつ"}],
-"天空海闊": [{"r":["てんくうかいかつ"],"g":["the open sky and the serene sea"],"p":"n","f":"てん|くう|かい|かつ"}],
-"天窓": [{"r":["てんまど","てんそう"],"g":["skylight","head"],"p":"n","f":"てん|まど"}],
-"天竜": [{"r":["てんりゅう","てんりょう"],"g":["deva and naga","heavenly dragon"],"p":"n","f":"てん|りゅう"}],
-"天竜八部衆": [{"r":["てんりゅうはちぶしゅう"],"g":["the eight legions…"],"p":"n","f":"てん|りゅう|はち|ぶ|しゅう"}],
-"天童": [{"r":["てんどう"],"g":["cherub"],"p":"n","f":"てん|どう"}],
-"天端": [{"r":["てんば"],"g":["top of a dam or embankment (oft. used as a road)"],"p":"n","f":"てん|ば"}],
-"天竺": [{"r":["てんじく"],"g":["India","cotton sheeting","foreign"],"p":"n n-pref","f":"てん|じく"}]
+"天空": [{"r":["てんくう"],"g":["sky"],"p":"n","f":"てん|くう"}]
 }
 }

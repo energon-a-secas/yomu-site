@@ -1,9 +1,8 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","KanjiVG stroke order SVGs r20250816"],"inputs":[{"id":"kanjivg","source":"KanjiVG, Ulrich Apel","url":"http://kanjivg.tagaini.net","spdx":"CC-BY-SA-3.0","screen":"required","acknowledgement":"Attribution. You must attribute the work by stating your use of KanjiVG in your own copyright header and linking to KanjiVG's website (http://kanjivg.tagaini.net)","use":"parts, the named components under each character, followed to their own parts"}],"generated_by":"tools/build-search.mjs","generated_at":"2026-10-01"},
 "format": "yomu-search-rare/1",
-"first": "dispirited",
+"first": "dispiritedness",
 "entries": {
-"dispirited": [["しょげる","",["to be dispirited"],"v1 vi",0],["しょげ返る","しょげかえる",["to be dispirited"],"v5r vi",0],["しょぼくれる","",["to be dispirited"],"v1 vi",0],["気が腐る","きがくさる",["to feel dispirited"],"exp v5r",0]],
 "dispiritedness": [["気抜け","きぬけ",["dispiritedness","going flat (of a carbonated drink, beer, etc.)"],"n vs vi",0]],
 "displaced": [["残留孤児","ざんりゅうこじ",["displaced orphans","Japanese orphans left behind in China (after WWII)"],"n",0],["国内避難民","こくないひなんみん",["internally displaced person"],"n",0]],
 "displacement": [["排気量","はいきりょう",["(engine) displacement"],"n",0],["排水量","はいすいりょう",["displacement (e.g. of a ship)","volume of wastewater"],"n",0],["転移性","てんいせい",["displacement"],"n",0],["変位計","へんいけい",["displacement sensor"],"n",0],["角変位","かくへんい",["angular displacement"],"n",0],["変位制御","へんいせいぎょ",["displacement controlled"],"n",0],["変位電流","へんいでんりゅう",["displacement current"],"n",0],["大排気量","だいはいきりょう",["large (engine) displacement"],"n adj-no",0],["変位センサ","へんいセンサ",["displacement sensor"],"n",0],["ディスプレースメント","",["displacement"],"n",0]],
@@ -498,6 +497,9 @@
 "downgrade": [["ランクダウン","",["downgrade"],"n",0],["ダウングレード","",["downgrade"],"n vs vt",0],["ランク・ダウン","",["downgrade"],"n",0]],
 "downgrading": [["降級","こうきゅう",["downgrading"],"n vs vt vi",0]],
 "downhearted": [["青菜に塩","あおなにしお",["feeling sad or downhearted"],"exp",0]],
-"downheartedly": [["しょぼん","",["downheartedly"],"adv adv-to vs",0],["しょんもり","",["downheartedly"],"adv adv-to vs",0]]
+"downheartedly": [["しょぼん","",["downheartedly"],"adv adv-to vs",0],["しょんもり","",["downheartedly"],"adv adv-to vs",0]],
+"downhill": [["下坂","しもさか",["downhill"],"n",0],["滑降競技","かっこうきょうぎ",["downhill"],"n",0],["ダウンヒル","",["downhill"],"n",0],["打ち下ろし","うちおろし",["downhill (hole)"],"adj-no n",0],["下り道","くだりみち",["downhill road"],"n",0],["下り勾配","くだりこうばい",["downhill grade"],"n",0],["坂を下りる","さかをおりる",["to go downhill"],"exp v1",0],["左前になる","ひだりまえになる",["to go downhill (e.g. for one's business)"],"exp v5r",0],["つま先下がり","つまさきさがり",["downhill path"],"n",0],["さか落とし","さかおとし",["dropping (something) headfirst down a precipice","downhill rush"],"n",0]],
+"downlight": [["ダウンライト","",["downlight"],"n",0]],
+"downlink": [["ダウンリンク","",["downlink"],"n",0]]
 }
 }

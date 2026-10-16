@@ -1,9 +1,16 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "美容室",
-"last": "聖数",
+"first": "美妓",
+"last": "聖心女子大学",
 "entries": {
+"美妓": [{"r":["びぎ"],"g":["beautiful maiko or geisha"],"p":"n","f":"び|ぎ"}],
+"美妙": [{"r":["びみょう"],"g":["elegant"],"p":"adj-na n","f":"び|みょう"}],
+"美姫": [{"r":["びき"],"g":["beautiful maiden"],"p":"n","f":"び|き"}],
+"美婦": [{"r":["びふ"],"g":["beautiful woman"],"p":"n","f":"び|ふ"}],
+"美学的": [{"r":["びがくてき"],"g":["aesthetic"],"p":"adj-na","f":"び|がく|てき"}],
+"美容体操": [{"r":["びようたいそう"],"g":["calisthenics"],"p":"n","f":"び|よう|たい|そう"}],
+"美容外科": [{"r":["びようげか"],"g":["cosmetic surgery"],"p":"n","f":"び|よう|げ|か"}],
 "美容室": [{"r":["びようしつ"],"g":["beauty parlor"],"p":"n","f":"び|よう|しつ"}],
 "美容家": [{"r":["びようか"],"g":["(highly-experienced) beautician"],"p":"n","f":"び|よう|か"}],
 "美容師法": [{"r":["びようしほう"],"g":["Cosmetologists Act"],"p":"n","f":"び|よう|し|ほう"}],
@@ -1211,6 +1218,7 @@
 "耳飾り": [{"r":["みみかざり"],"g":["earring"],"p":"n","f":"みみ|かざ"}],
 "耳馴れる": [{"r":["みみなれる"],"g":["to become familiar (to one's ears)"],"p":"v1 vi","f":"みみ|な"}],
 "耳馴染み": [{"r":["みみなじみ"],"g":["familiarity (of a sound, etc.)"],"p":"n","f":"みみ|な|じ"}],
+"耳鳴": [{"r":["じめい"],"g":["tinnitus"],"p":"n","f":"じ|めい"}],
 "耳鳴り": [{"r":["みみなり"],"g":["tinnitus"],"p":"n","f":"みみ|な"}],
 "耳鼻": [{"r":["じび"],"g":["nose and ears"],"p":"n","f":"じ|び"}],
 "耳鼻咽喉": [{"r":["じびいんこう"],"g":["ear, nose, and throat"],"p":"n","f":"じ|び|いん|こう"}],
@@ -1305,12 +1313,6 @@
 "聖徳大学": [{"r":["せいとくだいがく"],"g":["Seitoku University"],"p":"n","f":"せい|とく|だい|がく"}],
 "聖徳学園岐阜教育大学": [{"r":["しょうとくがくえんぎふきょういくだいがく"],"g":["Gifu University for Education and Languages"],"p":"n","f":"しょう|とく|がく|えん|ぎ|ふ|きょう|いく|だい|がく"}],
 "聖心": [{"r":["せいしん","ひじりごころ","みこころ"],"g":["Sacred Heart"],"p":"n","f":"せい|しん"}],
-"聖心女子大学": [{"r":["せいしんじょしだいがく"],"g":["Seishin Women's University"],"p":"n","f":"せい|しん|じょ|し|だい|がく"}],
-"聖性": [{"r":["せいせい"],"g":["holiness"],"p":"n","f":"せい|せい"}],
-"聖恩": [{"r":["せいおん"],"g":["imperial blessings or favor (favour)"],"p":"n","f":"せい|おん"}],
-"聖意": [{"r":["せいい"],"g":["emperor's will","saint's will"],"p":"n","f":"せい|い"}],
-"聖所": [{"r":["せいじょ"],"g":["sanctuary"],"p":"n","f":"せい|じょ"}],
-"聖教": [{"r":["せいきょう"],"g":["sacred teachings (esp. of Confucius)","Christianity","Buddhism"],"p":"n","f":"せい|きょう"},{"r":["しょうぎょう"],"g":["Buddhist teachings"],"p":"n","f":"しょう|ぎょう","t":1}],
-"聖数": [{"r":["せいすう"],"g":["holy number"],"p":"n","f":"せい|すう"}]
+"聖心女子大学": [{"r":["せいしんじょしだいがく"],"g":["Seishin Women's University"],"p":"n","f":"せい|しん|じょ|し|だい|がく"}]
 }
 }

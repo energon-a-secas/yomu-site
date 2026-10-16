@@ -1,13 +1,13 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826"],"generated_by":"tools/build-sets.mjs","generated_at":"2026-10-01"},
 "format": "yomu-sets-words-index/1",
-"keys": 2769,
+"keys": 2764,
 "maxKey": 6,
 "shards": [
 {"src":"data/sets/w00.json","first":"あの世"},
-{"src":"data/sets/w01.json","first":"古い"},
-{"src":"data/sets/w02.json","first":"懸命"},
-{"src":"data/sets/w03.json","first":"獅子"},
-{"src":"data/sets/w04.json","first":"誠"}
+{"src":"data/sets/w01.json","first":"古今"},
+{"src":"data/sets/w02.json","first":"成る"},
+{"src":"data/sets/w03.json","first":"率先"},
+{"src":"data/sets/w04.json","first":"読み"}
 ]
 }

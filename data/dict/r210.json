@@ -1,9 +1,20 @@
 {
 "_licence": {"source":"JMdict / EDICT, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.","links":["https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project","https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"],"screen":"required","upstream":["jmdict-simplified jmdict-eng 3.6.2+20260831182826","jmdict-simplified kanjidic2-en 3.6.2+20260831182826","Tatoeba Japanese sentences export of 2026-10-03"],"inputs":[{"id":"tatoeba","source":"Tatoeba Project, Japanese sentences","url":"https://tatoeba.org/en/downloads","spdx":"CC-BY-2.0-FR","screen":"none","acknowledgement":"Word frequency bands are counted over the Tatoeba Project's Japanese sentences, used under the Creative Commons Attribution 2.0 France licence. No sentence is included.","use":"q, a frequency band per key, and which keys the core holds; no sentence ships"}],"generated_by":"tools/build-dict.mjs","generated_at":"2026-10-01"},
 "format": "yomu-dict-rare/1",
-"first": "小夜曲",
-"last": "局内",
+"first": "小売値段",
+"last": "尿道球腺",
 "entries": {
+"小売値段": [{"r":["こうりねだん"],"g":["retail price"],"p":"n","f":"こ|うり|ね|だん"}],
+"小売商": [{"r":["こうりしょう"],"g":["retail trade"],"p":"n","f":"こ|うり|しょう"}],
+"小売業": [{"r":["こうりぎょう"],"g":["retail trade"],"p":"n","f":"こ|うり|ぎょう"}],
+"小売物価指数": [{"r":["こうりぶっかしすう"],"g":["retail price index"],"p":"n","f":"こ|うり|ぶっ|か|し|すう"}],
+"小変": [{"r":["しょうへん"],"g":["slight change"],"p":"n","f":"しょう|へん"}],
+"小夏": [{"r":["こなつ"],"g":["hyuganatsu (species of citrus, Citrus tamurana)"],"p":"n","f":"こ|なつ"}],
+"小夜": [{"r":["さよ"],"g":["evening"],"p":"n","f":"さ|よ"}],
+"小夜中": [{"r":["さよなか"],"g":["midnight"],"p":"n adv","f":"さ|よ|なか"}],
+"小夜啼鳥": [{"r":["さよなきどり"],"g":["nightingale (Luscinia megarhynchos)"],"p":"n","f":"さ|よ|なき|どり","u":1}],
+"小夜嵐": [{"r":["さよあらし"],"g":["strong nighttime wind"],"p":"n","f":"さ|よ|あらし"}],
+"小夜時雨": [{"r":["さよしぐれ"],"g":["light shower on a night in late autumn and early winter"],"p":"n","f":"*"}],
 "小夜曲": [{"r":["さよきょく"],"g":["serenade"],"p":"n","f":"さ|よ|きょく"}],
 "小夜鳴き鳥": [{"r":["さよなきどり"],"g":["nightingale (Luscinia megarhynchos)"],"p":"n","f":"さ|よ|な;どり","u":1}],
 "小天地": [{"r":["しょうてんち"],"g":["a small world"],"p":"n","f":"しょう|てん|ち"}],
@@ -1226,17 +1237,6 @@
 "尿道海綿体": [{"r":["にょうどうかいめんたい"],"g":["corpus spongiosum penis"],"p":"n","f":"にょう|どう|かい|めん|たい"}],
 "尿道炎": [{"r":["にょうどうえん"],"g":["urethritis"],"p":"n","f":"にょう|どう|えん"}],
 "尿道球": [{"r":["にょうどうきゅう"],"g":["bulb of penis"],"p":"n","f":"にょう|どう|きゅう"}],
-"尿道球腺": [{"r":["にょうどうきゅうせん"],"g":["bulbourethral gland"],"p":"n","f":"にょう|どう|きゅう|せん"}],
-"尿道球腺液": [{"r":["にょうどうきゅうせんえき"],"g":["pre-ejaculate"],"p":"n","f":"にょう|どう|きゅう|せん|えき"}],
-"尿道結石": [{"r":["にょうどうけっせき"],"g":["urethral stone"],"p":"n","f":"にょう|どう|けっ|せき"}],
-"尿酸値": [{"r":["にょうさんち"],"g":["uric acid level"],"p":"n","f":"にょう|さん|ち"}],
-"尿量": [{"r":["にょうりょう"],"g":["urine volume"],"p":"n","f":"にょう|りょう"}],
-"尿閉": [{"r":["にょうへい"],"g":["urinary retention"],"p":"n","f":"にょう|へい"}],
-"局": [{"r":["つぼね"],"g":["court lady (Heian period)","separate room in a palace (esp. for a lady; Heian period)","room for a very low class prostitute"],"p":"n"}],
-"局に当たる": [{"r":["きょくにあたる"],"g":["to deal with a situation"],"p":"exp v5r"}],
-"局アナ": [{"r":["きょくアナ"],"g":["TV announcer…"],"p":"n"}],
-"局コード": [{"r":["きょくコード"],"g":["office code"],"p":"n"}],
-"局データ": [{"r":["きょくデータ"],"g":["office data"],"p":"n"}],
-"局内": [{"r":["きょくない"],"g":["within an office (bureau, branch, etc.)"],"p":"n adj-no","f":"きょく|ない"}]
+"尿道球腺": [{"r":["にょうどうきゅうせん"],"g":["bulbourethral gland"],"p":"n","f":"にょう|どう|きゅう|せん"}]
 }
 }
