@@ -3,7 +3,7 @@
 "format": "yomu-set/1",
 "set": "idiom",
 "rows": [
-["後の祭り","あとのまつり",["a day after the fair; (at a) stage when it's too late"],1,"atonomatsuri"],
+["後の祭り","あとのまつり",["a day after the fair; (at a) stage when it's too late"],1,"ato no matsuri"],
 ["雲泥の差","うんでいのさ",["wide difference; a world of difference"],1,"undeenosa"],
 ["草の根","くさのね",["grassroots (e.g. of a political party); rank and file","places hidden from sight"],1,"kusanone"],
 ["犬猿の仲","けんえんのなか",["like cats and dogs; (on) very bad terms; relationship of dogs and monkeys"],1,"ken'ennonaka"],
@@ -315,7 +315,7 @@
 ["角を立てる","かどをたてる",["to worsen (the situation); to exacerbate; to aggravate","to look with anger"],0,""],
 ["鼎の軽重を問う","かなえのけいちょうをとう",["to call someone's ability into question; to doubt a ruler's competence"],0,"kanae no keechoo o tou"],
 ["叶わぬ時の神頼み","かなわぬときのかみだのみ",["turning to God only in one's trouble"],0,""],
-["金の世の中","かねのよのなか",["money rules the world; rich man's world"],0,"kane no yononaka"],
+["金の世の中","かねのよのなか",["money rules the world; rich man's world"],0,"kane no yo no naka"],
 ["株が上がる","かぶがあがる",["to rise in esteem; to become popular"],0,"kabu ga agaru"],
 ["兜の緒を締める","かぶとのおをしめる",["to brace oneself (e.g. for battle); to pull oneself together; to focus one's mind; to tighten the strings of one's helmet"],0,"kabuto no o o shimeru"],
 ["竈を起こす","かまどをおこす",["to make a fortune; to build family wealth","to become the head of a family"],0,""],

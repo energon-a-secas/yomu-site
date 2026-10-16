@@ -141,9 +141,10 @@ function saidOf(reading, cuts, words, particle, finalWa, waAt) {
     ? [...reading].map((ch, k) => (waAt.includes(k) && (ch === 'は' || ch === 'ハ') ? 'わ' : ch)).join('')
     : reading;
   if (!words) return said(kana, { cuts, particle, finalWa });
-  return words.map(([a, b]) => said(kana.slice(a, b), {
+  // A word the lattice marks a particle (a set phrase's を, js/lattice.js phraseWords) is said as one.
+  return words.map(([a, b, prt]) => said(kana.slice(a, b), {
     cuts: cuts.filter((c) => c > a && c < b).map((c) => c - a),
-    particle,
+    particle: particle || !!prt,
     finalWa: finalWa && b === kana.length,
   })).join(' ');
 }

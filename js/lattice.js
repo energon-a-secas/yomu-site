@@ -151,7 +151,7 @@ function wordsOf(node, reading, dict, env) {
   const tags = String(node.rec.p).split(' ');
   if (!(tags.includes('exp') || tags.includes('int'))) return null;
   const inner = bestPath(node.s, dict, { ...env, exclude: true, after: undefined, before: false });
-  if (inner.length !== 2) return null;
+  if (inner.length !== 2) return phraseWords(node, reading, dict, env);
   const [left, right] = inner;
   const lt = left.rec ? String(left.rec.p).split(' ') : [];
   const leftOk = left.rec && !left.chain.length && !lt.includes('n') && !lt.includes('pn')
@@ -159,7 +159,56 @@ function wordsOf(node, reading, dict, env) {
     && isAllKana(left.s) && reading.startsWith(toHira(left.s));
   const rightOk = (right.cls === 'cop' && right.closed)
     || (right.rec && ['verb', 'exp'].includes(right.cls) && POLITE_END.test(right.s));
-  return leftOk && rightOk ? [[0, left.j], [left.j, reading.length]] : null;
+  if (leftOk && rightOk) return [[0, left.j], [left.j, reading.length]];
+  return phraseWords(node, reading, dict, env);
+}
+
+/**
+ * An expression written with kanji is read again as its pieces; when they
+ * read it exactly as its record does, `reads` is each piece's reading, so
+ * an offset into them is an offset into the token's reading. null when the
+ * pieces read it otherwise, or a piece is a guess.
+ */
+function piecesOf(node, reading, dict, env) {
+  const path = bestPath(node.s, dict, { ...env, exclude: true, after: undefined, before: false });
+  if (path.length < 2) return null;
+  const reads = path.map((x, k) => toHira(readingOf(x, path[k + 1])));
+  return reads.join('') === toHira(reading) ? { path, reads } : null;
+}
+
+/** The particles a set phrase is split at, each said as a particle (を is o). */
+const SPLIT_PARTICLES = new Set(['は', 'が', 'を', 'に', 'の', 'も', 'で', 'と', 'へ', 'から', 'まで', 'より', 'な', 'なり', 'だけ', 'ほど']);
+/** The pieces that may stand between them as words. */
+const WORD_CLASSES = new Set(['noun', 'verb', 'adj', 'cop']);
+
+/**
+ * A proverb or a set phrase written with kanji is said word by word, its
+ * particles words of their own: 時は金なり is toki wa kane nari, 後の祭り ato
+ * no matsuri, 時には toki niwa. Only when its pieces read it exactly, every
+ * piece is one of SPLIT_PARTICLES or a noun, verb, adjective or the copula,
+ * a particle is among them, and no two words touch: 行けません (行け|ませ|ん)
+ * stays ikemasen, お陰で (a prefix) okagede, ざるを得ない (a piece unknown)
+ * one word. Particles that touch are one word (でも, には). Measured over
+ * the 31,529 example sentences before choosing the list (docs/ANALYZER.md).
+ * Returns [start, end, particle] spans; a kana expression keeps the rules
+ * above, which a looser split once broke (oya suminasai).
+ */
+function phraseWords(node, reading, dict, env) {
+  if (!hasKanji(node.s)) return null;
+  const pieces = piecesOf(node, reading, dict, env);
+  if (!pieces) return null;
+  const kinds = pieces.path.map((x) => (x.cls === 'prt' && SPLIT_PARTICLES.has(x.s) ? 'p' : WORD_CLASSES.has(x.cls) ? 'w' : null));
+  if (kinds.some((k) => !k) || !kinds.includes('p') || kinds.some((k, n) => k === 'w' && kinds[n - 1] === 'w')) return null;
+  const words = [];
+  let at = 0;
+  pieces.reads.forEach((r, n) => {
+    const span = [at, at + r.length, kinds[n] === 'p'];
+    at += r.length;
+    const last = words[words.length - 1];
+    if (last && span[2] && last[2]) last[1] = span[1];
+    else words.push(span);
+  });
+  return words;
 }
 
 const POLITE_END = /ま(す|した|せん|して|しょう)$/;
@@ -303,7 +352,7 @@ function toToken(node, path, k, run, dict, env) {
     aid.f = pieces.every(Boolean) ? pieces.join('|') : undefined;
   }
   aid.words = wordsOf(node, token.reading, dict, env);
-  aid.waAt = particleWa(node, dict, env);
+  aid.waAt = particleWa(node, dict, env, token.reading);
   token.aid = aid;
   return token;
 }
@@ -317,21 +366,31 @@ function toToken(node, path, k, run, dict, env) {
  * is an offset into the reading; てにはいる keeps its は, because its pieces
  * are て|に|はいる.
  */
-function particleWa(node, dict, env, depth = 0) {
+function particleWa(node, dict, env, reading = readingOf(node), depth = 0) {
   const s = node.s;
-  if (!node.rec || node.chain.length || !isAllKana(s) || s.indexOf('は', 1) < 0) return [];
+  if (!node.rec || node.chain.length || s.indexOf('は', 1) < 0) return [];
   const tags = String(node.rec.p).split(' ');
   if (!tags.includes('exp') && !tags.includes('conj')) return [];
+  // With kanji in it (時は金なり), the pieces must read it as the record does,
+  // or an offset into their readings would not be one into the token's.
+  const pieces = isAllKana(s)
+    ? { path: bestPath(s, dict, { ...env, exclude: true, after: undefined, before: false }), reads: null }
+    : piecesOf(node, reading, dict, env);
+  if (!pieces) return [];
   const out = [];
-  for (const x of bestPath(s, dict, { ...env, exclude: true, after: undefined, before: false })) {
+  let at = 0;
+  pieces.path.forEach((x, n) => {
+    const r = pieces.reads ? pieces.reads[n] : toHira(x.s);
+    const base = pieces.reads ? at : x.i;
     // Every は in a particle or a copula form (では, ではない) is the
     // particle; a piece the data marks is too (では is `w`); and a piece
     // that is an expression itself (ということは) is read the same way.
     if (x.cls === 'prt' || x.cls === 'cop') {
-      for (let k = 0; k < x.s.length; k++) if (x.s[k] === 'は') out.push(x.i + k);
-    } else if (x.rec && x.s.endsWith('は') && (x.rec.w || x.rec.x)) out.push(x.j - 1);
-    else if (depth < 2) for (const k of particleWa(x, dict, env, depth + 1)) out.push(x.i + k);
-  }
+      for (let k = 0; k < r.length; k++) if (r[k] === 'は') out.push(base + k);
+    } else if (x.rec && x.s.endsWith('は') && (x.rec.w || x.rec.x)) out.push(base + r.length - 1);
+    else if (depth < 2) for (const k of particleWa(x, dict, env, r, depth + 1)) out.push(base + k);
+    at += r.length;
+  });
   return out;
 }
 

@@ -374,3 +374,23 @@ test('a 500-character paragraph is read in well under a second once the shards a
   // CI machine passes and a cost that went quadratic does not.
   assert.ok(ms < 1000, `${ms.toFixed(0)} ms`);
 });
+
+// ── A set phrase said word by word (queue #147, plan 1.4) ────────────────
+
+test('a set phrase written with kanji is said word by word, its particles as particles', async () => {
+  const d = diskDict();
+  const said = async (text) => saidLine(await analyze(normalize(text), { dict: d }));
+  // One dictionary entry each; the は inside was said "ha" and the words ran together.
+  assert.equal(await said('時は金なり'), 'toki wa kane nari');
+  assert.equal(await said('後の祭り'), 'ato no matsuri');
+  assert.equal(await said('心を込めて'), 'kokoro o komete', 'a particle を is o');
+  assert.equal(await said('誰でも'), 'dare demo', 'particles that touch are one word');
+  // What the rule must leave alone: two words that touch, a prefix, a kana expression.
+  assert.equal(await said('済みません'), 'sumimasen');
+  assert.equal(await said('お陰で'), 'okagede');
+  assert.equal(await said('お願いします'), 'onegaishimasu');
+  assert.equal(await said('ではまた'), 'dewamata');
+  assert.equal(await said('こんにちは'), 'konnichiwa');
+  // A は inside an expression the rule does not split is still wa.
+  assert.equal(await said('とは言え'), 'towaie');
+});
