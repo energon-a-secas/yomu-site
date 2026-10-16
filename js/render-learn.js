@@ -17,6 +17,7 @@ import { toKata, beats, beatRomaji } from './kana.js';
 import { withKanji } from './render-save.js';
 import { COUNTER_LIST, counterRow } from './counters.js';
 import { KANA_ROWS } from './kana-rows.js';
+import { handSwitch } from './render-hand.js';
 
 const GOJUON = Object.freeze([
   'あいうえお', 'かきくけこ', 'さしすせそ', 'たちつてと', 'なにぬねの',
@@ -62,16 +63,19 @@ function rowsNodes(script, known) {
   ];
 }
 
-export function kanaChartNodes(script, known = []) {
+export function kanaChartNodes(script, known = [], hand = false) {
   const kept = [];
   const combined = COMBINED.map((k) => [`${k}ゃ`, `${k}ゅ`, `${k}ょ`]);
   return {
     kept,
     nodes: [
       ...rowsNodes(script, known),
-      h('div', { class: 'seg kc-switch', role: 'group', 'aria-label': ui('kanaScript') }, ['hiragana', 'katakana'].map((s) => h('button', {
-        type: 'button', class: 'seg-btn', 'data-act': 'kc-script', 'data-script': s, 'aria-pressed': String(s === script),
-      }, ui(s === 'hiragana' ? 'kpHiragana' : 'kpKatakana')))),
+      h('div', { class: 'kc-switches' }, [
+        h('div', { class: 'seg kc-switch', role: 'group', 'aria-label': ui('kanaScript') }, ['hiragana', 'katakana'].map((s) => h('button', {
+          type: 'button', class: 'seg-btn', 'data-act': 'kc-script', 'data-script': s, 'aria-pressed': String(s === script),
+        }, ui(s === 'hiragana' ? 'kpHiragana' : 'kpKatakana')))),
+        handSwitch(hand, 'kc-hand-label'),
+      ]),
       h('p', { class: 'quiet kc-lead' }, ui('kanaLead')),
       h('h3', { class: 'word-sub' }, ui('kanaBasic')),
       grid(GOJUON, script, kept),

@@ -131,6 +131,22 @@ export const LICENCES = {
     ],
     screen: 'required',
   },
+  // Klee One (tools/build-font.mjs): the subset Yomu serves from fonts/klee/,
+  // with the licence beside it, as the OFL asks of a copy that ships.
+  kleeOne: {
+    source: 'Klee One, The Klee Project Authors (Fontworks)',
+    url: 'https://github.com/fontworks-fonts/Klee',
+    spdx: 'OFL-1.1',
+    derived: true,
+    id: 'kleeOne',
+    acknowledgement:
+      'The handwritten form is Klee One, Copyright 2020 The Klee Project Authors (https://github.com/fontworks-fonts/Klee), used under the SIL Open Font License 1.1; the subset Yomu serves and the licence are in fonts/klee/.',
+    links: [
+      'https://github.com/fontworks-fonts/Klee',
+      'https://openfontlicense.org',
+    ],
+    screen: 'required',
+  },
   // The names read Tatoeba twice over: the Japanese sentences say which names
   // ship and how often each is met, and their English translations say which
   // of a katakana name's JMnedict spellings is shown (tools/lib/original.mjs).

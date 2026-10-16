@@ -47,6 +47,13 @@ export const KPAGE_STRINGS = Object.freeze({
   exSourceLabel: { en: 'This sentence on tatoeba.org (opens a new tab)', es: 'Esta oración en tatoeba.org (se abre en una pestaña nueva)' },
   exNote: { en: 'From the Tatoeba Project, written by volunteers.', es: 'Del proyecto Tatoeba, escritas por voluntarios.' },
   exMore: { en: 'More examples ({n})', es: 'Más ejemplos ({n})' },
+  handPick: { en: 'Form', es: 'Forma' },
+  handPrint: { en: 'Print', es: 'Impresa' },
+  handWritten: { en: 'Handwritten', es: 'A mano' },
+  handMissing: {
+    en: 'Klee One, the handwriting here, has no form of this character, so it stays in print.',
+    es: 'Klee One, la letra a mano de aquí, no tiene este carácter, así que se ve impreso.',
+  },
   exMoreLoading: { en: 'Loading more examples.', es: 'Cargando más ejemplos.' },
   alsoWritten: { en: 'Also written', es: 'También se escribe' },
   otherForms: { en: 'Other forms', es: 'Otras formas' },

@@ -24,6 +24,8 @@ import { toHira, isKana, isHiragana } from './kana.js';
 import { state, rate } from './state.js';
 import { loadLookalikes } from './play-data.js';
 import { loadJlpt } from './levels.js';
+import { hasHand } from './hand.js';
+import { applyHand, onHand } from './events-hand.js';
 
 const STEP_MS = 650;
 
@@ -135,6 +137,7 @@ function paint(view) {
     back: kp.stack.length > 1 ? kp.stack[kp.stack.length - 2] : null,
     mine: { saved: mine.isSaved(ch), n: seen ? seen.n : 0 },
     speakable: canSpeak(),
+    hand: { on: state.prefs.hand, has: hasHand(ch) },
     ...view,
   });
   kp.drawn = drawn;
@@ -152,6 +155,9 @@ async function show() {
   kp.paths = null;
   const empty = { info: null, infos: new Map(), paths: null, page: null };
   paint({ ...empty, state: 'loading' });
+  // With the hand on, its index loads beside the page and the page paints
+  // again to say whether the hand has this character.
+  applyHand().then((covered) => { if (covered && token === kp.token && kp.last) paint(kp.last); });
   try {
     const store = pageData();
     // The look-alikes and the JLPT lists are niceties: one that does not
@@ -237,6 +243,8 @@ export const KANJI_PAGE_ACTIONS = {
 };
 
 export function bindKanjiPage() {
+  // The switch turned on: the open page says whether the hand has its character.
+  onHand(() => { const dialog = $('kanji-dialog'); if (dialog && dialog.open && kp.last) paint(kp.last); });
   const dialog = $('kanji-dialog');
   if (!dialog) return;
   bindDialog(dialog, { focus: (o) => { const el = $('main'); if (el) el.focus(o); } });

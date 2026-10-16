@@ -330,6 +330,27 @@ additions such as 葛 and 遡, which KanjiVG draws in their printed form, and
 牙); the page says so beside the drawing, and `tests/kanji-page.test.mjs`
 names the nine, so a rebuild that changes them fails.
 
+**The handwritten form is Klee One, served by Yomu, and loads on first use.**
+Print and handwriting differ (さ, き, 令), and a learner copies the hand. The
+kanji page (under the large character) and the kana chart (beside Hiragana
+and Katakana) have a Print / Handwritten switch (`render-hand.js`,
+`events-hand.js`, `state.prefs.hand`, this browser's only), which sets
+`html[data-hand]`; CSS swaps `.kp-big` and `.kc-kana` to it. `fonts/klee/`
+is Klee One (SIL OFL 1.1, no Reserved Font Name, so the subset keeps its
+name) cut by `tools/build-font.mjs` (python3 with fonttools and brotli) into
+woff2 slices of 200 glyphs by code point, the kana in the first (24.5 KB), a
+kanji slice about 65 KB, 7,719 characters and 2.5 MB in all, with OFL.txt
+beside them as the licence asks; no layout features, which were 135 KB of the
+kana's 160. Nothing loads until the switch is first on: then
+`fonts/klee/index.json` (`yomu-font/1`, each slice's characters), whose
+slices `hand.js loadHand` registers with the FontFace API, so the browser
+fetches a slice only when it draws one of its characters (one file for a
+kanji page). With the switch left on, the index loads when a kanji page or
+the chart opens. The print font stays next in line, so a kanji Klee One lacks
+(2,847 of the shards' 10,384, 寬 among the name kanji) is drawn in print and
+the kanji page says so (`handMissing`). Google Fonts would have sent every
+visitor's address to Google; `font-src 'self'` stays as it is.
+
 **Search keeps its query in the field, never in the address.** `#/search`
 (`events-search.js`, a route that draws its own section like Play's,
 `routes.js sectionOf`) reads Japanese the way the reader does (the key in
@@ -614,6 +635,7 @@ refuses it.
 - `data/search/**`: emitted by `tools/build-search.mjs` from the committed `data/dict/`, `data/kanji/` and `data/strokes/` (after `build-kanji-page.mjs`). Rebuild, do not hand-edit.
 - `data/strokes/**`, `data/kpage/**`: emitted by `tools/build-kanji-page.mjs` from KanjiVG (the pin in `tools/lib/sources.mjs`) and the committed `data/dict/` and `data/kanji/` (after `build-dict.mjs` and `build-kanji.mjs`). Rebuild, do not hand-edit.
 - `data/kanji/jinmeiyo.json`: emitted by `tools/build-joyo.mjs` (and `build-kanji.mjs`) from the committed kanji shards. Rebuild, do not hand-edit.
+- `fonts/klee/**`: emitted by `tools/build-font.mjs` from the pinned Klee One and its OFL.txt (`tools/lib/sources.mjs`) over the committed kanji shards. Rebuild, do not hand-edit.
 - `data/kanji/jlpt.json`: emitted by `tools/build-jlpt.mjs` from Waller's archived pages (the pins in `tools/lib/sources.mjs`); the checker holds it to his sizes and to the kanji shards. Rebuild, do not hand-edit.
 - `data/play/lookalikes.json`: emitted by `tools/build-lookalikes.mjs` from the committed `data/kanji/` (after `build-kanji.mjs` or `build-joyo.mjs`). Rebuild, do not hand-edit.
 - `data/play/spaces.json`: emitted by `tools/build-spaces.mjs` from the phrase library, `tools/lib/compound-lines.mjs` and the analyzer over the committed `data/` (after any change to `js/`'s analyzer, the dictionary or the library). Rebuild, do not hand-edit.

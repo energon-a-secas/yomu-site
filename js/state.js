@@ -47,6 +47,8 @@ export const state = {
     // This browser's only, never synced (sync-rules.js PREFS): furigana over
     // saved kanji hidden, and the reading's size.
     furiSaved: false, size: 'M', kanjiShown: 'all', kanaRows: [],
+    // The handwritten form on the kanji page and the kana chart (js/hand.js).
+    hand: false,
   },
   // One sentence at a time (reading-view.js): for this visit, never saved.
   view: { one: false, sent: 0 },
@@ -110,6 +112,7 @@ export function loadPrefs(s, loc = globalThis.location, nav = globalThis.navigat
   if (typeof p.slow === 'boolean') s.prefs.slow = p.slow;
   if (typeof p.furiSaved === 'boolean') s.prefs.furiSaved = p.furiSaved;
   if (SIZES.includes(p.size)) s.prefs.size = p.size;
+  if (typeof p.hand === 'boolean') s.prefs.hand = p.hand;
   if (KANJI_SHOWN.includes(p.kanjiShown)) s.prefs.kanjiShown = p.kanjiShown;
   if (Array.isArray(p.kanaRows)) s.prefs.kanaRows = [...new Set(p.kanaRows.filter((r) => KANA_ROWS.includes(r)))];
   if (REMEMBER.includes(p.remember)) s.prefs.remember = p.remember;

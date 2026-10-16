@@ -151,6 +151,29 @@ export const SOURCES = {
     bytes: 1454991,
     licence: 'CC-BY-2.0-FR',
   },
+  // Klee One, a textbook hand by Fontworks, under the SIL Open Font License
+  // 1.1 with no Reserved Font Name (tools/build-font.mjs subsets it for the
+  // kanji page and the kana chart). From Google's fonts repository, whose
+  // main branch keeps one path, so the pin records the file of 2026-10-16
+  // and a later download prints "Upstream moved".
+  kleeOne: {
+    name: 'Klee One Regular, Fontworks (google/fonts ofl/kleeone)',
+    release: 'google/fonts main, fetched 2026-10-16',
+    url: 'https://raw.githubusercontent.com/google/fonts/main/ofl/kleeone/KleeOne-Regular.ttf',
+    file: 'KleeOne-Regular.ttf',
+    sha256: 'bf4063f030cc2ae6adf0a11424a1888e5c0eb4438f1f6d02f52294af868e9b3a',
+    bytes: 8724204,
+    licence: 'OFL-1.1',
+  },
+  kleeOneOfl: {
+    name: 'Klee One licence (OFL.txt)',
+    release: 'google/fonts main, fetched 2026-10-16',
+    url: 'https://raw.githubusercontent.com/google/fonts/main/ofl/kleeone/OFL.txt',
+    file: 'KleeOne-OFL.txt',
+    sha256: 'e376b0df8e8a2345a9533db6f0a5333a1107975569ad9d1973a7ee557161ca38',
+    bytes: 4479,
+    licence: 'OFL-1.1',
+  },
   // Jonathan Waller's JLPT kanji lists, N5 to N1 (tools/build-jlpt.mjs).
   // tanos.co.uk no longer answers, so these are the Wayback Machine's
   // captures, fetched raw (`id_`): the last of each page that still holds

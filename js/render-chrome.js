@@ -65,6 +65,7 @@ export function paintChrome(state) {
   }
   // Every romaji outside the reading follows the reader's choice (render-romaji.js).
   doc.documentElement.dataset.romaji = state.prefs.romaji;
+  doc.documentElement.dataset.hand = state.prefs.hand ? 'on' : 'off';
   paintGapsHint(state);
 
   // The language toggle names the current language in bold and says in its

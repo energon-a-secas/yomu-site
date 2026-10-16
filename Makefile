@@ -48,6 +48,7 @@ data:
 	node tools/build-sounds-like.mjs
 	node tools/build-lookalikes.mjs
 	node tools/build-kanji-page.mjs
+	node tools/build-font.mjs
 	node tools/build-search.mjs
 	node tools/build-spellings.mjs
 	node tools/build-sets.mjs

@@ -740,6 +740,16 @@ rt .snd { border-bottom: 0; padding-bottom: 0; }
 .ex-list { list-style: none; display: flex; flex-direction: column; border-top: 1px solid var(--border-subtle); }
 .ex-item { display: flex; flex-direction: column; gap: 2px; padding: var(--space-2) 0; border-bottom: 1px solid var(--border-subtle); }
 .ex-more { align-self: flex-start; margin-top: var(--space-2); }
+
+/* The handwritten form (js/hand.js): Klee One, a textbook hand, served by
+   Yomu itself. The print font stays next in line, so a character the hand
+   lacks is drawn in print, and the kanji page says so. */
+html[data-hand="on"] .kp-big,
+html[data-hand="on"] .kc-kana { font-family: 'Yomu Klee One', var(--ja); }
+.hand-switch { flex-wrap: wrap; margin-top: var(--space-2); }
+.kp-hand-missing { font-size: var(--text-xs); margin-top: var(--space-1); }
+.kc-switches { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-4); }
+.kc-switches .hand-switch { margin-top: 0; }
 .ex-ja { font-size: 1.0625rem; line-height: 1.6; }
 .ex-word { background: var(--accent-wash); color: var(--text-primary); border-radius: 3px; padding: 0 2px; box-shadow: inset 0 -2px 0 var(--accent-bright); }
 .ex-en { font-size: var(--text-sm); color: var(--text-secondary); }
@@ -1163,7 +1173,7 @@ html[data-romaji="off"] .rom { display: none; }
 .sr-shelf-glyph { grid-row: 1 / 3; font-size: 1.6rem; line-height: 1; }
 .sr-shelf-name { font-weight: 600; font-size: var(--text-sm); }
 .sr-shelf-line { font-size: var(--text-xs); color: var(--text-secondary); }
-.kc-switch { margin-bottom: var(--space-3); }
+.kc-switches { margin-bottom: var(--space-3); }
 .kc-rows-lead { font-size: var(--text-sm); color: var(--text-secondary); }
 .kc-rows { margin: var(--space-2) 0 var(--space-4); }
 .ph-readable-bar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); margin: var(--space-2) 0; }

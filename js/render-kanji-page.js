@@ -22,6 +22,7 @@ import {
 } from './kana.js';
 import { readingRomajiPair, wordRomaji } from './render-romaji.js';
 import { apartOf } from './lookalike-apart.js';
+import { handSwitch, handMissing } from './render-hand.js';
 
 const SVG = 'http://www.w3.org/2000/svg';
 
@@ -213,10 +214,14 @@ function facts(info, jlpt) {
 }
 
 /** The top of a page: the character large, and beside it what it means and how it is read. */
-function hero(ch, lines) {
+function hero(ch, lines, hand) {
   return h('div', { class: 'kp-hero' }, [
     h('span', { class: 'kp-big', lang: 'ja', 'aria-hidden': 'true' }, ch),
-    h('div', { class: 'kp-hero-text' }, lines),
+    h('div', { class: 'kp-hero-text' }, [
+      ...lines,
+      hand ? handSwitch(hand.on, 'kp-hand-label') : null,
+      hand ? handMissing(hand.on, hand.has) : null,
+    ]),
   ]);
 }
 
@@ -283,13 +288,13 @@ function likesPart(ch, likes, infos, drawn) {
  * A kana's page: how it is drawn, how it is spelled in romaji, the same
  * sound in the other script, and common words that start with it.
  */
-function kanaPage(ch, paths, page, nodes, drawn, wordsKept, mine, sounds, speakable) {
+function kanaPage(ch, paths, page, nodes, drawn, wordsKept, mine, sounds, speakable, hand) {
   const hira = isHiragana(ch);
   const other = hira ? toKata(ch) : toHira(ch);
   nodes.push(hero(ch, [
     h('p', { class: 'kp-mean', lang: 'ja-Latn' }, beatRomaji(ch) || ''),
     h('p', { class: 'mk-meta' }, ui(hira ? 'kpHiragana' : 'kpKatakana')),
-  ]));
+  ], hand));
   nodes.push(actionsPart(ch, mine, { save: false }));
   nodes.push(strokesPart(ch, paths));
   if (other && other !== ch) {
@@ -322,7 +327,7 @@ function kanaPage(ch, paths, page, nodes, drawn, wordsKept, mine, sounds, speaka
  *   `sounds` the kana its say buttons say.
  */
 export function kanjiPageNodes({
-  ch, info, infos, paths, page, back, mine, state = 'ready', likes = [], speakable = false, jlpt = null,
+  ch, info, infos, paths, page, back, mine, state = 'ready', likes = [], speakable = false, jlpt = null, hand = null,
 }) {
   const drawn = [];
   const wordsKept = [];
@@ -344,13 +349,13 @@ export function kanjiPageNodes({
       sounds,
     };
   }
-  if (isKana(ch)) return kanaPage(ch, paths, page, nodes, drawn, wordsKept, mine, sounds, speakable);
+  if (isKana(ch)) return kanaPage(ch, paths, page, nodes, drawn, wordsKept, mine, sounds, speakable, hand);
   const meaning = meaningText(info, 5);
   nodes.push(hero(ch, [
     meaning ? h('p', { class: 'kp-mean', lang: 'en' }, meaning) : h('p', { class: 'quiet' }, ui('kanjiMissing')),
     facts(info, jlpt),
     mine.n ? h('p', { class: 'mk-meta' }, seenText(mine.n, true)) : null,
-  ]));
+  ], hand));
   if (info) nodes.push(readingsPart(info, sounds, speakable));
   nodes.push(actionsPart(ch, mine));
   nodes.push(strokesPart(ch, paths));

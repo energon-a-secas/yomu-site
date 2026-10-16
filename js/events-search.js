@@ -24,6 +24,7 @@ import { paintSets, chooseSet, currentSet } from './events-sets.js';
 import { paintLevels } from './events-levels.js';
 import { state, savePrefs } from './state.js';
 import { KANA_ROWS } from './kana-rows.js';
+import { applyHand } from './events-hand.js';
 
 const TABS = Object.freeze(['words', 'parts', 'kana', 'counters', 'sets', 'levels']);
 /** Look up holds the field and the parts picker; Browse the shelves. */
@@ -133,9 +134,11 @@ async function paintParts() {
 }
 
 function paintKana() {
-  const { nodes, kept } = kanaChartNodes(sr.script, state.prefs.kanaRows);
+  const { nodes, kept } = kanaChartNodes(sr.script, state.prefs.kanaRows, state.prefs.hand);
   sr.kanaKept = kept;
   fill($('sr-kana'), nodes);
+  // the hand left on: register its font, which the chart then draws in
+  applyHand();
 }
 
 function showTab(tab, { focus = false } = {}) {
