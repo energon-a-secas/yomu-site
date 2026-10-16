@@ -277,3 +277,28 @@ export function devoicedNotation(kana, indices) {
     return r.replace(/[iu]$/, (v) => `(${v})`);
   }).join('');
 }
+
+// ── A dictionary reading ──────────────────────────────────────────────────
+
+/**
+ * A kanji reading as KANJIDIC writes it, said or spelled. The okurigana dot
+ * goes (ひと.つ is hitotsu), an affix keeps its hyphen on its side (ひと- is
+ * hito-, -び is -bi), and a small っ that ends a reading, which doubles the
+ * sound after it (ジッ in 十分, じっぷん), is an apostrophe: ji'. Both lines
+ * would drop it, since nothing follows it to double.
+ */
+export function readingRomaji(reading, how = 'said') {
+  const s = String(reading || '');
+  const before = s.startsWith('-') ? '-' : '';
+  const after = s.endsWith('-') ? '-' : '';
+  let core = toHira(s.replace(/^-+|-+$/g, '').replace(/\./g, ''));
+  const held = /っ$/.test(core);
+  if (held) core = core.slice(0, -1);
+  const r = how === 'spelled' ? spelled(core) : said(core);
+  return `${before}${r}${held ? "'" : ''}${after}`;
+}
+
+/** The kana to say for a KANJIDIC reading: no dot, no hyphen, in hiragana. */
+export function readingKana(reading) {
+  return toHira(String(reading || '').replace(/[.-]/g, ''));
+}

@@ -19,6 +19,7 @@ import { toHiragana } from './vendor/wanakana.js';
 import { myKanji, dayOf } from './kanji-store.js';
 import { saveToggle, seenText, wordRuby, dayText, today, withKanji } from './render-save.js';
 import { pageOpener } from './render-kanji-page.js';
+import { readingRomajiPair } from './render-romaji.js';
 import { lastSeenLine } from './render-remember.js';
 
 export const SORTS = Object.freeze(['recent', 'seen', 'due']);
@@ -41,8 +42,10 @@ export const view = {
 /** "on テン、 kun あめ" as nodes, or null. */
 export function readingsLine(info) {
   if (!info) return null;
+  // Each reading with its romaji, which the Romaji switch shows said, spelled or not at all.
+  const one = (r) => h('span', { class: 'kj-reading' }, [h('span', { lang: 'ja' }, r), ' ', ...readingRomajiPair(r, 'kj-rom')]);
   const part = (label, items) => (Array.isArray(items) && items.length
-    ? h('span', { class: 'kj-read' }, [h('span', { class: 'kj-key' }, label), ' ', h('span', { lang: 'ja' }, items.join('、'))])
+    ? h('span', { class: 'kj-read' }, [h('span', { class: 'kj-key' }, label), ' ', ...items.flatMap((r, i) => (i ? ['、', one(r)] : [one(r)]))])
     : null);
   const on = part(ui('onReading'), info.on);
   const kun = part(ui('kunReading'), info.kun);

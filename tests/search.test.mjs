@@ -91,7 +91,7 @@ test('a result carries its romaji both ways, and the Romaji switch shows one', a
   const search = html.slice(html.indexOf('id="sr-words"'), html.indexOf('id="sr-results"'));
   for (const v of ['said', 'spelled', 'off']) assert.match(search, new RegExp(`data-pref="romaji" data-value="${v}"`), v);
   const css = await import('node:fs').then((fs) => fs.readFileSync(new URL('../css/style.css', import.meta.url), 'utf8'));
-  assert.match(css, /#search\[data-romaji="off"\] \.sr-romaji \{ display: none; \}/);
+  assert.match(css, /html\[data-romaji="off"\] \.rom \{ display: none; \}/);
   assert.equal(said('せんせい'), 'sensee');
   assert.equal(spelled('せんせい'), 'se-n-se-i');
 });

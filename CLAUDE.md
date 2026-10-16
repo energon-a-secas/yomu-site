@@ -302,7 +302,17 @@ paths (`data/strokes/`, kanji and kana) drawn with one dash each
 (`pathLength` 1), stepped with back, Draw (Pause while it runs) and next;
 its words (each with Read it), the kanji sharing each part and the kanji built
 on it are `data/kpage/` (`tools/build-kanji-page.mjs` says how each is
-chosen). KanjiVG and KANJIDIC disagree on nine jōyō stroke counts (the 2010
+chosen). Every reading and every word on the page says itself when pressed
+(`kp-say-item`, the kana kept in `sounds`), at the Slow rate when Slow is on,
+with its romaji under it: `kana.js readingRomaji` drops KANJIDIC's okurigana
+dot, keeps an affix's hyphen (ひと- hito-) and writes a final small っ as an
+apostrophe (ジッ ji'), since it doubles a sound that is not there. All romaji
+outside the reading follows the reader's Romaji switch through
+`html[data-romaji]` (`render-romaji.js`), so one switch serves the kanji page,
+My kanji, Search and the Idioms shelves. "Looks like" lists Play's look-alikes
+of the kanji with what tells each apart (`lookalike-apart.js`, from KanjiVG's
+parts, then the stroke counts); the list loads with the page, and a list that
+fails leaves the section out. KanjiVG and KANJIDIC disagree on nine jōyō stroke counts (the 2010
 additions such as 葛 and 遡, which KanjiVG draws in their printed form, and
 牙); the page says so beside the drawing, and `tests/kanji-page.test.mjs`
 names the nine, so a rebuild that changes them fails.

@@ -10,7 +10,8 @@
 import { h, withJa } from './utils.js';
 import { glossWords } from './search.js';
 import { ui, t, posWord } from './strings.js';
-import { said, spelled, isKanji } from './kana.js';
+import { isKanji } from './kana.js';
+import { wordRomaji } from './render-romaji.js';
 import { wordRuby, withKanji } from './render-save.js';
 import { NAME_TYPES } from './name-types.js';
 import { meaningText } from './render-mykanji.js';
@@ -59,17 +60,9 @@ export function shownWord(res) {
 /** Whether a result is a first-tier word, the only kind data/spell and data/sent file. */
 export const firstTier = (res) => res.via !== 'name' && res.via !== 'rare';
 
-/**
- * A reading's romaji both ways; #search[data-romaji] shows the one the
- * learner chose (Said, Spelled or Off), so a switch repaints nothing. A
- * phrase passes the reader's own said line (saru mo ki kara ochiru), which
- * spelling the reading as one word cannot give.
- */
+/** A result's romaji, both lines (render-romaji.js); a phrase passes the reader's said line. */
 export function romajiNodes(reading, saidLine = '') {
-  return [
-    h('span', { class: 'sr-romaji sr-romaji--said', lang: 'ja-Latn' }, saidLine || said(reading)),
-    h('span', { class: 'sr-romaji sr-romaji--spelled', lang: 'ja-Latn' }, spelled(reading)),
-  ];
+  return wordRomaji(reading, { saidLine, extra: 'sr-romaji' });
 }
 
 /** How a result was reached, in words: "Dictionary form of 食べた", "English: eat", "Romaji: さけ". */

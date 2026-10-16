@@ -54,3 +54,38 @@ test('a character KanjiVG does not draw reads as null', async () => {
   assert.equal(got.get('☃'), null);
   assert.ok(Array.isArray(got.get('鬱')));
 });
+
+// ── Say it, see it (plan 1.1 to 1.3) ─────────────────────────────────────
+
+test('a KANJIDIC reading reads in romaji: no dot, the affix hyphen kept, a final small tsu an apostrophe', async () => {
+  const { readingRomaji, readingKana } = await import('../js/kana.js');
+  const cases = [
+    ['ゲン', 'gen', 'ge-n'], ['ひと.つ', 'hitotsu', 'hi-to-tsu'], ['ひと-', 'hito-', 'hi-to-'],
+    ['-び', '-bi', '-bi'], ['おお.きい', 'ookii', 'o-o-ki-i'], ['ジッ', "ji'", "ji'"], ['ジュウ', 'juu', 'ju-u'],
+  ];
+  for (const [r, said, spelled] of cases) {
+    assert.equal(readingRomaji(r, 'said'), said, r);
+    assert.equal(readingRomaji(r, 'spelled'), spelled, r);
+  }
+  assert.equal(readingKana('-ま.ち'), 'まち', 'what is said has no marks, in hiragana');
+  assert.equal(readingKana('タイ'), 'たい');
+});
+
+test('what tells look-alikes apart comes from their parts, then their strokes', async () => {
+  const { apartOf } = await import('../js/lookalike-apart.js');
+  const index = JSON.parse(readFileSync(`${DATA}/kanji/index.json`, 'utf8'));
+  const all = new Map();
+  for (const s of index.shards) for (const [ch, v] of Object.entries(JSON.parse(readFileSync(`${DATA}/../${s.src}`, 'utf8')).entries)) all.set(ch, v);
+  const of = (c) => all.get(c);
+  assert.deepEqual(apartOf('待', '持', of), { kind: 'swap', shared: ['寺'], theirs: ['扌'], mine: ['彳'] });
+  assert.equal(apartOf('日', '白', of).kind, 'has', '白 has 日 inside it');
+  assert.equal(apartOf('白', '日', of).kind, 'in', '日 is a part of 白');
+  assert.deepEqual(apartOf('日', '目', of), { kind: 'strokes', n: 5, m: 4 });
+  assert.equal(apartOf('未', '末', of).kind, 'same', 'the same parts and strokes: the data cannot say more');
+  assert.equal(apartOf('未', '〆', () => undefined).kind, 'look', 'with nothing known, nothing is claimed');
+  // Every look-alike Play ships gets a line the page can draw.
+  const likes = JSON.parse(readFileSync(`${DATA}/play/lookalikes.json`, 'utf8')).kanji;
+  for (const [ch, list] of Object.entries(likes)) {
+    for (const other of list) assert.ok(['has', 'in', 'swap', 'strokes', 'same', 'look'].includes(apartOf(ch, other, of).kind), `${ch} ${other}`);
+  }
+});

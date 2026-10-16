@@ -60,9 +60,8 @@ export function paintChrome(state) {
     reading.dataset.unsaved = state.prefs.unsaved;
     reading.dataset.gaps = state.prefs.gaps ? 'on' : 'off';
   }
-  // Search's cards and the Idioms tab show the romaji the reader does: one choice, two switches.
-  const search = $('search');
-  if (search) search.dataset.romaji = state.prefs.romaji;
+  // Every romaji outside the reading follows the reader's choice (render-romaji.js).
+  doc.documentElement.dataset.romaji = state.prefs.romaji;
   paintGapsHint(state);
 
   // The language toggle names the current language in bold and says in its

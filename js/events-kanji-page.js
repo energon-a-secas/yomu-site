@@ -21,6 +21,8 @@ import { afterChange, openReader } from './events-kanji.js';
 import { loadText } from './events-read.js';
 import { speak, canSpeak } from './speech.js';
 import { toHira, isKana, isHiragana } from './kana.js';
+import { state, rate } from './state.js';
+import { loadLookalikes } from './play-data.js';
 
 const STEP_MS = 650;
 
@@ -28,6 +30,7 @@ const kp = {
   stack: [],
   drawn: [],
   words: [],
+  sounds: [],   // the kana each say button says, by its data-ix
   paths: null,
   token: 0,
   timer: null,
@@ -100,7 +103,20 @@ function say(b) {
   if (!ch || !canSpeak() || b.getAttribute('aria-disabled') === 'true') return;
   const info = kp.last && kp.last.info;
   const first = info ? [...(info.on || []), ...(info.kun || [])][0] : null;
-  speak(first ? toHira(String(first).replace(/[.-]/g, '')) : ch);
+  speak(first ? toHira(String(first).replace(/[.-]/g, '')) : ch, { rate: rate(state) });
+}
+
+/**
+ * Say one reading or word, marking its button while the voice speaks, so
+ * a press is seen as well as heard.
+ */
+async function sayItem(b) {
+  const text = kp.sounds[Number(b.dataset.ix)];
+  if (!text || !canSpeak() || b.getAttribute('aria-disabled') === 'true') return;
+  for (const el of document.querySelectorAll('#kanji-dialog .is-saying')) el.classList.remove('is-saying');
+  b.classList.add('is-saying');
+  await speak(text, { rate: rate(state) });
+  b.classList.remove('is-saying');
 }
 
 function paint(view) {
@@ -113,14 +129,16 @@ function paint(view) {
   if (!body) return;
   const mine = myKanji();
   const seen = mine.seenOf(ch);
-  const { nodes, drawn, words } = kanjiPageNodes({
+  const { nodes, drawn, words, sounds } = kanjiPageNodes({
     ch,
     back: kp.stack.length > 1 ? kp.stack[kp.stack.length - 2] : null,
     mine: { saved: mine.isSaved(ch), n: seen ? seen.n : 0 },
+    speakable: canSpeak(),
     ...view,
   });
   kp.drawn = drawn;
   kp.words = words;
+  kp.sounds = sounds;
   fill(body, nodes);
   if (view.state === 'ready') setStep(kp.paths ? kp.paths.length : 0);
 }
@@ -135,15 +153,19 @@ async function show() {
   paint({ ...empty, state: 'loading' });
   try {
     const store = pageData();
-    const [infos, strokes, page] = await Promise.all([kanjiInfo([ch]), store.strokesOf([ch]), store.pageOf(ch)]);
+    // The look-alikes are a nicety: a list that does not load leaves the section out.
+    const [infos, strokes, page, alike] = await Promise.all([
+      kanjiInfo([ch]), store.strokesOf([ch]), store.pageOf(ch), loadLookalikes().catch(() => new Map()),
+    ]);
     const info = infos.get(ch) || null;
     const parts = info && Array.isArray(info.parts) ? info.parts : [];
-    const around = [...parts, ...Object.values(page.parts).flat(), ...page.used, ...page.variants];
+    const likes = alike.get(ch) || [];
+    const around = [...parts, ...Object.values(page.parts).flat(), ...page.used, ...page.variants, ...likes];
     const more = around.length ? await kanjiInfo(around) : new Map();
     if (token !== kp.token) return;
     kp.paths = strokes.get(ch) || null;
     paint({
-      info, infos: new Map([...infos, ...more]), paths: kp.paths, page, state: 'ready',
+      info, infos: new Map([...infos, ...more]), paths: kp.paths, page, likes, state: 'ready',
     });
   } catch (err) {
     if (token !== kp.token) return;
@@ -190,6 +212,7 @@ export const KANJI_PAGE_ACTIONS = {
   'kp-next': next,
   'kp-prev': prev,
   'kp-say': say,
+  'kp-say-item': sayItem,
   'kp-read': (b) => {
     const w = kp.words[Number(b.dataset.ix)];
     if (!w) return;

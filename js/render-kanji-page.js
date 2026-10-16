@@ -1,8 +1,11 @@
 // The kanji page: one kanji, taken apart. How it is drawn, stroke by stroke
 // (KanjiVG's paths, data/strokes/), what it means and how it is read
-// (KANJIDIC, data/kanji/), the parts it is made of and the kanji that share
+// (KANJIDIC, data/kanji/), the kanji it is easily taken for (Play's
+// look-alikes, data/play/), the parts it is made of and the kanji that share
 // each part or are built on it (data/kpage/), the common words written with
-// it, and the same save toggle as everywhere else.
+// it, and the same save toggle as everywhere else. Every reading and every
+// word says itself when pressed, with its romaji under it: what to say is
+// kept in `sounds`, found by `data-ix`, like everything else here.
 //
 // Every kanji the page offers to go to is a button found by `data-ix`, its
 // place in the list this paint drew (`drawn`): no character is written into
@@ -15,8 +18,10 @@ import { seenText, wordRuby, withKanji } from './render-save.js';
 import { meaningText } from './render-mykanji.js';
 import { gradeName } from './render-remember.js';
 import {
-  isKana, isHiragana, toHira, toKata, beatRomaji,
+  isKana, isHiragana, toHira, toKata, beatRomaji, readingKana,
 } from './kana.js';
+import { readingRomajiPair, wordRomaji } from './render-romaji.js';
+import { apartOf } from './lookalike-apart.js';
 
 const SVG = 'http://www.w3.org/2000/svg';
 
@@ -146,18 +151,28 @@ function strip(chars, drawn) {
   return h('div', { class: 'kp-strip' }, chars.map((c) => goTile(c, drawn, null)));
 }
 
-/** The common words, each with Read it, found by `data-ix` in `words`. */
-function wordsPart(titleKey, words, wordsKept) {
+/** A button that says something kept in `sounds`, found by its `data-ix`; disabled with no Japanese voice. */
+function sayButton(cls, ix, speakable, kids) {
+  return h('button', {
+    type: 'button', class: cls, 'data-act': 'kp-say-item', 'data-ix': ix, 'data-speak': '', 'aria-disabled': speakable ? null : 'true',
+  }, kids);
+}
+
+/** The common words, each with its romaji, a speaker, and Read it, found by `data-ix` in `words`. */
+function wordsPart(titleKey, words, wordsKept, sounds, speakable) {
   return h('section', { class: 'kp-sec' }, [
     h('h3', { class: 'word-sub' }, ui(titleKey)),
     words.length
       ? h('ul', { class: 'kp-words', role: 'list' }, words.map((w) => {
         const ix = wordsKept.push(w.written) - 1;
+        const say = sounds.push(toHira(w.reading)) - 1;
         return h('li', { class: 'kp-word' }, [
           h('span', { class: 'kp-word-text' }, [
             wordRuby([w.written, w.reading]),
+            h('span', { class: 'kp-word-rom' }, wordRomaji(toHira(w.reading))),
             h('span', { class: 'kp-gloss', lang: 'en' }, w.gloss),
           ]),
+          sayButton('kp-say-word', say, speakable, [speakerIcon(), h('span', { class: 'sr-only' }, withKanji('kpSayWord', w.written))]),
           h('button', { type: 'button', class: 'btn btn--ghost btn--sm kp-read', 'data-act': 'kp-read', 'data-ix': ix }, [
             h('span', { 'aria-hidden': 'true' }, ui('searchRead')),
             h('span', { class: 'sr-only' }, ui('searchReadLabel', { w: w.written })),
@@ -199,16 +214,70 @@ function hero(ch, lines) {
   ]);
 }
 
-function chip(label, items) {
-  if (!Array.isArray(items) || !items.length) return null;
-  return h('span', { class: 'kp-chip' }, [label, ' ', h('span', { lang: 'ja' }, items.join(' · '))]);
+/** A KANJIDIC reading as the page draws it: 〜 for an affix's hyphen, the okurigana after the dot lighter. */
+function readingShown(r) {
+  const s = String(r);
+  const core = s.replace(/^-+|-+$/g, '');
+  const dot = core.indexOf('.');
+  return [
+    s.startsWith('-') ? '〜' : '',
+    ...(dot < 0 ? [core] : [core.slice(0, dot), h('span', { class: 'kp-oku' }, core.slice(dot + 1))]),
+    s.endsWith('-') ? '〜' : '',
+  ].filter((x) => x !== '');
+}
+
+/** The on and kun readings, each a button that says it, its romaji under it. */
+function readingsPart(info, sounds, speakable) {
+  const group = (label, items) => (Array.isArray(items) && items.length ? h('div', { class: 'kp-readgroup' }, [
+    h('span', { class: 'kp-readlabel' }, label),
+    h('span', { class: 'kp-readings' }, items.map((r) => sayButton('kp-reading', sounds.push(readingKana(r)) - 1, speakable, [
+      h('span', { class: 'sr-only' }, `${ui('kpSay')}: `),
+      h('span', { class: 'kp-reading-kana', lang: 'ja' }, readingShown(r)),
+      ...readingRomajiPair(r, 'kp-reading-rom'),
+    ]))),
+  ]) : null);
+  return h('div', { class: 'kp-readblock' }, [group(ui('onReading'), info.on), group(ui('kunReading'), info.kun)]);
+}
+
+/** A line with Japanese in it: `{name}` in a string is a lang="ja" span. */
+function jaLine(key, vars) {
+  return ui(key).split(/(\{\w+\})/).filter(Boolean).map((piece) => {
+    const m = /^\{(\w+)\}$/.exec(piece);
+    if (!m) return piece;
+    const v = vars[m[1]];
+    return typeof v === 'number' ? String(v) : h('span', { lang: 'ja' }, Array.isArray(v) ? v.join('') : String(v));
+  });
+}
+
+/** "Looks like": each look-alike, a tile to its page, and what tells it apart (lookalike-apart.js). */
+function likesPart(ch, likes, infos, drawn) {
+  if (!likes.length) return null;
+  const infoOf = (c) => infos.get(c);
+  return h('section', { class: 'kp-sec' }, [
+    h('h3', { class: 'word-sub' }, ui('kpLooksLike')),
+    h('ul', { class: 'kp-likes', role: 'list' }, likes.map((other) => {
+      const d = apartOf(ch, other, infoOf);
+      const line = {
+        has: () => jaLine('kpApartHas', { a: ch }),
+        in: () => jaLine('kpApartIn', { a: ch }),
+        swap: () => jaLine('kpApartSwap', { s: d.shared, t: d.theirs, a: ch, m: d.mine }),
+        strokes: () => jaLine('kpApartStrokes', { n: d.n, a: ch, m: d.m }),
+        same: () => jaLine('kpApartSame', {}),
+        look: () => jaLine('kpApartLook', {}),
+      }[d.kind]();
+      return h('li', { class: 'kp-like' }, [
+        infos.has(other) ? goTile(other, drawn, meaningText(infos.get(other), 1)) : h('span', { class: 'kp-go kp-go--plain' }, h('span', { class: 'kp-go-char', lang: 'ja' }, other)),
+        h('p', { class: 'kp-sub kp-apart' }, line),
+      ]);
+    })),
+  ]);
 }
 
 /**
  * A kana's page: how it is drawn, how it is spelled in romaji, the same
  * sound in the other script, and common words that start with it.
  */
-function kanaPage(ch, paths, page, nodes, drawn, wordsKept, mine) {
+function kanaPage(ch, paths, page, nodes, drawn, wordsKept, mine, sounds, speakable) {
   const hira = isHiragana(ch);
   const other = hira ? toKata(ch) : toHira(ch);
   nodes.push(hero(ch, [
@@ -223,9 +292,9 @@ function kanaPage(ch, paths, page, nodes, drawn, wordsKept, mine) {
       strip([other], drawn),
     ]));
   }
-  nodes.push(wordsPart('kpStartsWith', page ? page.words : [], wordsKept));
+  nodes.push(wordsPart('kpStartsWith', page ? page.words : [], wordsKept, sounds, speakable));
   nodes.push(h('p', { class: 'quiet kp-source' }, ui('kpSource')));
-  return { nodes, drawn, words: wordsKept };
+  return { nodes, drawn, words: wordsKept, sounds };
 }
 
 /**
@@ -240,14 +309,18 @@ function kanaPage(ch, paths, page, nodes, drawn, wordsKept, mine) {
  * @param {string|null} p.back      the kanji Back returns to
  * @param {{ saved: boolean, n: number }} p.mine
  * @param {string} [p.state]        'loading' | 'failed' | 'ready'
- * @returns {{ nodes: Node[], drawn: string[], words: string[] }}
- *   `drawn` the kanji its go buttons name, `words` the words Read it sends.
+ * @param {string[]} [p.likes]      its look-alikes, Play's
+ * @param {boolean} [p.speakable]   a Japanese voice is there to say things
+ * @returns {{ nodes: Node[], drawn: string[], words: string[], sounds: string[] }}
+ *   `drawn` the kanji its go buttons name, `words` the words Read it sends,
+ *   `sounds` the kana its say buttons say.
  */
 export function kanjiPageNodes({
-  ch, info, infos, paths, page, back, mine, state = 'ready',
+  ch, info, infos, paths, page, back, mine, state = 'ready', likes = [], speakable = false,
 }) {
   const drawn = [];
   const wordsKept = [];
+  const sounds = [];
   const meanOf = (c) => meaningText(infos.get(c), 1);
   const nodes = [];
   if (back) {
@@ -255,23 +328,24 @@ export function kanjiPageNodes({
       h('span', { 'aria-hidden': 'true' }, '← '), ...withKanji('kpBack', back),
     ]));
   }
-  if (state === 'loading') return { nodes: [...nodes, h('p', { class: 'quiet', role: 'status' }, ui('kpLoading'))], drawn, words: wordsKept };
+  if (state === 'loading') return { nodes: [...nodes, h('p', { class: 'quiet', role: 'status' }, ui('kpLoading'))], drawn, words: wordsKept, sounds };
   if (state === 'failed') {
     return {
       nodes: [...nodes, h('p', { class: 'word-warn', role: 'alert' }, ui('kpFailed')),
         h('button', { type: 'button', class: 'btn btn--secondary btn--sm', 'data-act': 'kp-retry' }, ui('retry'))],
       drawn,
       words: wordsKept,
+      sounds,
     };
   }
-  if (isKana(ch)) return kanaPage(ch, paths, page, nodes, drawn, wordsKept, mine);
+  if (isKana(ch)) return kanaPage(ch, paths, page, nodes, drawn, wordsKept, mine, sounds, speakable);
   const meaning = meaningText(info, 5);
   nodes.push(hero(ch, [
     meaning ? h('p', { class: 'kp-mean', lang: 'en' }, meaning) : h('p', { class: 'quiet' }, ui('kanjiMissing')),
-    info ? h('p', { class: 'kp-chips' }, [chip(ui('onReading'), info.on), chip(ui('kunReading'), info.kun)]) : null,
     facts(info),
     mine.n ? h('p', { class: 'mk-meta' }, seenText(mine.n, true)) : null,
   ]));
+  if (info) nodes.push(readingsPart(info, sounds, speakable));
   nodes.push(actionsPart(ch, mine));
   nodes.push(strokesPart(ch, paths));
   if (paths && info && Number.isInteger(info.s) && info.s !== paths.length) {
@@ -286,6 +360,9 @@ export function kanjiPageNodes({
       h('p', { class: 'quiet kp-note' }, ui('otherFormsNote')),
     ]));
   }
+
+  const like = likesPart(ch, likes, infos, drawn);
+  if (like) nodes.push(like);
 
   // KanjiVG names some parts by a code (CDP-8BC4) or a layout (⿱日隹): only characters are shown.
   const parts = info && Array.isArray(info.parts) ? info.parts.filter((x) => x && x !== ch && [...x].length === 1) : [];
@@ -313,7 +390,7 @@ export function kanjiPageNodes({
     ]));
   }
 
-  nodes.push(wordsPart('kpWords', page ? page.words : [], wordsKept));
+  nodes.push(wordsPart('kpWords', page ? page.words : [], wordsKept, sounds, speakable));
   nodes.push(h('p', { class: 'quiet kp-source' }, ui('kpSource')));
-  return { nodes, drawn, words: wordsKept };
+  return { nodes, drawn, words: wordsKept, sounds };
 }
