@@ -461,6 +461,16 @@ test('check-data fails each broken rule and names the file', async () => {
       d.kanji = d.kanji.slice(1);
       d.count -= 1;
     }), /jinmeiyo\.json: is not what the shards give/],
+    ['a JLPT level one kanji short', (rw) => rw('data/kanji/jlpt.json', (d) => {
+      d.levels.n5 = d.levels.n5.slice(1);
+      d.count -= 1;
+    }), /jlpt\.json: n5 holds 78 kanji, not 79/],
+    ['a kanji in two JLPT levels', (rw) => rw('data/kanji/jlpt.json', (d) => {
+      d.levels.n4 = d.levels.n5[0] + d.levels.n4.slice(1);
+    }), /jlpt\.json: 日 is in n5 and n4/],
+    ['a JLPT kanji no kanji shard holds', (rw) => rw('data/kanji/jlpt.json', (d) => {
+      d.levels.n1 = '鿿' + d.levels.n1.slice(1);
+    }), /jlpt\.json: n1: 鿿 is in no kanji shard/],
     ['a collection row with no glosses', (rw) => rw('data/sets/proverb0.json', (d) => {
       d.rows[2][2] = [];
     }), /proverb0\.json: row 2 is not \[written/],

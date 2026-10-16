@@ -112,6 +112,25 @@ export const LICENCES = {
     ],
     screen: 'none',
   },
+  // Jonathan Waller's JLPT kanji lists (tools/build-jlpt.mjs): which kanji
+  // each level holds, nothing else of his pages. His terms ask for credit to
+  // the site, and a link would be nice; tanos.co.uk no longer answers, so the
+  // links are the archived pages: the lists, and the terms. CC BY with no
+  // version named, so the spdx says no version either.
+  waller: {
+    source: "Jonathan Waller's JLPT Resources, tanos.co.uk",
+    url: 'https://web.archive.org/web/20230130032341/http://www.tanos.co.uk/jlpt/sharing/',
+    spdx: 'CC-BY',
+    derived: true,
+    id: 'waller',
+    acknowledgement:
+      "The kanji by JLPT level are Jonathan Waller's lists from his JLPT Resources site, tanos.co.uk, used under the Creative Commons Attribution licence his site states. They are unofficial: the JLPT has published no kanji lists since 2010.",
+    links: [
+      'https://web.archive.org/web/2018/http://www.tanos.co.uk/jlpt/',
+      'https://web.archive.org/web/20230130032341/http://www.tanos.co.uk/jlpt/sharing/',
+    ],
+    screen: 'required',
+  },
   // The names read Tatoeba twice over: the Japanese sentences say which names
   // ship and how often each is met, and their English translations say which
   // of a katakana name's JMnedict spellings is shown (tools/lib/original.mjs).

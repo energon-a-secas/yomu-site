@@ -435,6 +435,14 @@ with no rank last by code point. Sizes 80, 160, 200, 202, 193, 191 and
 `tools/build-joyo.mjs`. `tools/check-data.mjs` rebuilds it from the shards
 and fails any difference.
 
+`data/kanji/jlpt.json` (format `yomu-jlpt/1`) is not read by the analyzer
+either: `{ _licence, format, count: 2211, levels: { n5: '日一国...', n4,
+n3, n2, n1 } }`, each level one string of kanji in the order of Jonathan
+Waller's list (79, 166, 367, 367, 1,232), no kanji in two levels, every one
+a kanji the shards hold (`tools/lib/jlpt.mjs` has the rules the builder
+refuses and the checker fails on). The lists are unofficial and CC BY: the
+JLPT has published none since 2010.
+
 `data/play/lookalikes.json` (format `yomu-lookalikes/1`) is not read by the
 analyzer either: it is Play's kanji look-alikes,
 `{ _licence, format, count, kanji: { '待': '持侍特時', ... } }`, each key a
@@ -1426,4 +1434,5 @@ analyzer moves an edge.
 - JMnedict (jmdict-simplified's jmnedict-all), for `data/names/`: the same Group and licence. Its acknowledgement (`tools/lib/licence.mjs`, the EDRDG's sample text with the names file named) must be on the page whenever a name from the names tier is.
 - KanjiVG: Ulrich Apel, CC BY-SA 3.0, for `parts`.
 - Tatoeba: CC BY 2.0 FR, used to rank keys, to choose and count names, and, through the English translations of its Japanese sentences, to choose which of a katakana name's JMnedict spellings is shown; and, in data/sent/ only (tools/build-sentences.mjs), the example sentences themselves with their English, each linked to its page on tatoeba.org for the credit.
+- Jonathan Waller's JLPT kanji lists (tanos.co.uk, archived): Creative Commons BY with no version named, for `data/kanji/jlpt.json` only; the credit is on the level view and in the Sources dialog.
 - The phrase library, the compound lines of "Where are the spaces?" and every note are written here and are public domain. `data/play/spaces.json` carries JMdict's licence block, with JMnedict and the authored lines as inputs, because where its lines part is the analysis over both.

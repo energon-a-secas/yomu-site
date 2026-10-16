@@ -89,6 +89,7 @@ export const COLLECT_STRINGS = Object.freeze({
 
   // The kanji dialog.
   jlptOld: { en: 'old JLPT level {n}', es: 'nivel {n} del JLPT antiguo' },
+  jlptN: { en: 'JLPT N{n}, unofficial list', es: 'JLPT N{n}, lista no oficial' },
   seenSpanOne: { en: 'Seen in 1 text, {day}.', es: 'Visto en 1 texto: {day}.' },
   seenSpanMany: { en: 'Seen in {n} texts, first {first}, last {last}.', es: 'Visto en {n} textos: el primero {first}, el último {last}.' },
   notCollected: {

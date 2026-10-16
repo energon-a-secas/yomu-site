@@ -83,6 +83,7 @@ import { isKanji, isHiragana } from '../js/kana.js';
 import {
   joyoDoc, JOYO_FORMAT, JOYO_GRADES, JOYO_SIZES, JOYO_TOTAL, jinmeiyoDoc, JINMEIYO_FORMAT,
 } from './lib/joyo.mjs';
+import { jlptProblems, JLPT_FORMAT } from './lib/jlpt.mjs';
 import { groupsOfWord } from '../js/sounds-like.js';
 import { BANNED_WORDS } from './lib/licence.mjs';
 import { LOOKALIKES_FORMAT, LOOKALIKES_SRC, lookalikesProblems } from './lib/lookalikes.mjs';
@@ -283,6 +284,7 @@ const FORMATS = {
   'yomu-library/1': null,
   [JOYO_FORMAT]: checkJoyoDoc,
   [JINMEIYO_FORMAT]: null,
+  [JLPT_FORMAT]: (rel, doc) => { for (const p of jlptProblems(doc)) fail(rel, p); },
   'yomu-strokes-index/1': null,
   'yomu-strokes/1': checkStrokes,
   'yomu-kpage-index/1': null,
@@ -453,6 +455,17 @@ function checkJinmeiyo(docs) {
   if (typeof doc.kanji !== 'string' || doc.kanji !== built.kanji || doc.count !== built.count) {
     fail(rel, `is not what the shards give (${built.count} kanji of grades 9 and 10); run node tools/build-joyo.mjs`);
   }
+}
+
+/** The JLPT lists: every kanji one the kanji shards hold, so its page can show it. */
+function checkJlpt(docs) {
+  const rel = 'data/kanji/jlpt.json';
+  const doc = docs.get(rel);
+  const shards = shardFiles(docs, 'yomu-kanji/1');
+  if (!doc) { if (shards.length) fail(rel, 'missing, but kanji shards exist; run node tools/build-jlpt.mjs'); return; }
+  const known = new Set();
+  for (const src of shards) for (const ch of Object.keys(docs.get(src).entries || {})) known.add(ch);
+  for (const p of jlptProblems(doc, known)) if (p.endsWith('in no kanji shard')) fail(rel, p);
 }
 
 /**
@@ -818,6 +831,7 @@ function main() {
   checkKanjiIndex(docs);
   checkJoyo(docs);
   checkJinmeiyo(docs);
+  checkJlpt(docs);
   checkRangeIndex(docs, 'data/dict/rare.json', 'yomu-dict-rare/1');
   checkRangeIndex(docs, 'data/names/index.json', 'yomu-names/1');
   checkRangeIndex(docs, 'data/strokes/index.json', 'yomu-strokes/1');

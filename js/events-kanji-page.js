@@ -23,6 +23,7 @@ import { speak, canSpeak } from './speech.js';
 import { toHira, isKana, isHiragana } from './kana.js';
 import { state, rate } from './state.js';
 import { loadLookalikes } from './play-data.js';
+import { loadJlpt } from './levels.js';
 
 const STEP_MS = 650;
 
@@ -153,9 +154,11 @@ async function show() {
   paint({ ...empty, state: 'loading' });
   try {
     const store = pageData();
-    // The look-alikes are a nicety: a list that does not load leaves the section out.
-    const [infos, strokes, page, alike] = await Promise.all([
+    // The look-alikes and the JLPT lists are niceties: one that does not
+    // load leaves its section, or its line, out.
+    const [infos, strokes, page, alike, lists] = await Promise.all([
       kanjiInfo([ch]), store.strokesOf([ch]), store.pageOf(ch), loadLookalikes().catch(() => new Map()),
+      loadJlpt().catch(() => null),
     ]);
     const info = infos.get(ch) || null;
     const parts = info && Array.isArray(info.parts) ? info.parts : [];
@@ -166,6 +169,7 @@ async function show() {
     kp.paths = strokes.get(ch) || null;
     paint({
       info, infos: new Map([...infos, ...more]), paths: kp.paths, page, likes, state: 'ready',
+      jlpt: (lists && lists.levelOf.get(ch)) || null,
     });
   } catch (err) {
     if (token !== kp.token) return;

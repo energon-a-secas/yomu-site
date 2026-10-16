@@ -43,6 +43,7 @@ validate:
 data:
 	node tools/build-dict.mjs
 	node tools/build-kanji.mjs
+	node tools/build-jlpt.mjs
 	node tools/build-names.mjs
 	node tools/build-sounds-like.mjs
 	node tools/build-lookalikes.mjs

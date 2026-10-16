@@ -151,6 +151,60 @@ export const SOURCES = {
     bytes: 1454991,
     licence: 'CC-BY-2.0-FR',
   },
+  // Jonathan Waller's JLPT kanji lists, N5 to N1 (tools/build-jlpt.mjs).
+  // tanos.co.uk no longer answers, so these are the Wayback Machine's
+  // captures, fetched raw (`id_`): the last of each page that still holds
+  // its list, all from 2018 (the later captures are empty). His "Use my
+  // data!" page, captured 2023-01-30 (LICENCES.waller), puts everything on
+  // the site he does not sell under Creative Commons "BY", commercial use
+  // included, with credit to the site; it names no version. The JLPT has
+  // published no kanji lists since 2010, so the lists are unofficial, and
+  // only which kanji each level holds is kept: no reading, no meaning.
+  wallerN5: {
+    name: "Jonathan Waller's JLPT N5 kanji list, tanos.co.uk",
+    release: 'Wayback Machine capture 20180428180651',
+    url: 'https://web.archive.org/web/20180428180651id_/http://www.tanos.co.uk:80/jlpt/jlpt5/kanji/',
+    file: 'waller-n5-kanji.html',
+    sha256: '07e03ec4b0fe8ec4141aae3713c141e43a03df2907f78bdef3a7641d9b561de9',
+    bytes: 46087,
+    licence: 'CC-BY',
+  },
+  wallerN4: {
+    name: "Jonathan Waller's JLPT N4 kanji list, tanos.co.uk",
+    release: 'Wayback Machine capture 20180514070408',
+    url: 'https://web.archive.org/web/20180514070408id_/http://www.tanos.co.uk:80/jlpt/jlpt4/kanji/',
+    file: 'waller-n4-kanji.html',
+    sha256: '7922a19751c304ff4d62e391fa72bb8f38b6cc3220f87e8c657bf0a6a966d873',
+    bytes: 83270,
+    licence: 'CC-BY',
+  },
+  wallerN3: {
+    name: "Jonathan Waller's JLPT N3 kanji list, tanos.co.uk",
+    release: 'Wayback Machine capture 20180506124054',
+    url: 'https://web.archive.org/web/20180506124054id_/http://www.tanos.co.uk:80/jlpt/jlpt3/kanji/',
+    file: 'waller-n3-kanji.html',
+    sha256: 'db743d52580b36626270cfeb184552295654d2df7c6b7bfd9c2b9d7ceaee25ab',
+    bytes: 172152,
+    licence: 'CC-BY',
+  },
+  wallerN2: {
+    name: "Jonathan Waller's JLPT N2 kanji list, tanos.co.uk",
+    release: 'Wayback Machine capture 20180423221317',
+    url: 'https://web.archive.org/web/20180423221317id_/http://www.tanos.co.uk:80/jlpt/jlpt2/kanji/',
+    file: 'waller-n2-kanji.html',
+    sha256: 'da462c435bbfd6ae12bf36c14d6638acfef7e28c7f17460b95f9f77a35eaad83',
+    bytes: 167019,
+    licence: 'CC-BY',
+  },
+  wallerN1: {
+    name: "Jonathan Waller's JLPT N1 kanji list, tanos.co.uk",
+    release: 'Wayback Machine capture 20180430143238',
+    url: 'https://web.archive.org/web/20180430143238id_/http://www.tanos.co.uk:80/jlpt/jlpt1/kanji/',
+    file: 'waller-n1-kanji.html',
+    sha256: '8a772e01fb54e32fc718070b1b3122d080c52125a1537a034b87be42c5932f67',
+    bytes: 521400,
+    licence: 'CC-BY',
+  },
 };
 
 function sh(cmd, args, opts = {}) {

@@ -1728,7 +1728,9 @@ html[data-embed="1"] body:has(> .neo-footer) { min-height: 0; }
 .tabbar-due { position: absolute; top: -8px; left: calc(100% - 4px); }
 
 /* ── Kanji by level (render-levels.js) ─────────────────────── */
-.lv-pick { display: flex; flex-wrap: wrap; gap: var(--space-2); margin: var(--space-3) 0; }
+.lv-picks { display: flex; flex-direction: column; gap: var(--space-2); margin: var(--space-3) 0; }
+.lv-pick { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+.lv-pick-label { flex-basis: 100%; font-size: var(--text-xs); color: var(--text-muted); }
 .lv-chip { font-family: inherit; font-size: var(--text-sm); }
 .lv-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2); }
 .lv-head .btn { min-height: 44px; }

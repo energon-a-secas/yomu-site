@@ -34,6 +34,7 @@ export const collect = {
   joyo: null,                 // collection.js parseJoyo() result
   joyoState: 'idle',          // idle | loading | ready | error
   joyoError: '',
+  jlpt: null,                 // levels.js loadJlpt() result, for a tile's JLPT level
   dialog: null,               // the kanji the dialog shows
 };
 
@@ -180,7 +181,10 @@ function facts(ch, info) {
   const out = [];
   if (grade) out.push(gradeName(grade));
   if (info && Number.isInteger(info.s)) out.push(ui('strokes', { n: info.s }));
-  if (info && Number.isInteger(info.j)) out.push(ui('jlptOld', { n: info.j }));
+  // Waller's level, as the kanji page names it; KANJIDIC's old one for a kanji his lists leave out
+  const jlpt = collect.jlpt && collect.jlpt.levelOf.get(ch);
+  if (jlpt) out.push(ui('jlptN', { n: jlpt }));
+  else if (info && Number.isInteger(info.j)) out.push(ui('jlptOld', { n: info.j }));
   return out.length ? h('p', { class: 'mk-meta' }, out.join(' · ')) : null;
 }
 

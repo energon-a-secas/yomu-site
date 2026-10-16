@@ -196,12 +196,18 @@ function goTile(ch, drawn, meaning) {
 /** KANJIDIC's grades the page names: the jōyō school years and secondary school. */
 const GRADES = new Set([1, 2, 3, 4, 5, 6, 8]);
 
-function facts(info) {
+/**
+ * The line under the meanings: school year, strokes, the JLPT level on
+ * Waller's lists (`jlpt`, 5 for N5) or, for a kanji they leave out,
+ * KANJIDIC's level of the test before 2010, and the newspaper rank.
+ */
+function facts(info, jlpt) {
   if (!info) return null;
   const out = [];
   if (GRADES.has(info.g)) out.push(gradeName(info.g));
   if (Number.isInteger(info.s)) out.push(ui('strokes', { n: info.s }));
-  if (Number.isInteger(info.j)) out.push(ui('jlptOld', { n: info.j }));
+  if (jlpt) out.push(ui('jlptN', { n: jlpt }));
+  else if (Number.isInteger(info.j)) out.push(ui('jlptOld', { n: info.j }));
   if (Number.isInteger(info.f)) out.push(ui('kpFreq', { n: info.f }));
   return out.length ? h('p', { class: 'mk-meta' }, out.join(' · ')) : null;
 }
@@ -316,7 +322,7 @@ function kanaPage(ch, paths, page, nodes, drawn, wordsKept, mine, sounds, speaka
  *   `sounds` the kana its say buttons say.
  */
 export function kanjiPageNodes({
-  ch, info, infos, paths, page, back, mine, state = 'ready', likes = [], speakable = false,
+  ch, info, infos, paths, page, back, mine, state = 'ready', likes = [], speakable = false, jlpt = null,
 }) {
   const drawn = [];
   const wordsKept = [];
@@ -342,7 +348,7 @@ export function kanjiPageNodes({
   const meaning = meaningText(info, 5);
   nodes.push(hero(ch, [
     meaning ? h('p', { class: 'kp-mean', lang: 'en' }, meaning) : h('p', { class: 'quiet' }, ui('kanjiMissing')),
-    facts(info),
+    facts(info, jlpt),
     mine.n ? h('p', { class: 'mk-meta' }, seenText(mine.n, true)) : null,
   ]));
   if (info) nodes.push(readingsPart(info, sounds, speakable));

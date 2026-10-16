@@ -30,6 +30,7 @@ import {
   myHistory, textKey, MAX_SAVED, KEY as HISTORY_KEY,
 } from './history-store.js';
 import { loadJoyo } from './collection.js';
+import { loadJlpt } from './levels.js';
 import { view } from './render-mykanji.js';
 import { paintStatus, afterPaintAll } from './render.js';
 import {
@@ -51,6 +52,8 @@ import {
 async function ensureJoyo() {
   if (collect.joyo || collect.joyoState === 'loading') return;
   collect.joyoState = 'loading';
+  // A tile's JLPT level; a list that does not load leaves KANJIDIC's old level
+  loadJlpt().then((lists) => { collect.jlpt = lists; }).catch(() => {});
   try {
     collect.joyo = await loadJoyo();
     collect.joyoState = 'ready';
