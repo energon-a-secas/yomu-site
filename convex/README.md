@@ -154,7 +154,10 @@ word; no real Clerk user has those subjects.
 
 `wandering-ox-429` (`https://wandering-ox-429.convex.cloud`), the production
 deployment of project `yomu`, has held the schema and functions since
-2026-10-08, and `js/account.js` (`CONVEX_URL`) and `index.html`'s CSP
+2026-10-08, and the saved words' table and its two functions since
+2026-10-16 (deployed from the main checkout; checked read-only: the function
+list names all seven, `pullWords` refuses a caller with no identity and
+returns no rows for a made-up one, `pullMeta` still refuses), and `js/account.js` (`CONVEX_URL`) and `index.html`'s CSP
 `connect-src` name it (`tests/sync-account.test.mjs` fails when they
 disagree). It needs no environment variable: there is no admin role, and
 `auth.config.ts` names the Clerk issuer itself. Ship from the main checkout,
