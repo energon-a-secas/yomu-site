@@ -401,7 +401,12 @@ only once their word is nearly due (`believe`), because Chromium on macOS
 sends them all 90 ms in. Repeat after me pauses as long as the sentence took
 after each one; no microphone. A run stops on Stop, a new text
 (`render.js paintReading`), leaving the reader, or a voice someone else
-cancelled (Speak all), which it then leaves speaking (`keepVoice`).
+cancelled (Speak all), which it then leaves speaking (`keepVoice`). The kana chart marks the rows a learner
+knows (`prefs.kanaRows`, this browser's only), and the phrase library's
+"Only phrases I can read" keeps the phrases and dialogues whose kana use only
+those rows (`kana-rows.js`: a voiced kana counts as its plain row, a small one
+as its big one's, っ as た, ん and を as わ). Measured on the library: 18 of
+71 phrases with あ to ま, all with every row.
 
 **The Word panel's All forms is built forward and checked backward.**
 `conjugate.js` makes every form of a verb or adjective from its dictionary

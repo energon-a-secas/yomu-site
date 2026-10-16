@@ -14,6 +14,7 @@
 
 import { createStore, safeGet, safeSet, safeRemove } from './neorgon-persist.js';
 import { LANGS } from './strings.js';
+import { KANA_ROWS } from './kana-rows.js';
 
 const prefsStore = createStore({ key: 'yomu-site:preferences', version: 1 });
 export const TEXT_KEY = 'yomu-site:text';
@@ -45,7 +46,7 @@ export const state = {
     lang: 'en', furigana: true, romaji: 'said', highlights: true, unsaved: 'mark', gaps: false, gapsSeen: false, slow: false, remember: 'ask', translate: 'off',
     // This browser's only, never synced (sync-rules.js PREFS): furigana over
     // saved kanji hidden, and the reading's size.
-    furiSaved: false, size: 'M', kanjiShown: 'all',
+    furiSaved: false, size: 'M', kanjiShown: 'all', kanaRows: [],
   },
   // One sentence at a time (reading-view.js): for this visit, never saved.
   view: { one: false, sent: 0 },
@@ -110,6 +111,7 @@ export function loadPrefs(s, loc = globalThis.location, nav = globalThis.navigat
   if (typeof p.furiSaved === 'boolean') s.prefs.furiSaved = p.furiSaved;
   if (SIZES.includes(p.size)) s.prefs.size = p.size;
   if (KANJI_SHOWN.includes(p.kanjiShown)) s.prefs.kanjiShown = p.kanjiShown;
+  if (Array.isArray(p.kanaRows)) s.prefs.kanaRows = [...new Set(p.kanaRows.filter((r) => KANA_ROWS.includes(r)))];
   if (REMEMBER.includes(p.remember)) s.prefs.remember = p.remember;
   if (TRANSLATE.includes(p.translate)) s.prefs.translate = p.translate;
   return s.prefs;

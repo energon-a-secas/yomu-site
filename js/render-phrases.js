@@ -9,6 +9,7 @@ import { h } from './utils.js';
 import { ui, t, registerWord, currentLang } from './strings.js';
 import { beatRomaji } from './kana.js';
 import { phraseBeats } from './library.js';
+import { canRead } from './kana-rows.js';
 
 function speakAttrs(canSpeak) {
   return canSpeak ? {} : { 'aria-disabled': 'true', 'aria-describedby': 'phrases-speech-note' };
@@ -82,20 +83,48 @@ function dialogueRow(d) {
   ]);
 }
 
-/** The dialog body for a loaded library. */
-export function phrasesNode(lib, { canSpeak, speechReason }) {
+/**
+ * "Only phrases I can read": a toggle, and what it found. With no row marked
+ * on the kana chart there is nothing to read with, and the line says where
+ * to mark them (events-kana-rows.js opens the chart).
+ */
+function readableBar(readable, shown, total) {
+  const bar = [h('button', {
+    type: 'button', class: 'btn btn--ghost btn--sm ph-readable', 'data-act': 'ph-readable', 'aria-pressed': String(!!readable.on),
+  }, ui('phReadable'))];
+  if (readable.on && !readable.known.length) {
+    bar.push(h('p', { class: 'quiet ph-readable-note', role: 'status' }, [ui('phNoRows'), ' ',
+      h('button', { type: 'button', class: 'text-link', 'data-act': 'ph-mark-rows' }, ui('phMarkRows'))]));
+  } else if (readable.on) {
+    bar.push(h('p', { class: 'quiet ph-readable-note', role: 'status' }, ui('phReadableCount', { n: shown, total })));
+  }
+  return h('div', { class: 'ph-readable-bar' }, bar);
+}
+
+/**
+ * The dialog body for a loaded library. `readable` is { on, known }: with
+ * it on, only the phrases and dialogues whose kana use the known rows of
+ * the kana chart (kana-rows.js canRead), kanji read as their kana.
+ */
+export function phrasesNode(lib, { canSpeak, speechReason, readable = { on: false, known: [] } }) {
   const out = [h('p', { class: 'quiet' }, ui('phrasesLead'))];
   if (!canSpeak && speechReason) out.push(h('p', { class: 'quiet', id: 'phrases-speech-note' }, speechReason));
-  for (const c of lib.categories) {
+  const keep = (p) => !readable.on || canRead(p, readable.known);
+  const keepDialogue = (d) => !readable.on || d.lines.every((l) => !l || !l.ja || canRead(l, readable.known));
+  const total = lib.categories.reduce((n, c) => n + c.phrases.length, 0);
+  const cats = lib.categories.map((c) => ({ ...c, phrases: c.phrases.filter(keep) })).filter((c) => c.phrases.length);
+  const dialogues = lib.dialogues.filter(keepDialogue);
+  out.push(readableBar(readable, cats.reduce((n, c) => n + c.phrases.length, 0), total));
+  for (const c of cats) {
     out.push(h('section', { class: 'ph-cat', 'aria-labelledby': `cat-${c.id}` }, [
       h('h3', { class: 'ph-cat-title', id: `cat-${c.id}` }, t(c.title)),
       h('ul', { class: 'ph-list', role: 'list' }, c.phrases.map((p) => phraseRow(p, canSpeak))),
     ]));
   }
-  if (lib.dialogues.length) {
+  if (dialogues.length) {
     out.push(h('section', { class: 'ph-cat', 'aria-labelledby': 'cat-dialogues' }, [
       h('h3', { class: 'ph-cat-title', id: 'cat-dialogues' }, ui('dialogues')),
-      h('ul', { class: 'ph-list', role: 'list' }, lib.dialogues.map(dialogueRow)),
+      h('ul', { class: 'ph-list', role: 'list' }, dialogues.map(dialogueRow)),
     ]));
   }
   return out;

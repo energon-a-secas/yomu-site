@@ -1148,6 +1148,11 @@ html[data-romaji="off"] .rom { display: none; }
 .sr-shelf-name { font-weight: 600; font-size: var(--text-sm); }
 .sr-shelf-line { font-size: var(--text-xs); color: var(--text-secondary); }
 .kc-switch { margin-bottom: var(--space-3); }
+.kc-rows-lead { font-size: var(--text-sm); color: var(--text-secondary); }
+.kc-rows { margin: var(--space-2) 0 var(--space-4); }
+.ph-readable-bar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); margin: var(--space-2) 0; }
+.ph-readable[aria-pressed="true"] { border-color: var(--accent-bright); background: var(--accent-lit); }
+.ph-readable-note { font-size: var(--text-sm); }
 .sets-more { margin-top: var(--space-3); min-height: 44px; }
 .kc-lead { margin-bottom: var(--space-3); }
 .sr-pane .word-sub { margin-top: var(--space-4); }

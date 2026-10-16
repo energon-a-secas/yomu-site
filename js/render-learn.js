@@ -16,6 +16,7 @@ import { ui, t } from './strings.js';
 import { toKata, beats, beatRomaji } from './kana.js';
 import { withKanji } from './render-save.js';
 import { COUNTER_LIST, counterRow } from './counters.js';
+import { KANA_ROWS } from './kana-rows.js';
 
 const GOJUON = Object.freeze([
   'あいうえお', 'かきくけこ', 'さしすせそ', 'たちつてと', 'なにぬねの',
@@ -50,12 +51,24 @@ function grid(rows, script, kept, cols = 5) {
 }
 
 /** @returns {{ nodes: Node[], kept: string[] }} */
-export function kanaChartNodes(script) {
+/** The rows the learner marks as known, chips in the chart's order (kana-rows.js), shown in the script on screen. */
+function rowsNodes(script, known) {
+  const have = new Set(known || []);
+  return [
+    h('p', { class: 'kc-rows-lead', id: 'kc-rows-label' }, ui('kanaRowsKnown')),
+    h('div', { class: 'cn-chips kc-rows', role: 'group', 'aria-labelledby': 'kc-rows-label' }, KANA_ROWS.map((r, i) => h('button', {
+      type: 'button', class: 'cn-chip', 'data-act': 'kc-row', 'data-ix': i, 'aria-pressed': String(have.has(r)),
+    }, h('span', { lang: 'ja' }, script === 'katakana' ? toKata(r) : r)))),
+  ];
+}
+
+export function kanaChartNodes(script, known = []) {
   const kept = [];
   const combined = COMBINED.map((k) => [`${k}ゃ`, `${k}ゅ`, `${k}ょ`]);
   return {
     kept,
     nodes: [
+      ...rowsNodes(script, known),
       h('div', { class: 'seg kc-switch', role: 'group', 'aria-label': ui('kanaScript') }, ['hiragana', 'katakana'].map((s) => h('button', {
         type: 'button', class: 'seg-btn', 'data-act': 'kc-script', 'data-script': s, 'aria-pressed': String(s === script),
       }, ui(s === 'hiragana' ? 'kpHiragana' : 'kpKatakana')))),

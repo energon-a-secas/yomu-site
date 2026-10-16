@@ -300,13 +300,13 @@ function sayWord() {
 
 let library = null;
 
-async function showPhrases() {
+export async function showPhrases() {
   const body = $('phrases-body');
   if (!body) return;
   if (!library) fill(body, h('p', { class: 'quiet', role: 'status' }, ui('phrasesLoading')));
   try {
     library = await loadLibrary();
-    fill(body, phrasesNode(library, { canSpeak: state.speech === 'ok', speechReason: speechReason(state.speech) }));
+    fill(body, phrasesNode(library, { canSpeak: state.speech === 'ok', speechReason: speechReason(state.speech), readable: { on: !!state.view.readable, known: state.prefs.kanaRows } }));
   } catch (err) {
     const why = describe(err);
     fill(body, h('p', { class: 'read-error', role: 'alert' }, [

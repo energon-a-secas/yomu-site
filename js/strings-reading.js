@@ -28,6 +28,11 @@ export const READING_STRINGS = Object.freeze({
   raSaying: { en: 'Reading sentence {n} of {of}.', es: 'Leyendo la oración {n} de {of}.' },
   raYourTurn: { en: 'Your turn: say it back.', es: 'Tu turno: repítela.' },
   raDone: { en: 'Done. Read along again starts from the first sentence.', es: 'Listo. Leer al ritmo de nuevo empieza por la primera oración.' },
+  kanaRowsKnown: { en: 'Rows you know: the phrase library can offer only the lines they spell.', es: 'Filas que conoces: la biblioteca de frases puede ofrecer solo las líneas que escriben.' },
+  phReadable: { en: 'Only phrases I can read', es: 'Solo frases que puedo leer' },
+  phNoRows: { en: 'Mark the kana rows you know first.', es: 'Primero marca las filas de kana que conoces.' },
+  phMarkRows: { en: 'Open the kana chart', es: 'Abrir la tabla de kana' },
+  phReadableCount: { en: '{n} of {total} phrases use only the rows you know.', es: '{n} de {total} frases usan solo las filas que conoces.' },
   tabbarLabel: { en: 'Sections', es: 'Secciones' },
   tabRead: { en: 'Read', es: 'Leer' },
 });

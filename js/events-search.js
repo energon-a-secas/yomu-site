@@ -22,6 +22,8 @@ import { onRoute, openReader } from './events-kanji.js';
 import { loadText } from './events-read.js';
 import { paintSets, chooseSet, currentSet } from './events-sets.js';
 import { paintLevels } from './events-levels.js';
+import { state, savePrefs } from './state.js';
+import { KANA_ROWS } from './kana-rows.js';
 
 const TABS = Object.freeze(['words', 'parts', 'kana', 'counters', 'sets', 'levels']);
 /** Look up holds the field and the parts picker; Browse the shelves. */
@@ -131,7 +133,7 @@ async function paintParts() {
 }
 
 function paintKana() {
-  const { nodes, kept } = kanaChartNodes(sr.script);
+  const { nodes, kept } = kanaChartNodes(sr.script, state.prefs.kanaRows);
   sr.kanaKept = kept;
   fill($('sr-kana'), nodes);
 }
@@ -181,6 +183,18 @@ export const SEARCH_ACTIONS = {
     input.focus({ preventScroll: true });
   },
   'kc-kana': (b) => { const ch = sr.kanaKept[Number(b.dataset.ix)]; if (ch) openKanjiPage(ch, b); },
+  // A row the learner knows: the phrase library can offer what those rows spell (events-kana-rows.js).
+  'kc-row': (b) => {
+    const row = KANA_ROWS[Number(b.dataset.ix)];
+    if (!row) return;
+    const have = new Set(state.prefs.kanaRows);
+    if (have.has(row)) have.delete(row);
+    else have.add(row);
+    state.prefs.kanaRows = KANA_ROWS.filter((r) => have.has(r));
+    savePrefs(state);
+    paintKana();
+    document.querySelector(`#sr-kana [data-act="kc-row"][data-ix="${b.dataset.ix}"]`)?.focus({ preventScroll: true });
+  },
   'kc-script': (b) => {
     sr.script = b.dataset.script === 'katakana' ? 'katakana' : 'hiragana';
     paintKana();
@@ -214,6 +228,13 @@ export const SEARCH_ACTIONS = {
     paintParts().then(() => $('sr-title')?.focus({ preventScroll: true }));
   },
 };
+
+/** Open Search on the kana chart, where the rows a learner knows are marked. */
+export function openKanaChart() {
+  location.hash = '#/search';
+  showTab('kana');
+  document.querySelector('#sr-kana [data-act="kc-row"]')?.focus({ preventScroll: true });
+}
 
 /** Open Search on the Words tab with `q` in the field, and search it now. */
 export function searchFor(q) {
