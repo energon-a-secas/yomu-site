@@ -15,25 +15,29 @@ import { openBook } from '../../js/sync-book.js';
 import { openKanji } from '../../js/kanji-store.js';
 import { openHistory } from '../../js/history-store.js';
 import { openPlay } from '../../js/play-store.js';
+import { openWords } from '../../js/word-store.js';
 
 export const T = (n) => 1_700_000_000_000 + n * 60_000;
 export const day = (n) => new Date(T(n)).toISOString().slice(0, 10);
 
-export function device(server, subject, { at = 0, remember = 'on', fail, storage, clockAt } = {}) {
+export function device(server, subject, { at = 0, remember = 'on', fail, storage, clockAt, missing = [] } = {}) {
   const stores = storage || {
-    kanji: memoryStore(), history: memoryStore(), play: memoryStore(), book: memoryStore(),
+    kanji: memoryStore(), history: memoryStore(), play: memoryStore(), book: memoryStore(), words: memoryStore(),
     prefs: { lang: 'en', furigana: true, romaji: 'said', highlights: true, unsaved: 'mark', slow: false, remember, translate: 'off' },
   };
+  // A storage made before saved words existed gets one, kept for its reloads.
+  if (!stores.words) stores.words = memoryStore();
   let clock = clockAt === undefined ? T(at) : clockAt;
   const now = () => clock;
   const kanji = openKanji({ store: stores.kanji, readRaw: () => null, keepRaw: () => {} }).load(now());
   const history = openHistory({ store: stores.history, readRaw: () => null, keepRaw: () => {}, dropRaw: () => {} }).load();
   const play = openPlay({ store: stores.play, readRaw: () => null, keepRaw: () => {} }).load();
+  const words = openWords({ store: stores.words, readRaw: () => null, keepRaw: () => {} }).load();
   const state = { prefs: stores.prefs };
   const prefsListeners = new Set();
   const savePrefs = () => { for (const fn of prefsListeners) fn(state.prefs); };
   const local = storesAdapter({
-    kanji, history, play,
+    kanji, history, play, words,
     prefs: { get: () => state.prefs, set: (c) => { Object.assign(state.prefs, c); savePrefs(); } },
     remembering: () => state.prefs.remember === 'on',
   });
@@ -42,16 +46,16 @@ export function device(server, subject, { at = 0, remember = 'on', fail, storage
   let pushes = 0;
   let sync = null;
   watchStores({
-    kanji, history, play, books, local, now,
+    kanji, history, play, words, books, local, now,
     onPrefsSaved: (fn) => { prefsListeners.add(fn); return () => prefsListeners.delete(fn); },
     changed: () => { pushes += 1; },
     known: (kind, id) => sync.known(kind, id),     // as js/account.js wires it
   });
   const failing = { on: fail || (() => false) };
-  const client = fakeClient(server, subject, { fail: (...a) => failing.on(...a) });
+  const client = fakeClient(server, subject, { fail: (...a) => failing.on(...a), missing });
   sync = createSync({ client, local, book: books, now });
   return {
-    kanji, history, play, state, books, bookStore, client, sync, failing,
+    kanji, history, play, words, state, books, bookStore, client, sync, failing,
     get changes() { return pushes; },
     tick(n = 1) { clock += n * 60_000; return clock; },
     now,
@@ -80,7 +84,7 @@ export function device(server, subject, { at = 0, remember = 'on', fail, storage
       return sync.sync(b.mode);
     },
     mutations: () => client.calls.filter((c) => c.kind === 'mutation'),
-    reload: () => device(server, subject, { fail, storage: stores, clockAt: clock }),
+    reload: ({ missing: gone = missing } = {}) => device(server, subject, { fail, storage: stores, clockAt: clock, missing: gone }),
   };
 }
 

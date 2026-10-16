@@ -36,6 +36,7 @@ export const WORDS_STRINGS = Object.freeze({
     es: 'Repasaste {w}: {got} al primer intento y {again} con Otra vez.',
   },
   rvWordMeaning: { en: 'Meaning', es: 'Significado' },
+  rvWordGone: { en: 'This word is no longer saved. Answer to go on.', es: 'Esta palabra ya no está guardada. Responde para seguir.' },
   rvWordRead: { en: 'Read it', es: 'Leerla' },
   importedWordsOne: { en: '1 saved word added or updated.', es: '1 palabra guardada nueva o actualizada.' },
   importedWordsMany: { en: '{n} saved words added or updated.', es: '{n} palabras guardadas nuevas o actualizadas.' },

@@ -199,7 +199,7 @@ test('another account signing in is asked about first, and nothing moves until i
   assert.equal(p.asked[0].label, 'Ben');
   // The account's side also says what it removed and whether it cleared,
   // which a first sign-in is asked about (sync.js accountHolds).
-  assert.deepEqual(p.asked[0].counts, { account: { kanji: 0, phrases: 0, removed: { kanji: 0, phrases: 0 }, cleared: false }, here: { kanji: 1, phrases: 0 } });
+  assert.deepEqual(p.asked[0].counts, { account: { kanji: 0, phrases: 0, words: 0, removed: { kanji: 0, phrases: 0, words: 0 }, cleared: false }, here: { kanji: 1, phrases: 0, words: 0 } });
   assert.equal(p.last().phase, 'paused', 'Not now leaves sync paused');
   assert.deepEqual(p.server.rowsOf('user_b').kanji, []);
   p.answers.push('add');
@@ -221,7 +221,7 @@ test('a first sign-in into an account that holds data, with data here too, is as
     assert.equal(p.asked[0].since, 0, 'no earlier sync to name');
     // The account's side also says what it removed and whether it cleared,
     // which a first sign-in is asked about (sync.js accountHolds).
-    assert.deepEqual(p.asked[0].counts, { account: { kanji: 1, phrases: 0, removed: { kanji: 0, phrases: 0 }, cleared: false }, here: { kanji: 1, phrases: 0 } });
+    assert.deepEqual(p.asked[0].counts, { account: { kanji: 1, phrases: 0, words: 0, removed: { kanji: 0, phrases: 0, words: 0 }, cleared: false }, here: { kanji: 1, phrases: 0, words: 0 } });
     assert.deepEqual(savedIn(server, 'user_a'), ['雪'], 'nothing moved before the answer');
     assert.equal(p.last().synced, false, 'nothing here syncs yet');
     p.answers.push(choice);
@@ -255,7 +255,7 @@ test('the first sign-in\'s question has its own words, in both languages, and na
       assert.match(first.counts, /3/);
     }
     useLang('en');
-    assert.equal(askParts({ label: 'A', counts, first: true }).body, 'This browser has kanji and phrases from before you signed in. Add them to your account, or use your account\'s data here?');
+    assert.equal(askParts({ label: 'A', counts, first: true }).body, 'This browser has kanji, phrases or words from before you signed in. Add them to your account, or use your account\'s data here?');
   } finally {
     useLang('en');
   }

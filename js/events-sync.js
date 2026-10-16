@@ -8,6 +8,7 @@ import { ui } from './strings.js';
 import { myKanji } from './kanji-store.js';
 import { myHistory } from './history-store.js';
 import { myPlay } from './play-store.js';
+import { myWords } from './word-store.js';
 import { openBook } from './sync-book.js';
 import { startAccount, CONVEX_CLIENT } from './account.js';
 import { paintSync, askAccount, dismissAsk, bindSyncDialog } from './render-sync.js';
@@ -31,6 +32,7 @@ export function startAccounts() {
     kanji: myKanji(),
     history: myHistory(),
     play: myPlay(),
+    words: myWords(),
     prefs: {
       get: () => state.prefs,
       set: (changes) => { Object.assign(state.prefs, changes); savePrefs(state); paintAll(state); },

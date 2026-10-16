@@ -134,14 +134,22 @@ let answer = null;
  */
 export function askParts({ label, counts, since, first }) {
   const gone = counts.account.removed || { kanji: 0, phrases: 0 };
+  // Words are named only where some are: a dialog reading "words 0" says nothing.
+  const goneWords = gone.words || 0;
+  // ...and only when the account could say how many it holds.
+  const words = counts.account.words !== null && counts.account.words !== undefined
+    && counts.account.words + (counts.here.words || 0) > 0;
   return {
-    removed: first && gone.kanji + gone.phrases > 0 ? ui('syncFirstRemoved', { name: label, kanji: gone.kanji, phrases: gone.phrases }) : null,
+    removed: first && gone.kanji + gone.phrases + goneWords > 0
+      ? ui(goneWords ? 'syncFirstRemovedWords' : 'syncFirstRemoved', { name: label, kanji: gone.kanji, phrases: gone.phrases, words: goneWords })
+      : null,
     cleared: first && counts.account.cleared ? ui('syncFirstCleared', { name: label }) : null,
     title: first ? 'syncFirstTitle' : 'syncAskTitle',
     how: first ? 'syncFirstHow' : 'syncAskHow',
     body: first ? ui('syncFirstBody') : ui('syncAskBody', { name: label }),
-    counts: ui('syncAskCounts', {
+    counts: ui(words ? 'syncAskCountsWords' : 'syncAskCounts', {
       name: label, kanji: counts.account.kanji, phrases: counts.account.phrases, hereKanji: counts.here.kanji, herePhrases: counts.here.phrases,
+      words: counts.account.words || 0, hereWords: counts.here.words || 0,
     }),
     // When the changes the old account will not get began: its last sync
     // with this browser.

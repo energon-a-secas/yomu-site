@@ -396,7 +396,8 @@ never in the URL, an attribute, the title or the beacon target. A backup
 file carries the saved phrases and no other text. Signed in (Accounts and
 sync, below), what leaves the device is the saved phrases (their text, the
 counts and the times), My kanji (schedules, counts, the eight words per
-kanji, `src` and the history key `h`, never a sentence), Play's store, and
+kanji, `src` and the history key `h`, never a sentence), the saved words
+(dictionary form, reading, first meaning, schedule), Play's store, and
 lang, furigana, romaji, highlights, unsaved and slow; never the text in the
 box, a History text not saved, the remember and translate choices, or the
 session. An unsaved phrase leaves its key and the time of the removal on
@@ -498,7 +499,9 @@ first meaning for the card and a saved kanji's schedule, in
 `localStorage['yomu-site:words']` under a cyrb53 id of the two (`wordId`,
 ASCII, for sync), at most 2,000. One review holds both: `dueAll` is the due
 kanji then the due words, a word's place in the queue `w:` and its id, and
-`answerAny` moves the right schedule. The backup carries them as `words`.
+`answerAny` moves the right schedule. The backup carries them as `words`,
+and signed in they sync as a saved phrase does, through `pullWords` and
+`pushWords` of their own (docs/SYNC.md).
 
 ## Play
 
@@ -513,7 +516,7 @@ data under `data/play/` is emitted (Do not touch, below).
 ## Accounts and sync
 
 Optional, through the Neorgon Auth Kit. Signed in, My kanji, the saved
-phrases, Play's store and six display preferences sync to Convex project
+phrases, the saved words, Play's store and six display preferences sync to Convex project
 `yomu` (production `wandering-ox-429`, dev `jovial-mouse-131`); signed out,
 every store stays in this browser. **Read `docs/SYNC.md` and
 `convex/README.md` ("Sync rules") before any change to `js/sync*.js`,

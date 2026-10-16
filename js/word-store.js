@@ -17,6 +17,7 @@
 
 import { createStore, safeGet, safeSet } from './neorgon-persist.js';
 import { cyrb53 } from './history-text.js';
+import { cleanGloss, MAX_GLOSS } from './sync-rules.js';
 import {
   schedule, isDue, dayOf, isObject, TOP_BOX, myKanji,
 } from './kanji-store.js';
@@ -24,11 +25,16 @@ import {
 export const KEY = 'yomu-site:words';
 export const VERSION = 1;
 export const DAMAGED_KEY = `${KEY}:damaged`;
-/** At most this many saved words; the next is refused and nothing changes. */
+/**
+ * At most this many words saved here: the next save, or a word Import would
+ * add, is refused. What sync brings is kept whole: two devices may each hold
+ * their own 2,000, and a cap on what the account sends was applied again on
+ * every sync.
+ */
 export const MAX_SAVED_WORDS = 2000;
 /** kanji-words.js MAX_FIELD: a word or a reading longer than this is no dictionary word. */
 export const MAX_FIELD = 24;
-export const MAX_GLOSS = 120;
+export { cleanGloss, MAX_GLOSS };
 export const REVIEW_PREFIX = 'w:';
 
 const DAY = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
@@ -39,13 +45,6 @@ const len = (s) => [...s].length;
 /** A word's key: the same written form and reading, the same key. */
 export function wordId(w, r) {
   return cyrb53(`${w}\u0000${r}`).toString(36);
-}
-
-/** A gloss as the card shows it: one line, at most MAX_GLOSS characters, never cut inside a character. */
-export function cleanGloss(g) {
-  if (typeof g !== 'string') return '';
-  const one = g.replace(/\s+/g, ' ').trim();
-  return len(one) <= MAX_GLOSS ? one : `${[...one].slice(0, MAX_GLOSS - 1).join('')}…`;
 }
 
 /** A saved word as stored, or null. */
@@ -65,7 +64,7 @@ export function validate(raw) {
   if (raw.saved !== undefined && !isObject(raw.saved)) return { data, dropped: 1, damaged: false };
   for (const [id, v] of Object.entries(raw.saved || {})) {
     const rec = cleanWord(v);
-    if (rec && wordId(rec.w, rec.r) === id && Object.keys(data.saved).length < MAX_SAVED_WORDS) data.saved[id] = rec;
+    if (rec && wordId(rec.w, rec.r) === id) data.saved[id] = rec;
     else dropped += 1;
   }
   return { data, dropped, damaged: false };
@@ -195,9 +194,16 @@ export function openWords({ store = createStore({ key: KEY, version: VERSION }),
     due: (today) => dueWords(data, today),
     nextDue: (today) => nextDueWords(data, today),
     exportList: () => listWords(data).map(({ id, ...rec }) => rec),
+    /**
+     * Import: the event names every word of the backup, changed or not, as
+     * the kanji store's does, so each counts as saved now (sync-watch.js): an
+     * unchanged word was stamped nowhere, and another device's older unsave
+     * then won over the Import.
+     */
     merge(list) {
       const sum = mergeWords(data, list);
-      commit(sum.added + sum.updated > 0, { type: 'import', ids: (Array.isArray(list) ? list : []).map((v) => v && wordId(v.w, v.r)) });
+      const ids = (Array.isArray(list) ? list : []).map((v) => (v && typeof v.w === 'string' && typeof v.r === 'string' ? wordId(v.w, v.r) : null)).filter(Boolean);
+      commit(true, { type: 'import', ids });
       return sum;
     },
     /** What sync decided: per id a record, or null to remove it, read through this store's own validation. */

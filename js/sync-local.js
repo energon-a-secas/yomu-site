@@ -26,7 +26,7 @@
 // texts that are not saved, and the remember and translate preferences.
 
 import {
-  cleanKanjiRow, cleanPhraseRow, cleanPlay, cleanPrefs, joinKanji, joinPhrase, joinPlay, joinPrefs, same, PREF_KEYS,
+  cleanKanjiRow, cleanPhraseRow, cleanWordRow, cleanPlay, cleanPrefs, joinKanji, joinPhrase, joinWord, joinPlay, joinPrefs, same, PREF_KEYS,
 } from './sync-rules.js';
 
 function dayOf(cached, w, r) {
@@ -55,6 +55,17 @@ export function localPhraseRow(key, entry, book, cached) {
     removed: Math.max(book.removed.phrases[key] || 0, cached ? cached.removed : 0),
     phrase: entry
       ? { t: entry.t, first: entry.first, last: entry.last, n: entry.n, src: entry.src, saved: entry.saved, s: Math.max(entry.saved, book.brought.phrases[key] || 0, book.saves.phrases[key] || 0, cached && cached.phrase && cached.phrase.saved === entry.saved ? cached.phrase.s : 0) }
+      : null,
+  });
+}
+
+/** One saved word (word-store.js), or none, as this browser holds it: `s` rebuilt as a saved kanji's is. */
+export function localWordRow(key, rec, book, cached) {
+  return cleanWordRow({
+    key,
+    removed: Math.max(book.removed.words[key] || 0, cached ? cached.removed : 0),
+    word: rec
+      ? { ...rec, s: Math.max(rec.at, book.brought.words[key] || 0, book.saves.words[key] || 0, cached && cached.word && cached.word.at === rec.at ? cached.word.s : 0) }
       : null,
   });
 }
@@ -92,6 +103,17 @@ function sameSeen(a, b) {
   return a.n === b.n && a.first === b.first && a.last === b.last && a.src === b.src && a.h === b.h && wordSet(a.words) === wordSet(b.words);
 }
 
+/** The stores' saved words; a snapshot from before words has none. */
+const localWords = (local) => (local && local.words && local.words.saved) || {};
+
+export function toWord(row) {
+  const x = row && row.word;
+  return x ? { w: x.w, r: x.r, g: x.g, at: x.at, box: x.box, due: x.due, reviews: x.reviews, lapses: x.lapses } : null;
+}
+
+const WORD_FIELDS = ['w', 'r', 'g', 'at', 'box', 'due', 'reviews', 'lapses'];
+const sameWord = (a, b) => (!a || !b ? !a === !b : WORD_FIELDS.every((f) => a[f] === b[f]));
+
 const PHRASE_FIELDS = ['first', 'last', 'n', 'src', 'saved'];
 const samePhrase = (e, p) => PHRASE_FIELDS.every((f) => e[f] === p[f]);
 
@@ -113,21 +135,27 @@ const samePhrase = (e, p) => PHRASE_FIELDS.every((f) => e[f] === p[f]);
 function sinceAnswer(local, book) {
   const saved = {};
   for (const [ch, rec] of Object.entries(local.kanji.saved)) if (Object.hasOwn(book.saves.kanji, ch)) saved[ch] = rec;
+  const words = {};
+  for (const [key, rec] of Object.entries(localWords(local))) if (Object.hasOwn(book.saves.words, key)) words[key] = rec;
   const values = {};
   const mine = localPrefs(local.prefs, book);
   for (const [k, p] of Object.entries(mine ? mine.values : {})) if (book.prefsAt[k]) values[k] = p;
   return {
     kanji: { saved, seen: {} },
     phrases: local.phrases.filter((e) => Object.hasOwn(book.saves.phrases, e.key)),
+    words: { saved: words },
     prefs: Object.keys(values).length ? { values } : null,
   };
 }
 
 /**
  * One sync, decided. `server` is what the account holds ({ clear, kanji:
- * Map, phrases: Map, play, prefs }, as pulled, or as this page last left it);
+ * Map, phrases: Map, words: Map, or null from a deployment without the
+ * words functions, play, prefs }, as pulled, or as this page last left it);
  * `local` is the stores' data ({ kanji: { saved, seen }, phrases: the saved
- * entries, play: { games, mixed }, prefs }); `book` is this browser's book.
+ * entries, words: { saved }, play: { games, mixed }, prefs }); `book` is
+ * this browser's book. With no words from the server, the words are left as
+ * they are on both sides, their stamps kept for a deployment that has them.
  * With `replace` (Use), this browser takes the account's data and adds only
  * what the learner did after answering (sinceAnswer).
  *
@@ -137,10 +165,10 @@ function sinceAnswer(local, book) {
  */
 export function planSync(server, local, book, { replace = false } = {}) {
   const clear = Math.max(server.clear, book.epoch);
-  const push = { clear: book.epoch > server.clear ? book.epoch : null, kanji: [], phrases: [], play: null, prefs: null };
+  const push = { clear: book.epoch > server.clear ? book.epoch : null, kanji: [], phrases: [], words: [], play: null, prefs: null };
   const own = replace ? sinceAnswer(local, book) : local;
-  const apply = { saved: {}, seen: {}, unsave: [], merge: [], play: null, prefs: null };
-  const next = { clear, kanji: new Map(), phrases: new Map(), play: null, prefs: null };
+  const apply = { saved: {}, seen: {}, unsave: [], merge: [], words: {}, play: null, prefs: null };
+  const next = { clear, kanji: new Map(), phrases: new Map(), words: server.words instanceof Map ? new Map() : null, play: null, prefs: null };
 
   const chars = new Set([...server.kanji.keys(), ...Object.keys(local.kanji.saved), ...Object.keys(local.kanji.seen), ...Object.keys(book.removed.kanji)]);
   for (const ch of chars) {
@@ -174,6 +202,28 @@ export function planSync(server, local, book, { replace = false } = {}) {
     apply.merge.push({ t: want.t, first: want.first, last: want.last, n: want.n, src: want.src, saved: want.saved });
   }
 
+  if (server.words instanceof Map) {
+    const here = localWords(local);
+    const ownWords = localWords(own);
+    const keys = new Set([...server.words.keys(), ...Object.keys(here), ...Object.keys(book.removed.words)]);
+    for (const key of keys) {
+      const theirs = server.words.get(key) || null;
+      const mine = localWordRow(key, ownWords[key] || null, book, theirs);
+      const row = joinWord(theirs, mine);
+      if (row && !same(row, theirs)) push.words.push(row);
+      if (row) next.words.set(key, row);
+      const want = toWord(row);
+      if (!sameWord(here[key] || null, want)) apply.words[key] = want;
+    }
+  } else if (replace) {
+    // Use, against a deployment without the words functions: the account's
+    // words cannot be read yet, but this browser's own are still left
+    // behind, as the answer said, but for those saved since it. Kept, they
+    // entered the account the first time it could take words.
+    const keep = localWords(own);
+    for (const key of Object.keys(localWords(local))) if (!Object.hasOwn(keep, key)) apply.words[key] = null;
+  }
+
   const myPlay = localPlay(local.play);
   const play = joinPlay(server.play, replace ? null : myPlay);
   const nothing = play && !Object.keys(play.games).length && !play.mixed.length && !server.play;
@@ -195,11 +245,11 @@ export function planSync(server, local, book, { replace = false } = {}) {
 /** Whether a plan sends anything at all. */
 export function pushes(plan) {
   const p = plan.push;
-  return p.clear !== null || p.kanji.length > 0 || p.phrases.length > 0 || !!p.play || !!p.prefs;
+  return p.clear !== null || p.kanji.length > 0 || p.phrases.length > 0 || p.words.length > 0 || !!p.play || !!p.prefs;
 }
 
 /** Whether a plan changes anything here. */
 export function applies(plan) {
   const a = plan.apply;
-  return Object.keys(a.saved).length + Object.keys(a.seen).length + a.unsave.length + a.merge.length > 0 || !!a.play || !!a.prefs;
+  return Object.keys(a.saved).length + Object.keys(a.seen).length + a.unsave.length + a.merge.length + Object.keys(a.words).length > 0 || !!a.play || !!a.prefs;
 }

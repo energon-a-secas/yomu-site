@@ -9,7 +9,7 @@ Optional, through the Neorgon Auth Kit (`packages/neorgon-ui/auth/README.md`,
 vendored as `js/neorgon-auth.js`, `js/neorgon-auth-sites.js`,
 `css/neorgon-auth.css`; the slot is `div.neo-auth` before `.header-home`,
 the key is the fleet's production `pk_live_`). Signed in, My kanji, the
-saved phrases, Play's store and the six display preferences sync to Convex
+saved phrases, the saved words, Play's store and the six display preferences sync to Convex
 project `yomu` (team lucio; production deployment `wandering-ox-429`, its
 URL in `js/account.js CONVEX_URL`; dev `jovial-mouse-131`;
 `convex/README.md`). Signed out, or never signed in, every store stays in
@@ -45,7 +45,9 @@ converging), `tests/sync-stamps.test.mjs` (Import, and clocks that disagree),
 `tests/sync-saves.test.mjs` (a save keeps its own time through a merge),
 `tests/sync-first.test.mjs` (what a first sign-in asks, and each answer),
 `tests/sync-account.test.mjs` and `tests/sync-tabs.test.mjs` (two tabs of
-one browser over the same storage).
+one browser over the same storage), and `tests/sync-words.test.mjs` (the
+saved words: their row, the server's two functions, devices, and a
+deployment from before those functions).
 
 **An anonymous visit fetches nothing from Clerk, Convex or esm.sh.**
 `app.js` imports `events-sync.js` only with a key on the page and only
@@ -326,21 +328,74 @@ kind in a plain sentence (offline, the sign-in not accepted, another tab
 switched accounts, refused, a server error), never a code or a Convex
 request id; those go to the console.
 
-**Two joins depend on the grouping, and it does not matter which.**
-`joinKanji` and `joinPhrase` are commutative and idempotent but not
+**Three joins depend on the grouping, and it does not matter which.**
+`joinKanji`, `joinPhrase` and `joinWord` are commutative and idempotent but not
 associative. A copy that a removal kills can still have lent its values to
 a live copy it met before the removal reached them: for a saved kanji, the
 schedule, `at` and `lapses` (`tests/sync-rules.test.mjs`, "the one grouping
 that differs"); for a phrase, its read count `n`, its last read (`last`,
 `src`, and `t`, the spelling read then, which may differ from another
 copy's in spaces or width and still have the same key) and the earliest
-`saved`. It is harmless because whether a kanji or a phrase is saved, and
+`saved`; for a saved word, as for a saved kanji, its schedule (`box`,
+`due`, `reviews`), the earliest `at` and the highest `lapses`. It is
+harmless because whether a kanji, a phrase or a word is saved, and
 a phrase's key, are the same in any grouping (the newest save against the
 newest removal, both maxima, which the random test asserts), seen counts,
 words, Play and preferences are fully associative, and every device takes
 the account's row at its next sync, so the devices still agree with each
 other. What the order decides is a review schedule, a read count, the
 last-read time and spelling, or the date History sorts a saved phrase by.
+
+**A saved word syncs as a saved phrase does, through functions of its
+own.** A row is `{ key, removed, word: { w, r, g, at, box, due, reviews,
+lapses, s } | null }` (`sync-rules.js cleanWordRow`, `joinWord`), `key` the
+words store's id, the cyrb53 of written form and reading
+(`wordKeyOf`, the store's `wordId` repeated so the server bundles no store),
+checked against the word it names. Two live copies keep the schedule with
+more reviews (ties: the later due, the higher box, then the gloss, since two
+dictionary versions may differ in it), the earliest `at`, the highest
+`lapses`, the latest `s`; a tombstone wins over an older save and loses to a
+newer one, and Clear all, which is My kanji's, never reaches a word. The
+book holds a third kind, `words`, in `brought`, `removed`, `saves` and
+`heard`, stamped by `sync-watch.js` exactly as a phrase's save, unsave and
+Import are; a join stamps the words it brings (`joinStamps`), Use keeps only
+those saved since the answer (`sinceAnswer`), and the account question
+counts saved and removed words, named only when there are some
+(`syncAskCountsWords`, `syncFirstRemovedWords`). The server has a `words`
+table and two functions, `pullWords` and `pushWords`, so `push` and the
+three pulls are byte for byte what they were and a page from before them
+never calls them. A deployment without them answers "Could not find public
+function" (`sync.js isMissingFunction`): the pull returns `words: null`,
+the plan leaves the words alone on both sides, `carriedOf(book, { words:
+false })` prunes none of their stamps, and `heardFrom` keeps what the book
+had heard of them, so the first sync with a deployment that has them
+carries every save and unsave made meanwhile. Any other failure of a words
+call fails the sync as any call's does. Measured on the dev deployment: a
+missing query and a missing mutation both answer "Could not find public
+function for 'sync:...'". Use against such a deployment still leaves this
+browser's words behind, but for those saved since the answer, though it
+cannot read the account's (`planSync`, `replace` with no words): kept, they
+entered the account the first time it could take words. The question then
+counts no words for the account (`accountHolds` words null), rather than a
+wrong 0.
+
+Three rules keep the words settled. A gloss is one canonical line on both
+sides (`sync-rules.js cleanGloss`, which the store takes too): a row whose
+gloss the store would rewrite was applied again on every sync. The 2,000
+words the store keeps (`MAX_SAVED_WORDS`) cap a save made here and a word
+Import would add, never what sync brings, so two devices of 2,000 each end
+with all of them. And an Import names every word of its backup, changed or
+not, as the kanji store's does, so an unchanged word still counts as saved
+now. The store is read again on another tab's write (`events-words.js
+bindWords`), as My kanji's and History's are: without it, a stale tab's
+next save wrote over a word the other tab had saved and stamped.
+
+What is not covered: a tab still running the page from before saved words,
+open beside a new one, rewrites the shared book field by field
+(`cleanBook`) and drops its `words` maps, so a word unsaved in the new tab
+and not yet pushed can come back. Code shipped now cannot change what an
+old tab does; the window closes when the old tab reloads, and a push
+carries the removal about four seconds after the unsave.
 
 **Sign-in cannot be tried on localhost.** The production key refuses it and
 the kit's dialog says so (expected). The functions are checked with

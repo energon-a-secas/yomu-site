@@ -12,7 +12,7 @@ import { TABBAR_ACTIONS, bindTabbar } from './events-tabbar.js';
 import { LEVELS_ACTIONS } from './events-levels.js';
 import { KANA_ROWS_ACTIONS } from './events-kana-rows.js';
 import { HAND_ACTIONS } from './events-hand.js';
-import { WORDS_ACTIONS } from './events-words.js';
+import { WORDS_ACTIONS, bindWords } from './events-words.js';
 
 export const EXTRA_ACTIONS = Object.freeze({
   ...SETS_ACTIONS,
@@ -30,4 +30,5 @@ export function bindExtra() {
   bindProgress();
   bindTabbar();
   bindView();
+  bindWords();
 }

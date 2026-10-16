@@ -14,6 +14,7 @@ import * as model from '../../convex/model/sync.ts';
 const INDEXES = {
   kanji: { by_owner_char: ['owner', 'char'] },
   phrases: { by_owner_key: ['owner', 'key'] },
+  words: { by_owner_key: ['owner', 'key'] },
   play: { by_owner: ['owner'] },
   prefs: { by_owner: ['owner'] },
   clears: { by_owner: ['owner'] },
@@ -103,6 +104,8 @@ const HANDLERS = {
   'sync:pullPhrases': model.pullPhrases,
   'sync:pullMeta': model.pullMeta,
   'sync:push': model.push,
+  'sync:pullWords': model.pullWords,
+  'sync:pushWords': model.pushWords,
 };
 
 /**
@@ -110,7 +113,7 @@ const HANDLERS = {
  * `fail(name, args)` returning true makes that call throw as a lost
  * connection does; `calls` lists every call made.
  */
-export function fakeClient(server, subject, { fail = () => false } = {}) {
+export function fakeClient(server, subject, { fail = () => false, missing = [] } = {}) {
   const calls = [];
   const ctx = () => ({
     db: server.db,
@@ -119,6 +122,8 @@ export function fakeClient(server, subject, { fail = () => false } = {}) {
   const call = async (kind, name, args) => {
     calls.push({ kind, name, args });
     if (fail(name, args)) throw new TypeError('Failed to fetch');
+    // A deployment from before a function existed answers as Convex does.
+    if (missing.includes(name)) throw new Error(`[Request ID: 0f1e2d3c4b5a6978] Server Error\nCould not find public function for '${name}'. Did you forget to run \`npx convex dev\` or \`npx convex deploy\`?`);
     if (!HANDLERS[name]) throw new Error(`no function ${name}`);
     checkValue(args, `${name} args`);
     // What crosses the wire is JSON both ways.

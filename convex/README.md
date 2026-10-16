@@ -9,7 +9,8 @@ idempotent (`../js/sync-rules.js`).
 **What syncs**, signed in only: My kanji (each save with its review
 schedule; each kanji's count, first and last day, where it was last met and
 its eight most recently met words), the saved phrases (text, counts,
-source), Play's best scores and mixed-up pairs, and six display
+source), the saved words (dictionary form, reading, first meaning, review
+schedule), Play's best scores and mixed-up pairs, and six display
 preferences (lang, furigana, romaji, highlights, unsaved, slow). **Never**:
 History's texts that are not saved, the session, the text in the box, the
 remember and translate preferences, an embed, and anything from a browser
@@ -25,6 +26,8 @@ push carries it):
   account's save is the same save (the same `at`, or `saved`).
 - An unsave: a tombstone `removed`, stamped `max(now, newest save known +
   1)`. A copy whose `s` is not newer than `removed` is dead.
+- A saved word is stamped as a phrase is, save and unsave alike; Clear all
+  never reaches it.
 - Clear all (My kanji only): one tombstone for every kanji, the account's
   `clear`, stamped `max(now, newest kanji save known + 1)`. It kills every
   save not newer than it and every count made under an older clear. Made
@@ -106,9 +109,9 @@ token Convex verifies, and every function reads its owner from it.
 
 | File | What it is |
 |---|---|
-| `schema.ts` | Five tables: `kanji` (owner, char), `phrases` (owner, key), and one row each of `play`, `prefs` and `clears` per owner, all indexed by owner |
+| `schema.ts` | Six tables: `kanji` (owner, char), `phrases` (owner, key), `words` (owner, key), and one row each of `play`, `prefs` and `clears` per owner, all indexed by owner |
 | `auth.config.ts` | Trusts `https://clerk.neorgon.com`, application id `convex` (the JWT template) |
-| `sync.ts` | `whoami`, `pullKanji`, `pullPhrases`, `pullMeta`, `push`: an argument validator and a handler each |
+| `sync.ts` | `whoami`, `pullKanji`, `pullPhrases`, `pullMeta`, `push`, and the saved words' own `pullWords` and `pushWords`: an argument validator and a handler each |
 | `model/sync.ts` | The handlers. Each reads `ctx.auth.getUserIdentity().subject`, refuses a caller with none (`{ ok: false, error: "not-authenticated" }`), and never takes an owner from an argument |
 | `model/validators.ts` | The row shapes as Convex validators; what a value may be is the rules' `clean*` |
 
@@ -143,7 +146,9 @@ npx convex run sync:pullKanji '{"cursor":null}' --identity "$B"  # rows: [], use
 ```
 
 That run (2026-10-07) left `user_a` and `user_b` test rows in the dev
-deployment; no real Clerk user has those subjects.
+deployment, and 2026-10-16's check of `pullWords` and `pushWords` (refused
+with no identity, wrote 1 then 0, `user_b` saw none of it) left a `user_a`
+word; no real Clerk user has those subjects.
 
 ## Production
 
@@ -158,7 +163,7 @@ whose `.env.local` (gitignored) names the project, never from a worktree:
 ```bash
 npx convex deploy --dry-run -y          # what would change, nothing pushed
 npx convex deploy                       # pushes schema and functions to wandering-ox-429
-npx convex function-spec --prod         # lists whoami, pullKanji, pullPhrases, pullMeta, push
+npx convex function-spec --prod         # lists whoami, pullKanji, pullPhrases, pullMeta, push, pullWords, pushWords
 ```
 
 **Run it from this site's folder.** `npx convex deploy` deploys whatever

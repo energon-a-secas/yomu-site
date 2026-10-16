@@ -300,7 +300,7 @@ test('a failed pull changes nothing here and keeps the join pending; a failed pu
   const kept = b.books.read();
   assert.equal(kept.account, 'user_a');
   assert.ok(kept.pending);
-  assert.deepEqual([kept.brought, kept.removed], [{ kanji: {}, phrases: {} }, { kanji: {}, phrases: {} }]);
+  assert.deepEqual([kept.brought, kept.removed], [{ kanji: {}, phrases: {}, words: {} }, { kanji: {}, phrases: {}, words: {} }]);
 
   b.failing.on = (name) => name === 'sync:push';
   await assert.rejects(b.signIn());
@@ -331,7 +331,7 @@ test('another account signing in is asked about, and either answer leaves the fi
   assert.equal(asked.mode, 'ask');
   // The account's side also says what it removed and whether it cleared,
   // which a first sign-in is asked about (sync.js accountHolds).
-  assert.deepEqual(asked.counts, { account: { kanji: 1, phrases: 0, removed: { kanji: 0, phrases: 0 }, cleared: false }, here: { kanji: 1, phrases: 0 } });
+  assert.deepEqual(asked.counts, { account: { kanji: 1, phrases: 0, words: 0, removed: { kanji: 0, phrases: 0, words: 0 }, cleared: false }, here: { kanji: 1, phrases: 0, words: 0 } });
   assert.deepEqual(Object.keys(add.kanji.data.saved), ['月'], 'asking changes nothing here');
   assert.equal(add.mutations().length, 0, 'and sends nothing');
   await add.sync.sync('adopt');          // Add this browser's data to user_b

@@ -18,6 +18,9 @@
 //                due, then the higher box), lapses the max, the earliest save
 //   phrase       n the max, first the earliest, last the latest (its text
 //                and src go with it), the earliest save
+//   saved word   the schedule with more reviews behind it (ties: the later
+//                due, the higher box, then the gloss), lapses the max, the
+//                earliest save
 //   Play         the max per game and per pair, the 400 most mixed pairs kept
 //   prefs        per preference, the later change wins (ties: by value)
 //
@@ -33,7 +36,7 @@
 // own to compare. docs/SYNC.md, says what each means for
 // the learner.
 
-import { textKey, MAX_TEXT } from './history-text.js';
+import { textKey, MAX_TEXT, cyrb53 } from './history-text.js';
 
 /** kanji-store.js SOURCES; tests/sync-rules.test.mjs holds the two equal. */
 export const SOURCES = Object.freeze(['paste', 'typed', 'example', 'phrase', 'link', 'host', 'history']);
@@ -226,6 +229,75 @@ export function joinPhrase(a, b) {
   }
   if (!phrase && !removed) return null;
   return { key, removed, phrase };
+}
+
+// ── Saved words ───────────────────────────────────────────────────────────
+//
+// { key, removed, word: { w, r, g, at, box, due, reviews, lapses, s } | null }
+//
+// A word saved from the Word panel (js/word-store.js): its dictionary form,
+// reading and first meaning, and a saved kanji's schedule. `key` is the
+// store's id, the cyrb53 of written form and reading in base36, checked
+// against the word it names. A dead row keeps its key and its removal, as a
+// phrase's does. Words take no part in Clear all, which is My kanji's.
+
+export const WORD_KEY = /^[0-9a-z]{1,16}$/;
+/** The longest gloss a saved word keeps; js/word-store.js takes this one. */
+export const MAX_GLOSS = 120;
+
+/**
+ * A gloss as a saved word keeps it: one line, at most MAX_GLOSS characters,
+ * never cut inside a character. The store and every row take it from here,
+ * so a row the server holds is the gloss the store would write, and a sync
+ * that has nothing new applies nothing (a row whose gloss the store would
+ * rewrite was applied again on every sync).
+ */
+export function cleanGloss(g) {
+  if (typeof g !== 'string') return '';
+  const one = g.replace(/\s+/g, ' ').trim();
+  return len(one) <= MAX_GLOSS ? one : `${[...one].slice(0, MAX_GLOSS - 1).join('')}\u2026`;
+}
+const KANA = /^[\u3041-\u3096\u30a1-\u30faー]+$/;
+
+/** word-store.js wordId, repeated so the server bundles no store. */
+export const wordKeyOf = (w, r) => cyrb53(`${w}\u0000${r}`).toString(36);
+
+export function cleanWordSaved(v) {
+  if (!isObject(v) || typeof v.w !== 'string' || typeof v.r !== 'string' || typeof v.g !== 'string') return null;
+  if (!v.w || !v.r || len(v.w) > MAX_FIELD || len(v.r) > MAX_FIELD || !KANA.test(v.r)) return null;
+  if (!isTime(v.at) || !Number.isInteger(v.box) || v.box < 0 || v.box > TOP_BOX) return null;
+  if (!DAY.test(v.due) || !isCount(v.reviews) || !isCount(v.lapses)) return null;
+  return {
+    w: v.w, r: v.r, g: cleanGloss(v.g), at: v.at, box: v.box, due: v.due, reviews: v.reviews, lapses: v.lapses,
+    s: isTime(v.s) ? maxOf(v.s, v.at) : v.at,
+  };
+}
+
+/** A word row, or null. A word that is not its key's word is left out, the removal kept. */
+export function cleanWordRow(v) {
+  if (!isObject(v) || typeof v.key !== 'string' || !WORD_KEY.test(v.key)) return null;
+  const word = cleanWordSaved(v.word);
+  return { key: v.key, removed: isStamp(v.removed) ? v.removed : 0, word: word && wordKeyOf(word.w, word.r) === v.key ? word : null };
+}
+
+export function joinWord(a, b) {
+  if (!a && !b) return null;
+  const key = (a || b).key;
+  const removed = Math.max(a ? a.removed : 0, b ? b.removed : 0);
+  const live = [a && a.word, b && b.word].filter((x) => x && x.s > removed);
+  let word = live[0] || null;
+  if (live.length === 2) {
+    const [x, y] = live;
+    // A lexicographic max, so the join is associative as well: the gloss
+    // breaks the last tie, since two dictionary versions may differ in it.
+    const lead = cmp([x.reviews, x.due, x.box, x.g], [y.reviews, y.due, y.box, y.g]) >= 0 ? x : y;
+    word = {
+      w: lead.w, r: lead.r, g: lead.g, at: minOf(x.at, y.at), box: lead.box, due: lead.due, reviews: lead.reviews,
+      lapses: maxOf(x.lapses, y.lapses), s: maxOf(x.s, y.s),
+    };
+  }
+  if (!word && !removed) return null;
+  return { key, removed, word };
 }
 
 // ── Play ──────────────────────────────────────────────────────────────────

@@ -64,13 +64,13 @@ export function failureKind(err, online = true) {
  * setTimer, clearTimer.
  */
 export function startAccount(deps) {
-  const { doc, win, embed, importKit, importClient, importEngine, kanji, history, play, prefs, remembering, books, ui } = deps;
+  const { doc, win, embed, importKit, importClient, importEngine, kanji, history, play, words = null, prefs, remembering, books, ui } = deps;
   if (!accountsWanted(doc, embed)) return null;
   const now = deps.now || Date.now;
   const setTimer = deps.setTimer || ((fn, ms) => setTimeout(fn, ms));
   const clearTimer = deps.clearTimer || ((t) => clearTimeout(t));
 
-  const local = storesAdapter({ kanji, history, play, prefs, remembering });
+  const local = storesAdapter({ kanji, history, play, words, prefs, remembering });
   const kept = books.read();
   const status = { available: false, signedIn: false, label: '', phase: 'idle', at: kept ? kept.at : 0, synced: false, clears: 'here', error: null };
   let kit = null;
@@ -275,7 +275,7 @@ export function startAccount(deps) {
   }
 
   watchStores({
-    kanji, history, play, onPrefsSaved: prefs.onSaved, books, local, now, changed: schedule,
+    kanji, history, play, words, onPrefsSaved: prefs.onSaved, books, local, now, changed: schedule,
     known: (kind, id) => (engine ? engine.known(kind, id) : NOTHING_KNOWN),
     clears,
   });

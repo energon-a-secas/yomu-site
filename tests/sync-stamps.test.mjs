@@ -486,9 +486,9 @@ test('the book keeps what it heard of the account\'s rows, field by field', asyn
     account: 'user_a', joined: 5,
     heard: { kanji: { 一: [7, 0], 二: [0, 9], 三: [0, 0], ab: [1, 1], 四: [1], 五: ['x', 1] }, phrases: { 'no key': [1, 1] } },
   });
-  assert.deepEqual(book.heard, { kanji: { 一: [7, 0], 二: [0, 9] }, phrases: {} });
+  assert.deepEqual(book.heard, { kanji: { 一: [7, 0], 二: [0, 9] }, phrases: {}, words: {} });
   assert.deepEqual(heardOf(book, 'kanji', '二'), { s: 0, removed: 9 });
   assert.deepEqual(heardOf(book, 'kanji', '六'), { s: 0, removed: 0 });
   assert.deepEqual(heardOf(book, 'kanji', null), { s: 7, removed: 0 }, 'the newest save of any kanji, for a Clear all');
-  assert.deepEqual(cleanBook({ account: 'user_a', joined: 5 }).heard, { kanji: {}, phrases: {} }, 'a book from before it hears nothing');
+  assert.deepEqual(cleanBook({ account: 'user_a', joined: 5 }).heard, { kanji: {}, phrases: {}, words: {} }, 'a book from before it hears nothing');
 });

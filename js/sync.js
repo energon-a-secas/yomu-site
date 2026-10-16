@@ -13,7 +13,7 @@
 // whole pull is in, and a push that fails is tried again whole, since every
 // row is a join and a row sent twice changes nothing.
 
-import { cleanKanjiRow, cleanPhraseRow, cleanPlay, cleanPrefs, cleanClear } from './sync-rules.js';
+import { cleanKanjiRow, cleanPhraseRow, cleanWordRow, cleanPlay, cleanPrefs, cleanClear } from './sync-rules.js';
 import { planSync, pushes, applies } from './sync-local.js';
 import { newBook, answeredBook, answerBook, carriedOf, pruneCarried, heardFrom, PENDING, FIRST } from './sync-book.js';
 
@@ -24,10 +24,20 @@ export const FN = Object.freeze({
   pullPhrases: 'sync:pullPhrases',
   pullMeta: 'sync:pullMeta',
   push: 'sync:push',
+  pullWords: 'sync:pullWords',
+  pushWords: 'sync:pushWords',
 });
-/** Rows per push call: convex/model/sync.ts MAX_KANJI and MAX_PHRASES. */
+/** Rows per push call: convex/model/sync.ts MAX_KANJI, MAX_PHRASES and MAX_WORDS. */
 export const KANJI_BATCH = 200;
 export const PHRASE_BATCH = 50;
+export const WORD_BATCH = 200;
+
+/**
+ * Whether an error is a deployment saying it has no such function: one from
+ * before the saved words' (Convex: "Could not find public function for
+ * 'sync:pullWords'"). Then the words wait, and everything else syncs.
+ */
+export const isMissingFunction = (err) => /Could not find public function/.test(String((err && err.message) || err || ''));
 /** Pages per pull, far past any real account (2,000 kanji is five). */
 const MAX_PAGES = 500;
 
@@ -63,8 +73,11 @@ export function decide(book, subject) {
  * a saved phrase. Counts, scores and display settings alone never ask.
  */
 export function holdsOwn(snap) {
-  return Object.keys(snap.kanji.saved).length > 0 || snap.phrases.length > 0;
+  return Object.keys(snap.kanji.saved).length > 0 || snap.phrases.length > 0 || Object.keys(wordsOf(snap)).length > 0;
 }
+
+/** A snapshot's saved words; one from a page or a test before words has none. */
+export const wordsOf = (snap) => (snap && snap.words && snap.words.saved) || {};
 
 /**
  * What the account holds that a first sign-in asks about: its saved kanji
@@ -73,7 +86,13 @@ export function holdsOwn(snap) {
  * saved, is none of these. The question's counts are these numbers.
  */
 export function accountHolds(server) {
-  const out = { kanji: 0, phrases: 0, removed: { kanji: 0, phrases: 0 }, cleared: server.clear > 0 };
+  // `words` null when the deployment could not say (no words functions yet).
+  const known = server.words instanceof Map;
+  const out = { kanji: 0, phrases: 0, words: known ? 0 : null, removed: { kanji: 0, phrases: 0, words: 0 }, cleared: server.clear > 0 };
+  for (const row of known ? server.words.values() : []) {
+    if (row.word) out.words += 1;
+    else if (row.removed > 0) out.removed.words += 1;
+  }
   for (const row of server.kanji.values()) {
     if (row.saved) out.kanji += 1;
     else if (row.removed > 0) out.removed.kanji += 1;
@@ -91,7 +110,7 @@ export function accountHolds(server) {
  */
 export function holdsAny(server) {
   const a = accountHolds(server);
-  return a.cleared || a.kanji + a.phrases + a.removed.kanji + a.removed.phrases > 0;
+  return a.cleared || a.kanji + a.phrases + (a.words || 0) + a.removed.kanji + a.removed.phrases + a.removed.words > 0;
 }
 
 /** Everything the account holds, page by page. */
@@ -111,10 +130,20 @@ export async function pullAll(client) {
     }
     throw new SyncError('pull-too-long');
   };
+  const kanji = await read(FN.pullKanji, cleanKanjiRow, (r) => r.char);
+  const phrases = await read(FN.pullPhrases, cleanPhraseRow, (r) => r.key);
+  // null from a deployment without the words functions: the words wait.
+  let words = null;
+  try {
+    words = await read(FN.pullWords, cleanWordRow, (r) => r.key);
+  } catch (err) {
+    if (!isMissingFunction(err)) throw err;
+  }
   return {
     clear: cleanClear(meta.clear),
-    kanji: await read(FN.pullKanji, cleanKanjiRow, (r) => r.char),
-    phrases: await read(FN.pullPhrases, cleanPhraseRow, (r) => r.key),
+    kanji,
+    phrases,
+    words,
     play: meta.play ? cleanPlay(meta.play) : null,
     prefs: meta.prefs ? cleanPrefs(meta.prefs) : null,
   };
@@ -144,12 +173,18 @@ export async function pushAll(client, push) {
     wrote += res.wrote || 0;
     clear = Math.max(clear, cleanClear(res.clear));
   }
+  // The saved words go through their own function, after the rest.
+  const words = (push.words || []).slice();
+  while (words.length) {
+    const res = answer(await client.mutation(FN.pushWords, { words: words.splice(0, WORD_BATCH) }));
+    wrote += res.wrote || 0;
+  }
   return { wrote, clear };
 }
 
 /** What each side holds, for the account question. */
 export function counts(server, snap) {
-  return { account: accountHolds(server), here: { kanji: Object.keys(snap.kanji.saved).length, phrases: snap.phrases.length } };
+  return { account: accountHolds(server), here: { kanji: Object.keys(snap.kanji.saved).length, phrases: snap.phrases.length, words: Object.keys(wordsOf(snap)).length } };
 }
 
 /**
@@ -174,7 +209,7 @@ export function counts(server, snap) {
 export function joinStamps(server, snap, at, now = at) {
   const past = (t) => (t > at && t < now ? 0 : t + 1);
   const joined = Math.max(at, past(server.clear));
-  const brought = { kanji: {}, phrases: {} };
+  const brought = { kanji: {}, phrases: {}, words: {} };
   for (const ch of Object.keys(snap.kanji.saved)) {
     const row = server.kanji.get(ch);
     brought.kanji[ch] = row ? Math.max(joined, past(row.removed), past(row.seen ? row.seen.e : 0)) : joined;
@@ -182,6 +217,12 @@ export function joinStamps(server, snap, at, now = at) {
   for (const entry of snap.phrases) {
     const row = server.phrases.get(entry.key);
     brought.phrases[entry.key] = row ? Math.max(at, past(row.removed)) : at;
+  }
+  // A word, as a phrase: no Clear all reaches it. A deployment without the
+  // words functions has no rows to step past, so each counts at the answer.
+  for (const key of Object.keys(wordsOf(snap))) {
+    const row = server.words instanceof Map ? server.words.get(key) : null;
+    brought.words[key] = row ? Math.max(at, past(row.removed)) : at;
   }
   return { joined, brought };
 }
@@ -265,8 +306,8 @@ export function createSync({ client, local, book: books, now = Date.now, kit = (
     delete book.pending;
     if (as === 'replace') {
       book.epoch = server.clear;
-      book.removed = { kanji: {}, phrases: {} };
-      book.brought = { kanji: {}, phrases: {} };
+      book.removed = { kanji: {}, phrases: {}, words: {} };
+      book.brought = { kanji: {}, phrases: {}, words: {} };
       return book;
     }
     book.epoch = Math.max(book.epoch, server.clear);
@@ -308,20 +349,20 @@ export function createSync({ client, local, book: books, now = Date.now, kit = (
     // them, since a store's own merge may keep more than the join did: History
     // folds an ordinary entry's reads into a phrase it saves again.
     const plan = planSync(server, local.snapshot(), book);
-    const carried = carriedOf(book);
+    const carried = carriedOf(book, { words: server.words instanceof Map });
     book.epoch = plan.clear;
     if (plan.next.prefs) {
       for (const [k, p] of Object.entries(plan.next.prefs.values)) { book.prefsAt[k] = p.at; book.prefsVal[k] = p.v; }
     }
     // What the page knows of the account's rows goes into the book with it,
     // so a reload before the next pull still stamps past them (known()).
-    book.heard = heardFrom(server);
+    book.heard = heardFrom(server, book.heard);
     books.write(book);   // the account is remembered from here, even if the push fails
     cache = server;
     const res = await pushAll(client, plan.push);
     cache = plan.next;
     const at = now();
-    books.update((b) => { if (b.account === who) { pruneCarried(b, carried); b.heard = heardFrom(plan.next); b.at = at; } });
+    books.update((b) => { if (b.account === who) { pruneCarried(b, carried); b.heard = heardFrom(plan.next, b.heard); b.at = at; } });
     return { ok: true, at, wrote: res.wrote, applied: applies(merge), stale: res.clear > plan.clear };
   }
 
@@ -365,7 +406,7 @@ export function createSync({ client, local, book: books, now = Date.now, kit = (
       if (!book || book.account !== who) throw new SyncError('account-changed');
       const plan = planSync(cache, local.snapshot(), book);
       if (!pushes(plan)) return { ok: true, wrote: 0 };
-      const carried = carriedOf(book);
+      const carried = carriedOf(book, { words: cache.words instanceof Map });
       const res = await pushAll(client, plan.push);
       cache = plan.next;
       const at = now();
@@ -373,7 +414,7 @@ export function createSync({ client, local, book: books, now = Date.now, kit = (
         if (b.account !== who) return;
         pruneCarried(b, carried);
         b.epoch = Math.max(b.epoch, plan.clear);
-        b.heard = heardFrom(plan.next);
+        b.heard = heardFrom(plan.next, b.heard);
         b.at = at;
       });
       return { ok: true, at, wrote: res.wrote, stale: res.clear > plan.clear };
@@ -401,6 +442,10 @@ export function createSync({ client, local, book: books, now = Date.now, kit = (
     if (kind === 'phrases') {
       const row = cache.phrases.get(id);
       return { s: row && row.phrase ? row.phrase.s : 0, removed: row ? row.removed : 0 };
+    }
+    if (kind === 'words') {
+      const row = cache.words instanceof Map ? cache.words.get(id) : null;
+      return { s: row && row.word ? row.word.s : 0, removed: row ? row.removed : 0 };
     }
     if (id === null || id === undefined) {
       let s = 0;

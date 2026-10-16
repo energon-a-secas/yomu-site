@@ -16,13 +16,14 @@ import { textKey } from './history-text.js';
  * back as one: a removal stamped "now" while applying another device's would
  * outrank a save made after it.
  */
-export function storesAdapter({ kanji, history, play, prefs, remembering }) {
+export function storesAdapter({ kanji, history, play, words = null, prefs, remembering }) {
   const adapter = {
     applying: false,
     snapshot() {
       return {
         kanji: { saved: kanji.data.saved, seen: kanji.data.seen },
         phrases: history.savedList(),
+        words: { saved: words ? words.data.saved : {} },
         play: { games: play.data.games, mixed: play.data.mixed },
         prefs: { ...prefs.get() },
       };
@@ -33,6 +34,7 @@ export function storesAdapter({ kanji, history, play, prefs, remembering }) {
         if (Object.keys(a.saved).length || Object.keys(a.seen).length) kanji.adopt({ saved: a.saved, seen: a.seen });
         for (const key of a.unsave) history.unsave(key, remembering());
         if (a.merge.length) history.mergePhrases(a.merge);
+        if (words && a.words && Object.keys(a.words).length) words.adopt(a.words);
         if (a.play) play.adopt(a.play);
         if (a.prefs) prefs.set(a.prefs);
       } finally {
@@ -51,7 +53,8 @@ const REACH = Object.freeze(['here', 'joining', 'account']);
 const least = (said, now) => (REACH.includes(said) && REACH.indexOf(said) < REACH.indexOf(now) ? said : now);
 
 /**
- * Listen to the four stores. An unsave and a Clear all go into the book as
+ * Listen to the stores (My kanji, History, My words, Play, the
+ * preferences). An unsave and a Clear all go into the book as
  * tombstones (a Clear all as one per kanji it emptied while a join waits
  * for the account's data, and as none while it stays in this browser),
  * every save is stamped with its own time, a preference saved with a new
@@ -72,7 +75,7 @@ const least = (said, now) => (REACH.includes(said) && REACH.indexOf(said) < REAC
  * time: what the learner just did on the screen is what syncs, whatever
  * the clocks say.
  */
-export function watchStores({ kanji, history, play, onPrefsSaved, books, local, now = Date.now, changed = () => {}, known = () => NOTHING, clears = (b) => clearsOf(b) }) {
+export function watchStores({ kanji, history, play, words = null, onPrefsSaved, books, local, now = Date.now, changed = () => {}, known = () => NOTHING, clears = (b) => clearsOf(b) }) {
   const mine = () => !local.applying;
   /**
    * The account's copy of a row: as the page last saw it (`known`), or as
@@ -160,14 +163,16 @@ export function watchStores({ kanji, history, play, onPrefsSaved, books, local, 
    * now, and after any removal or Clear all this browser knows, so the next
    * sync keeps it. Its schedule and counts are the backup's own.
    */
-  function imported(chars, texts) {
+  function imported(chars, texts, ids = []) {
     const keys = texts.map(textKey).filter((key) => history.isSaved(key));
     const kept = chars.filter((ch) => kanji.isSaved(ch));
-    if (!keys.length && !kept.length) return;
+    const held = words ? ids.filter((id) => id && words.byId(id)) : [];
+    if (!keys.length && !kept.length && !held.length) return;
     books.update((b) => {
       const at = now();
       for (const ch of kept) b.saves.kanji[ch] = Math.max(b.saves.kanji[ch] || 0, at, newestRemoval(b, 'kanji', ch) + 1);
       for (const key of keys) b.saves.phrases[key] = Math.max(b.saves.phrases[key] || 0, at, newestRemoval(b, 'phrases', key) + 1);
+      for (const id of held) b.saves.words[id] = Math.max(b.saves.words[id] || 0, at, newestRemoval(b, 'words', id) + 1);
     });
   }
 
@@ -188,6 +193,15 @@ export function watchStores({ kanji, history, play, onPrefsSaved, books, local, 
       else if (type === 'save') saved('phrases', ev.key, ev.at);
       changed();
     }),
+    // A saved word, as a phrase: no Clear all reaches it (sync-rules.js).
+    ...(words ? [words.onChange((ev) => {
+      if (!mine()) return;
+      const type = ev && ev.type;
+      if (type === 'unsave') unsaved('words', ev.id, ev.rec && ev.rec.at);
+      else if (type === 'save') saved('words', ev.id, ev.at);
+      else if (type === 'import') imported([], [], ev.ids || []);
+      changed();
+    })] : []),
     play.onChange(() => { if (mine()) changed(); }),
     onPrefsSaved((prefs) => {
       if (!mine()) return;

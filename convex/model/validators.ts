@@ -49,6 +49,27 @@ export const phraseFields = {
 };
 export const phraseRowV = v.object(phraseFields);
 
+// A saved word (js/word-store.js): its dictionary form, reading and first
+// meaning, a saved kanji's schedule, and `s`, its latest save.
+export const wordV = v.object({
+  w: v.string(),
+  r: v.string(),
+  g: v.string(),
+  at: v.number(),
+  box: v.number(),
+  due: v.string(),
+  reviews: v.number(),
+  lapses: v.number(),
+  s: v.number(),
+});
+
+export const wordFields = {
+  key: v.string(),
+  removed: v.number(),
+  word: v.union(wordV, v.null()),
+};
+export const wordRowV = v.object(wordFields);
+
 const gameV = v.optional(v.object({ best: v.number(), rounds: v.number() }));
 
 export const playFields = {

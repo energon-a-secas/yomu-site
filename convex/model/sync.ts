@@ -14,8 +14,8 @@
  */
 import type { QueryCtx, MutationCtx } from "../_generated/server";
 import {
-  cleanKanjiRow, cleanPhraseRow, cleanPlay, cleanPrefs, cleanClear,
-  joinKanji, joinPhrase, joinPlay, joinPrefs, same,
+  cleanKanjiRow, cleanPhraseRow, cleanWordRow, cleanPlay, cleanPrefs, cleanClear,
+  joinKanji, joinPhrase, joinWord, joinPlay, joinPrefs, same,
 } from "../../js/sync-rules.js";
 
 /** Rows per pull page. A kanji row is a few hundred bytes; a phrase up to 2,000 characters. */
@@ -24,6 +24,9 @@ export const PHRASE_PAGE = 100;
 /** Rows per push. js/sync.js sends no more than this in one call. */
 export const MAX_KANJI = 200;
 export const MAX_PHRASES = 50;
+/** A word row is a few hundred bytes, as a kanji's is. */
+export const WORD_PAGE = 400;
+export const MAX_WORDS = 200;
 
 export const REFUSED = { ok: false as const, error: "not-authenticated" };
 
@@ -48,7 +51,7 @@ async function oneDoc(ctx: Ctx, table: "play" | "prefs", owner: string) {
  * Write `next` where `doc` stood: insert, replace, delete, or nothing when
  * the stored row already is `next`. Returns how many documents changed.
  */
-async function put(ctx: MutationCtx, table: "kanji" | "phrases" | "play" | "prefs", owner: string, doc: { _id: any } | null, before: Row, next: Row) {
+async function put(ctx: MutationCtx, table: "kanji" | "phrases" | "words" | "play" | "prefs", owner: string, doc: { _id: any } | null, before: Row, next: Row) {
   if (!next) {
     if (!doc) return 0;
     await ctx.db.delete(doc._id);
@@ -153,4 +156,35 @@ export async function push(ctx: MutationCtx, args: PushArgs) {
     wrote += await put(ctx, table, owner, doc, before, (join as any)(before, row));
   }
   return { ok: true as const, wrote, skipped, clear };
+}
+
+/** One page of the owner's saved words and word tombstones. */
+export async function pullWords(ctx: QueryCtx, { cursor }: Cursor) {
+  const owner = await ownerOf(ctx);
+  if (!owner) return REFUSED;
+  const page = await ctx.db.query("words").withIndex("by_owner_key", (q) => q.eq("owner", owner)).paginate({ numItems: WORD_PAGE, cursor });
+  const rows = [];
+  for (const doc of page.page) {
+    const row = joinWord(cleanWordRow(doc), null);
+    if (row) rows.push(row);
+  }
+  return { ok: true as const, rows, cursor: page.continueCursor, done: page.isDone };
+}
+
+/** Join the saved words the page sends into what is stored, as push does a phrase. */
+export async function pushWords(ctx: MutationCtx, args: { words?: unknown[] }) {
+  const owner = await ownerOf(ctx);
+  if (!owner) return { ...REFUSED, wrote: 0 };
+  const words = args.words ?? [];
+  if (words.length > MAX_WORDS) return { ok: false as const, error: "too-many-rows", wrote: 0 };
+  let wrote = 0;
+  let skipped = 0;
+  for (const raw of words) {
+    const row = cleanWordRow(raw);
+    if (!row) { skipped += 1; continue; }
+    const doc = await ctx.db.query("words").withIndex("by_owner_key", (q) => q.eq("owner", owner).eq("key", row.key)).first();
+    const before = doc ? cleanWordRow(doc) : null;
+    wrote += await put(ctx, "words", owner, doc, before, joinWord(before, row));
+  }
+  return { ok: true as const, wrote, skipped };
 }

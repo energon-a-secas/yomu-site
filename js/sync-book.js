@@ -24,7 +24,7 @@
 //             made it (with Use, the time of the answer, which starts the
 //             book afresh: the saves stamped in `saves` since are the
 //             learner's own in the account, and the rest stays behind)
-//   brought   { kanji: { 天: ms }, phrases: { key: ms } }: each save this
+//   brought   { kanji: { 天: ms }, phrases: { key: ms }, words: { key: ms } }: each save this
 //             browser held when it joined, and when it counts as saved: no
 //             earlier than `joined`, and one past the account's removal of
 //             that row then (sync.js joinStamps), so a removal or a Clear
@@ -34,16 +34,17 @@
 //             Clear all of the row here drops it (sync-watch.js)
 //   epoch     the latest Clear all of My kanji this browser has applied (ms)
 //   at        the last sync that finished (ms), for the My kanji line
-//   removed   { kanji: { 天: ms }, phrases: { key: ms } }: removals made here
-//             and not yet known to have reached the account
-//   saves     { kanji: { 天: ms }, phrases: { key: ms } }: when each save
+//   removed   { kanji: { 天: ms }, phrases: { key: ms }, words: { key: ms } }:
+//             removals made here and not yet known to have reached the account
+//   saves     { kanji: { 天: ms }, phrases: { key: ms }, words: { key: ms } }: when each save
 //             made here counts as made, until a push carries it: its own
 //             time, or one past a removal or Clear all this browser knows
 //             when that is later; and a save brought back by Import (saved
 //             now, after any removal known). Kept here because the store
 //             cannot keep it: a merge moves the store's save time back to
 //             the earliest copy's (sync-watch.js)
-//   heard     { kanji: { 天: [s, removed] }, phrases: { key: [s, removed] } }:
+//   heard     { kanji: { 天: [s, removed] }, phrases: { key: [s, removed] },
+//             words: { key: [s, removed] } }:
 //             the account's newest save and removal of each row, as this
 //             browser last pulled or pushed it (a row with neither is left
 //             out), so a removal, a save or a Clear all made after a reload,
@@ -52,12 +53,18 @@
 //   prefsAt   { lang: ms, ... }: when each synced preference last changed here
 //   prefsVal  { lang: 'es', ... }: its value then, to tell a change from a save
 //
+// A saved word (js/word-store.js) is a third kind beside kanji and phrases,
+// keyed by its ASCII id; a book from before words has none of it, and reads
+// as one with nothing for words. A deployment from before the words
+// functions syncs the rest, and the words' stamps here wait for one that has
+// them (js/sync.js).
+//
 // Read field by field, like every store on the page: a value that does not
 // fit is left out, and a book that does not read at all is no book, which
 // makes the next sign-in a first one (it merges; it never empties anything).
 
 import { createStore } from './neorgon-persist.js';
-import { PREFS, PREF_KEYS, HISTORY_KEY, oneKanji } from './sync-rules.js';
+import { PREFS, PREF_KEYS, HISTORY_KEY, WORD_KEY, oneKanji } from './sync-rules.js';
 
 export const BOOK_KEY = 'yomu-site:sync';
 export const BOOK_VERSION = 1;
@@ -82,8 +89,8 @@ export const FIRST = 'first';
 export function newBook(account, now, prefs, epoch = 0) {
   return {
     account, joined: now, epoch, at: 0,
-    brought: { kanji: {}, phrases: {} }, removed: { kanji: {}, phrases: {} }, saves: { kanji: {}, phrases: {} },
-    heard: { kanji: {}, phrases: {} }, prefsAt: {}, prefsVal: syncedPrefs(prefs),
+    brought: { kanji: {}, phrases: {}, words: {} }, removed: { kanji: {}, phrases: {}, words: {} }, saves: { kanji: {}, phrases: {}, words: {} },
+    heard: { kanji: {}, phrases: {}, words: {} }, prefsAt: {}, prefsVal: syncedPrefs(prefs),
   };
 }
 
@@ -145,6 +152,9 @@ function cleanHeard(raw, keyOk) {
   return out;
 }
 
+const isKey = (k) => HISTORY_KEY.test(k);
+const isWord = (k) => WORD_KEY.test(k);
+
 export function cleanBook(raw) {
   if (!isObject(raw) || typeof raw.account !== 'string' || !raw.account || raw.account.length > 200 || !isTime(raw.joined)) return null;
   const brought = isObject(raw.brought) ? raw.brought : {};
@@ -158,10 +168,10 @@ export function cleanBook(raw) {
     joined: raw.joined,
     epoch: isStamp(raw.epoch) ? raw.epoch : 0,
     at: isStamp(raw.at) ? raw.at : 0,
-    brought: { kanji: cleanMap(brought.kanji, oneKanji), phrases: cleanMap(brought.phrases, (k) => HISTORY_KEY.test(k)) },
-    removed: { kanji: cleanMap(removed.kanji, oneKanji), phrases: cleanMap(removed.phrases, (k) => HISTORY_KEY.test(k)) },
-    saves: { kanji: cleanMap(saves.kanji, oneKanji), phrases: cleanMap(saves.phrases, (k) => HISTORY_KEY.test(k)) },
-    heard: { kanji: cleanHeard(heard.kanji, oneKanji), phrases: cleanHeard(heard.phrases, (k) => HISTORY_KEY.test(k)) },
+    brought: { kanji: cleanMap(brought.kanji, oneKanji), phrases: cleanMap(brought.phrases, isKey), words: cleanMap(brought.words, isWord) },
+    removed: { kanji: cleanMap(removed.kanji, oneKanji), phrases: cleanMap(removed.phrases, isKey), words: cleanMap(removed.words, isWord) },
+    saves: { kanji: cleanMap(saves.kanji, oneKanji), phrases: cleanMap(saves.phrases, isKey), words: cleanMap(saves.words, isWord) },
+    heard: { kanji: cleanHeard(heard.kanji, oneKanji), phrases: cleanHeard(heard.phrases, isKey), words: cleanHeard(heard.words, isWord) },
     prefsAt,
     prefsVal: syncedPrefs(raw.prefsVal),
   };
@@ -171,12 +181,13 @@ export function cleanBook(raw) {
 }
 
 /**
- * The account's rows as a sync left them (`server`: kanji and phrases as
- * Maps of rows), in the shape `heard` keeps: each row's newest save and
- * removal, rows with neither left out.
+ * The account's rows as a sync left them (`server`: kanji, phrases and
+ * words as Maps of rows), in the shape `heard` keeps: each row's newest save
+ * and removal, rows with neither left out. A deployment that did not answer
+ * for words (`server.words` null) leaves what `before` heard of them.
  */
-export function heardFrom(server) {
-  const out = { kanji: {}, phrases: {} };
+export function heardFrom(server, before = null) {
+  const out = { kanji: {}, phrases: {}, words: server.words instanceof Map ? {} : { ...((before && before.words) || {}) } };
   for (const [ch, row] of server.kanji) {
     const s = row.saved ? row.saved.s : 0;
     if (s > 0 || row.removed > 0) out.kanji[ch] = [s, row.removed];
@@ -184,6 +195,12 @@ export function heardFrom(server) {
   for (const [key, row] of server.phrases) {
     const s = row.phrase ? row.phrase.s : 0;
     if (s > 0 || row.removed > 0) out.phrases[key] = [s, row.removed];
+  }
+  if (server.words instanceof Map) {
+    for (const [key, row] of server.words) {
+      const s = row.word ? row.word.s : 0;
+      if (s > 0 || row.removed > 0) out.words[key] = [s, row.removed];
+    }
   }
   return out;
 }
@@ -204,7 +221,7 @@ export function heardOf(book, kind, id) {
   return row ? { s: row[0], removed: row[1] } : { s: 0, removed: 0 };
 }
 
-/** A removal made here (`kind` is 'kanji' or 'phrases'), kept until a sync carries it. */
+/** A removal made here (`kind` is 'kanji', 'phrases' or 'words'), kept until a sync carries it. */
 export function noteRemoval(book, kind, id, at) {
   book.removed[kind][id] = Math.max(book.removed[kind][id] || 0, at);
 }
@@ -227,9 +244,13 @@ export function notePrefs(book, prefs, at) {
   return changed;
 }
 
-/** The removals and save stamps a sync plans with, copied: what pruneCarried may forget once its push is in. */
-export function carriedOf(book) {
-  const copy = (m) => ({ kanji: { ...m.kanji }, phrases: { ...m.phrases } });
+/**
+ * The removals and save stamps a sync plans with, copied: what pruneCarried
+ * may forget once its push is in. `words: false` when the deployment did not
+ * answer for words, so their stamps stay for one that does.
+ */
+export function carriedOf(book, { words = true } = {}) {
+  const copy = (m) => ({ kanji: { ...m.kanji }, phrases: { ...m.phrases }, words: words ? { ...m.words } : {} });
   return { removed: copy(book.removed), saves: copy(book.saves) };
 }
 
@@ -242,7 +263,7 @@ export function carriedOf(book) {
  */
 export function pruneCarried(book, carried) {
   for (const part of ['removed', 'saves']) {
-    for (const kind of ['kanji', 'phrases']) {
+    for (const kind of ['kanji', 'phrases', 'words']) {
       for (const [id, t] of Object.entries(carried[part][kind] || {})) {
         if (book[part][kind][id] !== undefined && book[part][kind][id] <= t) delete book[part][kind][id];
       }

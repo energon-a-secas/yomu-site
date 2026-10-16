@@ -59,8 +59,11 @@ export function reviewText(rid) {
 
 function cardNodes(r) {
   const rid = current(r);
-  const word = wordOfReview(rid) === null ? null : myWords().byId(wordOfReview(rid));
-  const ch = word ? word.w : rid;
+  const isWord = wordOfReview(rid) !== null;
+  const word = isWord ? myWords().byId(wordOfReview(rid)) : null;
+  // A word unsaved elsewhere while its card waited: say so, never its id.
+  const gone = isWord && !word;
+  const ch = word ? word.w : gone ? '' : rid;
   const pos = position(r);
   return [
     h('h3', { class: 'mk-sec-title rv-title', id: 'rv-title' }, [
@@ -69,7 +72,8 @@ function cardNodes(r) {
       isRepeat(r) ? h('span', { class: 'rv-tag' }, ` · ${ui('reviewAgainTag')}`) : null,
     ]),
     h('p', { class: `rv-char${word ? ' rv-char--word' : ''}`, id: 'rv-char', lang: 'ja', tabindex: '-1' }, ch),
-    !r.shown ? h('p', { class: 'quiet rv-prompt' }, ui('reviewPrompt')) : word ? wordAnswerNodes(word) : answerNodes(ch),
+    gone ? h('p', { class: 'quiet rv-prompt', id: 'rv-answer', tabindex: '-1' }, ui('rvWordGone'))
+      : !r.shown ? h('p', { class: 'quiet rv-prompt' }, ui('reviewPrompt')) : word ? wordAnswerNodes(word) : answerNodes(ch),
     h('p', { class: 'rv-actions' }, r.shown
       ? [keyButton('rv-again', ui('again'), '1', 'btn--secondary'), keyButton('rv-got', ui('gotIt'), '2', 'btn--secondary')]
       : [keyButton('rv-show', ui('reviewShow'), 'Space', 'btn--secondary')]),

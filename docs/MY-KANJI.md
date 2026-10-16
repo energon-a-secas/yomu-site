@@ -173,7 +173,10 @@ cyrb53 of written form and reading in base36 (`wordId`), so 方 read かた and
 方 read ほう are two words and a key is ASCII, which sync needs. Read field by
 field like the kanji store; a value the kit cannot read is kept aside as
 `yomu-site:words:damaged`, and nothing is written for a first visit. At most
-2,000 (`MAX_SAVED_WORDS`): the next is refused with a note. The schedule is
+2,000 saved here (`MAX_SAVED_WORDS`): the next save is refused with a note,
+and Import counts what did not fit; what sync brings from the account is
+kept whole (docs/SYNC.md). Another tab's write is read again
+(`events-words.js bindWords`). The schedule is
 the kanji's (`kanji-store.js schedule`). A review takes the due kanji, then
 the due words (`dueAll`); a word sits in the review's queue as `w:` and its
 id, which no one-character kanji can be, its card shows the word, then its

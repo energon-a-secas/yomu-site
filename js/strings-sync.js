@@ -55,19 +55,23 @@ export const SYNC_STRINGS = Object.freeze({
   // Another account signed in on a browser that synced with one before.
   syncAskTitle: { en: 'This browser synced with another account', es: 'Este navegador se sincronizó con otra cuenta' },
   syncAskBody: {
-    en: '{name} just signed in. The kanji, saved phrases and scores in this browser came from the account it synced with before.',
-    es: '{name} acaba de iniciar sesión. Los kanji, las frases guardadas y los puntajes de este navegador vienen de la cuenta con la que se sincronizó antes.',
+    en: '{name} just signed in. The kanji, saved phrases, saved words and scores in this browser came from the account it synced with before.',
+    es: '{name} acaba de iniciar sesión. Los kanji, las frases y palabras guardadas y los puntajes de este navegador vienen de la cuenta con la que se sincronizó antes.',
   },
   syncAskCounts: {
     en: 'In {name}\'s account: saved kanji {kanji}, saved phrases {phrases}. In this browser: saved kanji {hereKanji}, saved phrases {herePhrases}.',
     es: 'En la cuenta de {name}: kanji guardados {kanji}, frases guardadas {phrases}. En este navegador: kanji guardados {hereKanji}, frases guardadas {herePhrases}.',
   },
+  syncAskCountsWords: {
+    en: 'In {name}\'s account: saved kanji {kanji}, saved phrases {phrases}, saved words {words}. In this browser: saved kanji {hereKanji}, saved phrases {herePhrases}, saved words {hereWords}.',
+    es: 'En la cuenta de {name}: kanji guardados {kanji}, frases guardadas {phrases}, palabras guardadas {words}. En este navegador: kanji guardados {hereKanji}, frases guardadas {herePhrases}, palabras guardadas {hereWords}.',
+  },
   // What each answer does, and no more than that. The account this browser
   // synced with before is never written to again from here: it keeps what
   // it had at its last sync, and nothing changed since reaches it.
   syncAskHow: {
-    en: 'Adding keeps both: this browser\'s data joins the account that just signed in. Using the account\'s data replaces what this browser holds with that account\'s. Either way, the account this browser synced with before keeps what it already had, and nothing more: what changed in this browser since its last sync with that account (kanji and phrases saved or unsaved, reviews, scores, display settings) is not sent to it. If you use the account\'s data, those changes are gone from this browser too.',
-    es: 'Añadir conserva ambos: los datos de este navegador se suman a la cuenta que acaba de iniciar sesión. Usar los datos de la cuenta reemplaza lo que tiene este navegador por lo de esa cuenta. En ambos casos, la cuenta con la que este navegador se sincronizó antes conserva lo que ya tenía, y nada más: lo que cambió en este navegador desde su última sincronización con esa cuenta (kanji y frases guardados o quitados, repasos, puntajes, ajustes de la vista) no se le envía. Si usas los datos de la cuenta, esos cambios también desaparecen de este navegador.',
+    en: 'Adding keeps both: this browser\'s data joins the account that just signed in. Using the account\'s data replaces what this browser holds with that account\'s. Either way, the account this browser synced with before keeps what it already had, and nothing more: what changed in this browser since its last sync with that account (kanji, phrases and words saved or unsaved, reviews, scores, display settings) is not sent to it. If you use the account\'s data, those changes are gone from this browser too.',
+    es: 'Añadir conserva ambos: los datos de este navegador se suman a la cuenta que acaba de iniciar sesión. Usar los datos de la cuenta reemplaza lo que tiene este navegador por lo de esa cuenta. En ambos casos, la cuenta con la que este navegador se sincronizó antes conserva lo que ya tenía, y nada más: lo que cambió en este navegador desde su última sincronización con esa cuenta (kanji, frases y palabras guardados o quitados, repasos, puntajes, ajustes de la vista) no se le envía. Si usas los datos de la cuenta, esos cambios también desaparecen de este navegador.',
   },
   syncAskSince: {
     en: 'This browser last synced with that account {when}.',
@@ -76,20 +80,24 @@ export const SYNC_STRINGS = Object.freeze({
   // A first sign-in, when this browser holds saved kanji or phrases of its
   // own and the account holds data too (sync.js begin()). This browser's
   // data was never in the account, so Use loses it: the text says so.
-  syncFirstTitle: { en: 'This browser has kanji and phrases of its own', es: 'Este navegador tiene kanji y frases propios' },
+  syncFirstTitle: { en: 'This browser has kanji, phrases or words of its own', es: 'Este navegador tiene kanji, frases o palabras propios' },
   syncFirstBody: {
-    en: 'This browser has kanji and phrases from before you signed in. Add them to your account, or use your account\'s data here?',
-    es: 'Este navegador tiene kanji y frases de antes de que iniciaras sesión. ¿Los añades a tu cuenta, o usas aquí los datos de tu cuenta?',
+    en: 'This browser has kanji, phrases or words from before you signed in. Add them to your account, or use your account\'s data here?',
+    es: 'Este navegador tiene kanji, frases o palabras de antes de que iniciaras sesión. ¿Los añades a tu cuenta, o usas aquí los datos de tu cuenta?',
   },
   syncFirstHow: {
-    en: 'Adding keeps both: this browser\'s kanji, phrases, reviews and scores join your account, including any your account had removed or cleared. Using your account\'s data replaces this browser\'s saved kanji, their reviews and counts, its saved phrases and its scores with your account\'s. They were never in your account, so they are gone from this browser too: to keep a copy, choose Not now and use Export in My kanji first.',
-    es: 'Añadir conserva ambos: los kanji, las frases, los repasos y los puntajes de este navegador se suman a tu cuenta, incluso los que tu cuenta había quitado o borrado. Usar los datos de tu cuenta reemplaza los kanji guardados de este navegador, sus repasos y conteos, sus frases guardadas y sus puntajes por los de tu cuenta. Nunca estuvieron en tu cuenta, así que también desaparecen de este navegador: para guardar una copia, elige Ahora no y usa Exportar en Mis kanji antes.',
+    en: 'Adding keeps both: this browser\'s kanji, phrases, words, reviews and scores join your account, including any your account had removed or cleared. Using your account\'s data replaces this browser\'s saved kanji, their reviews and counts, its saved phrases and words and its scores with your account\'s. They were never in your account, so they are gone from this browser too: to keep a copy, choose Not now and use Export in My kanji first.',
+    es: 'Añadir conserva ambos: los kanji, las frases, las palabras, los repasos y los puntajes de este navegador se suman a tu cuenta, incluso los que tu cuenta había quitado o borrado. Usar los datos de tu cuenta reemplaza los kanji guardados de este navegador, sus repasos y conteos, sus frases y palabras guardadas y sus puntajes por los de tu cuenta. Nunca estuvieron en tu cuenta, así que también desaparecen de este navegador: para guardar una copia, elige Ahora no y usa Exportar en Mis kanji antes.',
   },
   // The rest of what a first sign-in asks about (sync.js accountHolds),
   // shown only when the account holds it.
   syncFirstRemoved: {
     en: 'Removed in {name}\'s account: kanji {kanji}, phrases {phrases}.',
     es: 'Quitados en la cuenta de {name}: kanji {kanji}, frases {phrases}.',
+  },
+  syncFirstRemovedWords: {
+    en: 'Removed in {name}\'s account: kanji {kanji}, phrases {phrases}, words {words}.',
+    es: 'Quitados en la cuenta de {name}: kanji {kanji}, frases {phrases}, palabras {words}.',
   },
   syncFirstCleared: {
     en: 'In {name}\'s account, My kanji was cleared.',

@@ -1,7 +1,7 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 import * as model from "./model/sync";
-import { kanjiRowV, phraseRowV, playV, prefsV } from "./model/validators";
+import { kanjiRowV, phraseRowV, wordRowV, playV, prefsV } from "./model/validators";
 
 // The functions js/sync.js calls, as strings ("sync:pullKanji", ...). Each is
 // the argument validator and a handler from convex/model/sync.ts, which reads
@@ -28,4 +28,14 @@ export const push = mutation({
     prefs: v.optional(prefsV),
   },
   handler: (ctx, args) => model.push(ctx, args),
+});
+
+// The saved words have functions of their own, so a page that syncs them
+// leaves push and the three pulls above exactly as they were, and a page
+// from before them never calls these.
+export const pullWords = query({ args: cursor, handler: (ctx, args) => model.pullWords(ctx, args) });
+
+export const pushWords = mutation({
+  args: { words: v.array(wordRowV) },
+  handler: (ctx, args) => model.pushWords(ctx, args),
 });
