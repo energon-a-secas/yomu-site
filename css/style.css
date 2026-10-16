@@ -1683,11 +1683,16 @@ html[data-embed="1"] body:has(> .neo-footer) { min-height: 0; }
 }
 
 /* ── Reduced motion ────────────────────────────────────────── */
+/* Transitions off, not shortened: transition-property is `all` by default,
+   so a duration on every element made every property of every element
+   transition. Turned on its side, the reading's font sizes then grew one
+   nesting level a frame (3,000 transitions, 700ms in WebKit), and the turn
+   handler measured the chosen word halfway there. */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+    transition: none !important;
     scroll-behavior: auto !important;
   }
 }

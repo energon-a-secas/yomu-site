@@ -213,6 +213,15 @@ test('a turn of the phone brings what the sheet was opened for back above it, on
   assert.match(events, /bindTurn\(\);/);
 });
 
+test('reduced motion turns transitions off rather than shortening them, so a turn lays out in one frame', () => {
+  const reduced = blocks(esc('@media (prefers-reduced-motion: reduce)')).join('\n');
+  assert.match(reduced, /\*, \*::before, \*::after\s*\{[^}]*transition:\s*none\s*!important/);
+  // transition-property is `all` by default: a duration given to every
+  // element transitioned every property, and the turn handler measured the
+  // reading while its font sizes were still growing.
+  assert.doesNotMatch(reduced, /transition-duration/);
+});
+
 test('after a touch, a dialog gives focus back with no ring, and to the ⋯ button for a control in its menu', () => {
   const dialogs = readFileSync(join(SITE, 'js/dialogs.js'), 'utf8');
   assert.match(dialogs, /focusVisible: false/);

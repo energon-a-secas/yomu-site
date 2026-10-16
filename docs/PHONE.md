@@ -120,7 +120,13 @@ thousands of pixels. Only a change of width counts, because Safari's
 toolbars change the height as the page scrolls. It measures the band between
 the header's scroll padding and the sheet's top (`intoBand`): scrollIntoView
 with the sheet's scroll-margin left the word 28px under the sheet in WebKit
-one turn in three. The sheet's padding and the
+one turn in three. With `intoBand` in place, a long text still failed one
+turn in three, and the cause was the reduced-motion rule (which the check
+sets): a `transition-duration` on every element transitions every property,
+since `transition-property` is `all` by default, so the turned reading's font
+sizes grew one nesting level a frame, about 700ms in WebKit, and the word was
+measured halfway. Reduced motion turns transitions off (`transition: none`),
+and `tests/mobile.test.mjs` holds it to that. The sheet's padding and the
 toast's offset add `env(safe-area-inset-bottom)`, which is 0 until the page
 declares `viewport-fit=cover`, as the kits do. A text field is 16px under
 `pointer: coarse` (`.mk-filter-input` was 14): iOS zooms the page into a
