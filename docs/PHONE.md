@@ -61,7 +61,7 @@ a phone) cannot take focus, so a dialog it opened gives focus to the ⋯ button
 instead; it fell to `<body>`.
 
 **The reading starts under one row of tools.** On a phone (under 600px wide,
-or 480px tall on its side) the seven display switches fold behind
+or 480px tall on its side) the eight display switches fold behind
 `#display-toggle` (`aria-expanded`, `data-folded` on `#display-panel`, not
 saved; above that the button is not drawn), the Remember card comes after the
 reading and its Translation, the send links and their note after the reading,

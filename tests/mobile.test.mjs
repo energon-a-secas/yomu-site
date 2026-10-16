@@ -69,7 +69,7 @@ test('the Remember card comes after the reading and its Translation, never above
   assert.ok(at('id="remember-ask"') < at('id="in-text"'), 'and comes before In this text');
 });
 
-test('the seven display switches sit behind one Display button, folded in the markup', () => {
+test('the eight display switches sit behind one Display button, folded in the markup', () => {
   const toggle = element('id="display-toggle"');
   assert.match(toggle, /aria-expanded="false"/);
   assert.match(toggle, /aria-controls="display-panel"/);

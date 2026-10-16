@@ -48,6 +48,8 @@ export function paintChrome(state) {
   for (const b of doc.querySelectorAll('[data-act="set"]')) {
     b.setAttribute('aria-pressed', String(prefValue(state.prefs, b.dataset.pref) === b.dataset.value));
   }
+  const shown = $('kanji-shown');
+  if (shown) shown.value = state.prefs.kanjiShown;
   const slow = $('slow-toggle');
   if (slow) slow.setAttribute('aria-pressed', String(!!state.prefs.slow));
 
@@ -55,6 +57,7 @@ export function paintChrome(state) {
   if (reading) {
     reading.dataset.furigana = prefValue(state.prefs, 'furigana');
     reading.dataset.size = state.prefs.size;
+    reading.dataset.kanji = state.prefs.kanjiShown === 'all' ? 'all' : 'some';
     reading.dataset.romaji = state.prefs.romaji;
     reading.dataset.highlights = state.prefs.highlights ? 'on' : 'off';
     reading.dataset.unsaved = state.prefs.unsaved;

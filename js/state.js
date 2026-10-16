@@ -35,6 +35,8 @@ export const REMEMBER = Object.freeze(['ask', 'on', 'off']);
 /** The on-device translation under the reading (translate.js): off until the learner asks for it. */
 export const TRANSLATE = Object.freeze(['on', 'off']);
 export const SIZES = Object.freeze(['S', 'M', 'L']);
+/** Which kanji the reading keeps as kanji; the rest are shown in kana (reading-view.js). */
+export const KANJI_SHOWN = Object.freeze(['all', 'mine', 'g1', 'g2', 'g3', 'g4', 'g5', 'g6']);
 
 export const state = {
   // `gaps` draws the edges between words (gaps.js), off until the learner
@@ -43,7 +45,7 @@ export const state = {
     lang: 'en', furigana: true, romaji: 'said', highlights: true, unsaved: 'mark', gaps: false, gapsSeen: false, slow: false, remember: 'ask', translate: 'off',
     // This browser's only, never synced (sync-rules.js PREFS): furigana over
     // saved kanji hidden, and the reading's size.
-    furiSaved: false, size: 'M',
+    furiSaved: false, size: 'M', kanjiShown: 'all',
   },
   // One sentence at a time (reading-view.js): for this visit, never saved.
   view: { one: false, sent: 0 },
@@ -107,6 +109,7 @@ export function loadPrefs(s, loc = globalThis.location, nav = globalThis.navigat
   if (typeof p.slow === 'boolean') s.prefs.slow = p.slow;
   if (typeof p.furiSaved === 'boolean') s.prefs.furiSaved = p.furiSaved;
   if (SIZES.includes(p.size)) s.prefs.size = p.size;
+  if (KANJI_SHOWN.includes(p.kanjiShown)) s.prefs.kanjiShown = p.kanjiShown;
   if (REMEMBER.includes(p.remember)) s.prefs.remember = p.remember;
   if (TRANSLATE.includes(p.translate)) s.prefs.translate = p.translate;
   return s.prefs;

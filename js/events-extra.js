@@ -6,7 +6,7 @@
 
 import { SETS_ACTIONS, bindSets } from './events-sets.js';
 import { PROGRESS_ACTIONS, bindProgress } from './events-progress.js';
-import { VIEW_ACTIONS } from './events-view.js';
+import { VIEW_ACTIONS, bindView } from './events-view.js';
 import { TABBAR_ACTIONS, bindTabbar } from './events-tabbar.js';
 import { LEVELS_ACTIONS } from './events-levels.js';
 
@@ -22,4 +22,5 @@ export function bindExtra() {
   bindSets();
   bindProgress();
   bindTabbar();
+  bindView();
 }

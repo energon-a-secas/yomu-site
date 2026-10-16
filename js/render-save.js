@@ -128,10 +128,23 @@ export function paintSavedMarks(state) {
     for (const el of body.querySelectorAll('.kj[data-kid]')) {
       el.classList.toggle('is-unsaved', saved[Number(el.dataset.kid)] === false);
     }
-    // Furigana's "Not in My kanji" hides a ruby whose kanji are all saved.
+    // Furigana's "Not in My kanji" hides a ruby whose kanji are all saved;
+    // the kana view keeps as kanji a ruby whose kanji are all familiar:
+    // saved, or taught by the school year chosen (prefs.kanjiShown).
+    const upTo = /^g([1-6])$/.exec((state.prefs && state.prefs.kanjiShown) || '');
+    const info = (state.analysis && state.analysis.info) || new Map();
+    const inYears = (ch) => { const g = info.get(ch) && info.get(ch).g; return !!upTo && Number.isInteger(g) && g >= 1 && g <= Number(upTo[1]); };
+    // A ruby over 々 alone (人|々) has no kanji of its own: it repeats the one before, and follows it.
+    let prev = { known: false, familiar: false };
     for (const ruby of body.querySelectorAll('ruby')) {
-      const kjs = [...ruby.querySelectorAll('.kj[data-kid]')];
-      ruby.classList.toggle('is-known', kjs.length > 0 && kjs.every((el) => saved[Number(el.dataset.kid)] === true));
+      const kids = [...ruby.querySelectorAll('.kj[data-kid]')].map((el) => Number(el.dataset.kid));
+      const mark = kids.length ? {
+        known: kids.every((k) => saved[k] === true),
+        familiar: kids.every((k) => saved[k] === true || inYears(order[k])),
+      } : /^[々〻ゝゞヽヾ]+$/.test([...ruby.childNodes].filter((n) => n.nodeName !== 'RT').map((n) => n.textContent).join('')) ? prev : { known: false, familiar: false };
+      ruby.classList.toggle('is-known', mark.known);
+      ruby.classList.toggle('is-familiar', mark.familiar);
+      prev = mark;
     }
   }
   for (const b of document.querySelectorAll('[data-act="save-kanji"][data-kid]')) {

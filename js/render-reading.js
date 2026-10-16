@@ -139,7 +139,8 @@ export function surfaceNode(token, { kidOf = null, marks = true, cuts = [] } = {
       const rubyChars = [...p.ruby];
       const at = r;
       const types = aligned ? [...new Set(rubyChars.map((_, j) => typeAt[at + j]).filter(Boolean).join(' ').split(' '))].filter(Boolean) : [];
-      const base = chars.map((ch) => (isKanji(ch) ? kanjiSpan(ch, kidOf) : ch));
+      // Every character under a ruby is a span, so the kana view can put them all away (々 too).
+      const base = chars.map((ch) => (isKanji(ch) ? kanjiSpan(ch, kidOf) : h('span', { class: 'kj-other' }, ch)));
       const rt = h('rt', null, runs(rubyChars, (j) => (aligned ? typeAt[at + j] : null), -1, 0));
       wrap.appendChild(h('ruby', {
         class: types.length ? 'snd-base' : null,

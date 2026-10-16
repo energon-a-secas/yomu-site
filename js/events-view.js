@@ -3,7 +3,9 @@
 // stays with the sentence on screen; and followFocus, which the arrow keys'
 // roving focus calls, so focus never moves onto a word that is put away.
 
-import { state } from './state.js';
+import { state, savePrefs, KANJI_SHOWN } from './state.js';
+import { paintChrome } from './render-chrome.js';
+import { paintSavedMarks } from './render-save.js';
 import { paintSentence, firstWordOf, sentenceOf } from './reading-view.js';
 import { select } from './events.js';
 import { $ } from './utils.js';
@@ -34,4 +36,17 @@ export function followFocus(el) {
   if (!state.view.one || sent === null || sent === state.view.sent) return;
   state.view.sent = sent;
   paintSentence(state);
+}
+
+/** The Kanji select of the Display row: which kanji stay kanji, the rest in kana. */
+export function bindView() {
+  const select = $('kanji-shown');
+  if (!select) return;
+  select.addEventListener('change', () => {
+    if (!KANJI_SHOWN.includes(select.value)) return;
+    state.prefs.kanjiShown = select.value;
+    savePrefs(state);
+    paintChrome(state);
+    paintSavedMarks(state);
+  });
 }

@@ -379,7 +379,13 @@ On, Not in My kanji and Off write `prefs.furigana` (synced, a boolean) and
 them back as one value and sets `#reading[data-furigana]` to on, saved or
 off. Not in My kanji hides a ruby whose kanji are all saved
 (`render-save.js paintSavedMarks` toggles `ruby.is-known`), with `visibility`,
-so a save never moves the line. The size (S, M, L, `prefs.size`) is this
+so a save never moves the line. The Kanji select (`prefs.kanjiShown`: all, only My kanji, or My
+kanji and the school years up to one, this browser's only) keeps as kanji a
+ruby whose kanji are all familiar (`ruby.is-familiar`, set beside
+`is-known`) and draws every other one as its kana, inline and dotted under,
+by CSS alone (`#reading[data-kanji="some"]`): every character under a ruby
+is a span (`.kj`, or `.kj-other`), so all of them can be put away, and a
+ruby over 々 alone follows the kanji before it. The size (S, M, L, `prefs.size`) is this
 browser's too: `sync-rules.js PREFS` keeps the six it had, and the server's
 validators would refuse a seventh. One sentence at a time (`reading-view.js`,
 `events-view.js`) numbers the reading's units by sentence after each paint

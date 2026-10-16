@@ -216,6 +216,19 @@
                 <button class="seg-btn" type="button" data-act="set" data-pref="size" data-value="M" aria-pressed="true" data-ui-label="sizeM" aria-label="Medium">M</button>
                 <button class="seg-btn" type="button" data-act="set" data-pref="size" data-value="L" aria-pressed="false" data-ui-label="sizeL" aria-label="Large">L</button>
               </div>
+              <div class="seg" role="group" aria-labelledby="seg-kanji">
+                <label class="seg-label" id="seg-kanji" for="kanji-shown" data-ui="kanjiShown">Kanji</label>
+                <select class="kanji-select" id="kanji-shown">
+                  <option value="all" data-ui="kanjiAll">All kanji</option>
+                  <option value="mine" data-ui="kanjiMine">Only My kanji, the rest in kana</option>
+                  <option value="g1" data-ui="kanjiG1">My kanji and grade 1</option>
+                  <option value="g2" data-ui="kanjiG2">My kanji and grades 1 to 2</option>
+                  <option value="g3" data-ui="kanjiG3">My kanji and grades 1 to 3</option>
+                  <option value="g4" data-ui="kanjiG4">My kanji and grades 1 to 4</option>
+                  <option value="g5" data-ui="kanjiG5">My kanji and grades 1 to 5</option>
+                  <option value="g6" data-ui="kanjiG6">My kanji and grades 1 to 6</option>
+                </select>
+              </div>
               <div class="seg" role="group" aria-labelledby="seg-view">
                 <span class="seg-label" id="seg-view" data-ui="readView">Show</span>
                 <button class="seg-btn" type="button" data-act="read-view" data-value="all" aria-pressed="true" data-ui="viewAll">All</button>
