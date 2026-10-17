@@ -88,14 +88,16 @@ function nameLine(token) {
 }
 
 function meaningsPart(token) {
-  const glosses = token.entry && Array.isArray(token.entry.g) ? token.entry.g.filter(Boolean) : [];
+  const usage = token.usage?.[currentLang()];
+  const glosses = usage?.meanings || (token.entry && Array.isArray(token.entry.g) ? token.entry.g.filter(Boolean) : []);
   const lines = [];
   if (token.entry && token.entry.tier === 2) lines.push(rareLine());
   const named = nameLine(token);
   if (named) lines.push(named);
   if (glosses.length) {
-    lines.push(h('ol', { class: 'glosses', lang: 'en' }, glosses.map((g) => h('li', null, g))));
-    if (currentLang() !== 'en') lines.push(h('p', { class: 'quiet' }, ui('meaningsEnglish')));
+    lines.push(h('ol', { class: 'glosses', lang: usage ? currentLang() : 'en' }, glosses.map((g) => h('li', null, g))));
+    if (usage?.note) lines.push(h('p', { class: 'quiet' }, usage.note));
+    if (!usage && currentLang() !== 'en') lines.push(h('p', { class: 'quiet' }, ui('meaningsEnglish')));
   } else if (token.entry) {
     lines.push(h('p', { class: 'quiet' }, ui('noMeaning')));
   }

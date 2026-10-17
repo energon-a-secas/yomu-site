@@ -13,29 +13,17 @@
 
 import { h } from './utils.js';
 import { ui, t } from './strings.js';
-import { toKata, beats, beatRomaji } from './kana.js';
+import { toKata } from './kana.js';
+import { GOJUON, VOICED, COMBINED, kanaRomaji } from './kana-chart.js';
 import { withKanji } from './render-save.js';
 import { COUNTER_LIST, counterRow } from './counters.js';
 import { KANA_ROWS } from './kana-rows.js';
 import { handSwitch } from './render-hand.js';
 
-const GOJUON = Object.freeze([
-  'あいうえお', 'かきくけこ', 'さしすせそ', 'たちつてと', 'なにぬねの',
-  'はひふへほ', 'まみむめも', 'や ゆ よ', 'らりるれろ', 'わ   を', 'ん    ',
-]);
-const VOICED = Object.freeze(['がぎぐげご', 'ざじずぜぞ', 'だぢづでど', 'ばびぶべぼ', 'ぱぴぷぺぽ']);
-const COMBINED = Object.freeze(['き', 'し', 'ち', 'に', 'ひ', 'み', 'り', 'ぎ', 'じ', 'び', 'ぴ']);
-
-/** The romaji of a sound, one beat or a combined one: し shi, きゃ kya. */
-function romajiOf(kana) {
-  const list = beats(kana);
-  return list.map((b, i) => beatRomaji(b, list[i + 1] || '', list[i - 1] || '')).join('');
-}
-
 function cell(kana, script, kept) {
   if (!kana || kana === ' ') return h('span', { class: 'kc-cell kc-cell--empty', 'aria-hidden': 'true' });
   const shown = script === 'katakana' ? toKata(kana) : kana;
-  const romaji = h('span', { class: 'kc-romaji', lang: 'ja-Latn' }, romajiOf(kana));
+  const romaji = h('span', { class: 'kc-romaji', lang: 'ja-Latn' }, kanaRomaji(kana));
   if ([...shown].length > 1) {
     return h('span', { class: 'kc-cell kc-cell--pair' }, [h('span', { class: 'kc-kana', lang: 'ja' }, shown), romaji]);
   }

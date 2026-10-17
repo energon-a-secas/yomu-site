@@ -51,7 +51,7 @@ const len = (s) => [...s].length;
  */
 export function savableWord(token) {
   if (!token || !token.entry || !['word', 'inflected'].includes(token.kind) || token.confidence === 'guess') return null;
-  const g = Array.isArray(token.entry.g) ? token.entry.g[0] : '';
+  const g = token.usage?.en?.meanings?.[0] || (Array.isArray(token.entry.g) ? token.entry.g[0] : '');
   const w = token.base || token.surface;
   const r = baseReading(token);
   return w && r && g ? { w, r, g } : null;

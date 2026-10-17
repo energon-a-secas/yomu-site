@@ -32,6 +32,7 @@ import { annotateGrammar } from './grammar.js';
 import { NAME_VARIANTS } from './names.js';
 import { titleNames } from './title-names.js';
 import { joinKatakana } from './compounds.js';
+import { usageFor } from './usage-notes.js';
 import { guessParts } from './sounds-like.js';
 
 /** The kinds that are Japanese words, as opposed to what sits between them. */
@@ -188,6 +189,8 @@ function enrich(t) {
   const particle = t.kind === 'particle' || t.kind === 'copula';
   t.romaji = { said: saidOf(kana, fur.cuts, aid.words, particle, aid.finalWa, aid.waAt), spelled: spelled(t.reading) };
   t.kanji = kanjiOf(t.surface);
+  const usage = usageFor(t);
+  if (usage) t.usage = usage;
   t.sounds = [];
   t.grammar = [];
   // The same cuts and the same は go to sounds.js, so a long vowel the said

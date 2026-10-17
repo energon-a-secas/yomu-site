@@ -1457,3 +1457,48 @@ The native phrase search uses `library-filter.js`, sharing the idiom shelves’
 Japanese/romaji/English matching, with the reader’s said romaji as an additional
 match (konnichiwa, koohii). The helper returns a filtered library without
 mutating its categories or authored text and imports no browser globals.
+
+### Kana practice and contextual usage (2026-10-17)
+
+`kana-chart.js` holds the chart constants formerly inside `render-learn.js`;
+the web renderer imports the same tables. `kanaChart(script)` returns basic,
+voiced, combined and timing sections, plus loanword combinations in katakana.
+Cell ids use hiragana so a script change cannot change a sound's identity.
+The chart distinguishes the written romaji from the spoken prompt: を plays お,
+ぢ plays じ, and づ plays ず. Timing marks play an example word.
+
+`kana-practice.js` combines 20 original CC0 starter lines with the authored
+phrase library, deduplicating identical kana. The current catalog is 91 lines.
+`requiredKana(text)` normalizes NFKC and uses `kana.js beats` to require complete
+sounds; きゃ, が, っ and ー must each be selected explicitly. Punctuation and
+spaces are ignored; kanji, Latin text, numbers and unsupported sounds reject
+the exercise. An empty selection yields no exercises. The 46 basic kana yield
+29; selecting only the five vowels yields いいえ and あおい いえ. Katakana
+practice changes the exercise display, not the original wording used for
+analysis or audio, and is labelled a script drill in the app. This helper
+generates no sentences and calls no service.
+
+`kana-detail.js` explains each shared beat as a sound with its romaji, optional
+component formula, playable text and existing localized sound notes. Examples:
+き (ki) + ゃ (small ya) = きゃ (kya), and か (ka) + ゛ = が (ga).
+The native tables, reader sound targets and word-sheet chips all call this
+helper; Swift does not implement a second kana converter. `soundRules` exposes
+the 17 existing notes for the dedicated reference. Component explanation copy
+is currently English, matching the native release's language.
+
+An optional token `usage` field supplements an expression's dictionary gloss:
+`{ en: { meanings: [String], note: String }, es: { meanings: [String], note: String } }`.
+`usage-notes.js` currently covers よろしくお願いします and its いたします form.
+It explains requesting help, starting to work together and introductions;
+it does not infer which situation an arbitrary pasted sentence describes.
+The source `entry.g` is preserved. The web word panel and native word/search
+details prefer this authored guidance. Newly saved words use its first English
+meaning; existing saved glosses are not rewritten. This is not sentence
+translation. The phrase library has corresponding contextual wording.
+Context reference: Japan Foundation's [Irodori vocabulary](https://www.irodori.jpf.go.jp/assets/data/wordlist_Z.pdf),
+including the expression used when continuing a relationship in a new year.
+
+`tests/kana-practice.test.mjs` holds selection, script and catalog invariants;
+`tests/kana-detail.test.mjs` holds combinations, diacritics, real note links,
+contextual usage and negative cases. The native bridge has decoding, filtering
+and UI interaction regressions too.

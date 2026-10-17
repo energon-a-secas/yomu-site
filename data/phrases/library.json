@@ -652,13 +652,13 @@
       "id": "yoroshiku",
       "ja": "よろしくお願いします",
       "kana": "よろしくおねがいします",
-      "en": "I hope we get along.",
-      "es": "Espero que nos llevemos bien.",
+      "en": "Thank you in advance / I look forward to working with you.",
+      "es": "Gracias de antemano / Espero que trabajemos bien juntos.",
       "register": "set",
       "chunk": true,
       "note": {
-        "en": "Literally 'please (treat me) well'. It closes an introduction and almost any request, and neither English nor Spanish has a neat equivalent.",
-        "es": "Literalmente 'por favor, (trátame) bien'. Cierra una presentación y casi cualquier pedido, y ni el español ni el inglés tienen un equivalente exacto."
+        "en": "A polite request for goodwill or cooperation. In a request, it can mean 'thank you in advance for your help'; when starting together, 'I look forward to working with you'; in an introduction, 'nice to meet you'.",
+        "es": "Pide buena disposición o colaboración con cortesía. Según la situación: 'gracias de antemano por tu ayuda' al pedir un favor, 'espero que trabajemos bien juntos' al comenzar, o 'mucho gusto' al presentarse."
       },
       "situation": {
         "en": "At the end of a self-introduction, or when you ask a favour.",
