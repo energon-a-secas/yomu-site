@@ -24,8 +24,8 @@
 .info-document details[open] summary { margin-bottom: .75rem; }
 .info-contact { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
 .info-document :focus-visible, .info-nav a:focus-visible { outline: 2px solid var(--accent-bright); outline-offset: 5px; border-radius: 3px; }
-.info-footer-links { display: flex; flex-wrap: wrap; gap: .5rem 1.25rem; align-items: center; }
-.info-footer-links a { display: inline-flex; align-items: center; min-height: 44px; }
+.info-related-links { display: flex; flex-wrap: wrap; gap: .5rem 1.25rem; align-items: center; }
+.info-related-links a { display: inline-flex; align-items: center; min-height: 44px; }
 @media (max-width: 380px) {
   .header-logo-img { display: none; }
   .info-nav { gap: .75rem; }

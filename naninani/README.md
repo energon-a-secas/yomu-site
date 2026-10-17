@@ -1,24 +1,27 @@
-# Naninani support and privacy drafts
+# Naninani support and privacy pages
 
-Prepared for owner review on 17 October 2026. These pages are not published.
-They describe the native iPhone app, separately from Yomu's website accounts
-and analytics. The listing package lives in the sibling iOS repository at
-`docs/app-store/1.0.2/`.
+Published and verified on 17 October 2026:
 
-The owner confirmed `contact@neorgon.com` as the public support/privacy alias.
-Both pages use it; the personal Gmail is excluded. Delivery and replies have
-not been tested by the agent, and no test message has been sent. The page copy,
-including support-retention wording, remains ready for owner review before
-publication.
+- [Support](https://yomu.neorgon.com/naninani/)
+- [Privacy policy](https://yomu.neorgon.com/naninani/privacy/)
 
-After approval, deploy through the site's normal workflow and verify:
+Both URLs returned HTTP 200 with content matching the reviewed local files.
+GitHub Pages published the release work through `03a0f4d`; the iPhone build
+1.0.2 (4) bundles that same shared engine and audio revision. Later page-only
+maintenance does not change the bundled analyzer or recordings.
 
-- `https://yomu.neorgon.com/naninani/`
-- `https://yomu.neorgon.com/naninani/privacy/`
-- Contact links, header/footer navigation and narrow-phone rendering.
+These pages describe the native iPhone app separately from Yomu's website
+accounts and analytics. The owner chose `contact@neorgon.com` for public
+support/privacy. Delivery and replies still need a mailbox test; no test
+message was sent by the agent. Apple's private App Review phone is not public
+page content.
 
-The pages reuse the existing fleet shell and Yomu CSS. They load no app,
-authentication or analytics JavaScript. Browser checks covered Chromium and
-WebKit at 320, 390 and 1440 pixels, with keyboard-operated FAQ disclosures.
-The native build 4 adds About links to these URLs, so publish before uploading
-that build. No deployment or App Store submission has been performed here.
+The pages reuse the existing fleet header/footer styles and Yomu CSS. They
+load no application, authentication or analytics JavaScript. Chromium and
+WebKit checks covered 320, 390 and 1440 pixels and keyboard-operated FAQ
+controls. The native app links here from More > About.
+
+The versioned listing, screenshots, privacy/age evidence and current release
+checks live in the sibling iOS repository at `docs/app-store/1.0.2/` and
+`docs/SOFT-LAUNCH-REVIEW.md`. Publishing a policy page does not publish Apple's
+App Privacy label or submit the app for review.
