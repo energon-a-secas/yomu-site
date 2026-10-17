@@ -8,7 +8,7 @@
 // written into an attribute.
 
 import { h, withJa } from './utils.js';
-import { glossWords } from './search.js';
+import { glossWords, byWord, writtenOf } from './search.js';
 import { ui, t, posWord } from './strings.js';
 import { isKanji } from './kana.js';
 import { wordRomaji } from './render-romaji.js';
@@ -24,19 +24,8 @@ export const PARTS_SHOWN = 60;
 /** Results this short carry their meanings; longer ones are characters alone, so the picker stays near. */
 export const PARTS_MEANT = 24;
 
-/**
- * One card per word: a kana key whose records are different words (さけ is
- * 酒 and 鮭) gives one result per record, each written its own way.
- */
-export function byWord(results) {
-  return results.flatMap((res) => {
-    const kana = ![...res.key].some(isKanji);
-    if (res.via === 'name' || !kana || res.recs.length < 2) return [res];
-    const spelled = res.recs.map((r) => (Array.isArray(r.k) && r.k.length && !r.u ? r.k[0] : res.key));
-    if (new Set(spelled).size < 2) return [res];
-    return res.recs.map((r) => Object.freeze({ ...res, recs: [r] }));
-  });
-}
+// One card per word, and how each is written (search.js, where the iOS app's bridge reads them too).
+export { byWord };
 
 /** How a result is written and read, and what it means, from its key and records. */
 export function shownWord(res) {
@@ -45,9 +34,7 @@ export function shownWord(res) {
     const types = String(rec.n || '').split(' ').map((id) => t(NAME_TYPES[id])).filter(Boolean);
     return { written: res.key, reading: rec.r || res.key, glosses: types, pos: [], more: 0 };
   }
-  const kana = ![...res.key].some(isKanji);
-  const written = kana && Array.isArray(rec.k) && rec.k.length && !rec.u ? rec.k[0] : res.key;
-  const reading = written === res.key ? (Array.isArray(rec.r) && rec.r[0]) || res.key : res.key;
+  const { written, reading } = writtenOf(res);
   const glosses = res.recs.flatMap((r) => r.g || []);
   const pos = [...new Set(String(rec.p || '').split(/\s+/).filter(Boolean).map(posWord).filter(Boolean))];
   // A rare word found by its English carries only its first meanings, and how many it left out.

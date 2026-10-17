@@ -35,6 +35,33 @@ export function glossWords(text) {
     .filter((w) => w.length > 1 && !STOP.has(w));
 }
 
+/**
+ * How a result is written and read: a kana key under its usual kanji
+ * spelling (the record's first `k`), unless the dictionary says the word is
+ * usually written in kana (`u`); then its key, read as its record says. Here,
+ * not in render-search.js, so the iOS app's bridge asks the same rule.
+ */
+export function writtenOf(res, rec = (res.recs && res.recs[0]) || {}) {
+  const kana = ![...res.key].some(isKanji);
+  const written = kana && Array.isArray(rec.k) && rec.k.length && !rec.u ? rec.k[0] : res.key;
+  const reading = written === res.key ? (Array.isArray(rec.r) && rec.r[0]) || res.key : res.key;
+  return { written, reading };
+}
+
+/**
+ * One card per word: a kana key whose records are different words (さけ is
+ * 酒 and 鮭) gives one result per record, each written its own way.
+ */
+export function byWord(results) {
+  return results.flatMap((res) => {
+    const kana = ![...res.key].some(isKanji);
+    if (res.via === 'name' || !kana || res.recs.length < 2) return [res];
+    const spelled = res.recs.map((r) => writtenOf(res, r).written);
+    if (new Set(spelled).size < 2) return [res];
+    return res.recs.map((r) => Object.freeze({ ...res, recs: [r] }));
+  });
+}
+
 /** At most this many words in one answer. */
 export const MAX_RESULTS = 40;
 /** English finding fewer common words than this asks the rare words too. */

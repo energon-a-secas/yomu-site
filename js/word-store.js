@@ -18,6 +18,7 @@
 import { createStore, safeGet, safeSet } from './neorgon-persist.js';
 import { cyrb53 } from './history-text.js';
 import { cleanGloss, MAX_GLOSS } from './sync-rules.js';
+import { baseReading } from './conjugate.js';
 import {
   schedule, isDue, dayOf, isObject, TOP_BOX, myKanji,
 } from './kanji-store.js';
@@ -41,6 +42,20 @@ const DAY = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
 const KANA = /^[ぁ-ゖァ-ヺー]+$/;
 const isCount = (n) => Number.isInteger(n) && n >= 0;
 const len = (s) => [...s].length;
+
+/**
+ * What the Word panel's bookmark saves for a token: its dictionary form, the
+ * reading of that form and its first meaning; or null for what is no word
+ * to save (a particle, a number, a name, a guess). Here, not in render.js,
+ * so the iOS app's bridge asks the same rule (yomu-ios bridge/entry.js).
+ */
+export function savableWord(token) {
+  if (!token || !token.entry || !['word', 'inflected'].includes(token.kind) || token.confidence === 'guess') return null;
+  const g = Array.isArray(token.entry.g) ? token.entry.g[0] : '';
+  const w = token.base || token.surface;
+  const r = baseReading(token);
+  return w && r && g ? { w, r, g } : null;
+}
 
 /** A word's key: the same written form and reading, the same key. */
 export function wordId(w, r) {
