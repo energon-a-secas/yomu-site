@@ -409,7 +409,7 @@ links are built at click time.
 **Recorded voices are Yomu's own text only, made once, and checked.**
 `data/audio/` holds clips of the sound notes, every beat, the phrase library,
 the notes' examples and their words in four ElevenLabs voices, and of the
-first tier's common words (band 1 in all four, band 2 in Clear, which the
+common words (band 1 in all four, bands 2 and 3 in Clear, which the
 others borrow), a word filed under spelling and reading (雨|あめ), made by
 `tools/build-audio.mjs` (a manual step that spends the owner's credits) and
 each transcribed and read back by the analyzer before it is kept; a clip that

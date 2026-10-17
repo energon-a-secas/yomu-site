@@ -20,10 +20,10 @@ import { analyze } from '../../js/analyze.js';
 export const KINDS = Object.freeze(['sound', 'kana', 'phrase', 'note', 'word', 'common']);
 
 // Which voices record the common words of each frequency band (q, 1 the most
-// frequent): band 1 in every voice, band 2 in Clear alone, whose clip any
-// other voice borrows (js/audio.js clipByKeys). Every voice through band 2
-// would add about 26 MB to the 42.3 that all of data/audio holds (docs/AUDIO.md).
-export const COMMON_BANDS = Object.freeze({ 1: null, 2: Object.freeze(['clear']) });
+// frequent): band 1 in every voice, bands 2 and 3 in Clear alone, whose clip any
+// other voice borrows (js/audio.js clipByKeys). Coverage, size and account
+// costs are recorded in docs/AUDIO.md and docs/AUDIO-BAND3.md.
+export const COMMON_BANDS = Object.freeze({ 1: null, 2: Object.freeze(['clear']), 3: Object.freeze(['clear']) });
 
 // Every beat the reader can sound out: the plain kana, the voiced ones, the
 // small-ya, yu and yo beats, and the loanword digraphs of GENKI_MAP. ゐ and ゑ

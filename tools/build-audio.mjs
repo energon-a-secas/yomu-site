@@ -5,12 +5,14 @@
 // of tools/lib/audio-voices.mjs. docs/AUDIO.md is the account.
 //
 // THIS IS A MANUAL DATA STEP, NOT A BUILD. It spends credits from the owner's
-// ElevenLabs plan, so it makes only what is missing or changed, and stops at
-// --budget. The key is read from ELEVENLABS_API_TOKEN (or _KEY), in the
+// ElevenLabs plan, so it makes only what is missing or changed. --budget
+// counts TTS headers only, not all account charges: use bounded --limit
+// batches and check the account balance between runs (docs/AUDIO.md).
+// The key is read from ELEVENLABS_API_TOKEN (or _KEY), in the
 // environment or the repo's .env, which git ignores.
 //
 //   node tools/build-audio.mjs --dry-run           what would be made, and roughly what it costs
-//   node tools/build-audio.mjs --budget=3000       make it, spending at most 3,000 credits
+//   node tools/build-audio.mjs --budget=100 --limit=30   a small recording batch
 //     --voices=clear,calm   only these roles
 //     --kinds=sound,kana    only these parts of the script
 //     --limit=20            at most this many clips (a trial run)
@@ -51,7 +53,8 @@ const FINISH_VERSION = 1;
 // Credits per character, measured on eleven_v4 for Japanese (11 characters
 // cost 5); only the dry run's estimate uses it, the real cost is counted.
 const EST_PER_CHAR = 0.5;
-// Never spend the plan below this, whatever --budget says.
+// Initial quota headroom only. TTS headers omit other charges; an account
+// balance check between bounded batches is still required.
 const RESERVE = 2000;
 const PARALLEL = 3;
 const ATTEMPTS = 3;
@@ -72,6 +75,8 @@ function args(argv) {
   }
   for (const v of out.voices) if (!VOICES.some((x) => x.id === v)) throw new Error(`unknown voice ${v}`);
   for (const k of out.kinds) if (!KINDS.includes(k)) throw new Error(`unknown kind ${k}`);
+  if (!Number.isFinite(out.budget) || out.budget < 0) throw new Error('--budget must be a finite non-negative number');
+  if (out.limit !== Infinity && (!Number.isSafeInteger(out.limit) || out.limit <= 0)) throw new Error('--limit must be a positive integer');
   return out;
 }
 
@@ -152,7 +157,7 @@ function plan(opts, script, made) {
       if (!voicesOf(line).includes(voice)) continue;
       const sig = signature(voice, line);
       const rec = made[madeKey(voice.id, line.id)];
-      const done = rec && rec.sig === sig && (rec.ok ? fs.existsSync(clipPath(voice.id, line.id)) : !opts.retryFailed);
+      const done = rec && rec.sig === sig && (rec.ok ? fs.existsSync(clipPath(voice.id, line.id)) : !rec.pending && !opts.retryFailed);
       if (!done) jobs.push({ voice, line, sig });
     }
   }
@@ -173,7 +178,10 @@ async function makeClip(job, ctx) {
   let rec = null;
   const tries = [];
   for (let attempt = 0; attempt < ATTEMPTS; attempt += 1) {
-    if (ctx.spent >= ctx.budget) break;
+    if (ctx.stopping || ctx.spent >= ctx.budget) {
+      if (rec) rec.pending = true;
+      break;
+    }
     const sent = attempt === ATTEMPTS - 1 && other ? other : line.send;
     const seed = seedFor(voice, line, taken + attempt);
     const { pcm, credits } = await speak(ctx.key, voice, sent, { seed });
@@ -236,7 +244,9 @@ function writeIndex(script, made) {
   let cur = [];
   let size = 0;
   for (const k of [...entries.keys()].sort(jsOrder)) {
-    const piece = JSON.stringify(k).length + JSON.stringify(entries.get(k)).length + 2;
+    // Japanese keys occupy more UTF-8 bytes than JavaScript code units.
+    // Count emitted bytes so a growing vocabulary cannot overflow the cap.
+    const piece = Buffer.byteLength(JSON.stringify(k)) + Buffer.byteLength(JSON.stringify(entries.get(k))) + 2;
     if (size + piece > SHARD_BYTES && cur.length) { shards.push(cur); cur = []; size = 0; }
     cur.push(k);
     size += piece;
@@ -314,16 +324,18 @@ async function main() {
   const left = sub.character_limit - sub.character_count;
   const budget = Math.min(opts.budget, left - RESERVE);
   if (!(budget > 0)) throw new Error(`no budget: --budget=${opts.budget}, ${left} credits left, ${RESERVE} kept in reserve`);
-  console.log(`build-audio: ${left} credits left this month; spending at most ${budget}`);
+  console.log(`build-audio: ${left} credits left this month; TTS-header threshold ${budget} (excludes other account charges; in-flight requests can exceed it)`);
 
-  const ctx = { key, dict, made, check: makeCheck(dict), spent: 0, budget };
+  const ctx = { key, dict, made, check: makeCheck(dict), spent: 0, budget, stopping: false };
   let next = 0;
   let passed = 0;
   let failed = 0;
   async function worker() {
-    while (next < jobs.length && ctx.spent < ctx.budget) {
+    while (next < jobs.length && !ctx.stopping && ctx.spent < ctx.budget) {
       const job = jobs[next++];
-      const rec = await makeClip(job, ctx);
+      let rec;
+      try { rec = await makeClip(job, ctx); }
+      catch (err) { ctx.stopping = true; throw err; }
       if (!rec) continue;
       made[madeKey(job.voice.id, job.line.id)] = rec;
       if (rec.ok) passed += 1;
@@ -334,16 +346,26 @@ async function main() {
       if ((passed + failed) % 50 === 0) {
         saveMade(made);
         writeIndex(full, made);
-        console.log(`  ${passed + failed}/${jobs.length}, ${ctx.spent} credits`);
+        console.log(`  ${passed + failed}/${jobs.length}, ${ctx.spent} TTS-header credits so far`);
       }
     }
   }
-  await Promise.all(Array.from({ length: PARALLEL }, worker));
+  const stop = () => { ctx.stopping = true; };
+  process.on('SIGINT', stop);
+  process.on('SIGTERM', stop);
+  // Let all in-flight workers settle before checkpointing, including when
+  // one request fails. A rejected Promise.all used to lose completed takes.
+  const results = await Promise.allSettled(Array.from({ length: PARALLEL }, worker));
   const removed = prune(full, made);
   saveMade(made);
   const doc = writeIndex(full, made);
-  const stopped = next < jobs.length ? `; stopped at the budget with ${jobs.length - next} left` : '';
-  console.log(`build-audio: ${passed} kept, ${failed} failed their check, ${ctx.spent} credits spent${stopped}; ${removed} old clips removed; ${doc.keys} keys in ${doc.shards.length} shards, ${doc.voices.length} voices`);
+  const remaining = plan(opts, script, made).length;
+  const stopped = remaining ? `; ${remaining} jobs remain in this selection` : '';
+  console.log(`build-audio: ${passed} kept, ${failed} failed or interrupted, ${ctx.spent} TTS-header credits${stopped}; ${removed} old clips removed; ${doc.keys} keys in ${doc.shards.length} shards, ${doc.voices.length} voices`);
+  process.off('SIGINT', stop);
+  process.off('SIGTERM', stop);
+  const error = results.find((r) => r.status === 'rejected');
+  if (error) throw error.reason;
 }
 
 main().catch((err) => { console.error(`build-audio: ${err.message}`); process.exit(1); });

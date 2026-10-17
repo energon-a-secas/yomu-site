@@ -1,8 +1,10 @@
 # Recorded voices
 
-Yomu's own text is recorded in four voices, so it can be heard on any device,
-with a Japanese voice installed or not, and in a voice chosen for teaching.
-The learner's own text is still said by the device's voice. Started
+Yomu's authored examples are recorded in four voices, so they can be heard on
+any device, with a Japanese voice installed or not. Common-word recordings
+extend that coverage, with Clear shared across the other voices in later bands.
+Unrecorded sentences use the device's voice; matching individual words can
+use their stored recordings. Started
 2026-10-16; the run that made the first set is in `tools/audio-made.json`.
 
 ## What is recorded, and why only that
@@ -23,12 +25,11 @@ list:
    Yomu reads おばさん as were said by the device until 2026-10-17, which the
    owner heard as "computer like". A word of one kana is a beat already.
 6. **common**: the dictionary's most common words by Tatoeba band
-   (`commonLines`, the record's `q`): band 1 (858 words) in every voice,
-   band 2 (1,967) in Clear alone (`COMMON_BANDS`), whose clip another voice
-   borrows. Every voice through band 2 would add about 26 MB (some 1,900
-   clips in each of three more voices, at the 4.6 KB a common clip measures)
-   to the 42.3 MB all of `data/audio/` holds. Band 3 (5,293 more) is the next
-   step.
+   (`commonLines`, the record's `q`): band 1 in every voice, bands 2 and 3
+   in Clear alone (`COMMON_BANDS`), whose clip another voice borrows.
+   The third band added 5,013 accepted word recordings from 5,168 new
+   word keys. The [band-3 report](AUDIO-BAND3.md) records its actual scope,
+   cost, validation and listening samples.
 
 A word is filed under its spelling and reading (`audio.js wordKey`: 雨|あめ),
 never under its reading alone, so a homophone never plays another word's
@@ -132,14 +133,20 @@ transcript does not show. The listening list exists for those.
 
 ```bash
 node tools/build-audio.mjs --dry-run              # what would be made, about what it costs
-node tools/build-audio.mjs --budget=3000          # make it, spending at most 3,000 credits
-node tools/build-audio.mjs --budget=500 --retry-failed   # try the failed ones again
+node tools/build-audio.mjs --budget=100 --limit=30 # small pilot; compare account balances
+node tools/build-audio.mjs --budget=100 --limit=30 --retry-failed # bounded retry pilot
 ```
 
 The key is `ELEVENLABS_API_TOKEN` in the repo's `.env` (git ignores it). It
 needs text to speech, speech to text, voices read and user read. The tool reads
-the plan's quota first and never spends below 2,000 credits left, whatever
-`--budget` says. A clip whose inputs did not change is not made again.
+the plan's quota first and keeps 2,000 credits out of its initial allowance.
+**`--budget` counts TTS response headers, not total account charges. It is not
+an account spending cap.** Concurrent requests can also exceed that threshold.
+Use bounded `--limit` batches, compare `/v1/user/subscription` balances between
+them, and allow time for delayed charges before starting another. Keep extra
+headroom for pending charges and the account reserve. A clip whose inputs did
+not change is not made again. Completed workers now checkpoint even when another
+request fails; an interrupted validation retry remains pending for resumption.
 
 Measured on the first runs (Starter plan, 40,000 credits a month): Japanese
 costs about 0.45 credits a character on `eleven_v4`; a lone kana costs
@@ -179,7 +186,7 @@ What failed, and so plays in another voice or the device's:
 Every rejected take is in `.forge/audio-rejects/` (not in git). A person who
 listens and finds one right can ship it; that is not built yet.
 
-## What the word set holds
+## The first word expansion
 
 Added 2026-10-17: the `word` and `common` kinds. With the first set, 8,157
 clips are kept and 278 failed their check; 96.0% passed on the first take.
@@ -201,7 +208,26 @@ of 40,000 (19,159 left until 2026-11-17), with two runs stopped to fix the
 check and one network failure resumed. The balance fell faster than the
 `character-cost` headers add up: run 5 lowered it by 9,726 while its headers
 summed to 7,011 at its last report. The headers count every take, retakes
-included, so the rest is something else the account charges.
+included. A later usage check confirmed separate transcription charges;
+the exact split for this historical run was not measured.
+
+## The third common-word band
+
+Completed 2026-10-17 in Clear only: **5,013 accepted clips**, **155 rejected**,
+and no unattempted words in the current band. The owner approved up to 13,000
+total credits, including the pilot. Actual account use was **7,852 credits**,
+from 20,841 to 28,693 of 40,000; **11,307 remain** until the November 17 reset.
+
+The addition is **24.82 MB** of MP3 content. The library now has **13,170 voice
+clips, 67.12 MB**, excluding the tiny playback-unlock silence file. Previous
+clips and lookups are unchanged. Every accepted new word is available through
+Clear fallback for all four selected voices; rejected takes are not indexed.
+Natural playback of arbitrary unrecorded sentences still uses device speech.
+
+See [AUDIO-BAND3.md](AUDIO-BAND3.md) for automated evidence and 26 listening
+samples. Human listening and publication to the website/TestFlight remain
+separate steps. The original 5,293-word estimate predates the current script's
+deduplication and dictionary coverage; it is not the number of new jobs.
 
 ## The page
 

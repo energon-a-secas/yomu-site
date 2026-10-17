@@ -1,0 +1,1750 @@
+{
+  "recordedAt": "2026-10-17T17:29:22.547Z",
+  "scope": "Common-word band 3, Clear only",
+  "rawDictionaryRecords": 5581,
+  "uniqueWordKeys": 5241,
+  "alreadyCovered": 73,
+  "planned": 5168,
+  "accepted": 5013,
+  "rejected": 155,
+  "pending": 0,
+  "takes": 5790,
+  "priorClips": 8157,
+  "totalClips": 13170,
+  "newMp3Bytes": 24820956,
+  "totalMp3Bytes": 67123608,
+  "quota": {
+    "before": 20841,
+    "after": 28693,
+    "spent": 7852,
+    "limit": 40000,
+    "remaining": 11307,
+    "approvedCeiling": 13000,
+    "nextReset": "2026-11-17T02:06:14.000Z"
+  },
+  "invariants": {
+    "existingClipsUnchanged": true,
+    "existingRecordsUnchanged": true,
+    "existingLookupsUnchanged": true,
+    "allNewClipsResolveToClearForEveryVoice": true,
+    "failedTakesExcluded": true
+  },
+  "shardBytes": [
+    {
+      "file": "data/audio/k00.json",
+      "bytes": 110692
+    },
+    {
+      "file": "data/audio/k01.json",
+      "bytes": 110701
+    },
+    {
+      "file": "data/audio/k02.json",
+      "bytes": 104924
+    }
+  ],
+  "verification": {
+    "siteTests": {
+      "command": "npm test",
+      "total": 1309,
+      "passed": 1309,
+      "failed": 0,
+      "skipped": 0
+    },
+    "dataChecker": "check-data: 708 files, 88033.6 KB, all pass",
+    "mp3Samples": {
+      "count": 26,
+      "allDecoded": true,
+      "codec": "mp3",
+      "sampleRate": 24000,
+      "channels": 1
+    },
+    "remainingJobsDryRun": 0
+  },
+  "humanListening": "pending",
+  "samples": [
+    {
+      "group": "Native fallback example",
+      "key": "生まれる|うまれる",
+      "word": "生まれる",
+      "reading": "うまれる",
+      "transcript": "生まれる。",
+      "takes": 1,
+      "seconds": 0.679,
+      "path": "data/audio/clear/14xubkxvziv.mp3",
+      "meaning": "to be born"
+    },
+    {
+      "group": "Accepted after a retry",
+      "key": "てつ",
+      "word": "てつ",
+      "reading": "てつ",
+      "transcript": "鉄、鉄、鉄。",
+      "takes": 2,
+      "seconds": 0.634,
+      "path": "data/audio/clear/gsy8olkpc6.mp3",
+      "meaning": "iron (Fe)"
+    },
+    {
+      "group": "Accepted after a retry",
+      "key": "あめりかん",
+      "word": "アメリカン",
+      "reading": "あめりかん",
+      "transcript": "アメリカン",
+      "takes": 2,
+      "seconds": 0.801,
+      "path": "data/audio/clear/239qpw2x7bj.mp3",
+      "meaning": "American"
+    },
+    {
+      "group": "Accepted after a retry",
+      "key": "停止|ていし",
+      "word": "停止",
+      "reading": "ていし",
+      "transcript": "停止。",
+      "takes": 2,
+      "seconds": 0.71,
+      "path": "data/audio/clear/f3bis8w5xr.mp3",
+      "meaning": "stoppage"
+    },
+    {
+      "group": "Accepted after a retry",
+      "key": "弾丸|だんがん",
+      "word": "弾丸",
+      "reading": "だんがん",
+      "transcript": "弾丸。",
+      "takes": 2,
+      "seconds": 0.73,
+      "path": "data/audio/clear/14zvnte2him.mp3",
+      "meaning": "bullet"
+    },
+    {
+      "group": "Accepted after a retry",
+      "key": "笑み|えみ",
+      "word": "笑み",
+      "reading": "えみ",
+      "transcript": "エミ、エミ、エミ。",
+      "takes": 3,
+      "seconds": 0.453,
+      "path": "data/audio/clear/iswuhwh6at.mp3",
+      "meaning": "smile"
+    },
+    {
+      "group": "Short words",
+      "key": "あう",
+      "word": "あう",
+      "reading": "あう",
+      "transcript": "会う。会う。会う。",
+      "takes": 1,
+      "seconds": 0.64,
+      "path": "data/audio/clear/tyvox1jseb.mp3",
+      "meaning": "to meet"
+    },
+    {
+      "group": "Short words",
+      "key": "こす",
+      "word": "こす",
+      "reading": "こす",
+      "transcript": "コス。コス。コス。",
+      "takes": 1,
+      "seconds": 0.657,
+      "path": "data/audio/clear/23lntkp9sv5.mp3",
+      "meaning": "to cross over (e.g. mountain)"
+    },
+    {
+      "group": "Short words",
+      "key": "いぶ",
+      "word": "イブ",
+      "reading": "いぶ",
+      "transcript": "イブ。イブ。イブ。",
+      "takes": 1,
+      "seconds": 0.56,
+      "path": "data/audio/clear/1kzrlxe3gu.mp3",
+      "meaning": "eve (esp. Christmas Eve)"
+    },
+    {
+      "group": "Short words",
+      "key": "居る|おる",
+      "word": "居る",
+      "reading": "おる",
+      "transcript": "おる。おる。おる。",
+      "takes": 1,
+      "seconds": 0.511,
+      "path": "data/audio/clear/1tcvihasyq3.mp3",
+      "meaning": "to be (animate)"
+    },
+    {
+      "group": "Combined sounds",
+      "key": "にゅー",
+      "word": "ニュー",
+      "reading": "にゅー",
+      "transcript": "ニュー、ニュー、ニュー。",
+      "takes": 1,
+      "seconds": 0.588,
+      "path": "data/audio/clear/1pe4fakugla.mp3",
+      "meaning": "new"
+    },
+    {
+      "group": "Combined sounds",
+      "key": "予想以上|よそういじょう",
+      "word": "予想以上",
+      "reading": "よそういじょう",
+      "transcript": "予想以上。",
+      "takes": 1,
+      "seconds": 1.151,
+      "path": "data/audio/clear/u7bsgde850.mp3",
+      "meaning": "more than expected"
+    },
+    {
+      "group": "Combined sounds",
+      "key": "契約書|けいやくしょ",
+      "word": "契約書",
+      "reading": "けいやくしょ",
+      "transcript": "契約書",
+      "takes": 1,
+      "seconds": 0.849,
+      "path": "data/audio/clear/xnpm6hdavf.mp3",
+      "meaning": "(written) contract"
+    },
+    {
+      "group": "Combined sounds",
+      "key": "校長|こうちょう",
+      "word": "校長",
+      "reading": "こうちょう",
+      "transcript": "校長",
+      "takes": 1,
+      "seconds": 0.8,
+      "path": "data/audio/clear/115urpjix0r.mp3",
+      "meaning": "principal"
+    },
+    {
+      "group": "Combined sounds",
+      "key": "苗字|みょうじ",
+      "word": "苗字",
+      "reading": "みょうじ",
+      "transcript": "苗字。",
+      "takes": 1,
+      "seconds": 0.616,
+      "path": "data/audio/clear/1ab5wirz4ib.mp3",
+      "meaning": "surname"
+    },
+    {
+      "group": "Katakana words",
+      "key": "あど",
+      "word": "アド",
+      "reading": "あど",
+      "transcript": "アド、アド、アド。",
+      "takes": 1,
+      "seconds": 0.51,
+      "path": "data/audio/clear/1jpmtht78ja.mp3",
+      "meaning": "ad"
+    },
+    {
+      "group": "Katakana words",
+      "key": "きゃらくたー",
+      "word": "キャラクター",
+      "reading": "きゃらくたー",
+      "transcript": "キャラクター",
+      "takes": 1,
+      "seconds": 0.96,
+      "path": "data/audio/clear/212247knd9u.mp3",
+      "meaning": "character"
+    },
+    {
+      "group": "Katakana words",
+      "key": "すてーじ",
+      "word": "ステージ",
+      "reading": "すてーじ",
+      "transcript": "ステージ",
+      "takes": 1,
+      "seconds": 0.702,
+      "path": "data/audio/clear/rsm3f7qmmg.mp3",
+      "meaning": "stage (platform)"
+    },
+    {
+      "group": "Katakana words",
+      "key": "ばってりー",
+      "word": "バッテリー",
+      "reading": "ばってりー",
+      "transcript": "バッテリー。",
+      "takes": 2,
+      "seconds": 0.817,
+      "path": "data/audio/clear/h6l8vjhws6.mp3",
+      "meaning": "battery"
+    },
+    {
+      "group": "Katakana words",
+      "key": "ぽり",
+      "word": "ポリ",
+      "reading": "ぽり",
+      "transcript": "ポリ、ポリ、ポリ。",
+      "takes": 1,
+      "seconds": 0.514,
+      "path": "data/audio/clear/25dlzhrp8rw.mp3",
+      "meaning": "poly-"
+    },
+    {
+      "group": "Across the band",
+      "key": "下さる|くださる",
+      "word": "下さる",
+      "reading": "くださる",
+      "transcript": "くださる。",
+      "takes": 1,
+      "seconds": 0.674,
+      "path": "data/audio/clear/21yrpuagc0v.mp3",
+      "meaning": "to give"
+    },
+    {
+      "group": "Across the band",
+      "key": "入り口|いりぐち",
+      "word": "入り口",
+      "reading": "いりぐち",
+      "transcript": "入り口。",
+      "takes": 1,
+      "seconds": 0.846,
+      "path": "data/audio/clear/1jtrka1iceq.mp3",
+      "meaning": "entrance"
+    },
+    {
+      "group": "Across the band",
+      "key": "学習者|がくしゅうしゃ",
+      "word": "学習者",
+      "reading": "がくしゅうしゃ",
+      "transcript": "学習者。",
+      "takes": 1,
+      "seconds": 0.994,
+      "path": "data/audio/clear/1vyw40gb5r0.mp3",
+      "meaning": "learner"
+    },
+    {
+      "group": "Across the band",
+      "key": "旅行者|りょこうしゃ",
+      "word": "旅行者",
+      "reading": "りょこうしゃ",
+      "transcript": "旅行者。",
+      "takes": 1,
+      "seconds": 0.767,
+      "path": "data/audio/clear/upx2m3ofak.mp3",
+      "meaning": "traveller"
+    },
+    {
+      "group": "Across the band",
+      "key": "男たち|おとこたち",
+      "word": "男たち",
+      "reading": "おとこたち",
+      "transcript": "男たち",
+      "takes": 1,
+      "seconds": 0.96,
+      "path": "data/audio/clear/1xrcj93ry39.mp3",
+      "meaning": "men"
+    },
+    {
+      "group": "Across the band",
+      "key": "記念碑|きねんひ",
+      "word": "記念碑",
+      "reading": "きねんひ",
+      "transcript": "記念碑",
+      "takes": 1,
+      "seconds": 0.78,
+      "path": "data/audio/clear/11fkz0wfkwo.mp3",
+      "meaning": "commemorative plaque (usu. on a stone)"
+    }
+  ],
+  "rejectedWords": [
+    {
+      "word": "きれ",
+      "reading": "きれ",
+      "key": "きれ",
+      "transcript": "綺麗、綺麗、綺麗。",
+      "expected": "kire",
+      "heard": "kiree kiree kiree",
+      "takes": 3
+    },
+    {
+      "word": "コンピュータ",
+      "reading": "こんぴゅーた",
+      "key": "こんぴゅーた",
+      "transcript": "コンピューター",
+      "expected": "kon pi yu - ta",
+      "heard": "konpyuutaa",
+      "takes": 3
+    },
+    {
+      "word": "パーティ",
+      "reading": "ぱーてぃ",
+      "key": "ぱーてぃ",
+      "transcript": "Party",
+      "expected": "pa - te i",
+      "heard": "Party",
+      "takes": 3
+    },
+    {
+      "word": "マン",
+      "reading": "まん",
+      "key": "まん",
+      "transcript": "Mom, Mom, Mom",
+      "expected": "man",
+      "heard": "Mom Mom Mom",
+      "takes": 3
+    },
+    {
+      "word": "両",
+      "reading": "りょう",
+      "key": "両|りょう",
+      "transcript": "六、六、六。",
+      "expected": "ryoo",
+      "heard": "roku roku roku",
+      "takes": 3
+    },
+    {
+      "word": "判",
+      "reading": "はん",
+      "key": "判|はん",
+      "transcript": "はあはあはあ。",
+      "expected": "han",
+      "heard": "ha a wa a wa a",
+      "takes": 3
+    },
+    {
+      "word": "夕",
+      "reading": "ゆう",
+      "key": "夕|ゆう",
+      "transcript": "ゆ。ゆ。ゆ。",
+      "expected": "yuu",
+      "heard": "yu yu yu",
+      "takes": 3
+    },
+    {
+      "word": "段",
+      "reading": "だん",
+      "key": "段|だん",
+      "transcript": "ダウン、ダウン、ダウン。",
+      "expected": "dan",
+      "heard": "daun daun daun",
+      "takes": 3
+    },
+    {
+      "word": "計",
+      "reading": "けい",
+      "key": "計|けい",
+      "transcript": "K K K",
+      "expected": "kee",
+      "heard": "K K K",
+      "takes": 3
+    },
+    {
+      "word": "えと",
+      "reading": "えと",
+      "key": "えと",
+      "transcript": "えっと、えっと、えっと。",
+      "expected": "eto",
+      "heard": "etto etto etto",
+      "takes": 3
+    },
+    {
+      "word": "かそ",
+      "reading": "かそ",
+      "key": "かそ",
+      "transcript": "火葬、火葬、火葬。",
+      "expected": "kaso",
+      "heard": "kasoo kasoo kasoo",
+      "takes": 3
+    },
+    {
+      "word": "がいや",
+      "reading": "がいや",
+      "key": "がいや",
+      "transcript": "ガイア",
+      "expected": "gaiya",
+      "heard": "gaia",
+      "takes": 3
+    },
+    {
+      "word": "こたえ",
+      "reading": "こたえ",
+      "key": "こたえ",
+      "transcript": "交代。",
+      "expected": "kotae",
+      "heard": "kootai",
+      "takes": 3
+    },
+    {
+      "word": "この種",
+      "reading": "このしゅ",
+      "key": "この種|このしゅ",
+      "transcript": "この週",
+      "expected": "kono shu",
+      "heard": "kono shuu",
+      "takes": 3
+    },
+    {
+      "word": "さは",
+      "reading": "さは",
+      "key": "さは",
+      "transcript": "沢。沢。沢。",
+      "expected": "saha",
+      "heard": "sawa sawa sawa",
+      "takes": 3
+    },
+    {
+      "word": "さよなら",
+      "reading": "さよなら",
+      "key": "さよなら",
+      "transcript": "さようなら。",
+      "expected": "sayonara",
+      "heard": "sayoonara",
+      "takes": 3
+    },
+    {
+      "word": "しかい",
+      "reading": "しかい",
+      "key": "しかい",
+      "transcript": "近い。",
+      "expected": "shikai",
+      "heard": "chikai",
+      "takes": 3
+    },
+    {
+      "word": "じい",
+      "reading": "じい",
+      "key": "じい",
+      "transcript": "G, G, G",
+      "expected": "jii",
+      "heard": "G G G",
+      "takes": 3
+    },
+    {
+      "word": "それじゃ",
+      "reading": "それじゃ",
+      "key": "それじゃ",
+      "transcript": "それじゃあ。",
+      "expected": "soreja",
+      "heard": "sorejaa",
+      "takes": 3
+    },
+    {
+      "word": "たいよ",
+      "reading": "たいよ",
+      "key": "たいよ",
+      "transcript": "太陽",
+      "expected": "taiyo",
+      "heard": "taiyoo",
+      "takes": 3
+    },
+    {
+      "word": "だは",
+      "reading": "だは",
+      "key": "だは",
+      "transcript": "だわ。だわ。だわ。",
+      "expected": "daha",
+      "heard": "da wa da wa da wa",
+      "takes": 3
+    },
+    {
+      "word": "っちゅう",
+      "reading": "っちゅう",
+      "key": "っちゅう",
+      "transcript": "中。",
+      "expected": "tchuu",
+      "heard": "naka",
+      "takes": 3
+    },
+    {
+      "word": "っ子",
+      "reading": "っこ",
+      "key": "っ子|っこ",
+      "transcript": "こう、こう、こう。",
+      "expected": "ko",
+      "heard": "koo koo koo",
+      "takes": 3
+    },
+    {
+      "word": "ていいん",
+      "reading": "ていいん",
+      "key": "ていいん",
+      "transcript": "転院",
+      "expected": "teein",
+      "heard": "ten'in",
+      "takes": 3
+    },
+    {
+      "word": "とうと",
+      "reading": "とうと",
+      "key": "とうと",
+      "transcript": "とうとう。",
+      "expected": "tooto",
+      "heard": "tootoo",
+      "takes": 3
+    },
+    {
+      "word": "どうせ",
+      "reading": "どうせ",
+      "key": "どうせ",
+      "transcript": "同棲。",
+      "expected": "doose",
+      "heard": "doosee",
+      "takes": 3
+    },
+    {
+      "word": "はえ",
+      "reading": "はえ",
+      "key": "はえ",
+      "transcript": "はい、はい、はい。",
+      "expected": "hae",
+      "heard": "hai hai hai",
+      "takes": 3
+    },
+    {
+      "word": "ぶどう酒",
+      "reading": "ぶどうしゅ",
+      "key": "ぶどう酒|ぶどうしゅ",
+      "transcript": "ブドウ酒。",
+      "expected": "budoo shu",
+      "heard": "budou sake",
+      "takes": 3
+    },
+    {
+      "word": "へい",
+      "reading": "へい",
+      "key": "へい",
+      "transcript": "Hey Hey Hey",
+      "expected": "hee",
+      "heard": "Hey Hey Hey",
+      "takes": 3
+    },
+    {
+      "word": "ほほ",
+      "reading": "ほほ",
+      "key": "ほほ",
+      "transcript": "ほほう、ほほう、ほほう。",
+      "expected": "hoho",
+      "heard": "hoho u hoho u hoho u",
+      "takes": 3
+    },
+    {
+      "word": "めい",
+      "reading": "めい",
+      "key": "めい",
+      "transcript": "May. May. May.",
+      "expected": "mee",
+      "heard": "May May May",
+      "takes": 3
+    },
+    {
+      "word": "もうい",
+      "reading": "もうい",
+      "key": "もうい",
+      "transcript": "もういい。",
+      "expected": "mooi",
+      "heard": "moo ii",
+      "takes": 3
+    },
+    {
+      "word": "ようが",
+      "reading": "ようが",
+      "key": "ようが",
+      "transcript": "ヨガ。",
+      "expected": "yooga",
+      "heard": "yoga",
+      "takes": 3
+    },
+    {
+      "word": "ろくに",
+      "reading": "ろくに",
+      "key": "ろくに",
+      "transcript": "六二。",
+      "expected": "rokuni",
+      "heard": "rokujuuni",
+      "takes": 3
+    },
+    {
+      "word": "アイディア",
+      "reading": "あいでぃあ",
+      "key": "あいでぃあ",
+      "transcript": "Idea",
+      "expected": "ai de i a",
+      "heard": "Idea",
+      "takes": 3
+    },
+    {
+      "word": "アクセス",
+      "reading": "あくせす",
+      "key": "あくせす",
+      "transcript": "Access",
+      "expected": "aku se su",
+      "heard": "Access",
+      "takes": 3
+    },
+    {
+      "word": "アンド",
+      "reading": "あんど",
+      "key": "あんど",
+      "transcript": "And",
+      "expected": "an do",
+      "heard": "And",
+      "takes": 3
+    },
+    {
+      "word": "インディアン",
+      "reading": "いんでぃあん",
+      "key": "いんでぃあん",
+      "transcript": "Indian",
+      "expected": "in de i an",
+      "heard": "Indian",
+      "takes": 3
+    },
+    {
+      "word": "ウェブ",
+      "reading": "うぇぶ",
+      "key": "うぇぶ",
+      "transcript": "Web。Web。Web。",
+      "expected": "u e bu",
+      "heard": "Web Web Web",
+      "takes": 3
+    },
+    {
+      "word": "オックスフォード",
+      "reading": "おっくすふぉーど",
+      "key": "おっくすふぉーど",
+      "transcript": "Oxford",
+      "expected": "o  ku su fu o - do",
+      "heard": "Oxford",
+      "takes": 3
+    },
+    {
+      "word": "オープン",
+      "reading": "おーぷん",
+      "key": "おーぷん",
+      "transcript": "Open。",
+      "expected": "o - pu n",
+      "heard": "Open",
+      "takes": 3
+    },
+    {
+      "word": "オール",
+      "reading": "おーる",
+      "key": "おーる",
+      "transcript": "All",
+      "expected": "o - ru",
+      "heard": "All",
+      "takes": 3
+    },
+    {
+      "word": "カフェ",
+      "reading": "かふぇ",
+      "key": "かふぇ",
+      "transcript": "Coffee, coffee, coffee.",
+      "expected": "kafu e",
+      "heard": "Coffee coffee coffee",
+      "takes": 3
+    },
+    {
+      "word": "ゲイ",
+      "reading": "げい",
+      "key": "げい",
+      "transcript": "Gay. Gay. Gay.",
+      "expected": "gee",
+      "heard": "Gay Gay Gay",
+      "takes": 3
+    },
+    {
+      "word": "コール",
+      "reading": "こーる",
+      "key": "こーる",
+      "transcript": "Coal",
+      "expected": "ko - ru",
+      "heard": "Coal",
+      "takes": 3
+    },
+    {
+      "word": "ゴール",
+      "reading": "ごーる",
+      "key": "ごーる",
+      "transcript": "gore",
+      "expected": "go - ru",
+      "heard": "gore",
+      "takes": 3
+    },
+    {
+      "word": "サーフィン",
+      "reading": "さーふぃん",
+      "key": "さーふぃん",
+      "transcript": "Surfing",
+      "expected": "saa fu i n",
+      "heard": "Surfing",
+      "takes": 3
+    },
+    {
+      "word": "シェイク",
+      "reading": "しぇいく",
+      "key": "しぇいく",
+      "transcript": "Shake",
+      "expected": "shi e iku",
+      "heard": "Shake",
+      "takes": 3
+    },
+    {
+      "word": "シェーク",
+      "reading": "しぇーく",
+      "key": "しぇーく",
+      "transcript": "Shake",
+      "expected": "shi e - ku",
+      "heard": "Shake",
+      "takes": 3
+    },
+    {
+      "word": "シップ",
+      "reading": "しっぷ",
+      "key": "しっぷ",
+      "transcript": "Ship",
+      "expected": "shi  pu",
+      "heard": "Ship",
+      "takes": 3
+    },
+    {
+      "word": "シューズ",
+      "reading": "しゅーず",
+      "key": "しゅーず",
+      "transcript": "Shoes",
+      "expected": "shu - zu",
+      "heard": "Shoes",
+      "takes": 3
+    },
+    {
+      "word": "シーズン",
+      "reading": "しーずん",
+      "key": "しーずん",
+      "transcript": "Seasons",
+      "expected": "shi - zu n",
+      "heard": "Seasons",
+      "takes": 3
+    },
+    {
+      "word": "スパイ",
+      "reading": "すぱい",
+      "key": "すぱい",
+      "transcript": "Spy",
+      "expected": "su pa i",
+      "heard": "Spy",
+      "takes": 3
+    },
+    {
+      "word": "スピア",
+      "reading": "すぴあ",
+      "key": "すぴあ",
+      "transcript": "Spear",
+      "expected": "su pi a",
+      "heard": "Spear",
+      "takes": 3
+    },
+    {
+      "word": "スペア",
+      "reading": "すぺあ",
+      "key": "すぺあ",
+      "transcript": "Spare",
+      "expected": "su pe a",
+      "heard": "Spare",
+      "takes": 3
+    },
+    {
+      "word": "スペース",
+      "reading": "すぺーす",
+      "key": "すぺーす",
+      "transcript": "Space",
+      "expected": "su pe - su",
+      "heard": "Space",
+      "takes": 3
+    },
+    {
+      "word": "セーフ",
+      "reading": "せーふ",
+      "key": "せーふ",
+      "transcript": "Safe",
+      "expected": "se - fu",
+      "heard": "Safe",
+      "takes": 3
+    },
+    {
+      "word": "ソファ",
+      "reading": "そふぁ",
+      "key": "そふぁ",
+      "transcript": "Sofa。Sofa。Sofa。",
+      "expected": "sofu a",
+      "heard": "Sofa Sofa Sofa",
+      "takes": 3
+    },
+    {
+      "word": "タイム",
+      "reading": "たいむ",
+      "key": "たいむ",
+      "transcript": "Time",
+      "expected": "tai mu",
+      "heard": "Time",
+      "takes": 3
+    },
+    {
+      "word": "タフ",
+      "reading": "たふ",
+      "key": "たふ",
+      "transcript": "Tough, tough, tough.",
+      "expected": "ta fu",
+      "heard": "Tough tough tough",
+      "takes": 3
+    },
+    {
+      "word": "タワー",
+      "reading": "たわー",
+      "key": "たわー",
+      "transcript": "Tower",
+      "expected": "ta wa -",
+      "heard": "Tower",
+      "takes": 3
+    },
+    {
+      "word": "ダウン",
+      "reading": "だうん",
+      "key": "だうん",
+      "transcript": "Down",
+      "expected": "da un",
+      "heard": "Down",
+      "takes": 3
+    },
+    {
+      "word": "ツアー",
+      "reading": "つあー",
+      "key": "つあー",
+      "transcript": "つあ。",
+      "expected": "tsu aa",
+      "heard": "tsu a",
+      "takes": 3
+    },
+    {
+      "word": "テキサス",
+      "reading": "てきさす",
+      "key": "てきさす",
+      "transcript": "Texas",
+      "expected": "teki sasu",
+      "heard": "Texas",
+      "takes": 3
+    },
+    {
+      "word": "デイ",
+      "reading": "でい",
+      "key": "でい",
+      "transcript": "Day Day Day",
+      "expected": "de i",
+      "heard": "Day Day Day",
+      "takes": 3
+    },
+    {
+      "word": "デー",
+      "reading": "でー",
+      "key": "でー",
+      "transcript": "Day. Day. Day.",
+      "expected": "de -",
+      "heard": "Day Day Day",
+      "takes": 3
+    },
+    {
+      "word": "ニーズ",
+      "reading": "にーず",
+      "key": "にーず",
+      "transcript": "Knees",
+      "expected": "ni - zu",
+      "heard": "Knees",
+      "takes": 3
+    },
+    {
+      "word": "ネーム",
+      "reading": "ねーむ",
+      "key": "ねーむ",
+      "transcript": "Name",
+      "expected": "ne - mu",
+      "heard": "Name",
+      "takes": 3
+    },
+    {
+      "word": "ハウス",
+      "reading": "はうす",
+      "key": "はうす",
+      "transcript": "House",
+      "expected": "hau su",
+      "heard": "House",
+      "takes": 3
+    },
+    {
+      "word": "バレー",
+      "reading": "ばれー",
+      "key": "ばれー",
+      "transcript": "バレエ",
+      "expected": "ba re -",
+      "heard": "baree",
+      "takes": 3
+    },
+    {
+      "word": "バースデー",
+      "reading": "ばーすでー",
+      "key": "ばーすでー",
+      "transcript": "バスデー",
+      "expected": "ba - su de -",
+      "heard": "basudee",
+      "takes": 3
+    },
+    {
+      "word": "パーク",
+      "reading": "ぱーく",
+      "key": "ぱーく",
+      "transcript": "Park",
+      "expected": "pa - ku",
+      "heard": "Park",
+      "takes": 3
+    },
+    {
+      "word": "ビザ",
+      "reading": "びざ",
+      "key": "びざ",
+      "transcript": "Visa. Visa. Visa.",
+      "expected": "bi za",
+      "heard": "Visa Visa Visa",
+      "takes": 3
+    },
+    {
+      "word": "ビッグ",
+      "reading": "びっぐ",
+      "key": "びっぐ",
+      "transcript": "Big",
+      "expected": "bi  gu",
+      "heard": "Big",
+      "takes": 3
+    },
+    {
+      "word": "ビーフ",
+      "reading": "びーふ",
+      "key": "びーふ",
+      "transcript": "Beef",
+      "expected": "bi - fu",
+      "heard": "Beef",
+      "takes": 3
+    },
+    {
+      "word": "ピン",
+      "reading": "ぴん",
+      "key": "ぴん",
+      "transcript": "Ping, ping, ping。",
+      "expected": "pi n",
+      "heard": "Ping ping ping",
+      "takes": 3
+    },
+    {
+      "word": "ピーナッツ",
+      "reading": "ぴーなっつ",
+      "key": "ぴーなっつ",
+      "transcript": "Peanuts",
+      "expected": "pi - na  tsu",
+      "heard": "Peanuts",
+      "takes": 3
+    },
+    {
+      "word": "ファースト",
+      "reading": "ふぁーすと",
+      "key": "ふぁーすと",
+      "transcript": "First",
+      "expected": "fu a - su to",
+      "heard": "First",
+      "takes": 3
+    },
+    {
+      "word": "フィン",
+      "reading": "ふぃん",
+      "key": "ふぃん",
+      "transcript": "Thing。Thing。Thing。",
+      "expected": "fu i n",
+      "heard": "Thing Thing Thing",
+      "takes": 3
+    },
+    {
+      "word": "フィート",
+      "reading": "ふぃーと",
+      "key": "ふぃーと",
+      "transcript": "Fito。",
+      "expected": "fu i - to",
+      "heard": "Fito",
+      "takes": 3
+    },
+    {
+      "word": "フェア",
+      "reading": "ふぇあ",
+      "key": "ふぇあ",
+      "transcript": "Fair. Fair. Fair.",
+      "expected": "fu e a",
+      "heard": "Fair Fair Fair",
+      "takes": 3
+    },
+    {
+      "word": "フェイス",
+      "reading": "ふぇいす",
+      "key": "ふぇいす",
+      "transcript": "Face",
+      "expected": "fu e isu",
+      "heard": "Face",
+      "takes": 3
+    },
+    {
+      "word": "ブック",
+      "reading": "ぶっく",
+      "key": "ぶっく",
+      "transcript": "Book",
+      "expected": "bu  ku",
+      "heard": "Book",
+      "takes": 3
+    },
+    {
+      "word": "プラットホーム",
+      "reading": "ぷらっとほーむ",
+      "key": "ぷらっとほーむ",
+      "transcript": "プラットフォーム",
+      "expected": "pu ra  toho - mu",
+      "heard": "purattofoomu",
+      "takes": 3
+    },
+    {
+      "word": "プラン",
+      "reading": "ぷらん",
+      "key": "ぷらん",
+      "transcript": "プラーン。",
+      "expected": "pu ran",
+      "heard": "puraan",
+      "takes": 3
+    },
+    {
+      "word": "ヘア",
+      "reading": "へあ",
+      "key": "へあ",
+      "transcript": "Hair Hair Hair",
+      "expected": "e a",
+      "heard": "Hair Hair Hair",
+      "takes": 3
+    },
+    {
+      "word": "ボディ",
+      "reading": "ぼでぃ",
+      "key": "ぼでぃ",
+      "transcript": "Body Body Body",
+      "expected": "bo de i",
+      "heard": "Body Body Body",
+      "takes": 3
+    },
+    {
+      "word": "ボーイ",
+      "reading": "ぼーい",
+      "key": "ぼーい",
+      "transcript": "Boy",
+      "expected": "bo - i",
+      "heard": "Boy",
+      "takes": 3
+    },
+    {
+      "word": "マック",
+      "reading": "まっく",
+      "key": "まっく",
+      "transcript": "Mac",
+      "expected": "ma  ku",
+      "heard": "Mac",
+      "takes": 3
+    },
+    {
+      "word": "ミュージック",
+      "reading": "みゅーじっく",
+      "key": "みゅーじっく",
+      "transcript": "Music",
+      "expected": "mi yu - ji  ku",
+      "heard": "Music",
+      "takes": 3
+    },
+    {
+      "word": "ミリ",
+      "reading": "みり",
+      "key": "みり",
+      "transcript": "ミディ。ミディ。ミディ。",
+      "expected": "mi ri",
+      "heard": "midi midi midi",
+      "takes": 3
+    },
+    {
+      "word": "メイト",
+      "reading": "めいと",
+      "key": "めいと",
+      "transcript": "Meito。",
+      "expected": "mee to",
+      "heard": "Meito",
+      "takes": 3
+    },
+    {
+      "word": "メロディー",
+      "reading": "めろでぃー",
+      "key": "めろでぃー",
+      "transcript": "メロディ",
+      "expected": "me ro de i -",
+      "heard": "merodi",
+      "takes": 3
+    },
+    {
+      "word": "ユーザー",
+      "reading": "ゆーざー",
+      "key": "ゆーざー",
+      "transcript": "User",
+      "expected": "yu - za -",
+      "heard": "User",
+      "takes": 3
+    },
+    {
+      "word": "ライン",
+      "reading": "らいん",
+      "key": "らいん",
+      "transcript": "Line",
+      "expected": "rai n",
+      "heard": "Line",
+      "takes": 3
+    },
+    {
+      "word": "ラフ",
+      "reading": "らふ",
+      "key": "らふ",
+      "transcript": "Laugh, laugh, laugh.",
+      "expected": "rafu",
+      "heard": "Laugh laugh laugh",
+      "takes": 3
+    },
+    {
+      "word": "ラブ",
+      "reading": "らぶ",
+      "key": "らぶ",
+      "transcript": "Love. Love. Love.",
+      "expected": "ra bu",
+      "heard": "Love Love Love",
+      "takes": 3
+    },
+    {
+      "word": "ルーム",
+      "reading": "るーむ",
+      "key": "るーむ",
+      "transcript": "Room",
+      "expected": "ru - mu",
+      "heard": "Room",
+      "takes": 3
+    },
+    {
+      "word": "ロング",
+      "reading": "ろんぐ",
+      "key": "ろんぐ",
+      "transcript": "Long",
+      "expected": "ro n gu",
+      "heard": "Long",
+      "takes": 3
+    },
+    {
+      "word": "ワーク",
+      "reading": "わーく",
+      "key": "わーく",
+      "transcript": "",
+      "expected": "wa - ku",
+      "heard": "",
+      "takes": 3
+    },
+    {
+      "word": "万歳",
+      "reading": "よろずとせ",
+      "key": "万歳|よろずとせ",
+      "transcript": "万年床",
+      "expected": "yo ro zu to se",
+      "heard": "ichimannen toko",
+      "takes": 3
+    },
+    {
+      "word": "不運",
+      "reading": "ふうん",
+      "key": "不運|ふうん",
+      "transcript": "ふーん。",
+      "expected": "fuun",
+      "heard": "fu - n",
+      "takes": 3
+    },
+    {
+      "word": "中古",
+      "reading": "ちゅうこ",
+      "key": "中古|ちゅうこ",
+      "transcript": "中高",
+      "expected": "chuuko",
+      "heard": "chuukoo",
+      "takes": 3
+    },
+    {
+      "word": "井戸",
+      "reading": "いど",
+      "key": "井戸|いど",
+      "transcript": "",
+      "expected": "ido",
+      "heard": "",
+      "takes": 3
+    },
+    {
+      "word": "仏",
+      "reading": "ふつ",
+      "key": "仏|ふつ",
+      "transcript": "普通。普通。普通。",
+      "expected": "futsu",
+      "heard": "futsuu futsuu futsuu",
+      "takes": 3
+    },
+    {
+      "word": "任命",
+      "reading": "にんめい",
+      "key": "任命|にんめい",
+      "transcript": "人名。",
+      "expected": "ninmee",
+      "heard": "jinmee",
+      "takes": 3
+    },
+    {
+      "word": "兵",
+      "reading": "へい",
+      "key": "兵|へい",
+      "transcript": "Hey. Hey. Hey.",
+      "expected": "hee",
+      "heard": "Hey Hey Hey",
+      "takes": 3
+    },
+    {
+      "word": "出生",
+      "reading": "しゅっしょう",
+      "key": "出生|しゅっしょう",
+      "transcript": "出所",
+      "expected": "shusshoo",
+      "heard": "shussho",
+      "takes": 3
+    },
+    {
+      "word": "刑",
+      "reading": "けい",
+      "key": "刑|けい",
+      "transcript": "K、K、K",
+      "expected": "kee",
+      "heard": "K K K",
+      "takes": 3
+    },
+    {
+      "word": "判明",
+      "reading": "はんめい",
+      "key": "判明|はんめい",
+      "transcript": "はっめ。",
+      "expected": "hanmee",
+      "heard": "ha  me",
+      "takes": 3
+    },
+    {
+      "word": "博士",
+      "reading": "はくし",
+      "key": "博士|はくし",
+      "transcript": "拍手。",
+      "expected": "hakushi",
+      "heard": "hakushu",
+      "takes": 3
+    },
+    {
+      "word": "反し",
+      "reading": "かえし",
+      "key": "反し|かえし",
+      "transcript": "開始。",
+      "expected": "kae shi",
+      "heard": "kaishi",
+      "takes": 3
+    },
+    {
+      "word": "四半期",
+      "reading": "しはんき",
+      "key": "四半期|しはんき",
+      "transcript": "自販機",
+      "expected": "shihanki",
+      "heard": "jihanki",
+      "takes": 3
+    },
+    {
+      "word": "回る",
+      "reading": "めぐる",
+      "key": "回る|めぐる",
+      "transcript": "巡",
+      "expected": "meguru",
+      "heard": "jun",
+      "takes": 3
+    },
+    {
+      "word": "回目",
+      "reading": "かいめ",
+      "key": "回目|かいめ",
+      "transcript": "改名。",
+      "expected": "kaime",
+      "heard": "kaimee",
+      "takes": 3
+    },
+    {
+      "word": "塀",
+      "reading": "へい",
+      "key": "塀|へい",
+      "transcript": "Hey。Hey。Hey。",
+      "expected": "hee",
+      "heard": "Hey Hey Hey",
+      "takes": 3
+    },
+    {
+      "word": "大家",
+      "reading": "おおや",
+      "key": "大家|おおや",
+      "transcript": "おや。",
+      "expected": "ooya",
+      "heard": "oya",
+      "takes": 3
+    },
+    {
+      "word": "寮",
+      "reading": "りょう",
+      "key": "寮|りょう",
+      "transcript": "秒、秒、秒。",
+      "expected": "ryoo",
+      "heard": "byoo byoo byoo",
+      "takes": 3
+    },
+    {
+      "word": "封",
+      "reading": "ふう",
+      "key": "封|ふう",
+      "transcript": "ふー、ふー、ふー。",
+      "expected": "fuu",
+      "heard": "fu - fu - fu -",
+      "takes": 3
+    },
+    {
+      "word": "小包",
+      "reading": "こづつみ",
+      "key": "小包|こづつみ",
+      "transcript": "小包み。",
+      "expected": "kozutsumi",
+      "heard": "ko tsutsumi",
+      "takes": 3
+    },
+    {
+      "word": "尿",
+      "reading": "にょう",
+      "key": "尿|にょう",
+      "transcript": "にょ、にょ、にょ。",
+      "expected": "nyoo",
+      "heard": "ni yo ni yo ni yo",
+      "takes": 3
+    },
+    {
+      "word": "崎",
+      "reading": "さき",
+      "key": "崎|さき",
+      "transcript": "咲、咲、咲。",
+      "expected": "saki",
+      "heard": "zaki zaki zaki",
+      "takes": 3
+    },
+    {
+      "word": "年収",
+      "reading": "ねんしゅう",
+      "key": "年収|ねんしゅう",
+      "transcript": "練習。",
+      "expected": "nenshuu",
+      "heard": "renshuu",
+      "takes": 3
+    },
+    {
+      "word": "年後",
+      "reading": "ねんご",
+      "key": "年後|ねんご",
+      "transcript": "年号",
+      "expected": "nengo",
+      "heard": "nengoo",
+      "takes": 3
+    },
+    {
+      "word": "年生",
+      "reading": "ねんせい",
+      "key": "年生|ねんせい",
+      "transcript": "免責。",
+      "expected": "nen see",
+      "heard": "menseki",
+      "takes": 3
+    },
+    {
+      "word": "弟子",
+      "reading": "でし",
+      "key": "弟子|でし",
+      "transcript": "です。です。です。",
+      "expected": "deshi",
+      "heard": "desu desu desu",
+      "takes": 3
+    },
+    {
+      "word": "恵み",
+      "reading": "めぐみ",
+      "key": "恵み|めぐみ",
+      "transcript": "恵",
+      "expected": "megumi",
+      "heard": "kee",
+      "takes": 3
+    },
+    {
+      "word": "愛好",
+      "reading": "あいこう",
+      "key": "愛好|あいこう",
+      "transcript": "あいこ。",
+      "expected": "aikoo",
+      "heard": "ai ko",
+      "takes": 3
+    },
+    {
+      "word": "推進",
+      "reading": "すいしん",
+      "key": "推進|すいしん",
+      "transcript": "追伸",
+      "expected": "suishin",
+      "heard": "tsuishin",
+      "takes": 3
+    },
+    {
+      "word": "摂氏",
+      "reading": "せっし",
+      "key": "摂氏|せっし",
+      "transcript": "接視。",
+      "expected": "sesshi",
+      "heard": "setsushi",
+      "takes": 3
+    },
+    {
+      "word": "支出",
+      "reading": "ししゅつ",
+      "key": "支出|ししゅつ",
+      "transcript": "私出。",
+      "expected": "shishutsu",
+      "heard": "watashi de",
+      "takes": 3
+    },
+    {
+      "word": "木々",
+      "reading": "きぎ",
+      "key": "木々|きぎ",
+      "transcript": "危機、危機、危機。",
+      "expected": "kigi",
+      "heard": "kiki kiki kiki",
+      "takes": 3
+    },
+    {
+      "word": "歓呼",
+      "reading": "かんこ",
+      "key": "歓呼|かんこ",
+      "transcript": "観光",
+      "expected": "kan ko",
+      "heard": "kankoo",
+      "takes": 3
+    },
+    {
+      "word": "気味",
+      "reading": "ぎみ",
+      "key": "気味|ぎみ",
+      "transcript": "ジミー、ジミー、ジミー",
+      "expected": "gimi",
+      "heard": "jimii jimii jimii",
+      "takes": 3
+    },
+    {
+      "word": "湿気",
+      "reading": "しっけ",
+      "key": "湿気|しっけ",
+      "transcript": "失敬。",
+      "expected": "shikke",
+      "heard": "shikkee",
+      "takes": 3
+    },
+    {
+      "word": "焼く",
+      "reading": "やく",
+      "key": "焼く|やく",
+      "transcript": "訳。訳。訳。",
+      "expected": "yaku",
+      "heard": "wake wake wake",
+      "takes": 3
+    },
+    {
+      "word": "理屈",
+      "reading": "りくつ",
+      "key": "理屈|りくつ",
+      "transcript": "微屈。",
+      "expected": "rikutsu",
+      "heard": "bikutsu",
+      "takes": 3
+    },
+    {
+      "word": "番目",
+      "reading": "ばんめ",
+      "key": "番目|ばんめ",
+      "transcript": "晩飯",
+      "expected": "banme",
+      "heard": "banmeshi",
+      "takes": 3
+    },
+    {
+      "word": "相応",
+      "reading": "そうおう",
+      "key": "相応|そうおう",
+      "transcript": "そう。",
+      "expected": "soooo",
+      "heard": "soo",
+      "takes": 3
+    },
+    {
+      "word": "範囲",
+      "reading": "はんい",
+      "key": "範囲|はんい",
+      "transcript": "はい。",
+      "expected": "han'i",
+      "heard": "hai",
+      "takes": 3
+    },
+    {
+      "word": "系",
+      "reading": "けい",
+      "key": "系|けい",
+      "transcript": "K K K",
+      "expected": "kee",
+      "heard": "K K K",
+      "takes": 3
+    },
+    {
+      "word": "級友",
+      "reading": "きゅうゆう",
+      "key": "級友|きゅうゆう",
+      "transcript": "給油。",
+      "expected": "kyuu yuu",
+      "heard": "kyuuyu",
+      "takes": 3
+    },
+    {
+      "word": "給仕",
+      "reading": "きゅうじ",
+      "key": "給仕|きゅうじ",
+      "transcript": "9時。",
+      "expected": "kyuu ji",
+      "heard": "kuji",
+      "takes": 3
+    },
+    {
+      "word": "芸",
+      "reading": "げい",
+      "key": "芸|げい",
+      "transcript": "Gay. Gay. Gay.",
+      "expected": "gee",
+      "heard": "Gay Gay Gay",
+      "takes": 3
+    },
+    {
+      "word": "著名",
+      "reading": "ちょめい",
+      "key": "著名|ちょめい",
+      "transcript": "トメイ",
+      "expected": "chomee",
+      "heard": "tomee",
+      "takes": 3
+    },
+    {
+      "word": "行き方",
+      "reading": "ゆきがた",
+      "key": "行き方|ゆきがた",
+      "transcript": "雪型。",
+      "expected": "yuki ga ta",
+      "heard": "yukikata",
+      "takes": 3
+    },
+    {
+      "word": "講演者",
+      "reading": "こうえんしゃ",
+      "key": "講演者|こうえんしゃ",
+      "transcript": "後援者",
+      "expected": "kooen sha",
+      "heard": "kooen mono",
+      "takes": 3
+    },
+    {
+      "word": "負う",
+      "reading": "おう",
+      "key": "負う|おう",
+      "transcript": "おー、おー、おー。",
+      "expected": "oo",
+      "heard": "o - o - o -",
+      "takes": 3
+    },
+    {
+      "word": "関連",
+      "reading": "かんれん",
+      "key": "関連|かんれん",
+      "transcript": "観念。",
+      "expected": "kanren",
+      "heard": "kannen",
+      "takes": 3
+    },
+    {
+      "word": "食う",
+      "reading": "くう",
+      "key": "食う|くう",
+      "transcript": "くー、くー、くー。",
+      "expected": "kuu",
+      "heard": "ku - ku - ku -",
+      "takes": 3
+    },
+    {
+      "word": "１０代",
+      "reading": "じゅうだい",
+      "key": "10代|じゅうだい",
+      "transcript": "10代。",
+      "expected": "juudai",
+      "heard": "juu yo",
+      "takes": 3
+    },
+    {
+      "word": "１０００",
+      "reading": "いっせん",
+      "key": "1000",
+      "transcript": "千",
+      "expected": "issen",
+      "heard": "sen",
+      "takes": 3
+    },
+    {
+      "word": "２０代",
+      "reading": "にじゅうだい",
+      "key": "20代|にじゅうだい",
+      "transcript": "20代",
+      "expected": "nijuu dai",
+      "heard": "nijuu yo",
+      "takes": 3
+    },
+    {
+      "word": "７人",
+      "reading": "しちにん",
+      "key": "7人|しちにん",
+      "transcript": "七人",
+      "expected": "shichi nin",
+      "heard": "nananin",
+      "takes": 3
+    },
+    {
+      "word": "Ｔシャツ",
+      "reading": "てぃーしゃつ",
+      "key": "Tしゃつ",
+      "transcript": "Tシャツ",
+      "expected": "te i - sha tsu",
+      "heard": "T shatsu",
+      "takes": 3
+    }
+  ]
+}
