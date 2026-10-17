@@ -326,7 +326,7 @@ async function reader(browser, phone, lang) {
   await step(where, 'the Display button', async () => {
     await tap(page, '#display-toggle');
     const opened = await page.evaluate(() => ({ e: document.querySelector('#display-toggle').getAttribute('aria-expanded'), n: [...document.querySelectorAll('#display-panel .seg')].filter((s) => s.getClientRects().length).length }));
-    if (opened.e !== 'true' || opened.n !== 8) fail(where, `Display opened: aria-expanded ${opened.e}, ${opened.n} of 8 switches shown`);
+    if (opened.e !== 'true' || opened.n !== 9) fail(where, `Display opened: aria-expanded ${opened.e}, ${opened.n} of 9 switches shown`);
     await audit(page, where, 'display-open');
     await tap(page, '#display-toggle');
   });

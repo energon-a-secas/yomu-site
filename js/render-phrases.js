@@ -1,11 +1,12 @@
 // The Phrases dialog: the library by category, then the dialogues.
 //
-// Choosing a phrase reads it; a phrase marked chunk: true also offers Chunk
-// it, which opens its beats under the row and says them one by one before the
-// whole phrase. The chips are drawn when the row opens, not before, so a long
+// Choosing a phrase reads it, and Listen says it from its recording
+// (js/audio.js); a dialogue's Listen says it line by line, speaker B in a
+// second voice. A phrase marked chunk: true also offers Chunk it, which opens
+// its beats under the row and says them one by one before the whole phrase. The chips are drawn when the row opens, not before, so a long
 // library does not build a few hundred hidden lists.
 
-import { h } from './utils.js';
+import { h, speakerIcon } from './utils.js';
 import { ui, t, registerWord, currentLang } from './strings.js';
 import { beatRomaji } from './kana.js';
 import { phraseBeats } from './library.js';
@@ -36,6 +37,10 @@ function phraseRow(p, canSpeak) {
     ]),
     h('div', { class: 'ph-actions' }, [
       h('button', {
+        type: 'button', class: 'btn btn--ghost btn--sm ph-listen', 'data-act': 'ph-listen', 'data-id': p.id,
+        ...speak, 'aria-describedby': [described, speak['aria-describedby']].filter(Boolean).join(' '),
+      }, [speakerIcon(), h('span', null, ui('listen'))]),
+      h('button', {
         type: 'button', class: 'btn btn--secondary btn--sm', 'data-act': 'read-phrase', 'data-id': p.id, 'aria-describedby': described,
       }, ui('readPhrase')),
       p.chunk ? h('button', {
@@ -65,7 +70,8 @@ export function chunkNodes(phrase) {
   ];
 }
 
-function dialogueRow(d) {
+function dialogueRow(d, canSpeak) {
+  const speak = speakAttrs(canSpeak);
   const lang = currentLang();
   const tr = d.translation && Array.isArray(d.translation[lang]) ? d.translation[lang]
     : d.translation && Array.isArray(d.translation.en) ? d.translation.en : [];
@@ -77,9 +83,15 @@ function dialogueRow(d) {
       h('span', { class: 'dlg-ja', lang: 'ja' }, l.ja),
       tr[i] ? h('span', { class: 'dlg-tr' }, tr[i]) : null,
     ]))),
-    h('button', {
-      type: 'button', class: 'btn btn--secondary btn--sm', 'data-act': 'read-dialogue', 'data-id': d.id, 'aria-describedby': `dlg-${d.id}`,
-    }, ui('readDialogue')),
+    h('div', { class: 'dlg-actions' }, [
+      h('button', {
+        type: 'button', class: 'btn btn--ghost btn--sm ph-listen', 'data-act': 'dlg-listen', 'data-id': d.id,
+        ...speak, 'aria-describedby': [`dlg-${d.id}`, speak['aria-describedby']].filter(Boolean).join(' '),
+      }, [speakerIcon(), h('span', null, ui('listenDialogue'))]),
+      h('button', {
+        type: 'button', class: 'btn btn--secondary btn--sm', 'data-act': 'read-dialogue', 'data-id': d.id, 'aria-describedby': `dlg-${d.id}`,
+      }, ui('readDialogue')),
+    ]),
   ]);
 }
 
@@ -124,7 +136,7 @@ export function phrasesNode(lib, { canSpeak, speechReason, readable = { on: fals
   if (dialogues.length) {
     out.push(h('section', { class: 'ph-cat', 'aria-labelledby': 'cat-dialogues' }, [
       h('h3', { class: 'ph-cat-title', id: 'cat-dialogues' }, ui('dialogues')),
-      h('ul', { class: 'ph-list', role: 'list' }, dialogues.map(dialogueRow)),
+      h('ul', { class: 'ph-list', role: 'list' }, dialogues.map((d) => dialogueRow(d, canSpeak))),
     ]));
   }
   return out;

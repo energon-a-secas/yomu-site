@@ -855,6 +855,24 @@ html[data-hand="on"] .kc-kana { font-family: 'Yomu Klee One', var(--ja); }
 .ex-kana { color: var(--text-secondary); }
 .ex-spelled { font-size: var(--text-xs); color: var(--text-muted); }
 .ex-gloss { color: var(--text-secondary); }
+/* A note's example with its speaker (render-notes.js sayButton): the text in
+   the first column, the 44px button beside it however many lines it has. */
+.ex--say { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--space-2); align-items: start; }
+.ex--say > :not(.ex-say) { grid-column: 1; }
+.ex--say > .ex-say { grid-column: 2; grid-row: 1 / span 6; align-self: center; }
+.ex-say {
+  width: 44px; height: 44px; display: grid; place-items: center;
+  border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);
+  background: transparent; color: var(--text-secondary); cursor: pointer;
+}
+.ex-say .kp-icon, .pair-say .kp-icon, .ph-listen .kp-icon { width: 18px; height: 18px; }
+@media (hover: hover) { .ex-say:hover { border-color: var(--border-strong); color: var(--text-primary); } }
+.ex-say[aria-disabled="true"], .pair-say[aria-disabled="true"], .ph-listen[aria-disabled="true"] { opacity: 0.45; cursor: default; }
+/* Lit while it is said, as read along lights a word (.tok.is-reading). */
+.ex.is-saying, .dlg-lines > li.is-saying { background: var(--accent-lit); border-radius: var(--radius-sm); box-shadow: 0 0 0 4px var(--accent-lit); }
+.pair-say, .ph-listen { display: inline-flex; align-items: center; gap: var(--space-2); }
+.pair-say { margin-top: var(--space-3); }
+.dlg-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-2); }
 
 /* ── The kanji table ───────────────────────────────────────── */
 .kj-list { list-style: none; display: flex; flex-direction: column; border-top: 1px solid var(--border-subtle); }

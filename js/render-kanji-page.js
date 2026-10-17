@@ -12,7 +12,7 @@
 // an attribute. The stroke drawing names itself in a <title>, a text node,
 // for the same reason.
 
-import { h } from './utils.js';
+import { h, speakerIcon } from './utils.js';
 import { ui } from './strings.js';
 import { seenText, wordRuby, withKanji } from './render-save.js';
 import { meaningText } from './render-mykanji.js';
@@ -91,12 +91,6 @@ function bookmarkIcon() {
   return svg('svg', {
     class: 'kp-icon', viewBox: '0 0 24 24', 'aria-hidden': 'true', focusable: 'false',
   }, [svg('path', { d: 'M7 3.5h10a1 1 0 0 1 1 1V20.5l-6-4.2-6 4.2V4.5a1 1 0 0 1 1-1Z' })]);
-}
-
-function speakerIcon() {
-  return svg('svg', {
-    class: 'kp-icon', viewBox: '0 0 24 24', 'aria-hidden': 'true', focusable: 'false',
-  }, [svg('path', { d: 'M11 5 6 9H3v6h3l5 4V5z' }), svg('path', { d: 'M15.5 8.5a5 5 0 0 1 0 7' })]);
 }
 
 function chevron(dir) {

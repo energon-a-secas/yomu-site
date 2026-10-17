@@ -11,6 +11,7 @@ import { SEARCH_STRINGS } from './strings-search.js';
 import { PROGRESS_STRINGS } from './strings-progress.js';
 import { READING_STRINGS } from './strings-reading.js';
 import { WORDS_STRINGS } from './strings-words.js';
+import { SAY_STRINGS } from './strings-say.js';
 
 export const MORE_STRINGS = Object.freeze({
   ...CONJ_STRINGS,
@@ -19,4 +20,5 @@ export const MORE_STRINGS = Object.freeze({
   ...PROGRESS_STRINGS,
   ...READING_STRINGS,
   ...WORDS_STRINGS,
+  ...SAY_STRINGS,
 });

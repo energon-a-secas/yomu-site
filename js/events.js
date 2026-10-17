@@ -6,22 +6,19 @@
 // note), because "nothing hover-only" is a rule, not a nicety. Reading, the
 // one asynchronous action, lives in events-read.js.
 
-import { state, savePrefs, rate } from './state.js';
-import { $, touchOnly, prefersReducedMotion, attrSel, fill, h } from './utils.js';
+import { state, savePrefs } from './state.js';
+import { $, touchOnly, prefersReducedMotion, attrSel } from './utils.js';
 import { ui, currentLang, EXAMPLES } from './strings.js';
 import { resetDictionary } from './reader.js';
 import {
-  paintAll, paintSelection, paintNote, paintSide, paintChrome, paintSpeech, paintWord, selectedToken,
+  paintAll, paintSelection, paintNote, paintSide, paintChrome, paintSpeech, paintWord,
 } from './render.js';
 import { lightKanji, lightTokenKanji, lightNote } from './render-highlight.js';
-import { speak, cancel, speakSteps, beatSteps, sayable, voicesReady } from './speech.js';
-import { tokenBeats } from './render-word.js';
+import { cancel, voicesReady } from './speech.js';
 import { selectable } from './render-reading.js';
 import { openDialog, bindDialog } from './dialogs.js';
-import { loadLibrary, dialogueText, phraseBeats } from './library.js';
-import { phrasesNode, chunkNodes } from './render-phrases.js';
-import { speechReason } from './render-chrome.js';
-import { analyzeNow, loadText, clearText, bindInput, describe, focusHome } from './events-read.js';
+import { SAY_ACTIONS, bindSay, showPhrases, repaintPhrases } from './events-say.js';
+import { analyzeNow, loadText, clearText, bindInput, focusHome } from './events-read.js';
 import { KANJI_ACTIONS, bindKanji } from './events-kanji.js';
 import { startTranslation, stopTranslation } from './render-translate.js';
 import { COLLECT_ACTIONS, bindCollect } from './events-collect.js';
@@ -256,86 +253,6 @@ function closeNote() {
   if (back) back.focus();
 }
 
-// ── Speech ────────────────────────────────────────────────────────────────
-
-function speechOk(el) {
-  return state.speech === 'ok' && !(el && el.getAttribute('aria-disabled') === 'true');
-}
-
-async function speakAll() {
-  if (state.speaking) { cancel(); return; }
-  if (!state.text.trim()) return;
-  state.speaking = true;
-  paintSpeech(state);
-  await speak(state.text, { rate: rate(state) });
-  state.speaking = false;
-  paintSpeech(state);
-}
-
-/** Light each chip as its beat is said, then everything as the whole is said. */
-async function playBeats(chips, whole, steps) {
-  const setOn = (i) => {
-    chips.forEach((c, j) => c.classList.toggle('is-on', j === i));
-    if (whole) whole.classList.toggle('is-on', i === steps.length - 1 && steps[i] && steps[i].whole);
-  };
-  await speakSteps(steps, { rate: rate(state), onStep: setOn });
-  setOn(-1);
-}
-
-function soundOut() {
-  const token = selectedToken(state);
-  if (!token) return;
-  const beats = tokenBeats(token).map((b) => b.kana);
-  const chips = [...document.querySelectorAll('#word-beats .beat')];
-  playBeats(chips, $('word-surface'), beatSteps(beats, sayable(token)));
-}
-
-function sayWord() {
-  const token = selectedToken(state);
-  if (token) speak(sayable(token), { rate: rate(state) });
-}
-
-
-// ── Phrases ───────────────────────────────────────────────────────────────
-
-let library = null;
-
-export async function showPhrases() {
-  const body = $('phrases-body');
-  if (!body) return;
-  if (!library) fill(body, h('p', { class: 'quiet', role: 'status' }, ui('phrasesLoading')));
-  try {
-    library = await loadLibrary();
-    fill(body, phrasesNode(library, { canSpeak: state.speech === 'ok', speechReason: speechReason(state.speech), readable: { on: !!state.view.readable, known: state.prefs.kanaRows } }));
-  } catch (err) {
-    const why = describe(err);
-    fill(body, h('p', { class: 'read-error', role: 'alert' }, [
-      h('span', null, why.file ? ui('failedFile', why) : why.detail), ' ',
-      h('button', { type: 'button', class: 'btn btn--secondary btn--sm', 'data-act': 'retry-phrases' }, ui('retry')),
-    ]));
-  }
-}
-
-function chunk(button) {
-  const phrase = library && library.byId.get(button.dataset.id);
-  const area = button.closest('.ph') && button.closest('.ph').querySelector('.ph-chunk');
-  if (!phrase || !area) return;
-  if (area.hidden) {
-    fill(area, chunkNodes(phrase));
-    area.hidden = false;
-    button.setAttribute('aria-expanded', 'true');
-  }
-  const list = area.querySelector('.beats');
-  playBeats([...area.querySelectorAll('.beat')], list, beatSteps(phraseBeats(phrase), phrase.ja));
-}
-
-function readFromLibrary(text) {
-  const dialog = $('phrases-dialog');
-  cancel();
-  if (dialog && dialog.open) dialog.close();
-  loadText(text, { source: 'phrase' }).catch(() => {});
-}
-
 // ── Translators ───────────────────────────────────────────────────────────
 //
 // The link carries the bare site until the moment it is followed, and goes
@@ -418,7 +335,6 @@ const ACTIONS = {
   set: (b) => setPref(b.dataset.pref, b.dataset.value),
   display: toggleDisplay,
   slow: () => { state.prefs.slow = !state.prefs.slow; savePrefs(state); paintChrome(state); },
-  'speak-all': (b) => speechOk(b) && speakAll(),
   clear: clearText,
   // Both buttons are removed by what they start, so focus moves first.
   example: (b) => { focusHome(); loadText(EXAMPLES[Number(b.dataset.ex)].ja, { source: 'example' }).catch(() => {}); },
@@ -428,21 +344,14 @@ const ACTIONS = {
   note: (b) => openNote(b.dataset.kind, b.dataset.id, b),
   'close-note': closeNote,
   kanji: (b) => pinKanji(Number(b.dataset.kid)),
-  'sound-out': (b) => speechOk(b) && soundOut(),
-  'say-word': (b) => speechOk(b) && sayWord(),
   lang: () => {
     state.prefs.lang = currentLang() === 'en' ? 'es' : 'en';
     savePrefs(state);
     dropLangParam();
     paintAll(state);
-    const dialog = $('phrases-dialog');
-    if (dialog && dialog.open && library) showPhrases();
+    repaintPhrases();
   },
   phrases: (b) => { openDialog($('phrases-dialog'), b); showPhrases(); },
-  'retry-phrases': showPhrases,
-  'read-phrase': (b) => { const p = library && library.byId.get(b.dataset.id); if (p) readFromLibrary(p.ja); },
-  'read-dialogue': (b) => { const d = library && library.dialogueById.get(b.dataset.id); if (d) readFromLibrary(dialogueText(d)); },
-  chunk: (b) => speechOk(b) && chunk(b),
   'translate-on': () => startTranslation(state),
   'translate-off': () => stopTranslation(state),
   'kanji-page': (b) => {
@@ -457,6 +366,7 @@ const ACTIONS = {
   ...DAILY_ACTIONS,
   ...COLLECT_ACTIONS,
   ...PLAY_ACTIONS,
+  ...SAY_ACTIONS,
 };
 
 export function bindEvents() {
@@ -477,6 +387,7 @@ export function bindEvents() {
     bindDialog(dialog, $('phrases-open'));
     dialog.addEventListener('close', () => cancel());
   }
+  bindSay();
   voicesReady().then((status) => {
     state.speech = status;
     paintSpeech(state);

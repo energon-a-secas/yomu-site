@@ -258,7 +258,7 @@ export function paintNote(state) {
   const body = $('note-body');
   if (!body) return;
   const ref = state.note;
-  fill(body, noteNode(ref ? noteOf(ref.kind, ref.id) : null, ref));
+  fill(body, noteNode(ref ? noteOf(ref.kind, ref.id) : null, ref, { canSay: state.speech === 'ok' || state.prefs.voice !== 'device' }));
   if (panel) {
     if (ref) panel.removeAttribute('data-empty');
     else panel.setAttribute('data-empty', '');

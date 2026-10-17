@@ -50,6 +50,8 @@ export function paintChrome(state) {
   }
   const shown = $('kanji-shown');
   if (shown) shown.value = state.prefs.kanjiShown;
+  const voice = $('voice-choice');
+  if (voice) voice.value = state.prefs.voice;
   const slow = $('slow-toggle');
   if (slow) slow.setAttribute('aria-pressed', String(!!state.prefs.slow));
 
@@ -83,7 +85,7 @@ export function paintChrome(state) {
   paintSpeech(state);
 }
 
-/** Speak controls: enabled only with a Japanese voice, and a reason when not. */
+/** Speak controls: the learner's text needs a Japanese voice on the device, with a reason when there is none. */
 export function paintSpeech(state) {
   const ok = state.speech === 'ok';
   const reason = speechReason(state.speech);
@@ -94,6 +96,17 @@ export function paintSpeech(state) {
   }
   for (const b of document.querySelectorAll('[data-speak]')) {
     if (ok) {
+      b.removeAttribute('aria-disabled');
+      b.removeAttribute('aria-describedby');
+    } else {
+      b.setAttribute('aria-disabled', 'true');
+      b.setAttribute('aria-describedby', 'speech-note');
+    }
+  }
+  // Yomu's own text (a note's examples): a recorded voice says it on any device.
+  const say = ok || state.prefs.voice !== 'device';
+  for (const b of document.querySelectorAll('[data-say]')) {
+    if (say) {
       b.removeAttribute('aria-disabled');
       b.removeAttribute('aria-describedby');
     } else {

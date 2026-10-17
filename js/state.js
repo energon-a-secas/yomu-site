@@ -36,6 +36,10 @@ export const REMEMBER = Object.freeze(['ask', 'on', 'off']);
 /** The on-device translation under the reading (translate.js): off until the learner asks for it. */
 export const TRANSLATE = Object.freeze(['on', 'off']);
 export const SIZES = Object.freeze(['S', 'M', 'L']);
+// The recorded voices (js/audio.js), or the device's own. The ids are roles
+// that tools/lib/audio-voices.mjs fills, so a voice swapped behind a role
+// keeps the learner's choice.
+export const VOICE_CHOICES = Object.freeze(['clear', 'calm', 'bright', 'male', 'device']);
 /** Which kanji the reading keeps as kanji; the rest are shown in kana (reading-view.js). */
 export const KANJI_SHOWN = Object.freeze(['all', 'mine', 'g1', 'g2', 'g3', 'g4', 'g5', 'g6']);
 
@@ -49,6 +53,8 @@ export const state = {
     furiSaved: false, size: 'M', kanjiShown: 'all', kanaRows: [],
     // The handwritten form on the kanji page and the kana chart (js/hand.js).
     hand: false,
+    // Which recorded voice says Yomu's own text (js/speech.js setVoice).
+    voice: 'clear',
   },
   // One sentence at a time (reading-view.js): for this visit, never saved.
   view: { one: false, sent: 0 },
@@ -113,6 +119,7 @@ export function loadPrefs(s, loc = globalThis.location, nav = globalThis.navigat
   if (typeof p.furiSaved === 'boolean') s.prefs.furiSaved = p.furiSaved;
   if (SIZES.includes(p.size)) s.prefs.size = p.size;
   if (typeof p.hand === 'boolean') s.prefs.hand = p.hand;
+  if (VOICE_CHOICES.includes(p.voice)) s.prefs.voice = p.voice;
   if (KANJI_SHOWN.includes(p.kanjiShown)) s.prefs.kanjiShown = p.kanjiShown;
   if (Array.isArray(p.kanaRows)) s.prefs.kanaRows = [...new Set(p.kanaRows.filter((r) => KANA_ROWS.includes(r)))];
   if (REMEMBER.includes(p.remember)) s.prefs.remember = p.remember;

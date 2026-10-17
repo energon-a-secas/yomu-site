@@ -5,7 +5,7 @@
 // { en, es }. This file only lays a note out, and a note with a missing field
 // still shows what it has rather than nothing.
 
-import { h, withJa } from './utils.js';
+import { h, withJa, speakerIcon } from './utils.js';
 import { ui, t } from './strings.js';
 import { grammarIds, soundTypes } from './render-reading.js';
 
@@ -149,8 +149,20 @@ function field(o, ...names) {
   return null;
 }
 
-/** One example: the Japanese, then said and spelled, then what it means. */
-export function exampleNode(ex, tag) {
+/**
+ * A speaker for an example, found by `attrs` (data-ex or data-pair) in the
+ * open note and said from its recording (events-say.js). Disabled, with the
+ * reason, when nothing on this device can say it.
+ */
+function sayButton(ja, attrs, canSay) {
+  return h('button', {
+    type: 'button', class: 'ex-say', 'data-act': 'say-ex', 'data-say': '', ...attrs,
+    'aria-disabled': canSay ? null : 'true', 'aria-describedby': canSay ? null : 'speech-note',
+  }, [speakerIcon(), h('span', { class: 'sr-only' }, [ui('sayIt'), ' ', h('span', { lang: 'ja' }, ja)])]);
+}
+
+/** One example: the Japanese, then said and spelled, then what it means; a speaker when `say` is given. */
+export function exampleNode(ex, tag, say = null) {
   if (!ex) return null;
   const ja = field(ex, 'ja', 'text', 'kana');
   const kana = field(ex, 'kana');
@@ -158,7 +170,8 @@ export function exampleNode(ex, tag) {
   const spelled = field(ex, 'spelled');
   const whispered = field(ex, 'whispered');
   const gloss = field(ex, 'gloss', 'translation', 'meaning');
-  return h('li', { class: 'ex' }, [
+  return h('li', { class: say ? 'ex ex--say' : 'ex' }, [
+    say && ja ? sayButton(ja, say.attrs, say.canSay) : null,
     tag ? h('span', { class: 'ex-tag' }, tag) : null,
     h('span', { class: 'ex-ja', lang: 'ja' }, ja || ''),
     kana && kana.replace(/\s+/g, '') !== ja ? h('span', { class: 'ex-kana', lang: 'ja' }, kana) : null,
@@ -169,23 +182,28 @@ export function exampleNode(ex, tag) {
   ]);
 }
 
-function pairNodes(note) {
+function pairNodes(note, canSay) {
   const p = note && note.pair;
   if (!p || (!p.with && !p.without)) return [];
+  const off = { 'aria-disabled': canSay ? null : 'true', 'aria-describedby': canSay ? null : 'speech-note' };
   return [
     h('h4', { class: 'note-sub' }, ui('minimalPair')),
     h('ul', { class: 'ex-list ex-list--pair', role: 'list' }, [
-      exampleNode(p.with, ui('pairWith')),
-      exampleNode(p.without, ui('pairWithout')),
+      exampleNode(p.with, ui('pairWith'), { attrs: { 'data-pair': 'with' }, canSay }),
+      exampleNode(p.without, ui('pairWithout'), { attrs: { 'data-pair': 'without' }, canSay }),
     ]),
+    p.with && p.without ? h('button', {
+      type: 'button', class: 'btn btn--secondary btn--sm pair-say', 'data-act': 'say-pair', 'data-say': '', ...off,
+    }, [speakerIcon(), h('span', null, ui('hearBoth'))]) : null,
   ];
 }
 
 /**
  * The note panel's content: the rule, examples with said and spelled, and the
- * minimal pair that makes the rule audible.
+ * minimal pair that makes the rule audible. `canSay` is whether anything on
+ * this device can say them: a recorded voice, or the device's own.
  */
-export function noteNode(note, ref) {
+export function noteNode(note, ref, { canSay = false } = {}) {
   if (!ref) return h('p', { class: 'side-empty' }, ui('notesEmpty'));
   const head = h('div', { class: 'note-head' }, [
     h('h3', { class: 'note-title', id: 'note-title' }, withJa(noteTitle(note, ref.id))),
@@ -201,13 +219,14 @@ export function noteNode(note, ref) {
   }
   for (const para of paragraphs(note.rule)) out.push(h('p', { class: 'note-rule' }, withJa(para)));
 
-  const examples = Array.isArray(note.examples) ? note.examples.map((ex) => exampleNode(ex)).filter(Boolean) : [];
+  const say = (i) => ({ attrs: { 'data-ex': i }, canSay });
+  const examples = Array.isArray(note.examples) ? note.examples.map((ex, i) => exampleNode(ex, null, say(i))).filter(Boolean) : [];
   if (examples.length) {
     out.push(h('h4', { class: 'note-sub' }, ui('examples')), h('ul', { class: 'ex-list', role: 'list' }, examples));
   } else if (note.example && note.example.ja) {
-    out.push(h('h4', { class: 'note-sub' }, ui('example')), h('ul', { class: 'ex-list', role: 'list' }, exampleNode(note.example)));
+    out.push(h('h4', { class: 'note-sub' }, ui('example')), h('ul', { class: 'ex-list', role: 'list' }, exampleNode(note.example, null, say(0))));
   }
-  out.push(...pairNodes(note));
+  out.push(...pairNodes(note, canSay));
   if (note.exception) out.push(h('p', { class: 'note-rule quiet' }, withJa(t(note.exception))));
   if (note.fallback) out.push(h('p', { class: 'quiet' }, ui('noteFallback')));
   return out;

@@ -12,7 +12,7 @@
        client opens no websocket, so no wss); tests/sync-account.test.mjs fails when the two
        disagree. frame-ancestors, report-uri and sandbox are ignored in a meta tag, so they are
        left out. -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-na6phygP/tfoCIp4oBeQgGJJpQsZob/udrLum+20QTI=' https://gc.zgo.at https://static.cloudflareinsights.com https://clerk.neorgon.com https://challenges.cloudflare.com https://esm.sh/convex@1.46.0/; style-src 'self' 'unsafe-inline' https://cdn.neorgon.org/v1.0.0/; img-src 'self' data: https://neorgon.goatcounter.com https://img.clerk.com; font-src 'self'; connect-src 'self' https://neorgon.goatcounter.com https://cloudflareinsights.com https://clerk.neorgon.com https://wandering-ox-429.convex.cloud; manifest-src 'self'; frame-src https://challenges.cloudflare.com; worker-src blob:; object-src 'none'; base-uri 'none'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-na6phygP/tfoCIp4oBeQgGJJpQsZob/udrLum+20QTI=' https://gc.zgo.at https://static.cloudflareinsights.com https://clerk.neorgon.com https://challenges.cloudflare.com https://esm.sh/convex@1.46.0/; style-src 'self' 'unsafe-inline' https://cdn.neorgon.org/v1.0.0/; img-src 'self' data: https://neorgon.goatcounter.com https://img.clerk.com; font-src 'self'; media-src 'self'; connect-src 'self' https://neorgon.goatcounter.com https://cloudflareinsights.com https://clerk.neorgon.com https://wandering-ox-429.convex.cloud; manifest-src 'self'; frame-src https://challenges.cloudflare.com; worker-src blob:; object-src 'none'; base-uri 'none'; form-action 'self'">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="icon" type="image/x-icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
@@ -257,6 +257,20 @@
                 <span class="seg-label" id="seg-gaps" data-ui="gaps">Gaps</span>
                 <button class="seg-btn" type="button" data-act="set" data-pref="gaps" data-value="off" aria-pressed="true" data-ui="off">Off</button>
                 <button class="seg-btn" type="button" data-act="set" data-pref="gaps" data-value="on" aria-pressed="false" data-ui="on">On</button>
+              </div>
+              <!-- Voice (js/audio.js, docs/AUDIO.md): which recording says Yomu's own
+                   text, the notes and the phrase library; the learner's text is said
+                   by this device's voice whatever is chosen. A select, as Kanji is:
+                   five buttons did not fit a 320px phone. Kept in this browser only. -->
+              <div class="seg" role="group" aria-labelledby="seg-voice">
+                <label class="seg-label" id="seg-voice" for="voice-choice" data-ui="voice">Voice</label>
+                <select class="kanji-select" id="voice-choice">
+                  <option value="clear" data-ui="voiceClear">Clear</option>
+                  <option value="calm" data-ui="voiceCalm">Calm</option>
+                  <option value="bright" data-ui="voiceBright">Bright, anime style</option>
+                  <option value="male" data-ui="voiceMale">Male</option>
+                  <option value="device" data-ui="voiceDevice">This device's voice</option>
+                </select>
               </div>
             </div>
             <p class="tools-note" id="speech-note" hidden></p>
@@ -560,6 +574,7 @@
       <p><strong>Tatoeba.</strong> The example sentences and their English translations are from the Tatoeba Project, written by its volunteers, and each one links to its own page there. Word frequency bands are also counted over its Japanese sentences, and the spelling shown for a name written in katakana is the one their English translations use most. All used under the <a href="https://creativecommons.org/licenses/by/2.0/fr/" target="_blank" rel="noopener noreferrer">Creative Commons Attribution 2.0 France</a> licence. <a href="https://tatoeba.org/en/downloads" target="_blank" rel="noopener noreferrer">tatoeba.org</a></p>
       <p><strong>JLPT lists.</strong> The kanji by JLPT level, N5 to N1, are Jonathan Waller's lists from his JLPT Resources site, tanos.co.uk, used under the Creative Commons Attribution licence his site states (<a href="https://web.archive.org/web/20230130032341/http://www.tanos.co.uk/jlpt/sharing/" target="_blank" rel="noopener noreferrer">his terms</a>, archived; the site is gone). Only which kanji each level holds is taken. They are unofficial: the JLPT has published no kanji lists since 2010.</p>
       <p><strong>Klee One.</strong> The handwritten form on the kanji page and the kana chart is Klee One, Copyright 2020 The Klee Project Authors (<a href="https://github.com/fontworks-fonts/Klee" target="_blank" rel="noopener noreferrer">Fontworks</a>), used under the <a href="https://openfontlicense.org" target="_blank" rel="noopener noreferrer">SIL Open Font License 1.1</a>. Yomu serves a subset of it, with the licence, from its own fonts/klee/, so choosing it sends nothing anywhere.</p>
+      <p><strong>Recorded voices.</strong> The recorded voices are Yomu's own text said by voices from the <a href="https://elevenlabs.io/voice-library" target="_blank" rel="noopener noreferrer">ElevenLabs Voice Library</a> (Konoha, Yuki, Kuon and Hiroki), made with ElevenLabs text to speech: the sound notes' examples and pairs, every beat, the phrase library and the notes' example sentences. Each recording was checked by transcription against the reading Yomu shows. Yomu serves them from its own data/audio/, so playing one sends nothing anywhere; your own text is said by your device's voice.</p>
       <p><strong>Written here.</strong> The notes on sounds and grammar, the phrase library and the dialogues, and Play's hints, example words, look-alike rules and the lines with katakana compounds were written for Yomu and are in the public domain. Where the words of a line part, in the Gaps view and in Where are the spaces?, is Yomu's own reading of it over JMdict and JMnedict. Which kanji look alike is chosen from KanjiVG's parts and KANJIDIC's stroke counts.</p>
       <p><strong>Your text.</strong> What you paste is read in this browser. It is kept in this browser's local storage so a reload does not lose it, and Clear forgets it. It is never put in the address bar or sent anywhere, unless you click DeepL, Google Translate or Jisho, which open that site in a new tab with the text or the word.</p>
       <p><strong>My kanji.</strong> The kanji you save, their review dates, how many texts you met each kanji in, what kind of text each was last met in, and up to eight dictionary words per kanji are kept in this browser's local storage too, and so are the words you save from the Word panel, each with its reading, its first meaning and its review dates. The text itself is not. Export writes them to a file on your device.</p>

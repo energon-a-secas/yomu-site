@@ -94,3 +94,17 @@ export function attrSel(name, value) {
 export function touchOnly() {
   return typeof matchMedia === 'function' && matchMedia('(hover: none)').matches;
 }
+
+const SVG_NS = 'http://www.w3.org/2000/svg';
+
+/** The speaker on every button that says something aloud. */
+export function speakerIcon(cls = 'kp-icon') {
+  const icon = document.createElementNS(SVG_NS, 'svg');
+  for (const [k, v] of Object.entries({ class: cls, viewBox: '0 0 24 24', 'aria-hidden': 'true', focusable: 'false' })) icon.setAttribute(k, v);
+  for (const d of ['M11 5 6 9H3v6h3l5 4V5z', 'M15.5 8.5a5 5 0 0 1 0 7']) {
+    const path = document.createElementNS(SVG_NS, 'path');
+    path.setAttribute('d', d);
+    icon.append(path);
+  }
+  return icon;
+}

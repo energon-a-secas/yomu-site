@@ -5,7 +5,7 @@
 
 import { state } from './state.js';
 import { $ } from './utils.js';
-import { showPhrases } from './events.js';
+import { showPhrases } from './events-say.js';
 import { openKanaChart } from './events-search.js';
 
 export const KANA_ROWS_ACTIONS = {
