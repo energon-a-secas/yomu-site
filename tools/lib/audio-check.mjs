@@ -57,6 +57,20 @@ export function unheld(hira) {
   return out.join('');
 }
 
+// The long-vowel bar as the kana that spells the same sound: ちゅー is ちゅう,
+// せー is せい, らー is らあ. A transcript writes チュー for ちゅう.
+const BAR_AS = Object.freeze({ a: 'あ', i: 'い', u: 'う', e: 'い', o: 'う' });
+
+/** Kana with each bar written as its vowel, so ちゅー and ちゅう compare equal. */
+export function barless(hira) {
+  const out = [];
+  for (const b of beats(hira)) {
+    const v = b === 'ー' && out.length ? vowelOf(out[out.length - 1]) : null;
+    out.push(v ? BAR_AS[v] : b);
+  }
+  return out.join('');
+}
+
 /** Said romaji folded for comparison: letters and the apostrophe only. */
 export function foldSaid(s) {
   return String(s || '').toLowerCase().replace(/[^a-z']/g, '');
@@ -65,12 +79,24 @@ export function foldSaid(s) {
 export function makeCheck(dict) {
   const read = (text) => analyze(text, { dict });
 
-  /** What a line must sound like: { said, reading } or, for a lone beat, { kana }. */
+  /**
+   * What a line must sound like: { said, reading, times } or, for a lone
+   * beat, { kana }. A word of two beats or fewer (おば, さん) is heard from
+   * its clip played three times, as a beat is, so it must come back three
+   * times over or once.
+   */
   async function expected(line) {
     if (line.kind === 'kana') return { kana: line.kana };
     const kanaOnly = line.kana || (/\p{Script=Han}/u.test(line.ja) ? '' : line.ja);
-    const analysis = await read(line.ja);
-    return { said: line.said || saidOf(analysis), reading: kanaOnly ? toHira(audioKey(kanaOnly)) : readingOf(analysis) };
+    // A word is said as its own reading: 中 read ちゅう is chuu, though the
+    // analyzer reads a bare 中 as naka (a right clip failed that way).
+    const isWord = (line.kind === 'word' || line.kind === 'common') && line.kana;
+    const analysis = await read(isWord ? line.kana : line.ja);
+    return {
+      said: line.said || saidOf(analysis),
+      reading: kanaOnly ? toHira(audioKey(kanaOnly)) : readingOf(analysis),
+      times: line.triple ? 3 : 1,
+    };
   }
 
   /**
@@ -80,12 +106,13 @@ export function makeCheck(dict) {
    * failed. A word sent in kanji has one reading in its own entry
    * (build-audio.mjs sendText), so no wrong reading can pass this way.
    */
-  async function couldRead(text, reading) {
+  async function couldRead(text, wanted) {
+    const reading = barless(wanted);
     let at = new Set([0]);
     for (const t of spoken(await read(text))) {
-      const options = new Set([toHira(t.reading || t.surface)]);
+      const options = new Set([barless(toHira(t.reading || t.surface))]);
       if (!(t.chain && t.chain.length)) {
-        for (const rec of dict.get(t.surface) || []) for (const r of rec.r || [t.surface]) options.add(toHira(r));
+        for (const rec of dict.get(t.surface) || []) for (const r of rec.r || [t.surface]) options.add(barless(toHira(r)));
       }
       const next = new Set();
       for (const p of at) for (const o of options) if (o && reading.startsWith(o, p)) next.add(p + o.length);
@@ -113,9 +140,12 @@ export function makeCheck(dict) {
       return { ok: false, got };
     }
     const got = saidOf(await read(text));
-    if (foldSaid(got) === foldSaid(want.said)) return { ok: true, got };
-    const ok = !!want.reading && await couldRead(text, want.reading);
-    return { ok, got: ok ? `${got} (read as ${want.reading})` : got };
+    const said = foldSaid(want.said);
+    const g = foldSaid(got);
+    if (g === said || (want.times === 3 && g === said.repeat(3))) return { ok: true, got };
+    const readings = want.reading ? [want.reading, ...(want.times === 3 ? [want.reading.repeat(3)] : [])] : [];
+    for (const r of readings) if (await couldRead(text, r)) return { ok: true, got: `${got} (read as ${want.reading})` };
+    return { ok: false, got };
   }
 
   return { expected, verdict };

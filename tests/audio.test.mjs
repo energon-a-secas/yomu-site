@@ -10,14 +10,24 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
-import { audioKey, clipId, normalizeAudio, clipFor, useAudio } from '../js/audio.js';
-import { audioScript, beatInventory } from '../tools/lib/audio-script.mjs';
-import { makeCheck, unheld, foldSaid } from '../tools/lib/audio-check.mjs';
+import {
+  audioKey, wordKey, clipId, keysOf, normalizeAudio, addShard, shardsFor, clipByKeys, clipInVoice, useAudio,
+} from '../js/audio.js';
+import { audioScript, beatInventory, wordLines } from '../tools/lib/audio-script.mjs';
+import { makeCheck, unheld, foldSaid, barless } from '../tools/lib/audio-check.mjs';
 import { SOUND_NOTES } from '../js/notes-sounds.js';
 import { toKata } from '../js/kana.js';
 import { dict } from './helpers/disk.mjs';
 
 const library = JSON.parse(readFileSync(new URL('../data/phrases/library.json', import.meta.url), 'utf8'));
+
+const VOICES3 = [
+  { id: 'clear', label: { en: 'Clear', es: 'Clara' } },
+  { id: 'calm', label: { en: 'Calm', es: 'Serena' } },
+  { id: 'male', label: { en: 'Male', es: 'Masculina' } },
+];
+const index = (shards) => ({ format: 'yomu-audio/2', voices: VOICES3, shards });
+const shard = (clips) => ({ format: 'yomu-audio-clips/1', clips });
 
 test('a text and its kana, spaced or punctuated any way, share one key', () => {
   assert.equal(audioKey('わたしは がくせいです。'), audioKey('わたしは、がくせいです'));
@@ -29,22 +39,33 @@ test('a text and its kana, spaced or punctuated any way, share one key', () => {
   assert.equal(clipId(audioKey('おばあさん')), clipId(audioKey('オバアサン')));
 });
 
-test('a clip is found for its voice, never for a voice that failed it', () => {
-  const id = clipId(audioKey('きって'));
-  const audio = normalizeAudio({
-    format: 'yomu-audio/1',
-    voices: [{ id: 'clear', label: { en: 'Clear', es: 'Clara' } }, { id: 'male', label: { en: 'Male', es: 'Masculina' } }],
-    clips: { [audioKey('きって')]: id },
-    missing: { clear: [], male: [id] },
-    slow: { clear: [id], male: [] },
-  });
-  assert.match(clipFor(audio, 'キッテ', 'clear').url, new RegExp(`data/audio/clear/${id}\\.mp3$`));
-  assert.equal(clipFor(audio, 'きって', 'male'), null, 'listed missing for male');
-  assert.equal(clipFor(audio, 'きって', 'bright'), null, 'a voice the index does not have');
-  assert.equal(clipFor(audio, 'きて', 'clear'), null, 'a text with no clip');
-  const slow = clipFor(audio, 'きって', 'clear', { slow: true });
-  assert.ok(slow.slow && slow.url.endsWith(`${id}.slow.mp3`));
-  assert.throws(() => normalizeAudio({ format: 'yomu-audio/0' }));
+test('a word is filed under its spelling and reading, so homophones never share a clip', () => {
+  assert.equal(wordKey('雨', 'あめ'), '雨|あめ');
+  assert.notEqual(wordKey('雨', 'あめ'), wordKey('飴', 'あめ'));
+  assert.notEqual(wordKey('方', 'かた'), wordKey('方', 'ほう'), 'one spelling, two words');
+  assert.equal(wordKey('おば', 'おば'), audioKey('おば'), 'a word in kana is its kana');
+  assert.equal(wordKey('ラーメン', 'らーめん'), audioKey('ラーメン'));
+  assert.deepEqual(keysOf('あめ', [wordKey('雨', 'あめ')]), ['雨|あめ', 'あめ'], 'the word first, then the text');
+});
+
+test('a clip is found in its shard, for a voice whose bit is set', () => {
+  const audio = normalizeAudio(index([{ first: '', src: 'data/audio/k00.json' }, { first: 'つ', src: 'data/audio/k01.json' }]));
+  assert.deepEqual(shardsFor(audio, ['きって', 'はし']), [0, 1], 'each key in the shard its range holds');
+  addShard(audio, 0, shard({ [audioKey('きって')]: ['k1', 0b011] }));
+  assert.deepEqual(shardsFor(audio, ['きって']), [], 'a loaded shard is not asked for again');
+  assert.equal(clipInVoice(audio, ['きって'], 'calm').path, 'data/audio/calm/k1.mp3');
+  assert.equal(clipInVoice(audio, ['きって'], 'male'), null, 'male failed it');
+  assert.equal(clipByKeys(audio, ['きって'], 'male').voice, 'clear', 'and borrows the first voice\'s');
+  assert.equal(clipByKeys(audio, ['きて'], 'clear'), null, 'a text with no clip');
+  assert.throws(() => normalizeAudio({ format: 'yomu-audio/1' }));
+  assert.throws(() => addShard(audio, 1, { format: 'nope' }));
+});
+
+test('an exact word in the first voice beats its bare kana in the chosen one', () => {
+  const audio = normalizeAudio(index([{ first: '', src: 'k' }]));
+  addShard(audio, 0, shard({ '雨|あめ': ['rain', 0b001], 'あめ': ['ame', 0b010] }));
+  assert.equal(clipByKeys(audio, keysOf('あめ', ['雨|あめ']), 'calm').id, 'rain');
+  assert.equal(clipByKeys(audio, keysOf('あめ'), 'calm').id, 'ame');
 });
 
 test('the script records every sound example, both sides of every pair, and every beat', () => {
@@ -61,12 +82,24 @@ test('the script records every sound example, both sides of every pair, and ever
   // A lone beat goes out in katakana, which a voice never reads as a particle.
   const ha = script.find((l) => l.kind === 'kana' && l.kana === 'は');
   assert.equal(ha.tts, toKata('は'));
-  // An example in kanji is sent as its reading, and filed under that too.
+  // An example in kanji is sent as its reading, and filed under that too,
+  // and under its word key, since it is one word.
   const kyou = script.find((l) => l.ja === '今日');
   assert.equal(kyou.tts, 'きょう');
-  assert.ok(kyou.keys.includes(audioKey('きょう')));
+  assert.ok(kyou.keys.includes(audioKey('きょう')) && kyou.keys.includes(wordKey('今日', 'きょう')));
   // Sounds come first, so a budget that runs out has made them.
   assert.equal(script[0].kind, 'sound');
+});
+
+test('the words of Yomu\'s own text are recorded, the おば and さん of おばさん among them', async () => {
+  const words = await wordLines([{ kind: 'sound', ja: 'おばさん' }, { kind: 'phrase', ja: '雨が降っています。' }, { kind: 'phrase', ja: '今日は寒い。' }], dict());
+  const keys = words.map((w) => w.key);
+  assert.ok(keys.includes('おば') && keys.includes('さん'), keys.join(' '));
+  assert.ok(keys.includes(wordKey('雨', 'あめ')));
+  assert.ok(!keys.includes('が') && !keys.includes('は'), 'one kana is a beat already');
+  assert.equal(words.find((w) => w.key === wordKey('雨', 'あめ')).tts, '雨', 'one reading: sent in kanji');
+  assert.equal(words.find((w) => w.key === wordKey('今日', 'きょう')).tts, 'きょう', 'two readings: sent as Yomu reads it');
+  assert.equal(words.find((w) => w.key === 'さん').triple, true, 'two beats: checked from a triple take');
 });
 
 test('the check fails a clip that says another word, and passes the right one', async () => {
@@ -94,10 +127,28 @@ test('the check fails a clip that says another word, and passes the right one', 
   assert.equal((await check.verdict(grandmother, '叔母さん')).ok, false, 'no reading of 叔母さん is obaasan');
 });
 
+test('a short word is heard three times over, and another word still fails', async () => {
+  const check = makeCheck(dict());
+  const san = await check.expected({ kind: 'word', ja: 'さん', kana: 'さん', said: 'san', triple: true });
+  assert.equal((await check.verdict(san, 'さん、さん、さん。')).ok, true);
+  assert.equal((await check.verdict(san, '三、三、三。')).ok, true, 'written as the number, read san');
+  assert.equal((await check.verdict(san, 'さあ、さあ、さあ。')).ok, false);
+  // A word is checked as its own reading, never the bare kanji's: 中 read
+  // ちゅう came back チュー and once failed for naka.
+  const chuu = await check.expected({ kind: 'common', ja: '中', kana: 'ちゅう', triple: true });
+  assert.equal((await check.verdict(chuu, 'チュー、チュー、チュー。')).ok, true);
+  assert.equal((await check.verdict(chuu, 'なか、なか、なか。')).ok, false, 'naka is another reading');
+  const oba = await check.expected({ kind: 'word', ja: 'おば', kana: 'おば', said: 'oba', triple: true });
+  assert.equal((await check.verdict(oba, 'おば、おば、おば')).ok, true);
+  assert.equal((await check.verdict(oba, 'おばあ、おばあ、おばあ')).ok, false, 'a long vowel is another word');
+});
+
 test('a lone beat passes held, and fails as another sound', async () => {
   const check = makeCheck(dict());
   const beat = async (kana, heard) => (await check.verdict({ kana }, heard)).ok;
   assert.equal(unheld('こうこうこう'), 'こここ');
+  assert.equal(barless('ちゅー'), 'ちゅう');
+  assert.equal(barless('らーめん'), 'らあめん');
   assert.equal(await beat('す', 'すーすーすー'), true);
   assert.equal(await beat('す', 'そう、そう、そう。'), false, 'so is not su');
   assert.equal(await beat('こ', 'こう、こう、こう。'), true);
@@ -126,40 +177,41 @@ class FakeAudio {
   static played = [];
   constructor() { this.src = ''; this.onended = null; this.onerror = null; }
   play() {
-    if (!this.src.startsWith('data:')) FakeAudio.played.push({ src: this.src, rate: this.playbackRate, pitch: this.preservesPitch });
+    if (!this.src.includes('silence.mp3')) FakeAudio.played.push({ src: this.src, rate: this.playbackRate, pitch: this.preservesPitch });
     queueMicrotask(() => { if (this.onended) this.onended(); });
     return Promise.resolve();
   }
   pause() {}
 }
+const played = () => FakeAudio.played.map((p) => p.src.split('/audio/')[1]);
 
-test('speak() plays the chosen voice\'s clip, and the device says what has none', async () => {
+test('speak() plays the chosen voice\'s clip, a word\'s own, and the device says what has none', async () => {
   globalThis.Audio = FakeAudio;
   const speech = await import('../js/speech.js');
-  const id = clipId(audioKey('おばあさん'));
-  useAudio({
-    format: 'yomu-audio/1',
-    voices: [{ id: 'clear', label: { en: 'Clear', es: 'Clara' } }, { id: 'male', label: { en: 'Male', es: 'Masculina' } }],
-    clips: { [audioKey('おばあさん')]: id, [audioKey('お')]: 'o1', [audioKey('ば')]: 'ba1' },
-    missing: { clear: [], male: [] },
-    slow: { clear: [id], male: [] },
-  });
+  useAudio(index([{ first: '', src: 'data/audio/k00.json' }]), [shard({
+    [audioKey('おばあさん')]: ['obaa', 0b111],
+    [audioKey('お')]: ['o1', 0b111],
+    [audioKey('ば')]: ['ba1', 0b001],
+    '雨|あめ': ['rain', 0b111],
+    '飴|あめ': ['candy', 0b111],
+    [audioKey('こんにちは')]: ['hello', 0b111],
+    [audioKey('はい、どうぞ。')]: ['please', 0b111],
+  })]);
   speech.setVoice('clear');
   FakeAudio.played = [];
   assert.equal(await speech.speak('オバアサン'), true);
-  assert.equal(FakeAudio.played.length, 1);
-  assert.ok(FakeAudio.played[0].src.endsWith(`/clear/${id}.mp3`));
-  assert.equal(FakeAudio.played[0].pitch, true, 'slowed with its pitch kept');
+  assert.deepEqual(played(), ['clear/obaa.mp3']);
+  assert.equal(FakeAudio.played[0].pitch, true);
 
   FakeAudio.played = [];
   await speech.speak('おばあさん', { rate: 0.6 });
-  assert.ok(FakeAudio.played[0].src.endsWith(`${id}.slow.mp3`), 'the slow take');
-  assert.equal(FakeAudio.played[0].rate, 1, 'a slow take is not slowed again');
+  assert.equal(FakeAudio.played[0].rate, 0.6, 'Slow slows the clip, its pitch kept');
 
+  // A word plays its own clip, never its homophone's.
   FakeAudio.played = [];
-  await speech.speak('おばあさん', { rate: 0.6, speaker: 'male' });
-  assert.ok(FakeAudio.played[0].src.endsWith(`/male/${id}.mp3`), 'another speaker, no slow take');
-  assert.equal(FakeAudio.played[0].rate, 0.6);
+  await speech.speak('あめ', { lookup: [wordKey('飴', 'あめ')] });
+  await speech.speak('あめ', { lookup: [wordKey('雨', 'あめ')] });
+  assert.deepEqual(played(), ['clear/candy.mp3', 'clear/rain.mp3']);
 
   // No clip, and no device voice in node: nothing is said, and no clip plays.
   FakeAudio.played = [];
@@ -171,33 +223,34 @@ test('speak() plays the chosen voice\'s clip, and the device says what has none'
   assert.equal(FakeAudio.played.length, 0);
   assert.equal(speech.otherVoice(), speech.DEVICE_VOICE);
 
-  // A sequence is one voice: one step with no clip and none of them play.
-  speech.setVoice('clear');
-  FakeAudio.played = [];
-  await speech.speakSteps([{ text: 'お' }, { text: 'ば' }]);
-  assert.equal(FakeAudio.played.length, 2);
-  FakeAudio.played = [];
-  await speech.speakSteps([{ text: 'お' }, { text: 'ば' }, { text: 'さ' }]);
-  assert.equal(FakeAudio.played.length, 0, 'さ has no clip, so the device says all three');
-
-  // A voice that failed a clip borrows the first voice's: a text, and a
-  // whole sequence, never a sequence of two voices.
-  useAudio({
-    format: 'yomu-audio/1',
-    voices: [{ id: 'clear', label: { en: 'Clear', es: 'Clara' } }, { id: 'calm', label: { en: 'Calm', es: 'Serena' } }],
-    clips: { [audioKey('お')]: 'o1', [audioKey('ば')]: 'ba1' },
-    missing: { clear: [], calm: ['ba1'] },
-  });
+  // A voice that failed a clip borrows the first voice's: a text, and a whole
+  // sequence, never a sequence of two voices.
   speech.setVoice('calm');
   FakeAudio.played = [];
   await speech.speak('ば');
-  assert.ok(FakeAudio.played[0].src.endsWith('/clear/ba1.mp3'));
+  assert.deepEqual(played(), ['clear/ba1.mp3']);
   FakeAudio.played = [];
   await speech.speakSteps([{ text: 'お' }, { text: 'ば' }]);
-  assert.deepEqual(FakeAudio.played.map((p) => p.src.split('/audio/')[1]), ['clear/o1.mp3', 'clear/ba1.mp3']);
+  assert.deepEqual(played(), ['clear/o1.mp3', 'clear/ba1.mp3']);
   FakeAudio.played = [];
   await speech.speakSteps([{ text: 'お' }]);
-  assert.deepEqual(FakeAudio.played.map((p) => p.src.split('/audio/')[1]), ['calm/o1.mp3'], 'the chosen voice when it has them all');
+  assert.deepEqual(played(), ['calm/o1.mp3'], 'the chosen voice when it has them all');
+  FakeAudio.played = [];
+  await speech.speakSteps([{ text: 'お' }, { text: 'さ' }]);
+  assert.equal(FakeAudio.played.length, 0, 'さ has no clip, so the device says both');
+  // Sound it out's last step is the word, found by its own key.
+  FakeAudio.played = [];
+  await speech.speakSteps(speech.beatSteps(['あ', 'め'], 'あめ', [wordKey('雨', 'あめ')]).slice(-1));
+  assert.deepEqual(played(), ['calm/rain.mp3']);
+
+  // A text of several lines plays its lines' clips in order, or none.
+  FakeAudio.played = [];
+  await speech.speakText('こんにちは\nはい、どうぞ。');
+  assert.deepEqual(played(), ['calm/hello.mp3', 'calm/please.mp3']);
+  FakeAudio.played = [];
+  await speech.speakText('こんにちは\nきょうは');
+  assert.equal(FakeAudio.played.length, 0, 'one line has no clip: the device reads it all');
+
   assert.equal(speech.otherVoice(), 'male');
   speech.setVoice('male');
   assert.equal(speech.otherVoice(), 'clear');

@@ -114,11 +114,11 @@ function say(b) {
  * a press is seen as well as heard.
  */
 async function sayItem(b) {
-  const text = kp.sounds[Number(b.dataset.ix)];
-  if (!text || !canSpeak() || b.getAttribute('aria-disabled') === 'true') return;
+  const item = kp.sounds[Number(b.dataset.ix)];
+  if (!item || !canSpeak() || b.getAttribute('aria-disabled') === 'true') return;
   for (const el of document.querySelectorAll('#kanji-dialog .is-saying')) el.classList.remove('is-saying');
   b.classList.add('is-saying');
-  await speak(text, { rate: rate(state) });
+  await speak(item.text, { rate: rate(state), lookup: item.lookup });
   b.classList.remove('is-saying');
 }
 

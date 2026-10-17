@@ -13,6 +13,7 @@
 // for the same reason.
 
 import { h, speakerIcon } from './utils.js';
+import { wordKey } from './audio.js';
 import { ui } from './strings.js';
 import { seenText, wordRuby, withKanji } from './render-save.js';
 import { meaningText } from './render-mykanji.js';
@@ -160,7 +161,7 @@ function wordsPart(titleKey, words, wordsKept, sounds, speakable) {
     words.length
       ? h('ul', { class: 'kp-words', role: 'list' }, words.map((w) => {
         const ix = wordsKept.push(w.written) - 1;
-        const say = sounds.push(toHira(w.reading)) - 1;
+        const say = sounds.push({ text: toHira(w.reading), lookup: [wordKey(w.written, w.reading)] }) - 1;
         return h('li', { class: 'kp-word' }, [
           h('span', { class: 'kp-word-text' }, [
             wordRuby([w.written, w.reading]),
@@ -235,7 +236,7 @@ function readingShown(r) {
 function readingsPart(info, sounds, speakable) {
   const group = (label, items) => (Array.isArray(items) && items.length ? h('div', { class: 'kp-readgroup' }, [
     h('span', { class: 'kp-readlabel' }, label),
-    h('span', { class: 'kp-readings' }, items.map((r) => sayButton('kp-reading', sounds.push(readingKana(r)) - 1, speakable, [
+    h('span', { class: 'kp-readings' }, items.map((r) => sayButton('kp-reading', sounds.push({ text: readingKana(r) }) - 1, speakable, [
       h('span', { class: 'sr-only' }, `${ui('kpSay')}: `),
       h('span', { class: 'kp-reading-kana', lang: 'ja' }, readingShown(r)),
       ...readingRomajiPair(r, 'kp-reading-rom'),
@@ -316,9 +317,9 @@ function kanaPage(ch, paths, page, nodes, drawn, wordsKept, mine, sounds, speaka
  * @param {string} [p.state]        'loading' | 'failed' | 'ready'
  * @param {string[]} [p.likes]      its look-alikes, Play's
  * @param {boolean} [p.speakable]   a Japanese voice is there to say things
- * @returns {{ nodes: Node[], drawn: string[], words: string[], sounds: string[] }}
+ * @returns {{ nodes: Node[], drawn: string[], words: string[], sounds: { text: string, lookup?: string[] }[] }}
  *   `drawn` the kanji its go buttons name, `words` the words Read it sends,
- *   `sounds` the kana its say buttons say.
+ *   `sounds` what its say buttons say: the kana, and for a word its own key (audio.js wordKey).
  */
 export function kanjiPageNodes({
   ch, info, infos, paths, page, back, mine, state = 'ready', likes = [], speakable = false, jlpt = null, hand = null,

@@ -267,40 +267,70 @@ function checkLikeGroup(rel, doc) {
 // A null checker means the generic rules above are the whole check here:
 // the indexes are checked against their shards below, and the phrase library
 // is authored by hand and has its own test (tests/library.test.mjs).
-// The recorded voices (tools/build-audio.mjs): every clip the index promises
-// is a file, and every file is one the index promises. A clip a voice failed
-// its check for is listed as missing and must not be there, so the page never
-// plays a recording that did not say what Yomu shows.
+// The recorded voices (tools/build-audio.mjs, docs/AUDIO.md): the index names
+// its voices and key shards; every shard holds keys of its own range only;
+// every clip a voice's bit promises is a file, and every file is one some
+// bit promises. A clip a voice failed its check for has no bit, so it must
+// not be on disk, and the page can never play a recording that did not say
+// what Yomu shows.
 const CLIP_ID = /^[0-9a-z]+$/;
-function checkAudio(rel, doc) {
-  const dir = path.join(DATA, 'audio');
-  const ids = new Set(Object.values(doc.clips || {}));
-  for (const [key, id] of Object.entries(doc.clips || {})) {
-    if (!key || !CLIP_ID.test(id)) fail(rel, `clip ${JSON.stringify(key)} has a bad id ${JSON.stringify(id)}`);
-  }
+const AUDIO_SHARD = /^data\/audio\/k\d{2}\.json$/;
+function checkAudioIndex(rel, doc) {
   const voices = Array.isArray(doc.voices) ? doc.voices : [];
   if (!voices.length) fail(rel, 'no voices');
+  if (voices.length > 30) fail(rel, `${voices.length} voices, more than a mask holds`);
   for (const v of voices) {
-    if (!/^[a-z]+$/.test(v.id || '') || !v.label || !v.label.en || !v.label.es) { fail(rel, `voice ${JSON.stringify(v.id)} needs an id and an en and es label`); continue; }
-    const missing = new Set((doc.missing && doc.missing[v.id]) || []);
-    const slow = new Set((doc.slow && doc.slow[v.id]) || []);
-    const want = new Set();
-    for (const id of ids) {
-      if (!missing.has(id)) want.add(`${id}.mp3`);
-      if (slow.has(id)) {
-        if (missing.has(id)) fail(rel, `${v.id}: ${id} has a slow take but no clip`);
-        want.add(`${id}.slow.mp3`);
-      }
+    if (!/^[a-z]+$/.test(v.id || '') || !v.label || !v.label.en || !v.label.es) fail(rel, `voice ${JSON.stringify(v.id)} needs an id and an en and es label`);
+  }
+  const shards = Array.isArray(doc.shards) ? doc.shards : [];
+  if (!shards.length) fail(rel, 'no shards');
+  shards.forEach((sh, n) => {
+    if (!sh || typeof sh.first !== 'string' || !AUDIO_SHARD.test(sh.src || '')) fail(rel, `shards[${n}] needs a first key and a data/audio/kNN.json src`);
+    else if (n && !(shards[n - 1].first < sh.first)) fail(rel, `shards[${n}] starts at or before the shard before it`);
+  });
+}
+function checkAudioShard(rel, doc) {
+  for (const [key, entry] of Object.entries(doc.clips || {})) {
+    if (!key || !Array.isArray(entry) || entry.length !== 2 || !CLIP_ID.test(entry[0]) || !Number.isInteger(entry[1]) || entry[1] <= 0) {
+      fail(rel, `clip ${JSON.stringify(key)} is not [id, mask]`);
     }
+  }
+}
+function checkAudio(docs) {
+  const rel = 'data/audio/index.json';
+  const index = docs.get(rel);
+  const dir = path.join(DATA, 'audio');
+  if (!index) {
+    if (fs.existsSync(dir) && fs.readdirSync(dir).some((f) => f.endsWith('.json'))) fail(rel, 'missing, but data/audio/ has shards');
+    return;
+  }
+  const voices = index.voices || [];
+  const want = voices.map(() => new Set());
+  const shards = index.shards || [];
+  shards.forEach((sh, n) => {
+    const doc = docs.get(sh.src);
+    if (!doc) { fail(rel, `${sh.src} is listed but missing`); return; }
+    const next = shards[n + 1] && shards[n + 1].first;
+    for (const [key, [id, mask]] of Object.entries(doc.clips || {})) {
+      if (key < sh.first || (next !== undefined && key >= next)) fail(sh.src, `${JSON.stringify(key)} is outside its range`);
+      if (mask >> voices.length) fail(sh.src, `${JSON.stringify(key)} names a voice the index has not`);
+      voices.forEach((v, i) => { if (mask & (1 << i)) want[i].add(`${id}.mp3`); });
+    }
+  });
+  const listed = new Set(shards.map((sh) => sh.src));
+  for (const f of fs.readdirSync(dir)) {
+    if (/^k\d+\.json$/.test(f) && !listed.has(`data/audio/${f}`)) fail(`data/audio/${f}`, 'a shard the index does not list');
+  }
+  voices.forEach((v, i) => {
     const vdir = path.join(dir, v.id);
     const have = new Set(fs.existsSync(vdir) ? fs.readdirSync(vdir).filter((f) => f.endsWith('.mp3')) : []);
-    for (const f of want) {
-      if (!have.has(f)) { fail(rel, `${v.id}/${f} is in the index but not on disk`); continue; }
+    for (const f of want[i]) {
+      if (!have.has(f)) { fail(rel, `${v.id}/${f} is promised but not on disk`); continue; }
       const size = fs.statSync(path.join(vdir, f)).size;
       if (size > MAX_BYTES) fail(`data/audio/${v.id}/${f}`, `${fmtBytes(size)} is over the ${fmtBytes(MAX_BYTES)} cap`);
     }
-    for (const f of have) if (!want.has(f)) fail(`data/audio/${v.id}/${f}`, 'on disk but not in the index (a clip that failed its check, or one no line needs)');
-  }
+    for (const f of have) if (!want[i].has(f)) fail(`data/audio/${v.id}/${f}`, 'on disk but no shard promises it (a clip that failed its check, or one no line needs)');
+  });
 }
 
 const FORMATS = {
@@ -318,7 +348,8 @@ const FORMATS = {
   'yomu-kanji-index/2': null,
   'yomu-kanji/1': checkKanjiShard,
   'yomu-library/1': null,
-  'yomu-audio/1': checkAudio,
+  'yomu-audio/2': checkAudioIndex,
+  'yomu-audio-clips/1': checkAudioShard,
   [JOYO_FORMAT]: checkJoyoDoc,
   [JINMEIYO_FORMAT]: null,
   [JLPT_FORMAT]: (rel, doc) => { for (const p of jlptProblems(doc)) fail(rel, p); },
@@ -927,6 +958,7 @@ function main() {
   checkLikeIndex(docs);
   checkLookalikes(docs);
   checkSpaces(docs);
+  checkAudio(docs);
 
   if (failures.length) {
     for (const f of failures.slice(0, 50)) process.stderr.write(`FAIL ${f}\n`);

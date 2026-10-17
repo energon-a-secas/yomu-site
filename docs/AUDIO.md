@@ -18,6 +18,26 @@ list:
    ぢ and づ play じ and ず, and を plays お, which is how each is said.
 3. **phrase**: the phrase library and every dialogue line.
 4. **note**: the grammar notes' examples and the loanword notes' examples.
+5. **word**: every word of the lines above (`wordLines`), so a word chosen
+   in a phrase or an example plays its own recording: the おば and さん that
+   Yomu reads おばさん as were said by the device until 2026-10-17, which the
+   owner heard as "computer like". A word of one kana is a beat already.
+6. **common**: the dictionary's most common words by Tatoeba band
+   (`commonLines`, the record's `q`): band 1 (858 words) in every voice,
+   band 2 (1,967) in Clear alone (`COMMON_BANDS`), whose clip another voice
+   borrows. Every voice through band 2 would add about 26 MB (some 1,900
+   clips in each of three more voices, at the 4.6 KB a common clip measures)
+   to the 42.3 MB all of `data/audio/` holds. Band 3 (5,293 more) is the next
+   step.
+
+A word is filed under its spelling and reading (`audio.js wordKey`: 雨|あめ),
+never under its reading alone, so a homophone never plays another word's
+clip (飴|あめ is candy), and a spelling with two readings has two clips (方|かた,
+方|ほう). A word is sent in kanji only when the dictionary gives that spelling
+one reading across all its entries (`wordTts`); otherwise as its reading. A
+word of two beats or fewer is checked from its clip played three times, as a
+beat is, and against its own reading: 中 read ちゅう once failed because the
+check read a bare 中 as naka.
 
 The clips are made once, here, and served as files from `data/audio/`. The
 page never calls ElevenLabs: that would put the key in the browser and send
@@ -123,9 +143,10 @@ the plan's quota first and never spends below 2,000 credits left, whatever
 
 Measured on the first runs (Starter plan, 40,000 credits a month): Japanese
 costs about 0.45 credits a character on `eleven_v4`; a lone kana costs
-nothing and a two-kana beat 1 credit; transcription did not count against the
-character quota. Everything, the audition, the trials and two full runs, came
-to 9,714 credits.
+nothing and a two-kana beat 1 credit. On those runs the balance fell by what
+the `character-cost` headers said; on the word runs it fell faster (What the
+word set holds), so budget by the balance. Everything, the audition, the
+trials and two full runs, came to 9,714 credits.
 
 ## What the first set holds
 
@@ -158,12 +179,44 @@ What failed, and so plays in another voice or the device's:
 Every rejected take is in `.forge/audio-rejects/` (not in git). A person who
 listens and finds one right can ship it; that is not built yet.
 
+## What the word set holds
+
+Added 2026-10-17: the `word` and `common` kinds. With the first set, 8,157
+clips are kept and 278 failed their check; 96.0% passed on the first take.
+The mp3s come to 42.3 MB (57 MB on disk, in small files).
+
+| Kind | Clear | Calm | Bright | Male |
+|---|---|---|---|---|
+| word (336 a voice) | 334 | 335 | 335 | 333 |
+| common (2,825 in Clear, band 1's 858 in the others) | 2,752 | 836 | 831 | 815 |
+
+What failed is mostly a piece of grammar said alone (って, でし, んです,
+してい: heard as て, です or English "Stay"), a loanword heard as English
+(スプーン "Spoon"), and a short word heard as another (たよう as 太陽, 風
+ふう as はあ). A failed word borrows Clear's clip when Clear has it, or the
+device says it.
+
+Credits: the word and common runs took the month's use from 9,714 to 20,841
+of 40,000 (19,159 left until 2026-11-17), with two runs stopped to fix the
+check and one network failure resumed. The balance fell faster than the
+`character-cost` headers add up: run 5 lowered it by 9,726 while its headers
+summed to 7,011 at its last report. The headers count every take, retakes
+included, so the rest is something else the account charges.
+
 ## The page
 
-- **One seam.** `speech.js speak()` looks the text up in `data/audio/index.json`
-  (`js/audio.js`, loaded on the first speak, not at page load) and plays the
-  clip in the chosen voice, or hands the text to the device. Every caller gains
-  recordings without change.
+- **One seam.** `speech.js speak()` looks the text up and plays the clip in
+  the chosen voice, or hands the text to the device. Every caller gains
+  recordings without change; a word's callers (Say the word, Sound it out's
+  last step, a word on the kanji page) also pass its `wordKey` as `lookup`,
+  tried before the text. A particle passes none: は is said わ, and the clip
+  filed under は is the beat ha.
+- **The index is sharded.** `data/audio/index.json` (format yomu-audio/2)
+  names the voices and the key ranges of `kNN.json` shards (yomu-audio-clips/1,
+  `{ key: [id, mask] }`, bit i of the mask is voice i's). The page fetches the
+  index on the first speak and a shard when a key needs it, as the dictionary
+  does. A voice without a clip borrows the first voice's (`clipByKeys`); a
+  sequence borrows only as a whole (`clipInVoice`).
 - **A sequence is one voice.** Sound it out plays its beats as clips only when
   every beat and the whole word have one; beats in a recording and the word in
   the device's voice would be two people.
@@ -182,6 +235,14 @@ listens and finds one right can ship it; that is not built yet.
 - **A dialogue** plays line by line, speaker B in a second voice (Male, or
   Clear when Male is chosen).
 
-`tools/check-data.mjs` holds the files to the index: every clip the index
-promises is on disk, and every file on disk is one it promises, so a clip that
-failed its check can never be played.
+`tools/check-data.mjs` holds the files to the shards: every clip a voice's
+bit promises is on disk, every file on disk is one some bit promises, and
+every key sits in its own shard's range, so a clip that failed its check can
+never be played.
+
+## The iOS app
+
+Naninani (yomu-ios) bundles `data/audio/` and finds a clip through the same
+code: `bridge/entry.js` calls `audio.js clipByKeys` over the shards it reads
+with `__readFile`. Its Read all and a conversation's Listen play every line
+recorded or none (`lineClips`), as the page's `speakText` does.

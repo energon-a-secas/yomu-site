@@ -23,7 +23,9 @@
 // voice: the chosen one, else the first, else the device.
 
 import { vowelOf, toHira } from './kana.js';
-import { loadAudio, audioNow, clipFor, clipInTurn, voicesInTurn, siteUrl, SILENCE_SRC } from './audio.js';
+import {
+  needKeys, audioNow, keysOf, shardsFor, clipByKeys, clipInVoice, voicesInTurn, siteUrl, SILENCE_SRC,
+} from './audio.js';
 
 const VOICES_TIMEOUT_MS = 1500;
 const LANG = 'ja-JP';
@@ -136,15 +138,15 @@ function unlock() {
   if (p && p.catch) p.catch((err) => { if (err && err.name === 'NotAllowedError') unlocked = false; });
 }
 
-/** The clip for a text in a voice, or in the first voice when that one has none. */
-function clipIn(audio, text, speaker, rate) {
-  const clip = clipInTurn(audio, text, speaker, { slow: rate < 1 });
+/** The clip for `keys` in `speaker` (or the first voice), with its URL, or null. */
+function clipIn(audio, keys, speaker) {
+  const clip = clipByKeys(audio, keys, speaker);
   return clip && { ...clip, url: siteUrl(clip.path) };
 }
 
-/** The clip for a text, if recorded voices are on and the index has loaded and holds one. */
-function clipNow(text, rate, speaker) {
-  return recordedOn() ? clipIn(audioNow(), text, speaker, rate) : null;
+/** Whether the index has loaded with every shard `keys` need, so a lookup now is the answer. */
+function settled(audio, keys) {
+  return !!audio && shardsFor(audio, keys).length === 0;
 }
 
 /** A second voice beside the chosen one, for the other speaker in a dialogue. */
@@ -177,10 +179,10 @@ function playClip(clip, rate, onStart, refused) {
     el.onerror = () => finish(false);
     el.src = clip.url;
     // Loading a source resets playbackRate to defaultPlaybackRate, so both.
-    // A slow take is already slow; a normal one is slowed with its pitch kept.
-    const r = clip.slow ? 1 : rate;
-    el.defaultPlaybackRate = r;
-    el.playbackRate = r;
+    // Slow plays the clip slowed with its pitch kept: a slow take made by a
+    // model blurred the long vowels it exists to teach (docs/AUDIO.md).
+    el.defaultPlaybackRate = rate;
+    el.playbackRate = rate;
     el.preservesPitch = true;
     el.webkitPreservesPitch = true;
     const p = el.play();
@@ -206,15 +208,16 @@ function stopClip() {
 }
 
 /**
- * Can `text` be said now: by a clip (once the index has loaded), or by the
- * device. Before the index loads, a recorded voice answers yes for Yomu's
- * own text, which is what the buttons that ask are for.
+ * Can `text` be said now: by a clip (once its shard has loaded), or by the
+ * device. Before that, a recorded voice answers yes for Yomu's own text,
+ * which is what the buttons that ask are for.
  */
-export function canSay(text) {
+export function canSay(text, lookup = []) {
   if (canSpeak()) return true;
   if (!recordedOn()) return false;
+  const keys = keysOf(text, lookup);
   const audio = audioNow();
-  return !audio || !!clipFor(audio, text, chosen);
+  return !settled(audio, keys) || !!clipByKeys(audio, keys, chosen);
 }
 
 /**
@@ -223,26 +226,44 @@ export function canSay(text) {
  * is a normal outcome. `onStart` hears the voice begin, and `onBoundary` its
  * word boundaries (a character index into `text`) on a browser that sends
  * them: Android sends none, and others are uneven for Japanese, so read
- * along only lets them correct its estimate (read-along.js).
+ * along only lets them correct its estimate (read-along.js). `lookup` is a
+ * word's own key (audio.js wordKey: 雨|あめ), tried before the text's, so a
+ * word plays its recording and not a homophone's.
  */
-export function speak(text, { rate = 1, onStart = null, onBoundary = null, recorded = true, speaker = chosen } = {}) {
+export function speak(text, {
+  rate = 1, onStart = null, onBoundary = null, recorded = true, speaker = chosen, lookup = [],
+} = {}) {
   const words = String(text || '').trim();
   if (!words) return Promise.resolve(false);
   const device = () => sayOnDevice(words, { rate, onStart, onBoundary });
-  if (recorded && recordedOn()) {
-    const clip = clipNow(words, rate, speaker);
-    if (clip) return playClip(clip, rate, onStart, device);
-    if (!audioNow()) {
-      unlock();
-      const mine = generation;
-      return loadAudio().then((audio) => {
-        if (mine !== generation) return false;
-        const late = clipIn(audio, words, speaker, rate);
-        return late ? playClip(late, rate, onStart, device) : device();
-      });
-    }
+  if (!recorded || !recordedOn()) return device();
+  const keys = keysOf(words, lookup);
+  const audio = audioNow();
+  if (settled(audio, keys)) {
+    const clip = clipIn(audio, keys, speaker);
+    return clip ? playClip(clip, rate, onStart, device) : device();
   }
-  return device();
+  unlock();
+  const mine = generation;
+  return needKeys(keys).then((loaded) => {
+    if (mine !== generation) return false;
+    const late = loaded && clipIn(loaded, keys, speaker);
+    return late ? playClip(late, rate, onStart, device) : device();
+  });
+}
+
+/**
+ * Say a text that may be several lines (a dialogue sent to the reader): line
+ * by line from their recordings when every line has one, else as one text by
+ * the device, which reads across the line breaks.
+ */
+export async function speakText(text, { rate = 1 } = {}) {
+  const lines = String(text || '').split(/\n+/).map((l) => l.trim()).filter(Boolean);
+  if (lines.length < 2 || !recordedOn()) return speak(text, { rate });
+  unlock();
+  const audio = await needKeys(lines.flatMap((l) => keysOf(l)));
+  const all = !!audio && voicesInTurn(audio, chosen).some((v) => lines.every((l) => clipInVoice(audio, keysOf(l), v)));
+  return all ? speakSteps(lines.map((l) => ({ text: l })), { rate, gap: 450 }) : speak(text, { rate, recorded: false });
 }
 
 function sayOnDevice(words, { rate, onStart, onBoundary }) {
@@ -286,8 +307,8 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
  * Say a list of steps in order, telling the caller which one is current.
  * A step is { text } or { pause: ms } (a held beat, っ, which has no sound of
  * its own); a text step may name a `speaker`, the recorded voice that says
- * it (a dialogue's second speaker). A cancel() or a newer sequence ends this
- * one between steps.
+ * it (a dialogue's second speaker), and a `lookup`, a word's own key. A
+ * cancel() or a newer sequence ends this one between steps.
  *
  * @returns {Promise<boolean>} true when every step ran
  */
@@ -298,9 +319,11 @@ export async function speakSteps(steps, { rate = 1, onStep = () => {}, gap = 180
   // One voice for the whole sequence: beats in a recording and the word in
   // the device's voice would be two people. The chosen voice if it has every
   // step, else the first voice if that has, else the device for all.
-  const audio = recordedOn() ? audioNow() || await loadAudio() : null;
+  const keysAt = (st) => keysOf(st.text, st.lookup);
+  const texts = steps.filter((st) => !st.pause && st.text);
+  const audio = recordedOn() ? await needKeys(texts.flatMap(keysAt)) : null;
   if (mine !== generation) return false;
-  const has = (v) => steps.every((st) => st.pause || !st.text || clipFor(audio, st.text, st.speaker || v));
+  const has = (v) => texts.every((st) => clipInVoice(audio, keysAt(st), st.speaker || v));
   const voice = audio ? voicesInTurn(audio, chosen).find(has) : undefined;
   const recorded = !!voice;
   for (let i = 0; i < steps.length; i++) {
@@ -308,7 +331,7 @@ export async function speakSteps(steps, { rate = 1, onStep = () => {}, gap = 180
     onStep(i);
     const step = steps[i];
     if (step.pause) await wait(step.pause / Math.max(rate, 0.1));
-    else await speak(step.text, { rate, recorded, speaker: step.speaker || voice });
+    else await speak(step.text, { rate, recorded, speaker: step.speaker || voice, lookup: step.lookup });
     if (mine !== generation) return false;
     if (i < steps.length - 1) await wait(gap / Math.max(rate, 0.1));
   }
@@ -342,9 +365,10 @@ export function sayable(token) {
 /**
  * Beats first, then the whole: c-a-r, then car. Each beat is said as it is
  * spelled; っ is a held silence because that is all it is, and ー repeats the
- * vowel before it. The last step is the whole word, said.
+ * vowel before it. The last step is the whole word, said, found by `lookup`
+ * (the word's own key) before its text.
  */
-export function beatSteps(beats, whole) {
+export function beatSteps(beats, whole, lookup = []) {
   const steps = [];
   const list = Array.from(beats || []);
   list.forEach((b, i) => {
@@ -352,6 +376,6 @@ export function beatSteps(beats, whole) {
     else if (b === 'ー') steps.push({ text: VOWEL_KANA[vowelOf(list[i - 1])] || '' });
     else steps.push({ text: toHira(b) });
   });
-  if (whole) steps.push({ text: whole, whole: true });
+  if (whole) steps.push({ text: whole, whole: true, lookup });
   return steps;
 }

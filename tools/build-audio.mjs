@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 // Records Yomu's own text with ElevenLabs: the sound notes, every beat, the
-// phrase library and the notes' examples (tools/lib/audio-script.mjs), in
-// each voice of tools/lib/audio-voices.mjs. docs/AUDIO.md is the account.
+// phrase library and the notes' examples, every word of that text, and the
+// dictionary's most common words (tools/lib/audio-script.mjs), in the voices
+// of tools/lib/audio-voices.mjs. docs/AUDIO.md is the account.
 //
 // THIS IS A MANUAL DATA STEP, NOT A BUILD. It spends credits from the owner's
 // ElevenLabs plan, so it makes only what is missing or changed, and stops at
@@ -17,13 +18,14 @@
 //
 // Every clip is transcribed and the transcript read by the analyzer
 // (tools/lib/audio-check.mjs). A clip that does not say what Yomu shows is
-// made again with another seed, then from the analyzer's kana reading; one
-// that never passes is left out of the index, so the page says that text
-// with the device's voice rather than teach a wrong sound. The last take of
-// each is kept in .forge/audio-rejects/ to be listened to.
+// made again with another seed, then from its kana reading; one that never
+// passes is left out of the index, so the page says that text with the
+// device's voice, or borrows Clear's, rather than teach a wrong sound. The
+// last take of each is kept in .forge/audio-rejects/ to be listened to.
 //
-// Writes data/audio/<voice>/<id>.mp3, data/audio/index.json
-// and tools/audio-made.json, the record of what was sent, heard and kept.
+// Writes data/audio/<voice>/<id>.mp3, data/audio/index.json and its key
+// shards data/audio/kNN.json, and tools/audio-made.json, the record of what
+// was sent, heard and kept.
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -31,11 +33,11 @@ import { createDict } from '../js/dict.js';
 import { analyze } from '../js/analyze.js';
 import { hasKanji, toHira } from '../js/kana.js';
 import { cyrb53 } from '../js/history-text.js';
-import { AUDIO_FORMAT, SILENCE_SRC, audioKey, clipId } from '../js/audio.js';
+import { AUDIO_FORMAT, CLIPS_FORMAT, AUDIO_DIR, SILENCE_SRC, audioKey } from '../js/audio.js';
 import { SITE } from './lib/emit.mjs';
 import { licenceBlock } from './lib/licence.mjs';
 import { apiKey, call, ApiError } from './lib/elevenlabs.mjs';
-import { audioScript, beatAliases, KINDS } from './lib/audio-script.mjs';
+import { fullScript, beatAliases, KINDS } from './lib/audio-script.mjs';
 import { makeCheck } from './lib/audio-check.mjs';
 import { finish, triple, silence } from './lib/audio-finish.mjs';
 import { VOICES, MODEL, RAW_FORMAT, STT_MODEL } from './lib/audio-voices.mjs';
@@ -53,6 +55,8 @@ const EST_PER_CHAR = 0.5;
 const RESERVE = 2000;
 const PARALLEL = 3;
 const ATTEMPTS = 3;
+// A key shard stays well under check-data's 140,000-byte cap.
+const SHARD_BYTES = 110000;
 
 function args(argv) {
   const out = { dryRun: false, budget: 0, voices: VOICES.map((v) => v.id), kinds: [...KINDS], limit: Infinity, retryFailed: false };
@@ -74,6 +78,8 @@ function args(argv) {
 const readJson = (p, fallback) => (fs.existsSync(p) ? JSON.parse(fs.readFileSync(p, 'utf8')) : fallback);
 const clipPath = (voice, id) => path.join(OUT, voice, `${id}.mp3`);
 const madeKey = (voice, id) => `${voice}/${id}`;
+const isWord = (line) => line.kind === 'word' || line.kind === 'common';
+const voicesOf = (line) => VOICES.filter((v) => !line.voices || line.voices.includes(v.id));
 
 /** What a clip is made from; a change to any of it remakes the clip. */
 function signature(voice, line) {
@@ -90,7 +96,8 @@ const LAYOUT = new Set(['punct', 'space', 'newline']);
  * transcript cannot tell those apart: both readings come back as the same
  * kanji. Where the choice is between two words (字, じ or あざ), the voice
  * reads the kanji from context, as a reader does; measured 2026-10-16, 48 of
- * the script's lines send at least one word in kana.
+ * the script's lines send at least one word in kana. A word line has made
+ * that choice already (audio-script.mjs wordTts).
  */
 async function sendText(text, dict) {
   if (!hasKanji(text)) return text;
@@ -142,6 +149,7 @@ function plan(opts, script, made) {
   const jobs = [];
   for (const voice of VOICES.filter((v) => opts.voices.includes(v.id))) {
     for (const line of script) {
+      if (!voicesOf(line).includes(voice)) continue;
       const sig = signature(voice, line);
       const rec = made[madeKey(voice.id, line.id)];
       const done = rec && rec.sig === sig && (rec.ok ? fs.existsSync(clipPath(voice.id, line.id)) : !opts.retryFailed);
@@ -157,9 +165,11 @@ async function makeClip(job, ctx) {
   const before = ctx.made[madeKey(voice.id, line.id)];
   const taken = before && before.sig === sig ? before.takes || ATTEMPTS : 0;
   const want = await ctx.check.expected(line);
-  // The last take is sent another way: a beat in hiragana, a text with kanji
-  // as the analyzer's kana reading.
-  const other = line.kind === 'kana' ? line.kana : hasKanji(line.send) ? await kanaOf(line.tts, ctx.dict) : null;
+  // The last take is sent another way: a beat in hiragana, a word as its
+  // reading, a text with kanji as the analyzer's kana reading.
+  let other = null;
+  if (line.kind === 'kana') other = line.kana;
+  else if (hasKanji(line.send)) other = isWord(line) ? line.kana : await kanaOf(line.tts, ctx.dict);
   let rec = null;
   const tries = [];
   for (let attempt = 0; attempt < ATTEMPTS; attempt += 1) {
@@ -175,7 +185,8 @@ async function makeClip(job, ctx) {
       rec = { sig, key: line.key, kind: line.kind, sent, seed, attempt, takes: taken + attempt + 1, ok: false, why: err.message, tries };
       continue;
     }
-    const transcript = await transcribe(ctx.key, line.kind === 'kana' ? triple(mp3) : mp3);
+    const heard = line.kind === 'kana' || line.triple ? triple(mp3) : mp3;
+    const transcript = await transcribe(ctx.key, heard);
     const v = await ctx.check.verdict(want, transcript);
     if (!v.ok) tries.push({ sent, transcript, got: v.got });
     rec = { sig, key: line.key, kind: line.kind, sent, model: MODEL, seed, attempt, takes: taken + attempt + 1, transcript, want: want.said || want.kana, got: v.got, ok: v.ok, seconds, bytes: mp3.length };
@@ -191,36 +202,69 @@ async function makeClip(job, ctx) {
   return rec;
 }
 
-/** index.json from what the record says was kept. */
+const jsOrder = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
+
+/** The record, one clip a line, so a run's diff shows the clips it touched. */
+function saveMade(made) {
+  const rows = Object.entries(made).sort(([a], [b]) => jsOrder(a, b)).map(([k, v]) => `${JSON.stringify(k)}:${JSON.stringify(v)}`);
+  fs.writeFileSync(MADE, `{\n${rows.join(',\n')}\n}\n`);
+}
+
+/**
+ * index.json and its key shards from what the record says was kept: every
+ * key a line answers to, with the voices whose clip of it passed as a mask.
+ * A line no voice kept is not in the index at all.
+ */
 function writeIndex(script, made) {
-  const aliases = beatAliases();
-  const clips = {};
-  for (const line of script) for (const k of line.keys) if (!clips[k]) clips[k] = line.id;
-  for (const [from, to] of Object.entries(aliases)) {
-    const target = script.find((l) => l.key === audioKey(to));
-    if (target) clips[audioKey(from)] = target.id;
-  }
   const kept = (voice, id) => {
     const rec = made[madeKey(voice, id)];
     return !!(rec && rec.ok && fs.existsSync(clipPath(voice, id)));
   };
   const voices = VOICES.filter((v) => script.some((l) => kept(v.id, l.id)));
-  const missing = {};
-  for (const v of voices) missing[v.id] = script.filter((l) => !kept(v.id, l.id)).map((l) => l.id);
+  const entries = new Map();
+  const put = (key, entry) => { if (!entries.has(key)) entries.set(key, entry); };
+  for (const line of script) {
+    let mask = 0;
+    voices.forEach((v, i) => { if (kept(v.id, line.id)) mask |= 1 << i; });
+    if (mask) for (const k of line.keys) put(k, [line.id, mask]);
+  }
+  for (const [from, to] of Object.entries(beatAliases())) {
+    const target = entries.get(audioKey(to));
+    if (target) put(audioKey(from), target);
+  }
+  const shards = [];
+  let cur = [];
+  let size = 0;
+  for (const k of [...entries.keys()].sort(jsOrder)) {
+    const piece = JSON.stringify(k).length + JSON.stringify(entries.get(k)).length + 2;
+    if (size + piece > SHARD_BYTES && cur.length) { shards.push(cur); cur = []; size = 0; }
+    cur.push(k);
+    size += piece;
+  }
+  if (cur.length) shards.push(cur);
+  const licence = licenceBlock('elevenlabs', 'tools/build-audio.mjs', {
+    voices: voices.map((v) => `${v.name} (${v.label.en})`).join(', '),
+  });
+  const src = (n) => `${AUDIO_DIR}/k${String(n).padStart(2, '0')}.json`;
+  fs.mkdirSync(OUT, { recursive: true });
+  shards.forEach((keys, n) => {
+    const doc = { _licence: licence, format: CLIPS_FORMAT, clips: Object.fromEntries(keys.map((k) => [k, entries.get(k)])) };
+    fs.writeFileSync(path.join(SITE, src(n)), `${JSON.stringify(doc)}\n`);
+  });
+  for (const f of fs.readdirSync(OUT)) {
+    const m = f.match(/^k(\d+)\.json$/);
+    if (m && Number(m[1]) >= shards.length) fs.unlinkSync(path.join(OUT, f));
+  }
   const doc = {
-    _licence: licenceBlock('elevenlabs', 'tools/build-audio.mjs', {
-      voices: voices.map((v) => `${v.name} (${v.label.en})`).join(', '),
-    }),
+    _licence: licence,
     format: AUDIO_FORMAT,
     voices: voices.map((v) => ({ id: v.id, name: v.name, label: v.label })),
-    clips: Object.fromEntries(Object.entries(clips).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))),
-    missing,
+    shards: shards.map((keys, n) => ({ first: keys[0], src: src(n) })),
   };
-  fs.mkdirSync(OUT, { recursive: true });
   fs.writeFileSync(path.join(OUT, 'index.json'), `${JSON.stringify(doc)}\n`);
   const quiet = path.join(SITE, SILENCE_SRC);
   if (!fs.existsSync(quiet)) fs.writeFileSync(quiet, silence());
-  return doc;
+  return { ...doc, keys: entries.size };
 }
 
 /**
@@ -244,24 +288,23 @@ function prune(script, made) {
 async function main() {
   const opts = args(process.argv.slice(2));
   const library = readJson(path.join(DATA, 'phrases', 'library.json'), null);
-  const full = audioScript({ library });
+  const dict = createDict({ fetchJson: async (p) => JSON.parse(fs.readFileSync(p, 'utf8')), base: `${DATA}/` });
+  const full = await fullScript({ library, dict, dataDir: DATA });
+  for (const line of full) line.send = isWord(line) ? line.tts : await sendText(line.tts, dict);
   const script = full.filter((l) => opts.kinds.includes(l.kind));
   const made = readJson(MADE, {});
-  const dict = createDict({ fetchJson: async (p) => JSON.parse(fs.readFileSync(p, 'utf8')), base: `${DATA}/` });
-  for (const line of script) line.send = await sendText(line.tts, dict);
   const jobs = plan(opts, script, made);
 
   const chars = jobs.reduce((n, j) => n + [...j.line.send].length, 0);
   const byVoice = {};
   for (const j of jobs) byVoice[j.voice.id] = (byVoice[j.voice.id] || 0) + 1;
   console.log(`build-audio: ${script.length} lines, ${jobs.length} clips to make (${JSON.stringify(byVoice)}), ${chars} characters, about ${Math.ceil(chars * EST_PER_CHAR)} credits before retakes`);
-  if (opts.dryRun || !jobs.length) {
-    if (!opts.dryRun) {
-      const removed = prune(full, made);
-      fs.writeFileSync(MADE, `${JSON.stringify(Object.fromEntries(Object.entries(made).sort()), null, 1)}\n`);
-      writeIndex(full, made);
-      console.log(`build-audio: nothing to make; ${removed} old clips removed; index rewritten`);
-    }
+  if (opts.dryRun) return;
+  if (!jobs.length) {
+    const removed = prune(full, made);
+    saveMade(made);
+    const doc = writeIndex(full, made);
+    console.log(`build-audio: nothing to make; ${removed} old clips removed; index rewritten, ${doc.keys} keys in ${doc.shards.length} shards`);
     return;
   }
 
@@ -277,7 +320,6 @@ async function main() {
   let next = 0;
   let passed = 0;
   let failed = 0;
-  const save = () => fs.writeFileSync(MADE, `${JSON.stringify(Object.fromEntries(Object.entries(made).sort()), null, 1)}\n`);
   async function worker() {
     while (next < jobs.length && ctx.spent < ctx.budget) {
       const job = jobs[next++];
@@ -289,15 +331,19 @@ async function main() {
         failed += 1;
         console.log(`  FAILED ${job.voice.id} ${job.line.ja}: wanted ${rec.want || '?'}, heard ${JSON.stringify(rec.transcript || rec.why)} (${rec.got || ''})`);
       }
-      if ((passed + failed) % 25 === 0) { save(); console.log(`  ${passed + failed}/${jobs.length}, ${ctx.spent} credits`); }
+      if ((passed + failed) % 50 === 0) {
+        saveMade(made);
+        writeIndex(full, made);
+        console.log(`  ${passed + failed}/${jobs.length}, ${ctx.spent} credits`);
+      }
     }
   }
   await Promise.all(Array.from({ length: PARALLEL }, worker));
   const removed = prune(full, made);
-  save();
+  saveMade(made);
   const doc = writeIndex(full, made);
   const stopped = next < jobs.length ? `; stopped at the budget with ${jobs.length - next} left` : '';
-  console.log(`build-audio: ${passed} kept, ${failed} failed their check, ${ctx.spent} credits spent${stopped}; ${removed} old clips removed; index has ${doc.voices.length} voices`);
+  console.log(`build-audio: ${passed} kept, ${failed} failed their check, ${ctx.spent} credits spent${stopped}; ${removed} old clips removed; ${doc.keys} keys in ${doc.shards.length} shards, ${doc.voices.length} voices`);
 }
 
 main().catch((err) => { console.error(`build-audio: ${err.message}`); process.exit(1); });

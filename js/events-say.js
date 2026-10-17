@@ -14,7 +14,9 @@ import { state, rate, savePrefs, VOICE_CHOICES } from './state.js';
 import { $, fill, h } from './utils.js';
 import { ui, currentLang } from './strings.js';
 import { paintSpeech, paintChrome, selectedToken } from './render.js';
-import { speak, cancel, speakSteps, beatSteps, sayable, setVoice, otherVoice } from './speech.js';
+import { speak, speakText, cancel, speakSteps, beatSteps, sayable, setVoice, otherVoice } from './speech.js';
+import { wordKey } from './audio.js';
+import { hasKanji } from './kana.js';
 import { tokenBeats } from './render-word.js';
 import { loadLibrary, dialogueText, phraseBeats } from './library.js';
 import { phrasesNode, chunkNodes } from './render-phrases.js';
@@ -39,7 +41,7 @@ async function speakAll() {
   if (!state.text.trim()) return;
   state.speaking = true;
   paintSpeech(state);
-  await speak(state.text, { rate: rate(state) });
+  await speakText(state.text, { rate: rate(state) });
   state.speaking = false;
   paintSpeech(state);
 }
@@ -54,17 +56,25 @@ async function playBeats(chips, whole, steps) {
   setOn(-1);
 }
 
+/**
+ * A word written in kanji is looked up by its own key (雨|あめ) before its
+ * reading, so it plays its recording and not a homophone's. A word in kana
+ * needs none, and a particle must not have one: は is said わ, and the
+ * recording filed under は is the beat ha.
+ */
+const lookupOf = (token) => (token && hasKanji(token.surface || '') ? [wordKey(token.surface, token.reading)] : []);
+
 function soundOut() {
   const token = selectedToken(state);
   if (!token) return;
   const beats = tokenBeats(token).map((b) => b.kana);
   const chips = [...document.querySelectorAll('#word-beats .beat')];
-  playBeats(chips, $('word-surface'), beatSteps(beats, sayable(token)));
+  playBeats(chips, $('word-surface'), beatSteps(beats, sayable(token), lookupOf(token)));
 }
 
 function sayWord() {
   const token = selectedToken(state);
-  if (token) speak(sayable(token), { rate: rate(state) });
+  if (token) speak(sayable(token), { rate: rate(state), lookup: lookupOf(token) });
 }
 
 // ── A note's examples ─────────────────────────────────────────────────────
