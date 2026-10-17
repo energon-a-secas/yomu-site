@@ -267,6 +267,42 @@ function checkLikeGroup(rel, doc) {
 // A null checker means the generic rules above are the whole check here:
 // the indexes are checked against their shards below, and the phrase library
 // is authored by hand and has its own test (tests/library.test.mjs).
+// The recorded voices (tools/build-audio.mjs): every clip the index promises
+// is a file, and every file is one the index promises. A clip a voice failed
+// its check for is listed as missing and must not be there, so the page never
+// plays a recording that did not say what Yomu shows.
+const CLIP_ID = /^[0-9a-z]+$/;
+function checkAudio(rel, doc) {
+  const dir = path.join(DATA, 'audio');
+  const ids = new Set(Object.values(doc.clips || {}));
+  for (const [key, id] of Object.entries(doc.clips || {})) {
+    if (!key || !CLIP_ID.test(id)) fail(rel, `clip ${JSON.stringify(key)} has a bad id ${JSON.stringify(id)}`);
+  }
+  const voices = Array.isArray(doc.voices) ? doc.voices : [];
+  if (!voices.length) fail(rel, 'no voices');
+  for (const v of voices) {
+    if (!/^[a-z]+$/.test(v.id || '') || !v.label || !v.label.en || !v.label.es) { fail(rel, `voice ${JSON.stringify(v.id)} needs an id and an en and es label`); continue; }
+    const missing = new Set((doc.missing && doc.missing[v.id]) || []);
+    const slow = new Set((doc.slow && doc.slow[v.id]) || []);
+    const want = new Set();
+    for (const id of ids) {
+      if (!missing.has(id)) want.add(`${id}.mp3`);
+      if (slow.has(id)) {
+        if (missing.has(id)) fail(rel, `${v.id}: ${id} has a slow take but no clip`);
+        want.add(`${id}.slow.mp3`);
+      }
+    }
+    const vdir = path.join(dir, v.id);
+    const have = new Set(fs.existsSync(vdir) ? fs.readdirSync(vdir).filter((f) => f.endsWith('.mp3')) : []);
+    for (const f of want) {
+      if (!have.has(f)) { fail(rel, `${v.id}/${f} is in the index but not on disk`); continue; }
+      const size = fs.statSync(path.join(vdir, f)).size;
+      if (size > MAX_BYTES) fail(`data/audio/${v.id}/${f}`, `${fmtBytes(size)} is over the ${fmtBytes(MAX_BYTES)} cap`);
+    }
+    for (const f of have) if (!want.has(f)) fail(`data/audio/${v.id}/${f}`, 'on disk but not in the index (a clip that failed its check, or one no line needs)');
+  }
+}
+
 const FORMATS = {
   'yomu-dict-index/1': null,
   'yomu-dict-index/2': null,
@@ -282,6 +318,7 @@ const FORMATS = {
   'yomu-kanji-index/2': null,
   'yomu-kanji/1': checkKanjiShard,
   'yomu-library/1': null,
+  'yomu-audio/1': checkAudio,
   [JOYO_FORMAT]: checkJoyoDoc,
   [JINMEIYO_FORMAT]: null,
   [JLPT_FORMAT]: (rel, doc) => { for (const p of jlptProblems(doc)) fail(rel, p); },

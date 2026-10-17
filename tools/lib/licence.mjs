@@ -147,6 +147,25 @@ export const LICENCES = {
     ],
     screen: 'required',
   },
+  // The recorded voices (tools/build-audio.mjs): speech made with ElevenLabs
+  // text to speech, on the owner's paid plan, which allows commercial use of
+  // what it makes, in voices from the ElevenLabs Voice Library. The clips are
+  // Yomu's own text said aloud, so nothing upstream is quoted; the credit
+  // names the service and the voices, on screen in the Sources dialog.
+  elevenlabs: {
+    source: 'ElevenLabs text to speech, voices from the ElevenLabs Voice Library',
+    url: 'https://elevenlabs.io/terms-of-use',
+    spdx: 'LicenseRef-ElevenLabs-Output',
+    derived: false,
+    id: 'elevenlabs',
+    acknowledgement:
+      "The recorded voices are Yomu's own text said by voices from the ElevenLabs Voice Library, made with ElevenLabs text to speech. Each recording was checked by transcription against the reading Yomu shows.",
+    links: [
+      'https://elevenlabs.io/terms-of-use',
+      'https://elevenlabs.io/voice-library',
+    ],
+    screen: 'required',
+  },
   // The names read Tatoeba twice over: the Japanese sentences say which names
   // ship and how often each is met, and their English translations say which
   // of a katakana name's JMnedict spellings is shown (tools/lib/original.mjs).
