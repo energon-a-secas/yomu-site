@@ -30,6 +30,7 @@ import { createDict } from './dict.js';
 import { detectSounds } from './sounds.js';
 import { annotateGrammar } from './grammar.js';
 import { NAME_VARIANTS } from './names.js';
+import { titleNames } from './title-names.js';
 import { joinKatakana } from './compounds.js';
 import { guessParts } from './sounds-like.js';
 
@@ -364,7 +365,8 @@ export async function analyzeCore(input, { dict } = {}) {
     if (!firsts[k]) { tokens.push(plainToken(p)); return; }
     // Katakana pieces that touch are one compound with parts (compounds.js),
     // joined after both passes so neither pass's search changes.
-    for (const t of joinKatakana(runTokens(p.text, firsts[k], seconds[k], dict))) {
+    const named = titleNames(runTokens(p.text, firsts[k], seconds[k], dict), parts[k + 1], parts[k + 2]);
+    for (const t of joinKatakana(named)) {
       t.start += p.start;
       t.end += p.start;
       enrich(t);

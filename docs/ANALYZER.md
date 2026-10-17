@@ -99,6 +99,7 @@ same text and the same data give the same tokens.
 | `spellings.js` | what a kana word learns from its kanji spelling, read off the record: the rank of kana homographs (すき is 好き before 隙, `b`, ties by `t`) and the morpheme cuts of a kana compound (そのうち is その\|内, `c`) | `kana.js`, `costs.js` |
 | `costs.js` | the closed classes (particles, copula), every cost, connection costs, homograph ranking | `kana.js` |
 | `key-rules.js` | dictionary keys the lattice refuses (ですか, ませんか, 雨が降る, になると) | `kana.js`, `costs.js` |
+| `title-names.js` | conservative kana-name grouping before an ornamental star and a katakana title continuation; keeps the result explicitly a guess | nothing |
 | `names.js` | which kanji runs are names, a per-kanji guess at their reading, and the entry a name from the names tier carries (`nameEntry`) | `kana.js`, `deinflect.js`, `numbers.js`, `name-types.js` |
 | `name-types.js` | JMnedict's name types in words, `{ en, es }` (`NAME_TYPES`, and `NAME_LINE_TYPES` for the Word panel's name line), a leaf the page reads without loading the analyzer | nothing |
 | `numbers.js` | reading numbers, counters and 何 + counter, and the sound changes between them | nothing |
@@ -1436,3 +1437,23 @@ analyzer moves an edge.
 - Tatoeba: CC BY 2.0 FR, used to rank keys, to choose and count names, and, through the English translations of its Japanese sentences, to choose which of a katakana name's JMnedict spellings is shown; and, in data/sent/ only (tools/build-sentences.mjs, data/sent/more/ included), the example sentences themselves with their English, each linked to its page on tatoeba.org for the credit.
 - Jonathan Waller's JLPT kanji lists (tanos.co.uk, archived): Creative Commons BY with no version named, for `data/kanji/jlpt.json` only; the credit is on the level view and in the Sources dialog.
 - The phrase library, the compound lines of "Where are the spaces?" and every note are written here and are public domain. `data/play/spaces.json` carries JMdict's licence block, with JMnedict and the authored lines as inputs, because where its lines part is the analysis over both.
+
+
+### Ornamental titles (2026-10-17)
+
+Before enrichment and grammar annotation, `title-names.js` keeps a kana noun
+plus trailing か together as a possible name when an ornamental ☆ or ★ and a
+katakana continuation follow it. The preceding token must be a kanji noun or
+the start of the run. This gives 魔法少女まどか☆マギカ the reading
+魔法|少女|まどか|☆|マギカ, with `kind: name`, `confidence: guess`, no dictionary
+entry and no question-particle note for まどか. It does not identify an official
+work or infer an English title. Ordinary questions, copulas, other punctuation
+and preceding particles retain their original analysis. The narrow context
+avoids promoting arbitrary hiragana into confirmed names; names without that
+context remain a limitation. `tests/native-reader.test.mjs` checks the reported
+title and nearby prose cases.
+
+The native phrase search uses `library-filter.js`, sharing the idiom shelves’
+Japanese/romaji/English matching, with the reader’s said romaji as an additional
+match (konnichiwa, koohii). The helper returns a filtered library without
+mutating its categories or authored text and imports no browser globals.
