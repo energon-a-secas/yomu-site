@@ -5,11 +5,11 @@ They describe the native iPhone app, separately from Yomu's website accounts
 and analytics. The listing package lives in the sibling iOS repository at
 `docs/app-store/1.0.2/`.
 
-The public support alias is pending. The original personal Gmail was removed
-when the owner reconsidered publishing it. Replace both `data-contact-pending`
-paragraphs with the confirmed email links before publishing. Review the support
-retention wording with the owner. Do not invent an address or assume a forwarding
-alias already exists.
+The owner confirmed `contact@neorgon.com` as the public support/privacy alias.
+Both pages use it; the personal Gmail is excluded. Delivery and replies have
+not been tested by the agent, and no test message has been sent. The page copy,
+including support-retention wording, remains ready for owner review before
+publication.
 
 After approval, deploy through the site's normal workflow and verify:
 
