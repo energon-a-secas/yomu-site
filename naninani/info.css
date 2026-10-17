@@ -1,0 +1,37 @@
+/* Naninani's support documents use Yomu's existing palette and fleet shell. */
+.info-brand { font-size: 1.25rem; font-weight: 750; color: var(--text-primary); }
+.info-nav { display: flex; align-items: center; gap: 1.25rem; }
+.info-nav a { display: inline-flex; align-items: center; min-height: 44px; color: var(--text-secondary); }
+.info-nav a[aria-current="page"] { color: var(--text-primary); text-decoration-thickness: 2px; }
+.info-document { width: min(100% - 40px, 70ch); margin: 0 auto; padding: clamp(40px, 7vw, 88px) 0 72px; }
+.info-document h1 { font-size: clamp(2.25rem, 7vw, 3.5rem); line-height: 1.12; letter-spacing: -.035em; margin: .5rem 0 1.25rem; }
+.info-document h2 { font-size: 1.5rem; line-height: 1.3; margin: 2.75rem 0 .75rem; scroll-margin-top: 90px; }
+.info-document h3 { font-size: 1.125rem; margin: 1.5rem 0 .5rem; }
+.info-document section { scroll-margin-top: 90px; }
+.info-document p, .info-document li { font-size: 1rem; line-height: 1.75; }
+.info-document p { margin: 0 0 1rem; }
+.info-document ul, .info-document ol { padding-left: 1.4rem; margin: .75rem 0 1.25rem; }
+.info-document li + li { margin-top: .5rem; }
+.info-document a { color: var(--text-primary); text-decoration: underline; text-decoration-color: var(--accent-bright); text-underline-offset: .2em; overflow-wrap: anywhere; }
+.info-document a:hover { text-decoration-thickness: 2px; }
+.info-document .info-kicker { color: var(--text-muted); font-size: .875rem; letter-spacing: .08em; text-transform: uppercase; }
+.info-document .info-lead { color: var(--text-secondary); font-size: 1.25rem; line-height: 1.6; }
+.info-summary { border-block: 1px solid var(--border); padding: 1.25rem 0 .25rem; margin: 2rem 0; }
+.info-contents { display: flex; flex-wrap: wrap; gap: .25rem 1.5rem; padding: .5rem 0; }
+.info-contents a { display: inline-flex; align-items: center; min-height: 44px; }
+.info-document details { border-bottom: 1px solid var(--border); padding: 1rem 0; }
+.info-document summary { cursor: pointer; padding: .5rem 0; min-height: 44px; font-weight: 650; font-size: 1.125rem; }
+.info-document details[open] summary { margin-bottom: .75rem; }
+.info-contact { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+.info-document :focus-visible, .info-nav a:focus-visible { outline: 2px solid var(--accent-bright); outline-offset: 5px; border-radius: 3px; }
+.info-footer-links { display: flex; flex-wrap: wrap; gap: .5rem 1.25rem; align-items: center; }
+.info-footer-links a { display: inline-flex; align-items: center; min-height: 44px; }
+@media (max-width: 380px) {
+  .header-logo-img { display: none; }
+  .info-nav { gap: .75rem; }
+}
+@media print {
+  .header-bar, .neo-footer, .skip-link, .info-contents { display: none; }
+  .info-document { width: 100%; padding: 0; }
+  .info-document details { break-inside: avoid; }
+}
