@@ -20,6 +20,17 @@ import { SITE, run, cut, saidLine, diskDict } from './helpers/disk.mjs';
 const tok = (r, surface) => r.tokens.find((t) => t.surface === surface);
 const kanjiOf = (r, ch) => r.kanji.find((k) => k.char === ch);
 
+test('standalone 字 means a written character; address names keep あざ', async () => {
+  for (const text of ['字', '字を大きく書いてください。', '字が読めない。', '字の形', 'きれいな字ですね。']) {
+    const t = tok(await run(text), '字');
+    assert.equal(t.reading, 'じ', text);
+    assert.ok(t.entry.g.includes('character (esp. kanji)'), text);
+  }
+  for (const [text, reading] of [['字吉田', 'あざよしだ'], ['小字', 'こあざ'], ['大字吉田', 'おおあざよしだ']]) {
+    assert.equal((await run(text)).tokens[0].reading, reading, text);
+  }
+});
+
 /**
  * The committed dictionary with the second phase's tiers taken away, which
  * is the first pass alone: analyze.js skips the second phase for a

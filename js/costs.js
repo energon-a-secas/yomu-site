@@ -214,14 +214,17 @@ export function homographCost(key, rec, dict) {
 }
 
 /**
- * Two keys whose records tie on every signal above, where the tie went to the
+ * Keys whose records tie on every signal above, where the tie went to the
  * upstream's order and the order picked the reading a textbook does not
  * teach: 窓が開いています was ひらいています, and 下手 was したて, a sumo
  * grip. The data has no per-record frequency that could decide these, so
  * they are listed, one line each, and nothing else is. A 開く that follows
- * を is the transitive ひらく (本を開く), which connect() handles.
+ * を is the transitive ひらく (本を開く), which connect() handles. Standalone
+ * 字 is じ, a character, rather than あざ, an address subdivision. Address
+ * names such as 字吉田 and the dictionary words 小字/大字 keep their whole
+ * candidates and readings; this preference only breaks the bare 字 tie.
  */
-const TEXTBOOK = Object.freeze({ '開く': 'あく', '下手': 'へた' });
+const TEXTBOOK = Object.freeze({ '開く': 'あく', '下手': 'へた', '字': 'じ' });
 const TRANSITIVE_AFTER_O = Object.freeze({ '開く': 'ひらく' });
 
 /** 開く read ひらく and conjugated, but not into its potential: 窓を開けて is 開ける. */

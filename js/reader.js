@@ -15,7 +15,9 @@
 
 import { currentLang } from './strings.js';
 
-const ROOT = new URL('../', import.meta.url);
+// Resolve a web URL only when the web fetcher is used. Native clients import
+// the pure helpers and supply a bundle reader; JavaScriptCore has no URL API.
+let root;
 
 let loading = null;       // Promise of { analyze, createDict, notes }
 let mods = null;
@@ -64,6 +66,7 @@ function report() {
 
 /** The fetch every dictionary shard goes through, counted per read. */
 export async function fetchJson(path) {
+  const ROOT = root ||= new URL('../', import.meta.url);
   const mine = run;
   mine.total += 1;
   report();

@@ -1502,3 +1502,23 @@ including the expression used when continuing a relationship in a new year.
 `tests/kana-detail.test.mjs` holds combinations, diacritics, real note links,
 contextual usage and negative cases. The native bridge has decoding, filtering
 and UI interaction regressions too.
+
+## Standalone 字 and native kanji browsing (2026-10-18)
+
+`costs.js` now breaks the otherwise tied records for standalone 字 in favor of
+じ, “character”, instead of the address subdivision あざ. This uses the existing
+textbook-reading tie-break, without reordering or rebuilding dictionary data.
+Address candidates 字吉田, 大字吉田 and 小字 retain their readings. The regression
+checks ordinary writing sentences, a bare 字 and those address forms.
+
+Compared with revision `34bb1e7` on 6,224 Tatoeba sentences, the only two changed
+tokens were 字 あざ → じ; segmentation and guess counts were unchanged. The live
+export had moved from the recorded upstream pin: this comparison used 248,939
+sentences, archive SHA-256
+`9b2f0c18f58a5633a0dfba22b6a5f7a2bbbd55f649aeafcc31107d1be5cc5c2b`.
+It is a measured sample, not a claim that every ambiguous use is resolved.
+
+Naninani reuses `levels.js` and `collection.js` with its bundle reader for school
+grades and Waller's unofficial N5–N1 study groups. `reader.js` resolves the web
+base URL on the first web fetch, so importing its pure meaning helpers does not
+require a URL global in JavaScriptCore. No list or reading logic is copied into Swift.
