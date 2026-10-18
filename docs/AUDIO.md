@@ -231,6 +231,15 @@ deduplication and dictionary coverage; it is not the number of new jobs.
 
 ## The page
 
+Native word-by-word playback uses `audio.js wordSequence(audio, keysList, voice)`.
+It selects one recorded voice for the whole passage: the requested voice or
+Clear, whichever covers more words; the requested voice wins a tie. Each word's
+most specific available key is fixed before comparing voices, so a bare-kana
+homophone cannot replace a spelling/reading recording. Missing positions remain
+null for the caller's explicit device fallback. Natural sentence playback and
+the website's existing all-recorded sequence behavior are unchanged. Tests live
+in `tests/audio-sequence.test.mjs`; no synthesis or new recordings are involved.
+
 - **One seam.** `speech.js speak()` looks the text up and plays the clip in
   the chosen voice, or hands the text to the device. Every caller gains
   recordings without change; a word's callers (Say the word, Sound it out's

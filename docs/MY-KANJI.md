@@ -1,5 +1,23 @@
 # My kanji: the store, History and saved phrases
 
+## Native explicit phrase collection
+
+`js/phrase-book.js` adapts this module's History rules for Naninani 1.1.2.
+It has no DOM or storage access and never enables automatic history. Its
+`yomu-phrase-book/1` document contains the existing `phrasesOf` backup records
+plus a map of optional built-in expression/conversation references by text key.
+Source references are validated against the original library text on save and
+load. A conversation may reference its whole transcript or a zero-based line.
+An edited/custom paste never acquires a guessed origin; a source-free duplicate
+does not erase a known one. Localized titles/meanings are derived, not persisted.
+
+The existing 500-phrase and 2,000-UTF-16-unit limits apply. This adapter rejects
+oversized text with a visible message instead of clipping it. Malformed records
+are reported as recovered; the native persistence layer preserves the original
+bytes before writing recovered data. `tests/phrase-book.test.mjs` covers identity,
+relaunch, source validation, removal, search, limits and recovery. This collection
+does not change the web History view, sync settings or the main kanji document.
+
 Moved out of the project's CLAUDE.md on 2026-10-14, word for word, so the
 file every session loads stays short. CLAUDE.md keeps a summary and the
 rules a change must not break; this is the full account, and the one to

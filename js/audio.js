@@ -125,6 +125,25 @@ export function clipByKeys(audio, keys, voice) {
   return null;
 }
 
+/** One recorded speaker for a word sequence. Prefer the selected voice on a
+ * coverage tie; use Clear when it covers more words. Preserve the most specific
+ * available key before choosing a voice, so a bare-kana homophone cannot win
+ * over a known spelling. Missing clips remain null for explicit device fallback. */
+export function wordSequence(audio, keysList, voice) {
+  const choices = voicesInTurn(audio, voice);
+  const specific = keysList.map((keys) => {
+    const key = keys.find((key) => choices.some((v) => clipInVoice(audio, [key], v)));
+    return key ? [key] : [];
+  });
+  let best = { voice: voice || null, clips: keysList.map(() => null), recorded: 0 };
+  for (const v of choices) {
+    const clips = specific.map((keys) => clipInVoice(audio, keys, v));
+    const recorded = clips.filter(Boolean).length;
+    if (recorded > best.recorded) best = { voice: v, clips, recorded };
+  }
+  return best;
+}
+
 /** A path under the site as the URL the page fetches. */
 export function siteUrl(path) {
   return new URL(path, root()).href;
