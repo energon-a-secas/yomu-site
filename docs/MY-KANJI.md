@@ -52,8 +52,11 @@ pasted text is ever stored, and the test reads the raw store to prove it,
 with `h` set too. Every field is validated on load; a store that does not
 read degrades to empty with a note on the screen, and its raw value is
 copied to `yomu-site:kanji:damaged` first. A bad `src`, `h` or `at` is
-dropped and its record kept. `at` is when the session began (ms): set by
-`beginSession(src, now)` and `clearAll(now)`, and by `load(now)` when there
+dropped and its record kept. `forgetSeen(data, now)` empties `seen` and moves
+the session on while every saved kanji keeps its schedule; the native app's
+"Forget where I met kanji" calls it, since its reader records reading too.
+`at` is when the session began (ms): set by `beginSession(src, now)`,
+`clearAll(now)` and `forgetSeen`, and by `load(now)` when there
 is no session to read (nothing stored, or a damaged store, whose ids then
 count from 0 again). Such a start must be written before History relies on
 it: kept in memory only, a reload before the first count (a text with no

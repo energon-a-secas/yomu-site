@@ -254,6 +254,20 @@ export function recordReading(data, chars, words, today) {
   return { counted: fresh, changed: fresh.length > 0 || learned > 0 };
 }
 
+/**
+ * Forget where kanji were met: every count, day and word, and the current
+ * session's counted set, which moves on to a new session. Saved kanji and
+ * their schedule stay. For a learner who wants the reading record gone (the
+ * native app's More screen); the next settled read starts counting afresh.
+ * Returns whether there was anything to forget.
+ */
+export function forgetSeen(data, now) {
+  const had = Object.keys(data.seen).length > 0 || data.session.counted.length > 0;
+  data.seen = {};
+  data.session = startedAt({ id: data.session.id + 1, counted: [] }, now);
+  return had;
+}
+
 // ── Saving and the review schedule ────────────────────────────────────────
 
 /** Saved today, in box 0, due today: a kanji saved is one to review now. */
