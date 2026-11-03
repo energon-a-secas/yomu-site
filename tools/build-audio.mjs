@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 // Records Yomu's own text with ElevenLabs: the sound notes, every beat, the
-// phrase library and the notes' examples, every word of that text, and the
-// dictionary's most common words (tools/lib/audio-script.mjs), in the voices
-// of tools/lib/audio-voices.mjs. docs/AUDIO.md is the account.
+// phrase library and the notes' examples, every word of that text, the
+// dictionary's most common words, and the kanji pages' readings and words
+// (tools/lib/audio-script.mjs), in the voices of tools/lib/audio-voices.mjs.
+// docs/AUDIO.md is the account.
 //
 // THIS IS A MANUAL DATA STEP, NOT A BUILD. It spends credits from the owner's
 // ElevenLabs plan, so it makes only what is missing or changed. --budget
@@ -18,12 +19,21 @@
 //     --limit=20            at most this many clips (a trial run)
 //     --retry-failed        try again the clips that failed their check
 //
+//   node tools/build-audio.mjs --listen    write .forge/audio-listen.html, the takes that failed, to be heard
+//   node tools/build-audio.mjs --heard     ship the takes tools/audio-heard.json names, and stop
+//     --rejects=DIR         read the takes from DIR (another checkout's .forge/audio-rejects)
+//
+// None of --dry-run, --listen and --heard calls ElevenLabs. A recording run
+// applies tools/audio-heard.json first too, so a take a person heard and
+// called right is never paid for again (tools/lib/audio-heard.mjs).
+//
 // Every clip is transcribed and the transcript read by the analyzer
 // (tools/lib/audio-check.mjs). A clip that does not say what Yomu shows is
 // made again with another seed, then from its kana reading; one that never
 // passes is left out of the index, so the page says that text with the
 // device's voice, or borrows Clear's, rather than teach a wrong sound. The
-// last take of each is kept in .forge/audio-rejects/ to be listened to.
+// last take of each is kept in .forge/audio-rejects/ to be listened to, and
+// one a person heard and called right ships through tools/audio-heard.json.
 //
 // Writes data/audio/<voice>/<id>.mp3, data/audio/index.json and its key
 // shards data/audio/kNN.json, and tools/audio-made.json, the record of what
@@ -35,11 +45,14 @@ import { createDict } from '../js/dict.js';
 import { analyze } from '../js/analyze.js';
 import { hasKanji, toHira } from '../js/kana.js';
 import { cyrb53 } from '../js/history-text.js';
-import { AUDIO_FORMAT, CLIPS_FORMAT, AUDIO_DIR, SILENCE_SRC, audioKey } from '../js/audio.js';
+import { AUDIO_FORMAT, CLIPS_FORMAT, AUDIO_DIR, SILENCE_SRC } from '../js/audio.js';
 import { SITE } from './lib/emit.mjs';
 import { licenceBlock } from './lib/licence.mjs';
 import { apiKey, call, ApiError } from './lib/elevenlabs.mjs';
-import { fullScript, beatAliases, KINDS } from './lib/audio-script.mjs';
+import { fullScript, beatAliases, KINDS, WORD_KINDS } from './lib/audio-script.mjs';
+import { madeKey, parseHeard, heardPlan, applyHeard } from './lib/audio-heard.mjs';
+import { indexEntries } from './lib/audio-index.mjs';
+import { listenRows, listenPage } from './lib/audio-listen.mjs';
 import { makeCheck } from './lib/audio-check.mjs';
 import { finish, triple, silence } from './lib/audio-finish.mjs';
 import { VOICES, MODEL, RAW_FORMAT, STT_MODEL } from './lib/audio-voices.mjs';
@@ -48,6 +61,8 @@ const DATA = path.join(SITE, 'data');
 const OUT = path.join(DATA, 'audio');
 const MADE = path.join(SITE, 'tools', 'audio-made.json');
 const REJECTS = path.join(SITE, '.forge', 'audio-rejects');
+const HEARD = path.join(SITE, 'tools', 'audio-heard.json');
+const LISTEN = path.join(SITE, '.forge', 'audio-listen.html');
 // Bump when finish() changes what a clip sounds like, so every clip is remade.
 const FINISH_VERSION = 1;
 // Credits per character, measured on eleven_v4 for Japanese (11 characters
@@ -62,10 +77,13 @@ const ATTEMPTS = 3;
 const SHARD_BYTES = 110000;
 
 function args(argv) {
-  const out = { dryRun: false, budget: 0, voices: VOICES.map((v) => v.id), kinds: [...KINDS], limit: Infinity, retryFailed: false };
+  const out = { dryRun: false, budget: 0, voices: VOICES.map((v) => v.id), kinds: [...KINDS], limit: Infinity, retryFailed: false, heard: false, listen: false, rejects: REJECTS };
   for (const a of argv) {
     const [k, v] = a.replace(/^--/, '').split('=');
     if (k === 'dry-run') out.dryRun = true;
+    else if (k === 'heard') out.heard = true;
+    else if (k === 'listen') out.listen = true;
+    else if (k === 'rejects') out.rejects = path.resolve(v);
     else if (k === 'budget') out.budget = Number(v);
     else if (k === 'voices') out.voices = v.split(',');
     else if (k === 'kinds') out.kinds = v.split(',');
@@ -82,8 +100,7 @@ function args(argv) {
 
 const readJson = (p, fallback) => (fs.existsSync(p) ? JSON.parse(fs.readFileSync(p, 'utf8')) : fallback);
 const clipPath = (voice, id) => path.join(OUT, voice, `${id}.mp3`);
-const madeKey = (voice, id) => `${voice}/${id}`;
-const isWord = (line) => line.kind === 'word' || line.kind === 'common';
+const isWord = (line) => WORD_KINDS.has(line.kind);
 const voicesOf = (line) => VOICES.filter((v) => !line.voices || line.voices.includes(v.id));
 
 /** What a clip is made from; a change to any of it remakes the clip. */
@@ -150,14 +167,16 @@ async function transcribe(key, mp3) {
   return String(r.text || '').trim();
 }
 
-function plan(opts, script, made) {
+/** The clips to make. `heard` names records a heard take is about to ship (a dry run's). */
+function plan(opts, script, made, heard = new Set()) {
   const jobs = [];
   for (const voice of VOICES.filter((v) => opts.voices.includes(v.id))) {
     for (const line of script) {
       if (!voicesOf(line).includes(voice)) continue;
       const sig = signature(voice, line);
-      const rec = made[madeKey(voice.id, line.id)];
-      const done = rec && rec.sig === sig && (rec.ok ? fs.existsSync(clipPath(voice.id, line.id)) : !rec.pending && !opts.retryFailed);
+      const mk = madeKey(voice.id, line.id);
+      const rec = made[mk];
+      const done = heard.has(mk) || (rec && rec.sig === sig && (rec.ok ? fs.existsSync(clipPath(voice.id, line.id)) : !rec.pending && !opts.retryFailed));
       if (!done) jobs.push({ voice, line, sig });
     }
   }
@@ -170,10 +189,10 @@ async function makeClip(job, ctx) {
   const before = ctx.made[madeKey(voice.id, line.id)];
   const taken = before && before.sig === sig ? before.takes || ATTEMPTS : 0;
   const want = await ctx.check.expected(line);
-  // The last take is sent another way: a beat in hiragana, a word as its
-  // reading, a text with kanji as the analyzer's kana reading.
+  // The last take is sent another way: a beat or a reading in hiragana, a
+  // word as its reading, a text with kanji as the analyzer's kana reading.
   let other = null;
-  if (line.kind === 'kana') other = line.kana;
+  if (line.kind === 'kana' || line.kind === 'reading') other = line.kana;
   else if (hasKanji(line.send)) other = isWord(line) ? line.kana : await kanaOf(line.tts, ctx.dict);
   let rec = null;
   const tries = [];
@@ -228,18 +247,7 @@ function writeIndex(script, made) {
     const rec = made[madeKey(voice, id)];
     return !!(rec && rec.ok && fs.existsSync(clipPath(voice, id)));
   };
-  const voices = VOICES.filter((v) => script.some((l) => kept(v.id, l.id)));
-  const entries = new Map();
-  const put = (key, entry) => { if (!entries.has(key)) entries.set(key, entry); };
-  for (const line of script) {
-    let mask = 0;
-    voices.forEach((v, i) => { if (kept(v.id, line.id)) mask |= 1 << i; });
-    if (mask) for (const k of line.keys) put(k, [line.id, mask]);
-  }
-  for (const [from, to] of Object.entries(beatAliases())) {
-    const target = entries.get(audioKey(to));
-    if (target) put(audioKey(from), target);
-  }
+  const { voices, entries } = indexEntries(script, { kept, voices: VOICES, aliases: beatAliases() });
   const shards = [];
   let cur = [];
   let size = 0;
@@ -295,6 +303,33 @@ function prune(script, made) {
   return removed;
 }
 
+/** One line on what a plan makes, and roughly what it costs. */
+function estimate(script, jobs) {
+  const chars = jobs.reduce((n, j) => n + [...j.line.send].length, 0);
+  const byVoice = {};
+  for (const j of jobs) byVoice[j.voice.id] = (byVoice[j.voice.id] || 0) + 1;
+  return `build-audio: ${script.length} lines, ${jobs.length} clips to make (${JSON.stringify(byVoice)}), ${chars} characters, about ${Math.ceil(chars * EST_PER_CHAR)} credits before retakes`;
+}
+
+/** The heard-by list, or none when the file is not there. */
+function readHeardList() {
+  return fs.existsSync(HEARD) ? parseHeard(readJson(HEARD, null), { voices: VOICES.map((v) => v.id), attempts: ATTEMPTS }) : [];
+}
+
+function writeListenPage(opts, script, made, heard) {
+  const voices = VOICES.filter((v) => opts.voices.includes(v.id));
+  const keptClip = (voice, id) => {
+    const rec = made[madeKey(voice, id)];
+    return rec && rec.ok && fs.existsSync(clipPath(voice, id)) ? clipPath(voice, id) : null;
+  };
+  const sigOf = (voiceId, line) => signature(VOICES.find((v) => v.id === voiceId), line);
+  const rows = listenRows({ script, made, voices, sigOf, rejectsDir: opts.rejects, pageDir: path.dirname(LISTEN), keptClip });
+  fs.mkdirSync(path.dirname(LISTEN), { recursive: true });
+  fs.writeFileSync(LISTEN, listenPage(rows, heard, { generated: new Date().toISOString().slice(0, 10) }));
+  const takes = rows.reduce((n, r) => n + r.takes.length, 0);
+  console.log(`build-audio: ${rows.length} lines, ${takes} takes to hear, in ${path.relative(SITE, LISTEN)} (open it from disk)`);
+}
+
 async function main() {
   const opts = args(process.argv.slice(2));
   const library = readJson(path.join(DATA, 'phrases', 'library.json'), null);
@@ -303,13 +338,34 @@ async function main() {
   for (const line of full) line.send = isWord(line) ? line.tts : await sendText(line.tts, dict);
   const script = full.filter((l) => opts.kinds.includes(l.kind));
   const made = readJson(MADE, {});
-  const jobs = plan(opts, script, made);
 
-  const chars = jobs.reduce((n, j) => n + [...j.line.send].length, 0);
-  const byVoice = {};
-  for (const j of jobs) byVoice[j.voice.id] = (byVoice[j.voice.id] || 0) + 1;
-  console.log(`build-audio: ${script.length} lines, ${jobs.length} clips to make (${JSON.stringify(byVoice)}), ${chars} characters, about ${Math.ceil(chars * EST_PER_CHAR)} credits before retakes`);
-  if (opts.dryRun) return;
+  // The heard-by list, read only: what it would ship, take out, or cannot ship.
+  const heard = readHeardList();
+  const lines = new Map(full.map((l) => [l.key, l]));
+  const sigOf = (voiceId, line) => signature(VOICES.find((v) => v.id === voiceId), line);
+  const hp = heardPlan(heard, { lines, made, sigOf, rejectsDir: opts.rejects, clipPathOf: clipPath });
+  for (const { entry, why } of hp.skip) console.log(`  heard ${entry.voice} ${entry.key} take ${entry.take} not shipped: ${why}`);
+  if (opts.listen) { writeListenPage(opts, script, made, heard); return; }
+
+  const shipping = `${hp.ship.length} heard takes to ship, ${hp.unship.length} to take out, ${hp.already} in place`;
+  if (opts.dryRun) {
+    // As the real run will see it: the shipped records kept, the dropped ones failed.
+    const view = { ...made };
+    for (const mk of hp.unship) view[mk] = { ...view[mk], ok: false };
+    console.log(`build-audio: ${shipping}`);
+    console.log(estimate(script, plan(opts, script, view, new Set(hp.ship.map((x) => x.mk)))));
+    return;
+  }
+  if (hp.ship.length || hp.unship.length || opts.heard) {
+    applyHeard(hp, { made, clipPathOf: clipPath });
+    saveMade(made);
+    const doc = writeIndex(full, made);
+    console.log(`build-audio: ${shipping}; index rewritten, ${doc.keys} keys in ${doc.shards.length} shards`);
+  }
+  if (opts.heard) return;
+
+  const jobs = plan(opts, script, made);
+  console.log(estimate(script, jobs));
   if (!jobs.length) {
     const removed = prune(full, made);
     saveMade(made);

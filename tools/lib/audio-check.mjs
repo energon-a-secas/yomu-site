@@ -27,6 +27,7 @@ import { analyze } from '../../js/analyze.js';
 import { toHira, isAllKana, beats, vowelOf } from '../../js/kana.js';
 import { audioKey } from '../../js/audio.js';
 import { toHiragana, isRomaji } from '../../js/vendor/wanakana.js';
+import { WORD_KINDS } from './audio-script.mjs';
 
 const LAYOUT = new Set(['punct', 'space', 'newline']);
 
@@ -90,7 +91,7 @@ export function makeCheck(dict) {
     const kanaOnly = line.kana || (/\p{Script=Han}/u.test(line.ja) ? '' : line.ja);
     // A word is said as its own reading: 中 read ちゅう is chuu, though the
     // analyzer reads a bare 中 as naka (a right clip failed that way).
-    const isWord = (line.kind === 'word' || line.kind === 'common') && line.kana;
+    const isWord = WORD_KINDS.has(line.kind) && line.kana;
     const analysis = await read(isWord ? line.kana : line.ja);
     return {
       said: line.said || saidOf(analysis),

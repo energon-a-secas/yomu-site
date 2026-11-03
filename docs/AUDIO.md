@@ -30,6 +30,12 @@ list:
    The third band added 5,013 accepted word recordings from 5,168 new
    word keys. The [band-3 report](AUDIO-BAND3.md) records its actual scope,
    cost, validation and listening samples.
+7. **reading** and **kanji**: what the kanji page says when pressed
+   (`kanjiPageLines`), in Clear alone (`KANJI_PAGE_VOICES`): each page's
+   on and kun readings, then its words, page by page, the kana pages first
+   and then every kanji by frequency rank, so a run its budget cuts short
+   has covered the most common pages whole. Not recorded yet (The kanji
+   pages, below).
 
 A word is filed under its spelling and reading (`audio.js wordKey`: 雨|あめ),
 never under its reading alone, so a homophone never plays another word's
@@ -133,6 +139,7 @@ transcript does not show. The listening list exists for those.
 
 ```bash
 node tools/build-audio.mjs --dry-run              # what would be made, about what it costs
+node tools/build-audio.mjs --dry-run --kinds=reading,kanji   # one part of the script
 node tools/build-audio.mjs --budget=100 --limit=30 # small pilot; compare account balances
 node tools/build-audio.mjs --budget=100 --limit=30 --retry-failed # bounded retry pilot
 ```
@@ -184,7 +191,7 @@ What failed, and so plays in another voice or the device's:
   ("Party") in Clear; and ふあん in Bright, ナイター in Calm.
 
 Every rejected take is in `.forge/audio-rejects/` (not in git). A person who
-listens and finds one right can ship it; that is not built yet.
+listens and finds one right can ship it (Heard by a person, below).
 
 ## The first word expansion
 
@@ -228,6 +235,87 @@ See [AUDIO-BAND3.md](AUDIO-BAND3.md) for automated evidence and 26 listening
 samples. Human listening and publication to the website/TestFlight remain
 separate steps. The original 5,293-word estimate predates the current script's
 deduplication and dictionary coverage; it is not the number of new jobs.
+
+## Heard by a person
+
+The check can only turn a right take away, never let a wrong one through, and
+most of what it turns away is the transcriber writing a right sound another
+way (ゆ "You", み "Me", a loanword as English). So a take a person heard and
+called right ships: `tools/audio-heard.json` (format `yomu-audio-heard/1`,
+`tools/lib/audio-heard.mjs`) lists it by voice, the line's key, its take
+number in the record's last run and a hash of its bytes, with who heard it
+and when.
+
+```bash
+node tools/build-audio.mjs --listen   # .forge/audio-listen.html: every take that waits, with its player
+node tools/build-audio.mjs --heard    # ship what tools/audio-heard.json names, rewrite the index, stop
+```
+
+The listening page is opened from disk and sends nothing anywhere. It lists
+each failed record's takes (the beats first), with what was wanted, what was
+sent and what the transcriber wrote, and Clear's kept clip beside another
+voice's for comparison. Choose the take that is right, or none; the marks
+stay in that browser, and Copy or Download gives the whole file to put in
+`tools/audio-heard.json`, written by the same function the tool reads it with.
+Then `--heard` copies each named take to its clip path, marks its record kept
+with `heardBy` (the record's other fields stay those of its last take), and
+rewrites the index. No ElevenLabs call, no credit. A recording run applies the
+list first too, so a heard take is never paid for again, and a dry run counts
+it as made.
+
+Three rules keep it honest. What ships is the take that was heard: an entry
+whose hash no longer matches the file (a later run remade it) or whose line
+is now sent differently does not ship, and the tool says why. A take ships
+only while the list names it: an entry taken out takes its clip out again on
+the next run. And a record that later passed its check needs no entry. The
+takes live in one checkout's `.forge/`, so `--rejects=DIR` reads another
+checkout's (a worktree's run, say).
+
+Built 2026-11-03 with nothing heard yet: 433 records wait, 1,297 takes
+(`--listen`), most of them common words in Clear and beats outside it.
+
+## The kanji pages
+
+Built 2026-11-03 as script and check only; nothing is recorded. The kanji
+page needs no change to play them: a reading button, and the hero's Say it
+for the first reading, speak `readingKana(r)`, which finds a reading's clip by
+its kana key, and a word button already looks up its `wordKey`. A reading is
+recorded once for every kanji that has it (にち serves 日 and every other
+kanji read にち), and a reading or word another kind already holds keeps that
+clip (にち is a common word; 日本 is band 1). A reading is sent in katakana and
+checked against its own romaji (`readingRomaji`), not the analyzer's reading
+of the kana: 131 of the 4,746 distinct readings come out otherwise, and a bare
+へき is the particle へ and き, eki, so a take of えき would have passed. A
+reading of one beat is a beat already, and one that starts or ends in a small
+っ (ジッ, っこ) is not said alone.
+
+`node tools/build-audio.mjs --dry-run --kinds=reading,kanji`, measured
+2026-11-03 (free):
+
+| | Clips | Characters |
+|---|---|---|
+| reading | 3,982 | 14,005 |
+| kanji (words) | 7,198 | 17,627 |
+| both | 11,180 | 31,632 |
+
+About 15,800 credits at the header estimate before retakes; band 3 cost 1.52
+credits a word on the account, transcription included, which puts all of it
+near 17,000. In page order, the 134 kana pages need 74 clips (235
+characters); then the first 100 kanji pages 276 clips (817 characters), the
+first 500 1,741 (4,588), the first 1,000 4,471 (11,613), the first 2,000
+8,228 (21,601) and the first 3,000 9,088 (24,129), each counted from the
+first kanji page.
+Run it in bounded batches with the balance read between them (Running it,
+above), after the owner sets a ceiling.
+
+The kanji page still gates its buttons on the device's Japanese voice
+(`canSpeak`), as the learner's text does. Once its readings and words are
+recorded it can take `events-say.js`'s gate for Yomu's own text (a recorded
+voice chosen, or the device's), so a device with no Japanese voice can use
+it; before that, a button with no clip would do nothing there.
+
+The tool's next kind would be the example sentences (`data/sent/`): Tatoeba's
+text, CC BY 2.0 FR, which a recording would carry the credit of. Not built.
 
 ## The page
 

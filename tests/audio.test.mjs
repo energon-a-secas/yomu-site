@@ -13,11 +13,13 @@ import { readFileSync } from 'node:fs';
 import {
   audioKey, wordKey, clipId, keysOf, normalizeAudio, addShard, shardsFor, clipByKeys, clipInVoice, useAudio,
 } from '../js/audio.js';
-import { audioScript, beatInventory, wordLines } from '../tools/lib/audio-script.mjs';
+import {
+  audioScript, beatInventory, wordLines, kanjiPageLines, fullScript, KANJI_PAGE_VOICES,
+} from '../tools/lib/audio-script.mjs';
 import { makeCheck, unheld, foldSaid, barless } from '../tools/lib/audio-check.mjs';
 import { SOUND_NOTES } from '../js/notes-sounds.js';
-import { toKata } from '../js/kana.js';
-import { dict } from './helpers/disk.mjs';
+import { toKata, readingKana, readingRomaji, beats } from '../js/kana.js';
+import { dict, DATA } from './helpers/disk.mjs';
 
 const library = JSON.parse(readFileSync(new URL('../data/phrases/library.json', import.meta.url), 'utf8'));
 
@@ -100,6 +102,62 @@ test('the words of Yomu\'s own text are recorded, the おば and さん of お�
   assert.equal(words.find((w) => w.key === wordKey('雨', 'あめ')).tts, '雨', 'one reading: sent in kanji');
   assert.equal(words.find((w) => w.key === wordKey('今日', 'きょう')).tts, 'きょう', 'two readings: sent as Yomu reads it');
   assert.equal(words.find((w) => w.key === 'さん').triple, true, 'two beats: checked from a triple take');
+});
+
+test('the kanji pages are recorded page by page, the kana pages and then the most frequent kanji first', () => {
+  const lines = kanjiPageLines(DATA);
+  const firstKanji = lines.findIndex((l) => /\p{Script=Han}/u.test(l.page));
+  assert.ok(firstKanji > 0 && lines.slice(0, firstKanji).every((l) => /^[\u3041-\u30ff]$/u.test(l.page)), 'the kana pages lead');
+  assert.equal(lines[firstKanji].page, '日', 'KANJIDIC ranks 日 first');
+  const at = (ch) => lines.findIndex((l) => l.page === ch);
+  assert.ok(at('日') < at('一') && at('一') < at('国'), 'then by frequency rank');
+  for (const l of lines) assert.deepEqual(l.voices, [...KANJI_PAGE_VOICES]);
+  // A page's readings, then its words, each as the page says it: a reading
+  // button speaks readingKana(r), and a word button looks up its wordKey.
+  const hi = lines.filter((l) => l.page === '日');
+  assert.deepEqual(hi.filter((l) => l.kind === 'reading').map((l) => l.key), ['にち', 'じつ'], 'ひ, び and か are beats already');
+  assert.ok(hi.findLastIndex((l) => l.kind === 'reading') < hi.findIndex((l) => l.kind === 'kanji'));
+  const nichi = hi.find((l) => l.key === 'にち');
+  assert.deepEqual(keysOf(readingKana('ニチ')), [nichi.key], 'the reading button finds it with no lookup');
+  assert.equal(nichi.tts, 'ニチ', 'sent in katakana, never read as a particle');
+  assert.equal(nichi.said, 'nichi');
+  assert.equal(nichi.triple, true, 'two beats: heard three times over');
+  const words = hi.filter((l) => l.kind === 'kanji');
+  assert.deepEqual(words.slice(0, 3).map((l) => l.key), [wordKey('一日', 'いちにち'), wordKey('今日', 'きょう'), wordKey('日本', 'にほん')], 'in the page\'s order, 日 ひ left to the beat');
+  assert.equal(words.find((l) => l.key === wordKey('今日', 'きょう')).tts, 'きょう', 'two readings: sent as the page reads it');
+  assert.ok(!lines.some((l) => l.kind === 'reading' && (beats(l.kana).length < 2 || /^[っー]|っ$/.test(l.kana))), 'no beat, no half sound beside a doubled consonant');
+  assert.ok(lines.filter((l) => l.kind === 'reading').every((l) => l.said === readingRomaji(l.kana)), 'each reading carries its own romaji');
+});
+
+test('a kanji page\'s word that is already recorded keeps that clip', async () => {
+  const script = await fullScript({ library, dict: dict(), dataDir: DATA, kinds: ['common', 'reading', 'kanji'] });
+  assert.equal(new Set(script.map((l) => l.key)).size, script.length, 'one line per key');
+  const kindOf = (key) => (script.find((l) => l.key === key) || {}).kind;
+  assert.equal(kindOf(wordKey('日本', 'にほん')), 'common', 'a band-1 word stays a common word');
+  assert.equal(kindOf('にち'), 'common', 'a reading that is a common word keeps the word\'s clip');
+  assert.equal(kindOf('じつ'), 'reading');
+  const firstPage = script.findIndex((l) => l.kind === 'reading' || l.kind === 'kanji');
+  assert.ok(script.slice(firstPage).every((l) => l.kind === 'reading' || l.kind === 'kanji'), 'after every common word');
+});
+
+test('a reading is checked against its own romaji, never the analyzer\'s guess at a word', async () => {
+  const check = makeCheck(dict());
+  const reading = (kana) => check.expected({ kind: 'reading', ja: kana, kana, said: readingRomaji(kana), triple: beats(kana).length <= 2 });
+  const nichi = await reading('にち');
+  assert.equal((await check.verdict(nichi, 'ニチ、ニチ、ニチ。')).ok, true);
+  assert.equal((await check.verdict(nichi, 'イチ、イチ、イチ。')).ok, false);
+  // The analyzer reads a bare へき as the particle へ and き, eki (131 of the
+  // 4,746 readings come out otherwise, 2026-11-03): checked against that, a
+  // take of えき would pass. A reading line carries its own romaji instead.
+  const unsaid = await check.expected({ kind: 'reading', ja: 'へき', kana: 'へき', triple: true });
+  assert.equal((await check.verdict(unsaid, 'えき、えき、えき。')).ok, true, 'the trap');
+  const heki = await reading('へき');
+  assert.equal(heki.said, 'heki');
+  assert.equal((await check.verdict(heki, 'えき、えき、えき。')).ok, false);
+  assert.equal((await check.verdict(heki, 'ヘキ、ヘキ、ヘキ。')).ok, true);
+  const okonau = await reading('おこなう');
+  assert.equal((await check.verdict(okonau, '行う')).ok, true, 'a kanji spelling of it is how it is said');
+  assert.equal((await check.verdict(okonau, 'おこなった')).ok, false);
 });
 
 test('the check fails a clip that says another word, and passes the right one', async () => {

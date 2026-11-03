@@ -1,8 +1,8 @@
 // What Yomu records, read from the site's own text: the sound notes, every
 // beat Sound it out can play, the phrase library, and the grammar and
-// loanword notes' examples; then every word of that text, and the
-// dictionary's most common words. A new example or phrase is in the next
-// run's script with nothing to list here.
+// loanword notes' examples; then every word of that text, the dictionary's
+// most common words, and the readings and words of the kanji pages. A new
+// example or phrase is in the next run's script with nothing to list here.
 //
 // Each line says what to send (`tts`) and what it must sound like (`said`,
 // the said romaji, or `kana` for a lone beat).
@@ -13,11 +13,21 @@ import path from 'node:path';
 import { SOUND_NOTES } from '../../js/notes-sounds.js';
 import { GRAMMAR_NOTES } from '../../js/notes-grammar.js';
 import { LOAN_NOTES } from '../../js/notes-loan.js';
-import { GENKI_MAP, toKata, toHira, hasKanji, beats } from '../../js/kana.js';
+import { GENKI_MAP, toKata, toHira, hasKanji, beats, readingKana, readingRomaji } from '../../js/kana.js';
 import { audioKey, wordKey, clipId } from '../../js/audio.js';
 import { analyze } from '../../js/analyze.js';
 
-export const KINDS = Object.freeze(['sound', 'kana', 'phrase', 'note', 'word', 'common']);
+export const KINDS = Object.freeze(['sound', 'kana', 'phrase', 'note', 'word', 'common', 'reading', 'kanji']);
+
+// The kinds whose line is one word or one reading: sent as its `tts`, never
+// analyzed again (build-audio.mjs sendText), and checked as its own reading
+// (audio-check.mjs expected).
+export const WORD_KINDS = Object.freeze(new Set(['word', 'common', 'reading', 'kanji']));
+
+// The kanji pages' readings and words are recorded in Clear alone, as common
+// bands 2 and 3 are: another voice borrows Clear's clip (js/audio.js
+// clipByKeys), and a page holds thousands of words a fourth voice would cost.
+export const KANJI_PAGE_VOICES = Object.freeze(['clear']);
 
 // Which voices record the common words of each frequency band (q, 1 the most
 // frequent): band 1 in every voice, bands 2 and 3 in Clear alone, whose clip any
@@ -160,41 +170,110 @@ export async function wordLines(lines, dict) {
   return out;
 }
 
+/** Every first-tier key with its records, from the committed core and range shards, in file order. */
+function firstTier(dataDir) {
+  const dir = path.join(dataDir, 'dict');
+  const files = fs.readdirSync(dir).filter((f) => /^(core|w\d+)\.json$/.test(f)).sort();
+  const out = [];
+  for (const f of files) {
+    const doc = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'));
+    for (const [key, recs] of Object.entries(doc.entries || {})) out.push([key, recs]);
+  }
+  return out;
+}
+
+/** Every reading the dictionary gives a spelling, across all its records, in hiragana. */
+const readingsOf = (key, recs) => new Set(recs.flatMap((r) => (r.r && r.r.length ? r.r : [key])).map(toHira));
+
 /**
  * The dictionary's most common words, by Tatoeba band (`q` on a record,
  * docs/ANALYZER.md): each spelling with the reading its record gives, in the
  * voices COMMON_BANDS names. Read from the committed first-tier shards.
  */
 export function commonLines(dataDir, bands = COMMON_BANDS) {
-  const dir = path.join(dataDir, 'dict');
-  const files = fs.readdirSync(dir).filter((f) => /^(core|w\d+)\.json$/.test(f)).sort();
   const out = [];
-  for (const f of files) {
-    const doc = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'));
-    for (const [key, recs] of Object.entries(doc.entries || {})) {
-      const readings = new Set(recs.flatMap((r) => (r.r && r.r.length ? r.r : [key])).map(toHira));
-      for (const rec of recs) {
-        if (!Object.hasOwn(bands, rec.q)) continue;
-        const reading = toHira((rec.r && rec.r[0]) || key);
-        if (!rangeOk(beats(reading).length)) continue;
-        const voices = bands[rec.q];
-        out.push(wordLine('common', key, reading, { tts: wordTts(key, reading, readings), band: rec.q, ...(voices ? { voices: [...voices] } : {}) }));
-      }
+  for (const [key, recs] of firstTier(dataDir)) {
+    const readings = readingsOf(key, recs);
+    for (const rec of recs) {
+      if (!Object.hasOwn(bands, rec.q)) continue;
+      const reading = toHira((rec.r && rec.r[0]) || key);
+      if (!rangeOk(beats(reading).length)) continue;
+      const voices = bands[rec.q];
+      out.push(wordLine('common', key, reading, { tts: wordTts(key, reading, readings), band: rec.q, ...(voices ? { voices: [...voices] } : {}) }));
     }
   }
   return out.sort((a, b) => a.band - b.band);
 }
 
+const readSite = (dataDir, src) => JSON.parse(fs.readFileSync(path.join(path.dirname(dataDir), src), 'utf8'));
+const KANA_PAGE = /^[\u3041-\u30ff]$/u;
+
+/**
+ * The kanji pages in the order a learner meets them: the kana pages first,
+ * hiragana then katakana, then every kanji by its frequency rank, a kanji
+ * with none after every ranked one, by stroke count (the rank
+ * build-kanji-page.mjs offers neighbours by), so a run cut short by its
+ * budget has covered the most common pages whole.
+ */
+export function kanjiPages(dataDir) {
+  const info = new Map();
+  for (const s of readSite(dataDir, 'data/kanji/index.json').shards) {
+    for (const [ch, e] of Object.entries(readSite(dataDir, s.src).entries || {})) info.set(ch, e);
+  }
+  const words = new Map();
+  for (const s of readSite(dataDir, 'data/kpage/index.json').shards) {
+    for (const [ch, e] of Object.entries(readSite(dataDir, s.src).entries || {})) if (e && Array.isArray(e.w)) words.set(ch, e.w);
+  }
+  const jsOrder = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
+  const kana = [...words.keys()].filter((ch) => KANA_PAGE.test(ch)).sort(jsOrder);
+  const rank = (ch) => (info.get(ch).f ?? 10000) * 100 + (info.get(ch).s || 0);
+  const kanji = [...info.keys()].sort((a, b) => rank(a) - rank(b) || jsOrder(a, b));
+  return [...kana, ...kanji].map((ch) => ({ ch, info: info.get(ch) || null, words: words.get(ch) || [] }));
+}
+
+/**
+ * What the kanji page says when pressed (render-kanji-page.js): each page's
+ * on and kun readings (the hero's Say it and each reading button speak
+ * readingKana(r), so a reading is filed under that kana and needs no lookup),
+ * then its words (each button looks up wordKey(written, reading)). One page
+ * after another in kanjiPages order, a reading and a word interleaved by page
+ * rather than by kind. A reading is sent in katakana, which a voice reads as
+ * the sound and never as a particle, and checked against its own romaji,
+ * since the analyzer reads a bare へき as the particle へ and き. A reading of
+ * one beat is a beat already, and one that starts or ends in a small っ (ジッ,
+ * っこ) is half a sound beside a doubled consonant, said alone by nobody.
+ */
+export function kanjiPageLines(dataDir) {
+  const tier = new Map(firstTier(dataDir).map(([key, recs]) => [key, readingsOf(key, recs)]));
+  const out = [];
+  for (const page of kanjiPages(dataDir)) {
+    const said = page.info ? [...(page.info.on || []), ...(page.info.kun || [])] : [];
+    for (const r of said) {
+      const kana = readingKana(r);
+      if (!kana || !rangeOk(beats(kana).length) || /^[っー]|っ$/.test(kana)) continue;
+      out.push(wordLine('reading', kana, kana, { tts: toKata(kana), said: readingRomaji(kana), page: page.ch, voices: [...KANJI_PAGE_VOICES] }));
+    }
+    for (const [written, reading] of page.words) {
+      const kana = toHira(reading || written);
+      if (!rangeOk(beats(kana).length)) continue;
+      out.push(wordLine('kanji', written, kana, { tts: wordTts(written, kana, tier.get(written) || new Set([kana])), page: page.ch, voices: [...KANJI_PAGE_VOICES] }));
+    }
+  }
+  return out;
+}
+
 /**
  * The whole script with its words, one line per key, in priority order: the
- * lines, then the words of Yomu's text, then the common words by band. A key
- * a line already holds is not recorded again.
+ * lines, then the words of Yomu's text, then the common words by band, then
+ * the kanji pages' readings and words. A key a line already holds is not
+ * recorded again, so a page's word that is a common word keeps that clip.
  */
 export async function fullScript({ library, dict, dataDir, kinds = KINDS }) {
   const lines = audioScript({ library, kinds: KINDS });
   const extra = [];
   if (kinds.includes('word')) extra.push(...await wordLines(lines, dict));
   if (kinds.includes('common')) extra.push(...commonLines(dataDir));
+  if (kinds.includes('reading') || kinds.includes('kanji')) extra.push(...kanjiPageLines(dataDir).filter((l) => kinds.includes(l.kind)));
   const taken = new Set(lines.flatMap((l) => l.keys));
   const out = lines.filter((l) => kinds.includes(l.kind));
   for (const l of extra) {
