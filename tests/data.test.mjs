@@ -23,7 +23,7 @@ import { fileURLToPath } from 'node:url';
 
 import { isKana, isKanji, isHiragana, toHira } from '../js/kana.js';
 import { groupsOfWord } from '../js/sounds-like.js';
-import { BANNED_WORDS, licenceBlock } from '../tools/lib/licence.mjs';
+import { BANNED_WORDS } from '../tools/lib/licence.mjs';
 import { WORD_LEVELS_READY, WORDS_INDEX_FORMAT } from '../js/word-levels.js';
 import { wordsLicence } from '../tools/lib/jlpt-words.mjs';
 

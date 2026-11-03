@@ -17,9 +17,11 @@
  * captures could not be fetched from the session that wrote it): it finds
  * the tables by their headings, the way his kanji pages head theirs, reads
  * every table so headed (a list split over several), and reports the rows
- * it passes over that look like words, which the builder refuses. A page
- * it cannot find a table in is refused too, so the first real run either
- * reads all his rows or says why it did not.
+ * holding Japanese it did not read, in those tables or outside them, which
+ * the builder refuses. A page it cannot find a table in is refused too, and
+ * so is a row it cannot be sure which word of the dictionary is
+ * (resolveRow), so the first real run either reads all his rows or says
+ * why it did not.
  */
 import {
   WORDS_FORMAT, WORDS_INDEX_FORMAT, WORD_LEVELS, JLPT_WORD_SIZES, WORDS_SRC, isKanaWord,
@@ -41,7 +43,7 @@ const ENTITY = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ' };
 /**
  * A cell's text: tags out, entities decoded, runs of space (an ideographic
  * one too) as one. A line break, or the end of a paragraph or block, is a
- * space, so two readings a cell gives on two lines stay two (rowsOf).
+ * space, so two readings a cell gives on two lines stay two (readingsOf).
  */
 export function cellText(html) {
   return String(html)
@@ -72,17 +74,21 @@ const JAPANESE = /[\u3041-\u30ff\u3400-\u9fff々〆〜～]/;
  * One archived vocabulary page: `rows`, for each row of every table whose
  * headings name a Kanji column and a Hiragana one, [kanji cell, kana cell,
  * English cell], each '' when the page leaves it empty (or has no English
- * column); `tables`, how many tables were so headed; and `stray`, the cells
+ * column); `tables`, how many tables were so headed; `short`, the cells of
+ * each other row of those tables that holds Japanese, as a row short of
+ * the Kanji and Hiragana cells (one cell across the table, a section
+ * heading in kana) or one with both of them empty; and `stray`, the cells
  * of each row outside them that has two cells or more, one of them
- * Japanese: a row of his the headings did not reach, as when a table goes
- * on without them, which the builder refuses rather than drop. A heading
- * row a table repeats is passed over.
+ * Japanese, as when a table goes on without its headings. The builder
+ * refuses `short` and `stray` rows rather than drop them. A heading row a
+ * table repeats is passed over, and so is a row with no Japanese in it.
  */
 export function wallerPage(html) {
   const chunks = String(html).split(/<tr\b[^>]*>/i).slice(1);
   let cols = null;
   let tables = 0;
   const rows = [];
+  const short = [];
   const stray = [];
   for (const raw of chunks) {
     const end = raw.search(/<\/table\s*>/i);
@@ -94,9 +100,13 @@ export function wallerPage(html) {
       cols = at;
     } else if (cols) {
       const tds = cells.filter(([th]) => !th).map(([, c]) => cellText(c));
-      if (tds.length > Math.max(cols.kanji, cols.kana)) {
-        const row = [tds[cols.kanji], tds[cols.kana], cols.english >= 0 ? (tds[cols.english] || '') : ''];
-        if (row[0] || row[1]) rows.push(row);
+      const row = tds.length > Math.max(cols.kanji, cols.kana)
+        ? [tds[cols.kanji], tds[cols.kana], cols.english >= 0 ? (tds[cols.english] || '') : '']
+        : null;
+      if (row && (row[0] || row[1])) rows.push(row);
+      else {
+        const all = cells.map(([, c]) => cellText(c));
+        if (all.some((t) => JAPANESE.test(t))) short.push(all);
       }
     } else {
       const tds = cells.map(([, c]) => cellText(c));
@@ -106,7 +116,7 @@ export function wallerPage(html) {
   }
   if (!tables) throw new Error('no table headed Kanji and Hiragana');
   if (!rows.length) throw new Error('the tables headed Kanji and Hiragana have no rows');
-  return { rows, tables, stray };
+  return { rows, tables, short, stray };
 }
 
 /** The rows of one vocabulary page (wallerPage), the tables' rows alone. */
@@ -127,25 +137,50 @@ export function rowOf([kanji, kana]) {
   return [written, reading];
 }
 
-/** What separates two spellings or two readings a cell gives (おととい・おとつい, or a line each). */
+/**
+ * What separates two spellings or two readings a cell gives: a ・, a comma
+ * (、，,), a slash (/／), a semicolon (;；), or a space, which is what a
+ * line break in the cell becomes (cellText).
+ */
 const ALTERNATIVES = /\s*[・、，,／/;；]\s*|\s+/;
 
 /**
- * The words a row of his may be, in the order to try them: the row as
- * rowOf reads it, then, for a cell that gives two spellings or two
- * readings, each spelling with each reading, as rowOf reads them. One
- * that is a word of the dictionary is the row's word (chooseRows); the
- * whole cell comes first, so a word written with a ・ is still itself.
+ * The ways a row of his may be read, each [written, reading] as rowOf reads
+ * it: `whole`, the cells as they are (null for a row with neither);
+ * `joined`, the cells with what separates (ALTERNATIVES) taken out, as
+ * ボール・ペン is ボールペン and どうぞ よろしく is どうぞよろしく, or null
+ * when that is the whole; and `parts`, for a cell giving two spellings or
+ * two readings (一昨日, おととい・おとつい), each spelling with each
+ * reading, in his order (empty for a row whose cells give one each).
+ * resolveRow says which of them the row is.
  */
-export function rowsOf(cells) {
+export function readingsOf(cells) {
   const [kanji = '', kana = ''] = cells;
-  const out = new Map();
-  const add = (row) => { if (row && !out.has(wordKey(row))) out.set(wordKey(row), row); };
-  add(rowOf([kanji, kana]));
+  const whole = rowOf([kanji, kana]);
+  if (!whole) return { whole: null, joined: null, parts: [] };
   const split = (t) => t.split(ALTERNATIVES).filter(Boolean);
+  const join = (t) => split(t).join('');
+  const joinedRow = rowOf([join(kanji), join(kana)]);
+  const joined = joinedRow && wordKey(joinedRow) !== wordKey(whole) ? joinedRow : null;
   const ks = kanji ? split(kanji) : [''];
   const hs = kana ? split(kana) : [''];
-  if (ks.length > 1 || hs.length > 1) for (const k of ks) for (const h of hs) add(rowOf([k, h]));
+  const parts = new Map();
+  if (ks.length > 1 || hs.length > 1) {
+    for (const k of ks) {
+      for (const h of hs) {
+        const row = rowOf([k, h]);
+        if (row && !parts.has(wordKey(row))) parts.set(wordKey(row), row);
+      }
+    }
+  }
+  return { whole, joined, parts: [...parts.values()] };
+}
+
+/** Every [written, reading] readingsOf names for a row of his: the keys the dictionary is asked for. */
+export function rowsOf(cells) {
+  const { whole, joined, parts } = readingsOf(cells);
+  const out = new Map();
+  for (const row of [whole, joined, ...parts]) if (row && !out.has(wordKey(row))) out.set(wordKey(row), row);
   return [...out.values()];
 }
 
@@ -187,22 +222,25 @@ export function keysOf(rows) {
   return [...keys];
 }
 
+/** How many words a record's glosses share with his English, as Search splits them (glossWords). */
+export function englishScore(rec, english) {
+  const his = new Set(glossWords(english || ''));
+  let n = 0;
+  for (const w of new Set(glossWords(((rec && rec.g) || []).join(' ')))) if (his.has(w)) n += 1;
+  return n;
+}
+
 /**
  * The record a row of his is, of its candidates: the one whose glosses share
- * the most words with his English (glossWords, as Search splits them); on a
- * tie, for a word written in kana, one JMdict says is usually written in
- * kana or that has no kanji spelling, before one usually written in kanji
- * (いか the cuttlefish, not 以下); then the dictionary's own order. Null with
- * no candidate.
+ * the most words with his English (englishScore); on a tie, for a word
+ * written in kana, one JMdict says is usually written in kana or that has
+ * no kanji spelling, before one usually written in kanji (いか the
+ * cuttlefish, not 以下); then the dictionary's own order. Null with no
+ * candidate.
  */
 export function chooseRecord(candidates, english, kanaWritten = false) {
   if (!candidates.length) return null;
-  const his = new Set(glossWords(english || ''));
-  const score = (rec) => {
-    let n = 0;
-    for (const w of new Set(glossWords((rec.g || []).join(' ')))) if (his.has(w)) n += 1;
-    return n;
-  };
+  const score = (rec) => englishScore(rec, english);
   const kanaFirst = (rec) => (kanaWritten && (rec.u || !rec.k) ? 1 : 0);
   let best = candidates[0];
   for (const rec of candidates.slice(1)) {
@@ -214,55 +252,112 @@ export function chooseRecord(candidates, english, kanaWritten = false) {
 
 // ── The rows the shelf keeps ──────────────────────────────────────────────
 
+/** Two records are one word here when they give the same glosses, which is all a row keeps of one. */
+const meaningOf = (rec) => JSON.stringify(rec.g || []);
+
+/**
+ * Which word of the dictionary a row of his is, through `lookup(written,
+ * reading)` (its candidate records) and `readAs` (a row's leftOutName to
+ * the [written, reading] a person read it as): `{ row, rec, first, how }`,
+ * the reading taken, its record, its first candidate, and how it was read,
+ * or `{ why }` when it is not read. In order:
+ *
+ *   - a row `readAs` names is the word it names, which must be one;
+ *   - the cells as they are (`how` 'whole');
+ *   - the cells joined ('joined', readingsOf), when his English, if he gives
+ *     any, shares a word with that record's glosses: ボール・ペン is
+ *     ボールペン "ball-point pen";
+ *   - each part ('parts'), when every part is a word and all are the same
+ *     word, which is the first: 一昨日 read おととい or おとつい is one
+ *     record, so the row is 一昨日 おととい.
+ *
+ * Anything else is not read, with the reason: a cell whose parts are
+ * different words (ボール・ペン, if ボールペン were no word, is ボール
+ * "ball" and ペン "pen") is never taken as its first part, and a part the
+ * dictionary lacks is never passed over, as either would put a wrong word
+ * on the shelf with a real record's glosses, which no check could catch.
+ */
+export function resolveRow(cells, lookup, readAs = new Map()) {
+  const { whole, joined, parts } = readingsOf(cells);
+  if (!whole) return { why: 'is empty' };
+  const english = cells[2] || '';
+  const at = (row, how) => {
+    const cands = lookup(row[0], row[1]);
+    const rec = chooseRecord(cands, english, !row[1]);
+    return rec ? { row, rec, first: cands[0], how } : null;
+  };
+  const name = leftOutName(whole);
+  if (readAs.has(name)) {
+    const as = readAs.get(name);
+    const row = Array.isArray(as) ? rowOf(as) : null;
+    return (row && at(row, 'READ_AS')) || { why: `READ_AS reads it as ${JSON.stringify(as)}, which is no word of the dictionary` };
+  }
+  const own = at(whole, 'whole');
+  if (own) return own;
+  if (joined) {
+    const one = at(joined, 'joined');
+    if (one && (!english || englishScore(one.rec, english) > 0)) return one;
+    if (one) return { why: `read as one word it is ${leftOutName(joined)} ${JSON.stringify(one.rec.g[0])}, which his English does not name` };
+  }
+  if (!parts.length) return { why: 'is no word of the dictionary' };
+  const each = parts.map((row) => [row, at(row, 'parts')]);
+  if (each.every(([, got]) => got) && new Set(each.map(([, got]) => meaningOf(got.rec))).size === 1) return each[0][1];
+  const said = each.map(([row, got]) => `${leftOutName(row)} ${got ? JSON.stringify(got.rec.g[0]) : '(no word)'}`);
+  return { why: `its parts are not one word: ${said.join(', ')}` };
+}
+
 /**
  * The words each level keeps, from his rows (`raw`, a level id to rows of
  * [kanji cell, kana cell, English cell]) and `lookup(written, reading)`,
  * the candidate records of a word (candidatesOf over the first tier, or the
- * rare words when the first tier has none). A row is the first of rowsOf
- * that has a candidate, so a cell giving two readings is the one the
- * dictionary has (`split` counts those). Each kept row is [written,
- * reading, the chosen record's glosses]. A word his lists repeat stays at
- * the first level that has it, the easiest, and the repeat is reported; a
- * row named in `leftOut` (leftOutName of the row as rowOf reads it, to a
- * reason) is left out and reported; any other row with no candidate is
- * `unresolved`, which the builder refuses to write, as it does a `leftOut`
- * name no row matched (`stale`). `chosen` counts the rows whose record his
- * English chose over the first candidate.
+ * rare words when the first tier has none), each row read by resolveRow.
+ * Each kept row is [written, reading, the chosen record's glosses]. A word
+ * his lists repeat (the same spelling and reading, or the same spelling of
+ * the same record read another way, 一昨日 おととい after 一昨日 おとつい)
+ * stays at the first level that has it, the easiest, and the repeat is
+ * reported; a row named in `leftOut` (leftOutName of the row as rowOf
+ * reads it, to a reason) is left out and reported; a row read other than
+ * as its cells are is reported in `read`, to be checked against his page;
+ * any other row resolveRow does not read is `unresolved`, with its reason,
+ * which the builder refuses to write, as it does a `leftOut` name no row
+ * matched (`stale`) and a `readAs` one (`staleReadAs`). `chosen` counts
+ * the rows whose record his English chose over the first candidate.
  */
-export function chooseRows(raw, lookup, leftOut = new Map()) {
+export function chooseRows(raw, lookup, leftOut = new Map(), readAs = new Map()) {
   const levels = {};
   const seen = new Map();
   const repeats = [];
   const left = [];
+  const read = [];
   const unresolved = [];
   const named = new Set();
+  const namedAs = new Set();
   let chosen = 0;
-  let split = 0;
   for (const id of WORD_LEVELS) {
     levels[id] = [];
     for (const cells of raw[id] || []) {
-      const tries = rowsOf(cells);
-      if (!tries.length) continue;
-      const name = leftOutName(tries[0]);
-      if (leftOut.has(name)) { named.add(name); left.push({ id, row: tries[0], why: leftOut.get(name) }); continue; }
-      let row = tries[0];
-      let cands = [];
-      for (const t of tries) {
-        cands = lookup(t[0], t[1]);
-        if (cands.length) { row = t; break; }
-      }
+      const whole = rowOf(cells);
+      if (!whole) continue;
+      const name = leftOutName(whole);
+      if (leftOut.has(name)) { named.add(name); left.push({ id, row: whole, why: leftOut.get(name) }); continue; }
+      if (readAs.has(name)) namedAs.add(name);
+      const got = resolveRow(cells, lookup, readAs);
+      if (!got.rec) { unresolved.push({ id, row: whole, cells, why: got.why }); continue; }
+      const { row, rec } = got;
+      if (got.how !== 'whole') read.push({ id, cells, row, how: got.how, g: rec.g[0] });
       const key = wordKey(row);
-      if (seen.has(key)) { repeats.push({ id, row, first: seen.get(key) }); continue; }
-      const rec = chooseRecord(cands, cells[2], !row[1]);
-      if (!rec) { unresolved.push({ id, row, cells }); continue; }
-      if (rec !== cands[0]) chosen += 1;
-      if (row !== tries[0]) split += 1;
+      const same = `${row[0]}\u0000${meaningOf(rec)}`;
+      const was = seen.get(key) || seen.get(same);
+      if (was) { repeats.push({ id, row, first: was }); continue; }
+      if (rec !== got.first) chosen += 1;
       seen.set(key, id);
+      seen.set(same, id);
       levels[id].push([row[0], row[1], rec.g.slice()]);
     }
   }
   const stale = [...leftOut.keys()].filter((name) => !named.has(name));
-  return { levels, repeats, left, unresolved, stale, chosen, split };
+  const staleReadAs = [...readAs.keys()].filter((name) => !namedAs.has(name));
+  return { levels, repeats, left, read, unresolved, stale, staleReadAs, chosen };
 }
 
 // ── The documents ─────────────────────────────────────────────────────────

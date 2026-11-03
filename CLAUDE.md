@@ -386,18 +386,29 @@ JLPT_WORD_SIZES` is pinned from the builder's first report;
 the dictionary record the word is, first tier before the rare words. His
 English is read only to choose among a spelling's records (あの is "that",
 not the filler "say"; a kana word is one usually written in kana, so いか is
-the cuttlefish, not 以下) and is never kept. A word he lists twice stays at
-the easier level. The parser was written before any of his vocabulary pages
-was read, so the first run may need it fixed: it reads every table headed
-Kanji and Hiragana, refuses a page without one, and refuses rows that look
-like words outside those tables rather than drop them. A cell giving two
-readings or spellings (`・`, a comma, a line break) is the one the
-dictionary has. A row the dictionary lacks is refused until `LEFT_OUT` in
-the builder names it with a reason. The files carry EDRDG's licence block
-(the glosses are JMdict's, share-alike) with Waller's `waller-words` as the
-input, and the checker holds them to it. The shelf takes the rows of the
-level it was asked for: a level picked while another loads cannot take the
-other's rows (`peek` in the loader, not a cache in the events module).
+the cuttlefish, not 以下) and is never kept. A word he lists twice (or one
+record under two readings) stays at the easier level. The parser was
+written before any of his vocabulary pages was read, so the first run may
+need it fixed: it reads every table headed Kanji and Hiragana, refuses a
+page without one, and refuses every row holding Japanese it did not read
+(outside those tables, or in one without its Kanji or Hiragana cells)
+rather than drop it. A cell of several words or readings, split at `・`, a
+comma, a slash, a semicolon or a space (a line break in the cell is one),
+is read only when it is sure which word it is (`jlpt-words.mjs
+resolveRow`): its parts joined, when that is a word his English (if he
+gives any) names (ボール・ペン is ボールペン), or its first part, when every part is a word
+and all are one record (一昨日 おととい・おとつい). Never a first part that
+is another word (ボール "ball"): that row would carry a real record's
+glosses, so no check could catch it. The report names every row read that
+way, to check against his page. Any other row is refused until `READ_AS` in
+the builder says which word it is, or `LEFT_OUT` names it with a reason.
+The files carry EDRDG's licence block (the glosses are JMdict's,
+share-alike) with Waller's `waller-words` as the input, and the checker
+holds them to it. The shelf takes the rows of the level it was asked for: a
+level picked while another loads cannot take the other's rows (`peek` in
+the loader, not a cache in the events module), and
+`tests/word-levels-shelf.test.mjs` drives the events module through that
+race over a stand-in document.
 When the data lands, in the same commit: the Sources dialog's JLPT
 paragraph says words too (it is static HTML in the footer's template), the
 builder goes into `make data` after `build-dict.mjs`, and this paragraph

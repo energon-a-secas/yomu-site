@@ -464,11 +464,24 @@ fails on, the sizes `js/word-levels.js JLPT_WORD_SIZES` pins among them.
 Every file's `_licence` is EDRDG's (the rows carry JMdict glosses as they
 are, which are share-alike), with Waller's lists (`waller-words`) as the
 input that says which words each level holds. The parser reads every table
-of his page headed Kanji and Hiragana and refuses rows that look like words
-outside them; a cell giving two readings or spellings is the one the
-dictionary has. The
-page offers the shelf only once those sizes are pinned, and the checker
-fails `data/words/` without them, or them without it.
+of his page headed Kanji and Hiragana and refuses every row holding
+Japanese it did not read, outside those tables or in one without its Kanji
+or Hiragana cells. A cell of several words or readings, split at `・`, a
+comma (`、`, `，`, `,`), a slash (`/`, `／`), a semicolon (`;`, `；`) or a
+space (a line break in the cell is one), is read by `resolveRow` only when
+it is sure which word it is: the cells joined, when that is a word whose
+glosses share a word with his English, or he gives none (ボール・ペン is
+ボールペン), or the
+first part, when every part is a word and all give the same glosses
+(一昨日 read おととい or おとつい). A row whose parts are different words, or
+that has a part the dictionary lacks, is refused until the builder's
+`READ_AS` says which word it is or `LEFT_OUT` leaves it out: read as its
+first part it would carry another word's glosses, a real record's, which
+the checker cannot tell from a right row. The builder's report names every
+row read other than as its cells are. One record his lists give at two
+levels under two readings is a repeat, kept at the easier. The page offers
+the shelf only once those sizes are pinned, and the checker fails
+`data/words/` without them, or them without it.
 
 `data/play/lookalikes.json` (format `yomu-lookalikes/1`) is not read by the
 analyzer either: it is Play's kanji look-alikes,

@@ -18,7 +18,7 @@ import {
   savableRow, createWordLevels, WORD_LEVELS, JLPT_WORD_SIZES, WORD_LEVELS_READY, WORDS_SRC, WORDS_FORMAT, WORDS_INDEX_FORMAT,
 } from '../js/word-levels.js';
 import {
-  wallerWords, wallerPage, rowOf, rowsOf, chooseRows, chooseRecord, candidatesOf, keysOf, resolvesIn, jlptWordsDocs, jlptWordsProblems, wordKey, cellText,
+  wallerWords, wallerPage, rowOf, rowsOf, readingsOf, resolveRow, chooseRows, chooseRecord, candidatesOf, keysOf, resolvesIn, jlptWordsDocs, jlptWordsProblems, wordKey, cellText,
   wordsLicence,
 } from '../tools/lib/jlpt-words.mjs';
 import { MAX_BYTES } from '../tools/lib/emit.mjs';
@@ -51,6 +51,7 @@ test('a vocabulary page gives the Kanji, Hiragana and English cells of each row 
   const page = wallerPage(PAGE);
   assert.equal(page.tables, 2);
   assert.deepEqual(page.stray, [], 'a table of links in English is no row of his');
+  assert.deepEqual(page.short, [], 'a row of his with no Japanese in it is passed over');
   assert.deepEqual(wallerWords('<table><tr><th>Kanji</th><th>Hiragana</th></tr><tr><td>猫</td><td>ねこ</td></tr></table>'), [['猫', 'ねこ', '']], 'a page with no English column');
   assert.throws(() => wallerWords('<table><tr><th>Kanji</th><th>Onyomi</th></tr><tr><td>日</td><td>ニチ</td></tr></table>'), /no table headed Kanji and Hiragana/);
   assert.throws(() => wallerWords('<table><tr><th>Kanji</th><th>Hiragana</th></tr></table>'), /have no rows/);
@@ -71,6 +72,22 @@ test('rows that look like words outside the headed tables are reported, not drop
   assert.deepEqual(wallerPage(layout).rows, [['会う', 'あう', '']]);
 });
 
+test('rows of a headed table that hold Japanese but not in its Kanji and Hiragana cells are reported, not dropped', () => {
+  const page = wallerPage(`<table><tr><th>Kanji</th><th>Hiragana</th><th>English</th></tr>
+<tr><td>会う</td><td>あう</td><td>to meet</td></tr>
+<tr><td>ねこ</td></tr>
+<tr><td colspan="3">あ行 いぬ</td></tr>
+<tr><th colspan="3">か</th></tr>
+<tr><td></td><td></td><td>see 会う</td></tr>
+<tr><td colspan="3">Page 2</td></tr>
+<tr><td></td><td></td><td>nothing</td></tr>
+</table>`);
+  assert.deepEqual(page.rows, [['会う', 'あう', 'to meet']]);
+  assert.deepEqual(page.short, [['ねこ'], ['あ行 いぬ'], ['か'], ['', '', 'see 会う']],
+    'a row short of the cells, one cell across the table, a heading in kana, and Japanese outside both cells');
+  assert.deepEqual(page.stray, []);
+});
+
 test('a row is its kanji spelling and reading, or a kana word alone', () => {
   assert.deepEqual(rowOf(['会う', 'あう', 'to meet']), ['会う', 'あう']);
   assert.deepEqual(rowOf(['', 'いくら']), ['いくら', '']);
@@ -82,11 +99,20 @@ test('a row is its kanji spelling and reading, or a kana word alone', () => {
   assert.equal(wordKey(['いくら', '']), wordKey(['いくら', 'いくら']));
 });
 
-test('a cell giving two readings or spellings is each of them, after the cells as they are', () => {
-  assert.deepEqual(rowsOf(['一昨日', 'おととい・おとつい']), [['一昨日', 'おととい・おとつい'], ['一昨日', 'おととい'], ['一昨日', 'おとつい']]);
-  assert.deepEqual(rowsOf(['', 'おととい おとつい']), [['おととい おとつい', ''], ['おととい', ''], ['おとつい', '']]);
-  assert.deepEqual(rowsOf(['会う、逢う', 'あう']), [['会う、逢う', 'あう'], ['会う', 'あう'], ['逢う', 'あう']]);
-  assert.deepEqual(rowsOf(['会う', 'あう']), [['会う', 'あう']], 'one of each is the row alone');
+test('a row may be read as its cells, as its cells joined, or as each part a cell gives', () => {
+  assert.deepEqual(readingsOf(['一昨日', 'おととい・おとつい']), {
+    whole: ['一昨日', 'おととい・おとつい'], joined: ['一昨日', 'おとといおとつい'], parts: [['一昨日', 'おととい'], ['一昨日', 'おとつい']],
+  });
+  assert.deepEqual(readingsOf(['', 'ボール・ペン']), { whole: ['ボール・ペン', ''], joined: ['ボールペン', ''], parts: [['ボール', ''], ['ペン', '']] });
+  assert.deepEqual(readingsOf(['ワイ・シャツ', 'わい・しゃつ']).joined, ['ワイシャツ', ''], 'joined, a katakana word his kana column spells in hiragana');
+  assert.deepEqual(readingsOf(['', 'どうぞ よろしく']).joined, ['どうぞよろしく', ''], 'a space separates, as a line break in the cell does');
+  assert.deepEqual(readingsOf(['会う、逢う', 'あう']).parts, [['会う', 'あう'], ['逢う', 'あう']]);
+  for (const sep of ['・', '、', '，', ',', '/', '／', ';', '；', ' ']) {
+    assert.deepEqual(readingsOf(['', `あした${sep}あす`]).parts, [['あした', ''], ['あす', '']], `${JSON.stringify(sep)} separates`);
+  }
+  assert.deepEqual(readingsOf(['会う', 'あう']), { whole: ['会う', 'あう'], joined: null, parts: [] }, 'one of each is the row alone');
+  assert.deepEqual(readingsOf(['', '']), { whole: null, joined: null, parts: [] });
+  assert.deepEqual(rowsOf(['一昨日', 'おととい・おとつい']), [['一昨日', 'おととい・おとつい'], ['一昨日', 'おとといおとつい'], ['一昨日', 'おととい'], ['一昨日', 'おとつい']], 'every reading, for the keys');
   assert.deepEqual(rowsOf(['テレビ', 'てれび']), [['テレビ', '']]);
   assert.deepEqual(rowsOf(['', '']), []);
 });
@@ -123,6 +149,43 @@ test('a listed word is a record its spelling and reading name, and his English c
   assert.deepEqual(keysOf([['一日', 'イチニチ'], ['いくら', '']]), ['一日', 'いちにち', 'いくら']);
 });
 
+test('a cell of several words is read only when it is sure which word it is, never as its first part', async () => {
+  const cases = [
+    [['', 'どうぞ よろしく', 'pleased to meet you'], 'joined', ['どうぞよろしく', ''], 'pleased to meet you'],
+    [['', 'ボール・ペン', 'ball-point pen'], 'joined', ['ボールペン', ''], 'ball-point pen'],
+    [['', 'ボール・ペン', ''], 'joined', ['ボールペン', ''], 'ball-point pen'],
+    [['', 'テープ・レコーダー', 'tape recorder'], 'joined', ['テープレコーダー', ''], 'tape recorder'],
+    [['ワイ・シャツ', 'わい・しゃつ', 'shirt'], 'joined', ['ワイシャツ', ''], '(formal) shirt'],
+    [['一昨日', 'おととい・おとつい', 'day before yesterday'], 'parts', ['一昨日', 'おととい'], 'day before yesterday'],
+    [['', 'おととい・おとつい', ''], 'parts', ['おととい', ''], 'day before yesterday'],
+    [['会う・逢う', 'あう', 'to meet'], 'parts', ['会う', 'あう'], 'to meet'],
+    [['会う', 'あう', 'to meet'], 'whole', ['会う', 'あう'], 'to meet'],
+  ];
+  const refused = [
+    [['上手', 'じょうず・うわて', 'skillful'], /its parts are not one word: 上手 じょうず "skillful", 上手 うわて "upper part"/],
+    [['', 'わい・しゃつ', 'shirt'], /its parts are not one word: わい "I", しゃつ \(no word\)/],
+    [['', 'ワイ・シャツ', 'towel'], /read as one word it is ワイシャツ "\(formal\) shirt", which his English does not name/],
+    [['存在しない語', 'そんざい', ''], /is no word of the dictionary/],
+  ];
+  const { first, rare } = await loaded([...cases, ...refused].flatMap(([cells]) => rowsOf(cells)));
+  const lookup = (w, r) => {
+    const own = candidatesOf(first, w, r);
+    return own.length ? own : candidatesOf(rare, w, r);
+  };
+  for (const [cells, how, row, gloss] of cases) {
+    const got = resolveRow(cells, lookup);
+    assert.deepEqual([got.how, got.row, got.rec && got.rec.g[0]], [how, row, gloss], JSON.stringify(cells));
+  }
+  for (const [cells, why] of refused) assert.match(resolveRow(cells, lookup).why, why, JSON.stringify(cells));
+  const noBallpoint = (w, r) => (w === 'ボールペン' ? [] : lookup(w, r));
+  assert.match(resolveRow(['', 'ボール・ペン', 'ball-point pen'], noBallpoint).why, /its parts are not one word: ボール "ball", ペン "pen"/,
+    'a compound the dictionary lacks is refused, not read as ボール');
+  const readAs = new Map([['上手 じょうず・うわて', ['上手', 'じょうず']], ['ボール・ペン', ['ボールペンX', '']]]);
+  const read = resolveRow(['上手', 'じょうず・うわて', 'skillful'], lookup, readAs);
+  assert.deepEqual([read.how, read.row, read.rec.g[0]], ['READ_AS', ['上手', 'じょうず'], 'skillful'], 'a person says which word it is');
+  assert.match(resolveRow(['', 'ボール・ペン', ''], lookup, readAs).why, /READ_AS reads it as \["ボールペンX",""\], which is no word/);
+});
+
 test('Save keeps the row\'s spelling and reading and its first meaning', () => {
   assert.deepEqual(savableRow(['会う', 'あう', ['to meet', 'to have an accident']]), { w: '会う', r: 'あう', g: 'to meet' });
   assert.deepEqual(savableRow(['いくら', '', ['how much']]), { w: 'いくら', r: 'いくら', g: 'how much' });
@@ -131,24 +194,40 @@ test('Save keeps the row\'s spelling and reading and its first meaning', () => {
 });
 
 test('the words each level keeps: a repeat stays at the easier level, a named row is left out, any other unknown row refuses', () => {
-  const recs = new Map([['会う|あう', [{ g: ['to meet'] }]], ['いくら|', [{ g: ['salmon roe'] }, { g: ['how much'], u: 1 }]], ['上手|じょうず', [{ g: ['skillful'] }]], ['下手|へた', [{ g: ['unskillful'] }]], ['一昨日|おととい', [{ g: ['day before yesterday'] }]]]);
+  const ototoi = { g: ['day before yesterday'] };
+  const recs = new Map([
+    ['会う|あう', [{ g: ['to meet'] }]], ['いくら|', [{ g: ['salmon roe'] }, { g: ['how much'], u: 1 }]], ['上手|じょうず', [{ g: ['skillful'] }]], ['下手|へた', [{ g: ['unskillful'] }]],
+    ['一昨日|おととい', [ototoi]], ['一昨日|おとつい', [ototoi]], ['ボールペン|', [{ g: ['ball-point pen'] }]], ['ボール|', [{ g: ['ball'] }]], ['ペン|', [{ g: ['pen'] }]],
+    ['どうぞ|', [{ g: ['please'] }]], ['よろしく|', [{ g: ['regards'] }]], ['テープ|', [{ g: ['tape'] }]], ['どうぞよろしく|', [{ g: ['pleased to meet you'] }]],
+  ]);
   const lookup = (w, r) => recs.get(`${w}|${r}`) || [];
   const raw = {
-    n5: [['会う', 'あう', 'to meet'], ['', 'いくら', 'how much?'], ['会う', 'あう', 'to meet']],
-    n4: [['上手', 'じょうず', 'skillful'], ['', 'いくら', ''], ['～円', 'えん', 'yen']],
-    n3: [['下手', 'へた', 'unskillful'], ['猫又', 'ねこまた', 'a cat monster'], ['一昨日', 'おとつい おととい', 'day before yesterday']],
+    n5: [['会う', 'あう', 'to meet'], ['', 'いくら', 'how much?'], ['会う', 'あう', 'to meet'], ['', 'ボール・ペン', 'ball-point pen']],
+    n4: [['上手', 'じょうず', 'skillful'], ['', 'いくら', ''], ['～円', 'えん', 'yen'], ['', 'テープ・レコーダー', 'tape recorder']],
+    n3: [['下手', 'へた', 'unskillful'], ['猫又', 'ねこまた', 'a cat monster'], ['一昨日', 'おとつい おととい', 'day before yesterday'], ['', 'どうぞ よろしく', '']],
     n2: [['一昨日', 'おととい', 'day before yesterday']],
   };
-  const got = chooseRows(raw, lookup, new Map([['～円 えん', 'a suffix, not a word'], ['犬 いぬ', 'stale']]));
+  const left = new Map([['～円 えん', 'a suffix, not a word'], ['犬 いぬ', 'stale']]);
+  const got = chooseRows(raw, lookup, left, new Map([['どうぞ よろしく', ['どうぞよろしく', '']], ['猫 ねこ', ['猫', 'ねこ']]]));
   assert.deepEqual(got.levels, {
-    n5: [['会う', 'あう', ['to meet']], ['いくら', '', ['how much']]], n4: [['上手', 'じょうず', ['skillful']]], n3: [['下手', 'へた', ['unskillful']], ['一昨日', 'おととい', ['day before yesterday']]], n2: [], n1: [],
+    n5: [['会う', 'あう', ['to meet']], ['いくら', '', ['how much']], ['ボールペン', '', ['ball-point pen']]],
+    n4: [['上手', 'じょうず', ['skillful']]],
+    n3: [['下手', 'へた', ['unskillful']], ['一昨日', 'おとつい', ['day before yesterday']], ['どうぞよろしく', '', ['pleased to meet you']]],
+    n2: [],
+    n1: [],
   });
   assert.equal(got.chosen, 1, 'いくら took its second record, on his English');
-  assert.equal(got.split, 1, 'the cell with two readings is the one the dictionary has');
-  assert.deepEqual(got.repeats.map((x) => [x.id, x.first, x.row[0]]), [['n5', 'n5', '会う'], ['n4', 'n5', 'いくら'], ['n2', 'n3', '一昨日']], 'and repeats as that word');
+  assert.deepEqual(got.read.map((x) => [x.id, x.row[0], x.row[1], x.how]), [['n5', 'ボールペン', '', 'joined'], ['n3', '一昨日', 'おとつい', 'parts'], ['n3', 'どうぞよろしく', '', 'READ_AS']],
+    'each row read other than as its cells is named, the two readings of one record kept as the first');
+  assert.deepEqual(got.repeats.map((x) => [x.id, x.first, x.row[0], x.row[1]]), [['n5', 'n5', '会う', 'あう'], ['n4', 'n5', 'いくら', ''], ['n2', 'n3', '一昨日', 'おととい']],
+    'and repeats, the same record read another way among them');
   assert.deepEqual(got.left.map((x) => x.why), ['a suffix, not a word']);
-  assert.deepEqual(got.unresolved.map((x) => x.row), [['猫又', 'ねこまた']]);
+  assert.deepEqual(got.unresolved.map((x) => [x.row[0], x.why]), [
+    ['テープ・レコーダー', 'its parts are not one word: テープ "tape", レコーダー (no word)'],
+    ['猫又', 'is no word of the dictionary'],
+  ], 'a compound with a part the dictionary lacks is refused, not kept as テープ');
   assert.deepEqual(got.stale, ['犬 いぬ']);
+  assert.deepEqual(got.staleReadAs, ['猫 ねこ']);
 });
 
 /** Five small levels of real words with their records' glosses, the documents for them, and their sizes. */
