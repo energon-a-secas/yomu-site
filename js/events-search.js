@@ -22,11 +22,13 @@ import { onRoute, openReader } from './events-kanji.js';
 import { loadText } from './events-read.js';
 import { paintSets, chooseSet, currentSet } from './events-sets.js';
 import { paintLevels } from './events-levels.js';
+import { paintWordLevels } from './events-word-levels.js';
+import { WORD_LEVELS_READY } from './word-levels.js';
 import { state, savePrefs } from './state.js';
 import { KANA_ROWS } from './kana-rows.js';
 import { applyHand } from './events-hand.js';
 
-const TABS = Object.freeze(['words', 'parts', 'kana', 'counters', 'sets', 'levels']);
+const TABS = Object.freeze(['words', 'parts', 'kana', 'counters', 'sets', 'levels', 'wordlv']);
 /** Look up holds the field and the parts picker; Browse the shelves. */
 const LOOK = Object.freeze(['words', 'parts']);
 const groupOf = (tab) => (LOOK.includes(tab) ? 'look' : 'browse');
@@ -160,6 +162,7 @@ function showTab(tab, { focus = false } = {}) {
   if (sr.tab === 'counters') fill($('sr-counters'), countersNodes(sr.counter));
   if (sr.tab === 'sets') paintSets();
   if (sr.tab === 'levels') paintLevels();
+  if (sr.tab === 'wordlv') paintWordLevels();
   if (sr.tab === 'words' && focus) $('sr-input')?.focus();
 }
 
@@ -250,6 +253,8 @@ export function searchFor(q) {
 }
 
 export function bindSearch() {
+  // Words by level ships with its lists: the shelf stays hidden until js/word-levels.js pins their sizes.
+  for (const b of document.querySelectorAll('#search [data-tab="wordlv"]')) b.hidden = !WORD_LEVELS_READY;
   const input = $('sr-input');
   if (input) {
     input.addEventListener('input', () => {

@@ -2,8 +2,8 @@
 // 500-line limit, gathered here so events.js imports them once: the Idioms
 // shelves (events-sets.js), My progress (events-progress.js), the reading
 // view (events-view.js), the phone tab bar (events-tabbar.js), Kanji by
-// level (events-levels.js), the handwritten form (events-hand.js) and My
-// words (events-words.js).
+// level (events-levels.js), the handwritten form (events-hand.js), My
+// words (events-words.js) and Words by level (events-word-levels.js).
 
 import { SETS_ACTIONS, bindSets } from './events-sets.js';
 import { PROGRESS_ACTIONS, bindProgress } from './events-progress.js';
@@ -13,6 +13,7 @@ import { LEVELS_ACTIONS } from './events-levels.js';
 import { KANA_ROWS_ACTIONS } from './events-kana-rows.js';
 import { HAND_ACTIONS } from './events-hand.js';
 import { WORDS_ACTIONS, bindWords } from './events-words.js';
+import { WORD_LEVELS_ACTIONS } from './events-word-levels.js';
 
 export const EXTRA_ACTIONS = Object.freeze({
   ...SETS_ACTIONS,
@@ -23,6 +24,7 @@ export const EXTRA_ACTIONS = Object.freeze({
   ...KANA_ROWS_ACTIONS,
   ...HAND_ACTIONS,
   ...WORDS_ACTIONS,
+  ...WORD_LEVELS_ACTIONS,
 });
 
 export function bindExtra() {

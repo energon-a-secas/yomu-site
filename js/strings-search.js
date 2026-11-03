@@ -39,6 +39,22 @@ export const SEARCH_STRINGS = Object.freeze({
     en: 'Practise starts with the kanji not in My kanji yet, and moves no review dates.',
     es: 'Practicar empieza por los kanji que aún no están en Mis kanji, y no cambia las fechas de repaso.',
   },
+  shelfWordLevels: { en: 'Words by level', es: 'Palabras por nivel' },
+  shelfWordLevelsLine: { en: 'JLPT N5 to N1, unofficial', es: 'JLPT N5 a N1, no oficial' },
+  wordLevelsLead: {
+    en: 'The words of the JLPT levels N5 to N1 on Jonathan Waller\'s lists, in his order. The meanings are the dictionary\'s.',
+    es: 'Las palabras de los niveles N5 a N1 del JLPT según las listas de Jonathan Waller, en su orden. Los significados son los del diccionario.',
+  },
+  wordLevelPick: { en: 'JLPT level, unofficial', es: 'Nivel del JLPT, no oficial' },
+  wordLevelNote: {
+    en: 'Jonathan Waller\'s lists, from his site tanos.co.uk, under Creative Commons BY. Unofficial: the JLPT has published no word lists since 2010.',
+    es: 'Las listas de Jonathan Waller, de su sitio tanos.co.uk, con licencia Creative Commons BY. No oficiales: el JLPT no publica listas de palabras desde 2010.',
+  },
+  wordLevelSaveNote: {
+    en: 'Save puts a word in My words, to review with your kanji.',
+    es: 'Guardar pone la palabra en Mis palabras, para repasarla con tus kanji.',
+  },
+  wordLevelsLoading: { en: 'Loading the list…', es: 'Cargando la lista…' },
   shelfIdiom: { en: 'Set expressions, like 足を洗う', es: 'Expresiones fijas, como 足を洗う' },
   setsLead: {
     en: 'Four-character idioms, proverbs and idiomatic phrases, as JMdict tags them. The common ones come first.',

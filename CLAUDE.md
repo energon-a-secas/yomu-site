@@ -367,10 +367,34 @@ save the ones missed. A practice is the review route with `review.practice`. `da
 `words.json`) files each first-tier key with a kanji to up to three rows that
 hold it, its own row first, then the best of each collection: the Word
 panel's "In idioms and proverbs", and the collection a Search result names
-when it is one. Word lists by JLPT level and Kanken were asked for (queue
-#143) and are not here: neither upstream holds word levels. KANJIDIC's JLPT
-field is the four levels the test dropped in 2010, which imiwa renames N5 to
-N1; a learner would study the wrong list, so the N-levels are Waller's.
+when it is one. KANJIDIC's JLPT field is the four levels the test dropped
+in 2010, which imiwa renames N5 to N1; a learner would study the wrong list,
+so the N-levels are Waller's. Kanken levels are not here: no licensed source
+holds levels 4 and above (queue #146).
+
+**Words by level is built and waits on its data, and ships only with it.**
+Waller's JLPT vocabulary lists (`word-levels.js`, `render-word-levels.js`,
+`events-word-levels.js`) are read by `tools/build-jlpt-words.mjs` from his
+archived pages, whose captures are not pinned yet: `tools/lib/sources.mjs`
+`wallerN5Vocab` to `wallerN1Vocab` hold nulls, and the builder refuses until
+they are filled, printing the digests to pin once it has read them. The
+shelf stays hidden and `data/words/` absent until `js/word-levels.js
+JLPT_WORD_SIZES` is pinned from the builder's first report;
+`tools/check-data.mjs` fails either one without the other, and
+`tests/word-levels.test.mjs` the five sizes pinned apart. A row is
+`[written, reading, glosses]`: his spelling and reading, and the glosses of
+the dictionary record the word is, first tier before the rare words. His
+English is read only to choose among a spelling's records (あの is "that",
+not the filler "say"; a kana word is one usually written in kana, so いか is
+the cuttlefish, not 以下) and is never kept. A word he lists twice stays at
+the easier level. The parser was written before any of his vocabulary pages
+was read, so the first run may need it fixed: it finds the table by its
+Kanji and Hiragana headings and refuses a page without one. A row the
+dictionary lacks is refused until `LEFT_OUT` in the builder names it with a
+reason. When the data lands, in the same commit: the Sources dialog's JLPT
+paragraph says words too (it is static HTML in the footer's template), the
+builder goes into `make data` after `build-dict.mjs`, and this paragraph
+loses its first sentence.
 
 **The display choices are local but one.** Furigana (On, Not in My
 kanji, Off), the size, the Kanji select, one sentence at a time, read along
@@ -559,6 +583,7 @@ refuses it.
 - `data/strokes/**`, `data/kpage/**`: emitted by `tools/build-kanji-page.mjs` from KanjiVG (the pin in `tools/lib/sources.mjs`) and the committed `data/dict/` and `data/kanji/` (after `build-dict.mjs` and `build-kanji.mjs`). Rebuild, do not hand-edit.
 - `data/kanji/jinmeiyo.json`: emitted by `tools/build-joyo.mjs` (and `build-kanji.mjs`) from the committed kanji shards. Rebuild, do not hand-edit.
 - `fonts/klee/**`: emitted by `tools/build-font.mjs` from the pinned Klee One and its OFL.txt (`tools/lib/sources.mjs`) over the committed kanji shards. Rebuild, do not hand-edit.
+- `data/words/**` (not there yet, see Words by level above): emitted by `tools/build-jlpt-words.mjs` from Waller's archived vocabulary pages and the committed `data/dict/` (after `build-dict.mjs`); the checker holds every row to a dictionary record and the levels to `js/word-levels.js JLPT_WORD_SIZES`. Rebuild, do not hand-edit.
 - `data/kanji/jlpt.json`: emitted by `tools/build-jlpt.mjs` from Waller's archived pages (the pins in `tools/lib/sources.mjs`); the checker holds it to his sizes and to the kanji shards. Rebuild, do not hand-edit.
 - `data/play/lookalikes.json`: emitted by `tools/build-lookalikes.mjs` from the committed `data/kanji/` (after `build-kanji.mjs` or `build-joyo.mjs`). Rebuild, do not hand-edit.
 - `data/play/spaces.json`: emitted by `tools/build-spaces.mjs` from the phrase library, `tools/lib/compound-lines.mjs` and the analyzer over the committed `data/` (after any change to `js/`'s analyzer, the dictionary or the library). Rebuild, do not hand-edit.
