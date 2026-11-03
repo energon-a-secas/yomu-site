@@ -134,6 +134,9 @@ export const LICENCES = {
   // His vocabulary lists (tools/build-jlpt-words.mjs), under the same terms:
   // which words each level holds, as a spelling and a reading, nothing else
   // of his pages. Its own id, so the kanji file's block keeps saying kanji.
+  // An input, never the top level: each word file carries JMdict glosses as
+  // they are, so EDRDG's share-alike licence governs it
+  // (tools/lib/jlpt-words.mjs wordsLicence).
   wallerWords: {
     source: "Jonathan Waller's JLPT Resources, tanos.co.uk",
     url: 'https://web.archive.org/web/20230130032341/http://www.tanos.co.uk/jlpt/sharing/',

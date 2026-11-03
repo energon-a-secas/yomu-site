@@ -388,10 +388,17 @@ English is read only to choose among a spelling's records (あの is "that",
 not the filler "say"; a kana word is one usually written in kana, so いか is
 the cuttlefish, not 以下) and is never kept. A word he lists twice stays at
 the easier level. The parser was written before any of his vocabulary pages
-was read, so the first run may need it fixed: it finds the table by its
-Kanji and Hiragana headings and refuses a page without one. A row the
-dictionary lacks is refused until `LEFT_OUT` in the builder names it with a
-reason. When the data lands, in the same commit: the Sources dialog's JLPT
+was read, so the first run may need it fixed: it reads every table headed
+Kanji and Hiragana, refuses a page without one, and refuses rows that look
+like words outside those tables rather than drop them. A cell giving two
+readings or spellings (`・`, a comma, a line break) is the one the
+dictionary has. A row the dictionary lacks is refused until `LEFT_OUT` in
+the builder names it with a reason. The files carry EDRDG's licence block
+(the glosses are JMdict's, share-alike) with Waller's `waller-words` as the
+input, and the checker holds them to it. The shelf takes the rows of the
+level it was asked for: a level picked while another loads cannot take the
+other's rows (`peek` in the loader, not a cache in the events module).
+When the data lands, in the same commit: the Sources dialog's JLPT
 paragraph says words too (it is static HTML in the footer's template), the
 builder goes into `make data` after `build-dict.mjs`, and this paragraph
 loses its first sentence.

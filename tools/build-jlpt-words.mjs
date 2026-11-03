@@ -23,6 +23,8 @@
  *   - a capture is not pinned: its url or release is null in
  *     tools/lib/sources.mjs, or, once fetched, its sha256 or bytes, which
  *     the refusal prints so they can be pinned;
+ *   - a page has rows that look like words outside every table headed
+ *     Kanji and Hiragana (wallerPage), which would otherwise be dropped;
  *   - a row is no word of the dictionary and LEFT_OUT below does not name
  *     it, or LEFT_OUT names a row no page has;
  *   - js/word-levels.js JLPT_WORD_SIZES is not pinned: the first run prints
@@ -30,17 +32,19 @@
  *   - the documents break a rule of jlptWordsProblems.
  *
  * A word his lists give twice stays at the easier level, and the report
- * names each repeat.
+ * names each repeat. A cell giving two spellings or readings (おととい・
+ * おとつい) is the one the dictionary has (rowsOf). The files carry
+ * EDRDG's licence, the glosses being JMdict's, with Waller's lists as the
+ * input (wordsLicence).
  */
 import fs from 'node:fs';
 import path from 'node:path';
 import {
   SOURCES, fetchSource, upstream, sha256,
 } from './lib/sources.mjs';
-import { licenceBlock } from './lib/licence.mjs';
 import { writeJson, SITE, fmtBytes, pruneStale } from './lib/emit.mjs';
 import {
-  wallerWords, rowOf, chooseRows, jlptWordsDocs, jlptWordsProblems, leftOutName, candidatesOf, keysOf, resolvesIn,
+  wallerPage, rowsOf, chooseRows, jlptWordsDocs, jlptWordsProblems, leftOutName, candidatesOf, keysOf, resolvesIn, wordsLicence,
   WORD_LEVELS, JLPT_WORD_SIZES,
 } from './lib/jlpt-words.mjs';
 import { WORD_LEVELS_READY } from '../js/word-levels.js';
@@ -67,20 +71,30 @@ async function main() {
     process.exit(1);
   }
   const raw = {};
+  const tables = {};
   const undigested = [];
+  const stray = [];
   for (const id of WORD_LEVELS) {
     const key = sourceKey(id);
     const file = fetchSource(key);
     if (!SOURCES[key].sha256 || !SOURCES[key].bytes) undigested.push(`${key}: sha256 '${sha256(file)}', bytes ${fs.statSync(file).size}`);
-    raw[id] = wallerWords(fs.readFileSync(file, 'utf8'));
+    const page = wallerPage(fs.readFileSync(file, 'utf8'));
+    raw[id] = page.rows;
+    tables[id] = page.tables;
+    for (const cells of page.stray) stray.push(`${id} ${JSON.stringify(cells)}`);
   }
   if (undigested.length) {
     process.stderr.write(`REFUSED: pin what was read, in tools/lib/sources.mjs:\n  ${undigested.join('\n  ')}\n`);
     process.exit(1);
   }
+  if (stray.length) {
+    for (const line of stray.slice(0, 12)) process.stderr.write(`  outside the headed tables: ${line}\n`);
+    process.stderr.write(`REFUSED: ${stray.length} rows that look like words are outside every table headed Kanji and Hiragana. Change wallerPage in tools/lib/jlpt-words.mjs to read them, or to pass over what is not his list.\n`);
+    process.exit(1);
+  }
 
   const dict = createDict({ fetchJson: async (p) => JSON.parse(fs.readFileSync(p, 'utf8')), base: `${path.join(SITE, 'data')}/` });
-  const rows = WORD_LEVELS.flatMap((id) => raw[id].map(rowOf).filter(Boolean));
+  const rows = WORD_LEVELS.flatMap((id) => raw[id].flatMap(rowsOf));
   const keys = keysOf(rows);
   await dict.need(keys);
   await dict.needRare(keys);
@@ -93,8 +107,9 @@ async function main() {
   const resolves = resolvesIn(first, rare);
 
   const chosen = chooseRows(raw, lookup, LEFT_OUT);
-  const lines = WORD_LEVELS.map((id) => `${id}: ${raw[id].length} rows on his page, ${chosen.levels[id].length} kept`);
+  const lines = WORD_LEVELS.map((id) => `${id}: ${raw[id].length} rows on his page in ${tables[id]} ${tables[id] === 1 ? 'table' : 'tables'}, ${chosen.levels[id].length} kept`);
   lines.push(`${chosen.chosen} words took another record than the dictionary's first, on his English`);
+  if (chosen.split) lines.push(`${chosen.split} rows gave two spellings or readings, each kept as the one the dictionary has`);
   if (chosen.repeats.length) {
     lines.push(`${chosen.repeats.length} repeats, each kept at its first level: ${chosen.repeats.map((x) => `${leftOutName(x.row)} (${x.first}, again in ${x.id})`).join('; ')}`);
   }
@@ -113,9 +128,9 @@ async function main() {
     process.exit(1);
   }
 
-  const licence = licenceBlock('wallerWords', TOOL, {
-    upstream: WORD_LEVELS.map((id) => upstream(sourceKey(id))),
-    inputs: [['edrdg', 'the glosses of each word, from the dictionary record it is']],
+  // EDRDG's licence governs, as the glosses are JMdict's (wordsLicence).
+  const licence = wordsLicence(TOOL, {
+    upstream: [upstream('jmdictFull'), ...WORD_LEVELS.map((id) => upstream(sourceKey(id)))],
   });
   const { index, files } = jlptWordsDocs(chosen.levels, licence);
   const byPath = new Map(files);

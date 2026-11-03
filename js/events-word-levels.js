@@ -19,7 +19,6 @@ const wl = {
   shown: WORD_PAGE,
   kept: [],
   token: 0,
-  cache: new Map(), // level id -> its rows, so a save or Show more never flashes "Loading"
 };
 
 const savedOf = (words) => (row) => {
@@ -27,23 +26,30 @@ const savedOf = (words) => (row) => {
   return !!w && words.isSaved(w.w, w.r);
 };
 
-/** Draw the chosen level; a paint a newer one overtook draws nothing. */
+/**
+ * Draw the chosen level; a paint a newer one overtook draws nothing. The
+ * level is read once, before the wait: a learner may pick another while
+ * this one loads, and levels arrive in any order, each from its own files.
+ * The loader keeps each level's rows under the id it was asked for (peek),
+ * so a repaint (Save, Show more, a language switch) draws them at once.
+ */
 export async function paintWordLevels() {
   const body = $('sr-wordlv-body');
   if (!body) return;
   const token = ++wl.token;
+  const { level, shown } = wl;
   const isSaved = savedOf(myWords());
   const draw = (v) => {
-    const { nodes, kept } = wordLevelsNodes({ level: wl.level, shown: wl.shown, isSaved, ...v });
+    const { nodes, kept } = wordLevelsNodes({ level, shown, isSaved, ...v });
     wl.kept = kept;
     fill(body, nodes);
   };
-  const cached = wl.cache.get(wl.level);
-  if (cached) { draw({ rows: cached }); return; }
+  const lists = pageWordLevels();
+  const ready = lists.peek(level);
+  if (ready) { draw({ rows: ready }); return; }
   draw({ rows: null });
   try {
-    const rows = await pageWordLevels().rows(wl.level);
-    wl.cache.set(wl.level, rows);
+    const rows = await lists.rows(level);
     if (token !== wl.token) return;
     draw({ rows });
   } catch (err) {

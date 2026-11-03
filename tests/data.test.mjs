@@ -25,6 +25,7 @@ import { isKana, isKanji, isHiragana, toHira } from '../js/kana.js';
 import { groupsOfWord } from '../js/sounds-like.js';
 import { BANNED_WORDS, licenceBlock } from '../tools/lib/licence.mjs';
 import { WORD_LEVELS_READY, WORDS_INDEX_FORMAT } from '../js/word-levels.js';
+import { wordsLicence } from '../tools/lib/jlpt-words.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const SITE = resolve(HERE, '..');
@@ -566,7 +567,7 @@ test('check-data holds the JLPT word lists to the sizes js/word-levels.js pins',
     const run = await brokenCopy((rw, dir) => {
       mkdirSync(join(dir, 'data', 'words'));
       writeFileSync(join(dir, 'data', 'words', 'jlpt.json'), JSON.stringify({
-        _licence: licenceBlock('wallerWords', 'tests/data.test.mjs'), format: WORDS_INDEX_FORMAT, count: 0, levels: {},
+        _licence: wordsLicence('tests/data.test.mjs'), format: WORDS_INDEX_FORMAT, count: 0, levels: {},
       }));
     });
     assert.equal(run.status, 1, 'word lists with no sizes pinned');

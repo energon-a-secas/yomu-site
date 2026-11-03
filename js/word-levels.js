@@ -49,7 +49,10 @@ export function savableRow(row) {
 
 /**
  * The lists, loaded on first view: `levels()` the index's levels and their
- * files, `rows(id)` a level's rows, frozen, in his order. A failure is
+ * files, `rows(id)` a level's rows, frozen, in his order, and `peek(id)`
+ * those rows once they have arrived (null before), so a repaint can draw
+ * them at once instead of a moment of "Loading". Each level is kept under
+ * the id it was asked for, whatever order its files arrive in. A failure is
  * forgotten, so a retry fetches again.
  * @param {{ fetchJson: Function, base?: string }} o
  */
@@ -58,6 +61,7 @@ export function createWordLevels({ fetchJson, base = 'data/' }) {
   const resolve = (src) => (src.startsWith('data/') ? dir + src.slice(5) : src);
   let index = null;
   const loaded = new Map(); // level id -> Promise of rows
+  const arrived = new Map(); // level id -> its rows, once loaded
 
   function levels() {
     if (!index) {
@@ -80,14 +84,18 @@ export function createWordLevels({ fetchJson, base = 'data/' }) {
         for (const d of docs) {
           if (!d || d.format !== WORDS_FORMAT || d.level !== id || !Array.isArray(d.rows)) throw new Error(`${id}: not ${WORDS_FORMAT}`);
         }
-        return Object.freeze(docs.flatMap((d) => d.rows));
+        const list = Object.freeze(docs.flatMap((d) => d.rows));
+        arrived.set(id, list);
+        return list;
       }).catch((e) => { loaded.delete(id); throw e; });
       loaded.set(id, p);
     }
     return loaded.get(id);
   }
 
-  return Object.freeze({ levels, rows });
+  const peek = (id) => arrived.get(id) || null;
+
+  return Object.freeze({ levels, rows, peek });
 }
 
 let shared = null;

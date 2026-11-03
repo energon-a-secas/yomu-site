@@ -18,7 +18,8 @@ import {
   savableRow, createWordLevels, WORD_LEVELS, JLPT_WORD_SIZES, WORD_LEVELS_READY, WORDS_SRC, WORDS_FORMAT, WORDS_INDEX_FORMAT,
 } from '../js/word-levels.js';
 import {
-  wallerWords, rowOf, chooseRows, chooseRecord, candidatesOf, keysOf, resolvesIn, jlptWordsDocs, jlptWordsProblems, wordKey, cellText,
+  wallerWords, wallerPage, rowOf, rowsOf, chooseRows, chooseRecord, candidatesOf, keysOf, resolvesIn, jlptWordsDocs, jlptWordsProblems, wordKey, cellText,
+  wordsLicence,
 } from '../tools/lib/jlpt-words.mjs';
 import { MAX_BYTES } from '../tools/lib/emit.mjs';
 import { licenceBlock } from '../tools/lib/licence.mjs';
@@ -34,18 +35,40 @@ const PAGE = `<html><body>
 <tr><td><a href="/x">テレビ</a></td><td><a href="/x">てれび</a></td><td><a href="/x">television, TV</a></td></tr>
 <tr><td><a href="/x">上手&nbsp;</a></td><td>じょうず</td><td>skillful &amp; good</td></tr>
 <tr><td></td><td></td><td>a row with nothing in it</td></tr>
+<tr><th>Kanji</th><th>Hiragana</th><th>English</th></tr>
+<tr><td>一昨日</td><td>おととい<br>おとつい</td><td>day before yesterday</td></tr>
 </table>
+<p>Page 2</p>
 <table><tr><th>Kanji</th><th>Hiragana</th></tr><tr><td>猫</td><td>ねこ</td></tr></table>
+<table><tr><td>Home</td><td>N5 kanji</td></tr></table>
 </body></html>`;
 
-test('a vocabulary page gives the Kanji, Hiragana and English cells of each row of its table, nothing above it or after it', () => {
+test('a vocabulary page gives the Kanji, Hiragana and English cells of each row of every table so headed, nothing above them', () => {
   assert.deepEqual(wallerWords(PAGE), [
     ['会う', 'あう', 'to meet'], ['', 'いくら', 'how much?'], ['テレビ', 'てれび', 'television, TV'], ['上手', 'じょうず', 'skillful & good'],
-  ]);
+    ['一昨日', 'おととい おとつい', 'day before yesterday'], ['猫', 'ねこ', ''],
+  ], 'a heading row the table repeats is passed over, and a list split over two tables is read whole');
+  const page = wallerPage(PAGE);
+  assert.equal(page.tables, 2);
+  assert.deepEqual(page.stray, [], 'a table of links in English is no row of his');
   assert.deepEqual(wallerWords('<table><tr><th>Kanji</th><th>Hiragana</th></tr><tr><td>猫</td><td>ねこ</td></tr></table>'), [['猫', 'ねこ', '']], 'a page with no English column');
   assert.throws(() => wallerWords('<table><tr><th>Kanji</th><th>Onyomi</th></tr><tr><td>日</td><td>ニチ</td></tr></table>'), /no table headed Kanji and Hiragana/);
-  assert.throws(() => wallerWords('<table><tr><th>Kanji</th><th>Hiragana</th></tr></table>'), /has no rows/);
+  assert.throws(() => wallerWords('<table><tr><th>Kanji</th><th>Hiragana</th></tr></table>'), /have no rows/);
   assert.equal(cellText('<a>&#x4e00;&#26085;&nbsp; &lt;x&gt;　</a>'), '一日 <x>');
+  assert.equal(cellText('おととい<br/>おとつい'), 'おととい おとつい', 'a line break keeps two readings apart');
+});
+
+test('rows that look like words outside the headed tables are reported, not dropped', () => {
+  const split = `<table><tr><th>Kanji</th><th>Hiragana</th><th>English</th></tr>
+<tr><td>会う</td><td>あう</td><td>to meet</td></tr></table>
+<table><tr><td>猫</td><td>ねこ</td><td>cat</td></tr><tr><td>Next page</td><td>2</td></tr></table>`;
+  const page = wallerPage(split);
+  assert.deepEqual(page.rows, [['会う', 'あう', 'to meet']]);
+  assert.deepEqual(page.stray, [['猫', 'ねこ', 'cat']], 'a table that goes on without its headings');
+  const layout = `<table><tr><td>menu</td><td><table><tr><th>Kanji</th><th>Hiragana</th></tr><tr><td>会う</td><td>あう</td></tr></table></td></tr>
+<tr><td>日本語</td><td>にほんご</td></tr></table>`;
+  assert.deepEqual(wallerPage(layout).stray, [['日本語', 'にほんご']], 'a row of the layout table after his');
+  assert.deepEqual(wallerPage(layout).rows, [['会う', 'あう', '']]);
 });
 
 test('a row is its kanji spelling and reading, or a kana word alone', () => {
@@ -55,7 +78,17 @@ test('a row is its kanji spelling and reading, or a kana word alone', () => {
   assert.deepEqual(rowOf(['テレビ', 'てれび']), ['テレビ', ''], 'a katakana word his kana column spells in hiragana');
   assert.deepEqual(rowOf(['テレビ', '']), ['テレビ', '']);
   assert.equal(rowOf(['', '']), null);
+  assert.deepEqual(rowOf(['', 'おととい おとつい']), ['おととい おとつい', ''], 'a kana cell alone is the written form, whatever it holds');
   assert.equal(wordKey(['いくら', '']), wordKey(['いくら', 'いくら']));
+});
+
+test('a cell giving two readings or spellings is each of them, after the cells as they are', () => {
+  assert.deepEqual(rowsOf(['一昨日', 'おととい・おとつい']), [['一昨日', 'おととい・おとつい'], ['一昨日', 'おととい'], ['一昨日', 'おとつい']]);
+  assert.deepEqual(rowsOf(['', 'おととい おとつい']), [['おととい おとつい', ''], ['おととい', ''], ['おとつい', '']]);
+  assert.deepEqual(rowsOf(['会う、逢う', 'あう']), [['会う、逢う', 'あう'], ['会う', 'あう'], ['逢う', 'あう']]);
+  assert.deepEqual(rowsOf(['会う', 'あう']), [['会う', 'あう']], 'one of each is the row alone');
+  assert.deepEqual(rowsOf(['テレビ', 'てれび']), [['テレビ', '']]);
+  assert.deepEqual(rowsOf(['', '']), []);
 });
 
 /** The committed dictionary with these rows' keys loaded, both tiers, and lookups over each. */
@@ -98,19 +131,21 @@ test('Save keeps the row\'s spelling and reading and its first meaning', () => {
 });
 
 test('the words each level keeps: a repeat stays at the easier level, a named row is left out, any other unknown row refuses', () => {
-  const recs = new Map([['会う|あう', [{ g: ['to meet'] }]], ['いくら|', [{ g: ['salmon roe'] }, { g: ['how much'], u: 1 }]], ['上手|じょうず', [{ g: ['skillful'] }]], ['下手|へた', [{ g: ['unskillful'] }]]]);
+  const recs = new Map([['会う|あう', [{ g: ['to meet'] }]], ['いくら|', [{ g: ['salmon roe'] }, { g: ['how much'], u: 1 }]], ['上手|じょうず', [{ g: ['skillful'] }]], ['下手|へた', [{ g: ['unskillful'] }]], ['一昨日|おととい', [{ g: ['day before yesterday'] }]]]);
   const lookup = (w, r) => recs.get(`${w}|${r}`) || [];
   const raw = {
     n5: [['会う', 'あう', 'to meet'], ['', 'いくら', 'how much?'], ['会う', 'あう', 'to meet']],
     n4: [['上手', 'じょうず', 'skillful'], ['', 'いくら', ''], ['～円', 'えん', 'yen']],
-    n3: [['下手', 'へた', 'unskillful'], ['猫又', 'ねこまた', 'a cat monster']],
+    n3: [['下手', 'へた', 'unskillful'], ['猫又', 'ねこまた', 'a cat monster'], ['一昨日', 'おとつい おととい', 'day before yesterday']],
+    n2: [['一昨日', 'おととい', 'day before yesterday']],
   };
   const got = chooseRows(raw, lookup, new Map([['～円 えん', 'a suffix, not a word'], ['犬 いぬ', 'stale']]));
   assert.deepEqual(got.levels, {
-    n5: [['会う', 'あう', ['to meet']], ['いくら', '', ['how much']]], n4: [['上手', 'じょうず', ['skillful']]], n3: [['下手', 'へた', ['unskillful']]], n2: [], n1: [],
+    n5: [['会う', 'あう', ['to meet']], ['いくら', '', ['how much']]], n4: [['上手', 'じょうず', ['skillful']]], n3: [['下手', 'へた', ['unskillful']], ['一昨日', 'おととい', ['day before yesterday']]], n2: [], n1: [],
   });
   assert.equal(got.chosen, 1, 'いくら took its second record, on his English');
-  assert.deepEqual(got.repeats.map((x) => [x.id, x.first, x.row[0]]), [['n5', 'n5', '会う'], ['n4', 'n5', 'いくら']]);
+  assert.equal(got.split, 1, 'the cell with two readings is the one the dictionary has');
+  assert.deepEqual(got.repeats.map((x) => [x.id, x.first, x.row[0]]), [['n5', 'n5', '会う'], ['n4', 'n5', 'いくら'], ['n2', 'n3', '一昨日']], 'and repeats as that word');
   assert.deepEqual(got.left.map((x) => x.why), ['a suffix, not a word']);
   assert.deepEqual(got.unresolved.map((x) => x.row), [['猫又', 'ねこまた']]);
   assert.deepEqual(got.stale, ['犬 いぬ']);
@@ -134,7 +169,7 @@ async function sample() {
     });
   }
   const sizes = Object.fromEntries(WORD_LEVELS.map((id) => [id, levels[id].length]));
-  const { index, files } = jlptWordsDocs(levels, licenceBlock('wallerWords', 'tests/word-levels.test.mjs'));
+  const { index, files } = jlptWordsDocs(levels, wordsLicence('tests/word-levels.test.mjs'));
   return { levels, sizes, index, files: new Map(files), resolves: resolvesIn(first, rare), first };
 }
 
@@ -149,7 +184,7 @@ test('the documents: an index of the five levels and one file each while it fits
   assert.deepEqual(jlptWordsProblems(index, (rel) => files.get(rel), { sizes, resolves }), []);
   // a level larger than one file fills as many as the cap asks, in order
   const many = Array.from({ length: 6000 }, (_, i) => [`語${String(i).padStart(4, '0')}`, 'ご'.repeat(8), ['a word of a level larger than one file']]);
-  const big = jlptWordsDocs({ n1: many }, licenceBlock('wallerWords', 'tests/word-levels.test.mjs'));
+  const big = jlptWordsDocs({ n1: many }, wordsLicence('tests/word-levels.test.mjs'));
   assert.ok(big.index.levels.n1.files.length > 1);
   assert.deepEqual(big.files.flatMap(([, d]) => d.rows), many);
   for (const [, doc] of big.files) assert.ok(Buffer.byteLength(JSON.stringify(doc)) < MAX_BYTES);
@@ -173,11 +208,38 @@ test('the rules: sizes, repeats, rows out of shape, glosses no record has, and a
   assert.match(check((c) => { c.files['data/words/n5-0.json'].rows[0][2] = []; }), /row 0 has no glosses/);
   assert.match(check((c) => { c.index.levels.n1.files.push('data/words/n1-1.json'); }), /n1 lists data\/words\/n1-1\.json, which is missing/);
   assert.match(check((c) => { c.index.count = 9; }), /count is 9, and the levels hold 8/);
+  assert.match(check((c) => { c.files['data/words/n2-0.json']._licence = licenceBlock('wallerWords', 'x', { inputs: [['edrdg', 'the glosses']] }); }),
+    /n2-0\.json: _licence is waller-words, not edrdg: the glosses are JMdict's/, 'CC BY on top of share-alike glosses');
+  assert.match(check((c) => { c.index._licence = licenceBlock('edrdg', 'x'); }), /_licence\.inputs does not credit Waller's lists \(waller-words\)/);
   const unpinned = Object.fromEntries(WORD_LEVELS.map((id) => [id, null]));
   assert.match(jlptWordsProblems(base.index, (rel) => base.files.get(rel), { sizes: unpinned }).join('\n'), /n5: no size is pinned/);
   // without the rare tier, a word the first tier lacks cannot be told
   assert.equal(resolvesIn(base.first)('えびす講', 'えびすこう', ['x']), undefined);
   assert.equal(resolvesIn(base.first)('会う', 'あう', ['x']), false);
+});
+
+test('a level arrives under the id it was asked for, whichever level\'s files come back first', async () => {
+  const { index, files } = await sample();
+  const docs = new Map([['data/words/jlpt.json', index], ...files]);
+  const held = new Map();
+  const fetcher = (p) => {
+    const doc = docs.get(p);
+    if (p !== 'data/words/n5-0.json') return Promise.resolve(structuredClone(doc));
+    return new Promise((done) => held.set(p, () => done(structuredClone(doc))));
+  };
+  const lists = createWordLevels({ fetchJson: fetcher });
+  assert.equal(lists.peek('n5'), null, 'nothing before it is asked for');
+  const n5 = lists.rows('n5');
+  const n4 = await lists.rows('n4');
+  assert.deepEqual(n4.map((r) => r[0]), ['上手', '一日']);
+  assert.equal(lists.peek('n4'), n4);
+  assert.equal(lists.peek('n5'), null, 'N5 still on its way');
+  await new Promise((r) => setImmediate(r));
+  held.get('data/words/n5-0.json')();
+  assert.deepEqual((await n5).map((r) => r[0]), ['会う', 'いくら', 'テレビ']);
+  assert.equal(lists.peek('n5'), await n5);
+  assert.deepEqual(lists.peek('n4').map((r) => r[0]), ['上手', '一日'], 'N5 arriving last leaves N4 its own');
+  assert.equal(lists.peek('n9'), null);
 });
 
 test('the page loads a level\'s rows once, in order, and forgets a failure', async () => {
@@ -196,6 +258,7 @@ test('the page loads a level\'s rows once, in order, and forgets a failure', asy
     assert.deepEqual(await lists.rows('n9'), []);
     writeFileSync(join(dir, 'words', 'n3-0.json'), JSON.stringify({ format: 'nope' }));
     await assert.rejects(lists.rows('n3'), /n3: not yomu-jlpt-words\/1/);
+    assert.equal(lists.peek('n3'), null, 'a failure leaves nothing to peek at');
     writeFileSync(join(dir, 'words', 'n3-0.json'), JSON.stringify(files.get('data/words/n3-0.json')));
     assert.deepEqual((await lists.rows('n3')).map((r) => r[0]), ['彼奴'], 'a retry fetches again');
   } finally {

@@ -15,9 +15,11 @@
  *
  * The parser was written before any of his vocabulary pages was read (the
  * captures could not be fetched from the session that wrote it): it finds
- * the table by its headings, the way his kanji pages head theirs, and
- * refuses a page it cannot find one in, so the first real run either reads
- * his rows or says why it did not.
+ * the tables by their headings, the way his kanji pages head theirs, reads
+ * every table so headed (a list split over several), and reports the rows
+ * it passes over that look like words, which the builder refuses. A page
+ * it cannot find a table in is refused too, so the first real run either
+ * reads all his rows or says why it did not.
  */
 import {
   WORDS_FORMAT, WORDS_INDEX_FORMAT, WORD_LEVELS, JLPT_WORD_SIZES, WORDS_SRC, isKanaWord,
@@ -26,6 +28,7 @@ import { toHira } from '../../js/kana.js';
 import { glossWords } from '../../js/search.js';
 import { MAX_FIELD } from '../../js/word-store.js';
 import { serialize, MAX_BYTES } from './emit.mjs';
+import { licenceBlock, LICENCES } from './licence.mjs';
 
 export {
   WORDS_FORMAT, WORDS_INDEX_FORMAT, WORD_LEVELS, JLPT_WORD_SIZES, WORDS_SRC,
@@ -35,9 +38,14 @@ export {
 
 const ENTITY = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ' };
 
-/** A cell's text: tags out, entities decoded, runs of space (an ideographic one too) as one. */
+/**
+ * A cell's text: tags out, entities decoded, runs of space (an ideographic
+ * one too) as one. A line break, or the end of a paragraph or block, is a
+ * space, so two readings a cell gives on two lines stay two (rowsOf).
+ */
 export function cellText(html) {
   return String(html)
+    .replace(/<br\b[^>]*>|<\/(p|div|li)\s*>/gi, ' ')
     .replace(/<[^>]*>/g, '')
     .replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (m, e) => {
       if (e[0] === '#') return String.fromCodePoint(e[1] === 'x' || e[1] === 'X' ? parseInt(e.slice(2), 16) : Number(e.slice(1)));
@@ -57,50 +65,88 @@ function cellsOf(chunk) {
   return out;
 }
 
+/** Kana or kanji: a cell with any is Japanese, and a row with one may be a word. */
+const JAPANESE = /[\u3041-\u30ff\u3400-\u9fff々〆〜～]/;
+
 /**
- * The rows of one archived vocabulary page: for each row of the table whose
+ * One archived vocabulary page: `rows`, for each row of every table whose
  * headings name a Kanji column and a Hiragana one, [kanji cell, kana cell,
  * English cell], each '' when the page leaves it empty (or has no English
- * column). Nothing above the headings and nothing after the table's end is
- * read.
+ * column); `tables`, how many tables were so headed; and `stray`, the cells
+ * of each row outside them that has two cells or more, one of them
+ * Japanese: a row of his the headings did not reach, as when a table goes
+ * on without them, which the builder refuses rather than drop. A heading
+ * row a table repeats is passed over.
  */
-export function wallerWords(html) {
+export function wallerPage(html) {
   const chunks = String(html).split(/<tr\b[^>]*>/i).slice(1);
   let cols = null;
+  let tables = 0;
   const rows = [];
+  const stray = [];
   for (const raw of chunks) {
     const end = raw.search(/<\/table\s*>/i);
     const cells = cellsOf(end >= 0 ? raw.slice(0, end) : raw);
-    if (!cols) {
-      const heads = cells.filter(([th]) => th).map(([, c]) => cellText(c));
-      const at = Object.fromEntries(Object.entries(HEADS).map(([k, re]) => [k, heads.findIndex((t) => re.test(t))]));
-      if (heads.length && heads.length === cells.length && at.kanji >= 0 && at.kana >= 0) cols = at;
-    } else {
+    const heads = cells.filter(([th]) => th).map(([, c]) => cellText(c));
+    const at = Object.fromEntries(Object.entries(HEADS).map(([k, re]) => [k, heads.findIndex((t) => re.test(t))]));
+    if (heads.length && heads.length === cells.length && at.kanji >= 0 && at.kana >= 0) {
+      if (!cols) tables += 1;
+      cols = at;
+    } else if (cols) {
       const tds = cells.filter(([th]) => !th).map(([, c]) => cellText(c));
       if (tds.length > Math.max(cols.kanji, cols.kana)) {
         const row = [tds[cols.kanji], tds[cols.kana], cols.english >= 0 ? (tds[cols.english] || '') : ''];
         if (row[0] || row[1]) rows.push(row);
       }
+    } else {
+      const tds = cells.map(([, c]) => cellText(c));
+      if (tds.length >= 2 && tds.some((t) => JAPANESE.test(t))) stray.push(tds);
     }
-    if (cols && end >= 0) break;
+    if (end >= 0) cols = null;
   }
-  if (!cols) throw new Error('no table headed Kanji and Hiragana');
-  if (!rows.length) throw new Error('the table headed Kanji and Hiragana has no rows');
-  return rows;
+  if (!tables) throw new Error('no table headed Kanji and Hiragana');
+  if (!rows.length) throw new Error('the tables headed Kanji and Hiragana have no rows');
+  return { rows, tables, stray };
 }
+
+/** The rows of one vocabulary page (wallerPage), the tables' rows alone. */
+export const wallerWords = (html) => wallerPage(html).rows;
 
 /**
  * A row of his as the shelf keeps it: [written, reading], the kanji
  * spelling written and the kana its reading, or a word with no kanji
- * spelling written in kana with reading '' (a katakana word his kana
- * column gives in hiragana is the katakana word).
+ * spelling written as his kana cell gives it, with reading '' (a katakana
+ * word his kana column gives in hiragana is the katakana word).
  */
 export function rowOf([kanji, kana]) {
   const written = kanji || kana;
   const reading = kana || '';
   if (!written) return null;
+  if (!kanji) return [written, ''];
   if (isKanaWord(written) && (!reading || toHira(reading) === toHira(written))) return [written, ''];
   return [written, reading];
+}
+
+/** What separates two spellings or two readings a cell gives (おととい・おとつい, or a line each). */
+const ALTERNATIVES = /\s*[・、，,／/;；]\s*|\s+/;
+
+/**
+ * The words a row of his may be, in the order to try them: the row as
+ * rowOf reads it, then, for a cell that gives two spellings or two
+ * readings, each spelling with each reading, as rowOf reads them. One
+ * that is a word of the dictionary is the row's word (chooseRows); the
+ * whole cell comes first, so a word written with a ・ is still itself.
+ */
+export function rowsOf(cells) {
+  const [kanji = '', kana = ''] = cells;
+  const out = new Map();
+  const add = (row) => { if (row && !out.has(wordKey(row))) out.set(wordKey(row), row); };
+  add(rowOf([kanji, kana]));
+  const split = (t) => t.split(ALTERNATIVES).filter(Boolean);
+  const ks = kanji ? split(kanji) : [''];
+  const hs = kana ? split(kana) : [''];
+  if (ks.length > 1 || hs.length > 1) for (const k of ks) for (const h of hs) add(rowOf([k, h]));
+  return [...out.values()];
 }
 
 /** One word, whatever level holds it: the same spelling read the same way. */
@@ -172,14 +218,16 @@ export function chooseRecord(candidates, english, kanaWritten = false) {
  * The words each level keeps, from his rows (`raw`, a level id to rows of
  * [kanji cell, kana cell, English cell]) and `lookup(written, reading)`,
  * the candidate records of a word (candidatesOf over the first tier, or the
- * rare words when the first tier has none). Each kept row is [written,
+ * rare words when the first tier has none). A row is the first of rowsOf
+ * that has a candidate, so a cell giving two readings is the one the
+ * dictionary has (`split` counts those). Each kept row is [written,
  * reading, the chosen record's glosses]. A word his lists repeat stays at
  * the first level that has it, the easiest, and the repeat is reported; a
- * row named in `leftOut` (leftOutName to a reason) is left out and
- * reported; any other row with no candidate is `unresolved`, which the
- * builder refuses to write, as it does a `leftOut` name no row matched
- * (`stale`). `chosen` counts the rows whose record his English chose over
- * the first candidate.
+ * row named in `leftOut` (leftOutName of the row as rowOf reads it, to a
+ * reason) is left out and reported; any other row with no candidate is
+ * `unresolved`, which the builder refuses to write, as it does a `leftOut`
+ * name no row matched (`stale`). `chosen` counts the rows whose record his
+ * English chose over the first candidate.
  */
 export function chooseRows(raw, lookup, leftOut = new Map()) {
   const levels = {};
@@ -189,28 +237,56 @@ export function chooseRows(raw, lookup, leftOut = new Map()) {
   const unresolved = [];
   const named = new Set();
   let chosen = 0;
+  let split = 0;
   for (const id of WORD_LEVELS) {
     levels[id] = [];
     for (const cells of raw[id] || []) {
-      const row = rowOf(cells);
-      if (!row) continue;
+      const tries = rowsOf(cells);
+      if (!tries.length) continue;
+      const name = leftOutName(tries[0]);
+      if (leftOut.has(name)) { named.add(name); left.push({ id, row: tries[0], why: leftOut.get(name) }); continue; }
+      let row = tries[0];
+      let cands = [];
+      for (const t of tries) {
+        cands = lookup(t[0], t[1]);
+        if (cands.length) { row = t; break; }
+      }
       const key = wordKey(row);
       if (seen.has(key)) { repeats.push({ id, row, first: seen.get(key) }); continue; }
-      const name = leftOutName(row);
-      if (leftOut.has(name)) { named.add(name); left.push({ id, row, why: leftOut.get(name) }); continue; }
-      const cands = lookup(row[0], row[1]);
       const rec = chooseRecord(cands, cells[2], !row[1]);
       if (!rec) { unresolved.push({ id, row, cells }); continue; }
       if (rec !== cands[0]) chosen += 1;
+      if (row !== tries[0]) split += 1;
       seen.set(key, id);
       levels[id].push([row[0], row[1], rec.g.slice()]);
     }
   }
   const stale = [...leftOut.keys()].filter((name) => !named.has(name));
-  return { levels, repeats, left, unresolved, stale, chosen };
+  return { levels, repeats, left, unresolved, stale, chosen, split };
 }
 
 // ── The documents ─────────────────────────────────────────────────────────
+
+/**
+ * The `_licence` block of every word file. Each row carries JMdict glosses
+ * as they are, which are CC BY-SA, so EDRDG's licence governs the file, as
+ * it does every other file that carries the dictionary's text (data/sets,
+ * data/spell); Waller's lists, CC BY, are the input that says which words
+ * each level holds. jlptWordsProblems holds the files to this shape.
+ */
+export function wordsLicence(generatedBy, extra = {}) {
+  return licenceBlock('edrdg', generatedBy, {
+    ...extra,
+    inputs: [['wallerWords', 'which words each level holds, in his order: the spelling and the reading of each row of his lists']],
+  });
+}
+
+/** Why a file's `_licence` is not wordsLicence's shape, or null. */
+function licenceProblem(block) {
+  if (!block || block.id !== LICENCES.edrdg.id) return `_licence is ${block ? block.id : 'missing'}, not ${LICENCES.edrdg.id}: the glosses are JMdict's, under its share-alike licence`;
+  if (!Array.isArray(block.inputs) || !block.inputs.some((inp) => inp && inp.id === LICENCES.wallerWords.id)) return `_licence.inputs does not credit Waller's lists (${LICENCES.wallerWords.id})`;
+  return null;
+}
 
 /** A level's rows in files under the cap, in order: `n5-0.json`, `n5-1.json` and so on. */
 function pack(id, rows, licence) {
@@ -268,7 +344,8 @@ function rowProblem(row) {
 /**
  * What is wrong with the word lists, as sentences: the index (`index`,
  * data/words/jlpt.json) and the files it lists, read through `fileOf(path)`
- * (a parsed file, or undefined). Its levels are N5 to N1 in order, each row
+ * (a parsed file, or undefined). Each carries wordsLicence's block, its
+ * levels are N5 to N1 in order, each row
  * is [written, reading, glosses], no word is in two levels or twice in one,
  * every count is what the files hold and `sizes` pins, and, with
  * `resolves(written, reading, glosses)`, every row is a record of the
@@ -278,6 +355,8 @@ function rowProblem(row) {
 export function jlptWordsProblems(index, fileOf, { sizes = JLPT_WORD_SIZES, resolves = null } = {}) {
   const out = [];
   if (!index || index.format !== WORDS_INDEX_FORMAT) return [`is not ${WORDS_INDEX_FORMAT}`];
+  const indexLicence = licenceProblem(index._licence);
+  if (indexLicence) out.push(indexLicence);
   const levels = index.levels;
   if (!levels || typeof levels !== 'object' || Array.isArray(levels)) return ['levels is not an object'];
   if (Object.keys(levels).join() !== WORD_LEVELS.join()) out.push(`levels are ${JSON.stringify(Object.keys(levels))}, not ${JSON.stringify(WORD_LEVELS)}`);
@@ -292,6 +371,8 @@ export function jlptWordsProblems(index, fileOf, { sizes = JLPT_WORD_SIZES, reso
       const doc = fileOf(rel);
       if (!doc) { out.push(`${id} lists ${rel}, which is missing`); continue; }
       if (doc.format !== WORDS_FORMAT || doc.level !== id || !Array.isArray(doc.rows)) { out.push(`${rel} is not a ${WORDS_FORMAT} file of ${id}`); continue; }
+      const fileLicence = licenceProblem(doc._licence);
+      if (fileLicence) out.push(`${rel}: ${fileLicence}`);
       doc.rows.forEach((row, i) => {
         const bad = rowProblem(row);
         if (bad) { out.push(`${rel}: row ${i} ${bad}`); return; }

@@ -460,7 +460,13 @@ them; on a tie, for a kana spelling, a record usually written in kana or
 with no kanji spelling, so いか is the cuttlefish), and is not kept. No word
 is in two levels, a level fills as many files as the cap asks, and
 `tools/lib/jlpt-words.mjs` has the rules the builder refuses and the checker
-fails on, the sizes `js/word-levels.js JLPT_WORD_SIZES` pins among them. The
+fails on, the sizes `js/word-levels.js JLPT_WORD_SIZES` pins among them.
+Every file's `_licence` is EDRDG's (the rows carry JMdict glosses as they
+are, which are share-alike), with Waller's lists (`waller-words`) as the
+input that says which words each level holds. The parser reads every table
+of his page headed Kanji and Hiragana and refuses rows that look like words
+outside them; a cell giving two readings or spellings is the one the
+dictionary has. The
 page offers the shelf only once those sizes are pinned, and the checker
 fails `data/words/` without them, or them without it.
 
@@ -1456,7 +1462,7 @@ analyzer moves an edge.
 - KanjiVG: Ulrich Apel, CC BY-SA 3.0, for `parts`.
 - Tatoeba: CC BY 2.0 FR, used to rank keys, to choose and count names, and, through the English translations of its Japanese sentences, to choose which of a katakana name's JMnedict spellings is shown; and, in data/sent/ only (tools/build-sentences.mjs, data/sent/more/ included), the example sentences themselves with their English, each linked to its page on tatoeba.org for the credit.
 - Jonathan Waller's JLPT kanji lists (tanos.co.uk, archived): Creative Commons BY with no version named, for `data/kanji/jlpt.json` only; the credit is on the level view and in the Sources dialog.
-- Jonathan Waller's JLPT vocabulary lists (tanos.co.uk, archived), under the same terms, for `data/words/` (licence id `waller-words`, with JMdict's as the input the glosses come from) once it ships; the credit is on the Words by level view, and the Sources dialog says words too in the commit that adds the data.
+- Jonathan Waller's JLPT vocabulary lists (tanos.co.uk, archived), under the same terms, for `data/words/` once it ships: licence id `waller-words`, an input of each file, whose top-level block is JMdict's (`edrdg`, CC BY-SA 4.0) because every row carries the dictionary's glosses as they are, as in `data/sets/` and `data/spell/`. The credit is on the Words by level view, and the Sources dialog says words too in the commit that adds the data.
 - The phrase library, the compound lines of "Where are the spaces?" and every note are written here and are public domain. `data/play/spaces.json` carries JMdict's licence block, with JMnedict and the authored lines as inputs, because where its lines part is the analysis over both.
 
 
