@@ -228,6 +228,66 @@ export const SOURCES = {
     bytes: 521400,
     licence: 'CC-BY',
   },
+  // Jonathan Waller's JLPT vocabulary lists, N5 to N1
+  // (tools/build-jlpt-words.mjs), under the same terms as his kanji lists.
+  // NOT PINNED YET: no capture has been chosen, so `release`, `url`,
+  // `sha256` and `bytes` are null and the builder refuses to run. To pin
+  // one, list the page's captures with the Wayback Machine's CDX API
+  // (https://web.archive.org/cdx/search/cdx?url=tanos.co.uk/jlpt/jlpt5/vocab/
+  // and so on; the kanji pages' later captures were empty, so expect 2018),
+  // take the last that still holds the table, fetch it raw (`id_`), and
+  // record its timestamp, url, digest and size here, as above. `page` is
+  // the address his site had; it is not fetched.
+  wallerN5Vocab: {
+    name: "Jonathan Waller's JLPT N5 vocabulary list, tanos.co.uk",
+    release: null,
+    page: 'http://www.tanos.co.uk/jlpt/jlpt5/vocab/',
+    url: null,
+    file: 'waller-n5-vocab.html',
+    sha256: null,
+    bytes: null,
+    licence: 'CC-BY',
+  },
+  wallerN4Vocab: {
+    name: "Jonathan Waller's JLPT N4 vocabulary list, tanos.co.uk",
+    release: null,
+    page: 'http://www.tanos.co.uk/jlpt/jlpt4/vocab/',
+    url: null,
+    file: 'waller-n4-vocab.html',
+    sha256: null,
+    bytes: null,
+    licence: 'CC-BY',
+  },
+  wallerN3Vocab: {
+    name: "Jonathan Waller's JLPT N3 vocabulary list, tanos.co.uk",
+    release: null,
+    page: 'http://www.tanos.co.uk/jlpt/jlpt3/vocab/',
+    url: null,
+    file: 'waller-n3-vocab.html',
+    sha256: null,
+    bytes: null,
+    licence: 'CC-BY',
+  },
+  wallerN2Vocab: {
+    name: "Jonathan Waller's JLPT N2 vocabulary list, tanos.co.uk",
+    release: null,
+    page: 'http://www.tanos.co.uk/jlpt/jlpt2/vocab/',
+    url: null,
+    file: 'waller-n2-vocab.html',
+    sha256: null,
+    bytes: null,
+    licence: 'CC-BY',
+  },
+  wallerN1Vocab: {
+    name: "Jonathan Waller's JLPT N1 vocabulary list, tanos.co.uk",
+    release: null,
+    page: 'http://www.tanos.co.uk/jlpt/jlpt1/vocab/',
+    url: null,
+    file: 'waller-n1-vocab.html',
+    sha256: null,
+    bytes: null,
+    licence: 'CC-BY',
+  },
 };
 
 function sh(cmd, args, opts = {}) {

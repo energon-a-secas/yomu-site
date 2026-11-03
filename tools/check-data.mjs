@@ -70,6 +70,12 @@
  *   - the kanji page's files (data/strokes/, data/kpage/) held to the range
  *     rule, a stroke that is not SVG path data, a page word that does not
  *     contain its kanji, or a kanji listed among its own neighbours
+ *   - the JLPT word lists (data/words/) there before js/word-levels.js
+ *     pins their sizes, or missing after; a level file the index does not
+ *     list; a row that is not [written, reading, glosses], a word in two
+ *     levels, a count its files or the pinned sizes disagree with, or a row
+ *     whose glosses are no record's of the dictionary
+ *     (tools/lib/jlpt-words.mjs has the rules)
  *
  * A new kind of data file gets its format id and a checker in FORMATS below,
  * in the same commit that adds the file.
@@ -84,6 +90,10 @@ import {
   joyoDoc, JOYO_FORMAT, JOYO_GRADES, JOYO_SIZES, JOYO_TOTAL, jinmeiyoDoc, JINMEIYO_FORMAT,
 } from './lib/joyo.mjs';
 import { jlptProblems, JLPT_FORMAT } from './lib/jlpt.mjs';
+import {
+  jlptWordsProblems, resolvesIn, WORDS_FORMAT, WORDS_INDEX_FORMAT, WORDS_SRC,
+} from './lib/jlpt-words.mjs';
+import { WORD_LEVELS_READY } from '../js/word-levels.js';
 import { groupsOfWord } from '../js/sounds-like.js';
 import { BANNED_WORDS } from './lib/licence.mjs';
 import { LOOKALIKES_FORMAT, LOOKALIKES_SRC, lookalikesProblems } from './lib/lookalikes.mjs';
@@ -353,6 +363,8 @@ const FORMATS = {
   [JOYO_FORMAT]: checkJoyoDoc,
   [JINMEIYO_FORMAT]: null,
   [JLPT_FORMAT]: (rel, doc) => { for (const p of jlptProblems(doc)) fail(rel, p); },
+  [WORDS_INDEX_FORMAT]: null,
+  [WORDS_FORMAT]: null,
   'yomu-strokes-index/1': null,
   'yomu-strokes/1': checkStrokes,
   'yomu-kpage-index/1': null,
@@ -536,6 +548,38 @@ function checkJlpt(docs) {
   const known = new Set();
   for (const src of shards) for (const ch of Object.keys(docs.get(src).entries || {})) known.add(ch);
   for (const p of jlptProblems(doc, known)) if (p.endsWith('in no kanji shard')) fail(rel, p);
+}
+
+/**
+ * The JLPT word lists (tools/build-jlpt-words.mjs): here once
+ * js/word-levels.js pins their sizes and not before, every level file
+ * listed, and every row a record of the dictionary, its glosses that
+ * record's, in the first tier or, for a word the first tier lacks, the rare
+ * words (a copy of data/ without the rare tier says nothing of those).
+ */
+function checkJlptWords(docs) {
+  const rel = WORDS_SRC;
+  const index = docs.get(rel);
+  const files = shardFiles(docs, WORDS_FORMAT);
+  if (!index) {
+    if (files.length) fail(rel, `missing, but ${files[0]} is here`);
+    else if (WORD_LEVELS_READY && shardFiles(docs, 'yomu-dict/1').length) fail(rel, 'missing, but js/word-levels.js pins its sizes; run node tools/build-jlpt-words.mjs');
+    return;
+  }
+  if (!WORD_LEVELS_READY) {
+    fail(rel, 'is here, but js/word-levels.js JLPT_WORD_SIZES is not pinned, so the page would never offer it');
+    return;
+  }
+  const listed = new Set(Object.values(index.levels || {}).flatMap((l) => (l && Array.isArray(l.files) ? l.files : [])));
+  for (const f of files) if (!listed.has(f)) fail(rel, `does not list ${f}`);
+  const tier = new Map();
+  const rare = new Map();
+  for (const doc of docs.values()) {
+    const into = doc.format === 'yomu-dict/1' || doc.format === 'yomu-dict-core/1' ? tier : doc.format === 'yomu-dict-rare/1' ? rare : null;
+    if (into) for (const [k, v] of Object.entries(doc.entries || {})) into.set(k, v);
+  }
+  const resolves = tier.size ? resolvesIn((k) => tier.get(k), rare.size ? (k) => rare.get(k) : null) : null;
+  for (const p of jlptWordsProblems(index, (src) => docs.get(src), { resolves })) fail(rel, p);
 }
 
 /**
@@ -941,6 +985,7 @@ function main() {
   checkJoyo(docs);
   checkJinmeiyo(docs);
   checkJlpt(docs);
+  checkJlptWords(docs);
   checkMoreCounts(docs);
   checkRangeIndex(docs, 'data/dict/rare.json', 'yomu-dict-rare/1');
   checkRangeIndex(docs, 'data/names/index.json', 'yomu-names/1');

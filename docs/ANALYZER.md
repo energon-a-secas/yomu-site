@@ -117,6 +117,7 @@ same text and the same data give the same tokens.
 | `conjugate.js` | every form of a verb or adjective from its dictionary form and part of speech, forward (the Word panel's All forms); held to `deinflect.js` by `tests/conjugate.test.mjs`, which reads each form of every first-tier word back | `kana.js` |
 | `search.js` | Search's logic: what a query is, the keys a Japanese query asks for, the English index (`data/search/`, the rare words' too when the common ones find few) and kanji by parts; `glossWords`, which the builder splits glosses with too | `range-store.js`, `kana.js`, `deinflect.js`, `vendor/wanakana.js` |
 | `sets.js` | The Collections tab's logic: JMdict's four-character idioms, proverbs and idiomatic phrases (`data/sets/`), loaded a set at a time, and the filter over one (`rowMatches`) | `search.js`, `kana.js`, `vendor/wanakana.js` |
+| `word-levels.js` | Words by level: Waller's JLPT vocabulary lists (`data/words/`, not committed yet), a level loaded on first view, what Save keeps of a row, and `WORD_LEVELS_READY`, which offers the shelf only once the sizes are pinned | `levels.js`, `reader.js` |
 | `examples.js` | a word's example sentences (`data/sent/`) by key and reading, and the page's one shared loader | `range-store.js`, `other-forms.js` |
 | `other-forms.js` | a word's other spellings (`data/spell/`) with JMdict's tags, and the page's one shared loader | `range-store.js` |
 | `kanji-page-data.js` | the kanji page's strokes (`data/strokes/`) and words and neighbours (`data/kpage/`) | `range-store.js` |
@@ -443,6 +444,25 @@ Waller's list (79, 166, 367, 367, 1,232), no kanji in two levels, every one
 a kanji the shards hold (`tools/lib/jlpt.mjs` has the rules the builder
 refuses and the checker fails on). The lists are unofficial and CC BY: the
 JLPT has published none since 2010.
+
+`data/words/` (formats `yomu-jlpt-words-index/1` and `yomu-jlpt-words/1`)
+is not read by the analyzer either, and is not committed yet: it is Search's
+Words by level, Waller's JLPT vocabulary lists, written by
+`tools/build-jlpt-words.mjs` once his archived pages are pinned. The index,
+`data/words/jlpt.json`, is `{ _licence, format, count, levels: { n5: { n,
+files: ['data/words/n5-0.json'] }, ..., n1 } }`; each level file is `{
+_licence, format, level, rows }`, a row `[written, reading, glosses]` in his
+order: his spelling, its kana reading ('' when the spelling is kana), and
+the `g` of the first-tier record the word is (the rare words' only when the
+first tier has none). His English chooses among the records one spelling and
+reading name (the most words in common, as `search.js glossWords` splits
+them; on a tie, for a kana spelling, a record usually written in kana or
+with no kanji spelling, so いか is the cuttlefish), and is not kept. No word
+is in two levels, a level fills as many files as the cap asks, and
+`tools/lib/jlpt-words.mjs` has the rules the builder refuses and the checker
+fails on, the sizes `js/word-levels.js JLPT_WORD_SIZES` pins among them. The
+page offers the shelf only once those sizes are pinned, and the checker
+fails `data/words/` without them, or them without it.
 
 `data/play/lookalikes.json` (format `yomu-lookalikes/1`) is not read by the
 analyzer either: it is Play's kanji look-alikes,
@@ -1436,6 +1456,7 @@ analyzer moves an edge.
 - KanjiVG: Ulrich Apel, CC BY-SA 3.0, for `parts`.
 - Tatoeba: CC BY 2.0 FR, used to rank keys, to choose and count names, and, through the English translations of its Japanese sentences, to choose which of a katakana name's JMnedict spellings is shown; and, in data/sent/ only (tools/build-sentences.mjs, data/sent/more/ included), the example sentences themselves with their English, each linked to its page on tatoeba.org for the credit.
 - Jonathan Waller's JLPT kanji lists (tanos.co.uk, archived): Creative Commons BY with no version named, for `data/kanji/jlpt.json` only; the credit is on the level view and in the Sources dialog.
+- Jonathan Waller's JLPT vocabulary lists (tanos.co.uk, archived), under the same terms, for `data/words/` (licence id `waller-words`, with JMdict's as the input the glosses come from) once it ships; the credit is on the Words by level view, and the Sources dialog says words too in the commit that adds the data.
 - The phrase library, the compound lines of "Where are the spaces?" and every note are written here and are public domain. `data/play/spaces.json` carries JMdict's licence block, with JMnedict and the authored lines as inputs, because where its lines part is the analysis over both.
 
 

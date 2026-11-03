@@ -23,7 +23,8 @@ import { fileURLToPath } from 'node:url';
 
 import { isKana, isKanji, isHiragana, toHira } from '../js/kana.js';
 import { groupsOfWord } from '../js/sounds-like.js';
-import { BANNED_WORDS } from '../tools/lib/licence.mjs';
+import { BANNED_WORDS, licenceBlock } from '../tools/lib/licence.mjs';
+import { WORD_LEVELS_READY, WORDS_INDEX_FORMAT } from '../js/word-levels.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const SITE = resolve(HERE, '..');
@@ -554,6 +555,44 @@ test('check-data fails an m mark out of place and names the file', async () => {
     ...second.map(([, mutate]) => brokenCopy(mutate, { full: true })),
   ]);
   [...cases, ...second].forEach(([name, , expect], k) => {
+    assert.equal(runs[k].status, 1, `${name}: exit ${runs[k].status}`);
+    assert.match(runs[k].stderr, expect, name);
+  });
+});
+
+test('check-data holds the JLPT word lists to the sizes js/word-levels.js pins', async () => {
+  if (!WORD_LEVELS_READY) {
+    // Before the sizes are pinned the page never offers the shelf, so lists are refused.
+    const run = await brokenCopy((rw, dir) => {
+      mkdirSync(join(dir, 'data', 'words'));
+      writeFileSync(join(dir, 'data', 'words', 'jlpt.json'), JSON.stringify({
+        _licence: licenceBlock('wallerWords', 'tests/data.test.mjs'), format: WORDS_INDEX_FORMAT, count: 0, levels: {},
+      }));
+    });
+    assert.equal(run.status, 1, 'word lists with no sizes pinned');
+    assert.match(run.stderr, /words\/jlpt\.json: is here, but js\/word-levels\.js JLPT_WORD_SIZES is not pinned/);
+    return;
+  }
+  const level = (d, id, by) => { d.levels[id].n += by; d.count += by; };
+  const cases = [
+    ['a JLPT level one word short', (rw) => {
+      rw('data/words/n5-0.json', (d) => { d.rows.pop(); });
+      rw('data/words/jlpt.json', (d) => level(d, 'n5', -1));
+    }, /jlpt\.json: n5 holds \d+ words, not \d+/],
+    ['a word in two JLPT levels', (rw, dir) => {
+      const word = JSON.parse(readFileSync(join(dir, 'data/words/n5-0.json'), 'utf8')).rows[0];
+      rw('data/words/n4-0.json', (d) => { d.rows.push(word); });
+      rw('data/words/jlpt.json', (d) => level(d, 'n4', 1));
+    }, /jlpt\.json: .* is in n5 and n4/],
+    ['a row that is no record of the dictionary', (rw) => rw('data/words/n3-0.json', (d) => {
+      d.rows[0][2] = ['a meaning no record has'];
+    }), /jlpt\.json: n3: .* is no record of the dictionary/],
+    ['a level file the index does not list', (rw, dir) => {
+      writeFileSync(join(dir, 'data/words/n2-9.json'), readFileSync(join(dir, 'data/words/n2-0.json')));
+    }, /jlpt\.json: does not list data\/words\/n2-9\.json/],
+  ];
+  const runs = await Promise.all(cases.map(([, mutate]) => brokenCopy(mutate)));
+  cases.forEach(([name, , expect], k) => {
     assert.equal(runs[k].status, 1, `${name}: exit ${runs[k].status}`);
     assert.match(runs[k].stderr, expect, name);
   });

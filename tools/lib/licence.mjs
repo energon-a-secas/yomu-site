@@ -131,6 +131,23 @@ export const LICENCES = {
     ],
     screen: 'required',
   },
+  // His vocabulary lists (tools/build-jlpt-words.mjs), under the same terms:
+  // which words each level holds, as a spelling and a reading, nothing else
+  // of his pages. Its own id, so the kanji file's block keeps saying kanji.
+  wallerWords: {
+    source: "Jonathan Waller's JLPT Resources, tanos.co.uk",
+    url: 'https://web.archive.org/web/20230130032341/http://www.tanos.co.uk/jlpt/sharing/',
+    spdx: 'CC-BY',
+    derived: true,
+    id: 'waller-words',
+    acknowledgement:
+      "The words by JLPT level are Jonathan Waller's lists from his JLPT Resources site, tanos.co.uk, used under the Creative Commons Attribution licence his site states; the meanings shown are the dictionary's. They are unofficial: the JLPT has published no word lists since 2010.",
+    links: [
+      'https://web.archive.org/web/2018/http://www.tanos.co.uk/jlpt/',
+      'https://web.archive.org/web/20230130032341/http://www.tanos.co.uk/jlpt/sharing/',
+    ],
+    screen: 'required',
+  },
   // Klee One (tools/build-font.mjs): the subset Yomu serves from fonts/klee/,
   // with the licence beside it, as the OFL asks of a copy that ships.
   kleeOne: {
