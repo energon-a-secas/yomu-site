@@ -145,3 +145,44 @@ with a space between words (yoroshiku onegaishimasu), and こんにちは and
 こんばんは end in wa. `tests/mascot-lines.test.mjs` checks every phrase id,
 its Clear and Male clips, the romaji and the hour boundaries. No new
 recordings.
+
+## Kanji cards
+
+`js/kanji-cards.js` is Tomoshibi's glowing card as a drill over any set of
+kanji: My kanji, a JLPT study level or a school grade. Two ways to play:
+turn the card over and say Again or Got it, or pick the kanji's meaning from
+four. A round is `review.js`, as in Quick kana review: up to 20 kanji, due
+ones first, then new ones in the set's order, then practice ahead; Again
+sends a kanji to the back, and only its first answer moves its box. In the
+quiz a pick turns the card over and shows the verdict, and Next is the
+answer that moves the box; a revealed answer counts as Again.
+
+It is a free drill, the owner's choice (6 November 2026): each kanji keeps a
+Leitner box in this document, on My kanji's schedule but apart from it, and
+nothing here moves a saved kanji's review. The quiz needs four kanji whose
+labels differ; `overview` says so before a round can start.
+
+`cardEntry(rec, { level, row })` is the card itself: the short label (the
+kanji-of-the-day row's first gloss, else KANJIDIC's first meaning, never a
+radical's name), up to four meanings, up to three on and three kun readings
+as [kana, romaji], strokes, grade, JLPT level and an example word. It is the
+rule Tomoshibi's watch data was built with, moved here: for all 760 kanji in
+Tomoshibi's `kanji.json` it gives identical JSON, so the iOS app's watch
+payload decodes with the watch's own struct. `tests/kanji-cards.test.mjs`
+plays whole rounds in both ways, the stale-tap guard, the deal order, quiz
+options and document recovery.
+
+## Writing
+
+`js/strokes.js` turns KanjiVG's path data (`data/strokes`, the 109-unit
+grid) into absolute cubic segments any view can draw, points along each
+stroke, and a judge for a stroke traced by hand. `traceStroke(strokes, next,
+drawn)` is forgiving about neatness and strict about order and direction:
+the ends may miss by 20 units and the line may stray by 10 on average, but a
+stroke drawn from its end is `reversed`, and a line that fits a later stroke
+better is that stroke drawn too early (`order`, with `matched`).
+`traceWords` says it in a sentence. The kanji page now places its stroke
+numbers with the same `startOf`. `tests/strokes.test.mjs` parses every
+stroke in the data (a path command the drawing does not handle fails
+loudly), checks that each starts where its number goes, and judges traces of
+か and 書 (whose horizontal strokes sit ten units apart).

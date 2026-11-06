@@ -24,6 +24,7 @@ import {
 import { readingRomajiPair, wordRomaji } from './render-romaji.js';
 import { apartOf } from './lookalike-apart.js';
 import { handSwitch, handMissing } from './render-hand.js';
+import { startOf } from './strokes.js';
 
 const SVG = 'http://www.w3.org/2000/svg';
 
@@ -32,12 +33,6 @@ function svg(tag, attrs = {}, kids = []) {
   for (const [k, v] of Object.entries(attrs)) if (v !== null && v !== undefined) el.setAttribute(k, String(v));
   for (const kid of kids) el.append(kid);
   return el;
-}
-
-/** The first point of a path's data: where its stroke number goes. */
-function startOf(d) {
-  const m = /^[Mm]\s*(-?[\d.]+)[,\s]+(-?[\d.]+)/.exec(d);
-  return m ? [Number(m[1]), Number(m[2])] : [0, 0];
 }
 
 /**
