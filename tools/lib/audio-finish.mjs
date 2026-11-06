@@ -15,6 +15,15 @@ const TARGET_RMS_DB = -20;    // speech level, dBFS
 const PEAK_CEILING_DB = -1;
 const BITRATE = '48k';
 
+// A beat said alone comes back held: こ as こう, す as すー (docs/AUDIO.md, The
+// check). Held for half a second with the voice's falling pitch it sounds
+// like a moan, not a kana. A lone beat keeps its onset and a natural vowel,
+// then fades out inside that length.
+const BEAT_KEEP_S = 0.3;      // voice kept after the lead-in, one beat
+const DIGRAPH_KEEP_S = 0.32;  // きゃ, しゅ: a longer consonant before the vowel
+const BEAT_FADE_S = 0.08;
+const SMALL_KANA = /[ゃゅょぁぃぅぇぉゎ]/u;
+
 function ffmpeg(args, input) {
   const r = spawnSync('ffmpeg', ['-hide_banner', '-loglevel', 'error', ...args], { input, maxBuffer: 64 * 1024 * 1024 });
   if (r.error) throw new Error(`ffmpeg could not run: ${r.error.message}`);
@@ -51,9 +60,45 @@ export function gainFor({ rms, peak }) {
   return Math.min(TARGET_RMS_DB - rms, PEAK_CEILING_DB - peak);
 }
 
-/** Raw PCM in, { mp3, seconds } out. Throws on a clip with no sound in it. */
-export function finish(pcm) {
-  const trimmed = trim(pcm);
+/** Samples a lone beat keeps: the lead-in, then a little more voice for a two-kana beat. */
+function beatEnd(beat) {
+  const chars = [...String(beat || '')];
+  const keep = chars.length > 1 && SMALL_KANA.test(chars[1]) ? DIGRAPH_KEEP_S : BEAT_KEEP_S;
+  return Math.round((KEEP_BEFORE_S + keep) * RAW_RATE);
+}
+
+/** Whether trimmed PCM of `beat` runs past a natural beat's length. */
+export function heldBeat(pcm, beat) {
+  return Math.floor(pcm.length / 2) > beatEnd(beat);
+}
+
+/**
+ * Trimmed PCM of a lone beat cut to its natural length, the last part faded
+ * on a quarter cosine to silence. A beat already that short is returned as is.
+ */
+export function tightenBeat(pcm, beat) {
+  if (!heldBeat(pcm, beat)) return pcm;
+  const end = beatEnd(beat);
+  const fade = Math.round(BEAT_FADE_S * RAW_RATE);
+  const out = Buffer.from(pcm.subarray(0, end * 2));
+  for (let i = 0; i < fade; i += 1) {
+    const at = (end - fade + i) * 2;
+    out.writeInt16LE(Math.round(out.readInt16LE(at) * Math.cos(((i + 1) / fade) * (Math.PI / 2))), at);
+  }
+  return out;
+}
+
+/** A kept MP3 back to raw PCM at the API's rate, to finish it again. */
+export function decode(mp3) {
+  return ffmpeg(['-f', 'mp3', '-i', 'pipe:0', '-f', 's16le', '-ar', String(RAW_RATE), '-ac', '1', 'pipe:1'], mp3);
+}
+
+/**
+ * Raw PCM in, { mp3, seconds } out. Throws on a clip with no sound in it.
+ * `beat` names a lone beat (hiragana), which is cut to a natural length.
+ */
+export function finish(pcm, { beat = null } = {}) {
+  const trimmed = beat ? tightenBeat(trim(pcm), beat) : trim(pcm);
   const lv = levels(trimmed);
   if (!Number.isFinite(lv.rms) || lv.seconds < 0.08) throw new Error('the clip is silent');
   const mp3 = ffmpeg([

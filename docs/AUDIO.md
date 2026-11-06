@@ -30,6 +30,10 @@ list:
    The third band added 5,013 accepted word recordings from 5,168 new
    word keys. The [band-3 report](AUDIO-BAND3.md) records its actual scope,
    cost, validation and listening samples.
+7. **reading**: the readings a kanji page says for the kanji of the JLPT
+   study levels in `READING_LEVELS` (N5 to N3), each filed under its kana,
+   the key the page plays (`readingLines`), in Clear alone. A reading of one
+   beat is a beat already. See Kanji readings, below.
 
 A word is filed under its spelling and reading (`audio.js wordKey`: 雨|あめ),
 never under its reading alone, so a homophone never plays another word's
@@ -92,7 +96,8 @@ role's clips are remade and every learner keeps their choice.
    both ends (40 ms kept before, 80 ms after), so a beat follows a beat at
    once; levelled to -20 dBFS RMS with peaks under -1 dBFS, so no voice is
    louder than another; encoded once as 48 kbps mono MP3. A word is about
-   8 KB, a sentence 15 to 25 KB.
+   8 KB, a sentence 15 to 25 KB. A lone beat is also shaped (Beat shaping,
+   below): it keeps its onset and a natural vowel, then fades.
 4. **Check.** Below. A clip that fails is made again with another seed, then
    from the analyzer's kana reading (a beat: in hiragana). After three takes
    it is left out of the index, its last take kept in `.forge/audio-rejects/`
@@ -228,6 +233,42 @@ See [AUDIO-BAND3.md](AUDIO-BAND3.md) for automated evidence and 26 listening
 samples. Human listening and publication to the website/TestFlight remain
 separate steps. The original 5,293-word estimate predates the current script's
 deduplication and dictionary coverage; it is not the number of new jobs.
+
+## Beat shaping
+
+On 6 November 2026 the owner heard the lone kana as "moaning". Measured, a
+lone beat in Clear ran a median 0.58 s, nearly a two-beat word's 0.65 s: the
+voice holds the vowel of a mora said alone (The check, above, lets that pass
+on purpose). `finish(pcm, { beat })` now cuts a lone beat to its 40 ms lead-in
+and 0.30 s of voice (0.32 s for a small-kana pair such as きゃ, whose
+consonant is longer), the last 80 ms faded on a quarter cosine. A beat already
+that short is left alone. `tests/audio-finish.test.mjs` holds the lengths and
+the fade.
+
+The kept beats were not remade: `tools/tighten-beats.mjs` re-finished the 448
+accepted beat clips in place from their own MP3 (decode, trim, shape, level,
+encode once more), with no API call and no credits, and recorded
+`finish: "beat-1"` with the new `seconds` and `bytes` on each record. Medians
+went from 0.51 to 0.60 s down to 0.34 s in all four voices. `FINISH_VERSION`
+was not bumped, because a bump remakes every clip. The owner chose the shaped
+takes after a before/after listening page; re-recording beats from a spoken
+row of kana cut by alignment stays the alternative if they are ever not
+enough. `git checkout -- data/audio tools/audio-made.json` undoes it.
+
+## Kanji readings
+
+Recorded 2026-11-06 in Clear only, at the owner's request ("N5 to N3 now"):
+855 readings of the JLPT N5 to N3 kanji had no clip under the kana the kanji
+page plays. **767 were kept and 88 rejected** after three takes each (じゅっ
+cannot be said alone; the transcriber wrote げつ as 月 and read it つき;
+せわしい came back as 忙しい). A rejected reading keeps the device's voice.
+
+The owner was quoted 1,200 to 1,800 credits. The account fell from 7,162 to
+4,864 left: **2,298 credits**, while the TTS headers counted 1,398. The
+balance fell about 1.6 times faster than the headers, as on the word runs, so
+quote by the balance. A 60-clip pilot (108 credits) came first. The library
+now has **13,937 voice clips, 70.27 MB**. N2 and N1 (1,054 more readings by
+the same count) wait for an approved budget.
 
 ## The page
 
