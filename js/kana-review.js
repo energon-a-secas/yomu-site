@@ -28,8 +28,11 @@ import { makeRand, shuffle } from './play-rounds.js';
 import { schedule, dayOf, TOP_BOX } from './kanji-store.js';
 import { createReview, current, finished, show, isRepeat, position, answer, summary } from './review.js';
 
-/** The most kana one quick review holds. */
+/** The most kana one quick review holds, unless the learner chose a size. */
 export const QUICK_SIZE = 20;
+/** The largest review a learner can ask for, more than a script's whole chart. */
+export const QUICK_MAX = 500;
+const sizeOf = (size) => (Number.isInteger(size) && size >= 1 && size <= QUICK_MAX ? size : QUICK_SIZE);
 /** A kana in this box or higher is strong: it waits 8 or 16 days between reviews. */
 const STRONG_BOX = 4;
 const SCRIPTS = ['hiragana', 'katakana'];
@@ -170,6 +173,28 @@ function moveCard(cards, s, cellId, ok) {
   }
 }
 
+// The kana a review of `size` takes, group by group, before the shuffle: the
+// due ones first (the longest overdue, then the lower box, then chart order),
+// then those never answered, in chart order, and only when that is still
+// short, practice ahead: kana not due yet, the lowest box first, then the
+// soonest due.
+function pick(cards, script, pool, today, size) {
+  const order = new Map(pool.map((c, i) => [c.id, i]));
+  const card = (c) => cards[keyOf(script, c.id)];
+  const due = pool.filter((c) => card(c) && card(c).due <= today)
+    .sort((a, b) => earlier(card(a).due, card(b).due) || card(a).box - card(b).box || order.get(a.id) - order.get(b.id));
+  const fresh = pool.filter((c) => !card(c));
+  const ahead = pool.filter((c) => card(c) && card(c).due > today)
+    .sort((a, b) => card(a).box - card(b).box || earlier(card(a).due, card(b).due) || order.get(a.id) - order.get(b.id));
+  const picked = {};
+  let room = size;
+  for (const [name, group] of [['due', due], ['fresh', fresh], ['ahead', ahead]]) {
+    picked[name] = group.slice(0, room);
+    room -= picked[name].length;
+  }
+  return picked;
+}
+
 const stepId = (s) => `${s.id}:${s.review.first.size + s.review.repeats}`;
 const cellsOf = (script, ids) => new Map(gameKana(script, ids).map((c) => [c.id, c]));
 
@@ -194,9 +219,11 @@ export class KanaReview {
   /**
    * The selected kana of `script` and where each stands on `today`. The four
    * counts split `total`: fresh (never answered), due (answered, due today or
-   * earlier), strong (not due, box 4 or 5) and learning (the rest).
+   * earlier), strong (not due, box 4 or 5) and learning (the rest). `plan`
+   * is what a review of `size` would hold, group by group (start, below),
+   * so the screen can say how many cards there are and in what order.
    */
-  overview({ script = 'hiragana', selected = [], today = dayOf(Date.now()) } = {}) {
+  overview({ script = 'hiragana', selected = [], today = dayOf(Date.now()), size = QUICK_SIZE } = {}) {
     if (!isDay(today)) throw new Error('Expected today as YYYY-MM-DD.');
     const pool = SCRIPTS.includes(script) ? gameKana(script, selected) : [];
     const counts = { due: 0, fresh: 0, learning: 0, strong: 0 };
@@ -206,17 +233,18 @@ export class KanaReview {
       return { id: c.id, kana: c.kana, box: card ? card.box : -1 };
     });
     const { ready, message } = readiness(script, pool);
-    return { script, total: pool.length, ...counts, ready, message, cells };
+    const picked = pick(this.cards, script, pool, today, sizeOf(size));
+    const plan = { due: picked.due.length, fresh: picked.fresh.length, ahead: picked.ahead.length };
+    plan.total = plan.due + plan.fresh + plan.ahead;
+    return { script, total: pool.length, ...counts, ready, message, cells, plan };
   }
 
   /**
-   * Up to QUICK_SIZE kana: the due ones first (the longest overdue, then the
-   * lower box, then chart order), then those never answered, in chart order,
-   * and only when that is still short, practice ahead: kana not due yet, the
-   * lowest box first, then the soonest due. That order picks the kana; each
-   * group is then shuffled with `seed`, and the groups keep their order.
+   * Up to `size` kana (QUICK_SIZE unless the learner chose another, at most
+   * QUICK_MAX), picked as `pick` says; each group is then shuffled with
+   * `seed`, and the groups keep their order.
    */
-  start({ script = 'hiragana', selected = [], today = dayOf(Date.now()), seed = Date.now() } = {}) {
+  start({ script = 'hiragana', selected = [], today = dayOf(Date.now()), seed = Date.now(), size = QUICK_SIZE } = {}) {
     if (this.session && !finished(this.session.review)) {
       throw new Error(t({ en: 'Finish or leave the current review first.', es: 'Primero termina el repaso actual o sal de él.' }));
     }
@@ -225,16 +253,11 @@ export class KanaReview {
     if (!readiness(script, pool).ready) {
       throw new Error(t({ en: 'Choose at least two kana with different sounds.', es: 'Elige al menos dos kana con sonidos distintos.' }));
     }
-    const order = new Map(pool.map((c, i) => [c.id, i]));
     const card = (c) => this.cards[keyOf(script, c.id)];
-    const due = pool.filter((c) => card(c) && card(c).due <= today)
-      .sort((a, b) => earlier(card(a).due, card(b).due) || card(a).box - card(b).box || order.get(a.id) - order.get(b.id));
-    const fresh = pool.filter((c) => !card(c));
-    const ahead = pool.filter((c) => card(c) && card(c).due > today)
-      .sort((a, b) => card(a).box - card(b).box || earlier(card(a).due, card(b).due) || order.get(a.id) - order.get(b.id));
+    const picked = pick(this.cards, script, pool, today, sizeOf(size));
     const rand = makeRand(seed);
     const chosen = [];
-    for (const group of [due, fresh, ahead]) chosen.push(...shuffle(group.slice(0, QUICK_SIZE - chosen.length), rand));
+    for (const group of [picked.due, picked.fresh, picked.ahead]) chosen.push(...shuffle(group, rand));
     const kana = chosen.map((c) => c.id);
     this.session = {
       id: `${script}:${today}:${Number(seed) >>> 0}`, script, today, kana,

@@ -134,11 +134,15 @@ a box, 1, 2, 4, 8, 16 days; Again is box 1, due tomorrow). The review itself
 is `review.js`: a card is hidden until shown, Again sends the kana to the back
 of the queue, and only its first answer in a review moves the schedule.
 
-A review holds up to `QUICK_SIZE` (20) kana: the due ones first (longest
+A review holds up to `size` kana, `QUICK_SIZE` (20) unless the learner chose
+another (the app offers 10, 20, 30 or all of them; any whole number up to
+`QUICK_MAX`, 500, is taken, anything else is 20): the due ones first (longest
 overdue, then lower box, then chart order), then never-answered ones in chart
 order, and only when that is still short, practice ahead (lowest box, then
 soonest due). Each group is shuffled with the seed and the groups keep their
-order. A kana practised ahead keeps its box and day on Got it and only counts
+order. `overview` takes the same `size` and returns `plan`, how many due, new
+and ahead kana that review would hold, so the app can say before Start how
+many cards there are and in what order (a tester could not tell). A kana practised ahead keeps its box and day on Got it and only counts
 the review; Again is a lapse either way. Every answer is scheduled from the
 day the review began. Prompts, sounds and shape reminders are
 `kana-games.js gameKana`'s, and the timing marks are never cards.
@@ -155,7 +159,8 @@ recovery flag. Leaving discards the review; answered kana keep their schedule.
 `tests/kana-review.test.mjs` covers due, new and early kana in both scripts,
 Again and first-answer accounting, stale taps, show before answer, the
 overview's counts, selections with fewer than two sounds, the order and the
-cap, leaving, resuming after every action, and damaged documents.
+cap, a chosen size and its plan, leaving, resuming after every action, and
+damaged documents.
 
 ## Kana snacks
 

@@ -7,7 +7,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { KanaReview, QUICK_SIZE } from '../js/kana-review.js';
+import { KanaReview, QUICK_SIZE, QUICK_MAX } from '../js/kana-review.js';
 import { kanaChart } from '../js/kana-chart.js';
 import { schedule, addDays } from '../js/kanji-store.js';
 import { useLang } from '../js/strings.js';
@@ -179,8 +179,10 @@ for (const script of SCRIPTS) {
     assert.deepEqual(o.cells.map((c) => c.box), [1, 4, 2, 5, -1]);
     const chart = new Map(kanaChart(script).flatMap((s) => s.cells).map((c) => [c.id, c.kana]));
     assert.deepEqual(o.cells.map((c) => c.kana), o.cells.map((c) => chart.get(c.id)));
+    // The plan: both due kana, the new one, then the two not due yet (practice ahead).
     assert.deepEqual({ ...o, cells: null, message: null }, {
       script, total: 5, due: 2, fresh: 1, learning: 1, strong: 1, ready: true, message: null, cells: null,
+      plan: { due: 2, fresh: 1, ahead: 2, total: 5 },
     });
     assert.equal(o.due + o.fresh + o.learning + o.strong, o.total);
     assert.equal(typeof o.message, 'string');
@@ -234,6 +236,47 @@ test('a review holds QUICK_SIZE kana: due first, then new ones in chart order, t
   other.start({ selected: ids, today: DAY, seed: 22 });
   assert.deepEqual(set(other.dump().session.kana.slice(0, 5)), set(kana.slice(0, 5)));
   assert.notDeepEqual(other.dump().session.kana, kana);
+});
+
+test('a learner can choose the size; the overview says what a review of that size holds, group by group', () => {
+  const ids = all('hiragana');
+  // Five due, ten not due yet, the rest new.
+  const due = { 'ぬ': rec(1, '2026-10-01'), 'あ': rec(3, DAY), 'に': rec(2, '2026-10-20'), 'き': rec(1, '2026-10-20'), 'ぽ': rec(5, '2026-11-01') };
+  const ahead = Object.fromEntries(ids.slice(40, 50).map((id, i) => [id, rec(1 + (i % 5), addDays(DAY, 1 + i))]));
+  const cards = Object.fromEntries(Object.entries({ ...due, ...ahead }).map(([id, r]) => [`hiragana:${id}`, r]));
+  const fresh = ids.filter((id) => !cards[`hiragana:${id}`]).length;
+  const expect = (size) => {
+    const d = Math.min(5, size);
+    const f = Math.min(fresh, size - d);
+    const a = Math.min(10, size - d - f);
+    return { due: d, fresh: f, ahead: a, total: d + f + a };
+  };
+  for (const size of [3, 10, 20, 30, ids.length, QUICK_MAX]) {
+    const q = new KanaReview(doc(cards));
+    const { plan } = q.overview({ selected: ids, today: DAY, size });
+    assert.deepEqual(plan, expect(size), `size ${size}`);
+    q.start({ selected: ids, today: DAY, seed: 5, size });
+    const session = q.dump().session;
+    assert.equal(session.kana.length, plan.total, `a review of ${size} holds what the plan said`);
+    assert.ok(session.kana.slice(0, plan.due).every((id) => due[id]), 'the due kana come first');
+    assert.equal(session.kana.filter((id) => due[id]).length, plan.due);
+    assert.equal(session.ahead.length, plan.ahead);
+  }
+  // Every selected kana fits in the largest review, practice ahead included.
+  assert.equal(new KanaReview(doc(cards)).overview({ selected: ids, today: DAY, size: QUICK_MAX }).plan.total, ids.length);
+  // No size, or one out of range, is the usual twenty.
+  for (const size of [undefined, 0, -4, 2.5, QUICK_MAX + 1, '10']) {
+    const q = new KanaReview(doc(cards));
+    assert.equal(q.overview({ selected: ids, today: DAY, size }).plan.total, QUICK_SIZE, `size ${String(size)}`);
+    q.start({ selected: ids, today: DAY, seed: 5, size });
+    assert.equal(q.dump().session.kana.length, QUICK_SIZE);
+  }
+  // A size that has not changed draws the same review as before sizes existed.
+  const plain = new KanaReview(doc(cards));
+  plain.start({ selected: ids, today: DAY, seed: 21 });
+  const sized = new KanaReview(doc(cards));
+  sized.start({ selected: ids, today: DAY, seed: 21, size: QUICK_SIZE });
+  assert.deepEqual(sized.dump().session.kana, plain.dump().session.kana);
 });
 
 test('the most overdue kana make the cut, and practice ahead takes the lowest box, then the soonest day', () => {
