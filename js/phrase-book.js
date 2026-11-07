@@ -106,6 +106,28 @@ export class PhraseBook {
       !query.trim() || rowMatches([p.text, p.text, [p.source?.title || '', p.source?.meaning || '']], query)) };
   }
 
+  /**
+   * Add a backup's saved phrases (History's backup list) by History's merge:
+   * a phrase already here keeps its earlier save, and the collection's limit
+   * holds. A library source comes along only when it still matches the
+   * phrase's text and the phrase has none here. What changed, as
+   * history-store.js mergePhrases counts it, with the damaged entries left out.
+   */
+  merge(phrases, sources) {
+    this.message = null;
+    const checked = cleanPhrases(phrases);
+    const sum = mergePhrases(this.data, checked.phrases);
+    if (object(sources)) {
+      for (const [key, source] of Object.entries(sources)) {
+        const entry = this.data.entries[key];
+        if (!entry || this.sources[key]) continue;
+        const valid = phraseSource(this.library, source, entry.t, this.lang);
+        if (valid) this.sources[key] = this.reference(valid);
+      }
+    }
+    return { ...sum, dropped: checked.dropped };
+  }
+
   dump() { return { format: PHRASE_BOOK_FORMAT, phrases: phrasesOf(this.data), sources: { ...this.sources } }; }
 }
 

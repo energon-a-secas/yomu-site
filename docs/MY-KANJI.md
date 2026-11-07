@@ -145,6 +145,19 @@ importNote`, pure, tested in `tests/phrases.test.mjs`) counts the saved
 kanji and kanji counts, then the saved phrases added or updated and any
 that did not fit, each phrase count in the singular when it is one.
 
+**The app's backup is this file, plus practice.** Naninani's More > Your
+data writes the same `yomu-kanji-export/1` file through `js/app-backup.js`,
+with two additive fields Import here ignores: `sources` (a saved reading's
+place in the phrase library, `phrase-book.js`) and `practice` (the app's
+learning documents by file name, `PRACTICE`). So a file from the app imports
+here (kanji, words, saved phrases), and one from here restores in the app.
+`restoreBackup` merges by the rules above (`mergeInto`, `mergeWords`, the
+phrase book's `merge`), and a practice document the phone already has is
+replaced only when the learner asks. `backupSummary` describes even an
+empty backup, which `readBackup` refuses as a file to restore; the summary's
+`weight` (saved kanji, words, readings and practice documents) is what the
+app compares before keeping a copy in iCloud. Tests: `tests/app-backup.test.mjs`.
+
 **"Times seen" counts texts, not keystrokes.** A session begins in
 `events-read.js`: `loadText()` (an example, a phrase or dialogue, `#t=`, an
 embed `yomu:load`), a paste or drop into an empty box or a paste over all of
