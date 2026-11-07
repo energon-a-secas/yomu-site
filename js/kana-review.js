@@ -18,8 +18,10 @@
 // long-vowel bar need a word, so they are never cards (kana-games.js gameKana).
 // Nothing a learner typed is kept. The sounds and the shape reminders are
 // kana-games.js's; the few sentences written here are original and, like
-// them, dedicated to CC0.
+// them, dedicated to CC0. They are { en, es } and resolve to the current
+// language (strings.js useLang) when they are said.
 
+import { t } from './strings.js';
 import { gameKana } from './kana-games.js';
 import { kanaChart } from './kana-chart.js';
 import { makeRand, shuffle } from './play-rounds.js';
@@ -64,14 +66,49 @@ function cleanCard(v) {
   return { card: { box: v.box, due: v.due, reviews: v.reviews, lapses: v.lapses }, extra: Object.keys(v).some((k) => !CARD_FIELDS.includes(k)) };
 }
 
+/** A, B y C: a Spanish list. */
+const listEs = (items) => (items.length < 2 ? items.join('') : `${items.slice(0, -1).join(', ')} y ${items[items.length - 1]}`);
+
 /** Ready when the selection holds two kana that sound different, and what to do when it does not. */
 function readiness(script, pool) {
-  if (!SCRIPTS.includes(script)) return { ready: false, message: 'Choose hiragana or katakana.' };
+  if (!SCRIPTS.includes(script)) return { ready: false, message: t({ en: 'Choose hiragana or katakana.', es: 'Elige hiragana o katakana.' }) };
   const sounds = new Set(pool.map((c) => c.sound));
-  if (sounds.size >= 2) return { ready: true, message: `Due kana come first, then new ones, up to ${QUICK_SIZE} in one review.` };
-  if (!pool.length) return { ready: false, message: 'Choose at least two kana with different sounds. Small tsu and the long-vowel bar need a word, so they stay in reading practice.' };
-  if (pool.length === 1) return { ready: false, message: `Choose at least one more kana with a sound other than ${pool[0].sound}.` };
-  return { ready: false, message: `${pool.map((c) => c.kana).join(' and ')} ${pool.length === 2 ? 'both' : 'all'} sound ${pool[0].sound}. Choose one more kana with a different sound.` };
+  if (sounds.size >= 2) {
+    return {
+      ready: true,
+      message: t({
+        en: `Due kana come first, then new ones, up to ${QUICK_SIZE} in one review.`,
+        es: `Primero van los kana que tocan repaso y luego los nuevos, hasta ${QUICK_SIZE} por repaso.`,
+      }),
+    };
+  }
+  if (!pool.length) {
+    return {
+      ready: false,
+      message: t({
+        en: 'Choose at least two kana with different sounds. Small tsu and the long-vowel bar need a word, so they stay in reading practice.',
+        es: 'Elige al menos dos kana con sonidos distintos. La tsu pequeña y la barra de vocal larga necesitan una palabra, así que se quedan en la práctica de lectura.',
+      }),
+    };
+  }
+  const sound = pool[0].sound;
+  if (pool.length === 1) {
+    return {
+      ready: false,
+      message: t({
+        en: `Choose at least one more kana with a sound other than ${sound}.`,
+        es: `Elige al menos un kana más, con un sonido distinto de ${sound}.`,
+      }),
+    };
+  }
+  const kana = pool.map((c) => c.kana);
+  return {
+    ready: false,
+    message: t({
+      en: `${kana.join(' and ')} ${pool.length === 2 ? 'both' : 'all'} sound ${sound}. Choose one more kana with a different sound.`,
+      es: `${listEs(kana)} suenan igual: ${sound}. Elige un kana más con otro sonido.`,
+    }),
+  };
 }
 
 // ── Session ─────────────────────────────────────────────────────────────
@@ -180,10 +217,14 @@ export class KanaReview {
    * group is then shuffled with `seed`, and the groups keep their order.
    */
   start({ script = 'hiragana', selected = [], today = dayOf(Date.now()), seed = Date.now() } = {}) {
-    if (this.session && !finished(this.session.review)) throw new Error('Finish or leave the current review first.');
+    if (this.session && !finished(this.session.review)) {
+      throw new Error(t({ en: 'Finish or leave the current review first.', es: 'Primero termina el repaso actual o sal de él.' }));
+    }
     if (!isDay(today)) throw new Error('Expected today as YYYY-MM-DD.');
     const pool = SCRIPTS.includes(script) ? gameKana(script, selected) : [];
-    if (!readiness(script, pool).ready) throw new Error('Choose at least two kana with different sounds.');
+    if (!readiness(script, pool).ready) {
+      throw new Error(t({ en: 'Choose at least two kana with different sounds.', es: 'Elige al menos dos kana con sonidos distintos.' }));
+    }
     const order = new Map(pool.map((c, i) => [c.id, i]));
     const card = (c) => this.cards[keyOf(script, c.id)];
     const due = pool.filter((c) => card(c) && card(c).due <= today)

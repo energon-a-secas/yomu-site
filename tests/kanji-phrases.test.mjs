@@ -8,9 +8,16 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { phrasesWithKanji } from '../js/kanji-phrases.js';
 import { phraseSource } from '../js/phrase-book.js';
+import { useLang } from '../js/strings.js';
 
 const library = JSON.parse(fs.readFileSync(new URL('../data/phrases/library.json', import.meta.url)));
 const KANJI = ['日', '何', '願', '分', '一', '時', '行', '駅', '大', '本', '五', '円'];
+
+/** `fn` with every string in Spanish (strings.js useLang), then English again. */
+function inSpanish(fn) {
+  useLang('es');
+  try { return fn(); } finally { useLang('en'); }
+}
 
 test('every line found follows back to the library, in either language', () => {
   for (const lang of ['en', 'es']) {
@@ -57,4 +64,27 @@ test('a kanji the library never uses, or anything but one kanji, finds nothing',
     assert.deepEqual(phrasesWithKanji(library, input), [], String(input));
   }
   assert.deepEqual(phrasesWithKanji(null, '日'), []);
+});
+
+test('in Spanish, a kanji\'s lines carry the library\'s Spanish without being asked, and follow back the same way', () => {
+  const english = phrasesWithKanji(library, '日', { limit: 100 });
+  inSpanish(() => {
+    for (const ch of KANJI) {
+      const spanish = phrasesWithKanji(library, ch, { limit: 50 });
+      assert.deepEqual(spanish, phrasesWithKanji(library, ch, { limit: 50, lang: 'es' }), ch);
+      for (const p of spanish) {
+        const back = phraseSource(library, p.source, p.ja);
+        assert.deepEqual([back.title, back.meaning], [p.title, p.meaning], `${ch}: ${p.ja}`);
+      }
+    }
+    const day = phrasesWithKanji(library, '日', { limit: 100 });
+    assert.deepEqual(day.map((p) => p.source), english.map((p) => p.source), 'the same lines in either language');
+    assert.equal(day.find((p) => p.source.id === 'nihongo-benkyou').meaning, 'Estoy estudiando japonés.');
+    const line = day.find((p) => p.source.kind === 'conversation');
+    const d = library.dialogues.find((x) => x.id === line.source.id);
+    assert.deepEqual([line.title, line.meaning], [d.title.es, d.translation.es[line.source.line]]);
+    assert.notEqual(line.meaning, english.find((p) => p.source.kind === 'conversation').meaning);
+    assert.equal(phrasesWithKanji(library, '日', { limit: 100, lang: 'en' })[0].meaning, english[0].meaning, 'an explicit lang still wins');
+  });
+  assert.deepEqual(phrasesWithKanji(library, '日', { limit: 100 }), english, 'English again');
 });

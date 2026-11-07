@@ -1,5 +1,8 @@
 // Explicitly saved readings for native clients. Reuse History's text identity,
 // limits and backup format; never enable automatic history or infer a source.
+// Source titles, meanings and messages are in `lang`, which defaults to the
+// current language (strings.js useLang).
+import { t, currentLang } from './strings.js';
 import { emptyHistory, cleanPhrases, mergePhrases, phrasesOf, savedList, saveText, unsaveText, textKey, normalizeText, MAX_TEXT, MAX_SAVED } from './history-store.js';
 import { rowMatches } from './sets.js';
 
@@ -7,7 +10,7 @@ export const PHRASE_BOOK_FORMAT = 'yomu-phrase-book/1';
 const object = (v) => v && typeof v === 'object' && !Array.isArray(v);
 
 /** Only authored library references whose text still matches can be followed. */
-export function phraseSource(library, source, text, lang = 'en') {
+export function phraseSource(library, source, text, lang = currentLang()) {
   if (!object(source) || typeof source.id !== 'string') return null;
   let original, title, meaning, ref;
   if (source.kind === 'conversation') {
@@ -35,8 +38,9 @@ export function phraseSource(library, source, text, lang = 'en') {
 }
 
 export class PhraseBook {
-  constructor(library, document, lang = 'en') {
+  constructor(library, document, lang) {
     this.library = library;
+    // None means the current language, whenever a source or message is shown.
     this.lang = lang;
     this.data = emptyHistory();
     this.sources = {};
@@ -61,13 +65,28 @@ export class PhraseBook {
 
   save(text, source, now) {
     this.message = null;
-    if (typeof text !== 'string' || !text.trim()) { this.message = 'Read a phrase before saving it.'; return; }
+    if (typeof text !== 'string' || !text.trim()) {
+      this.message = t({ en: 'Read a phrase before saving it.', es: 'Lee una frase antes de guardarla.' }, this.lang);
+      return;
+    }
     text = text.trim();
-    if (text.length > MAX_TEXT) { this.message = `Save up to ${MAX_TEXT.toLocaleString('en-US')} characters per phrase. Shorten this reading first; nothing has been truncated.`; return; }
+    if (text.length > MAX_TEXT) {
+      this.message = t({
+        en: `Save up to ${MAX_TEXT.toLocaleString('en-US')} characters per phrase. Shorten this reading first; nothing has been truncated.`,
+        es: `Guarda hasta ${MAX_TEXT.toLocaleString('es')} caracteres por frase. Primero acorta esta lectura; no se recortó nada.`,
+      }, this.lang);
+      return;
+    }
     if (!Number.isFinite(now) || now <= 0) throw new Error('Invalid save time');
     const valid = phraseSource(this.library, source, text, this.lang);
     const result = saveText(this.data, text, 0, valid ? 'phrase' : 'typed', now);
-    if (!result.ok) { this.message = `Your ${MAX_SAVED}-phrase collection is full. Remove a phrase to save another.`; return; }
+    if (!result.ok) {
+      this.message = t({
+        en: `Your ${MAX_SAVED}-phrase collection is full. Remove a phrase to save another.`,
+        es: `Tu colección de ${MAX_SAVED.toLocaleString('es')} frases está llena. Quita una para guardar otra.`,
+      }, this.lang);
+      return;
+    }
     // A source-free paste never erases a known origin for the same phrase.
     if (valid && !this.sources[result.key]) this.sources[result.key] = this.reference(valid);
   }

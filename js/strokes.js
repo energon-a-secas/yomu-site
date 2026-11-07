@@ -7,7 +7,11 @@
 // The judge is deliberately forgiving about neatness and strict about order
 // and direction, which are what a writing tutorial teaches. Distances are in
 // grid units; a learner's finger is wide, so the ends may miss by a fifth of
-// the square, and the line may stray by half that on average.
+// the square, and the line may stray by half that on average. What the
+// learner is told (traceWords) is { en, es }, in the current language
+// (strings.js useLang); the errors about path data are for programmers.
+
+import { t } from './strings.js';
 
 export const GRID = 109;
 export const TRACE_TOLERANCE = 20;
@@ -219,14 +223,15 @@ export function traceStroke(strokes, next, drawn, options = {}) {
 
 /** What the learner is told for each verdict, with the stroke numbers filled in. */
 export function traceWords({ why, matched } = {}, next = 0) {
+  const n = next + 1;
   switch (why) {
-    case null: return next === null ? '' : `Stroke ${next + 1}: that's it.`;
-    case 'order': return `That is stroke ${matched + 1}. Stroke ${next + 1} comes first.`;
-    case 'reversed': return `Stroke ${next + 1} goes the other way: start at the dot.`;
-    case 'start': return `Start stroke ${next + 1} at the dot.`;
-    case 'end': return `Carry stroke ${next + 1} through to its end.`;
-    case 'shape': return `Follow the grey line of stroke ${next + 1} a little more closely.`;
-    case 'short': return 'Draw the whole stroke in one movement.';
+    case null: return next === null ? '' : t({ en: `Stroke ${n}: that's it.`, es: `Trazo ${n}: ¡eso es!` });
+    case 'order': return t({ en: `That is stroke ${matched + 1}. Stroke ${n} comes first.`, es: `Ese es el trazo ${matched + 1}. Primero va el trazo ${n}.` });
+    case 'reversed': return t({ en: `Stroke ${n} goes the other way: start at the dot.`, es: `El trazo ${n} va en el otro sentido: empieza en el punto.` });
+    case 'start': return t({ en: `Start stroke ${n} at the dot.`, es: `Empieza el trazo ${n} en el punto.` });
+    case 'end': return t({ en: `Carry stroke ${n} through to its end.`, es: `Lleva el trazo ${n} hasta el final.` });
+    case 'shape': return t({ en: `Follow the grey line of stroke ${n} a little more closely.`, es: `Sigue un poco más de cerca la línea gris del trazo ${n}.` });
+    case 'short': return t({ en: 'Draw the whole stroke in one movement.', es: 'Dibuja todo el trazo en un solo movimiento.' });
     default: return '';
   }
 }

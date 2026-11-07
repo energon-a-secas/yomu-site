@@ -19,7 +19,11 @@
 //
 // cardEntry is Tomoshibi's card, shared with the watch app: the short label,
 // meanings, readings and an example word the site's own data gives a kanji.
+// Its meanings are KANJIDIC's English, as on the site; the sentences this
+// module says are { en, es } and resolve to the current language (strings.js
+// useLang) when they are said.
 
+import { t } from './strings.js';
 import { readingKana, readingRomaji, hasKanji } from './kana.js';
 import { makeRand, shuffle } from './play-rounds.js';
 import { schedule, dayOf, TOP_BOX } from './kanji-store.js';
@@ -77,12 +81,23 @@ function distinctLabels(chars, labels) {
 
 /** Ready when a round can be dealt from `pool`, and what to do when it cannot. */
 function readiness(mode, pool, labels) {
-  if (!MODES.includes(mode)) return { ready: false, message: 'Choose cards or the quiz.' };
-  if (!pool.length) return { ready: false, message: 'There are no kanji in this set yet.' };
+  if (!MODES.includes(mode)) return { ready: false, message: t({ en: 'Choose cards or the quiz.', es: 'Elige las tarjetas o la prueba.' }) };
+  if (!pool.length) return { ready: false, message: t({ en: 'There are no kanji in this set yet.', es: 'Todavía no hay kanji en este grupo.' }) };
   if (mode === 'quiz' && distinctLabels(pool, labels) < QUIZ_CHOICES) {
-    return { ready: false, message: `The quiz needs ${QUIZ_CHOICES} kanji with different meanings. Turn cards over instead, or add kanji to this set.` };
+    return {
+      ready: false,
+      message: t({
+        en: `The quiz needs ${QUIZ_CHOICES} kanji with different meanings. Turn cards over instead, or add kanji to this set.`,
+        es: `La prueba necesita ${QUIZ_CHOICES} kanji con significados distintos. Mejor voltea las tarjetas, o agrega kanji a este grupo.`,
+      }),
+    };
   }
-  return { ready: true, message: mode === 'quiz' ? 'Pick each kanji\'s meaning from four.' : 'Turn each card over and say how it went.' };
+  return {
+    ready: true,
+    message: mode === 'quiz'
+      ? t({ en: 'Pick each kanji\'s meaning from four.', es: 'Elige el significado de cada kanji entre cuatro.' })
+      : t({ en: 'Turn each card over and say how it went.', es: 'Voltea cada tarjeta y di cómo te fue.' }),
+  };
 }
 
 /** A card read field by field: null when it cannot be used, `extra` when unknown fields were left out. */
@@ -237,7 +252,9 @@ export class KanjiCards {
    * `seed`; the groups keep their order. The quiz needs `labels` for the set.
    */
   start({ deck, chars = [], mode = 'flip', labels = {}, today = dayOf(Date.now()), seed = Date.now() } = {}) {
-    if (this.session && !finished(this.session.review)) throw new Error('Finish or leave the current round first.');
+    if (this.session && !finished(this.session.review)) {
+      throw new Error(t({ en: 'Finish or leave the current round first.', es: 'Primero termina la ronda actual o sal de ella.' }));
+    }
     if (typeof deck !== 'string' || !DECK.test(deck)) throw new Error('Expected a set id.');
     if (!isDay(today)) throw new Error('Expected today as YYYY-MM-DD.');
     let pool = [...new Set(chars.filter(isKanji))];

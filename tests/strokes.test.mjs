@@ -6,10 +6,19 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { cubicsOf, strokeOf, strokesFor, startOf, judgeStroke, traceStroke, traceWords, lengthOf } from '../js/strokes.js';
+import { useLang } from '../js/strings.js';
 
 const DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'data', 'strokes');
 const shard = (name) => JSON.parse(fs.readFileSync(path.join(DIR, name), 'utf8')).entries;
 const near = (a, b, eps = 1e-6) => a.every((v, i) => Math.abs(v - b[i]) < eps);
+/** The character is named, never written, so this file passes its own rule. */
+const EM_DASH = String.fromCharCode(0x2014);
+
+/** `fn` with every string in Spanish (strings.js useLang), then English again. */
+function inSpanish(fn) {
+  useLang('es');
+  try { return fn(); } finally { useLang('en'); }
+}
 
 test('path data becomes absolute cubics: relative, smooth and implied lines', () => {
   assert.deepEqual(cubicsOf('M10,10C20,10,30,20,40,40'), [[10, 10, 20, 10, 30, 20, 40, 40]]);
@@ -70,4 +79,28 @@ test('what the learner is told names the strokes', () => {
   assert.equal(traceWords({ why: 'reversed' }, 0), 'Stroke 1 goes the other way: start at the dot.');
   assert.equal(traceWords({ why: null }, 2), "Stroke 3: that's it.");
   assert.ok(lengthOf([[0, 0], [3, 4]]) === 5);
+});
+
+test('in Spanish, what the learner is told names the same strokes', () => {
+  const ka = strokesFor(shard('s00.json')['か']);
+  inSpanish(() => {
+    assert.equal(traceWords(traceStroke(ka, 0, ka[1].points), 0), 'Ese es el trazo 2. Primero va el trazo 1.');
+    assert.equal(traceWords(traceStroke(ka, 0, [...ka[0].points].reverse()), 0), 'El trazo 1 va en el otro sentido: empieza en el punto.');
+    assert.equal(traceWords(traceStroke(ka, 2, ka[2].points), 2), 'Trazo 3: ¡eso es!');
+    assert.equal(traceWords({ why: 'short' }, 0), 'Dibuja todo el trazo en un solo movimiento.');
+    assert.equal(traceWords({ why: null }, null), '');
+  });
+  assert.equal(traceWords({ why: null }, 2), "Stroke 3: that's it.", 'English again');
+});
+
+test('every Spanish verdict is written, differs from the English, keeps its stroke numbers and has no em dash', () => {
+  for (const why of [null, 'order', 'reversed', 'start', 'end', 'shape', 'short']) {
+    const english = traceWords({ why, matched: 4 }, 2);
+    const spanish = inSpanish(() => traceWords({ why, matched: 4 }, 2));
+    assert.ok(spanish.trim(), String(why));
+    assert.notEqual(spanish, english, String(why));
+    assert.ok(!spanish.includes(EM_DASH), String(why));
+    assert.deepEqual(spanish.match(/\d+/g)?.sort(), english.match(/\d+/g)?.sort(), `${why}: the same stroke numbers`);
+  }
+  assert.ok(!fs.readFileSync(new URL('../js/strokes.js', import.meta.url), 'utf8').includes(EM_DASH));
 });

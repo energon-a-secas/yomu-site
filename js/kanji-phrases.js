@@ -3,7 +3,10 @@
 // phrase-book.js follows back to the library (phraseSource). No DOM, and
 // nothing authored here: every line, reading and meaning is the library's
 // own CC0 text (data/phrases/library.json). This file's comments are CC0 too.
+// `lang` picks the library's English or Spanish, and defaults to the current
+// language (strings.js useLang).
 
+import { currentLang } from './strings.js';
 import { oneKanji } from './kanji-store.js';
 
 /**
@@ -14,7 +17,7 @@ import { oneKanji } from './kanji-store.js';
  * A dialogue line that repeats an expression already listed is left out.
  * Anything but exactly one kanji gives [].
  */
-export function phrasesWithKanji(library, ch, { limit = 6, lang = 'en' } = {}) {
+export function phrasesWithKanji(library, ch, { limit = 6, lang = currentLang() } = {}) {
   const max = Number.isFinite(limit) ? Math.max(0, Math.floor(limit)) : 6;
   if (!oneKanji(ch) || !max || !library) return [];
   const out = [];

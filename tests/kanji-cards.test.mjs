@@ -1,11 +1,21 @@
 // Kanji cards: a free drill over any set of kanji, with boxes of its own.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 import { KanjiCards, cardEntry, ROUND_SIZE, QUIZ_CHOICES } from '../js/kanji-cards.js';
+import { useLang } from '../js/strings.js';
 
 const TODAY = '2026-11-06';
 const LABELS = { 日: 'day', 月: 'month', 火: 'fire', 水: 'water', 木: 'tree', 金: 'gold', 土: 'soil' };
 const SET = Object.keys(LABELS);
+/** The character is named, never written, so this file passes its own rule. */
+const EM_DASH = String.fromCharCode(0x2014);
+
+/** `fn` with every string in Spanish (strings.js useLang), then English again. */
+function inSpanish(fn) {
+  useLang('es');
+  try { return fn(); } finally { useLang('en'); }
+}
 
 /**
  * Play a whole round, first answers by `firstOk(kanji)`. A kanji answered
@@ -150,4 +160,47 @@ test('a damaged document keeps what is valid and says it was recovered', () => {
   doc.session.shown = true; // turned over with no pick: not a state the quiz can reach
   assert.equal(new KanjiCards(doc).session, null);
   assert.equal(new KanjiCards('nonsense').recovered, true);
+});
+
+test('in Spanish, the readiness messages say what to do in Spanish', () => {
+  const cards = new KanjiCards();
+  const three = { 日: 'day', 月: 'month', 火: 'fire', 曜: 'day' };
+  inSpanish(() => {
+    assert.equal(cards.overview({ chars: SET, today: TODAY }).message, 'Voltea cada tarjeta y di cómo te fue.');
+    assert.equal(cards.overview({ chars: SET, mode: 'quiz', labels: LABELS, today: TODAY }).message, 'Elige el significado de cada kanji entre cuatro.');
+    assert.equal(cards.overview({ chars: [], today: TODAY }).message, 'Todavía no hay kanji en este grupo.');
+    assert.equal(cards.overview({ chars: SET, mode: 'cards', today: TODAY }).message, 'Elige las tarjetas o la prueba.');
+    const quiz = cards.overview({ chars: Object.keys(three), mode: 'quiz', labels: three, today: TODAY });
+    assert.equal(quiz.ready, false);
+    assert.equal(quiz.message, 'La prueba necesita 4 kanji con significados distintos. Mejor voltea las tarjetas, o agrega kanji a este grupo.');
+    assert.throws(() => cards.start({ deck: 'mine', chars: Object.keys(three), mode: 'quiz', labels: three, today: TODAY }), { message: quiz.message });
+    cards.start({ deck: 'n5', chars: SET, today: TODAY, seed: 1 });
+    assert.throws(() => cards.start({ deck: 'n5', chars: SET, today: TODAY, seed: 2 }), { message: 'Primero termina la ronda actual o sal de ella.' });
+    assert.equal(cardEntry({ on: [], kun: [], m: ['day', 'sun'], s: 4 }).label, 'day', 'KANJIDIC meanings stay English, as on the site');
+  });
+  assert.equal(new KanjiCards().overview({ chars: [], today: TODAY }).message, 'There are no kanji in this set yet.', 'English again');
+});
+
+test('every Spanish message of the cards is written, differs from the English, and has no em dash', () => {
+  const three = { 日: 'day', 月: 'month', 火: 'fire', 曜: 'day' };
+  const say = () => {
+    const cards = new KanjiCards();
+    const said = [
+      ...['flip', 'quiz', 'cards'].map((mode) => cards.overview({ chars: SET, mode, labels: LABELS, today: TODAY }).message),
+      cards.overview({ chars: [], today: TODAY }).message,
+      cards.overview({ chars: Object.keys(three), mode: 'quiz', labels: three, today: TODAY }).message,
+    ];
+    cards.start({ deck: 'n5', chars: SET, today: TODAY, seed: 1 });
+    try { cards.start({ deck: 'n5', chars: SET, today: TODAY, seed: 2 }); } catch (error) { said.push(error.message); }
+    return said;
+  };
+  const english = say();
+  const spanish = inSpanish(say);
+  assert.equal(spanish.length, 6);
+  spanish.forEach((es, i) => {
+    assert.ok(es.trim(), `message ${i} is empty`);
+    assert.notEqual(es, english[i], `message ${i} is still English`);
+    assert.ok(!es.includes(EM_DASH), `message ${i}: a dash`);
+  });
+  assert.ok(!fs.readFileSync(new URL('../js/kanji-cards.js', import.meta.url), 'utf8').includes(EM_DASH));
 });

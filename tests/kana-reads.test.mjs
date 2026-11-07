@@ -10,6 +10,13 @@ import { KanaReads, KANA_READ_THEMES, kanaReadThemes, kanaReadItems } from '../j
 import { said } from '../js/kana.js';
 import { ROUND } from '../js/play-rounds.js';
 import { normalizeAudio, addShard, shardsFor, keysOf, clipInVoice, clipByKeys } from '../js/audio.js';
+import { useLang } from '../js/strings.js';
+
+/** `fn` with every string in Spanish (strings.js useLang), then English again. */
+function inSpanish(fn) {
+  useLang('es');
+  try { return fn(); } finally { useLang('en'); }
+}
 
 const ROOT = new URL('../', import.meta.url);
 const SCRIPT = { hiragana: /^[ぁ-ゖー]+$/u, katakana: /^[ァ-ヺー]+$/u };
@@ -273,4 +280,73 @@ test('damaged counters keep their valid fields and signal a recovery', () => {
   const clean = { v: 1, stats: { sounds: { rounds: 1, best: 6, correct: 6, answered: 10, assisted: 2, misses: { iraira: 3 } } }, round: null };
   assert.equal(new KanaReads(clean).view().recovered, false);
   assert.deepEqual(new KanaReads(clean).dump(), clean);
+});
+
+test('every theme and word has its Spanish: titles, a meaning no other word of the theme shares, and a short note', () => {
+  for (const theme of KANA_READ_THEMES) {
+    for (const [english, spanish] of [[theme.title, theme.titleEs], [theme.subtitle, theme.subtitleEs]]) {
+      assert.ok(typeof spanish === 'string' && spanish.trim(), `${theme.id}: no Spanish for ${english}`);
+      assert.notEqual(spanish, english, `${theme.id}: still English`);
+      assert.ok(!spanish.includes(EM_DASH) && !BANNED.test(spanish), `${theme.id}: ${spanish}`);
+    }
+    const items = kanaReadItems(theme.id);
+    // The quiz's four answers are four different meanings in either language.
+    assert.equal(new Set(items.map((i) => i.es.toLowerCase())).size, items.length, `${theme.id}: two words share a Spanish meaning`);
+    for (const item of items) {
+      assert.ok(typeof item.es === 'string' && item.es.trim(), `${item.id}: no Spanish meaning`);
+      assert.ok(item.es.split(/\s+/).length <= 4, `${item.id}: ${item.es}`);
+      assert.match(item.noteEs, /^[^.!?]+[.!?]$/u, `${item.id}: one sentence`);
+      assert.ok(item.noteEs.length <= 140, `${item.id}: a short note (${item.noteEs.length})`);
+      assert.notEqual(item.noteEs, item.note, `${item.id}: the note is still English`);
+      for (const text of [item.es, item.noteEs]) {
+        assert.ok(!text.includes(EM_DASH), `${item.id}: a dash`);
+        assert.ok(!BANNED.test(text), `${item.id}: ${text}`);
+      }
+    }
+  }
+});
+
+test('in Spanish, a round asks in Spanish: the theme, four different options, the meaning and the note', () => {
+  inSpanish(() => {
+    const themes = kanaReadThemes();
+    assert.deepEqual(themes.map((t) => t.title), ['Menú de cafetería', 'Por el mundo', 'Cosas de todos los días', 'En el zoológico', 'Onomatopeyas', 'Palabras de todos los días']);
+    assert.equal(themes[0].subtitle, 'Bebidas y bocados en katakana');
+    assert.deepEqual(themes.map((t) => [t.id, t.script, t.count]), KANA_READ_THEMES.map((t) => [t.id, t.script, kanaReadItems(t.id).length]));
+    const g = new KanaReads();
+    g.start({ theme: 'cafe', seed: 31 });
+    assert.equal(g.view().round.title, 'Menú de cafetería');
+    assert.deepEqual(question(g).options.map((o) => o.label), ['Galleta', 'Flan', 'Sopa', 'Pastel']);
+    act(g, 'answer', { pick: target(g) });
+    const a = question(g);
+    assert.equal(a.meaning, 'Sopa');
+    assert.equal(a.note, 'En invierno, las máquinas expendedoras venden sopa de maíz caliente, コーンスープ, en lata.');
+    assert.equal(a.romaji, 'suupu', 'the romaji is the reader\'s in either language');
+    assert.throws(() => g.start({ theme: 'cafe' }), { message: 'Primero termina la ronda actual o sal de ella.' });
+    assert.throws(() => new KanaReads().start({ theme: 'nope' }), { message: 'Elige uno de los temas.' });
+  });
+  assert.equal(kanaReadThemes()[0].title, 'Café menu', 'English again');
+});
+
+test('a round begun in English resumes in Spanish, every question with four different Spanish answers', () => {
+  for (const theme of KANA_READ_THEMES) {
+    const g = new KanaReads();
+    g.start({ theme: theme.id, seed: 7 });
+    const document = JSON.parse(JSON.stringify(g.dump()));
+    const items = new Map(kanaReadItems(theme.id).map((item) => [item.id, item]));
+    inSpanish(() => {
+      let s = new KanaReads(document);
+      assert.equal(s.view().recovered, false);
+      for (let n = 0; n < ROUND; n++) {
+        const q = question(s);
+        assert.deepEqual(q.options.map((o) => o.label), q.options.map((o) => items.get(o.id).es));
+        assert.equal(new Set(q.options.map((o) => o.label)).size, q.options.length, `${theme.id}: four different answers`);
+        act(s, n % 2 ? 'skip' : 'answer', { pick: target(s) });
+        assert.equal(question(s).note, items.get(target(s)).noteEs);
+        act(s, 'next');
+        s = reload(s);
+      }
+      assert.equal(s.view().round.title, theme.titleEs);
+    });
+    assert.deepEqual(new KanaReads(document).dump(), document, 'the document holds no text, so it is the same in either language');
+  }
 });

@@ -6,9 +6,20 @@
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 import { KanaReview, QUICK_SIZE } from '../js/kana-review.js';
 import { kanaChart } from '../js/kana-chart.js';
 import { schedule, addDays } from '../js/kanji-store.js';
+import { useLang } from '../js/strings.js';
+
+/** The character is named, never written, so this file passes its own rule. */
+const EM_DASH = String.fromCharCode(0x2014);
+
+/** `fn` with every string in Spanish (strings.js useLang), then English again. */
+function inSpanish(fn) {
+  useLang('es');
+  try { return fn(); } finally { useLang('en'); }
+}
 
 const DAY = '2026-11-02';
 const SCRIPTS = ['hiragana', 'katakana'];
@@ -372,4 +383,54 @@ test('a damaged review is dropped and the cards are kept', () => {
   assert.equal(new KanaReview(finished).view().status, 'complete');
   finished.session.shown = true;
   assert.equal(new KanaReview(finished).view().recovered, true);
+});
+
+test('in Spanish, the overview says how to fix a selection, naming its kana and their sound', () => {
+  const q = new KanaReview();
+  const cases = [
+    ['hiragana', [], 'Elige al menos dos kana con sonidos distintos. La tsu pequeña y la barra de vocal larga necesitan una palabra, así que se quedan en la práctica de lectura.'],
+    ['hiragana', ['あ'], 'Elige al menos un kana más, con un sonido distinto de a.'],
+    ['hiragana', ['お', 'を'], 'お y を suenan igual: o. Elige un kana más con otro sonido.'],
+    ['katakana', ['じ', 'ぢ'], 'ジ y ヂ suenan igual: ji. Elige un kana más con otro sonido.'],
+    ['romaji', ['か', 'き'], 'Elige hiragana o katakana.'],
+  ];
+  inSpanish(() => {
+    for (const [script, selected, says] of cases) {
+      const o = q.overview({ script, selected, today: DAY });
+      assert.equal(o.ready, false, selected.join(''));
+      assert.equal(o.message, says);
+      assert.throws(() => q.start({ script, selected, today: DAY }), { message: 'Elige al menos dos kana con sonidos distintos.' });
+    }
+    assert.equal(q.overview({ selected: ['か', 'き'], today: DAY }).message, `Primero van los kana que tocan repaso y luego los nuevos, hasta ${QUICK_SIZE} por repaso.`);
+    q.start({ selected: ['か', 'き', 'く'], today: DAY, seed: 2 });
+    assert.throws(() => q.start({ selected: ['か', 'き'], today: DAY }), { message: 'Primero termina el repaso actual o sal de él.' });
+  });
+  q.act('leave');
+  assert.match(q.overview({ selected: ['お', 'を'], today: DAY }).message, /^お and を both sound o\./, 'English again');
+});
+
+test('every Spanish message of the review is written, differs from the English, and has no em dash', () => {
+  const selections = [['hiragana', []], ['hiragana', ['あ']], ['hiragana', ['お', 'を']], ['katakana', ['ず', 'づ']], ['romaji', ['か']], ['hiragana', ['か', 'き']]];
+  const say = () => {
+    const q = new KanaReview();
+    const said = selections.map(([script, selected]) => q.overview({ script, selected, today: DAY }).message);
+    const attempts = [
+      () => q.start({ selected: ['あ'], today: DAY }),
+      () => { q.start({ selected: ['か', 'き'], today: DAY, seed: 1 }); q.start({ selected: ['か', 'き'], today: DAY }); },
+    ];
+    for (const attempt of attempts) {
+      try { attempt(); } catch (error) { said.push(error.message); }
+    }
+    return said;
+  };
+  const english = say();
+  const spanish = inSpanish(say);
+  assert.equal(spanish.length, selections.length + 2);
+  spanish.forEach((es, i) => {
+    assert.ok(es.trim(), `message ${i} is empty`);
+    assert.notEqual(es, english[i], `message ${i} is still English`);
+    assert.ok(!es.includes(EM_DASH), `message ${i}: a dash`);
+    assert.ok(/[.]$/.test(es), `message ${i}: a plain sentence`);
+  });
+  assert.ok(!fs.readFileSync(new URL('../js/kana-review.js', import.meta.url), 'utf8').includes(EM_DASH));
 });
