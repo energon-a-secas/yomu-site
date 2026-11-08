@@ -19,9 +19,10 @@
 //
 // cardEntry is Tomoshibi's card, shared with the watch app: the short label,
 // meanings, readings and an example word the site's own data gives a kanji.
-// Its meanings are KANJIDIC's English, as on the site; the sentences this
-// module says are { en, es } and resolve to the current language (strings.js
-// useLang) when they are said.
+// Its meanings are KANJIDIC's English, as on the site, with their Spanish
+// beside them in `es` when the caller hands it the Spanish (docs/ANALYZER.md,
+// "Spanish meanings"); the sentences this module says are { en, es } and
+// resolve to the current language (strings.js useLang) when they are said.
 
 import { t } from './strings.js';
 import { readingKana, readingRomaji, hasKanji } from './kana.js';
@@ -58,11 +59,16 @@ const labelKey = (label) => String(label || '').trim().toLowerCase();
  * one. The label is the row's first gloss, else the first meaning. KANJIDIC
  * appends a radical's own name ("one radical (no.1)"), which is no answer to
  * choose from, so those meanings are left out.
+ *
+ * `es` is the Spanish of the same kanji, for a reader in Spanish: `m`,
+ * KANJIDIC's Spanish meanings (dict.js kanjiEs), and `gloss`, the Spanish of
+ * the example word (data/es/kpage/daily.json). The card then carries `es`:
+ * { label, m, w } with whichever of them there is, beside the English.
  */
-export function cardEntry(rec, { level = null, row = null } = {}) {
+export function cardEntry(rec, { level = null, row = null, es = null } = {}) {
   if (!object(rec)) return null;
   const m = (rec.m || []).filter((x) => !/radical/i.test(x)).slice(0, CARD_MEANINGS);
-  return {
+  const card = {
     label: row ? String(row[1]).split(',')[0].trim() : m[0] || '',
     m,
     on: (rec.on || []).slice(0, CARD_READINGS).map((r) => [r.replace(/[.-]/g, ''), readingRomaji(r)]),
@@ -72,6 +78,41 @@ export function cardEntry(rec, { level = null, row = null } = {}) {
     ...(level ? { n: level } : {}),
     ...(row ? { w: [row[2], row[3], row[4]] } : {}),
   };
+  const spanish = object(es) ? cardEs(es, card) : null;
+  return spanish ? { ...card, es: spanish } : card;
+}
+
+/** The Spanish beside a card: the label and meanings from KANJIDIC's Spanish, the word's gloss from JMdict's. */
+function cardEs({ m = null, gloss = null }, card) {
+  const out = {};
+  const meanings = (Array.isArray(m) ? m : [])
+    .filter((x) => typeof x === 'string' && x && !/radical/i.test(x)).slice(0, CARD_MEANINGS);
+  if (meanings.length) {
+    out.label = meanings[0];
+    out.m = meanings;
+  }
+  if (card.w && typeof gloss === 'string' && gloss) out.w = [card.w[0], card.w[1], gloss];
+  return Object.keys(out).length ? out : null;
+}
+
+/**
+ * The label the quiz deals for a card (cardEntry): its Spanish one when
+ * `spanish` is set and it has one, else the English, so the four choices
+ * differ in the language they are read in.
+ */
+export function quizLabel(entry, spanish = false) {
+  if (!object(entry)) return '';
+  return (spanish && object(entry.es) && entry.es.label) || entry.label || '';
+}
+
+/**
+ * A quiz option (view()'s `options`) as a screen gets it: a label dealt in
+ * Spanish moves beside the English one, `es`: { label }, so `label` is
+ * English in every option, as everywhere else.
+ */
+export function optionWithEs(option, entry) {
+  if (!object(option) || !object(entry) || !object(entry.es) || !entry.es.label || option.label !== entry.es.label) return option;
+  return { ch: option.ch, label: entry.label, es: { label: entry.es.label } };
 }
 
 /** How many of `chars` have a label no other of them has said already. */

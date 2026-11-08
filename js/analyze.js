@@ -34,6 +34,7 @@ import { titleNames } from './title-names.js';
 import { joinKatakana } from './compounds.js';
 import { usageFor } from './usage-notes.js';
 import { guessParts } from './sounds-like.js';
+import { addSpanish } from './spanish.js';
 
 /** The kinds that are Japanese words, as opposed to what sits between them. */
 export const JAPANESE_KINDS = Object.freeze(new Set([
@@ -388,9 +389,11 @@ export async function analyzeCore(input, { dict } = {}) {
 
 /**
  * The page's one entry point. Without a dict it reads the shards from data/
- * next to the page.
+ * next to the page. `meanings: 'es'` puts Spanish meanings beside the
+ * English ones (js/spanish.js, docs/ANALYZER.md "Spanish meanings"); without
+ * it no Spanish file is fetched and the tokens are what they always were.
  */
-export async function analyze(input, { dict } = {}) {
+export async function analyze(input, { dict, meanings } = {}) {
   const d = dict || defaultDict();
   const result = await analyzeCore(input, { dict: d });
   const fin = finals(result.tokens);
@@ -398,6 +401,7 @@ export async function analyze(input, { dict } = {}) {
     if (JAPANESE_KINDS.has(t.kind)) t.sounds = detectSounds(t, { final: fin[k], ...SAID.get(t) });
   });
   annotateGrammar(result.tokens);
+  if (meanings === 'es') await addSpanish(result, d);
   return result;
 }
 

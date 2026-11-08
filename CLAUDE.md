@@ -16,7 +16,7 @@ the display preferences to their account (Accounts and sync, below).
 ```bash
 make serve       # http://localhost:8895
 make validate    # node tools/check-data.mjs, then npm test
-make data        # rebuild data/dict, data/kanji, data/names, data/like, data/play, data/strokes, data/kpage, data/search, data/spell, data/sets and data/sent from the pinned upstreams (manual)
+make data        # rebuild data/dict, data/kanji, data/names, data/like, data/play, data/strokes, data/kpage, data/es, data/search, data/spell, data/sets and data/sent from the pinned upstreams (manual)
 npm test         # node --test tests/*.test.mjs
 node tests/mobile.browser.mjs [--base=http://localhost:8895/] [--shots=DIR]   # every screen on five phones, WebKit and Chromium (On a phone, below)
 node tools/compare-readings.mjs <old data/> [data/]   # every token two builds read differently, over Tatoeba
@@ -455,6 +455,17 @@ and grids are compact, cells 48 to 56px and never under 44 on a coarse
 pointer. A control that follows an answer goes inside the feedback block,
 never under it.
 
+**Spanish meanings sit beside the English, never in its place, and load only
+when asked.** `analyze(text, { meanings: 'es' })` and the lookups in
+docs/ANALYZER.md "Spanish meanings" put a meaning's Spanish in an `es` object
+beside the English field (`entry.es.g`, `info.es.m`); no `es` means there is
+none, and the English is the fallback. The page passes only `lang`, so it
+fetches no `data/es/` file and shows English meanings; Naninani asks for the
+Spanish. Records are shared, so whatever carries `es` is a copy, and a test
+reads English again after Spanish to hold that. JMdict's Spanish senses are not
+its English ones: never pair them, and never mix Spanish and English in one
+record's meanings.
+
 **Nothing from Genki, the Japan Foundation apps, Tofugu, Yomitan, rikaichan
 or 10ten is in this repository.** The deinflection table was written for
 Yomu from grammar; Genki was read for its order and its romaji convention
@@ -552,6 +563,7 @@ refuses it.
 - `data/spell/**`: emitted by `tools/build-spellings.mjs` from the pinned full JMdict and the committed first tier (after `build-dict.mjs`). Rebuild, do not hand-edit.
 - `data/sets/**`: emitted by `tools/build-sets.mjs` from the pinned full JMdict alone. Rebuild, do not hand-edit.
 - `data/search/**`: emitted by `tools/build-search.mjs` from the committed `data/dict/`, `data/kanji/` and `data/strokes/` (after `build-kanji-page.mjs`). Rebuild, do not hand-edit.
+- `data/es/**`: emitted by `tools/build-spanish.mjs` from the committed `data/dict/`, `data/kanji/` and `data/kpage/` (after `build-kanji-page.mjs`), the pinned jmdict-spa and kanjidic2-all, and the authored `tools/lib/spanish-words.mjs`. Every file names the English file it mirrors and its digest, and `check-data.mjs` fails one whose English file moved: rebuild it after any of those three. Rebuild, do not hand-edit.
 - `data/strokes/**`, `data/kpage/**`: emitted by `tools/build-kanji-page.mjs` from KanjiVG (the pin in `tools/lib/sources.mjs`) and the committed `data/dict/` and `data/kanji/` (after `build-dict.mjs` and `build-kanji.mjs`). Rebuild, do not hand-edit.
 - `data/kanji/jinmeiyo.json`: emitted by `tools/build-joyo.mjs` (and `build-kanji.mjs`) from the committed kanji shards. Rebuild, do not hand-edit.
 - `fonts/klee/**`: emitted by `tools/build-font.mjs` from the pinned Klee One and its OFL.txt (`tools/lib/sources.mjs`) over the committed kanji shards. Rebuild, do not hand-edit.

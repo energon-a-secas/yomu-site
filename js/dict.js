@@ -29,9 +29,12 @@
 // phase asks, so a text the first pass reads in full never touches them.
 // Behind those, the sound-alike words (data/like/, `needLike` and `like`),
 // read only for a katakana part no record covers (js/sounds-like.js).
+// Beside every tier, the Spanish of its meanings (data/es/, `needEs`, `esOf`
+// and `kanjiEs`), fetched only when a caller asks for Spanish.
 
 import { readFilter } from './bloom.js';
 import { createRangeStore, lastAtMost, loadError } from './range-store.js';
+import { createEsFiles } from './es-files.js';
 
 /**
  * Where a published path lands. `base` is the data/ directory, relative to the
@@ -82,6 +85,21 @@ export function createDict({ fetchJson, base = 'data/' } = {}) {
   const kanjiShards = new Map();
   const kanjiPending = new Map();
 
+  // Spanish (docs/ANALYZER.md, "Spanish meanings"): each English file's
+  // counterpart under data/es/, loaded only by needEs and kanjiEs. As a
+  // shard loads, each record is filed under the file it came from, its key
+  // and its place among the key's records, which is where its Spanish is;
+  // nothing is written onto the record, so a text read in English is the
+  // same, byte for byte, after one read in Spanish.
+  const es = createEsFiles({ fetchJson, resolve });
+  const filed = new WeakMap();   // record -> [src, key, place]
+  function file(src, entries) {
+    for (const [key, recs] of Object.entries(entries)) {
+      if (!Array.isArray(recs)) continue;
+      recs.forEach((rec, i) => { if (rec && typeof rec === 'object') filed.set(rec, [src, key, i]); });
+    }
+  }
+
   // The second phase's tiers. A rare record is marked `tier: 2` as it
   // loads, so a token built from it says so and the page can call it a rare
   // word; nothing in the shards spends bytes on the mark.
@@ -90,8 +108,9 @@ export function createDict({ fetchJson, base = 'data/' } = {}) {
     resolve,
     indexPath: `${dir}dict/rare.json`,
     what: 'The rare-word index',
-    onShard: (entries) => {
+    onShard: (entries, src) => {
       for (const recs of Object.values(entries)) for (const r of recs) r.tier = 2;
+      file(src, entries);
     },
   });
   const names = createRangeStore({
@@ -150,6 +169,7 @@ export function createDict({ fetchJson, base = 'data/' } = {}) {
       coring = loadExtra('The dictionary core', index.core, (doc) => {
         if (!doc || typeof doc.entries !== 'object' || doc.entries === null) throw new Error('it has no entries');
         core = doc.entries;
+        file(index.core.src, core);
       }).catch((e) => { coring = null; throw e; });
     }
     return coring;
@@ -175,6 +195,7 @@ export function createDict({ fetchJson, base = 'data/' } = {}) {
           throw new Error('it has no entries');
         }
         shards.set(n, doc.entries);
+        file(index.shards[n].src, doc.entries);
         pending.delete(n);
       })
       .catch((e) => {
@@ -313,6 +334,57 @@ export function createDict({ fetchJson, base = 'data/' } = {}) {
     return out;
   }
 
+  // ── Spanish ─────────────────────────────────────────────────────────────
+
+  /**
+   * Load the Spanish of these records (each from get() or rare()): the
+   * counterpart of every file they came from. Never rejects: a file that
+   * cannot be loaded leaves its records with no Spanish, and esOf says so.
+   */
+  async function needEs(records) {
+    const srcs = new Set();
+    for (const rec of records || []) {
+      const at = rec && typeof rec === 'object' ? filed.get(rec) : undefined;
+      if (at) srcs.add(at[0]);
+    }
+    await Promise.all([...srcs].map(es.load));
+  }
+
+  /**
+   * A record's Spanish meanings, one per Spanish sense (docs/ANALYZER.md), or
+   * null: JMdict has none for its entry, or needEs has not loaded them.
+   */
+  function esOf(rec) {
+    const at = rec && typeof rec === 'object' ? filed.get(rec) : undefined;
+    const entries = at ? es.get(at[0]) : null;
+    const list = entries && Object.prototype.hasOwnProperty.call(entries, at[1]) ? entries[at[1]] : null;
+    const g = Array.isArray(list) ? list[at[2]] : null;
+    return Array.isArray(g) && g.length ? g : null;
+  }
+
+  /**
+   * KANJIDIC's Spanish meanings of these characters (a string or an
+   * iterable): a Map of the ones that have any. Never rejects: a file that
+   * cannot be loaded leaves its characters out.
+   */
+  async function kanjiEs(chars) {
+    await loadKanjiIndex();
+    const list = [...new Set(typeof chars === 'string' ? [...chars] : [...(chars || [])])];
+    const srcOf = new Map();
+    for (const ch of list) {
+      const n = kanjiShardFor(ch);
+      if (n >= 0) srcOf.set(ch, kanjiIndex.shards[n].src);
+    }
+    await Promise.all([...new Set(srcOf.values())].map(es.load));
+    const out = new Map();
+    for (const [ch, src] of srcOf) {
+      const map = es.get(src);
+      const m = map && Object.prototype.hasOwnProperty.call(map, ch) ? map[ch] : null;
+      if (Array.isArray(m) && m.length) out.set(ch, m);
+    }
+    return out;
+  }
+
   // ── Sound-alike words ───────────────────────────────────────────────────
 
   function loadLikeIndex() {
@@ -388,6 +460,14 @@ export function createDict({ fetchJson, base = 'data/' } = {}) {
     like,
     /** Sound-alike files loaded so far, the index included, for tests. */
     get loadedLike() { return likeGroups.size + (likeIndex ? 1 : 0); },
+    /** Load the Spanish of these records (data/es/dict/), only when Spanish is asked for. */
+    needEs,
+    /** A record's Spanish meanings, or null. */
+    esOf,
+    /** Spanish meanings of these kanji (data/es/kanji/): Map char -> string[]. */
+    kanjiEs,
+    /** Spanish files loaded so far, for tests: none for a reader in English. */
+    get loadedEs() { return es.loaded; },
     /** Longest key in the dictionary; the lattice never looks further. */
     get maxKey() { return index && index.maxKey ? index.maxKey : 12; },
     /** How many dictionary files (the core and range shards) are loaded, for tests and the performance note. */

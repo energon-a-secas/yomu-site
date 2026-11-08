@@ -1,0 +1,26 @@
+{
+"_licence": {"source":"JMdict and KANJIDIC Spanish translations, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg-spanish","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence. The Spanish meanings are their Spanish translations: KANJIDIC's Spanish kanji meanings were compiled by Francisco Gutierrez and provided by Gabriel Sanroman, and JMdict's Spanish glosses are the work of their compilers, who hold their copyright. The Spanish meanings of a few common words, which JMdict has none of or has in error, were written for Yomu.","links":["https://www.edrdg.org/edrdg/licence.html","https://www.edrdg.org/kanjidic/kanjidic_doc_legacy.html","https://github.com/scriptin/jmdict-simplified"],"screen":"required","upstream":["jmdict-simplified kanjidic2-all 3.6.2+20260831182826"],"generated_by":"tools/build-spanish.mjs","generated_at":"2026-10-01"},
+"format": "yomu-kanji-es/1",
+"of": {"src":"data/kanji/k04.json","sha256":"e6110a7edad54bd971b82096ce921f46b43eab19615755d31d47b48542b0c921"},
+"entries": {
+"姪": ["sobrina"],
+"宥": ["tranquilizar","aliviar","calmar"],
+"寇": ["enemigo","rival","saqueo"],
+"屑": ["basura","desechos","chatarra"],
+"崚": ["destacarse en una fila"],
+"嵩": ["irritado","exasperado","hincharse"],
+"廻": ["giro","rotación","vuelta"],
+"廿": ["veinte","veinte años"],
+"恕": ["excusar","perdonar","tolerar"],
+"扁": ["llano","simple","plano"],
+"拗": ["torsión","tirón","malhumor"],
+"捷": ["victoria","rápido"],
+"捺": ["presionar","imprimir","sellar"],
+"摺": ["frotar","rascar","sellar"],
+"昂": ["subir","elevar","entusiasmado"],
+"昴": ["ascenso","incremento","auge"],
+"晏": ["tarde","avanzado","tranquilo"],
+"晟": ["claro"],
+"晨": ["mañana","temprano"]
+}
+}
