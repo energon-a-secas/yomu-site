@@ -14,8 +14,8 @@ kana details and practice, the games' shape hints (the look-alike ones from
 `play-kana.js` and the 47 written in `kana-games.js`), their setup messages
 and errors, quick kana review, Kana snacks (each word's meaning and note, no
 two meanings alike within a theme in either language), kanji cards' messages,
-the tracing verdicts, the phrase book's messages, the café story and Kana to
-kanji. Dictionary data stays English, as on the site: JMdict glosses (Kana to
+the tracing verdicts, the phrase book's messages, the café story, Kana to
+kanji and the writing rush. Dictionary data stays English, as on the site: JMdict glosses (Kana to
 kanji's meanings), KANJIDIC meanings (kanji cards) and Tatoeba translations.
 Documents hold ids and counts, never this text, so a round begun in one
 language resumes in the other. Each module's tests switch with
@@ -250,3 +250,73 @@ numbers with the same `startOf`. `tests/strokes.test.mjs` parses every
 stroke in the data (a path command the drawing does not handle fails
 loudly), checks that each starts where its number goes, and judges traces of
 か and 書 (whose horizontal strokes sit ten units apart).
+
+## Writing rush
+
+Asked for on 7 November 2026: writing as a timed game, with or without
+guides, over groups of kana and kanji, in rushes and marathons.
+`js/writing-rush.js` holds the rules and `js/writing-rush-words.js` what they
+say. Every stroke is judged by `strokes.js traceStroke`, the writing pad's
+judge: the app calls `trace` as the pad does and passes the verdict on, so
+the game adds no judge of its own.
+
+The groups are each script's ten rows of basic kana (the わ row is わ, を and
+ん, as `kana-rows.js` files them), all 46 of a script, My kanji (the app
+passes the saved kanji) and the sets kanji cards use (`levels.js LEVELS`:
+the school grades, the name kanji, JLPT N5 to N1). Only a character with a
+stroke order is dealt: the caller passes each character's number of strokes,
+and the 64 name kanji KanjiVG does not draw are left out. A rush lasts 30,
+60 or 120 seconds and deals the group in a seeded random order, again in a
+new order whenever it runs out, never the same character twice in a row
+(with two or more). A marathon deals every character once, in a seeded
+random order, and its result is the time. With guides the pad shows the
+faint character and the dot where the next stroke starts; without them, an
+empty square, where the verdicts say what was wrong without pointing at a
+dot or a line.
+
+What counts: a stroke the judge refuses is a miss, and the learner draws
+that stroke again; a tap (the judge's `short`) is not a stroke and counts
+nothing. The third miss on one stroke shows that stroke until it is traced,
+and its character is assisted. A character is written when its last stroke
+is traced; clean when it was written with no miss. A run's misses are those
+of its written characters. In a rush a character finished at or before the
+deadline counts, and one still in progress at the deadline counts for
+nothing, its misses and any shown stroke included.
+
+Time is the app's monotonic clock, in milliseconds from the run's start,
+paused while the app is away: each stroke carries when the finger touched
+down (`began`) and lifted (`at`), and a time earlier than the latest is
+read as the latest. The clock starts with the first stroke in both modes, as
+Play's timed game starts when the learner does: a rush ends its length after
+the first stroke's touch-down, and a marathon runs from that touch-down to
+the last character's last stroke. The app sends `time` when its countdown
+reaches the deadline; a stroke that ends after it ends the run uncounted.
+
+Bests are kept per group, mode, guides and rush length. A rush ranks by
+characters written, then clean ones, then fewer misses; a marathon by time,
+then fewer misses, and only against a best over the same number of
+characters, so when My kanji grows the next marathon sets the new count's
+first best. Only a strictly better run becomes the best. An assisted run
+does not: a best is the learner's own writing, so a run with a written
+assisted character goes into the recent results with its count of assisted
+characters and never replaces a best, and neither does a rush with nothing
+written. Guided runs set bests too, kept apart from runs without guides.
+Each result says whether it is a new best and what it was measured against.
+
+The document (`yomu-writing-rush/1`) holds `bests`, one record per key, and
+`recent`, the last ten results, newest first. A record is the group, mode,
+guides, the rush's length or the marathon's time, the counts (written,
+clean, misses, assisted), how many characters the group dealt and the day
+the app gave; it holds no text. Each best and each result is read on its own,
+against the counts a run can produce (an assisted character missed three
+times, a marathon wrote its whole group), so a damaged entry is dropped
+without the others and sets the recovery flag. A run in progress is never in
+the document: it is not resumed, the app abandons it when it leaves the
+screen, and a load starts without one.
+
+`tests/writing-rush.test.mjs` covers the groups, dealing over many seeds
+(only characters with strokes, a marathon's each once, a rush's cycles),
+misses and shown strokes, taps and stale taps, the deadline, the marathon's
+clock, bests per key and their flags, the recent list, the document's
+recovery and a marathon traced with the real judge over KanjiVG's strokes;
+`tests/writing-rush-es.test.mjs`, every text in Spanish.
