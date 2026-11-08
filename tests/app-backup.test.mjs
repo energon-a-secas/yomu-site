@@ -126,6 +126,8 @@ test('only the known practice documents travel, and only as objects', () => {
   const planted = JSON.stringify({ ...doc, practice: { ...doc.practice, 'not-a-module': { v: 1 }, story: 7 } });
   assert.deepEqual(readBackup(planted).summary.practice, ['kana-games', 'kana-review']);
   assert.ok(PRACTICE.every((name) => /^[a-z-]+$/.test(name)));
+  // Timed writing's bests and recent results travel too (writing-rush.js).
+  assert.ok(PRACTICE.includes('writing-rush'));
 });
 
 test('a damaged, foreign, empty or oversized file is refused before anything changes', () => {
