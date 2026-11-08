@@ -620,6 +620,42 @@ test('check-data fails a broken sound-alike file and names it', async () => {
   });
 });
 
+// ── The Spanish meanings (data/es/, tools/build-spanish.mjs) ─────────────
+
+test('check-data fails a Spanish file that no longer fits its English file, and names it', async () => {
+  const cases = [
+    ['an English shard rebuilt under its Spanish', (rw) => rw('data/dict/w03.json', (d) => {
+      const recs = Object.values(d.entries)[0];
+      recs[0].g = [...recs[0].g, 'one more meaning'];
+    }), /es\/dict\/w03\.json: was built from another data\/dict\/w03\.json/],
+    ['a Spanish key its English file does not hold', (rw) => rw('data/es/dict/w05.json', (d) => {
+      d.entries['存在しない語'] = [['algo']];
+    }), /es\/dict\/w05\.json: "存在しない語" is not in data\/dict\/w05\.json/],
+    ['more Spanish than the key has records', (rw) => rw('data/es/dict/core.json', (d) => {
+      const [key, list] = Object.entries(d.entries)[0];
+      d.entries[key] = [...list, ...Array(7).fill(['algo'])];
+    }), /es\/dict\/core\.json: .* has Spanish for \d+, data\/dict\/core\.json holds/],
+    ['an English file with meanings and no Spanish beside it', (rw, dir) => {
+      rmSync(join(dir, 'data/es/kanji/k03.json'));
+    }, /es\/kanji\/k03\.json: missing: data\/kanji\/k03\.json has meanings/],
+    ['a Spanish list that ends in a word with none', (rw) => rw('data/es/kpage/p01.json', (d) => {
+      const key = Object.keys(d.entries)[0];
+      d.entries[key] = [...d.entries[key], 0];
+    }), /es\/kpage\/p01\.json: .* is not its Spanish in this format's shape/],
+    ['a Spanish file away from the path of the file it mirrors', (rw, dir) => {
+      cpSync(join(dir, 'data/es/kanji/k02.json'), join(dir, 'data/es/kanji/k99.json'));
+    }, /es\/kanji\/k99\.json: mirrors data\/kanji\/k02\.json, so it belongs at data\/es\/kanji\/k02\.json/],
+    ['the kanji of the day\'s Spanish with a row too many', (rw) => rw('data/es/kpage/daily.json', (d) => {
+      d.rows.push([null, null]);
+    }), /es\/kpage\/daily\.json: has \d+ rows, data\/kpage\/daily\.json has/],
+  ];
+  const runs = await Promise.all(cases.map(([, mutate]) => brokenCopy(mutate)));
+  cases.forEach(([name, , expect], k) => {
+    assert.equal(runs[k].status, 1, `${name}: exit ${runs[k].status}`);
+    assert.match(runs[k].stderr, expect, name);
+  });
+});
+
 // ── The popular names (data/names/popular.json) ──────────────────────────
 
 test('popular.json: the corpus\'s commonest katakana names with their original spellings, in its own format', async () => {

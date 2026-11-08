@@ -70,6 +70,11 @@
  *   - the kanji page's files (data/strokes/, data/kpage/) held to the range
  *     rule, a stroke that is not SVG path data, a page word that does not
  *     contain its kanji, or a kanji listed among its own neighbours
+ *   - the Spanish meanings (data/es/, tools/lib/spanish-check.mjs): a file
+ *     out of its shape, not at the path of the English file it mirrors,
+ *     built from another version of it, holding a key it does not or more
+ *     Spanish than the key has records, and an English file with meanings
+ *     and no Spanish file beside it
  *
  * A new kind of data file gets its format id and a checker in FORMATS below,
  * in the same commit that adds the file.
@@ -90,6 +95,8 @@ import { LOOKALIKES_FORMAT, LOOKALIKES_SRC, lookalikesProblems } from './lib/loo
 import { KATAKANA_TYPES, LATIN_NAME } from './lib/jmnedict.mjs';
 import { popularProblems, POPULAR_FORMAT } from './lib/popular.mjs';
 import { SPACES_FORMAT, SPACES_SRC, spacesProblems } from './lib/spaces.mjs';
+import { ES_FORMATS } from './lib/spanish.mjs';
+import { spanishShape, spanishProblems } from './lib/spanish-check.mjs';
 
 const DATA = process.argv[2] ? path.resolve(process.argv[2]) : path.join(SITE, 'data');
 // Paths are reported, and index `src` values resolved, relative to the
@@ -377,6 +384,7 @@ const FORMATS = {
   'yomu-like/1': checkLikeGroup,
   [LOOKALIKES_FORMAT]: null,
   [SPACES_FORMAT]: (rel, doc) => { for (const why of spacesProblems(doc)) fail(rel, why); },
+  ...Object.fromEntries(ES_FORMATS.map((format) => [format, (rel, doc) => { for (const why of spanishShape(doc)) fail(rel, why); }])),
 };
 
 // ── Indexes against their shards ──────────────────────────────────────────
@@ -959,6 +967,7 @@ function main() {
   checkLookalikes(docs);
   checkSpaces(docs);
   checkAudio(docs);
+  for (const [rel, why] of spanishProblems(docs)) fail(rel, why);
 
   if (failures.length) {
     for (const f of failures.slice(0, 50)) process.stderr.write(`FAIL ${f}\n`);
