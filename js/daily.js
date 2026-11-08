@@ -20,11 +20,24 @@ export function dailyIndex(day, n) {
   return ((dayNumber(day) * STEP) % n + n) % n;
 }
 
-/** The day's row as { ch, meaning, word, reading, gloss }, or null. */
-export function dailyOf(doc, day) {
+/**
+ * The day's row as { ch, meaning, word, reading, gloss }, or null. With
+ * `esDoc`, the Spanish of the same rows (data/es/kpage/daily.json, row for
+ * row: [meaning, gloss], null where KANJIDIC or JMdict has none), the row
+ * carries `es`: { meaning, gloss }, whichever it has (docs/ANALYZER.md,
+ * "Spanish meanings").
+ */
+export function dailyOf(doc, day, esDoc = null) {
   const rows = doc && Array.isArray(doc.rows) ? doc.rows : [];
-  const r = rows[dailyIndex(day, rows.length)];
+  const k = dailyIndex(day, rows.length);
+  const r = rows[k];
   if (!r) return null;
   const [ch, meaning, word, reading, gloss] = r;
-  return Object.freeze({ ch, meaning, word, reading, gloss });
+  const es = esDoc && Array.isArray(esDoc.rows) && esDoc.rows.length === rows.length ? esDoc.rows[k] : null;
+  const spanish = {};
+  if (Array.isArray(es) && typeof es[0] === 'string' && es[0]) spanish.meaning = es[0];
+  if (Array.isArray(es) && typeof es[1] === 'string' && es[1]) spanish.gloss = es[1];
+  return Object.freeze(Object.keys(spanish).length
+    ? { ch, meaning, word, reading, gloss, es: Object.freeze(spanish) }
+    : { ch, meaning, word, reading, gloss });
 }

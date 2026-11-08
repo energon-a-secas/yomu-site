@@ -5,8 +5,9 @@
 // shape. Every choice reads differently, and none can be read as the prompt,
 // so exactly one answer is right. A round is ten questions and the first
 // answer counts, as in the kana games. Its messages are { en, es } through
-// strings.js; the meanings are JMdict's English. No DOM, audio player or
-// storage.
+// strings.js; the meanings are JMdict's English, with their Spanish beside
+// them (`es`: { gloss }) where the caller's words carry it (docs/ANALYZER.md,
+// "Spanish meanings"). No DOM, audio player or storage.
 import { ROUND, makeRand, shuffle, drawWeighted, weightOf } from './play-rounds.js';
 import { t } from './strings.js';
 
@@ -25,10 +26,14 @@ const emptyStats = () => ({ rounds: 0, best: 0, correct: 0, answered: 0, assiste
 export const wordKey = (w) => `${w.written}|${w.reading}`;
 const kanjiOf = (written) => [...written].filter((ch) => KANJI.test(ch));
 
+/** A word's Spanish meaning beside its English one: `es` absent, or { gloss } with a short gloss. */
+const validEs = (es) => es === undefined
+  || (Boolean(es) && typeof es === 'object' && typeof es.gloss === 'string' && es.gloss.length > 0 && es.gloss.length <= 200);
+
 /** A word the game can ask: kanji (and hiragana) read in hiragana alone. */
 function validWord(w) {
   return Boolean(w) && typeof w === 'object' && typeof w.written === 'string' && typeof w.reading === 'string'
-    && typeof w.gloss === 'string' && w.gloss.length <= 200
+    && typeof w.gloss === 'string' && w.gloss.length <= 200 && validEs(w.es)
     && WRITTEN.test(w.written) && KANJI.test(w.written) && READING.test(w.reading);
 }
 
@@ -41,13 +46,16 @@ function validKey(key) {
  * The words a set can ask: each kanji page word of the set's kanji, written
  * only with kanji the learner is taken to know (`known`, the set itself unless
  * given) and hiragana, read in hiragana, once per spelling and reading.
- * `pages` maps a kanji to its page's words, `{ written, reading, gloss }`.
+ * `pages` maps a kanji to its page's words, `{ written, reading, gloss }`,
+ * each with `es`: { gloss } where the caller gave it the Spanish.
  */
 export function spellingPool(chars, pages, known = new Set(chars)) {
   const out = new Map();
   for (const ch of chars) for (const w of pages.get(ch) || []) {
     const gloss = typeof w.gloss === 'string' ? w.gloss.slice(0, 200) : '';
     const word = { written: w.written, reading: w.reading, gloss };
+    const es = w.es && typeof w.es.gloss === 'string' && w.es.gloss ? w.es.gloss.slice(0, 200) : '';
+    if (es) word.es = { gloss: es };
     if (!validWord(word) || kanjiOf(word.written).some((k) => !known.has(k))) continue;
     if (!out.has(wordKey(word))) out.set(wordKey(word), word);
   }
@@ -225,9 +233,14 @@ export class KanaToKanji {
       written: q.target.written,
       answered: revealed, hinted: r.hinted,
       hint: r.hinted && !revealed ? q.target.gloss : null,
+      // The hint's Spanish beside it, where the word has one.
+      ...(r.hinted && !revealed && q.target.es ? { es: { hint: q.target.es.gloss } } : {}),
       correctId: revealed ? answer : null, pickedId: pick?.id ?? null,
       right: revealed ? pick.id === answer : null,
-      options: q.options.map((o) => ({ id: wordKey(o), written: o.written, reading: revealed ? o.reading : null, gloss: revealed ? o.gloss : null })),
+      options: q.options.map((o) => ({
+        id: wordKey(o), written: o.written, reading: revealed ? o.reading : null, gloss: revealed ? o.gloss : null,
+        ...(revealed && o.es ? { es: { gloss: o.es.gloss } } : {}),
+      })),
     };
     return { ...base, status: 'playing', round: details };
   }

@@ -57,7 +57,7 @@ function onceEach(load) {
  * @param {(src: string) => string} o.resolve  a published src to a fetchable path
  * @param {string} o.indexPath  where the index is
  * @param {string} o.what       how an error names the tier ("The rare-word index")
- * @param {(entries: object) => void} [o.onShard]  runs once on each loaded shard's entries
+ * @param {(entries: object, src: string) => void} [o.onShard]  runs once on each loaded shard's entries, with the src the index gives it
  */
 export function createRangeStore({ fetchJson, resolve, indexPath, what, onShard }) {
   let index = null;
@@ -94,7 +94,7 @@ export function createRangeStore({ fetchJson, resolve, indexPath, what, onShard 
     const path = resolve(index.shards[n].src);
     return Promise.resolve().then(() => fetchJson(path)).then((doc) => {
       if (!doc || typeof doc.entries !== 'object' || doc.entries === null) throw new Error('it has no entries');
-      if (onShard) onShard(doc.entries);
+      if (onShard) onShard(doc.entries, index.shards[n].src);
       return doc.entries;
     }).catch((e) => { throw loadError('Dictionary shard', path, e); });
   });
@@ -146,9 +146,17 @@ export function createRangeStore({ fetchJson, resolve, indexPath, what, onShard 
     return entries && Object.prototype.hasOwnProperty.call(entries, key) ? entries[key] : undefined;
   }
 
+  /** The src of the shard `key` falls in, as the index names it; null before need() has loaded the index. */
+  function srcOf(key) {
+    if (!index) return null;
+    const n = lastAtMost(firsts, String(key));
+    return n >= 0 ? index.shards[n].src : null;
+  }
+
   return Object.freeze({
     need,
     get,
+    srcOf,
     /** Files of this tier loaded so far: the index, filter parts and shards. */
     get loaded() { return (index ? 1 : 0) + filters.done.size + shards.done.size; },
     get maxKey() { return index && index.maxKey ? index.maxKey : 0; },

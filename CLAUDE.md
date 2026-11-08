@@ -455,6 +455,17 @@ and grids are compact, cells 48 to 56px and never under 44 on a coarse
 pointer. A control that follows an answer goes inside the feedback block,
 never under it.
 
+**Spanish meanings sit beside the English, never in its place, and load only
+when asked.** `analyze(text, { meanings: 'es' })` and the lookups in
+docs/ANALYZER.md "Spanish meanings" put a meaning's Spanish in an `es` object
+beside the English field (`entry.es.g`, `info.es.m`); no `es` means there is
+none, and the English is the fallback. The page passes only `lang`, so it
+fetches no `data/es/` file and shows English meanings; Naninani asks for the
+Spanish. Records are shared, so whatever carries `es` is a copy, and a test
+reads English again after Spanish to hold that. JMdict's Spanish senses are not
+its English ones: never pair them, and never mix Spanish and English in one
+record's meanings.
+
 **Nothing from Genki, the Japan Foundation apps, Tofugu, Yomitan, rikaichan
 or 10ten is in this repository.** The deinflection table was written for
 Yomu from grammar; Genki was read for its order and its romaji convention

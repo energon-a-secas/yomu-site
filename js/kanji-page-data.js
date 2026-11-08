@@ -9,6 +9,7 @@
 // draws 6,702 characters and KANJIDIC lists 10,384.
 
 import { createRangeStore } from './range-store.js';
+import { createEsFiles } from './es-files.js';
 
 /**
  * @param {{ fetchJson: (path: string) => Promise<any>, base?: string }} o
@@ -43,5 +44,22 @@ export function createPageData({ fetchJson, base = 'data/' }) {
     });
   }
 
-  return Object.freeze({ strokesOf, pageOf });
+  // The Spanish of the words (data/es/kpage/, docs/ANALYZER.md "Spanish
+  // meanings"), fetched only by wordsEs.
+  const es = createEsFiles({ fetchJson, resolve });
+
+  /**
+   * The Spanish of one kanji page's words, in pageOf's order: a meaning, or
+   * 0 where JMdict has none (a shorter list leaves the rest without).
+   * Empty when none has any, or when the file cannot be loaded.
+   */
+  async function wordsEs(ch) {
+    await pages.need([ch]);
+    const src = pages.srcOf(ch);
+    const entries = src ? await es.load(src) : null;
+    const list = entries && Object.prototype.hasOwnProperty.call(entries, ch) ? entries[ch] : null;
+    return Array.isArray(list) ? list : [];
+  }
+
+  return Object.freeze({ strokesOf, pageOf, wordsEs });
 }
