@@ -320,3 +320,26 @@ misses and shown strokes, taps and stale taps, the deadline, the marathon's
 clock, bests per key and their flags, the recent list, the document's
 recovery and a marathon traced with the real judge over KanjiVG's strokes;
 `tests/writing-rush-es.test.mjs`, every text in Spanish.
+
+## Sound rule drills
+
+Asked for on 8 November 2026, in Spanish, on the app's Sound rules screen:
+dedicated games like the kana ones, but for the sounds, to memorize or
+review them one by one and fast, going on with a button, the sound played
+on arriving, back, next and replay, and related words. `js/sound-drill.js`
+makes the cards from the sound notes themselves (`notes-sounds.js`, the
+seventeen rules Sound rules lists), so a rule written once is drilled as it
+is explained. One card per rule: its title and rule, the first example said
+on arrival, its romaji as said and as spelled and its meaning, then the
+rule's other examples (each with its own speaker) and its exception. In the
+list's order, or mixed with a seed (`order: 'mixed'`); the app starts at a
+rule when asked from that rule's page.
+
+It is a drill, not a quiz: no score, no schedule and nothing kept, so it
+writes no document and the backup has nothing to carry. The app says an
+example once per arrival and never while VoiceOver runs, where Replay is the
+way to hear it, as the listening games do.
+
+Tests: `tests/sound-drill.test.mjs` (every rule once, in the list's order and
+mixed by seed, the examples and exception as the notes have them, Spanish).
+
