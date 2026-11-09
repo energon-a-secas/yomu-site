@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { PhraseBook, phraseKey, phraseSource } from '../js/phrase-book.js';
+import { PhraseBook, phraseKey, phraseSource, libraryLine } from '../js/phrase-book.js';
 import { MAX_SAVED } from '../js/history-store.js';
 import { useLang } from '../js/strings.js';
 const library = JSON.parse(readFileSync(new URL('../data/phrases/library.json', import.meta.url)));
@@ -65,6 +65,23 @@ test('expressions can be traced, while a changed source never loses the saved re
   assert.equal(missing.view().items[0].source, null);
   assert.equal(missing.view().recovered, true);
   assert.equal(book.view(p.en).items.length, 1);
+});
+
+test('a key names a saved phrase or a library line, with its source; a text neither saved nor in the library names nothing', () => {
+  const book = new PhraseBook(library);
+  book.save('今日は雨。', null, 1000);
+  assert.deepEqual(book.keptText(phraseKey('今日は雨。')), { text: '今日は雨。', source: null });
+  const d = library.dialogues[0];
+  const line = libraryLine(library, phraseKey(d.lines[1].ja), 'en');
+  assert.equal(line.text, d.lines[1].ja);
+  assert.ok(line.source && ['conversation', 'expression'].includes(line.source.kind), 'a library line comes with a source that matches it');
+  const p = library.phrases[0];
+  assert.equal(book.keptText(phraseKey(p.ja)).text, p.ja, 'a library line is kept without being saved');
+  assert.equal(book.keptText(phraseKey('誰も保存していない文です。')), null);
+  assert.equal(book.keptText(null), null);
+  book.remove(phraseKey('今日は雨。'));
+  assert.equal(book.keptText(phraseKey('今日は雨。')), null, 'a removed phrase names nothing');
+  assert.equal(libraryLine(null, 'x'), null);
 });
 
 test('oversized and empty readings are refused without truncation or eviction', () => {

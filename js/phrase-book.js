@@ -37,6 +37,34 @@ export function phraseSource(library, source, text, lang = currentLang()) {
   return { ...ref, title, ...(meaning ? { meaning } : {}) };
 }
 
+const lineKeys = new WeakMap();
+
+/**
+ * The library line a History key names: an expression, or one line of a
+ * conversation, with its source in `lang`; null for a key no line has.
+ * The keys are worked out once per library.
+ */
+export function libraryLine(library, key, lang = currentLang()) {
+  if (!object(library) || typeof key !== 'string') return null;
+  let keys = lineKeys.get(library);
+  if (!keys) {
+    keys = new Map();
+    for (const p of library.phrases || []) if (typeof p.ja === 'string' && !keys.has(textKey(p.ja))) keys.set(textKey(p.ja), { kind: 'expression', id: p.id });
+    for (const d of library.dialogues || []) {
+      (d.lines || []).forEach((l, line) => {
+        if (typeof l.ja === 'string' && !keys.has(textKey(l.ja))) keys.set(textKey(l.ja), { kind: 'conversation', id: d.id, line });
+      });
+    }
+    lineKeys.set(library, keys);
+  }
+  const ref = keys.get(key);
+  if (!ref) return null;
+  const text = ref.kind === 'expression'
+    ? library.phrases.find((p) => p.id === ref.id).ja
+    : library.dialogues.find((d) => d.id === ref.id).lines[ref.line].ja;
+  return { text, source: phraseSource(library, ref, text, lang) };
+}
+
 export class PhraseBook {
   constructor(library, document, lang) {
     this.library = library;
@@ -126,6 +154,19 @@ export class PhraseBook {
       }
     }
     return { ...sum, dropped: checked.dropped };
+  }
+
+  /**
+   * The text a History key names among the texts a native client keeps: a
+   * saved phrase, else a line of the library, each with its source; null for
+   * any other text, which the client does not keep (no automatic History).
+   * A kanji met in a text points at its key (kanji-store.js `h`), and the
+   * client's "Last seen in" reads the sentence from here.
+   */
+  keptText(key) {
+    const e = typeof key === 'string' ? this.data.entries[key] : null;
+    if (e && e.saved) return { text: e.t, source: phraseSource(this.library, this.sources[key], e.t, this.lang) };
+    return libraryLine(this.library, key, this.lang);
   }
 
   dump() { return { format: PHRASE_BOOK_FORMAT, phrases: phrasesOf(this.data), sources: { ...this.sources } }; }
