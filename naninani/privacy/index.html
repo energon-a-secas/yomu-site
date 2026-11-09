@@ -28,7 +28,7 @@
   </header>
   <main id="main" tabindex="-1">
     <article class="info-document">
-      <p class="info-kicker">Naninani for iPhone · 18 October 2026</p>
+      <p class="info-kicker">Naninani for iPhone · 9 November 2026</p>
       <h1>Your reading.<br>Your device.</h1>
       <p class="info-lead">Privacy policy for Naninani and its Read in Naninani Share extension, developed by Neorgon.</p>
       <div class="info-summary">
@@ -42,11 +42,16 @@
         <ul>
           <li><strong>Your reading draft.</strong> The main app stores the last text you typed or pasted so you can resume after closing it. When opened from a built-in expression or conversation, it also keeps that source reference. Clear removes that draft. It is not uploaded to Neorgon or sent to a voice-generation service.</li>
           <li><strong>Saved phrases.</strong> Starting with version 1.1.2, Save in Read keeps the phrase text, save time and any known built-in expression or conversation reference in local files. Pasted text has no inferred source. Only phrases you explicitly save enter this collection; the app does not keep an automatic reading history.</li>
-          <li><strong>Study data.</strong> Saved words, their meanings and readings, saved kanji and review schedules are stored in the app’s local files. Kana game answers, unfinished rounds, story choices and completed practice turns are also kept locally in versions that include those activities.</li>
+          <li><strong>Study data.</strong> Saved words, their meanings and readings, saved kanji and review schedules are stored in the app’s local files. Starting with version 1.2.0, a word saved from a text in Read also keeps the sentence it was saved from (at most 60 characters), so My words can show it; it is removed with the word. Kana game answers, unfinished rounds, story choices and completed practice turns are also kept locally in versions that include those activities.</li>
+          <li><strong>Kanji met in reading.</strong> Starting with version 1.2.0, the reader counts the kanji in each text you read and keeps the dictionary words they appeared in, never the text itself, so My kanji can show where you met each one. When that text is a reading you saved, or a built-in expression or conversation, a kanji also keeps a short reference to it, so My kanji can show the sentence and open it. More &gt; Remember where I meet kanji turns this off, and Forget where I met kanji clears it.</li>
+          <li><strong>Widgets and Apple Watch.</strong> A small file shared with the app’s widgets holds the number of reviews due and the kanji of the day. If you use Naninani on Apple Watch, the iPhone sends your saved kanji (up to 200, with their review dates) to the watch through Apple’s connection between the two. Neither is sent to Neorgon.</li>
           <li><strong>Preferences.</strong> Voice, playback and display choices, plus your hiragana and katakana selections, are stored locally.</li>
           <li><strong>Shared text.</strong> The Share extension processes the text you explicitly share. It does not retain a reading draft.</li>
         </ul>
-        <p>The app does not provide account-based synchronization or a Neorgon cloud backup. Your operating system may include app data in iCloud or computer backups according to your own backup settings.</p>
+        <h3>Backups you control</h3>
+        <p>Starting with version 1.2.0, More &gt; Your data can write a backup file of your saved kanji, words (with the sentences they were saved from) and readings, the kanji met in reading and your practice progress, to a place you choose, such as Files or iCloud Drive. Preferences are not included. The file is not sent to Neorgon; where it goes is up to you, and it also imports on Yomu on the web.</p>
+        <p>Unless you turn off Keep a copy in iCloud, the app also keeps a compressed copy of the same data in your own iCloud account, through Apple’s iCloud key-value storage, so a reinstalled app can offer to restore it. Apple stores it under your Apple Account; Neorgon cannot read it. Turning the setting off offers to remove the copies already there.</p>
+        <p>The app has no accounts and no Neorgon cloud backup. Your operating system may also include app data in iCloud or computer backups according to your own backup settings.</p>
       </section>
 
       <section id="services" aria-labelledby="services-title">
@@ -66,7 +71,7 @@
         <h2 id="remove-title">Keeping and removing data</h2>
         <p>Your local draft remains until you replace it or press Clear. Clearing the draft does not remove saved phrases. Remove a saved phrase in Phrases &gt; Saved, or turn off Save for that reading. Saved words and kanji remain until you remove their bookmarks or delete the app. Game and story progress remains until the app is deleted; ending an unfinished round or restarting a scene resets that attempt while retaining completed progress. Preferences remain until changed or the app is deleted. Offloading the app preserves its data.</p>
         <p>If a local practice or saved-phrase file becomes unreadable, Naninani keeps its original bytes on the device before saving recovered data. These recovery copies are not uploaded and are removed with the app’s local data.</p>
-        <p>Deleting Naninani removes its local app data; it does not necessarily erase copies already in your device backups. Manage those through Apple or your computer’s backup controls. Neorgon cannot retrieve, restore or remotely delete the app’s local reading and study files.</p>
+        <p>Deleting Naninani removes its local app data; it does not necessarily erase copies already in your device backups, a backup file you saved, or the copy in your iCloud. Delete a backup file where you saved it, and remove the iCloud copies by turning off Keep a copy in iCloud before deleting the app. Manage device backups through Apple or your computer’s backup controls. Neorgon cannot retrieve, restore or remotely delete the app’s local reading and study files, or your backups.</p>
       </section>
 
       <section aria-labelledby="support-title">

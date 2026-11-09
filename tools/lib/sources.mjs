@@ -94,6 +94,36 @@ export const SOURCES = {
     bytes: 1253440,
     licence: 'CC-BY-SA-4.0',
   },
+  // The Spanish meanings (tools/build-spanish.mjs, data/es/), from the same
+  // release as the English files above. jmdict-spa is every entry of JMdict
+  // that has a Spanish gloss (34,304 of 218,672), its Spanish senses only:
+  // checked 2026-11-07 to be exactly jmdict-all's Spanish, entry for entry,
+  // and its entry ids are jmdict-eng's. kanjidic2-all is KANJIDIC2 with its
+  // meanings in every language (English, French, Spanish, Portuguese): the
+  // builder reads its Spanish meanings and its readings, which are the
+  // English cut's. Both digests are the ones GitHub's release API lists for
+  // the assets, and the downloads of 2026-11-07 matched them
+  // (yomu-ios docs/research/SPANISH-MEANINGS.md).
+  jmdictSpa: {
+    name: 'jmdict-simplified jmdict-spa',
+    release: '3.6.2+20260831182826',
+    url: 'https://github.com/scriptin/jmdict-simplified/releases/download/3.6.2%2B20260831182826/jmdict-spa-3.6.2+20260831182826.json.zip',
+    file: 'jmdict-spa.json.zip',
+    member: 'jmdict-spa-3.6.2.json',
+    sha256: 'bb6c5307424756940b00811f61705ff704e6b0d316f463309dc49caeffa02c26',
+    bytes: 1494096,
+    licence: 'CC-BY-SA-4.0',
+  },
+  kanjidicAll: {
+    name: 'jmdict-simplified kanjidic2-all',
+    release: '3.6.2+20260831182826',
+    url: 'https://github.com/scriptin/jmdict-simplified/releases/download/3.6.2%2B20260831182826/kanjidic2-all-3.6.2+20260831182826.json.zip',
+    file: 'kanjidic2-all.json.zip',
+    member: 'kanjidic2-all-3.6.2.json',
+    sha256: '6a86cc2d751aedb4d46e1e5e9a112d409a146bfbed9088c2f08ae01d00aa3b82',
+    bytes: 1552880,
+    licence: 'CC-BY-SA-4.0',
+  },
   kanjivg: {
     name: 'KanjiVG stroke order SVGs',
     release: 'r20250816',

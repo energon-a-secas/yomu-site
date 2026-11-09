@@ -82,7 +82,11 @@ this text gives the character; a reading that belongs to a whole word
 a whole" instead of teaching きょう as a reading of 今.
 
 It is async because shards load on demand, and it is pure otherwise: the
-same text and the same data give the same tokens.
+same text and the same data give the same tokens. `analyze(text, { meanings:
+'es' })` puts Spanish meanings beside the English ones ("Spanish meanings",
+below); without it no Spanish file is fetched and every token is what it was.
+The page's own `lang` changes nothing here: the notes resolve the language,
+and the dictionary's meanings stay English on the page.
 
 ## Modules (js/)
 
@@ -111,6 +115,8 @@ same text and the same data give the same tokens.
 | `grammar.js` | particle, copula and ending notes per token and per pair of tokens | nothing |
 | `notes.js` | every learner-facing explanation string, `{ en, es }`: sounds (`notes-sounds.js`), loanword rules (`notes-loan.js`), grammar (`notes-grammar.js`) | the three tables |
 | `furigana.js` | aligning a reading to a surface, per kanji where the data allows | `kana.js` |
+| `es-files.js` | where an English data file's Spanish counterpart is (`esSrc`), and loading those files once each, never with an error | nothing |
+| `spanish.js` | Spanish meanings beside the English ones on an analysis (`addSpanish`, for `meanings: 'es'`) and on a kanji page's words (`wordsWithEs`) | `name-types.js`, `rare.js` |
 | `analyze.js` | the pipeline above: the first pass, the second phase where it guessed, the tokens | all of the above |
 | `render*.js`, `events*.js`, `state.js` | the page | `analyze.js`, `notes.js`, `strings.js` |
 | `gaps.js` | where one word ends and the next begins, and the one reason for each edge, read from tokens the analyzer built (kinds, parts, confidence, the characters); the places, marks and score of "Where are the spaces?" | `kana.js` |
@@ -166,7 +172,8 @@ These fields appear only where they apply:
 - a `furigana` entry of a `number` token carries `whole: true` when the number and its counter are read as one word (八日 ようか, 二十歳 はたち, 一人 ひとり), exactly as a dictionary `*` does;
 - a `number` token carries `counterChange`, true when a number and its counter bent each other (いっぽん) or the number bent inside itself (ろっぴゃく);
 - a `number` token whose whole surface is a first-tier key read the way the number is read carries that record as its `entry` (何名 "how many people"), and is otherwise the token it was (see "Numbers and counters");
-- a katakana **name** the names tier spells in Latin letters carries `name: { o, types }`: `o` its original spelling (トム `{ o: 'Tom', types: ['given'] }`), `types` the ids of `entry.nt`. The Word panel shows it on a line of its own, "Name: Tom (given name)", "Nombre: Tom (nombre de pila)". It is the token's and not the entry's, because on a dictionary record `o` is something else (the place of a spelling, below).
+- a katakana **name** the names tier spells in Latin letters carries `name: { o, types }`: `o` its original spelling (トム `{ o: 'Tom', types: ['given'] }`), `types` the ids of `entry.nt`. The Word panel shows it on a line of its own, "Name: Tom (given name)", "Nombre: Tom (nombre de pila)". It is the token's and not the entry's, because on a dictionary record `o` is something else (the place of a spelling, below);
+- **Spanish**, only in an analysis asked for it (`meanings: 'es'`, "Spanish meanings" below), always beside the English and never in its place, in an `es` object named after the English field it translates: `entry.es = { g }` on a dictionary record's copy (雨 `{ g: ['lluvia'] }`), and on a name's entry the types in Spanish (`{ g: ['apellido', 'nombre de lugar'] }`); `entry.also.es = { g }`, at most two; a compound part's `es = { gloss }` (its first Spanish meaning, with `entry.es` on its entry) and the compound's own `es = { gloss }`, the parts' joined with ` + ` when every part has one; and each `kanji[].info.es = { m }`. A record with no Spanish keeps its English with no `es`, which is how a screen knows to say the meaning is in English. In English no token has an `es`.
 
 Rules the token obeys:
 
@@ -1471,6 +1478,7 @@ analyzer moves an edge.
 ## Licences
 
 - JMdict (jmdict-simplified's jmdict-eng) and KANJIDIC: Electronic Dictionary Research and Development Group, CC BY-SA 4.0. The acknowledgement is shown on the page whenever a gloss or a kanji reading is.
+- JMdict's and KANJIDIC's Spanish (jmdict-simplified's jmdict-spa and kanjidic2-all), for `data/es/`: the same Group and licence, and the `edrdgSpanish` credit in `tools/lib/licence.mjs`, which keeps the Group's sentence and names the Spanish: the EDRDG licence leaves a translation under its compilers' copyright, KANJIDIC's documentation names Francisco Gutierrez (compiled) and Gabriel Sanroman (provided) for its Spanish meanings, and nothing the EDRDG or jmdict-simplified publishes names those of JMdict's Spanish glosses. The meanings written for Yomu (`tools/lib/spanish-words.mjs`) are an `authored` input, CC0.
 - JMnedict (jmdict-simplified's jmnedict-all), for `data/names/`: the same Group and licence. Its acknowledgement (`tools/lib/licence.mjs`, the EDRDG's sample text with the names file named) must be on the page whenever a name from the names tier is.
 - KanjiVG: Ulrich Apel, CC BY-SA 3.0, for `parts`.
 - Tatoeba: CC BY 2.0 FR, used to rank keys, to choose and count names, and, through the English translations of its Japanese sentences, to choose which of a katakana name's JMnedict spellings is shown; and, in data/sent/ only (tools/build-sentences.mjs, data/sent/more/ included), the example sentences themselves with their English, each linked to its page on tatoeba.org for the credit.
@@ -1562,3 +1570,124 @@ Naninani reuses `levels.js` and `collection.js` with its bundle reader for schoo
 grades and Waller's unofficial N5–N1 study groups. `reader.js` resolves the web
 base URL on the first web fetch, so importing its pure meaning helpers does not
 require a URL global in JavaScriptCore. No list or reading logic is copied into Swift.
+
+## Spanish meanings (2026-11-07)
+
+The dictionary's meanings are English: JMdict's glosses and KANJIDIC's kanji
+meanings. Naninani speaks Spanish since 1.2.0, and its owner, reading on a
+Spanish phone, found the meanings still English. Both upstreams have Spanish
+of their own (measured in yomu-ios docs/research/SPANISH-MEANINGS.md): every
+kanji a learner studies has it, and JMdict has it for 82 to 86% of the word
+tokens learners read, though not for は, だ, で or ね. Yomu now ships that
+Spanish **beside** the English, never in its place, and only a caller that
+asks for it ever loads it.
+
+### Where it lives
+
+Every English file with meanings has a Spanish counterpart at the same path
+under `data/es/` (`js/es-files.js esSrc`: `data/dict/w03.json` has
+`data/es/dict/w03.json`), written by `tools/build-spanish.mjs` from the
+committed English files and the pinned jmdict-spa and kanjidic2-all. So a
+caller finds a file's Spanish with no index, and fetches only the Spanish of
+files it already read. Each file carries the `edrdgSpanish` licence block and
+`of`: `{ src, sha256 }`, the English file it mirrors and the SHA-256 of that
+file's `entries` (`rows`) as `JSON.stringify` writes them; the checker fails a
+Spanish file whose English file has moved since, so a Spanish meaning can never
+sit beside the wrong record (`tools/lib/spanish-check.mjs`).
+
+| File | Format | Body |
+|---|---|---|
+| `data/es/dict/core.json`, `wNN.json`, `rNNN.json` | `yomu-dict-es/1` | per key, the Spanish of each record in the English file's order: a list of meanings, or `0` for a record with none (trailing ones dropped, a key with none left out). `"あめ": [["lluvia"], ["caramelo, dulce"]]` |
+| `data/es/kanji/kNN.json` | `yomu-kanji-es/1` | per character, its Spanish meanings. `"認": ["reconocer", "admitir", "consentir"]` |
+| `data/es/kpage/pNN.json` | `yomu-kpage-es/1` | per page, the Spanish of each word of `w`, or `0`: the first Spanish meaning of the word's first record, as the English gloss is that record's first gloss |
+| `data/es/kpage/daily.json` | `yomu-daily-es/1` | `rows`, row for row with `daily.json`: [the kanji's first two Spanish meanings, its word's Spanish], `null` for either where there is none |
+
+**Which Spanish.** JMdict keeps its Spanish in senses of its own, not aligned
+with the English ones (the first tier's entries have 0.63 Spanish senses for
+each English one), so nothing pairs a Spanish meaning with an English one, and the
+fallback is per record, never per sense. A record's Spanish is its entry's:
+one meaning per Spanish sense, as the English shows one gloss per sense, made
+of the sense's first two glosses when both fit in 60 characters (学生
+"estudiante, alumno", ペン "bolígrafo, pluma"), for the first three senses
+that say something new (`tools/lib/spanish.mjs spanishGlosses`).
+jmdict-simplified hands the Spanish over split at every comma, parentheses or
+not, so the builder joins the pieces until a parenthesis closes and drops an
+"(eng: ...)" note on the English it was translated from: グレー was "(eng: grey"
+and "gray) gris", and is "gris"; 46 entries (パジャマ, フォーク, ロビー,
+だから) had no gloss left otherwise, and 5 still have none. A kanji's Spanish
+is KANJIDIC's first three, in its order. Records carry no JMdict id, so each
+is matched to its entry by building it again with `records.mjs recordFor`
+from every entry spelled with its key and comparing what identifies it (`g`,
+`p`, `r`, `k`, `u`, `ls`, `ws`): all 499,095 match, 705 through a first-tier
+katakana fold (アメ色) and 14 built alike by two entries, which are handed
+out in JMdict order.
+
+**Written for Yomu.** `tools/lib/spanish-words.mjs` is authored, not upstream
+(CC0, as the notes are): `WORDS`, Spanish for forty entries JMdict has none
+for, は, だ, で and ね first, then the rest of the phrase library and the next
+most frequent in the example sentences; and `CORRECTIONS`, four entries whose
+JMdict Spanish a learner should not learn from (です "copula cortes en
+japonés", を "una área transversada", に one sense of "tales cómo...", and 一日
+いちにち led by "primer día del mes", which is ついたち), each saying what JMdict
+has, to report upstream. The builder refuses a `WORDS` row for an entry JMdict
+has Spanish for, a correction for one it has none for, an id or a spelling
+JMdict does not have, and a meaning over 60 characters.
+
+### How a caller gets it
+
+- `analyze(text, { dict, meanings: 'es' })`: the tokens and kanji above
+  ("The token"), through `js/spanish.js addSpanish`, which asks the
+  dictionary for the Spanish of every record the tokens hold, once each.
+- `dict.needEs(records)`, then `dict.esOf(record)`: a record's Spanish
+  meanings or null, for any record `get` or `rare` returned (Search's). As a
+  shard loads, `dict.js` files each record under the file it came from, its
+  key and its place, in a WeakMap; nothing is written onto a record, so after
+  a read in Spanish an English read is byte for byte what it was.
+  `dict.kanjiEs(chars)`: KANJIDIC's Spanish meanings, a Map of those that
+  have any.
+- `createPageData().wordsEs(ch)`: a kanji page's words' Spanish, in
+  `pageOf`'s order (`spanish.js wordsWithEs` sets each beside its gloss as
+  `es: { gloss }`).
+- `dailyOf(doc, day, esDoc)`: the day's row with `es: { meaning, gloss }`,
+  whichever it has.
+- `kanji-cards.js cardEntry(rec, { level, row, es: { m, gloss } })`: the card
+  with `es: { label, m, w }`; `quizLabel(entry, true)` deals the quiz in
+  Spanish where a kanji has it, and `optionWithEs` puts a label dealt in
+  Spanish beside its English one, so `label` stays English in every option.
+- `kana-to-kanji.js`: a pool word may carry `es: { gloss }`, and the view
+  then gives the hint `es: { hint }` and each revealed option `es: { gloss }`.
+
+Every one of them reads nothing Spanish unless asked, never rejects for a
+Spanish file it cannot load (the English stands), and changes no English
+field. Where there is no Spanish there is no `es`, and the English beside it
+is the meaning to show, said to be English. The page itself still passes only
+its `lang` and shows English meanings; the app passes `meanings: 'es'`
+(yomu-ios bridge/entry.js).
+
+### Measured, 2026-11-07 and 2026-11-08
+
+| | Keys or items | With Spanish | Bytes (gzip) |
+|---|---:|---:|---:|
+| First tier (core and 29 shards) | 40,849 keys, 44,812 records | 28,448 keys, 30,721 records (68.6%) | 1,299,481 (461,416) |
+| Second tier (316 shards) | 432,117 keys, 454,283 records | 52,642 keys, 54,551 records (12.0%) | 3,073,091 (1,168,136) |
+| Kanji (10 shards) | 10,384 | 2,505 (24.1%), every jōyō kanji of grades 1 to 6 and every one of Waller's lists | 110,689 (47,511) |
+| Kanji pages (9 shards) | 16,332 words | 12,676 (77.6%) | 314,154 (127,841) |
+| Kanji of the day | 1,000 rows | 1,000 meanings, 945 words | 44,682 (16,505) |
+| **All of data/es/** | 366 files | | **4,842,097 (1,821,409)** |
+
+A read with Spanish, on a fresh dictionary, of the 127 lines of the phrase
+library and 144 example sentences: the same English files as a read in
+English (median 7, 679 KB, 251 KB gzip), and a median of 3 Spanish files
+more, 158 KB (58 KB gzip), mean 161 KB. A read in English fetches none.
+
+Word tokens with a Spanish meaning, counted as the research counted them (a
+compound's parts each, names and tokens with no record left out): all 453 of
+the phrase library's (85.9% with JMdict's Spanish alone), and 44,741 of the
+46,723 in every tenth example sentence, 95.8% (82.4% of all the sentences'
+with JMdict's alone). The most frequent still without: ら, ように, 待ち, つつ,
+品 and 妻.
+
+Not in Spanish: the example sentences (Tatoeba's Spanish covers one in seven),
+the idioms, proverbs and four-character idioms, a rare word Search draws from
+its English index row, the meaning a saved word keeps (`word-store.js`), and
+searching by a Spanish meaning, which needs an index of its own.

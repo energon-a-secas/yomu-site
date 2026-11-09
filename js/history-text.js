@@ -61,17 +61,43 @@ export function sentenceAround(text, ch) {
   const all = [...String(text ?? '')];
   const at = all.lastIndexOf(ch);
   if (!ch || at < 0) return null;
+  const { before, after } = around(all, at, 1);
+  return { before, ch, after };
+}
+
+/**
+ * The sentence holding a word: `surface` at UTF-16 offset `start` of `text`
+ * (an analysis token's start and surface, over the analyzed text), or its
+ * first occurrence when the offset does not hold it. Found and clipped as
+ * sentenceAround does for a kanji, the word always whole: { before, word,
+ * after }, or null when the text does not hold the word.
+ */
+export function sentenceAt(text, start, surface) {
+  const s = String(text ?? '');
+  const w = String(surface ?? '');
+  if (!w) return null;
+  const at = Number.isInteger(start) && start >= 0 && s.startsWith(w, start) ? start : s.indexOf(w);
+  if (at < 0) return null;
+  const { before, after } = around([...s], [...s.slice(0, at)].length, [...w].length);
+  return { before, word: w, after };
+}
+
+// The sentence around code points [at, at + len) of `all`: from the last
+// sentence end or line break before it to the next after it, trimmed, then
+// clipped to MAX_AROUND characters with the span whole and an ellipsis on
+// each side that was cut.
+function around(all, at, len) {
   const end = (c) => '。！？!?'.includes(c);
   const brk = (c) => c === '\n' || c === '\r';
   let from = at;
   while (from > 0 && !end(all[from - 1]) && !brk(all[from - 1])) from -= 1;
-  let to = at + 1;
+  let to = at + len;
   while (to < all.length && !brk(all[to]) && !end(all[to - 1])) to += 1;
   let left = all.slice(from, at);
-  let right = all.slice(at + 1, to);
+  let right = all.slice(at + len, to);
   while (left.length && /\s/u.test(left[0])) left.shift();
   while (right.length && /\s/u.test(right[right.length - 1])) right.pop();
-  const room = MAX_AROUND - 1;
+  const room = Math.max(0, MAX_AROUND - len);
   if (left.length + right.length > room) {
     let keepLeft = Math.min(left.length, Math.floor(room / 2));
     const keepRight = Math.min(right.length, room - keepLeft);
@@ -83,5 +109,5 @@ export function sentenceAround(text, ch) {
     if (cutLeft) left = ['…', ...left.slice(1)];
     if (cutRight) right = [...right.slice(0, -1), '…'];
   }
-  return { before: left.join(''), ch, after: right.join('') };
+  return { before: left.join(''), after: right.join('') };
 }

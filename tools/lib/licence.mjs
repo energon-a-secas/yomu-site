@@ -41,6 +41,33 @@ export const LICENCES = {
     ],
     screen: 'required',
   },
+  // The Spanish meanings (tools/build-spanish.mjs, data/es/): the Spanish of
+  // the same two files, from jmdict-simplified's jmdict-spa and
+  // kanjidic2-all, under the same licence. Section 2 of the EDRDG licence
+  // leaves "translational equivalents in other languages" under a separate
+  // copyright held by their compilers. KANJIDIC's documentation
+  // (https://www.edrdg.org/kanjidic/kanjidic_doc_legacy.html) names the
+  // compiler and the provider of its Spanish meanings; neither the EDRDG's
+  // pages nor jmdict-simplified's README name those of JMdict's Spanish
+  // glosses (looked for 2026-11-07), so the credit names them as their
+  // compilers. The sentence the Group asks for is kept word for word, and
+  // the few meanings written for Yomu (tools/lib/spanish-words.mjs) are named
+  // as Yomu's.
+  edrdgSpanish: {
+    source: 'JMdict and KANJIDIC Spanish translations, Electronic Dictionary Research and Development Group',
+    url: 'https://www.edrdg.org/edrdg/licence.html',
+    spdx: 'CC-BY-SA-4.0',
+    derived: true,
+    id: 'edrdg-spanish',
+    acknowledgement:
+      "This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence. The Spanish meanings are their Spanish translations: KANJIDIC's Spanish kanji meanings were compiled by Francisco Gutierrez and provided by Gabriel Sanroman, and JMdict's Spanish glosses are the work of their compilers, who hold their copyright. The Spanish meanings of a few common words, which JMdict has none of or has in error, were written for Yomu.",
+    links: [
+      'https://www.edrdg.org/edrdg/licence.html',
+      'https://www.edrdg.org/kanjidic/kanjidic_doc_legacy.html',
+      'https://github.com/scriptin/jmdict-simplified',
+    ],
+    screen: 'required',
+  },
   // JMnedict is the EDRDG's too, under the same licence, and its sample
   // acknowledgements (https://www.edrdg.org/edrdg/sample.html) name the files
   // a site uses and allow "any reasonable variant". This is that sample with

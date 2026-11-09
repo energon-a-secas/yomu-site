@@ -1,4 +1,7 @@
-// Shared chart data for the web reference and native kana practice.
+// Shared chart data for the web reference and native kana practice. Section
+// titles and the timing marks' words are { en, es }, resolved to the current
+// language (strings.js useLang) when the chart is built; ids never change.
+import { t } from './strings.js';
 import { beats, beatRomaji, toHira, toKata, GENKI_MAP } from './kana.js';
 
 export const GOJUON = Object.freeze([
@@ -22,18 +25,20 @@ export const PRACTICE_SOUNDS = Object.freeze([...BASIC_KANA, ...voiced, ...combi
 export function kanaChart(script = 'hiragana') {
   const show = script === 'katakana' ? toKata : toHira;
   const sections = [
-    ['basic', 'Basic kana', 5, basic],
-    ['voiced', 'Voiced sounds', 5, voiced],
-    ['combined', 'Combinations', 3, combined],
-    ['timing', 'Small tsu and long vowels', 2, ['っ', 'ー']],
+    ['basic', { en: 'Basic kana', es: 'Kana básicos' }, 5, basic],
+    ['voiced', { en: 'Voiced sounds', es: 'Sonidos sonoros' }, 5, voiced],
+    ['combined', { en: 'Combinations', es: 'Combinaciones' }, 3, combined],
+    ['timing', { en: 'Small tsu and long vowels', es: 'Tsu pequeña y vocales largas' }, 2, ['っ', 'ー']],
   ];
-  if (script === 'katakana') sections.push(['loan', 'Loanword combinations', 3, Object.keys(GENKI_MAP)]);
+  if (script === 'katakana') sections.push(['loan', { en: 'Loanword combinations', es: 'Combinaciones para palabras prestadas' }, 3, Object.keys(GENKI_MAP)]);
+  const pause = t({ en: 'pause', es: 'pausa' });
+  const longVowel = t({ en: 'long vowel', es: 'vocal larga' });
   return sections.map(([id, title, columns, sounds]) => ({
-    id, title, columns,
+    id, title: t(title), columns,
     cells: sounds.map((k, i) => ({
       id: k === ' ' ? `${id}-empty-${i}` : k,
       kana: k === ' ' ? '' : show(k),
-      romaji: k === 'っ' ? 'pause' : k === 'ー' ? 'long vowel' : kanaRomaji(k),
+      romaji: k === 'っ' ? pause : k === 'ー' ? longVowel : kanaRomaji(k),
       // These timing marks need context, not an isolated spoken symbol.
       spoken: k === 'っ' ? 'きって' : k === 'ー' ? 'コーヒー' : ({ 'を': 'お', 'ぢ': 'じ', 'づ': 'ず' }[k] || k),
       example: k === 'っ' ? show('きって') : k === 'ー' ? show('こーひー') : null,

@@ -52,8 +52,11 @@ pasted text is ever stored, and the test reads the raw store to prove it,
 with `h` set too. Every field is validated on load; a store that does not
 read degrades to empty with a note on the screen, and its raw value is
 copied to `yomu-site:kanji:damaged` first. A bad `src`, `h` or `at` is
-dropped and its record kept. `at` is when the session began (ms): set by
-`beginSession(src, now)` and `clearAll(now)`, and by `load(now)` when there
+dropped and its record kept. `forgetSeen(data, now)` empties `seen` and moves
+the session on while every saved kanji keeps its schedule; the native app's
+"Forget where I met kanji" calls it, since its reader records reading too.
+`at` is when the session began (ms): set by `beginSession(src, now)`,
+`clearAll(now)` and `forgetSeen`, and by `load(now)` when there
 is no session to read (nothing stored, or a damaged store, whose ids then
 count from 0 again). Such a start must be written before History relies on
 it: kept in memory only, a reload before the first count (a text with no
@@ -142,6 +145,19 @@ importNote`, pure, tested in `tests/phrases.test.mjs`) counts the saved
 kanji and kanji counts, then the saved phrases added or updated and any
 that did not fit, each phrase count in the singular when it is one.
 
+**The app's backup is this file, plus practice.** Naninani's More > Your
+data writes the same `yomu-kanji-export/1` file through `js/app-backup.js`,
+with two additive fields Import here ignores: `sources` (a saved reading's
+place in the phrase library, `phrase-book.js`) and `practice` (the app's
+learning documents by file name, `PRACTICE`). So a file from the app imports
+here (kanji, words, saved phrases), and one from here restores in the app.
+`restoreBackup` merges by the rules above (`mergeInto`, `mergeWords`, the
+phrase book's `merge`), and a practice document the phone already has is
+replaced only when the learner asks. `backupSummary` describes even an
+empty backup, which `readBackup` refuses as a file to restore; the summary's
+`weight` (saved kanji, words, readings and practice documents) is what the
+app compares before keeping a copy in iCloud. Tests: `tests/app-backup.test.mjs`.
+
 **"Times seen" counts texts, not keystrokes.** A session begins in
 `events-read.js`: `loadText()` (an example, a phrase or dialogue, `#t=`, an
 embed `yomu:load`), a paste or drop into an empty box or a paste over all of
@@ -205,6 +221,18 @@ the most recently saved first, with Read it and the bookmark that unsaves;
 the backup carries them as `words` (only when there is one), merged on
 Import by more reviews, the earlier save and the higher lapses
 (`mergeWords`).
+
+**A word saved in a text keeps its sentence** (Naninani 1.2.0, the owner's
+note on build 15): `from`, `{ before, word, after }`, the sentence holding
+the word as the reader saw it, clipped to 60 characters with the word whole
+(`history-text.js sentenceAt`, by the token's UTF-16 `start` and `surface`).
+The iOS app passes it from its word sheet and shows it under the word in My
+words, a tap reading it again. It never reaches the account: sync's row takes
+the named fields only (`sync-rules.js cleanWordSaved`), and a change sync
+brings keeps the sentence the word has here (`adopt`). A backup carries it,
+and Import keeps the sentence a word has here, else the backup's. A sentence
+that is not one (a line break, too long, an empty word) is left out and the
+word kept. The site's own bookmark saves no sentence yet.
 
 **Review schedule:** saved is box 0, due that day; Got it moves up one box,
 due in 1, 2, 4, 8, 16 days (top box repeats 16); Again is box 1, due tomorrow,

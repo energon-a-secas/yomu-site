@@ -13,7 +13,7 @@ import {
   KEY, DAMAGED_KEY, MAX_WORDS, INTERVALS, SOURCES,
   emptyData, validate, beginSession, recordReading, saveKanji, unsaveKanji, schedule,
   dueList, nextDue, oftenUnsaved, addDays, dayOf, sessionSource, setSessionText,
-  dictionaryWord, wordsByKanji, openKanji,
+  dictionaryWord, wordsByKanji, openKanji, forgetSeen,
 } from '../js/kanji-store.js';
 import { EXPORT_FORMAT, parseImport, mergeInto, exportDoc } from '../js/kanji-backup.js';
 import { textKey } from '../js/history-store.js';
@@ -165,6 +165,22 @@ test('names, guesses and numbers read by rule are not dictionary words', () => {
 });
 
 // ── Saving and the schedule ───────────────────────────────────────────────
+
+test('forgetSeen clears where kanji were met and keeps what was saved', () => {
+  const data = emptyData(1000);
+  beginSession(data, 'paste', 1000);
+  recordReading(data, ['雨', '日'], words({ 雨: [['雨', 'あめ']] }), '2026-11-02');
+  saveKanji(data, '雨', Date.UTC(2026, 10, 2));
+  const id = data.session.id;
+  assert.equal(forgetSeen(data, 2000), true);
+  assert.deepEqual(data.seen, {});
+  assert.deepEqual(data.session.counted, []);
+  assert.equal(data.session.id, id + 1, 'a new session, so the next read counts afresh');
+  assert.ok(data.saved['雨'], 'saved kanji and their schedule stay');
+  assert.equal(forgetSeen(data, 3000), false, 'nothing left to forget');
+  assert.equal(recordReading(data, ['雨'], words({}), '2026-11-03').counted.length, 1);
+  assert.equal(data.seen['雨'].n, 1);
+});
 
 test('a kanji saved is in box 0 and due the day it was saved', () => {
   const d = emptyData();

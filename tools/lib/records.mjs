@@ -40,7 +40,7 @@ export function sensesFor(entry, key, kind) {
  * open, because "to be surprised (by something unexpected, et…" reads as a
  * broken page where "to be surprised…" reads as a short gloss.
  */
-function trimGloss(text) {
+export function trimGloss(text) {
   const s = text.trim();
   if (s.length <= MAX_GLOSS) return s;
   let cut = s.slice(0, MAX_GLOSS - 1);

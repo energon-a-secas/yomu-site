@@ -1,0 +1,29 @@
+{
+"_licence": {"source":"JMdict and KANJIDIC Spanish translations, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg-spanish","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence. The Spanish meanings are their Spanish translations: KANJIDIC's Spanish kanji meanings were compiled by Francisco Gutierrez and provided by Gabriel Sanroman, and JMdict's Spanish glosses are the work of their compilers, who hold their copyright. The Spanish meanings of a few common words, which JMdict has none of or has in error, were written for Yomu.","links":["https://www.edrdg.org/edrdg/licence.html","https://www.edrdg.org/kanjidic/kanjidic_doc_legacy.html","https://github.com/scriptin/jmdict-simplified"],"screen":"required","upstream":["jmdict-simplified kanjidic2-all 3.6.2+20260831182826"],"generated_by":"tools/build-spanish.mjs","generated_at":"2026-10-01"},
+"format": "yomu-kanji-es/1",
+"of": {"src":"data/kanji/k03.json","sha256":"8c09d9f86aed606792be2512ddc38661a135b99d9c401e334d3316d4c83b823e"},
+"entries": {
+"丞": ["ayudar","avanzar"],
+"云": ["decir"],
+"亥": ["signo del cerdo","doceavo signo del zodíaco"],
+"亦": ["también","otra vez","de nuevo"],
+"伶": ["músico","inteligente","astuto"],
+"侃": ["fuerte","justo","honrado"],
+"侑": ["animar a comer","ayudar"],
+"倖": ["felicidad","suerte"],
+"兎": ["conejo","liebre"],
+"凜": ["frío","estricto","severo"],
+"凪": ["calmado","tranquilo"],
+"勁": ["fuerte"],
+"勺": ["cucharón","unidad de capacidad y área"],
+"勿": ["no","no deber","no ser"],
+"匁": ["antigua medida de peso (3.75 gramos)","antigua moneda"],
+"卜": ["adivinación","vaticinio","adivinar"],
+"叡": ["inteligente","angelical","imperial"],
+"吠": ["ladrar","rugir","aullar"],
+"咳": ["tos"],
+"哉": ["¿cómo?","¿qué?","exclamación"],
+"圃": ["campo","plantación"],
+"奎": ["estrella","dios de la literatura"]
+}
+}

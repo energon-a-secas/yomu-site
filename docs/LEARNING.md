@@ -4,6 +4,24 @@ The native Naninani 1.1 increment presents these modules in SwiftUI. They have
 no DOM or native dependency, and can support a web presentation later. They do
 not change the existing web Play scores, sync document or routes.
 
+## Languages
+
+What a learner reads in these modules is `{ en, es }`, resolved by
+`strings.js` `t()` in the current language (`useLang`) when a function is
+called, never when a module loads: the native app sets the language after
+every import has run (`bridge/entry.js`). That covers the kana chart's titles,
+kana details and practice, the games' shape hints (the look-alike ones from
+`play-kana.js` and the 47 written in `kana-games.js`), their setup messages
+and errors, quick kana review, Kana snacks (each word's meaning and note, no
+two meanings alike within a theme in either language), kanji cards' messages,
+the tracing verdicts, the phrase book's messages, the café story, Kana to
+kanji and the writing rush. Dictionary data stays English, as on the site: JMdict glosses (Kana to
+kanji's meanings), KANJIDIC meanings (kanji cards) and Tatoeba translations.
+Documents hold ids and counts, never this text, so a round begun in one
+language resumes in the other. Each module's tests switch with
+`useLang('es')` and restore English; `tests/kana-learning-es.test.mjs` holds
+every hint the games can show, in both scripts, to its own Spanish.
+
 ## Kana recall
 
 `js/kana-games.js` reuses `kana-chart.js`, the original CC0 shape hints in
@@ -33,6 +51,47 @@ a recovery notice; the native file layer keeps original bytes before writing.
 `tests/kana-games.test.mjs` covers all six script/mode combinations, small sets,
 homophones, assistance, skips, first-answer idempotence, later revisits, stale
 taps, relaunch, invalid data and leaving a round.
+
+### Weak kana drills
+
+Asked for on 6 November 2026: drills of the kana a learner gets wrong or is
+slow to answer. Each kana keeps a record per script, across the three modes
+(`kana` in the document, keyed `script:id`): how often it was asked and
+missed, a recent miss rate in thousandths, and the average time of its right,
+unaided answers, in milliseconds. Both averages move by 0.35 per answer, so a
+kana leaves the list after a few right, quick answers; the lifetime counts
+stay for the screen ("missed 3 of 10"). The app measures the time from the
+question appearing to the tap and sends it with the answer; only a right,
+unaided answer in Read or Tell them apart is kept (a listening question's
+time includes its recording), and a time under 0.2 s or over 30 s is a stray
+tap or a learner who looked away. `weakKana({ script })` lists at most eight,
+weakest first: a recent miss rate of 0.25 or more, or an average 1.4 times
+the learner's own median (once four kana have times, and two answers of the
+kana itself). A drill is `start({ ..., focus })`: only the focus kana are
+asked, the wrong answers still come from the whole selection, and it needs
+two of them with different sounds. A drill counts as a round but never sets
+the best score. `tests/kana-weak.test.mjs` holds the arithmetic, the limits,
+recovery from damaged records and a tampered drill.
+
+## Kana to kanji
+
+Asked for on 6 November 2026: a word written in hiragana, and its kanji
+spelling to pick. `js/kana-to-kanji.js` deals from the kanji page's words
+(`data/kpage`, JMdict's first tier, up to ten per kanji): `spellingPool`
+keeps a set's words written only with kanji the learner is taken to know and
+read in hiragana alone (the app passes the set and every easier level of its
+kind; My kanji with the N5 kanji). The wrong answers share a kanji with the
+answer where the set has them, then match its length, so けんきゅうしつ is
+asked among 研究, 研究室, 学究 and 図書室. No two choices read alike, and no
+choice is a spelling the set also reads as the prompt (今日 for こんにち when
+きょう is in the set), so exactly one answer is right. Rounds follow Kana
+recall: ten questions, the first answer counts, the meaning is the hint, a
+missed word returns three questions later with its choices turned, and missed
+words weight later rounds (500 kept per set). Once answered, every choice
+shows its reading. Meanings are JMdict's English. The `v: 1` document keeps
+counters per set and the round's own words, read back field by field.
+`tests/kana-to-kanji.test.mjs` covers the pool, fairness over many seeds,
+first-answer accounting, revisits, weighting and recovery.
 
 ## The corner café
 
@@ -65,3 +124,222 @@ is no microphone permission, recording or network service.
 The tests walk every choice combination as either role, serialize between
 turns, validate recovery, check both endings and reject duplicate/invalid actions.
 Human listening and learner playtesting remain separate acceptance evidence.
+
+## Quick kana review
+
+`js/kana-review.js` is a short self-graded pass over the selected kana of one
+script, so weak kana come back sooner than strong ones. Each kana keeps a
+Leitner box on My kanji's schedule (`kanji-store.js schedule`: Got it moves up
+a box, 1, 2, 4, 8, 16 days; Again is box 1, due tomorrow). The review itself
+is `review.js`: a card is hidden until shown, Again sends the kana to the back
+of the queue, and only its first answer in a review moves the schedule.
+
+A review holds up to `size` kana, `QUICK_SIZE` (20) unless the learner chose
+another (the app offers 10, 20, 30 or all of them; any whole number up to
+`QUICK_MAX`, 500, is taken, anything else is 20): the due ones first (longest
+overdue, then lower box, then chart order), then never-answered ones in chart
+order, and only when that is still short, practice ahead (lowest box, then
+soonest due). Each group is shuffled with the seed and the groups keep their
+order. `overview` takes the same `size` and returns `plan`, how many due, new
+and ahead kana that review would hold, so the app can say before Start how
+many cards there are and in what order (a tester could not tell). A kana practised ahead keeps its box and day on Got it and only counts
+the review; Again is a lapse either way. Every answer is scheduled from the
+day the review began. Prompts, sounds and shape reminders are
+`kana-games.js gameKana`'s, and the timing marks are never cards.
+
+The `v: 1` document is `{ cards, session }`. A card is keyed by script and
+chart cell id (`'katakana:か'` is カ) and holds `box`, `due`, `reviews` and
+`lapses`. The session keeps its kana, review.js's queue, shown flag, first
+answers and repeats, each kana's box before the review and the kana practised
+ahead. A card's id is the session's id and the answers so far, so a stale or
+double tap never answers the next card. Bad cards are dropped one by one, a
+session that breaks the review's shape is dropped whole, and either sets the
+recovery flag. Leaving discards the review; answered kana keep their schedule.
+
+`tests/kana-review.test.mjs` covers due, new and early kana in both scripts,
+Again and first-answer accounting, stale taps, show before answer, the
+overview's counts, selections with fewer than two sounds, the order and the
+cap, a chosen size and its plan, leaving, resuming after every action, and
+damaged documents.
+
+## Kana snacks
+
+`js/kana-reads.js` is a ten-question game: read a real word written only in
+hiragana or only in katakana and pick its meaning from four English options.
+Six themes (café menu, around the world, everyday things, at the zoo in
+katakana; sound words and everyday words in hiragana) hold 18 words each,
+with a short meaning and a one-sentence note. The words, meanings and notes
+are original CC0 text. The romaji shown after a hint or an answer is the
+reader's said line (`kana.js said`), never a romanizer of its own.
+
+Rounds follow kana recall: draws without repeats weighted by earlier misses,
+three distractors from the same theme with different meanings, the first
+answer counts, a hint marks the question assisted, a skip or a miss comes
+back three questions later when there is room, and a stale tap names an old
+question and changes nothing. The `v: 1` document has `stats` per theme
+(`rounds`, `best`, `correct`, `answered`, `assisted`, `misses` per word) and
+an optional `round`, validated as kana recall validates its own.
+
+Every word already has a recorded clip in the Clear voice, which the other
+voices fall back to; 49 of the 108 also have their own Male clip.
+`tests/kana-reads.test.mjs` reads the committed `data/audio` index to prove
+it, checks that each word is kana of its theme's script only (with ー and
+small kana) and that no two words of a theme share a meaning, and plays every
+theme to the end with a relaunch after each step. The game adds **zero new
+recordings**.
+
+## A kanji's library lines
+
+`js/kanji-phrases.js phrasesWithKanji(library, ch, { limit, lang })` lists the
+library lines that contain one kanji: its expressions first, then dialogue
+lines, at most `limit` (6), with the meaning and title the phrase book shows.
+Each carries the source `phrase-book.js phraseSource` follows back, and
+`tests/kanji-phrases.test.mjs` follows every one of them for a dozen kanji in
+English and Spanish. Anything but exactly one kanji finds nothing.
+
+## Hoho's lines
+
+`js/mascot-lines.js` maps fourteen moments (greetings by the hour, welcome,
+start, a perfect round, the end of a session, relief, retry, comfort, fun,
+goodbye, understood) to library phrases, so every line has its library
+reading and meaning and is already recorded in every voice.
+`greetingMoment(hour)` picks morning (5 to 10), day (11 to 17), evening
+(18 to 22) or night. The romaji is `kana.js said` over the library's kana
+with a space between words (yoroshiku onegaishimasu), and こんにちは and
+こんばんは end in wa. `tests/mascot-lines.test.mjs` checks every phrase id,
+its Clear and Male clips, the romaji and the hour boundaries. No new
+recordings.
+
+## Kanji cards
+
+`js/kanji-cards.js` is Tomoshibi's glowing card as a drill over any set of
+kanji: My kanji, a JLPT study level or a school grade. Two ways to play:
+turn the card over and say Again or Got it, or pick the kanji's meaning from
+four. A round is `review.js`, as in Quick kana review: up to 20 kanji, due
+ones first, then new ones in the set's order, then practice ahead; Again
+sends a kanji to the back, and only its first answer moves its box. In the
+quiz a pick turns the card over and shows the verdict, and Next is the
+answer that moves the box; a revealed answer counts as Again.
+
+It is a free drill, the owner's choice (6 November 2026): each kanji keeps a
+Leitner box in this document, on My kanji's schedule but apart from it, and
+nothing here moves a saved kanji's review. The quiz needs four kanji whose
+labels differ; `overview` says so before a round can start.
+
+`cardEntry(rec, { level, row })` is the card itself: the short label (the
+kanji-of-the-day row's first gloss, else KANJIDIC's first meaning, never a
+radical's name), up to four meanings, up to three on and three kun readings
+as [kana, romaji], strokes, grade, JLPT level and an example word. It is the
+rule Tomoshibi's watch data was built with, moved here: for all 760 kanji in
+Tomoshibi's `kanji.json` it gives identical JSON, so the iOS app's watch
+payload decodes with the watch's own struct. `tests/kanji-cards.test.mjs`
+plays whole rounds in both ways, the stale-tap guard, the deal order, quiz
+options and document recovery.
+
+## Writing
+
+`js/strokes.js` turns KanjiVG's path data (`data/strokes`, the 109-unit
+grid) into absolute cubic segments any view can draw, points along each
+stroke, and a judge for a stroke traced by hand. `traceStroke(strokes, next,
+drawn)` is forgiving about neatness and strict about order and direction:
+the ends may miss by 20 units and the line may stray by 10 on average, but a
+stroke drawn from its end is `reversed`, and a line that fits a later stroke
+better is that stroke drawn too early (`order`, with `matched`).
+`traceWords` says it in a sentence. The kanji page now places its stroke
+numbers with the same `startOf`. `tests/strokes.test.mjs` parses every
+stroke in the data (a path command the drawing does not handle fails
+loudly), checks that each starts where its number goes, and judges traces of
+か and 書 (whose horizontal strokes sit ten units apart).
+
+## Writing rush
+
+Asked for on 7 November 2026: writing as a timed game, with or without
+guides, over groups of kana and kanji, in rushes and marathons.
+`js/writing-rush.js` holds the rules and `js/writing-rush-words.js` what they
+say. Every stroke is judged by `strokes.js traceStroke`, the writing pad's
+judge: the app calls `trace` as the pad does and passes the verdict on, so
+the game adds no judge of its own.
+
+The groups are each script's ten rows of basic kana (the わ row is わ, を and
+ん, as `kana-rows.js` files them), all 46 of a script, My kanji (the app
+passes the saved kanji) and the sets kanji cards use (`levels.js LEVELS`:
+the school grades, the name kanji, JLPT N5 to N1). Only a character with a
+stroke order is dealt: the caller passes each character's number of strokes,
+and the 64 name kanji KanjiVG does not draw are left out. A rush lasts 30,
+60 or 120 seconds and deals the group in a seeded random order, again in a
+new order whenever it runs out, never the same character twice in a row
+(with two or more). A marathon deals every character once, in a seeded
+random order, and its result is the time. With guides the pad shows the
+faint character and the dot where the next stroke starts; without them, an
+empty square, where the verdicts say what was wrong without pointing at a
+dot or a line.
+
+What counts: a stroke the judge refuses is a miss, and the learner draws
+that stroke again; a tap (the judge's `short`) is not a stroke and counts
+nothing. The third miss on one stroke shows that stroke until it is traced,
+and its character is assisted. A character is written when its last stroke
+is traced; clean when it was written with no miss. A run's misses are those
+of its written characters. In a rush a character finished at or before the
+deadline counts, and one still in progress at the deadline counts for
+nothing, its misses and any shown stroke included.
+
+Time is the app's monotonic clock, in milliseconds from the run's start,
+paused while the app is away: each stroke carries when the finger touched
+down (`began`) and lifted (`at`), and a time earlier than the latest is
+read as the latest. The clock starts with the first stroke in both modes, as
+Play's timed game starts when the learner does: a rush ends its length after
+the first stroke's touch-down, and a marathon runs from that touch-down to
+the last character's last stroke. The app sends `time` when its countdown
+reaches the deadline; a stroke that ends after it ends the run uncounted.
+
+Bests are kept per group, mode, guides and rush length. A rush ranks by
+characters written, then clean ones, then fewer misses; a marathon by time,
+then fewer misses, and only against a best over the same number of
+characters, so when My kanji grows the next marathon sets the new count's
+first best. Only a strictly better run becomes the best. An assisted run
+does not: a best is the learner's own writing, so a run with a written
+assisted character goes into the recent results with its count of assisted
+characters and never replaces a best, and neither does a rush with nothing
+written. Guided runs set bests too, kept apart from runs without guides.
+Each result says whether it is a new best and what it was measured against.
+
+The document (`yomu-writing-rush/1`) holds `bests`, one record per key, and
+`recent`, the last ten results, newest first. A record is the group, mode,
+guides, the rush's length or the marathon's time, the counts (written,
+clean, misses, assisted), how many characters the group dealt and the day
+the app gave; it holds no text. Each best and each result is read on its own,
+against the counts a run can produce (an assisted character missed three
+times, a marathon wrote its whole group), so a damaged entry is dropped
+without the others and sets the recovery flag. A run in progress is never in
+the document: it is not resumed, the app abandons it when it leaves the
+screen, and a load starts without one.
+
+`tests/writing-rush.test.mjs` covers the groups, dealing over many seeds
+(only characters with strokes, a marathon's each once, a rush's cycles),
+misses and shown strokes, taps and stale taps, the deadline, the marathon's
+clock, bests per key and their flags, the recent list, the document's
+recovery and a marathon traced with the real judge over KanjiVG's strokes;
+`tests/writing-rush-es.test.mjs`, every text in Spanish.
+
+## Sound rule drills
+
+Asked for on 8 November 2026, in Spanish, on the app's Sound rules screen:
+dedicated games like the kana ones, but for the sounds, to memorize or
+review them one by one and fast, going on with a button, the sound played
+on arriving, back, next and replay, and related words. `js/sound-drill.js`
+makes the cards from the sound notes themselves (`notes-sounds.js`, the
+seventeen rules Sound rules lists), so a rule written once is drilled as it
+is explained. One card per rule: its title and rule, the first example said
+on arrival, its romaji as said and as spelled and its meaning, then the
+rule's other examples (each with its own speaker) and its exception. In the
+list's order, or mixed with a seed (`order: 'mixed'`); the app starts at a
+rule when asked from that rule's page.
+
+It is a drill, not a quiz: no score, no schedule and nothing kept, so it
+writes no document and the backup has nothing to carry. The app says an
+example once per arrival and never while VoiceOver runs, where Replay is the
+way to hear it, as the listening games do.
+
+Tests: `tests/sound-drill.test.mjs` (every rule once, in the list's order and
+mixed by seed, the examples and exception as the notes have them, Spanish).
+

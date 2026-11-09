@@ -1,6 +1,13 @@
 // Versioned, local story progression. Completion records choices and a
 // learner's own attempts, never a pronunciation or fluency assessment.
+// The scene's words are { en, es } (story-cafe.js); view() resolves them to
+// the current language (strings.js useLang), so the document stays the same
+// whichever language reads it.
+import { t } from './strings.js';
 import { nextStoryNode } from './story-cafe.js';
+
+/** A scene's { en, es } in the current language; a missing value stays missing. */
+const say = (v) => (v == null ? v : t(v));
 
 export class StoryPractice {
   constructor(scene, document) {
@@ -46,8 +53,10 @@ export class StoryPractice {
   }
 
   start(role = this.role, restart = false) {
-    if (this.started && this.walk().node.kind !== 'ending' && !restart) throw new Error('Resume or restart the current scene.');
-    if (!this.scene.roles.some((r) => r.id === role)) throw new Error('Choose one of the scene roles.');
+    if (this.started && this.walk().node.kind !== 'ending' && !restart) {
+      throw new Error(t({ en: 'Resume or restart the current scene.', es: 'Retoma la escena actual o empiézala de nuevo.' }));
+    }
+    if (!this.scene.roles.some((r) => r.id === role)) throw new Error(t({ en: 'Choose one of the scene roles.', es: 'Elige uno de los papeles de la escena.' }));
     this.role = role; this.path = []; this.started = true;
     return this.view();
   }
@@ -70,22 +79,27 @@ export class StoryPractice {
   }
 
   line(node) {
-    return { id: node.id, speaker: node.speaker, ja: node.ja, kana: node.kana, meaning: node.meaning, grammar: node.grammar, recording: node.recording };
+    return { id: node.id, speaker: node.speaker, ja: node.ja, kana: node.kana, meaning: say(node.meaning), grammar: say(node.grammar), recording: node.recording };
   }
 
   view() {
     const { node, choices } = this.walk();
     const lines = this.path.filter((r) => this.scene.nodes[r.id].kind === 'line');
     const current = !this.started ? null : node.kind === 'line' ? { kind: 'line', id: node.id, line: this.line(node) } : node.kind === 'choice' ? {
-      kind: 'choice', id: node.id, prompt: node.prompt,
-      options: node.options.map((o) => ({ id: o.id, label: o.label, ja: this.scene.nodes[o.next].ja, meaning: this.scene.nodes[o.next].meaning })),
-    } : { kind: 'ending', id: node.id, title: node.title, text: node.text };
+      kind: 'choice', id: node.id, prompt: say(node.prompt),
+      options: node.options.map((o) => ({ id: o.id, label: say(o.label), ja: this.scene.nodes[o.next].ja, meaning: say(this.scene.nodes[o.next].meaning) })),
+    } : { kind: 'ending', id: node.id, title: say(node.title), text: say(node.text) };
+    const scene = this.scene;
     return {
-      recovered: this.recovered, scene: { id: this.scene.id, title: this.scene.title, subtitle: this.scene.subtitle, introduction: this.scene.introduction, roles: this.scene.roles },
+      recovered: this.recovered,
+      scene: {
+        id: scene.id, title: say(scene.title), subtitle: say(scene.subtitle), introduction: say(scene.introduction),
+        roles: scene.roles.map((r) => ({ ...r, description: say(r.description) })),
+      },
       started: this.started, role: this.role, current, choices,
       turns: lines.length, tried: lines.filter((r) => r.status === 'tried').length,
-      endings: this.endings.map((id) => ({ id, title: this.scene.nodes[id].title })),
-      history: lines.map((r) => ({ ...this.line(this.scene.nodes[r.id]), status: r.status })),
+      endings: this.endings.map((id) => ({ id, title: say(scene.nodes[id].title) })),
+      history: lines.map((r) => ({ ...this.line(scene.nodes[r.id]), status: r.status })),
     };
   }
 

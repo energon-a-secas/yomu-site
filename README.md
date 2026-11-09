@@ -118,6 +118,7 @@ yomu-site/
 ├── data/
 │   ├── dict/             # JMdict: a core, 28 range shards and a key filter, each under 140 KB
 │   ├── kanji/            # KANJIDIC and KanjiVG parts, and joyo.json (the jōyō list by grade)
+│   ├── es/               # the meanings' Spanish, one file beside each English one, fetched only when asked (tools/build-spanish.mjs)
 │   ├── like/             # English words JMdict glosses with, for the sound-alike guess
 │   ├── play/             # the kanji look-alikes (tools/build-lookalikes.mjs) and the spaces game's lines (tools/build-spaces.mjs)
 │   └── phrases/          # the phrase library (original, CC0)
@@ -128,7 +129,9 @@ yomu-site/
 ```
 
 Dictionary data: JMdict and KANJIDIC by the Electronic Dictionary Research and
-Development Group (CC BY-SA 4.0), KanjiVG by Ulrich Apel (CC BY-SA 3.0),
+Development Group (CC BY-SA 4.0), with their Spanish translations (KANJIDIC's
+compiled by Francisco Gutierrez and provided by Gabriel Sanroman), KanjiVG by
+Ulrich Apel (CC BY-SA 3.0),
 Tatoeba (CC BY 2.0 FR, word ranking only).
 
 ---

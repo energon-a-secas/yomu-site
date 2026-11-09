@@ -12,7 +12,7 @@ import assert from 'node:assert/strict';
 import {
   KEY, DAMAGED_KEY, MAX_TEXT, MAX_ENTRIES, MAX_CHARS, MIN_PARTIAL, MAX_AROUND,
   emptyHistory, normalizeText, textKey, clipText, validate, recordText, partialMatch, evict,
-  forget, forgetAll, list, sentenceAround, openHistory,
+  forget, forgetAll, list, sentenceAround, sentenceAt, openHistory,
 } from '../js/history-store.js';
 import { HISTORY_KEY, KEY as KANJI_KEY, openKanji } from '../js/kanji-store.js';
 
@@ -373,4 +373,28 @@ test('a long sentence is clipped around the kanji, an ellipsis on each side that
   assert.equal([...near.before, near.ch, ...near.after].length, MAX_AROUND);
   const short = sentenceAround(`${left.slice(0, 10)}雨${right.slice(0, 10)}`, '雨');
   assert.ok(!short.before.includes('…') && !short.after.includes('…'));
+});
+
+// ── The sentence a word was saved from ────────────────────────────────────
+
+test('the sentence holding a word at its offset, or at its first occurrence when the offset does not hold it', () => {
+  const text = '今日は雨が降っています。明日も雨？';
+  assert.deepEqual(sentenceAt(text, 3, '雨'), { before: '今日は', word: '雨', after: 'が降っています。' });
+  assert.deepEqual(sentenceAt(text, 15, '雨'), { before: '明日も', word: '雨', after: '？' }, 'the second rain, by its offset');
+  assert.deepEqual(sentenceAt(text, 99, '雨'), sentenceAt(text, 3, '雨'), 'an offset that does not hold it: the first');
+  assert.deepEqual(sentenceAt(text, 5, '降って'), { before: '今日は雨が', word: '降って', after: 'います。' }, 'a word of several characters, whole');
+  // Offsets are UTF-16, as the analyzer's are; the clip counts characters.
+  assert.deepEqual(sentenceAt('𠮟られた。雨だ。', 6, '雨'), { before: '', word: '雨', after: 'だ。' });
+  assert.deepEqual(sentenceAt('𠮟られた。', 0, '𠮟られた'), { before: '', word: '𠮟られた', after: '。' });
+  assert.equal(sentenceAt(text, 0, '晴'), null);
+  assert.equal(sentenceAt(text, 0, ''), null);
+  assert.equal(sentenceAt(null, 0, '雨'), null);
+});
+
+test('a long sentence is clipped around the word, which is never cut', () => {
+  const word = '食べられませんでした';
+  const both = sentenceAt(`${'あ'.repeat(100)}${word}${'い'.repeat(100)}`, 100, word);
+  assert.equal(both.word, word);
+  assert.equal([...both.before, ...both.word, ...both.after].length, MAX_AROUND);
+  assert.ok(both.before.startsWith('…') && both.after.endsWith('…'));
 });

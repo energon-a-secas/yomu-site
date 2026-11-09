@@ -4,19 +4,23 @@
 // schedule). Pure functions plus the store, no DOM.
 //
 // One store, localStorage['yomu-site:words'], Persist kit version 1:
-// { saved: { id: { w, r, g, at, box, due, reviews, lapses } } }, `id` the
-// cyrb53 of the written form and the reading (wordId), so a key is short and
-// ASCII, which sync needs. A dictionary word and its gloss are all it holds:
-// no sentence and no pasted text. A store that does not read degrades to
-// empty, its raw value copied to `yomu-site:words:damaged` first, as the
-// kanji store does.
+// { saved: { id: { w, r, g, at, box, due, reviews, lapses, from? } } }, `id`
+// the cyrb53 of the written form and the reading (wordId), so a key is short
+// and ASCII, which sync needs. A dictionary word and its gloss are what sync
+// sends. `from` is the sentence the word was saved from, { before, word,
+// after } as history-text.js sentenceAt clips it (the iOS app passes it; at
+// most MAX_SENTENCE characters): it stays on the device, since sync's row
+// (sync-rules.js cleanWordSaved) takes the named fields only and a synced
+// change keeps it (adopt), and it travels in a backup file. A store that
+// does not read degrades to empty, its raw value copied to
+// `yomu-site:words:damaged` first, as the kanji store does.
 //
 // A review holds kanji and words together (events-kanji.js): a word's place
 // in its queue is REVIEW_PREFIX and its id, which no kanji (one character)
 // can be.
 
 import { createStore, safeGet, safeSet } from './neorgon-persist.js';
-import { cyrb53 } from './history-text.js';
+import { cyrb53, MAX_AROUND } from './history-text.js';
 import { cleanGloss, MAX_GLOSS } from './sync-rules.js';
 import { baseReading } from './conjugate.js';
 import {
@@ -37,6 +41,8 @@ export const MAX_SAVED_WORDS = 2000;
 export const MAX_FIELD = 24;
 export { cleanGloss, MAX_GLOSS };
 export const REVIEW_PREFIX = 'w:';
+/** The longest sentence a saved word keeps, before, word and after together: sentenceAt's clip. */
+export const MAX_SENTENCE = MAX_AROUND;
 
 const DAY = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
 const KANA = /^[ぁ-ゖァ-ヺー]+$/;
@@ -62,13 +68,28 @@ export function wordId(w, r) {
   return cyrb53(`${w}\u0000${r}`).toString(36);
 }
 
+/**
+ * The sentence a word was saved from as a saved word keeps it, or null:
+ * { before, word, after }, three strings on one line, the word not empty,
+ * at most MAX_SENTENCE characters together. Anything else is no sentence,
+ * and the word is kept without one.
+ */
+export function cleanSentence(v) {
+  if (!isObject(v) || ![v.before, v.word, v.after].every((x) => typeof x === 'string')) return null;
+  const all = v.before + v.word + v.after;
+  if (!v.word || /[\r\n]/.test(all) || len(all) > MAX_SENTENCE) return null;
+  return { before: v.before, word: v.word, after: v.after };
+}
+
 /** A saved word as stored, or null. */
 export function cleanWord(v) {
   if (!isObject(v) || typeof v.w !== 'string' || typeof v.r !== 'string') return null;
   if (!v.w || !v.r || len(v.w) > MAX_FIELD || len(v.r) > MAX_FIELD || !KANA.test(v.r)) return null;
   if (!Number.isFinite(v.at) || v.at <= 0 || !Number.isInteger(v.box) || v.box < 0 || v.box > TOP_BOX) return null;
   if (!DAY.test(v.due) || !isCount(v.reviews) || !isCount(v.lapses)) return null;
-  return { w: v.w, r: v.r, g: cleanGloss(v.g), at: v.at, box: v.box, due: v.due, reviews: v.reviews, lapses: v.lapses };
+  const rec = { w: v.w, r: v.r, g: cleanGloss(v.g), at: v.at, box: v.box, due: v.due, reviews: v.reviews, lapses: v.lapses };
+  const from = cleanSentence(v.from);
+  return from ? { ...rec, from } : rec;
 }
 
 /** A plain data object from whatever was stored: `dropped` what was left out, `damaged` not a store at all. */
@@ -85,9 +106,13 @@ export function validate(raw) {
   return { data, dropped, damaged: false };
 }
 
-/** Saved now, in box 0, due today. Returns its id, or null when it was saved already, is no word, or the list is full. */
-export function saveWord(data, { w, r, g } = {}, now) {
-  const rec = cleanWord({ w, r, g, at: +now, box: 0, due: dayOf(now), reviews: 0, lapses: 0 });
+/**
+ * Saved now, in box 0, due today, with the sentence it was saved from when
+ * one is given (`from`, sentenceAt's shape). Returns its id, or null when it
+ * was saved already, is no word, or the list is full.
+ */
+export function saveWord(data, { w, r, g, from } = {}, now) {
+  const rec = cleanWord({ w, r, g, from, at: +now, box: 0, due: dayOf(now), reviews: 0, lapses: 0 });
   if (!rec) return null;
   const id = wordId(rec.w, rec.r);
   if (data.saved[id] || Object.keys(data.saved).length >= MAX_SAVED_WORDS) return null;
@@ -128,7 +153,8 @@ export function listWords(data) {
 /**
  * A backup's words merged in: a word not here is added, one here keeps the
  * schedule with more reviews behind it and the earlier save, as a kanji's
- * does (kanji-backup.js mergeInto). Returns how many were added and updated.
+ * does (kanji-backup.js mergeInto), and the sentence it has here, else the
+ * backup's. Returns how many were added and updated.
  */
 export function mergeWords(data, list) {
   const sum = { added: 0, updated: 0, full: 0 };
@@ -145,6 +171,9 @@ export function mergeWords(data, list) {
     }
     const lead = rec.reviews > had.reviews ? rec : had;
     const next = { ...lead, g: had.g || rec.g, at: Math.min(had.at, rec.at), lapses: Math.max(had.lapses, rec.lapses) };
+    const from = had.from || rec.from;
+    if (from) next.from = from;
+    else delete next.from;
     if (JSON.stringify(next) !== JSON.stringify(had)) { data.saved[id] = next; sum.updated += 1; }
   }
   return sum;
@@ -221,10 +250,18 @@ export function openWords({ store = createStore({ key: KEY, version: VERSION }),
       commit(true, { type: 'import', ids });
       return sum;
     },
-    /** What sync decided: per id a record, or null to remove it, read through this store's own validation. */
+    /**
+     * What sync decided: per id a record, or null to remove it, read through
+     * this store's own validation. Sync never carries a sentence, so a word
+     * kept here keeps the one it has.
+     */
     adopt(changes = {}) {
       const raw = { saved: { ...data.saved } };
-      for (const [id, rec] of Object.entries(changes)) { if (rec) raw.saved[id] = rec; else delete raw.saved[id]; }
+      for (const [id, rec] of Object.entries(changes)) {
+        if (!rec) { delete raw.saved[id]; continue; }
+        const from = data.saved[id] && data.saved[id].from;
+        raw.saved[id] = from && !rec.from ? { ...rec, from } : rec;
+      }
       data = validate(raw).data;
       return commit(true, { type: 'sync' });
     },

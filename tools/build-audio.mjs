@@ -64,6 +64,8 @@ const REJECTS = path.join(SITE, '.forge', 'audio-rejects');
 const HEARD = path.join(SITE, 'tools', 'audio-heard.json');
 const LISTEN = path.join(SITE, '.forge', 'audio-listen.html');
 // Bump when finish() changes what a clip sounds like, so every clip is remade.
+// Beat shaping (finish's `beat`) was not a bump: tools/tighten-beats.mjs
+// re-finished the kept beats in place, where a bump would remake every clip.
 const FINISH_VERSION = 1;
 // Credits per character, measured on eleven_v4 for Japanese (11 characters
 // cost 5); only the dry run's estimate uses it, the real cost is counted.
@@ -207,7 +209,7 @@ async function makeClip(job, ctx) {
     ctx.spent += credits;
     let mp3;
     let seconds = 0;
-    try { ({ mp3, seconds } = finish(pcm)); } catch (err) {
+    try { ({ mp3, seconds } = finish(pcm, { beat: line.kind === 'kana' ? line.kana : null })); } catch (err) {
       tries.push({ sent, why: err.message });
       rec = { sig, key: line.key, kind: line.kind, sent, seed, attempt, takes: taken + attempt + 1, ok: false, why: err.message, tries };
       continue;

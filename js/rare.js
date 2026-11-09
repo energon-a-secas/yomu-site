@@ -208,8 +208,12 @@ function nameFits(j, sp) {
   return chars(next.s).length > 1 || AFTER_NAME.has(next.cls);
 }
 
-/** The rare words spelled `s` the second phase could place: no particle or copula. */
-function wordsSpelled(s, dict) {
+/**
+ * The rare words spelled `s` the second phase could place: no particle or
+ * copula. The first is the one a name's `also` is (js/spanish.js reads it
+ * again to say it in Spanish).
+ */
+export function wordsSpelled(s, dict) {
   return (dict.rare(s) || []).filter((r) => !/\b(prt|cop)\b/.test(String(r.p)));
 }
 

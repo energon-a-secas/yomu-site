@@ -16,6 +16,7 @@ import { LOAN_NOTES } from '../../js/notes-loan.js';
 import { GENKI_MAP, toKata, toHira, hasKanji, beats, readingKana, readingRomaji } from '../../js/kana.js';
 import { audioKey, wordKey, clipId } from '../../js/audio.js';
 import { analyze } from '../../js/analyze.js';
+import { loadJlpt } from '../../js/levels.js';
 
 export const KINDS = Object.freeze(['sound', 'kana', 'phrase', 'note', 'word', 'common', 'reading', 'kanji']);
 
@@ -28,6 +29,14 @@ export const WORD_KINDS = Object.freeze(new Set(['word', 'common', 'reading', 'k
 // bands 2 and 3 are: another voice borrows Clear's clip (js/audio.js
 // clipByKeys), and a page holds thousands of words a fourth voice would cost.
 export const KANJI_PAGE_VOICES = Object.freeze(['clear']);
+
+// The kanji whose readings were recorded first (Naninani 1.2.0), by JLPT
+// study level: the on and kun readings a kanji page says (KANJIDIC, as
+// js/kana.js readingKana gives them), each filed under its kana, which is
+// the key the page plays. Clear alone records them; any other voice borrows
+// its clip (js/audio.js clipByKeys).
+export const READING_LEVELS = Object.freeze(['n5', 'n4', 'n3']);
+const READING_VOICES = Object.freeze(['clear']);
 
 // Which voices record the common words of each frequency band (q, 1 the most
 // frequent): band 1 in every voice, bands 2 and 3 in Clear alone, whose clip any
@@ -263,6 +272,37 @@ export function kanjiPageLines(dataDir) {
 }
 
 /**
+ * Every reading of the kanji in `levels`, easiest level first, one line per
+ * kana: 日 gives にち and じつ; its ひ is a beat, recorded already. Read from
+ * the committed JLPT list and KANJIDIC shards.
+ */
+export async function readingLines(dataDir, levels = READING_LEVELS) {
+  const site = path.dirname(dataDir);
+  const jlpt = await loadJlpt(async (src) => JSON.parse(fs.readFileSync(path.join(site, src), 'utf8')));
+  const kanjiDir = path.join(dataDir, 'kanji');
+  const readings = new Map();
+  for (const f of fs.readdirSync(kanjiDir).filter((name) => /^k\d+\.json$/.test(name))) {
+    const doc = JSON.parse(fs.readFileSync(path.join(kanjiDir, f), 'utf8'));
+    for (const [ch, rec] of Object.entries(doc.entries || {})) readings.set(ch, [...(rec.on || []), ...(rec.kun || [])]);
+  }
+  const out = [];
+  const seen = new Set();
+  for (const level of levels) {
+    for (const ch of jlpt[level] || []) {
+      for (const reading of readings.get(ch) || []) {
+        const kana = readingKana(reading);
+        if (!rangeOk(beats(kana).length)) continue;
+        const l = wordLine('reading', kana, kana, { tts: kana, kanji: ch, level, voices: [...READING_VOICES] });
+        if (seen.has(l.key)) continue;
+        seen.add(l.key);
+        out.push(l);
+      }
+    }
+  }
+  return out;
+}
+
+/**
  * The whole script with its words, one line per key, in priority order: the
  * lines, then the words of Yomu's text, then the common words by band, then
  * the kanji pages' readings and words. A key a line already holds is not
@@ -273,6 +313,12 @@ export async function fullScript({ library, dict, dataDir, kinds = KINDS }) {
   const extra = [];
   if (kinds.includes('word')) extra.push(...await wordLines(lines, dict));
   if (kinds.includes('common')) extra.push(...commonLines(dataDir));
+  // Two scripts of readings met when Naninani 1.2.0 merged (docs/AUDIO.md,
+  // The kanji pages): the N5 to N3 readings were recorded from readingLines,
+  // sent as their kana, so a key they hold keeps that line and its record;
+  // the kanji pages' lines add every other reading, sent in katakana, and
+  // the pages' words.
+  if (kinds.includes('reading')) extra.push(...await readingLines(dataDir));
   if (kinds.includes('reading') || kinds.includes('kanji')) extra.push(...kanjiPageLines(dataDir).filter((l) => kinds.includes(l.kind)));
   const taken = new Set(lines.flatMap((l) => l.keys));
   const out = lines.filter((l) => kinds.includes(l.kind));

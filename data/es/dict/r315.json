@@ -1,0 +1,14 @@
+{
+"_licence": {"source":"JMdict and KANJIDIC Spanish translations, Electronic Dictionary Research and Development Group","url":"https://www.edrdg.org/edrdg/licence.html","spdx":"CC-BY-SA-4.0","derived":true,"id":"edrdg-spanish","acknowledgement":"This site uses the JMdict/EDICT and KANJIDIC dictionary files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence. The Spanish meanings are their Spanish translations: KANJIDIC's Spanish kanji meanings were compiled by Francisco Gutierrez and provided by Gabriel Sanroman, and JMdict's Spanish glosses are the work of their compilers, who hold their copyright. The Spanish meanings of a few common words, which JMdict has none of or has in error, were written for Yomu.","links":["https://www.edrdg.org/edrdg/licence.html","https://www.edrdg.org/kanjidic/kanjidic_doc_legacy.html","https://github.com/scriptin/jmdict-simplified"],"screen":"required","upstream":["jmdict-simplified jmdict-spa 3.6.2+20260831182826","jmdict-simplified kanjidic2-all 3.6.2+20260831182826","jmdict-simplified jmdict-eng 3.6.2+20260831182826"],"inputs":[{"id":"authored","source":"Written for Yomu: the Spanish meanings in tools/lib/spanish-words.mjs","url":"https://creativecommons.org/publicdomain/zero/1.0/","spdx":"CC0-1.0","screen":"none","use":"the Spanish of a few common words JMdict has none of, or has in error"}],"generated_by":"tools/build-spanish.mjs","generated_at":"2026-10-01"},
+"format": "yomu-dict-es/1",
+"of": {"src":"data/dict/r315.json","sha256":"ccc7fbf3b73d951fbe0790db9cc64c264e27371868bc7c12f54edf9844419423"},
+"entries": {
+"ｅｔｃ．": [["etcétera"]],
+"ｆ": [["etiqueta añadida a equipo industrial cuando se descubren…","EFF"]],
+"ｈ": [["indecente, obsceno"]],
+"ｈｔｔｐｄ": [["httpd"]],
+"ｘ": [["castigo, tache"],["equis, x"]],
+"ﾀﾋぬ": [["morir"]],
+"ﾀﾋ亡": [["muerte, mortalidad (pérdida de vidas humanas)"]]
+}
+}
