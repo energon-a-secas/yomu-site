@@ -7,9 +7,11 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
-  wordId, cleanWord, cleanGloss, validate, saveWord, unsaveWord, dueWords, nextDueWords, listWords, mergeWords,
+  wordId, cleanWord, cleanGloss, cleanSentence, validate, saveWord, unsaveWord, dueWords, nextDueWords, listWords, mergeWords,
   openWords, dueAll, nextDueAll, answerAny, wordOfReview, isWordReview, REVIEW_PREFIX, MAX_SAVED_WORDS, MAX_GLOSS,
+  MAX_SENTENCE,
 } from '../js/word-store.js';
+import { sentenceAt } from '../js/history-text.js';
 import { createReview, show, answer, summary } from '../js/review.js';
 
 const DAY = 24 * 3600 * 1000;
@@ -105,6 +107,46 @@ test('a backup merges by more reviews, the earlier save, the higher lapses', () 
   assert.deepEqual(sum, { added: 1, updated: 1, full: 0 });
   assert.deepEqual(data.saved[id], { ...eat, at: T0, box: 3, due: '2026-10-30', reviews: 4, lapses: 2 });
   assert.deepEqual(mergeWords(data, [data.saved[id]]), { added: 0, updated: 0, full: 0 }, 'the same backup twice changes nothing');
+});
+
+test('a word keeps the sentence it was saved from; a sentence that is not one is left out, the word kept', () => {
+  const rain = { w: '雨', r: 'あめ', g: 'rain' };
+  const from = sentenceAt('今日は雨が降っています。', 3, '雨');
+  const data = { saved: {} };
+  const id = saveWord(data, { ...rain, from }, T0);
+  assert.deepEqual(data.saved[id].from, { before: '今日は', word: '雨', after: 'が降っています。' });
+  assert.deepEqual(listWords(data)[0].from, from, 'the list, and so a backup, carries it');
+  assert.equal(saveWord({ saved: {} }, rain, T0) !== null, true, 'a word saved without one has none');
+  assert.equal(Object.hasOwn(listWords(validate({ saved: { [wordId('雨', 'あめ')]: { ...rain, at: T0, box: 0, due: '2026-10-16', reviews: 0, lapses: 0 } } }).data)[0], 'from'), false);
+  for (const bad of [null, 'a sentence', { before: '', word: '', after: 'x' }, { before: 'a\n', word: '雨', after: '' },
+    { before: 'あ'.repeat(MAX_SENTENCE), word: '雨', after: '' }, { before: 1, word: '雨', after: '' }]) {
+    assert.equal(cleanSentence(bad), null);
+    const rec = cleanWord({ ...rain, from: bad, at: T0, box: 0, due: '2026-10-16', reviews: 0, lapses: 0 });
+    assert.ok(rec && !Object.hasOwn(rec, 'from'), 'the word is kept without it');
+  }
+});
+
+test('a backup keeps the sentence a word has here, else brings its own; a synced change keeps it', () => {
+  const rain = { w: '雨', r: 'あめ', g: 'rain' };
+  const here = { before: '今日は', word: '雨', after: 'です。' };
+  const theirs = { before: '明日も', word: '雨', after: '？' };
+  const data = { saved: {} };
+  const id = saveWord(data, rain, T0);
+  mergeWords(data, [{ ...rain, from: theirs, at: T0, box: 2, due: '2026-10-20', reviews: 3, lapses: 0 }]);
+  assert.deepEqual(data.saved[id].from, theirs, 'a word with none takes the backup\'s');
+  data.saved[id].from = here;
+  mergeWords(data, [{ ...rain, from: theirs, at: T0, box: 4, due: '2026-11-20', reviews: 9, lapses: 0 }]);
+  assert.deepEqual(data.saved[id].from, here, 'the one here wins, whichever schedule leads');
+  assert.equal(data.saved[id].reviews, 9);
+
+  const m = memory();
+  const store = openWords({ store: m.store, readRaw: () => null, keepRaw: () => {} }).load();
+  store.save({ ...rain, from: here }, T0);
+  store.adopt({ [id]: { ...rain, at: T0, box: 1, due: '2026-10-17', reviews: 1, lapses: 0 } });
+  assert.deepEqual(store.byId(id).from, here, 'sync never carries a sentence, so the word keeps its own');
+  assert.equal(store.byId(id).reviews, 1);
+  store.adopt({ [id]: null });
+  assert.equal(store.byId(id), null, 'and a removal still removes the word');
 });
 
 test('one review holds the due kanji, then the due words, and each answer moves its own schedule', () => {

@@ -49,7 +49,7 @@ import { MAX_TEXT, normalizeText, textKey, clipText } from './history-text.js';
 
 // The text helpers live in history-text.js; every module and test that
 // imports them from here still does.
-export { MAX_TEXT, MAX_AROUND, normalizeText, cyrb53, textKey, clipText, sentenceAround } from './history-text.js';
+export { MAX_TEXT, MAX_AROUND, normalizeText, cyrb53, textKey, clipText, sentenceAround, sentenceAt } from './history-text.js';
 
 export const KEY = 'yomu-site:history';
 export const VERSION = 1;

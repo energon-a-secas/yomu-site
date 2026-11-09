@@ -222,6 +222,18 @@ the backup carries them as `words` (only when there is one), merged on
 Import by more reviews, the earlier save and the higher lapses
 (`mergeWords`).
 
+**A word saved in a text keeps its sentence** (Naninani 1.2.0, the owner's
+note on build 15): `from`, `{ before, word, after }`, the sentence holding
+the word as the reader saw it, clipped to 60 characters with the word whole
+(`history-text.js sentenceAt`, by the token's UTF-16 `start` and `surface`).
+The iOS app passes it from its word sheet and shows it under the word in My
+words, a tap reading it again. It never reaches the account: sync's row takes
+the named fields only (`sync-rules.js cleanWordSaved`), and a change sync
+brings keeps the sentence the word has here (`adopt`). A backup carries it,
+and Import keeps the sentence a word has here, else the backup's. A sentence
+that is not one (a line break, too long, an empty word) is left out and the
+word kept. The site's own bookmark saves no sentence yet.
+
 **Review schedule:** saved is box 0, due that day; Got it moves up one box,
 due in 1, 2, 4, 8, 16 days (top box repeats 16); Again is box 1, due tomorrow,
 and comes round again in the same review as practice that does not move the

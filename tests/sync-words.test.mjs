@@ -105,6 +105,28 @@ test('a word saved on one device reaches another, and an unsave reaches it too',
   assert.ok(b.words.isSaved(eat.w, eat.r));
 });
 
+test('the sentence a word was saved from never reaches the account, and a word synced back keeps it', async () => {
+  const server = fakeDb();
+  const from = { before: '今日は', word: '食べる', after: 'の？' };
+  const a = device(server, 'user_a', { at: 0 });
+  a.words.save({ ...eat, from }, a.now());
+  await a.signIn();
+  const pulled = await fakeClient(server, 'user_a').query('sync:pullWords', { cursor: null });
+  assert.equal(pulled.rows.length, 1);
+  assert.ok(!JSON.stringify(pulled.rows).includes('今日は'), 'the account holds the word, not the sentence');
+  const b = device(server, 'user_a', { at: 1 });
+  await b.signIn();
+  assert.ok(b.words.isSaved(eat.w, eat.r));
+  assert.equal(b.words.byId(KEY).from, undefined, 'another device gets the word alone');
+  b.tick();
+  b.words.answer(KEY, true, '2023-11-15');
+  await b.sync.flush();
+  a.tick(2);
+  await a.sync.sync('same');
+  assert.equal(a.words.byId(KEY).reviews, 1, 'A took B\'s review');
+  assert.deepEqual(a.words.byId(KEY).from, from, 'and kept its sentence');
+});
+
 test('a first sign-in holding only saved words is asked when the account holds words, and Use leaves them behind', async () => {
   const server = fakeDb();
   const a = device(server, 'user_a', { at: 0 });

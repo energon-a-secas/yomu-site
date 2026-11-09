@@ -21,7 +21,7 @@ function phone() {
   kanji.saved['雨'] = { ...kanji.saved['雨'], box: 2, due: '2026-11-09', reviews: 3 };
   recordReading(kanji, ['雨', '今'], null, TODAY);
   const words = validateWords(null).data;
-  saveWord(words, { w: '雨', r: 'あめ', g: 'rain' }, NOW);
+  saveWord(words, { w: '雨', r: 'あめ', g: 'rain', from: { before: '今日は', word: '雨', after: '。' } }, NOW);
   const d = library.dialogues[0];
   const book = new PhraseBook(library);
   book.save('今日は雨。', null, NOW);
@@ -49,6 +49,7 @@ test('a backup round-trips everything a learner keeps into an empty phone', () =
   assert.deepEqual(r.kanji.saved, docs.kanji.saved);
   assert.deepEqual(r.kanji.seen, docs.kanji.seen);
   assert.deepEqual(listWords(r.words), listWords(docs.words));
+  assert.deepEqual(listWords(r.words)[0].from, { before: '今日は', word: '雨', after: '。' }, 'with the sentence it was saved from');
   assert.deepEqual(r.phrases, docs.phrases);
   assert.deepEqual(r.practice, docs.practice);
   assert.deepEqual(r.sum.practice, ['kana-games', 'kana-review']);
