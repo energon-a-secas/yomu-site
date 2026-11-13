@@ -238,7 +238,8 @@ is 鯖, and its slang sense "server" read as v written バ).
 
 **Gaps are drawn, never typed.** The Display row's Gaps (Off by default)
 marks every edge between two words; `js/gaps.js` decides each edge's one
-reason from the tokens alone and `render-gaps.js` draws it. A gap holds no
+reason from the tokens alone, `gap-reasons.js` words it (no DOM, shared with
+the iOS app) and `render-gaps.js` draws it. A gap holds no
 text node (copying the reading copies nothing it adds), takes no focus, and
 the Word panel lists the gaps as text for a keyboard and a screen reader.
 Read `docs/READER.md` before changing them.

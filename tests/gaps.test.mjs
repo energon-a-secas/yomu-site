@@ -13,7 +13,8 @@ import {
   extraReason, wordsOf, pairAt, besideOf,
 } from '../js/gaps.js';
 import { reasonKey, reasonNodes } from '../js/render-gaps.js';
-import { STRINGS, useLang } from '../js/strings.js';
+import { reasonText } from '../js/gap-reasons.js';
+import { STRINGS, useLang, ui } from '../js/strings.js';
 import { run } from './helpers/disk.mjs';
 
 const w = (surface, extra = {}) => ({ kind: 'word', surface, confidence: 'dict', ...extra });
@@ -93,6 +94,24 @@ test('a guess beside a gap is said in words whatever reason won, and only once',
   useLang('es');
   assert.equal(say({ why: 'script', from: 'kanji', to: 'hiragana', guess: true }), 'Cambia la escritura: de kanji a hiragana; aquí la lectura es una suposición.');
   useLang('en');
+});
+
+test('a reason as text (gap-reasons.js, for the iOS app) is the string the page draws, in both languages', () => {
+  // Reasons that name no word draw as plain strings, so the page's own nodes compare directly.
+  const say = (g) => reasonNodes(g).map((n) => (typeof n === 'string' ? n : n.textContent)).join('');
+  for (const lang of ['en', 'es']) {
+    useLang(lang);
+    for (const g of [{ why: 'script', from: 'hiragana', to: 'katakana', guess: true }, { why: 'script', from: 'kanji', to: 'hiragana' }, { why: 'guess', guess: true }]) {
+      assert.equal(reasonText(g), say(g), `${lang} ${JSON.stringify(g)}`);
+    }
+    // Those that name words of the text say them in place of the string's slots.
+    assert.equal(reasonText({ why: 'particle', w: 'は' }), ui('gapParticle', { w: 'は' }));
+    assert.equal(reasonText({ why: 'name', w: 'トム', o: 'Tom' }), ui('gapNameO', { w: 'トム', o: 'Tom' }));
+    assert.equal(reasonText({ why: 'word', w: '話して', f: 'form', base: '話す' }), ui('gapWordForm', { w: '話して', base: '話す' }));
+  }
+  useLang('en');
+  assert.equal(reasonText({ why: 'particle', w: 'を' }), 'を is a particle, a word of its own.');
+  assert.equal(reasonText(null), '');
 });
 
 test('where a word has no gap, the Word panel says what stands there: the line, punctuation, a space, Latin letters', async () => {

@@ -23,7 +23,9 @@ actions), `js/events-odd.js` (Odd one out's grid and clock),
 `js/play-twins.js` (the authored content, CC0), all run by
 `tests/play.test.mjs`; Where are the spaces? is `js/play-spaces.js` (no
 DOM, run by `tests/spaces.test.mjs`), `js/render-spaces.js` and
-`js/events-spaces.js`. The section is `#play` in `index.html`; the
+`js/events-spaces.js`. Its reasons are worded by `js/gap-reasons.js` (no
+DOM), which `render-gaps.js` draws as nodes and the iOS app (Naninani 1.3.0)
+shows as text, so both say the same sentence. The section is `#play` in `index.html`; the
 header's Play link moves into the kit's ⋯ menu on a phone (with it kept, the
 Spanish header ran 2px past 390), and the embed bar has one beside My kanji.
 
