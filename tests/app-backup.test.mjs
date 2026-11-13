@@ -129,6 +129,8 @@ test('only the known practice documents travel, and only as objects', () => {
   assert.ok(PRACTICE.every((name) => /^[a-z-]+$/.test(name)));
   // Timed writing's bests and recent results travel too (writing-rush.js).
   assert.ok(PRACTICE.includes('writing-rush'));
+  // The app's Where are the spaces? keeps its best in a play-store.js document.
+  assert.ok(PRACTICE.includes('play'));
 });
 
 test('a damaged, foreign, empty or oversized file is refused before anything changes', () => {

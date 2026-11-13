@@ -21,7 +21,7 @@ import { validate as validateWords, listWords, mergeWords } from './word-store.j
 import { PhraseBook } from './phrase-book.js';
 
 /** The practice documents a backup carries, by the name of the file the app keeps each in. */
-export const PRACTICE = Object.freeze(['kana-games', 'story', 'kana-review', 'kana-snacks', 'kanji-cards', 'kana-to-kanji', 'writing-rush']);
+export const PRACTICE = Object.freeze(['kana-games', 'story', 'kana-review', 'kana-snacks', 'kanji-cards', 'kana-to-kanji', 'writing-rush', 'play']);
 
 /**
  * The backup of everything a learner keeps. `kanji` and `words` are My
