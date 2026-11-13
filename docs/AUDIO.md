@@ -328,9 +328,14 @@ recorded from them keep their line and their record, and `kanjiPageLines`
 adds the rest. They differ in what they send: the recorded readings went out
 as their kana, while the kanji pages' script sends katakana and checks each
 take against `readingRomaji`, because the analyzer reads 131 of the 4,746
-distinct bare readings otherwise (a bare へき is へ and き). Whether any of the
-767 is among those 131 is not checked yet; a listening pass over them before
-the next paid run settles it.
+distinct bare readings otherwise (a bare へき is へ and き). Checked on 13
+November 2026 from `tools/audio-made.json`, with no API call: of the 767, 753
+were accepted against their own romaji and 5 more by their kana; none says
+another word's sound. Of the 9 left, 4 are right as recorded and differ only
+in how the two romaji write a verb's う or a seam (おもう, ととのう, まよう,
+たていと), and 5 end in a small っ (じっ, かっ, がっ, おっ, ほっ) and were
+kept saying the beat without its stop, which the kanji pages' script would
+not record at all. They are left in place for the owner's ear.
 
 ## Beat shaping
 
@@ -367,6 +372,21 @@ balance fell about 1.6 times faster than the headers, as on the word runs, so
 quote by the balance. A 60-clip pilot (108 credits) came first. The library
 now has **13,937 voice clips, 70.27 MB**. N2 and N1 (1,054 more readings by
 the same count) wait for an approved budget.
+
+**13 November 2026, the month's last credits.** The owner confirmed the four
+voices and approved the run ("For the voice I approve"); the ceiling was what
+the account had left above the tool's 2,000 reserve, since the plan allows no
+overage and the month's credits lapse on 17 November. A 60-clip pilot, then
+four bounded batches, the balance read between them, in the kanji pages'
+order (the most frequent kanji first), Clear only: **686 readings kept and 66
+rejected** of 752 tried (the transcriber read ひたい as したい, になう as
+似合う, かおる as 薫 read くん). The account fell from 4,676 to 2,345:
+**2,331 credits**, against 1,367 by the TTS headers, 1.7 times as on the
+earlier runs. Nothing was pruned. The library now has **14,623 voice clips
+(70.2 MB of MP3 by file size)** and 10,091 keys. Of the reading kind, 2,384
+clips remain to make (a dry run's count; the rejected are not tried again
+without `--retry-failed`), and none of the kanji pages' 7,198 words is recorded:
+they wait for the next month's credits and a ceiling.
 
 ## The page
 
