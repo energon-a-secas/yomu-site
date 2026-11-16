@@ -100,7 +100,7 @@ somewhere else (Clerk's own profile menu) leaves its rows here until a
 `user.deleted` webhook is added, and a browser still signed in for the
 minute its token lasts can push once more after the erase: both are open
 (`tests/sync-erase.test.mjs` holds the rest). On the dev deployment since
-2026-11-14; production waits for the owner's word.
+2026-11-14, and on production since 2026-11-16, at the owner's word.
 
 ## The backend
 
