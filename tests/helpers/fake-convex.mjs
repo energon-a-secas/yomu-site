@@ -69,6 +69,10 @@ export function fakeDb() {
           return {
             first: async () => copy(rows()[0]),
             collect: async () => rows().map(copy),
+            take: async (n) => {
+              if (!Number.isInteger(n) || n < 0) throw new Error(`take(${n})`);
+              return rows().slice(0, n).map(copy);
+            },
             paginate: async ({ numItems, cursor }) => {
               const all = rows();
               const start = cursor ? Number(cursor) : 0;
@@ -106,6 +110,7 @@ const HANDLERS = {
   'sync:push': model.push,
   'sync:pullWords': model.pullWords,
   'sync:pushWords': model.pushWords,
+  'sync:erase': model.erase,
 };
 
 /**

@@ -91,6 +91,17 @@ Not now syncs nothing and asks again later.
 - After an account switch the old account keeps what it had: nothing
   changed here since its last sync with it is sent to it.
 
+**Deleting an account erases its rows here first.** `sync:erase` deletes
+everything the caller holds in the six tables, `ERASE_BATCH` rows a call
+(`done` false means call again; `js/sync.js eraseAll` loops), and leaves no
+tombstone, since nobody is left to sync with. No page calls it: the iOS app's
+Delete account does, then deletes the Clerk user. An account deleted from
+somewhere else (Clerk's own profile menu) leaves its rows here until a
+`user.deleted` webhook is added, and a browser still signed in for the
+minute its token lasts can push once more after the erase: both are open
+(`tests/sync-erase.test.mjs` holds the rest). On the dev deployment since
+2026-11-14; production waits for the owner's word.
+
 ## The backend
 
 Optional and per person: a learner who signs in keeps My kanji, the saved
