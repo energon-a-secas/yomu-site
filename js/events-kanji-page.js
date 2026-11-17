@@ -15,12 +15,15 @@ import { ui } from './strings.js';
 import { fetchJson, kanjiInfo } from './reader.js';
 import { myKanji } from './kanji-store.js';
 import { createPageData } from './kanji-page-data.js';
-import { kanjiPageNodes } from './render-kanji-page.js';
+import { kanjiPageNodes, markSay, SPEECH_NOTE_ID } from './render-kanji-page.js';
 import { openDialog, bindDialog } from './dialogs.js';
 import { afterChange, openReader } from './events-kanji.js';
 import { loadText } from './events-read.js';
-import { speak, canSpeak } from './speech.js';
-import { toHira, isKana, isHiragana } from './kana.js';
+import {
+  speak, canSay, sayKnown, recordedOn, speechStatus,
+} from './speech.js';
+import { speechReason } from './render-chrome.js';
+import { isKana, isHiragana } from './kana.js';
 import { state, rate } from './state.js';
 import { loadLookalikes } from './play-data.js';
 import { loadJlpt } from './levels.js';
@@ -100,22 +103,49 @@ function prev() {
   setStep(kp.step <= 1 ? 0 : kp.step - 1);
 }
 
-/** Say a kanji by its first reading (on before kun), a kana as itself. */
-function say(b) {
-  const ch = current();
-  if (!ch || !canSpeak() || b.getAttribute('aria-disabled') === 'true') return;
-  const info = kp.last && kp.last.info;
-  const first = info ? [...(info.on || []), ...(info.kun || [])][0] : null;
-  speak(first ? toHira(String(first).replace(/[.-]/g, '')) : ch, { rate: rate(state) });
+// ── Saying a reading or a word ────────────────────────────────────────────
+//
+// The page's readings and words are Yomu's own text: the gate is the one
+// events-say.js gives a note's examples, a recorded voice or the device's,
+// asked of each button (speech.js canSay). A button whose text has a clip in
+// the chosen voice (or Clear's, which it borrows) plays on a device with no
+// Japanese voice; one that has neither stays disabled, and the speech note
+// under Say it says why.
+
+/** Whether a say button's item ({ text, lookup }) can be said now. */
+const sayable = (item) => !!item && canSay(item.text, item.lookup);
+
+/** Why a say button cannot be pressed: no recording and no Japanese voice, or no voice at all. */
+function sayReason() {
+  return recordedOn() ? ui('kpSayUnrecorded') : speechReason(speechStatus());
+}
+
+/** Draw each say button as the gate answers now, in place, and the speech note with them. */
+function paintSay() {
+  markSay(document.querySelectorAll('#kanji-dialog [data-act="kp-say-item"]'), $(SPEECH_NOTE_ID), kp.sounds, sayable, sayReason());
 }
 
 /**
- * Say one reading or word, marking its button while the voice speaks, so
- * a press is seen as well as heard.
+ * A page drawn before its answers were known is marked again once they are
+ * (speech.js sayKnown): when the device's voice list arrives, which on Chrome
+ * can be after the page is drawn, and, with a recorded voice and no device
+ * voice, when the shards its buttons name have loaded, since canSay answers
+ * yes until then. The buttons no longer carry `data-speak`, so the reader's
+ * own repaint after the voices arrive (events.js) does not reach them.
+ */
+async function settleSay(token) {
+  await sayKnown(kp.sounds);
+  if (token === kp.token) paintSay();
+}
+
+/**
+ * Say what a say button holds (Say it's first reading, a reading, a word),
+ * marking the button while the voice speaks, so a press is seen as well as
+ * heard.
  */
 async function sayItem(b) {
   const item = kp.sounds[Number(b.dataset.ix)];
-  if (!item || !canSpeak() || b.getAttribute('aria-disabled') === 'true') return;
+  if (!sayable(item) || b.getAttribute('aria-disabled') === 'true') return;
   for (const el of document.querySelectorAll('#kanji-dialog .is-saying')) el.classList.remove('is-saying');
   b.classList.add('is-saying');
   await speak(item.text, { rate: rate(state), lookup: item.lookup });
@@ -136,7 +166,8 @@ function paint(view) {
     ch,
     back: kp.stack.length > 1 ? kp.stack[kp.stack.length - 2] : null,
     mine: { saved: mine.isSaved(ch), n: seen ? seen.n : 0 },
-    speakable: canSpeak(),
+    speakable: sayable,
+    sayReason: sayReason(),
     hand: { on: state.prefs.hand, has: hasHand(ch) },
     ...view,
   });
@@ -177,6 +208,8 @@ async function show() {
       info, infos: new Map([...infos, ...more]), paths: kp.paths, page, likes, state: 'ready',
       jlpt: (lists && lists.levelOf.get(ch)) || null,
     });
+    // A shard that fails to load leaves the buttons as they were drawn.
+    settleSay(token).catch(() => {});
   } catch (err) {
     if (token !== kp.token) return;
     if (typeof console !== 'undefined') console.warn('[yomu] kanji page', err);
@@ -221,7 +254,6 @@ export const KANJI_PAGE_ACTIONS = {
   'kp-draw': draw,
   'kp-next': next,
   'kp-prev': prev,
-  'kp-say': say,
   'kp-say-item': sayItem,
   'kp-read': (b) => {
     const w = kp.words[Number(b.dataset.ix)];

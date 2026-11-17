@@ -208,16 +208,43 @@ function stopClip() {
 }
 
 /**
+ * The gate a button that says something stands behind, as a decision with
+ * nothing read from the page: the device has a Japanese voice (`device`), or
+ * a recorded voice is chosen (`voice`) and one of `keys` has a clip in it, or
+ * in the first voice, which it borrows (audio.js clipByKeys), as speak() does.
+ * Until the index and the shards `keys` need have loaded the answer is not
+ * known, and `pending` is given instead.
+ */
+export function sayDecision({ device = false, voice = DEVICE_VOICE, audio = null, keys = [], pending = true } = {}) {
+  if (device) return true;
+  if (!voice || voice === DEVICE_VOICE) return false;
+  if (!settled(audio, keys)) return pending;
+  return !!clipByKeys(audio, keys, voice);
+}
+
+/**
  * Can `text` be said now: by a clip (once its shard has loaded), or by the
  * device. Before that, a recorded voice answers yes for Yomu's own text,
- * which is what the buttons that ask are for.
+ * which is what the buttons that ask are for; the kanji page waits for
+ * sayKnown and asks again (events-kanji-page.js).
  */
 export function canSay(text, lookup = []) {
-  if (canSpeak()) return true;
-  if (!recordedOn()) return false;
-  const keys = keysOf(text, lookup);
-  const audio = audioNow();
-  return !settled(audio, keys) || !!clipByKeys(audio, keys, chosen);
+  return sayDecision({ device: canSpeak(), voice: chosen, audio: audioNow(), keys: keysOf(text, lookup) });
+}
+
+/**
+ * Resolves once canSay's answer for each of `items` ({ text, lookup }) is
+ * the real one: the device's voice list is known (voicesReady: on Chrome it
+ * arrives up to a second and a half after the page loads), and, with a
+ * recorded voice chosen and no Japanese voice on the device, the shards their
+ * keys need have loaded. Nothing is fetched when the device can say them or
+ * no recorded voice is chosen. A shard that fails to load leaves canSay
+ * answering yes for its keys.
+ */
+export async function sayKnown(items, fetchImpl = globalThis.fetch) {
+  await voicesReady();
+  if (canSpeak() || !recordedOn() || !items.length) return;
+  await needKeys(items.flatMap((s) => keysOf(s.text, s.lookup)), fetchImpl);
 }
 
 /**
