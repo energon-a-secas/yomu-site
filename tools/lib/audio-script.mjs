@@ -13,7 +13,7 @@ import path from 'node:path';
 import { SOUND_NOTES } from '../../js/notes-sounds.js';
 import { GRAMMAR_NOTES } from '../../js/notes-grammar.js';
 import { LOAN_NOTES } from '../../js/notes-loan.js';
-import { GENKI_MAP, toKata, toHira, hasKanji, beats, readingKana, readingRomaji } from '../../js/kana.js';
+import { GENKI_MAP, SAID_AS, toKata, toHira, hasKanji, beats, readingKana, readingRomaji } from '../../js/kana.js';
 import { audioKey, wordKey, clipId } from '../../js/audio.js';
 import { analyze } from '../../js/analyze.js';
 import { loadJlpt } from '../../js/levels.js';
@@ -45,19 +45,21 @@ const READING_VOICES = Object.freeze(['clear']);
 export const COMMON_BANDS = Object.freeze({ 1: null, 2: Object.freeze(['clear']), 3: Object.freeze(['clear']) });
 
 // Every beat the reader can sound out: the plain kana, the voiced ones, the
-// small-ya, yu and yo beats, and the loanword digraphs of GENKI_MAP. ゐ and ゑ
-// are out of use; ぢ and づ are said as じ and ず, so they share those clips.
+// small-ya, yu and yo beats, and the loanword digraphs of GENKI_MAP. A beat
+// said as another (js/kana.js SAID_AS) has no clip of its own and plays that
+// beat's: を is said お, ぢ and づ じ and ず, ぢゃ ぢゅ ぢょ ぢぇ じゃ じゅ じょ
+// じぇ, and ゐ and ゑ, dropped from modern spelling but still met in names and
+// old texts, い and え. Recording them would pay for a sound Yomu already has.
 const PLAIN = [...'あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわん'];
 const VOICED = [...'がぎぐげござじずぜぞだでどばびぶべぼぱぴぷぺぽ'];
 const YOUON = ['き', 'し', 'ち', 'に', 'ひ', 'み', 'り', 'ぎ', 'じ', 'び', 'ぴ'].flatMap((k) => ['ゃ', 'ゅ', 'ょ'].map((s) => k + s));
-const SAID_AS = Object.freeze({ 'ぢ': 'じ', 'づ': 'ず', 'を': 'お' });
 
 /** Every beat with its own clip, as the reader splits it (hiragana). */
 export function beatInventory() {
   return [...PLAIN, ...VOICED, ...YOUON, ...Object.keys(GENKI_MAP)];
 }
 
-/** The beats that are said as another and so play its clip. */
+/** The beats that are said as another and so play its clip (the index's aliases, audio-index.mjs). */
 export function beatAliases() {
   return { ...SAID_AS };
 }

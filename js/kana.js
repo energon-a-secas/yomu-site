@@ -144,6 +144,26 @@ export function beats(kana) {
   return out;
 }
 
+/**
+ * The beats said as another beat, keyed in hiragana: を as お, ぢ and づ as
+ * じ and ず, ぢゃ ぢゅ ぢょ ぢぇ as じゃ じゅ じょ じぇ, and ゐ and ゑ, which
+ * modern spelling dropped but names and old texts still use, as い and え. A
+ * kana's spoken form says the beat it is said as (kana-chart.js, kana-detail.js), and
+ * the recorded voices file each under that beat's clip
+ * (tools/lib/audio-script.mjs beatAliases), so none needs a clip of its own.
+ */
+export const SAID_AS = Object.freeze({
+  'を': 'お', 'ぢ': 'じ', 'づ': 'ず',
+  'ぢゃ': 'じゃ', 'ぢゅ': 'じゅ', 'ぢょ': 'じょ', 'ぢぇ': 'じぇ',
+  'ゐ': 'い', 'ゑ': 'え',
+});
+
+/** The beat `beat` is said as (SAID_AS, in hiragana), or `beat` as given. */
+export function saidAs(beat) {
+  const hira = toHira(beat);
+  return Object.hasOwn(SAID_AS, hira) ? SAID_AS[hira] : beat;
+}
+
 const VOWELS = 'aiueo';
 
 /** The vowel a beat ends on, or null for っ, ん and ー. */
