@@ -460,8 +460,10 @@ never passes is left out, and the page uses the device's voice, unless a
 person heard one of its takes and called it right (`tools/audio-heard.json`,
 written from the page `build-audio.mjs --listen` makes, shipped by `--heard`
 with no API call). The kanji pages' readings and words are in the script, in
-Clear, and not recorded yet. `speech.js
-speak()` is the one seam; a sequence is all clips or all device. The page
+Clear: 1,453 readings are recorded and the words are not yet, so the page
+asks each say button the gate of Yomu's own text and disables one with
+neither a clip nor a device voice (docs/AUDIO.md, "The kanji page's gate").
+`speech.js speak()` is the one seam; a sequence is all clips or all device. The page
 never calls ElevenLabs. Read `docs/AUDIO.md` before changing the script, the
 check, or what is sent: a word with two readings in one entry goes as kana,
 a choice between two words does not (Yomu reads 字 as あざ).
