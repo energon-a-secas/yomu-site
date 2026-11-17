@@ -49,10 +49,10 @@ import { AUDIO_FORMAT, CLIPS_FORMAT, AUDIO_DIR, SILENCE_SRC } from '../js/audio.
 import { SITE } from './lib/emit.mjs';
 import { licenceBlock } from './lib/licence.mjs';
 import { apiKey, call, ApiError } from './lib/elevenlabs.mjs';
-import { fullScript, beatAliases, KINDS, WORD_KINDS } from './lib/audio-script.mjs';
+import { fullScript, beatAliases, kanjiPageLines, KINDS, WORD_KINDS } from './lib/audio-script.mjs';
 import { madeKey, parseHeard, heardPlan, applyHeard } from './lib/audio-heard.mjs';
 import { indexEntries } from './lib/audio-index.mjs';
-import { listenRows, listenPage } from './lib/audio-listen.mjs';
+import { listenRows, listenPage, listenGroups } from './lib/audio-listen.mjs';
 import { makeCheck } from './lib/audio-check.mjs';
 import { finish, triple, silence } from './lib/audio-finish.mjs';
 import { VOICES, MODEL, RAW_FORMAT, STT_MODEL } from './lib/audio-voices.mjs';
@@ -325,11 +325,16 @@ function writeListenPage(opts, script, made, heard) {
     return rec && rec.ok && fs.existsSync(clipPath(voice, id)) ? clipPath(voice, id) : null;
   };
   const sigOf = (voiceId, line) => signature(VOICES.find((v) => v.id === voiceId), line);
-  const rows = listenRows({ script, made, voices, sigOf, rejectsDir: opts.rejects, pageDir: path.dirname(LISTEN), keptClip });
+  // The readings in the kanji pages' order, the most frequent kanji first.
+  const readingOrder = new Map();
+  for (const l of kanjiPageLines(DATA)) if (l.kind === 'reading' && !readingOrder.has(l.key)) readingOrder.set(l.key, readingOrder.size);
+  const rows = listenRows({ script, made, voices, sigOf, rejectsDir: opts.rejects, pageDir: path.dirname(LISTEN), keptClip, readingOrder });
   fs.mkdirSync(path.dirname(LISTEN), { recursive: true });
   fs.writeFileSync(LISTEN, listenPage(rows, heard, { generated: new Date().toISOString().slice(0, 10) }));
   const takes = rows.reduce((n, r) => n + r.takes.length, 0);
   console.log(`build-audio: ${rows.length} lines, ${takes} takes to hear, in ${path.relative(SITE, LISTEN)} (open it from disk)`);
+  const many = (n, one) => `${n} ${one}${n === 1 ? '' : 's'}`;
+  for (const g of listenGroups(rows)) console.log(`  ${g.group}: ${many(g.lines, 'line')}, ${many(g.takes, 'take')}`);
 }
 
 async function main() {

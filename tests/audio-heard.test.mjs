@@ -15,7 +15,7 @@ import {
   HEARD_FORMAT, parseHeard, serializeHeard, heardPlan, applyHeard, takeHash, rejectName, madeKey,
 } from '../tools/lib/audio-heard.mjs';
 import { indexEntries } from '../tools/lib/audio-index.mjs';
-import { listenRows, listenPage } from '../tools/lib/audio-listen.mjs';
+import { listenRows, listenPage, listenGroups } from '../tools/lib/audio-listen.mjs';
 import { SITE } from './helpers/disk.mjs';
 
 const VOICES = [
@@ -179,5 +179,58 @@ test('the listening page lists the takes that wait, with the first voice\'s kept
   assert.equal(JSON.parse(data).rows[1].takes[0].heard, '</script><script>alert(1)</script>');
   assert.ok(html.includes(serializeHeard.toString()), 'the page exports with the very function the tool reads with');
   assert.ok(!/https?:\/\//.test(html), 'it loads nothing from anywhere');
+  assert.ok(!html.includes('tighten-beats'), 'every beat take here was made today, after beat shaping: nothing to shape');
   fs.rmSync(s.dir, { recursive: true, force: true });
+});
+
+test('the listening page says to shape a beat only while a beat take older than beat shaping waits, and counts them', () => {
+  const s = scratch();
+  const pageDir = path.join(s.dir, 'page');
+  // Calm's ほ takes were made on 17 October, before beat shaping; its み takes today.
+  const october = new Date('2026-10-17T03:00:00Z');
+  for (const take of [0, 1, 2]) fs.utimesSync(path.join(s.rejectsDir, rejectName('calm', 'h0', take)), october, october);
+  const rows = listenRows({ script: [...s.lines.values()], made: s.made, voices: VOICES, sigOf: s.sigOf, rejectsDir: s.rejectsDir, pageDir, keptClip: () => null });
+  assert.deepEqual(rows.map((r) => [r.key, r.takes.map((t) => !!t.unshaped)]), [['ほ', [true, true, true]], ['み', [false, false, false]]]);
+  const html = listenPage(rows, [], { generated: '2026-11-17' });
+  assert.ok(html.includes('3 of the beat takes here were made before beat shaping'), 'counted from the files\' dates');
+  assert.ok(html.includes('tools/tighten-beats.mjs'), 'and says to shape a beat shipped from one');
+  const one = listenPage([{ ...rows[0], takes: rows[0].takes.slice(0, 1) }], [], { generated: '2026-11-17' });
+  assert.ok(one.includes('1 of the beat takes here was made before beat shaping') && one.includes('it still holds its vowel'));
+  assert.ok(!listenPage(rows.slice(1), [], { generated: '2026-11-17' }).includes('tighten-beats'), 'a beat take made since needs no shaping');
+  fs.rmSync(s.dir, { recursive: true, force: true });
+});
+
+test('the listening page lists the most used first: readings by kanji page, common words by band, words, then beats', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'yomu-listen-'));
+  const rejectsDir = path.join(dir, 'rejects');
+  fs.mkdirSync(rejectsDir);
+  // In script order: the lines, their words, the common words, then the readings.
+  const script = [
+    { kind: 'sound', key: 'おばあさん', id: 's0' },
+    { kind: 'kana', key: 'ゆ', id: 'k0' },
+    { kind: 'phrase', key: 'こんにちは', id: 'p0' },
+    { kind: 'word', key: 'おば', id: 'w0' },
+    { kind: 'common', key: '雨|あめ', id: 'c1', band: 1 },
+    { kind: 'common', key: '町|まち', id: 'c3', band: 3 },
+    { kind: 'common', key: '空|そら', id: 'c2', band: 2 },
+    { kind: 'common', key: '海|うみ', id: 'c1b', band: 1 },
+    { kind: 'reading', key: 'じつ', id: 'r0', voices: ['clear'] },
+    { kind: 'reading', key: 'げつ', id: 'r1', voices: ['clear'] },
+    { kind: 'reading', key: 'じっ', id: 'r2', voices: ['clear'] },
+  ].map((l) => ({ ...l, keys: [l.key], ja: l.key }));
+  const made = {};
+  for (const l of script) {
+    made[madeKey('clear', l.id)] = failed(l.key, 'c', ['x']);
+    fs.writeFileSync(path.join(rejectsDir, rejectName('clear', l.id, 0)), `${l.id} take 0`);
+  }
+  // 月 is a more frequent page than 日's じつ; じっ is on no kanji page (a final small っ).
+  const readingOrder = new Map([['げつ', 0], ['じつ', 7]]);
+  const rows = listenRows({
+    script, made, voices: VOICES.slice(0, 1), sigOf: () => 'c', rejectsDir, pageDir: dir, keptClip: () => null, readingOrder,
+  });
+  assert.deepEqual(rows.map((r) => r.key), ['げつ', 'じつ', 'じっ', '雨|あめ', '海|うみ', '空|そら', '町|まち', 'おば', 'ゆ', 'おばあさん', 'こんにちは']);
+  assert.deepEqual(listenGroups(rows).map((g) => [g.group, g.lines, g.takes]), [
+    ['reading', 3, 3], ['common 1', 2, 2], ['common 2', 1, 1], ['common 3', 1, 1], ['word', 1, 1], ['kana', 1, 1], ['sound', 1, 1], ['phrase', 1, 1],
+  ]);
+  fs.rmSync(dir, { recursive: true, force: true });
 });
