@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 // Records Yomu's own text with ElevenLabs: the sound notes, every beat, the
 // phrase library and the notes' examples, every word of that text, the
-// dictionary's most common words, and the kanji pages' readings and words
-// (tools/lib/audio-script.mjs), in the voices of tools/lib/audio-voices.mjs.
-// docs/AUDIO.md is the account.
+// dictionary's most common words, the kanji pages' readings and words, and,
+// only when asked with `--kinds=corpus`, the example sentences' words with no
+// clip, the most frequent first (tools/measure-audio-corpus.mjs says what a
+// --limit adds) (tools/lib/audio-script.mjs), in the voices of
+// tools/lib/audio-voices.mjs. docs/AUDIO.md is the account.
 //
 // THIS IS A MANUAL DATA STEP, NOT A BUILD. It spends credits from the owner's
 // ElevenLabs plan, so it makes only what is missing or changed. --budget
@@ -15,7 +17,9 @@
 //   node tools/build-audio.mjs --dry-run           what would be made, and roughly what it costs
 //   node tools/build-audio.mjs --budget=100 --limit=30   a small recording batch
 //     --voices=clear,calm   only these roles
-//     --kinds=sound,kana    only these parts of the script
+//     --kinds=sound,kana    only these parts of the script (by default every
+//                           kind but corpus, which a run makes only when named;
+//                           --listen lists every kind's takes)
 //     --limit=20            at most this many clips (a trial run)
 //     --retry-failed        try again the clips that failed their check
 //
@@ -36,8 +40,9 @@
 // one a person heard and called right ships through tools/audio-heard.json.
 //
 // Writes data/audio/<voice>/<id>.mp3, data/audio/index.json and its key
-// shards data/audio/kNN.json, and tools/audio-made.json, the record of what
-// was sent, heard and kept.
+// shards data/audio/kNN.json, tools/audio-made.json, the record of what
+// was sent, heard and kept, and tools/audio-corpus.json, the corpus lines
+// with a kept clip, which stay in the script once paid for.
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -49,7 +54,7 @@ import { AUDIO_FORMAT, CLIPS_FORMAT, AUDIO_DIR, SILENCE_SRC } from '../js/audio.
 import { SITE } from './lib/emit.mjs';
 import { licenceBlock } from './lib/licence.mjs';
 import { apiKey, call, ApiError } from './lib/elevenlabs.mjs';
-import { fullScript, beatAliases, kanjiPageLines, KINDS, WORD_KINDS } from './lib/audio-script.mjs';
+import { fullScript, beatAliases, kanjiPageLines, KINDS, DEFAULT_KINDS, WORD_KINDS, CORPUS_KEPT, readCorpusKept, corpusKept } from './lib/audio-script.mjs';
 import { madeKey, parseHeard, heardPlan, applyHeard } from './lib/audio-heard.mjs';
 import { indexEntries } from './lib/audio-index.mjs';
 import { listenRows, listenPage, listenGroups } from './lib/audio-listen.mjs';
@@ -79,7 +84,7 @@ const ATTEMPTS = 3;
 const SHARD_BYTES = 110000;
 
 function args(argv) {
-  const out = { dryRun: false, budget: 0, voices: VOICES.map((v) => v.id), kinds: [...KINDS], limit: Infinity, retryFailed: false, heard: false, listen: false, rejects: REJECTS };
+  const out = { dryRun: false, budget: 0, voices: VOICES.map((v) => v.id), kinds: null, limit: Infinity, retryFailed: false, heard: false, listen: false, rejects: REJECTS };
   for (const a of argv) {
     const [k, v] = a.replace(/^--/, '').split('=');
     if (k === 'dry-run') out.dryRun = true;
@@ -93,6 +98,9 @@ function args(argv) {
     else if (k === 'retry-failed') out.retryFailed = true;
     else throw new Error(`unknown option ${a}`);
   }
+  // The corpus is made only when named; a failed take of it, already paid
+  // for, is listed to be heard like any other.
+  if (!out.kinds) out.kinds = out.listen ? [...KINDS] : [...DEFAULT_KINDS];
   for (const v of out.voices) if (!VOICES.some((x) => x.id === v)) throw new Error(`unknown voice ${v}`);
   for (const k of out.kinds) if (!KINDS.includes(k)) throw new Error(`unknown kind ${k}`);
   if (!Number.isFinite(out.budget) || out.budget < 0) throw new Error('--budget must be a finite non-negative number');
@@ -240,6 +248,29 @@ function saveMade(made) {
 }
 
 /**
+ * The corpus lines with a kept clip (audio-script.mjs corpusKept), one a
+ * line, so the next run's script still holds each one however the ranking
+ * moves and its prune never deletes a clip already paid for. Not written
+ * until the first corpus clip is kept.
+ */
+function saveKept(full, made) {
+  const kept = (line) => voicesOf(line).some((v) => {
+    const rec = made[madeKey(v.id, line.id)];
+    return !!(rec && rec.ok && fs.existsSync(clipPath(v.id, line.id)));
+  });
+  const rows = corpusKept(full, kept, readCorpusKept(SITE));
+  const file = path.join(SITE, CORPUS_KEPT);
+  if (!rows.length && !fs.existsSync(file)) return;
+  fs.writeFileSync(file, `[\n${rows.map((r) => JSON.stringify(r)).join(',\n')}\n]\n`);
+}
+
+/** Both records, after any change to what was kept. */
+function saveRecords(full, made) {
+  saveMade(made);
+  saveKept(full, made);
+}
+
+/**
  * index.json and its key shards from what the record says was kept: every
  * key a line answers to, with the voices whose clip of it passed as a mask.
  * A line no voice kept is not in the index at all.
@@ -365,7 +396,7 @@ async function main() {
   }
   if (hp.ship.length || hp.unship.length || opts.heard) {
     applyHeard(hp, { made, clipPathOf: clipPath });
-    saveMade(made);
+    saveRecords(full, made);
     const doc = writeIndex(full, made);
     console.log(`build-audio: ${shipping}; index rewritten, ${doc.keys} keys in ${doc.shards.length} shards`);
   }
@@ -375,7 +406,7 @@ async function main() {
   console.log(estimate(script, jobs));
   if (!jobs.length) {
     const removed = prune(full, made);
-    saveMade(made);
+    saveRecords(full, made);
     const doc = writeIndex(full, made);
     console.log(`build-audio: nothing to make; ${removed} old clips removed; index rewritten, ${doc.keys} keys in ${doc.shards.length} shards`);
     return;
@@ -407,7 +438,7 @@ async function main() {
         console.log(`  FAILED ${job.voice.id} ${job.line.ja}: wanted ${rec.want || '?'}, heard ${JSON.stringify(rec.transcript || rec.why)} (${rec.got || ''})`);
       }
       if ((passed + failed) % 50 === 0) {
-        saveMade(made);
+        saveRecords(full, made);
         writeIndex(full, made);
         console.log(`  ${passed + failed}/${jobs.length}, ${ctx.spent} TTS-header credits so far`);
       }
@@ -420,7 +451,7 @@ async function main() {
   // one request fails. A rejected Promise.all used to lose completed takes.
   const results = await Promise.allSettled(Array.from({ length: PARALLEL }, worker));
   const removed = prune(full, made);
-  saveMade(made);
+  saveRecords(full, made);
   const doc = writeIndex(full, made);
   const remaining = plan(opts, script, made).length;
   const stopped = remaining ? `; ${remaining} jobs remain in this selection` : '';

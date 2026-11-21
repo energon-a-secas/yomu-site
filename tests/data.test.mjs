@@ -451,6 +451,15 @@ test('check-data fails each broken rule and names the file', async () => {
     ['a rare search row without its glosses', (rw) => rw('data/search/x041.json', (d) => {
       Object.values(d.entries)[0][0][2] = [];
     }), /x041\.json: .* is not a list of distinct \[key/],
+    ['a Spanish search word with its accent left on', (rw) => rw('data/search/s01.json', (d) => {
+      d.entries = { ...d.entries, 'canción': { w: ['歌'] } };
+    }), /s01\.json: "canción" is not a folded Spanish word/],
+    ['a Spanish search word naming a key the dictionary does not hold', (rw) => rw('data/search/s02.json', (d) => {
+      Object.values(d.entries).find((e) => e.w).w.push('存在しない語');
+    }), /s02\.json: .* which the first tier does not hold/],
+    ['a plain spelling sending to a word with ñ that has no entry', (rw) => rw('data/search/s03.json', (d) => {
+      Object.values(d.entries)[0].n = ['ñoñoñoñ'];
+    }), /s03\.json: .* has an n that is not words spelled with ñ for it/],
     ['an example whose span runs past its sentence', (rw) => rw('data/sent/s005.json', (d) => {
       const [, rows] = Object.entries(d.entries)[0];
       rows[0][1][0][4] = rows[0][1][0][1].length + 3;
@@ -506,6 +515,12 @@ test('check-data fails each broken rule and names the file', async () => {
     ['a rare search word naming a key the rare tier does not hold', (rw) => rw('data/search/x040.json', (d) => {
       Object.values(d.entries)[0][0][0] = '存在しない語';
     }), /x040\.json: .* which the rare tier does not hold/],
+    ['an idiom row whose Spanish the dictionary does not give it', (rw) => rw('data/sets/proverb0.json', (d) => {
+      d.rows.find((r) => r[0] === '時は金なり')[5] = ['el oro es tiempo'];
+    }), /proverb0\.json: row \d+ \(時は金なり\) has Spanish .* the dictionary gives \["el tiempo es oro"\]/],
+    ['an idiom row left without the Spanish the dictionary gives it', (rw) => rw('data/sets/yoji0.json', (d) => {
+      d.rows.find((r) => r[0] === '一石二鳥').length = 5;
+    }), /yoji0\.json: row \d+ \(一石二鳥\) has Spanish null, the dictionary gives/],
     ['a rare key outside its range', (rw) => rw('data/dict/r010.json', (d) => {
       d.entries = { ...d.entries, '〇': [{ g: ['x'], p: 'n' }] };
     }), /r010\.json: "〇" is outside/],

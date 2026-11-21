@@ -18,6 +18,21 @@ export const ES_KPAGE = 'yomu-kpage-es/1';
 export const ES_DAILY = 'yomu-daily-es/1';
 export const ES_FORMATS = [ES_DICT, ES_KANJI, ES_KPAGE, ES_DAILY];
 
+/**
+ * The licence input of every file that can hold a Spanish meaning written
+ * for Yomu (tools/lib/spanish-words.mjs): the dictionary's Spanish files, the
+ * Spanish search index (tools/build-search.mjs) and the idiom shelves, whose
+ * rows carry their record's Spanish (tools/build-sets.mjs).
+ */
+export const AUTHORED_ES = Object.freeze({
+  id: 'authored',
+  source: 'Written for Yomu: the Spanish meanings in tools/lib/spanish-words.mjs',
+  url: 'https://creativecommons.org/publicdomain/zero/1.0/',
+  spdx: 'CC0-1.0',
+  screen: 'none',
+  use: 'the Spanish of a few common words JMdict has none of, or has in error',
+});
+
 /** At most this many Spanish meanings, as the English shows three. */
 export const MAX_ES = 3;
 /** A meaning's length, as records.mjs cuts an English gloss. */

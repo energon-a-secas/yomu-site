@@ -43,6 +43,12 @@ list:
    reading of one beat is a beat already. 1,453 readings are recorded: the
    N5 to N3 ones on 6 November 2026 and 686 more, in the pages' order, on 13
    November. None of the pages' words is recorded yet (Kanji readings, below).
+8. **corpus**: the words of the example sentences that have no clip, as the
+   reader meets them (conjugated forms included), in Clear alone, the most
+   frequent first (`corpusLines`). A run makes it only when it is named
+   (`--kinds=corpus`): a plain run makes every other kind (`DEFAULT_KINDS`).
+   Built 17 November 2026; nothing of it is recorded yet (Words of real text,
+   below).
 
 A word is filed under its spelling and reading (`audio.js wordKey`: 雨|あめ),
 never under its reading alone, so a homophone never plays another word's
@@ -146,8 +152,10 @@ transcript does not show. The listening list exists for those.
 ## Running it
 
 ```bash
-node tools/build-audio.mjs --dry-run              # what would be made, about what it costs
+node tools/build-audio.mjs --dry-run              # what would be made, about what it costs (every kind but corpus)
 node tools/build-audio.mjs --dry-run --kinds=reading,kanji   # one part of the script
+node tools/build-audio.mjs --dry-run --kinds=corpus --limit=500   # the corpus kind, which a run makes only when named
+node tools/measure-audio-corpus.mjs               # what the corpus kind's first 500, 1,000, 2,000 and all would add (free)
 node tools/build-audio.mjs --budget=100 --limit=30 # small pilot; compare account balances
 node tools/build-audio.mjs --budget=100 --limit=30 --retry-failed # bounded retry pilot
 ```
@@ -381,8 +389,9 @@ marks them when the voices arrive; `settleSay` does that.
 how they are marked once the shards load; `tests/kanji-page-voices.test.mjs`
 a page drawn before the voice list arrives.
 
-The tool's next kind would be the example sentences (`data/sent/`): Tatoeba's
+The example sentences themselves (`data/sent/`) are not recorded: Tatoeba's
 text, CC BY 2.0 FR, which a recording would carry the credit of. Not built.
+Their words are a kind of their own (Words of real text, below).
 
 **Two scripts of readings, merged on 9 November 2026.** The kanji pages'
 script (3 November) and Naninani 1.2.0's N5 to N3 readings (6 November) were
@@ -517,6 +526,138 @@ longer Starter's 40,000 a month, on which every figure above was measured.
 The tool would read 10,000 left and keep its 2,000 in reserve, but what those
 credits cost is not known here, so any run's ceiling waits for the owner to
 confirm the plan and its price.
+
+## Words of real text
+
+Built 17 November 2026 as script, check and measurement only: **nothing was
+recorded and no credit spent**. A study on 16 November found that the best
+use of a credit for the reader is the most frequent words of real text that
+have no clip in Clear, as they stand on the page, rather than common-word
+band 4: about half of what word by word misses is a conjugated form
+(している, 行った), whose dictionary form often has a clip already.
+
+**What the kind holds.** `corpusLines` reads the example sentences a word
+shows first (`data/sent/sNNN.json`, 31,512 sentences; not `more/`) with the
+analyzer and files each spoken token under the key Naninani's word by word
+looks it up by first (`spokenWord`, which is yomu-ios `Speech.spokenWord`
+and `written()` with `bridge/entry.js keysFor`): its spelling and reading
+(行った|いった), or its kana alone for a word in kana. It leaves out the
+punctuation, a particle in kana (said as a beat: は is わ), a number, a Latin
+word, a guess, a single beat (a beat already) and a name: the analyzer's
+names (トム, メアリー, ジョン), and a katakana word the sentence's English
+calls by a capitalized name that none of its glosses holds (`namedInEnglish`:
+Tatoeba's Sam and Ziri are read as サム "sum" and ジリ "Dili"; over every
+candidate this found six words, each a name in its sentence, and on kanji
+and hiragana words the same cue matched It, She and My, so it asks katakana
+only). Words are ranked by how many tokens they are in **the sentences with
+an even Tatoeba id** (`isRankingSentence`; 15,612 of them), most first,
+equal counts in key order; the odd ids (15,900) are held out to measure.
+
+**What it takes.** The kind is last in `KINDS` and in `fullScript`, which
+reads it against every other kind whatever `--kinds` asks for
+(`takeCorpus`): it never takes a key a line holds, recorded or not, nor a
+word whose other lookup key, its bare kana, a line holds, since the reader
+finds that clip first. Every key with a clip is some line's, so no word it
+ranks has a Clear clip already. A word sent as the same kana as a word above it
+is filed under that line's clip (行った|いった, 言った|いった and いった all
+send いった): 21 such keys in the first 2,000 lines. 6,654 lines remain of
+16,777 words, 1,914 of them met twice or more.
+
+**A kept clip stays.** The corpus is ranked again on every run, so a word
+could leave the script, and a run's prune deletes the clip of a line the
+script no longer has: when the analyzer or the sentences change the one or
+two sentences that ranked it (1,284 of the first 2,000 lines are met once or
+twice), or when another kind comes to hold its bare kana (68 of the first
+2,000 would, were common band 4 added). So `build-audio.mjs` writes each
+corpus line whose clip it keeps to `tools/audio-corpus.json` (`corpusKept`),
+as it was sent, and `fullScript` takes those lines back before any new word,
+whatever the ranking says (`keptCorpusLine`, `takeCorpus`). Only a key an
+earlier kind takes outranks a kept line: that kind's line has the clip's id,
+so the clip stays, and is made again only when that kind sends the word
+another way (2 of the first 2,000 under band 4). Deleting a row makes its
+word an ordinary corpus word again; if the ranking no longer takes it, the
+next run prunes its clip. The file is written from the first corpus clip
+kept, so it does not exist yet.
+
+**What it sends.** `wordTts`, as the other word kinds: a word in kanji goes
+in kanji only when every record of its spelling, or of an inflected form's
+dictionary form, gives one reading (食べた; 行った goes as いった, since 行く
+is いく or ゆく). An inflected form is also sent as its reading when another
+dictionary form the deinflector finds reads its kanji otherwise
+(`kanjiReadings`): 通って is 通う's かよって or 通る's とおって, 勝った 勝つ's
+or 勝る's, 断った 断つ's or 断る's, and a transcript shows the same kanji for
+both. That changed 12 of the first 2,000 lines; 498 of the 2,000 send kana, most
+of them words written in kana. A key that folds two spellings together
+(ジャガイモ and じゃがいも are both じゃがいも) sends the one the sentences
+write most, then the one with more katakana, which a voice reads only as the
+sound (`spellingOrder`), never the first met: the sentences' order would
+then decide what is sent, and a change of what is sent remakes a clip.
+
+**The check needs no new rule for conjugated forms.** A corpus line is a
+word kind: checked against its own reading and the said romaji the reader
+shows, from a triple take when it has two beats or fewer (39 of the first
+2,000). Read from `tools/audio-made.json`, with no API call: the inflected
+forms among the word kind's lines (Yomu's own text) passed 375 of 376 clips,
+368 on the first take; the one failure is Male's したり heard as English
+"Study". Copula forms passed 41 of 44 (じゃありませんでした came back
+じゃあありませんでした in three voices). The pieces that failed before (って,
+でし, んです, してい) were a particle in kana, which this kind leaves out, and
+fragments the analyzer no longer cuts. A right transcript of each of the
+first 2,000 lines, written as it is sent or as the sentence writes it,
+passes the check; the only ones that do not are loanwords written in
+hiragana with a long-vowel bar (おーぷん戦), which no transcriber writes.
+`tests/audio-corpus.test.mjs` holds the selection, the order, what is sent,
+what is taken and the check of a conjugated form.
+
+**Dry runs and coverage.** `node tools/build-audio.mjs --dry-run
+--kinds=corpus --limit=N` and `node tools/measure-audio-corpus.mjs`,
+17 November 2026, free. Coverage is word by word in Clear on the 15,900
+held-out sentences (108,984 spoken words), with the app's own key rule,
+counting every take as passing (an upper bound: 97 in 100 band-3 words
+passed). Before: **82.99%** of words, **25.76%** of sentences recorded from
+start to finish.
+
+| `--limit` | Clips | Characters | Met at least | Words | Whole sentences | Credits | Size |
+|---|---|---|---|---|---|---|---|
+| 500 | 500 | 1,850 | 3 times | 86.49% (+3.51 pp) | 34.88% (+9.12 pp) | about 1,000 to 1,700 | about 2.4 to 3.2 MB |
+| 1,000 | 1,000 | 3,724 | 2 times | 87.09% (+4.10 pp) | 36.67% (+10.91 pp) | about 2,000 to 3,400 | about 4.8 to 6.4 MB |
+| 2,000 | 2,000 | 7,174 | once | 88.00% (+5.01 pp) | 39.97% (+14.21 pp) | about 3,900 to 6,600 | about 9.6 to 12.4 MB |
+| every line | 6,654 | 26,621 | once | 90.27% (+7.28 pp) | 49.03% (+23.26 pp) | about 14,400 to 24,500 | about 32 to 46 MB |
+
+The last row is the most the kind can add as it is built: the ceiling, not a
+plan. The dry run's own estimate is 925, 1,862, 3,587 and 13,311 credits, at 0.5 a
+character before retakes and transcription. The credits are the account's
+measured rates per character sent, everything included: band 3's 7,852
+credits over the 14,462 characters its records send (0.54; 1.52 a word,
+its words averaging 2.8 characters) at the low end, and the two reading runs of 6 and
+13 November, 4,817 credits over 5,231 characters (0.92), at the high end.
+Corpus words are longer (3.6 characters on average), and October's transcription cost
+almost nothing beside November's, so the low end is a floor; the reading
+runs heard a fifth of their clips three times over, against 2 in 100 here,
+so the high end is a ceiling. The size is the 97 in 100 that pass, at band
+3's 4,952 bytes of MP3 a clip or its 1,781 a character sent; the app
+bundles all of `data/audio/`. The plan has changed since
+(What the account was charged): 10,000 credits a cycle, 2,000 of them kept
+back by the tool, at a price not known here. Run it in bounded batches with
+the balance read between them (Running it), after the owner sets a ceiling.
+
+The measurement also says whose the 18,539 missing words are. A line of
+this kind holds 7,916 of them (5,452 in its first 2,000, 2,464 after), so a
+run can record them. 4,748 are words this kind would take that the ranking
+half never meets, so no line holds them, and it leaves out 689 by its rule:
+356 numbers, 255 names (in 1.60% of the sentences, which therefore can never
+be recorded whole), 77 Latin words and 1 particle in kana. Every line
+recorded covers 7,936, 20 more than its own, because 20 words whose line of
+another kind has no clip would play a corpus word's clip by their bare kana
+(蜜蜂, a kanji page's word, by the corpus's みつばち). The rest are other
+kinds': 4,424 the kanji pages' words, not recorded yet, which this kind does
+not take (ranked by the same frequency, their first 500 would add 0.37 pp,
+so they are a long tail); 520 common words and 9 readings whose check failed
+(`--listen`); 216 kanji readings not recorded yet; and 17 sound examples.
+
+`--listen` lists this kind after every other (it is not in its order), in
+the script's order. Rerun the measurement after an analyzer change: what
+it ranks moves, though a kept clip does not (A kept clip stays, above).
 
 ## The page
 

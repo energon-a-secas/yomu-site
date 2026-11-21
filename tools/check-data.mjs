@@ -62,7 +62,7 @@
  *     to a reading, an id that is not a number, or a span outside its sentence
  *   - other spellings (data/spell/) held to the range rule, a spelling
  *     that is the key itself, or a tag JMdict does not give
- *   - search's English index (data/search/) held to the range rule, a word
+ *   - search's English and Spanish indexes (data/search/) held to the range rule, a word
  *     that is not lower-case English, a key the first tier does not hold,
  *     and a parts picker (data/search/parts.json) out of its shape
  *   - the collections (data/sets/): a row out of its shape, a set the index
@@ -107,6 +107,7 @@ import { popularProblems, POPULAR_FORMAT } from './lib/popular.mjs';
 import { SPACES_FORMAT, SPACES_SRC, spacesProblems } from './lib/spaces.mjs';
 import { ES_FORMATS } from './lib/spanish.mjs';
 import { spanishShape, spanishProblems } from './lib/spanish-check.mjs';
+import { rowSpanish, recordsFrom, SET_ES } from './lib/sets-spanish.mjs';
 
 const DATA = process.argv[2] ? path.resolve(process.argv[2]) : path.join(SITE, 'data');
 // Paths are reported, and index `src` values resolved, relative to the
@@ -387,6 +388,8 @@ const FORMATS = {
   'yomu-search/1': checkSearchShard,
   'yomu-search-rare-index/1': null,
   'yomu-search-rare/1': checkSearchRare,
+  'yomu-search-es-index/1': null,
+  'yomu-search-es/1': checkSearchEsShard,
   'yomu-parts/1': checkParts,
   'yomu-sets-index/1': null,
   'yomu-set/1': checkSet,
@@ -849,14 +852,45 @@ function checkSearchShard(rel, doc) {
   }
 }
 
-/** Every key the English index names is a first-tier key, or the page would show an empty result. */
+/**
+ * A Spanish shard (js/search-latin.js spanishWords): each folded Spanish word
+ * to `w` (keys), `k` (kanji) and `n` (the words spelled with ñ it is the
+ * plain spelling of).
+ */
+function checkSearchEsShard(rel, doc) {
+  for (const [word, e] of Object.entries(doc.entries || {})) {
+    if (!/^[a-zñ]+$/.test(word)) fail(rel, `${JSON.stringify(word)} is not a folded Spanish word`);
+    const extra = Object.keys(e).filter((k) => k !== 'w' && k !== 'k' && k !== 'n');
+    if (extra.length) fail(rel, `${JSON.stringify(word)} has unknown fields ${extra.join(' ')}`);
+    if (!e.w && !e.k && !e.n) fail(rel, `${JSON.stringify(word)} names nothing`);
+    if (e.w && !(Array.isArray(e.w) && e.w.length && e.w.every((k) => typeof k === 'string' && k))) fail(rel, `${JSON.stringify(word)} has a malformed w`);
+    if (e.k !== undefined && !(typeof e.k === 'string' && [...e.k].every((c) => IS_KANJI.test(c)))) fail(rel, `${JSON.stringify(word)} has a k that is not kanji`);
+    if (e.n !== undefined && !(Array.isArray(e.n) && e.n.length && e.n.every((x) => typeof x === 'string' && x.includes('ñ') && x.replace(/ñ/g, 'n') === word))) {
+      fail(rel, `${JSON.stringify(word)} has an n that is not words spelled with ñ for it`);
+    }
+  }
+}
+
+/** Every word a Spanish entry sends to with `n` has an entry of its own. */
+function checkSearchEsWords(docs) {
+  const words = new Set();
+  const shards = shardFiles(docs, 'yomu-search-es/1');
+  for (const rel of shards) for (const w of Object.keys(docs.get(rel).entries || {})) words.add(w);
+  for (const rel of shards) {
+    for (const [word, e] of Object.entries(docs.get(rel).entries || {})) {
+      for (const x of e.n || []) if (!words.has(x)) fail(rel, `${JSON.stringify(word)} sends to ${JSON.stringify(x)}, which has no entry`);
+    }
+  }
+}
+
+/** Every key the English and Spanish indexes name is a first-tier key, or the page would show an empty result. */
 function checkSearchKeys(docs) {
   const tier = new Set();
   for (const [rel, doc] of docs) {
     if (doc.format === 'yomu-dict/1' || doc.format === 'yomu-dict-core/1') for (const k of Object.keys(doc.entries || {})) tier.add(k);
   }
   if (!tier.size) return;
-  for (const rel of shardFiles(docs, 'yomu-search/1')) {
+  for (const rel of [...shardFiles(docs, 'yomu-search/1'), ...shardFiles(docs, 'yomu-search-es/1')]) {
     let missed = 0;
     for (const [word, e] of Object.entries(docs.get(rel).entries || {})) {
       for (const k of e.w || []) {
@@ -900,17 +934,38 @@ function checkSearchRareKeys(docs) {
 
 const SET_IDS = ['yoji', 'proverb', 'idiom'];
 
-/** A collection file: its set, and rows [written, reading, [glosses], 0 or 1, said romaji or ''] . */
+/** A collection file: its set, and rows [written, reading, [glosses], 0 or 1, said romaji or '', and its Spanish where it has any] . */
 function checkSet(rel, doc) {
   if (!SET_IDS.includes(doc.set)) fail(rel, `set ${JSON.stringify(doc.set)} is not one of ${SET_IDS.join(' ')}`);
   if (!Array.isArray(doc.rows) || !doc.rows.length) { fail(rel, 'has no rows'); return; }
   doc.rows.forEach((r, i) => {
-    const ok = Array.isArray(r) && r.length === 5 && typeof r[0] === 'string' && r[0]
+    const ok = Array.isArray(r) && (r.length === 5 || r.length === 6) && typeof r[0] === 'string' && r[0]
       && typeof r[1] === 'string' && r[1] !== r[0]
       && Array.isArray(r[2]) && r[2].length && r[2].every((g) => typeof g === 'string' && g)
-      && (r[3] === 0 || r[3] === 1) && typeof r[4] === 'string' && !/[^a-z' ,.!?-]/.test(r[4]) && !/ [,.!?]/.test(r[4]);
-    if (!ok) fail(rel, `row ${i} is not [written, reading, [glosses], 0 or 1, romaji]`);
+      && (r[3] === 0 || r[3] === 1) && typeof r[4] === 'string' && !/[^a-z' ,.!?-]/.test(r[4]) && !/ [,.!?]/.test(r[4])
+      && (r.length === 5 || (Array.isArray(r[5]) && r[5].length >= 1 && r[5].length <= SET_ES && r[5].every((g) => typeof g === 'string' && g)));
+    if (!ok) fail(rel, `row ${i} is not [written, reading, [glosses], 0 or 1, romaji, [Spanish]?]`);
   });
+}
+
+/**
+ * Every row's Spanish is what the dictionary's Spanish gives it
+ * (tools/lib/sets-spanish.mjs), and no row lacks what it gives. A copy of
+ * data/ without the rare words (tests/data.test.mjs makes them) cannot say
+ * what most idioms' records are, so it is not held to this.
+ */
+function checkSetsSpanish(docs) {
+  const rows = [];
+  for (const [rel, doc] of docs) if (doc.format === 'yomu-set/1') for (const [i, r] of (doc.rows || []).entries()) rows.push([rel, i, r]);
+  if (!rows.length || !docs.get('data/dict/index.json') || !docs.get('data/dict/rare.json')) return;
+  const recordsOf = recordsFrom((src) => docs.get(src) || null, new Set(rows.map(([, , r]) => r[0])));
+  let wrong = 0;
+  for (const [rel, i, r] of rows) {
+    const want = rowSpanish(r, recordsOf);
+    if (JSON.stringify(want) !== JSON.stringify(r[5] || null) && (wrong += 1) <= 3) {
+      fail(rel, `row ${i} (${r[0]}) has Spanish ${JSON.stringify(r[5] || null)}, the dictionary gives ${JSON.stringify(want)}: node tools/build-sets.mjs --spanish`);
+    }
+  }
 }
 
 /** Each word to at most three rows [set, written, reading, gloss] whose written form holds it. */
@@ -1003,9 +1058,12 @@ function main() {
   checkRangeIndex(docs, 'data/spell/index.json', 'yomu-spell/1');
   checkRangeIndex(docs, 'data/sent/index.json', 'yomu-sentences/1');
   checkRangeIndex(docs, 'data/search/rare.json', 'yomu-search-rare/1');
+  checkRangeIndex(docs, 'data/search/es.json', 'yomu-search-es/1');
   checkSearchKeys(docs);
+  checkSearchEsWords(docs);
   checkSearchRareKeys(docs);
   checkSets(docs);
+  checkSetsSpanish(docs);
   checkRangeIndex(docs, 'data/sets/words.json', 'yomu-sets-words/1');
   checkPopular(docs);
   checkLikeIndex(docs);

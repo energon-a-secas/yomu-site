@@ -312,11 +312,22 @@ the slicing and the measurements.
 (`events-search.js`, a route that draws its own section like Play's,
 `routes.js sectionOf`) reads Japanese the way the reader does (the key in
 both scripts and every dictionary form `deinflect.js` finds, then the rare
-words and the names), romaji as kana and as English, and English through
-`data/search/`, an index of the first tier's gloss words to keys; the builder
-and the page split words with the same `search.js glossWords`. One word is
+words and the names), and Latin letters in every reading that applies,
+merged as typed first, then a meaning that names every word (the learner's
+language first), then what an edit spells (`search(q, { lang })`,
+docs/ANALYZER.md "Search in Spanish, and romaji however it is typed"): romaji
+as kana however it is typed (`search-latin.js`: spaces, wa for は, a long
+vowel or a っ left out; a sentence typed together is read by the analyzer,
+`search-sentence.js`, which search-romaji.js imports only then, and offered only
+where it reads as one and no meaning names every word: agua is no ああ具ああ),
+English through `data/search/`, an index of the first tier's gloss words to
+keys, and Spanish through `data/search/es.json`, the same over `data/es/`'s
+Spanish; the builder and the page split words with the same `glossWords` and
+`spanishWords`. Romaji is Hepburn's letters only (no l, q or x, c only in ch
+or cch), or Spanish caliente was romaji. One word is
 one result, filed under the spelling the dictionary marks usual (`u`), so
-eat finds 食べる once, not たべる too. English that finds fewer than
+eat finds 食べる once, not たべる too; a word two readings find is one card
+(`mergeResults`). English that finds fewer than
 `RARE_WHEN` (5) common words asks the rare words too (`data/search/xNNN.json`,
 index `rare.json`), and each rare result is drawn from its index row (reading,
 the first two meanings, part of speech, how many more), never from
@@ -508,9 +519,12 @@ never under it.
 when asked.** `analyze(text, { meanings: 'es' })` and the lookups in
 docs/ANALYZER.md "Spanish meanings" put a meaning's Spanish in an `es` object
 beside the English field (`entry.es.g`, `info.es.m`); no `es` means there is
-none, and the English is the fallback. The page passes only `lang`, so it
-fetches no `data/es/` file and shows English meanings; Naninani asks for the
-Spanish. Records are shared, so whatever carries `es` is a copy, and a test
+none, and the English is the fallback. The page passes only `lang`, so the
+reader fetches no `data/es/` file and shows English meanings; Naninani asks
+for the Spanish. Search is the page's one exception: in Spanish it fetches
+the Spanish of the records it found (`dict.needEs`) and shows it where every
+record of a card has it, else the English, labelled; and an idiom row
+carries its Spanish in the row (`data/sets/`, sixth item). Records are shared, so whatever carries `es` is a copy, and a test
 reads English again after Spanish to hold that. JMdict's Spanish senses are not
 its English ones: never pair them, and never mix Spanish and English in one
 record's meanings.
@@ -610,8 +624,8 @@ refuses it.
 - `data/like/**`: emitted by `tools/build-sounds-like.mjs` from the committed `data/dict/` (after `build-dict.mjs`). Rebuild, do not hand-edit.
 - `data/sent/**` (and `data/sent/more/`): emitted by `tools/build-sentences.mjs` from the pinned Tatoeba exports, read through the analyzer over the committed `data/` (after `build-dict.mjs`; about five minutes). Rebuild, do not hand-edit.
 - `data/spell/**`: emitted by `tools/build-spellings.mjs` from the pinned full JMdict and the committed first tier (after `build-dict.mjs`). Rebuild, do not hand-edit.
-- `data/sets/**`: emitted by `tools/build-sets.mjs` from the pinned full JMdict alone. Rebuild, do not hand-edit.
-- `data/search/**`: emitted by `tools/build-search.mjs` from the committed `data/dict/`, `data/kanji/` and `data/strokes/` (after `build-kanji-page.mjs`). Rebuild, do not hand-edit.
+- `data/sets/**`: emitted by `tools/build-sets.mjs` from the pinned full JMdict, with each row's Spanish from the committed `data/dict/` and `data/es/dict/` (after `build-spanish.mjs`; `--spanish` puts it on the committed rows again without the upstream, and `check-data.mjs` holds every row to `tools/lib/sets-spanish.mjs`). Rebuild, do not hand-edit.
+- `data/search/**`: emitted by `tools/build-search.mjs` from the committed `data/dict/`, `data/kanji/`, `data/strokes/` and, for the Spanish index (`es.json`, `sNN.json`), `data/es/` (after `build-kanji-page.mjs` and `build-spanish.mjs`). Rebuild, do not hand-edit.
 - `data/es/**`: emitted by `tools/build-spanish.mjs` from the committed `data/dict/`, `data/kanji/` and `data/kpage/` (after `build-kanji-page.mjs`), the pinned jmdict-spa and kanjidic2-all, and the authored `tools/lib/spanish-words.mjs`. Every file names the English file it mirrors and its digest, and `check-data.mjs` fails one whose English file moved: rebuild it after any of those three. Rebuild, do not hand-edit.
 - `data/strokes/**`, `data/kpage/**`: emitted by `tools/build-kanji-page.mjs` from KanjiVG (the pin in `tools/lib/sources.mjs`) and the committed `data/dict/` and `data/kanji/` (after `build-dict.mjs` and `build-kanji.mjs`). Rebuild, do not hand-edit.
 - `data/kanji/jinmeiyo.json`: emitted by `tools/build-joyo.mjs` (and `build-kanji.mjs`) from the committed kanji shards. Rebuild, do not hand-edit.

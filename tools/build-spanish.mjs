@@ -41,7 +41,7 @@ import { writeJson, SITE, fmtBytes, pruneStale } from './lib/emit.mjs';
 import { recordFor } from './lib/records.mjs';
 import { readingTable } from './lib/split.mjs';
 import {
-  ES_DICT, ES_KANJI, ES_KPAGE, ES_DAILY, MAX_ES, MAX_ES_CHARS,
+  ES_DICT, ES_KANJI, ES_KPAGE, ES_DAILY, MAX_ES, MAX_ES_CHARS, AUTHORED_ES,
   esSrc, spanishGlosses, spanishMeanings, bodyDigest,
 } from './lib/spanish.mjs';
 import { WORDS, CORRECTIONS } from './lib/spanish-words.mjs';
@@ -243,14 +243,7 @@ function main() {
   const characters = new Map(kd.characters.map((c) => [c.literal, c]));
 
   const sources = [upstream('jmdictSpa'), upstream('kanjidicAll'), upstream('jmdictFull')];
-  const authored = {
-    id: 'authored',
-    source: 'Written for Yomu: the Spanish meanings in tools/lib/spanish-words.mjs',
-    url: 'https://creativecommons.org/publicdomain/zero/1.0/',
-    spdx: 'CC0-1.0',
-    screen: 'none',
-    use: 'the Spanish of a few common words JMdict has none of, or has in error',
-  };
+  const authored = { ...AUTHORED_ES };
   // The meanings written for Yomu are an input of every file that can hold
   // one; the kanji's Spanish is KANJIDIC's alone.
   const { generated_by: by, generated_at: at, ...head } = licenceBlock('edrdgSpanish', TOOL, { upstream: sources });

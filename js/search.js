@@ -1,26 +1,61 @@
-// Search: a word by its Japanese, its romaji or its English, and a kanji by
-// its parts. No DOM.
+// Search: a word by its Japanese, its romaji, its English or its Spanish,
+// and a kanji by its parts. No DOM.
 //
 // Japanese is looked up the way the reader reads a word: the key as typed,
 // in hiragana and in katakana, and every dictionary form deinflect.js finds
 // for it (食べた finds 食べる), in the first tier, then the rare words and
-// the names. Romaji is turned into kana and searched as Japanese. English
-// goes through data/search/ (tools/build-search.mjs): each word of the query
-// names the dictionary keys whose glosses use it, and a query of several
-// words keeps the keys every word names. When the common words give fewer
-// than RARE_WHEN, the rare words' index (data/search/xNNN.json) adds up to
-// RARE_MAX more, each drawn from its index row, so no rare shard is fetched.
-// A query that reads as both (sake, kami) is searched both ways, the
-// Japanese first.
+// the names. A Japanese query is read as Japanese only.
 //
-// The query is never stored and never put in the address.
+// Latin letters are tried in every reading that can apply, and the results
+// merged: what the letters spell as typed first, then a meaning every word
+// of the query names (the learner's language first), then what romaji
+// spells with an edit, so in English house is 家 before 法制 (ほうせい, a
+// long vowel put in), and in Spanish gato is 猫. A word romaji spells as
+// typed stays first (sake is さけ; in Spanish it follows the first meaning:
+// manga is 袖, then 漫画).
+//
+// - Romaji is turned into kana however it is typed (search-latin.js): spaces
+//   do not matter, a particle written as said or a long vowel left out is
+//   an edit, and the reading with the fewest edits that a first-tier word
+//   spells whole wins (konnichiwa is こんにちは, gakko 学校). When no word
+//   spells it whole, it is a sentence typed together and the reader's own
+//   analyzer reads it (search-romaji.js, search-sentence.js): its words come back in order,
+//   with the sentence, so a page can offer to read it. A sentence is
+//   offered only where it reads as one: no guess, a word and a particle,
+//   the copula or an inflection, and no meaning index that names every
+//   word of the query (agua is Spanish, not ああ具ああ).
+// - English goes through data/search/ (tools/build-search.mjs): each word of
+//   the query names the dictionary keys whose glosses use it, and a query
+//   of several words keeps the keys every word names. When nothing common
+//   is found, the rare words' index (data/search/xNNN.json) adds up to
+//   RARE_MAX more, each drawn from its index row, so no rare shard is fetched.
+// - Spanish goes through data/search/es.json and sNN.json the same way,
+//   from JMdict's and KANJIDIC's Spanish (data/es/), its words folded
+//   (search-latin.js spanishWords) and each also read as the words it may be
+//   a form of (spanishForms: libros, roja, bebo). The rare words have no
+//   Spanish index: their Spanish covers one key in eight (docs/ANALYZER.md).
+//   An English learner sees Spanish only where English and romaji found
+//   nothing, and a Spanish one English only where it names every word.
+//
+// Every result keeps its records as the dictionary has them (English `g`),
+// and says how it was reached (`via`); showing a meaning in Spanish is the
+// page's (render-search.js) and the app's. The query is never stored and
+// never put in the address.
 
 import { createRangeStore } from './range-store.js';
-import { toHiragana, isRomaji } from './vendor/wanakana.js';
 import {
   toHira, toKata, isJapanese, isKanji,
 } from './kana.js';
 import { deinflect, posMatches } from './deinflect.js';
+import { currentLang } from './strings.js';
+import {
+  foldLatin, spanishWords, spanishForms, romajiReading, STOP_ES, WEAK_ES,
+} from './search-latin.js';
+import { createRomajiSearch } from './search-romaji.js';
+
+export {
+  foldLatin, spanishWords, romajiKana, romajiKanas, romajiReading, romajiVariants, looseRomaji, STOP_ES,
+} from './search-latin.js';
 
 /** Words that say nothing a learner searches for. The builder splits glosses with the same list. */
 const STOP = new Set(`a an the to of in on at by for with from as or and be is are was
@@ -68,6 +103,9 @@ export const MAX_RESULTS = 40;
 export const RARE_WHEN = 5;
 /** At most this many rare words in one English answer. */
 export const RARE_MAX = 10;
+/** At most this many kanji offered for a meaning. */
+export const KANJI_MAX = 10;
+export { ROMAJI_READINGS, ROMAJI_EDITS, SENTENCE_MAX } from './search-romaji.js';
 
 /**
  * A record drawn from a rare index row [key, reading, glosses, pos, more]:
@@ -83,15 +121,14 @@ export function rareRecord(row) {
 
 /**
  * What a query is: `ja` (it has Japanese in it), `romaji` (Latin letters
- * that spell kana, which may be English too), `en`, or `empty`.
+ * that spell kana, which may be English or Spanish too), `en` (Latin letters
+ * that are not romaji: English or Spanish), or `empty`.
  */
 export function queryKind(q) {
   const s = String(q || '').trim();
   if (!s) return 'empty';
   if ([...s].some(isJapanese)) return 'ja';
-  const kana = toHiragana(s.toLowerCase());
-  if (isRomaji(s) && kana && ![...kana].some((ch) => /[a-z]/i.test(ch))) return 'romaji';
-  return 'en';
+  return romajiReading(s) ? 'romaji' : 'en';
 }
 
 /** The keys a Japanese query asks for: as typed, in both scripts, and its dictionary forms. */
@@ -104,6 +141,86 @@ export function japaneseKeys(q) {
     keys.add(d.base);
   }
   return { keys: [...keys].filter(Boolean), bases };
+}
+
+/** How a record of a result is written and read, as one string: a card shown twice is one card. */
+const cardOf = (res, rec) => {
+  if (res.via === 'name') return `name:${res.key}`;
+  const { written, reading } = writtenOf(res, rec);
+  return `${written}|${toHira(reading)}`;
+};
+
+/**
+ * `lists` of results as one list, each card once, the first list's first: a
+ * word a reading already found is left out of a later one, and a kana key's
+ * record another reading found is left out of its records (sake: 酒 by its
+ * Spanish, then さけ by its romaji keeps 鮭). Records are the dictionary's.
+ */
+export function mergeResults(lists) {
+  const seen = new Set();
+  const keys = new Set();
+  const out = [];
+  for (const list of lists) {
+    for (const res of list || []) {
+      if (keys.has(res.key) && res.via !== 'name') continue;
+      const recs = res.recs.filter((rec) => !seen.has(cardOf(res, rec)));
+      if (!recs.length) continue;
+      for (const rec of recs) seen.add(cardOf(res, rec));
+      keys.add(res.key);
+      out.push(recs.length === res.recs.length ? res : Object.freeze({ ...res, recs }));
+    }
+  }
+  return out;
+}
+
+/** Keys every list names, ranked by the sum of their places; [] when none is shared. */
+function shared(lists) {
+  if (!lists.length) return [];
+  const score = new Map();
+  lists[0].forEach((k, i) => score.set(k, i));
+  for (const list of lists.slice(1)) {
+    const here = new Map(list.map((k, i) => [k, i]));
+    for (const k of [...score.keys()]) {
+      if (here.has(k)) score.set(k, score.get(k) + here.get(k));
+      else score.delete(k);
+    }
+  }
+  return [...score].sort((a, b) => a[1] - b[1]).map(([k]) => k);
+}
+
+/** Keys every list names; the first list alone when none is shared (English). */
+function intersect(lists) {
+  if (!lists.length) return [];
+  const both = shared(lists);
+  return both.length ? both : lists[0];
+}
+
+/** Spanish pronouns that come before a verb: the word after one is read as a verb first. */
+const CLITIC_ES = new Set(['me', 'te', 'nos', 'os']);
+
+/** Every key the lists name, by its best place in any of them, an earlier list first among equals. */
+function byPlace(lists) {
+  const best = new Map();
+  lists.forEach((list, li) => list.forEach((k, i) => {
+    const score = i * 64 + li;
+    if (!best.has(k) || best.get(k) > score) best.set(k, score);
+  }));
+  return [...best].sort((a, b) => a[1] - b[1]).map(([k]) => k);
+}
+
+/**
+ * A Spanish query's keys: those every word names, then, where that is
+ * fewer than RARE_WHEN, those its words other than WEAK_ES name together
+ * (tengo hambre is hambre's; muy bien is 詳しい, then bien's よく); and where
+ * the words share nothing, each one's by place (tomar agua).
+ */
+function combineSpanish(lists, weak) {
+  const named = lists.filter((l) => l.length);
+  const strong = lists.filter((l, i) => l.length && !weak[i]);
+  const out = [...shared(named)];
+  if (out.length < RARE_WHEN && strong.length && strong.length < named.length) out.push(...shared(strong));
+  if (!out.length) out.push(...byPlace(strong.length ? strong : named));
+  return [...new Set(out)];
 }
 
 /**
@@ -119,6 +236,9 @@ export function createSearch({ dict, fetchJson, base = 'data/' }) {
   const rareEnglish = createRangeStore({
     fetchJson, resolve, indexPath: `${dir}search/rare.json`, what: 'The rare words\' search index',
   });
+  const spanish = createRangeStore({
+    fetchJson, resolve, indexPath: `${dir}search/es.json`, what: 'The Spanish search index',
+  });
   let parts = null;
 
   /** One result: the key, its records, and how the query reached it. */
@@ -126,11 +246,9 @@ export function createSearch({ dict, fetchJson, base = 'data/' }) {
     key, recs, via, ...extra,
   });
 
-  async function japanese(q) {
-    const { keys, bases } = japaneseKeys(q);
-    await dict.need(keys);
+  /** First-tier results for `keys` (a japaneseKeys()), each key once. */
+  function common({ keys, bases }, seen = new Set()) {
     const out = [];
-    const seen = new Set();
     for (const k of keys) {
       const recs = dict.get(k);
       if (!recs || seen.has(k)) continue;
@@ -142,8 +260,13 @@ export function createSearch({ dict, fetchJson, base = 'data/' }) {
       seen.add(k);
       out.push(result(k, ok, d ? 'form' : 'exact', d ? { chain: d.chain } : {}));
     }
-    if (out.length) return out;
-    // Nothing common: the rare words, then the names.
+    return out;
+  }
+
+  /** The rare words, then the names, spelled by `keys`. */
+  async function rareAndNames(keys) {
+    const out = [];
+    const seen = new Set();
     await dict.needRare(keys);
     for (const k of keys) {
       const recs = dict.rare(k);
@@ -157,37 +280,90 @@ export function createSearch({ dict, fetchJson, base = 'data/' }) {
     return out;
   }
 
-  /** Keys every word of the query names, ranked by the sum of their places; the first word's alone when none is shared. */
-  function intersect(lists) {
-    if (!lists.length) return [];
-    const score = new Map();
-    lists[0].forEach((k, i) => score.set(k, i));
-    for (const list of lists.slice(1)) {
-      const here = new Map(list.map((k, i) => [k, i]));
-      for (const k of [...score.keys()]) {
-        if (here.has(k)) score.set(k, score.get(k) + here.get(k));
-        else score.delete(k);
-      }
-    }
-    const shared = [...score].sort((a, b) => a[1] - b[1]).map(([k]) => k);
-    return shared.length ? shared : lists[0];
+  async function japanese(q, extra = []) {
+    const found = japaneseKeys(q);
+    const keys = { keys: [...new Set([...found.keys, ...extra])], bases: found.bases };
+    await dict.need(keys.keys);
+    const out = common(keys);
+    if (out.length) return out;
+    // Nothing common: the rare words, then the names.
+    return rareAndNames(keys.keys);
   }
 
-  async function inEnglish(q) {
-    const words = glossWords(q);
-    if (!words.length) return { words: [], kanji: [] };
-    await english.need(words);
-    const entries = words.map((w) => english.get(w) || {});
-    const keys = intersect(entries.map((e) => e.w || []).filter((l) => l.length)).slice(0, MAX_RESULTS);
-    const kanji = intersect(entries.map((e) => [...(e.k || '')]).filter((l) => l.length));
+  const { romajiWords, readRomaji, ownWord } = createRomajiSearch({
+    dict, japanese, common, result, japaneseKeys,
+  });
+
+
+  // ── English and Spanish ─────────────────────────────────────────────────
+
+  /**
+   * The first-tier results and kanji of index entries, one per query word.
+   * `complete` says every word had an entry: a romaji sentence's words are
+   * no English, and wa alone named 昭和 for konnichi wa.
+   */
+  async function fromIndex(entries, via, keys, kanji) {
     await dict.need(keys);
     const out = [];
     for (const k of keys) {
       const recs = dict.get(k);
-      if (recs) out.push(result(k, recs, 'english'));
+      if (recs) out.push(result(k, recs, via));
     }
-    if (out.length < RARE_WHEN) out.push(...await rareInEnglish(words));
-    return { words: out, kanji };
+    const complete = entries.every((e) => (e.w && e.w.length) || e.k);
+    return { words: out, kanji, complete, direct: complete && entries.every((e) => e.direct !== false) };
+  }
+
+  async function inEnglish(q, lang) {
+    // An accent says nothing in the English index, whose words are a to z: café is cafe.
+    // On a Spanish page, a Spanish article is no English word (el gato is no El Salvador).
+    const words = glossWords(foldLatin(q, { enye: false })).filter((w) => lang !== 'es' || !STOP_ES.has(w));
+    if (!words.length) return { words: [], kanji: [], asked: [], complete: false };
+    await english.need(words);
+    const entries = words.map((w) => english.get(w) || {});
+    const keys = intersect(entries.map((e) => e.w || []).filter((l) => l.length)).slice(0, MAX_RESULTS);
+    const kanji = intersect(entries.map((e) => [...(e.k || '')]).filter((l) => l.length));
+    return { ...await fromIndex(entries, 'english', keys, kanji), asked: words };
+  }
+
+  /**
+   * Spanish: each word's entry and those of its plural or feminine forms
+   * (spanishForms: libros is libro too), each key by its best place in any,
+   * the word's own first among equals; the words with ñ the index lists any
+   * of them under (`n`: nino is niño), before the word's own where the ñ word
+   * names more (ano is año first); then the verb a form belongs to (bebo is
+   * beber), after all of those, so nombre is 名前 before nombrar's 任命.
+   */
+  async function inSpanish(q) {
+    const words = spanishWords(q, { alone: true });
+    if (!words.length) return { words: [], kanji: [], complete: false };
+    const asked = words.map((w) => {
+      const { nouns, verbs } = spanishForms(w);
+      return { own: w, nouns, verbs };
+    });
+    await spanish.need(asked.flatMap((a) => [a.own, ...a.nouns, ...a.verbs]));
+    const withN = asked.map((a) => [...new Set([a.own, ...a.nouns, ...a.verbs].flatMap((w) => (spanish.get(w) || {}).n || []))]);
+    if (withN.flat().length) await spanish.need(withN.flat());
+    const entries = asked.map((a, i) => {
+      const own = spanish.get(a.own) || {};
+      const nouns = a.nouns.map((x) => spanish.get(x)).filter(Boolean);
+      const verbs = a.verbs.map((x) => spanish.get(x)).filter(Boolean);
+      const enye = withN[i].map((x) => spanish.get(x)).filter(Boolean);
+      const more = enye.filter((e) => (e.w || []).length > (own.w || []).length);
+      const order = [...more, own, ...nouns, ...enye.filter((e) => !more.includes(e))];
+      const listed = (list, field) => list.map((e) => (field === 'w' ? e.w || [] : [...(e.k || '')]));
+      // After me, te or nos a word is a verb (te amo is amar's 愛する before amo's 主人).
+      const verb = i > 0 && CLITIC_ES.has(words[i - 1]);
+      const of = (field) => {
+        const [a, b] = verb ? [verbs, order] : [order, verbs];
+        return [...new Set([...byPlace(listed(a, field)), ...byPlace(listed(b, field))])];
+      };
+      // direct: the word or its plural names something, not only a verb it may be a form of.
+      return { w: of('w'), k: of('k').join(''), direct: order.some((e) => (e.w && e.w.length) || e.k) };
+    });
+    const weak = words.map((w) => WEAK_ES.has(w) && words.some((x) => !WEAK_ES.has(x)));
+    const keys = combineSpanish(entries.map((e) => e.w), weak).slice(0, MAX_RESULTS);
+    const kanji = combineSpanish(entries.map((e) => [...e.k]), weak);
+    return fromIndex(entries.filter((e, i) => !weak[i]), 'spanish', keys, kanji);
   }
 
   /** The rare words every word of the query names, from their index rows. */
@@ -200,27 +376,75 @@ export function createSearch({ dict, fetchJson, base = 'data/' }) {
   }
 
   /**
-   * @returns {Promise<{ kind: string, words: object[], kanji: string[] }>}
+   * @param {string} q
+   * @param {{ lang?: string }} [o]  the learner's language, 'en' or 'es'
+   *   (strings.js currentLang() by default): its meanings rank first
+   * @returns {Promise<{ kind: string, words: object[], kanji: string[], sentence?: { kana: string, text: string } }>}
    *   `kanji` are the kanji to offer pages for: those typed, or those whose
-   *   meanings use the English.
+   *   meanings use the words. `sentence` is a romaji sentence's reading.
    */
-  async function search(q) {
+  async function search(q, { lang = currentLang() } = {}) {
     const kind = queryKind(q);
     if (kind === 'empty') return { kind, words: [], kanji: [] };
     if (kind === 'ja') {
       const words = await japanese(q);
       return { kind, words: words.slice(0, MAX_RESULTS), kanji: [...new Set([...q].filter(isKanji))] };
     }
-    if (kind === 'romaji') {
-      const kana = toHiragana(String(q).trim().toLowerCase());
-      const [ja, en] = await Promise.all([japanese(kana), inEnglish(q)]);
-      const seen = new Set(ja.map((r) => r.key));
-      // A word found through the romaji says the kana it was read as.
-      const read = ja.map((r) => Object.freeze({ ...r, romaji: kana }));
-      return { kind, words: [...read, ...en.words.filter((r) => !seen.has(r.key))].slice(0, MAX_RESULTS), kanji: en.kanji };
-    }
-    const en = await inEnglish(q);
-    return { kind, ...en };
+    const reading = kind === 'romaji' ? romajiReading(q) : null;
+    const [rw, en0, es0] = await Promise.all([
+      reading ? romajiWords(reading) : { typed: [], edited: [], asTyped: [], sentence: null },
+      inEnglish(q, lang),
+      inSpanish(q),
+    ]);
+    // A sentence where a meaning names every word of the query is that
+    // meaning's (agua, tea), unless a particle only Japanese types was typed
+    // on its own (sore wa).
+    const meaning = en0.complete || es0.complete;
+    const read = rw.sentence && (!meaning || rw.sentence.strong) ? await readRomaji(reading, rw.sentence) : null;
+    const said = read ? read.words : [];
+    const own = rw.asTyped.filter((r) => ownWord(r, rw.edited));
+    const rest = rw.asTyped.filter((r) => !own.includes(r));
+    // Where the romaji found a word as typed, or a sentence, a meaning counts
+    // only if every word of the query is one the index knows (sake is English
+    // too; konnichi wa is not, and wa alone named 昭和).
+    const sure = said.length > 0 || rw.typed.length > 0;
+    const meant = (x) => (!sure || x.complete ? x : { ...x, words: [], kanji: [] });
+    const firstTierRomaji = said.length + rw.typed.length + rw.edited.length;
+    let en = meant(en0);
+    let es = meant(es0);
+    // An English learner sees Spanish only where English and romaji found
+    // nothing (sales is no 塩); a Spanish one sees English where it names
+    // every word or Spanish found nothing.
+    const romajiAny = firstTierRomaji + rw.asTyped.length;
+    const englishToo = lang !== 'es' || en0.complete || !es.words.length;
+    if (!englishToo) en = { ...en, words: [], kanji: [] };
+    if (lang !== 'es' && (en.words.length || romajiAny)) es = { ...es, words: [], kanji: [] };
+    const commonFound = firstTierRomaji + en.words.length + es.words.length;
+    const rare = englishToo && en.asked.length && en.words.length < RARE_WHEN && commonFound < RARE_WHEN && (!romajiAny || en0.complete)
+      ? await rareInEnglish(en.asked) : [];
+    // What the letters spell as typed leads, then a meaning that names every
+    // word, then what an edit spells; in Spanish the meaning's first word
+    // goes before even the romaji's (manga is 袖, then 漫画).
+    const [mine, other] = lang === 'es' ? [es, en] : [en, es];
+    // A Spanish word read only as a verb form (ame as amar's) does not go before
+    // the romaji it spells as typed (ame is 雨).
+    const lists = [
+      ...(lang === 'es' && es.complete && (es.direct || !rw.typed.length) ? [es.words.slice(0, 1), rw.typed.slice(0, 1)] : []),
+      said, rw.typed,
+      mine.complete ? mine.words : [],
+      other.complete ? other.words : [],
+      own, rw.edited, rest,
+      mine.complete ? [] : mine.words,
+      other.complete ? [] : other.words,
+      rare,
+    ];
+    const kanji = [...new Set([...mine.kanji, ...other.kanji])].slice(0, KANJI_MAX);
+    return {
+      kind,
+      words: mergeResults(lists).slice(0, MAX_RESULTS),
+      kanji,
+      ...(read ? { sentence: read.sentence } : {}),
+    };
   }
 
   /** The parts picker's data: { list: [[part, strokes|null]], map: part -> kanji[] }. */

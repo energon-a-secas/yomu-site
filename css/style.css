@@ -1117,6 +1117,8 @@ button.mk-tab { background: transparent; border-top: 0; border-left: 0; border-r
 .sr-input { min-height: 44px; font-size: var(--text-base); }
 .sr-status { margin-top: var(--space-3); }
 .sr-kanji { margin-top: var(--space-4); }
+.sr-sentence { margin-top: var(--space-4); }
+.sr-sentence .sr-word { margin: 0 0 var(--space-2); }
 .sr-list { list-style: none; display: flex; flex-direction: column; gap: var(--space-2); margin-top: var(--space-3); }
 .sr-item {
   display: flex; flex-direction: column; gap: 4px;
