@@ -997,7 +997,12 @@ html[data-hand="on"] .kc-kana { font-family: 'Yomu Klee One', var(--ja); }
 .kp-reading-rom, .kp-word-rom .rom, .kj-rom { font-size: var(--text-xs); color: var(--text-secondary); }
 .kp-reading.is-saying, .kp-say-word.is-saying { border-color: var(--mark); background: var(--surface-2); }
 @media (hover: hover) { .kp-reading:hover { border-color: var(--border-strong); } }
-.kp-reading[aria-disabled="true"] { cursor: default; }
+/* A reading or word with no recording and no device voice (events-kanji-page.js):
+   the reading stays legible, in the secondary ink, inside a dashed frame no
+   stronger than an enabled one's, and does not answer hover; a word's speaker
+   dims. Off recedes. */
+.kp-reading[aria-disabled="true"] { cursor: default; border-style: dashed; border-color: var(--border); color: var(--text-secondary); }
+.kp-say-word[aria-disabled="true"] { opacity: 0.45; cursor: default; }
 .kp-say-word {
   width: 44px; height: 44px; display: grid; place-items: center;
   border: 1px solid transparent; border-radius: var(--radius-sm);
@@ -1112,6 +1117,8 @@ button.mk-tab { background: transparent; border-top: 0; border-left: 0; border-r
 .sr-input { min-height: 44px; font-size: var(--text-base); }
 .sr-status { margin-top: var(--space-3); }
 .sr-kanji { margin-top: var(--space-4); }
+.sr-sentence { margin-top: var(--space-4); }
+.sr-sentence .sr-word { margin: 0 0 var(--space-2); }
 .sr-list { list-style: none; display: flex; flex-direction: column; gap: var(--space-2); margin-top: var(--space-3); }
 .sr-item {
   display: flex; flex-direction: column; gap: 4px;

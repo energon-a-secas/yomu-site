@@ -23,7 +23,18 @@
  *   it is the written form), `glosses` the tagged senses' English, at most
  *   GLOSSES, and `common` 1 when JMdict marks a spelling common. Common
  *   entries first, then by reading. A set fills as many files as the cap
- *   asks.
+ *   asks. A sixth item, `es`, is the row's Spanish where the dictionary has
+ *   it (tools/lib/sets-spanish.mjs rowSpanish: the meanings data/es/dict
+ *   holds for the record the row is), so a filter in Spanish finds it; a
+ *   row without has five items.
+ *
+ * The Spanish is read from the committed data/dict/ and data/es/ (after
+ * build-spanish), not from the upstream, so it can be put on the committed
+ * rows again without it:
+ *
+ *   node tools/build-sets.mjs --spanish   (the rows as committed, each with its Spanish anew)
+ *
+ * The full run adds it the same way, after the romaji, so both write the same bytes.
  * data/sets/index.json, `yomu-sets-index/1`: each set's id, count and files.
  * data/sets/wNN.json, `yomu-sets-words/1`, index data/sets/words.json: each
  *   first-tier key with a kanji in it to up to IN_WORD rows that contain it,
@@ -39,6 +50,8 @@ import path from 'node:path';
 import { loadZippedJson, upstream } from './lib/sources.mjs';
 import { licenceBlock, unshippable } from './lib/licence.mjs';
 import { AVOID_EXPLICIT } from './lib/avoid.mjs';
+import { rowSpanish, recordsFrom } from './lib/sets-spanish.mjs';
+import { AUTHORED_ES } from './lib/spanish.mjs';
 import { createDict } from '../js/dict.js';
 import { analyze, normalize } from '../js/analyze.js';
 import { toHira, said } from '../js/kana.js';
@@ -144,6 +157,33 @@ async function addSaid(sets) {
   return `romaji: the reader agrees on ${found} of ${rows} rows`;
 }
 
+/** Each row's Spanish, where the dictionary has it, as its sixth item; how many each set has. */
+function addSpanish(sets) {
+  const keys = new Set([...sets.values()].flatMap((rows) => rows.map((r) => r[0])));
+  const read = (src) => {
+    const file = path.join(SITE, src);
+    return fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : null;
+  };
+  const recordsOf = recordsFrom(read, keys);
+  const counts = [];
+  for (const [id, rows] of sets) {
+    let n = 0;
+    for (const row of rows) {
+      row.length = 5;
+      const es = rowSpanish(row, recordsOf);
+      if (es) { row.push(es); n += 1; }
+    }
+    counts.push(`${id} ${n} of ${rows.length}`);
+  }
+  return `spanish: ${counts.join(', ')}`;
+}
+
+/** The committed rows, set by set, as the index lists their files. */
+function committed() {
+  const index = JSON.parse(fs.readFileSync(path.join(OUT, 'index.json'), 'utf8'));
+  return new Map(index.sets.map((set) => [set.id, set.files.flatMap((src) => JSON.parse(fs.readFileSync(path.join(SITE, src), 'utf8')).rows)]));
+}
+
 function collect() {
   const jm = loadZippedJson('jmdictFull');
   const out = new Map(SETS.map(([id]) => [id, []]));
@@ -243,14 +283,20 @@ function pack(id, rows, licence) {
 
 async function main() {
   const t0 = Date.now();
+  const spanishOnly = process.argv.includes('--spanish');
   const licence = licenceBlock('edrdg', TOOL, { upstream: [upstream('jmdictFull')] });
+  // The rows hold JMdict's Spanish too (and could hold a meaning written for
+  // Yomu), so the set files carry the Spanish licence; the words index holds none.
+  const { generated_by: by, generated_at: at, ...esHead } = licenceBlock('edrdgSpanish', TOOL, { upstream: [upstream('jmdictFull'), upstream('jmdictSpa')] });
+  const setLicence = { ...esHead, inputs: [{ ...AUTHORED_ES }], generated_by: by, generated_at: at };
   const written = [];
   const sets = [];
   const lines = [];
-  const all = collect();
-  lines.push(await addSaid(all));
+  const all = spanishOnly ? committed() : collect();
+  if (!spanishOnly) lines.push(await addSaid(all));
+  lines.push(addSpanish(all));
   for (const [id, rows] of all) {
-    const docs = pack(id, rows, licence);
+    const docs = pack(id, rows, setLicence);
     let bytes = 0;
     const files = docs.map((doc, i) => {
       const name = `${id}${i}.json`;
@@ -262,7 +308,14 @@ async function main() {
     sets.push({ id, n: rows.length, files });
     lines.push(`${id}: ${rows.length} entries (${rows.filter((r) => r[3]).length} common) in ${files.length} files, ${fmtBytes(bytes)}`);
   }
-  writeJson(path.join(OUT, 'index.json'), { _licence: licence, format: 'yomu-sets-index/1', sets }, 'sets');
+  writeJson(path.join(OUT, 'index.json'), { _licence: setLicence, format: 'yomu-sets-index/1', sets }, 'sets');
+  if (spanishOnly) {
+    const gone = pruneStale(OUT, /^(yoji|proverb|idiom)\d+\.json$/, written);
+    if (gone.length) lines.push(`removed ${gone.join(' ')}`);
+    lines.push(`wall time ${((Date.now() - t0) / 1000).toFixed(1)} s`);
+    process.stdout.write(`${lines.join('\n')}\n`);
+    return;
+  }
   const inDocs = packKeys(wordsIn(all), 'yomu-sets-words/1', licence);
   let inBytes = 0;
   const shards = inDocs.map((doc, i) => {

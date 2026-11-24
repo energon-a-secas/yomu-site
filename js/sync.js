@@ -26,6 +26,7 @@ export const FN = Object.freeze({
   push: 'sync:push',
   pullWords: 'sync:pullWords',
   pushWords: 'sync:pushWords',
+  erase: 'sync:erase',
 });
 /** Rows per push call: convex/model/sync.ts MAX_KANJI, MAX_PHRASES and MAX_WORDS. */
 export const KANJI_BATCH = 200;
@@ -53,6 +54,22 @@ export class SyncError extends Error {
 function answer(res) {
   if (!res || res.ok === false) throw new SyncError(res && res.error ? String(res.error) : 'no-answer');
   return res;
+}
+
+/**
+ * Erase everything the deployment holds for the caller, a batch a call
+ * (convex/model/sync.ts erase), for the account's deletion. How many rows
+ * went. The caller forgets its book afterwards: there is no account left
+ * for it to name.
+ */
+export async function eraseAll(client) {
+  let deleted = 0;
+  for (let i = 0; i < MAX_PAGES; i += 1) {
+    const res = answer(await client.mutation(FN.erase, {}));
+    deleted += res.deleted || 0;
+    if (res.done) return deleted;
+  }
+  throw new SyncError('too-many-rows');
 }
 
 /**

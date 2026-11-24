@@ -121,8 +121,15 @@ and the dictionary's meanings stay English on the page.
 | `render*.js`, `events*.js`, `state.js` | the page | `analyze.js`, `notes.js`, `strings.js` |
 | `gaps.js` | where one word ends and the next begins, and the one reason for each edge, read from tokens the analyzer built (kinds, parts, confidence, the characters); the places, marks and score of "Where are the spaces?" | `kana.js` |
 | `conjugate.js` | every form of a verb or adjective from its dictionary form and part of speech, forward (the Word panel's All forms); held to `deinflect.js` by `tests/conjugate.test.mjs`, which reads each form of every first-tier word back | `kana.js` |
-| `search.js` | Search's logic: what a query is, the keys a Japanese query asks for, the English index (`data/search/`, the rare words' too when the common ones find few) and kanji by parts; `glossWords`, which the builder splits glosses with too | `range-store.js`, `kana.js`, `deinflect.js`, `vendor/wanakana.js` |
-| `sets.js` | The Collections tab's logic: JMdict's four-character idioms, proverbs and idiomatic phrases (`data/sets/`), loaded a set at a time, and the filter over one (`rowMatches`) | `search.js`, `kana.js`, `vendor/wanakana.js` |
+| `search.js` | Search's logic: what a query is, the keys a Japanese query asks for, the English and Spanish indexes (`data/search/`, the rare words' too when the common ones find few), the readings merged (as typed, a meaning that names every word, then an edit's), a syllable still being typed held back, the kanji a Spanish answer's first words share, and kanji by parts | `range-store.js`, `kana.js`, `deinflect.js`, `strings.js`, `search-latin.js`, `search-meaning.js`, `search-romaji.js` |
+| `search-meaning.js` | a query's words in English and Spanish, as looked up and as typed (`glossWords`, which the builder and the filters split English with too; `askedWords`, the words a page names in a found-by tag), how the keys its words name are put together, and whether a result's English or Spanish is the query whole; no data | `search-latin.js` |
+| `search-romaji.js` | Search's romaji half: the words a romaji query spells as typed or with the fewest edits (a word's band read from its kanji spelling), a rare word that is a word of its own, a sure name, and when the query is a sentence, read by stretches between the particles typed on their own, then offered only where `search-grammar.js` trusts it, its words listed where it does not | `kana.js`, `search-latin.js`, `search-names.js`, `search-grammar.js`; `search-sentence.js` imported only for a sentence |
+| `search-grammar.js` | the grammar a romaji sentence's reading is held to: a said e before a verb of going or coming is へ, a form that ends a clause before a case particle is the noun its kana is, and `trusted`, whether a reading is one to offer | `kana.js`, `search-names.js` |
+| `search-names.js` | the sure names by reading (`data/search/names.json`): a romaji word that is a name, a sentence's names written as names (with an honorific always, without one only where the reading without it is no sentence to trust or cuts into it: `cutsName`), and a name a reading spelled as words (`splitNames`) | `kana.js` |
+| `search-latin.js` | what Latin letters say: folding (`foldLatin`), Spanish words (`spanishWords`, which the builder splits the Spanish glosses with too, and `spanishWordsTyped`, the same as typed), the words one may be a form of (`spanishForms`), the kana romaji spells (`romajiReading`) and a syllable still being typed (`heldRomaji`), the places it may be wrong and the readings they make (`romajiEdits`, `romajiVariants`, `applyEdits`), katakana with the bar (`withBar`) and loose romaji for a filter (`looseRomaji`); no data | `kana.js`, `vendor/wanakana.js` |
+| `search-sentence.js` | a romaji sentence typed together, read with the analyzer: the reading it is surest of over the places `romajiEdits` names and the katakana words a stretch of hiragana may be (`katakanaEdits`), its tokens and the edits it kept | `lattice.js`, `analyze.js`, `search-latin.js`, `kana.js` |
+| `sets.js` | The Collections tab's logic: JMdict's four-character idioms, proverbs and idiomatic phrases (`data/sets/`), loaded a set at a time, and the filter over one (`rowMatches`: English in the English, Spanish in the Spanish, folded, romaji however it is typed) | `search.js`, `kana.js` |
+| `saved-filter.js` | the filters over what a learner keeps: a saved kanji (`kanjiMatches`, My kanji's), a saved word (`wordMatches`: spelling, reading, meaning, the Spanish a caller passes, the sentence it was saved from) and a text (`textMatches`, History's), each reading romaji however it is typed and folding a meaning's accents; the iOS app's My collection asks the same three | `kana.js`, `search-latin.js`, `history-store.js` |
 | `word-levels.js` | Words by level: Waller's JLPT vocabulary lists (`data/words/`, not committed yet), a level loaded on first view, what Save keeps of a row, and `WORD_LEVELS_READY`, which offers the shelf only once the sizes are pinned | `levels.js`, `reader.js` |
 | `examples.js` | a word's example sentences (`data/sent/`) by key and reading, and the page's one shared loader | `range-store.js`, `other-forms.js` |
 | `other-forms.js` | a word's other spellings (`data/spell/`) with JMdict's tags, and the page's one shared loader | `range-store.js` |
@@ -1661,8 +1668,9 @@ Every one of them reads nothing Spanish unless asked, never rejects for a
 Spanish file it cannot load (the English stands), and changes no English
 field. Where there is no Spanish there is no `es`, and the English beside it
 is the meaning to show, said to be English. The page itself still passes only
-its `lang` and shows English meanings; the app passes `meanings: 'es'`
-(yomu-ios bridge/entry.js).
+its `lang` and shows English meanings, but for Search (below, "Search in
+Spanish"), which in Spanish asks `dict.needEs` for the records it found; the
+app passes `meanings: 'es'` (yomu-ios bridge/entry.js).
 
 ### Measured, 2026-11-07 and 2026-11-08
 
@@ -1688,6 +1696,519 @@ with JMdict's alone). The most frequent still without: ら, ように, 待ち, �
 品 and 妻.
 
 Not in Spanish: the example sentences (Tatoeba's Spanish covers one in seven),
-the idioms, proverbs and four-character idioms, a rare word Search draws from
-its English index row, the meaning a saved word keeps (`word-store.js`), and
-searching by a Spanish meaning, which needs an index of its own.
+a rare word Search draws from its English index row, and the meaning a saved
+word keeps (`word-store.js`). Searching by a Spanish meaning, and the idioms'
+Spanish, came on 2026-11-17 (below).
+
+## Search in Spanish, and romaji however it is typed (2026-11-17)
+
+Naninani's owner, reading in Spanish, found that Search found nothing in
+Spanish, and that romaji typed the way people type it (together, with wa for
+は, a long vowel left out) found nothing either. Measured over the committed
+data before the change: lluvia, comer, gracias, escuela, libro, tren and
+beber agua found nothing; gato and perro were read as romaji (gato the name
+ガト); buenos días found ブエノスアイレス; konnichiwa found こんにちわ (a rare
+spelling), konnichi wa 昭和, arigatou gozaimasu nothing, gakko がっこ; and
+nihongowobenkyoushimasu, watashiwagakuseidesu and kyouwaamedesu nothing. In
+the Phrases tab buenos dias and perdon found nothing (glossWords split días
+at its accent), and the idiom shelves had English only.
+
+### The Spanish index
+
+`data/search/es.json` (`yomu-search-es-index/1`) and `sNN.json`
+(`yomu-search-es/1`), written by `tools/build-search.mjs` from the Spanish
+`tools/build-spanish.mjs` wrote under `data/es/`: each Spanish word to `w`,
+up to 24 first-tier keys, and `k`, up to 10 kanji, ranked as the English are
+(band, record, meaning, the word's place, a gloss that is the word alone),
+each comma-separated gloss of a meaning counting as one. They sit in
+`data/search/` and not under `data/es/`, because `data/es/X` is the Spanish
+counterpart of `data/X` (`es-files.js esSrc`), and these are Search's own.
+
+- **Words** (`search-latin.js spanishWords`): lower case, accents and
+  diaeresis folded (canción is cancion, pingüino pinguino), parentheses left
+  out, and a stop list read from the glosses (de is in a tenth of them: a, al,
+  algo, alguien, como, con, de, del, e, el, en, es, etc, ej, la, las, le, les,
+  lo, los, o, p, para, por, que, se, su, sus, u, un, una, unas, uno, unos, y).
+  A gloss that is a stop word alone keeps it: 何 is "qué", so que finds it.
+- **Set phrases.** A key that is another plus a particle (`x`: 今日は, 一緒に)
+  is left out, as in English, unless it is usually written in kana (`u`):
+  then it is a phrase a learner looks for by its meaning, so hola finds
+  こんにちは, buenas tardes こんばんは and siempre いつも (41 keys). Such a key
+  ranks a band lower by any gloss but its meaning's first: こんにちは is "hola,
+  buenos días", and buenos días is おはよう first. English still leaves them
+  all out (hello finds もしもし and ハロー, as before).
+- **ñ** stays a letter of its own, so año and ano are two words; each word
+  with ñ is listed under its plain spelling too (`n`: `"nino": { "n":
+  ["niño"] }`, 180 words), so nino finds 子供. Where the ñ word names more
+  keys than the plain one, it comes first: ano is 年 before こう門.
+- **Forms** (`spanishForms`): a word is also asked as the plural or
+  feminine it may be (libros is libro, luces luz, lápices lápiz, roja rojo,
+  pequeña pequeño), each key by its best place in any of them, the word's
+  own first among equals (libros is 冊, then 本); and as the verb it may be a
+  form of (bebo is beber, comí comer, hablé hablar, gusta gustar), after all
+  of those (nombre is 名前 before nombrar's 任命), except after me, te, nos or
+  os, where it is a verb first (te amo is 愛する before amo's 主人). A form
+  shorter than three letters is never asked (mes is not me).
+- **Several words** keep the keys every word names. Where that is fewer than
+  five, the words other than pronouns, possessives, muy and the verbs that
+  come before what is meant (`WEAK_ES`: mi, tu, me, te, nos, yo, muy,
+  mucho, tengo, hace, estoy, soy, voy and their kin) are asked together too
+  (tengo hambre is hambre's 空腹; muy bien is 詳しい, then bien's よく); and
+  where the words share nothing, each one's keys by place (tomar agua). A
+  weak word alone is still searched: te is té, お茶.
+- **Kanji**: KANJIDIC's Spanish meanings name the kanji, as the English do
+  (lluvia offers 雨). They name a kanji in few words, and not always the one
+  a learner means: 食 is alimento, comida and eclipse, and comer named only
+  喫 (consumir, comer, beber). So a kanji at least half of the first six
+  words found share (`search.js sharedKanji`) goes first where the index
+  names it too (días offers 日 before the index's 旬), and is added before
+  the index's kanji where none of those is written in the six words: comer's
+  食べる, 食事, 食う, 外食 and 間食 share 食, and comer offers 食 and then 喫,
+  as eat does. Two of six is a compound's partner more often than the word
+  (baño's お風呂 and 風呂場 share 風 and 呂), and where a kanji the index names
+  is written in the words, the index has it right: escuela is 校 (学校), not
+  学校中, profesor 師 (教師), not 教師授, and tokio, which the index gives no
+  kanji, none (it offered 京).
+- **The rare words have no Spanish index.** Their Spanish covers 52,642 of
+  432,117 keys (12.0%), and an index row must carry its meanings, since a
+  card cannot fetch a rare shard; the English rare index is 13.7 MB for 53,282
+  words, and the app bundles all of `data/`. A review counted 7,723 Spanish
+  words only the rare tier has (ruso, ロシア人, among them, about 25,000 key
+  references): a smaller index of those alone is the owner's call against the
+  download, not made here.
+
+Sizes: 12,687 words from 16,933 keys, 5 shards, 687.9 KB and an index of
+1.8 KB (689,705 bytes, 242,754 gzip). `check-data.mjs` holds the shards to the range
+rule, every key to the first tier and every `n` to an entry.
+
+### One search, every reading
+
+`search(q, { lang })`, `lang` the learner's ('en' or 'es', `strings.js
+currentLang()` by default, which the app sets from `__lang`). A query with
+Japanese in it is read as Japanese only. Latin letters are tried in every
+reading that applies at once: romaji (when Hepburn's letters spell kana: no
+l, q or x, c only in ch or cch, so caliente and casa are not romaji), English
+and Spanish, merged in this order, each card once (`mergeResults`: a word a
+reading already found is left out of a later one, and a kana key keeps only
+the records no earlier card showed, so sake in Spanish is 酒 and then 鮭):
+
+1. in Spanish, where Spanish names every word, its first word, then the
+   first word the romaji spells as typed (manga is 袖, then 漫画; no is いや,
+   then の), unless the Spanish was found only as a verb form and the romaji
+   spells a word as typed (ame is 雨, not amar's 愛する); and where none of
+   that word's Spanish glosses is the query whole (each comma-separated
+   gloss, folded, ñ as n, or a plural, feminine or verb the query is a form
+   of: ano is año, so 年 keeps the lead over あの), a
+   word the romaji spells as typed, or one an English gloss of which is the
+   query exactly, goes before it: tokyo is in the Spanish of
+   東京証券取引所, "Tokyo Stock Exchange (Bolsa de Tokio)", and put it first,
+   tagged Spanish, with 東京 (Tokyo) second; 東京 is first now. 袖's Spanish
+   is manga, so manga keeps 袖 first;
+2. a sentence's words (or, where the reading is not one to trust, the
+   words it read, below), then a sure name the romaji spells;
+3. the words the romaji spells as typed (sake さけ, go ご, rain ライン), then
+   a sure name they spell too (satou is 砂糖, then 佐藤);
+4. a meaning that names every word of the query, the learner's language
+   first (house is 家; tokyo is 東京 by its English; gato is 猫 in Spanish);
+5. a rare word spelled as typed that is a word of its own (below);
+6. the words the romaji spells with edits (gakko 学校), then the other rare
+   words and names spelled as typed;
+7. a meaning that names only some of the words, the learner's language first;
+8. the English rare words.
+
+A meaning that names every word goes before an edit's reading because an
+English word is often romaji with one edit: house is ほうせ, one long vowel
+from 法制, see 性, time 知名, bee 米, nose 農政, dome 同盟. Where the romaji
+found a word as typed or a sentence, English and Spanish count only if every
+word of the query is in their index: konnichi wa named 昭和 through "wa".
+An English learner sees Spanish only where English and romaji found nothing
+(sales offered 塩, pie 足, bonito 綺麗); a Spanish learner sees English where
+it names every word or Spanish found nothing, and Spanish's stop words are no
+English on a Spanish page (el gato found El Salvador, carne de cerdo FIFA).
+The English rare words are asked only when the common words of all readings
+are fewer than five, and on a Spanish page only where English counts. Every
+result keeps its records as the dictionary has them and says how it was
+reached in `via`: `exact`, `form`, `rare`, `name`, `english`, `spanish` or
+`sentence`, and `romaji`, the kana it was read as.
+
+The answer also says `asked`, the words a meaning was looked up by as the
+learner typed them (`search-meaning.js askedWords`: trimmed, stop words
+dropped, accents and capitals kept), which the page's found-by tag names
+("Español: días") and the iOS app's bridge passes on. Folding is for
+matching only: the tag showed the folded word, dias for días, pajaro for
+pájaro, a spelling mistake in a Spanish interface.
+
+### Romaji however it is typed
+
+`romajiReading` reads each space-separated part on its own (kan i is かんい)
+and joins them, macrons as long vowels (Tōkyō is toukyou), m before b, m or
+p as ん (shimbun), a hyphen between letters as a space (konnichi-wa, o-cha),
+one ending a part as the bar (ohayo-) and a part that ends in nn as one ん,
+as an IME writes it (konn is こん; wanakana's こんん read as 紺ん while
+konnichiwa was being typed).
+
+**A syllable still being typed is held back** (`heldRomaji`). Typed letter
+by letter, every consonant left the query no romaji (konnic, kyouw,
+kyouwaamed, taber) and the answer emptied, between sentences that were
+often nonsense, after almost every key. Where the query is not romaji and
+no meaning names every word of it, its last consonants (at most three: tch)
+are held back where what is left is romaji and spells a first-tier word of
+three kana or more or a sentence to trust, and the answer says them in
+`held`: kyouw is read as kyou (今日), kyouwaamed as kyouwaame (今日は雨).
+dog and tab are English, so nothing is held there; gat and amig, Spanish
+gato and amigo half typed, were が and 網, and perr, hous, watr and chott
+ぺ, 方, わ and ちょ, so nothing is held there either. A final n is never
+held: it is ん. A later part that is a particle
+(wa, ha, wo, o, e, he, ni, to, de, ga, mo, no, ka, ya, ne, yo, kara, made,
+yori) is one typed on its own. `romajiEdits` names the places the kana may
+be wrong: a particle written as said (わ, お, え after the first kana, each
+with は, を, へ), a long vowel left out (after each beat: あ, い, う, and い or え
+after e, う or お after o, so okii is 大きい, kori 氷 and onesan お姉さん), oo or
+ee for おう or えい, and, for a single word, a ん left out before a な-row kana
+(konichiwa) and a っ left out before a k, s, t or p beat (choto ちょっと, zuto
+ずっと, gakou 学校). `romajiVariants` makes the readings of up to 3 edits,
+fewest first, at most 64, a っ counting two: ときょ is とうきょう (two long
+vowels, 東京) before とっきょ (特許), and kipu is キープ before 切符.
+
+A word is found as typed first (exact, its dictionary forms by their word's
+band, so matte is 待つ before 舞う, its katakana with the bar, `withBar`:
+koohii is コーヒー); failing that, the first number of edits at which a
+first-tier word spells the whole query wins, exact before a dictionary form,
+then by the band of its kanji spelling (a kana key's own band says how often
+the kana is the spelling: 協和 is band 4 and 今日 band 1, though under their
+kana both are 3 or none). A word typed whole is never edited: kawa is かわ,
+sake さけ; nor is a single kana. A rare word spelled exactly as typed goes
+before an edit's word when it is a word of its own: usually written in kana,
+not a kana spelling of a common word (`e`), and no spelling of the edit's
+word. So ojisan is おじさん (uncle) before おじいさん, obasan おばさん; while
+こんにちわ is こんにちは's 今日は, and がっこ (tsukemono), ありがと and ちょと are
+not words of their own, so konnichiwa, gakko, arigato and choto lead with
+the edit's word.
+
+### A sentence typed together
+
+Search reads the query as a sentence when no word spells it whole, when a
+particle was typed on its own and the query written with it (kyou wa is
+きょうは) is no word (konnichi wa is こんにちは, a word), or when a said
+particle ends an uncommon word whose stem is among the commonest (kyouwa:
+協和 and 共和 are band 4, 今日 band 1, so 今日は; heiwa stays 平和, band 1),
+or when a sure name of one spelling has an honorific or the copula after it
+(tanaka san desu; below). A name alone is no sentence (tanaka is 田中).
+It does not where English or Spanish names every word of the query (agua,
+tea, mountain), unless a particle only Japanese types (wa, ha, wo, he) was
+typed on its own (sore wa); nor past `SENTENCE_MAX`, 60 kana, since each
+first pass reads the whole text on every keystroke.
+
+The particles typed on their own are kept apart (sensei ni aimasu is never
+似合います), and a part typed on its own that no word spells as typed becomes
+the word of fewest edits that does (tokyo ni: ときょ is 東京). Each stretch
+between them is read by `search-sentence.js readSentence` with the reader's
+analyzer: from the reading as typed, it tries each edit alone and keeps the
+one the analyzer is surest of, then again, at most 4 steps and 48 first
+passes: fewest guesses, then the lowest cost of the first pass plus each
+edit's price, then fewest tokens. Cost before tokens because the fewest
+tokens read kyouwaamedesu as 共和|雨|です (3 tokens, cost 345) over
+今日|は|雨|です (4, 315). The price because the lattice alone would take a
+change the learner never typed: tsukurikatameerudeokurune keeps めえる
+(meeru) at a price, and becomes 滅入る without one. A particle costs 10, oo
+for おう 20, a katakana word 20, a kana put in 40 (`EDIT_PRICE`).
+
+- **Katakana.** A loanword in romaji is hiragana the lattice has no word for
+  (てれびをみます was 照れ|美|を|見ます, cost 565), so `katakanaEdits` offers,
+  for each stretch of hiragana that is no key, the katakana word it may be, kana for
+  kana (テレビ, 240): terebiwomimasu, koohiiwonomimasu, toirewadokodesuka and
+  korewapendesu are read right.
+- **A kana put in** is tried only beside a guess or a particle the text
+  opens with (no sentence opens with と: tokyoniikimasu is 東京に行きます), never
+  beside a one-kana word: めをみます costs 460 and めいをみます 270.
+- **A said particle in an uncommon word.** Where the reading has a word
+  that ends in a said particle, is band 4 or worse and whose stem is band 1,
+  the stretch is read again with the particle apart: kyouwaiitenkidesune is
+  今日はいい天気ですね, not 協和いい天気ですね (460 against 490).
+- **The commoner verb.** A kana verb the analyzer reads as an uncommon word
+  (band 4 or worse) where a common one (band 2 or better) fits the same
+  form is the common one: chotto matte is ちょっと待って, not 舞って.
+- **へ before a verb of going or coming** (`search-grammar.js
+  motionParticles`). A said e that follows two kana or more, where what
+  comes after it, read by the analyzer, opens with an inflected form of a
+  verb of going or coming (`MOTION`: 行く, 来る, 帰る, 戻る, 向かう and the
+  like, each with the readings that are that verb, so 入る read いる is none;
+  never a bare stem, and never a word, so tokyoekimade is 駅まで), is
+  a particle typed on its own, as if typed tokyo e ikimasu, and the part
+  before it the word of fewest edits that part spells. A word that ends in
+  ん runs into the e as ね (nihoneikimasu is にほねいきます), so a ね before
+  such a verb is ん and the particle where what comes before, with ん, is a
+  word. tokyoeikimasu was 問う虚栄来ます (the climb, one edit at a time,
+  could not reach two long vowels and the said へ), nihoneikimasu に骨行きます,
+  osakaeikimasu お坂へ行きます; they are 東京へ行きます, 日本へ行きます and
+  大阪へ行きます. After へ, an inflected form such a verb also explains is
+  that verb (`goingAfterParticles`): the stretch after a particle typed
+  apart is read alone, and the analyzer alone reads いった as 要った, so
+  tokyo e itta is 東京へ行った. Not after に, where it is as often 言った.
+  Never where the kana is the word's own (`ownKana`): where the stretch with
+  it is a word (えきまえ 駅前, おかね お金, はね 跳ね, いいね), a ね follows a
+  verb or an adjective, or an e after the e row is a long vowel said ee
+  (せんせえ for せんせい). iine ikimashou was 委員へ行きましょう, okane irimasu
+  悪寒へ入ります, booru ga takaku haneagatta ボールが高く版へ上がった and sensee
+  kimashita 先生へきました; ekimaekitekudasai was refused.
+- **A form that ends a clause before a case particle** (`finishClauses`).
+  An imperative or a volitional read straight before が, を, に, で, へ, は,
+  も, の, から, まで or より is the noun its kana is, as the analyzer reads
+  the kana with the particle: ashita ame ga furimasu was 明日編めが降ります
+  (編め, knit), read whole; it is 明日雨が降ります. A verb in its dictionary
+  form straight before は, を, も or で (which take の first: 行くのは) is the
+  same; not before が, which after a verb is "but" (お金はあるが時間がない
+  was refused). Where the kana with the particle is one word to the analyzer
+  (かれは, 枯葉), the kana alone is read, and a pronoun fits too: senshuu kare
+  wa was 先週刈れは, refused, and is 先週彼は. Where nothing fits, the reading
+  is no sentence.
+- **かれわ at the start of a stretch** is 彼 and the particle は, never 枯葉
+  or 刈れ and a word: the rest is read on its own and kept where it reads
+  with no guess and no stray kana, or where the whole read かれは as one word
+  (karewagakuseidesu, 彼は学生です, was 枯葉学生です; karewaishinoyowaihitoda
+  刈れ廃止の弱い人だ). Alone the rest can miss what the whole reads, so the
+  whole is kept otherwise. かのじょわ the same.
+
+The sentence is offered only when it reads as one: no guess, at least two
+tokens, a word, a particle, the copula, an inflection or a set expression
+(mizu kudasai is 水ください, koohii ippai kudasai コーヒー一杯ください, both
+refused before), or a name or a noun with an honorific (田中さん, 林さん for
+hayashi san), and no one-kana noun straight after a noun or a prefix
+(reunite was 霊|う|にて, kohi wo 小|火|を; この日 and 赤い火 are words). gato
+(が|と), mesa (め|さ), nino (に|の), Harajuku (腹|塾) and Asakusa (朝|草) are
+no sentence; and only where the reading is one to trust (below). Its words
+come back in order, each a result with `via: 'sentence'` and its record (a
+name with `via: 'name'` and its names-tier record), particles and
+punctuation left out, and `sentence: { kana, text }`, its kana and its
+Japanese as the analyzer writes it (each token in its record's usual
+spelling, the kana ending kept: 日本語を勉強します), so a page can offer to
+read it.
+
+#### A sure name reads as the name
+
+The names tier is keyed by spelling, and a romaji query has only kana:
+tanaka was read as 棚|か (shelf, and the question particle), the only
+result, and watashi no namae wa tanaka desu as 私の名前は棚かです. So
+`data/search/names.json` (`yomu-search-names/1`, `tools/build-name-readings.mjs`
+from the committed names shards, rebuilt by the checker to compare) files
+each sure name of the tier (`S`, "Names: JMnedict") under its reading: 699
+readings, 740 names, 20.1 KB, loaded once, the first time a romaji query is
+no word as typed. Only the sure names: the strong ones (`s`) would add 4,369
+readings, a third of them places. `search-names.js` reads it:
+
+- A romaji word that is a sure name alone, or with an honorific (san, sama,
+  kun, chan, sensei, senpai) or the copula after it, gives the name's
+  spellings as results (`via: 'name'`, `romaji` its reading), before any
+  other word. tanaka is 田中, and no sentence; tanaka san desu is 田中 and
+  the sentence 田中さんです. A reading of several spellings (いとう: 伊東,
+  伊藤) gives them all and no sentence, since none can be chosen to write
+  one; itou san desu was 一等さんです.
+- Where a word spells the romaji too, the name follows it: satou is 砂糖,
+  then 佐藤, and endou 沿道, then 遠藤 (each was the word alone). A name a
+  typed word writes the same way is that word.
+- In a stretch read as a sentence, a sure name of one spelling with an
+  honorific after it is written as the name before the analyzer reads it
+  (which reads 田中 as the name), where it starts the stretch, a part typed
+  on its own or follows a particle (は, わ, が, の, と, に, を, も, へ; not お or
+  え, which open more words: えきの is 駅の, not え and 木野): tanaka san desu
+  is 田中さんです.
+- One with no honorific is written only where the reading without it is no
+  sentence to trust, or cuts into it (`cutsName`: the name's kana is in the
+  reading but from no token's start to another's end), and only where it
+  starts the stretch, a part typed on its own or follows the topic (は, わ),
+  and the copula, a particle or the end follows. Written wherever a particle
+  went before it, a name took ordinary Japanese: eki no mae da was 駅の前田,
+  kore wa ike da これは池田, eiga o mita 映画を三田, jikan ga sugita
+  時間が杉田, hoshi ga kagayaite imasu 星が加賀やいています,
+  hashigaomomideochita 歯志賀重みで落ちた and kinoonotekiwakyoonotomo
+  木野をの敵は今日の友, each right before the names. Now: tanaka desu is
+  田中です (棚かです puts a sentence-final particle before the copula),
+  watashi no namae wa yamada desu 私の名前は山田です (山だです is two
+  copulas), and watashinonamaewatanakadesu 私の名前は田中です (わた|なか cuts
+  たなか), while 前|だ holds まえだ whole and 駅の前だ stands.
+- A first-tier word that starts where the name does and runs past it, or a
+  form of one, is that word (ひらがなで is never 比良|が|穴|で, かがやいて is
+  輝いて), and a reading a first-tier word or form spells is the word unless
+  an honorific follows: satou desu is 砂糖です, satou san 佐藤さん, mou akita
+  もう飽きた. A name the analyzer does not read as that name is read again as
+  kana.
+- A part typed on its own that is a sure name is never edited into another
+  word (itou is no 一等), unless the edit only writes a particle said as it
+  is written: dewa is では, though でわ is the name 出羽 (kore wa pen dewa
+  arimasen was これはペンで我ありません).
+- A reading that spells a sure name as two words or more where a name
+  stands (`splitNames`) is no sentence, and the name's spellings are listed
+  in their place: watashi wa saitou desu was 私は際頭です, watashi wa itou
+  desu 私は一等です; both list the names (斉藤, 斎藤; 伊東, 伊藤). At the
+  very end a sentence-final particle may close such a name: watashi no
+  namae wa tanaka was 私の名前は棚か and is 私の名前は田中. Where no
+  reading reads at all, the sure names typed as parts are listed: watashi
+  wa abe desu is 安倍, 安部 and 阿部, not 昭和 by its English wa.
+
+#### Only a sentence to trust
+
+A wrong sentence is worse than none: it teaches wrong Japanese, and Read
+the sentence sends it to the reader. `search-grammar.js trusted` offers a
+reading only where:
+
+- every word is a first-tier word (no rare word, no guess) and, where the
+  reading has no predicate (a verb, an adjective, a na-adjective, the copula
+  or a set expression), of band 3 or better as it is written (the kana key's
+  band for a word usually written in kana: もらう, not 貰う's 4): a word and
+  its particle stand on the word alone, so 紺に (navy blue, typed on the way
+  to konnichiwa) is none, while anokokosuiteimasuka (空く is band 4) is;
+- the last token is a dictionary word, the copula or a particle (紺ん is
+  not; 雨でした, 学生じゃない and これはペンではありません are, and were
+  refused while the copula's forms, which have no record, were not counted);
+  a word and a sentence-final particle typed together are not the whole
+  reading (棚か; 見損なったよ, a verb, is), no sentence-final particle comes
+  before the copula (棚かです), and no kana put in after the last letter
+  typed makes a last word of one or two kana (今日はああ, typed on the way to
+  kyouwaame);
+- no verb that opens with a particle it swallowed (as written, or お and わ
+  as said) stands straight after a noun, a pronoun, a name or its honorific:
+  どこ出会います is どこで会います, 上着起きている 上着を着ている,
+  洗濯機わかったの 洗濯機は買ったの, 田中さん似合いました 田中さんに会いました
+  (できる excepted, far commoner than で and 来る: 運転できます);
+- a verb straight after a noun with no particle between is one speech drops
+  を or が before (寿司食べたい, テレビ見ます, もうピザ頼んだよ, お弁当温めますか):
+  the noun a common one (band 3 or better) of three kana or more, or of two
+  among the commonest (band 2: 寿司, not 乙 in お橋は乙消します), the verb no
+  imperative, volitional or bare stem (昨日は友達取れ) and not なる, which
+  takes に (幸せなれない for shiawase na renai). する and できる after a
+  noun that takes them, and any verb after a quantity, stand: 運転できますか,
+  私には姪が二人いる (each was refused);
+- no できる after a verb (乗り吸ってできますか for norisute), no two copulas
+  (山だです), no を or が after a case particle (一人でを留守番, the お of
+  お留守番 typed apart), no て after anything but a verb or an adjective
+  (万ての取った for manten o totta), no counter after anything but a number
+  (バスは間人だった for manin), and no lone お or ご after a noun, a pronoun or
+  a verb, where it is を said (それお証明できますか);
+- a katakana word read from an edit stands as a word: no noun, name,
+  honorific or lone kana just before it (まリアです for maria, 田中さんカラメル
+  for tanaka san kara meeru), and after it only grammar, another loanword, a
+  verb, する, ください or a quantity (昨日は友達とレス虎, typed on
+  the way to resutoran, is not; これはペンです, コピーしてください,
+  ジョギングします and テレビ見ます are, and the last three were refused);
+- no ん straight after a noun (自家ん for jikan), no number straight after a
+  verb or the copula (だった十もう for datta to omou) or a noun (南蛮千 for
+  nanbansen), no ご beside a number (４０ご分, ご百円), and no この, その or
+  どの straight after a noun (紺どの for kondo no).
+
+Where no reading is trusted but the analyzer read the whole query with no
+guess, its words are listed without a sentence, each `via: 'exact'` or
+`'form'` with the kana it was read as, and meanings that do not name every
+word stay out: a refused sentence's place was taken by English the learner
+never typed (watashi wa sensei ja arimasen gave 昭和 and 矢切の渡し, unten
+dekimasu ka 十日えびす, ame deshita 愛する on an English page).
+
+Typed letter by letter, kyouwaamedesu now offers only 今日は, 今日は雨,
+今日は雨で and 今日は雨です on the way, and nothing in between, where it
+offered 今日はああ and emptied after every consonant.
+
+Measured on 2026-11-23 over the 127 lines of the phrase library, their said
+romaji typed together, each searched: 82 read as sentences and 47 of those
+exactly as written before these rules, 62 and 47 after, and 65 and 50 after
+the review of these rules (below): お先に失礼します, もう一度お願いします and
+はいお願いします had no particle, copula or inflection, and a set expression
+counts now. All 20 that are no
+longer offered were wrong (隅増せね気はどちらですか, お橋は乙消しますか,
+に集荷煮ろ色ありがとうございました, 南蛮千から出ますか, ご百円です,
+砂糖ですこの暮らすは初めてですか among them). Of the 15 offered and not
+exact, 12 differ only in a spelling (わかりました for 分かりました, 嬉しい for
+うれしい, 来ました as きました) and 3 are still wrong: 店内でお飯上がりですか,
+ご分ぐらいです and 気をつけて寝付いたら連絡してね.
+
+A review of these rules typed 1,500 short Tatoeba lines (4 to 10 kana,
+sampled evenly) as their said romaji, joined and with words apart, through
+the rules of 2026-11-17, the first version of these rules and the rules as
+they stand (corrected on 2026-11-23 for the review's findings). Of the
+offered sentences, how many are the line exactly, the line's kana in other
+kanji, wrong kana, and none:
+
+| Typed | 2026-11-17 | First version | Now |
+|---|---|---|---|
+| joined | 713, 405, 235, 147 | 655, 323, 130, 392 | 726, 329, 109, 336 |
+| words apart | 845, 488, 97, 70 | 791, 371, 74, 264 | 843, 386, 60, 211 |
+
+Most of the "other kanji" no longer offered were wrong too (富むは for tomu
+wa, 文化歳, 匹会わない, 登山かだ); the right lines still refused are mostly
+noun phrases with a rare word and no predicate (救急箱はどこ, 僕の水筒どこかな),
+a loanword before a noun (ニュース速報です, 窓ガラス), and casual Japanese
+whose verb opens with a particle (使い方わかりません, 車凹んでるよ).
+
+| Query | Read as |
+|---|---|
+| nihongowobenkyoushimasu | 日本語を勉強します: 日本語, 勉強, する |
+| watashiwagakuseidesu | 私は学生です: 私, 学生, です |
+| kyouwaamedesu | 今日は雨です: 今日, 雨, です |
+| watashiwa, watashino, gakkouni, mizuwo | 私は, 私の, 学校に, 水を |
+| ashitagakkoueikimasu | 明日学校へ行きます |
+| tokyoeikimasu, nihoneikimasu, osakaeikimasu | 東京へ行きます, 日本へ行きます, 大阪へ行きます |
+| ashita ame ga furimasu | 明日雨が降ります |
+| tanaka, tanaka san desu | 田中 (a name, no sentence), 田中さんです |
+| watashinonamaewatanakadesu | 私の名前は田中です |
+| eki no mae da, eiga o mita | 駅の前だ, 映画を見た (no 前田, no 三田) |
+| ame deshita, kore wa pen dewa arimasen | 雨でした, これはペンではありません |
+| kopii shite kudasai, unten dekimasu ka | コピーしてください, 運転できますか |
+| karewagakuseidesu | 彼は学生です |
+| watashi wa itou desu | no sentence: 私, 伊東, 伊藤, です |
+| terebiwomimasu, toirewadokodesuka | テレビを見ます, トイレはどこですか |
+| tokyo ni ikimasu, sensei ni aimasu | 東京に行きます, 先生に会います |
+| chotto matte | ちょっと待って |
+| onegaishimasu, itadakimasu | one word each, no sentence |
+| hot water, agua caliente | 湯, by English and by Spanish, no sentence |
+
+What it still reads wrong: English words the index lacks, which the lattice
+can still read (senate is 背な手), a sentence-final ね run into the next verb
+(kiotsuketenetsuitara is 気をつけて寝付いたら), a name that is not sure, which
+reads as the words its kana spell (watashi wa hiroshi desu is 私は干ろ市です),
+a homophone chosen without the context that decides it, which is the
+analyzer's to learn and not Search's (hon o yonda 本を呼んだ, nanji ni okimasu
+ka 何時に置きますか, juuji ni nemasu 従事に寝ます, kohi wo kudasai
+公費をください), a place name with a long vowel left out read as a prefix
+and a word where nothing sets it apart (osakaniikimashita お坂に行きました,
+shinjukuekiwadokodesuka 信塾駅はどこですか, yamaguchi ken 山愚痴件), and a
+particle the analyzer runs into the next word (itsu nihon ni kimashita ka
+いつに本にきましたか, nihongo hanashimasu 日本語はなします). The phrase library's measure is
+above, under "Only a sentence to trust".
+
+Measured in node on the committed data (a fresh dictionary, then the same
+query again): a sentence of 29 kana
+(kinouwatomodachitoeigawomimashitasoshitegohanwotabemashita) 50 ms cold and
+10 ms warm, of 58 kana 48 and 27 ms; anything past 60 kana under 20 ms warm
+(928 letters were 749 ms before the cap). With the rules above, on
+2026-11-23: the 29-kana sentence 54 ms cold and 12 ms warm, tokyoeikimasu
+18 and 2 ms, watashinonamaewatanakadesu 30 and 11 ms; after the review's
+corrections, 60 and 13 ms, 21 and 2 ms, and 35 and 14 ms (it is read twice,
+the second time with the name). Over the 1,500 lines above, 3 ms a query
+joined and 2 ms with words apart, warm.
+
+### Filters
+
+`sets.js rowMatches` (the idiom shelves, the app's Phrases tab through
+`library-filter.js`, its saved readings through `phrase-book.js`) reads an
+English query in the English glosses (`glossWords`, accents folded, so café
+is cafe, and ñ kept, so año is not "another") and a Spanish one in the
+Spanish (folded on both sides with ñ as n, so perdon finds Perdón and nino
+niño; Spanish's stop words out of the query unless it is a question word
+alone, como or que), and romaji as any reading of up to two edits in the
+row's kana (watashiwa finds わたしは). The said line is not searched: its
+letters run together, so eki was the seki of isseki and aku the saku of
+shikoosakugo (aku matched 341 rows, now 28). The Phrases tab also compares
+the query with each line's said romaji, loosely (`looseRomaji`: gakko,
+gakkou and gakkoo are one) only where the loosened query has three letters
+or more; ii loosened is i, which 57 of 71 phrases say. The idioms carry
+their Spanish as a sixth item where the dictionary has it
+(`tools/lib/sets-spanish.mjs`: the record under the row's written form that
+reads its reading, its first gloss opening the row's): 767 of 1,836
+four-character idioms, 102 of 938 proverbs and 165 of 1,288 phrases, 49 KB
+more in all, and the shelf shows it in Spanish. My kanji's filter and
+History's read romaji the same way (`saved-filter.js` `kanjiMatches` and
+`textMatches`, which `render-mykanji.js` and `render-history.js` use); My
+kanji folds a meaning's accents and reads a Spanish one where the info
+carries it, which the page's does not (it shows KANJIDIC's English). The
+iOS app filters My collection with the same module: its kanji with their
+Spanish meanings in a Spanish app, and its words with `wordMatches` (the
+spelling, the reading, the saved meaning and its Spanish, and the sentence
+a word was saved from).

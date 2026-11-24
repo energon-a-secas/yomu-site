@@ -2,7 +2,7 @@
 // titles and the timing marks' words are { en, es }, resolved to the current
 // language (strings.js useLang) when the chart is built; ids never change.
 import { t } from './strings.js';
-import { beats, beatRomaji, toHira, toKata, GENKI_MAP } from './kana.js';
+import { beats, beatRomaji, toHira, toKata, saidAs, GENKI_MAP } from './kana.js';
 
 export const GOJUON = Object.freeze([
   'あいうえお', 'かきくけこ', 'さしすせそ', 'たちつてと', 'なにぬねの',
@@ -39,8 +39,9 @@ export function kanaChart(script = 'hiragana') {
       id: k === ' ' ? `${id}-empty-${i}` : k,
       kana: k === ' ' ? '' : show(k),
       romaji: k === 'っ' ? pause : k === 'ー' ? longVowel : kanaRomaji(k),
-      // These timing marks need context, not an isolated spoken symbol.
-      spoken: k === 'っ' ? 'きって' : k === 'ー' ? 'コーヒー' : ({ 'を': 'お', 'ぢ': 'じ', 'づ': 'ず' }[k] || k),
+      // These timing marks need context, not an isolated spoken symbol; を, ぢ
+      // and づ are said as お, じ and ず (kana.js SAID_AS).
+      spoken: k === 'っ' ? 'きって' : k === 'ー' ? 'コーヒー' : saidAs(k),
       example: k === 'っ' ? show('きって') : k === 'ー' ? show('こーひー') : null,
     })),
   }));

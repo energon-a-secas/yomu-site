@@ -9,28 +9,53 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { HEARD_FORMAT, serializeHeard, madeKey, rejectName, takeHash } from './audio-heard.mjs';
 
-// The beats first: the triage of 2026-11-02 found most of what fails there is
-// the transcriber writing a right sound another way (ゆ "You", み "Me").
-const KIND_ORDER = ['kana', 'sound', 'phrase', 'note', 'word', 'common', 'reading', 'kanji'];
+// The most used first, since the owner has a few hours to listen (2026-11-17):
+// the kanji pages' readings in the pages' frequency order (`readingOrder`,
+// from audio-script.mjs kanjiPageLines), the common words by band, the words
+// of Yomu's own lines, then the beats; the lines themselves and the pages'
+// words after them. Until then the beats came first, because the triage of
+// 2026-11-02 found most of what fails there is the transcriber writing a
+// right sound another way (ゆ "You", み "Me").
+const KIND_ORDER = ['reading', 'common', 'word', 'kana', 'sound', 'phrase', 'note', 'kanji'];
+const LAST = Number.MAX_SAFE_INTEGER;
 
 const relUrl = (from, file) => path.relative(from, file).split(path.sep).map(encodeURIComponent).join('/');
+
+/** A row's group in the page's order: its kind, and a common word's band (common 1). */
+const groupOf = (line) => (line.kind === 'common' && line.band ? `common ${line.band}` : line.kind);
+
+// Beat shaping (docs/AUDIO.md, Beat shaping) came in with commit 9ec4d4b4 on
+// 6 November 2026; every beat take build-audio made since is shaped as it is
+// finished. A take is told apart by its file's date: one written before then
+// still holds its vowel, and shipped as it is it would moan beside the shaped
+// beats.
+const BEAT_SHAPING_MS = Date.parse('2026-11-06T14:07:49Z');
 
 /**
  * One row per record that waits to be heard: it failed its check (or shipped
  * from an earlier hearing, so it can be changed), it is still made under the
- * current signature, and at least one take of its last run is on disk.
+ * current signature, and at least one take of its last run is on disk. A
+ * beat's take whose file is older than beat shaping carries `unshaped`.
  *
- *   script      the current script (kinds and voices already chosen)
- *   made        tools/audio-made.json's records
- *   voices      the roles to list, in the page's order
- *   sigOf       (voiceId, line) -> the signature a clip of it is made under now
- *   rejectsDir  where the takes are
- *   pageDir     where the page is written, for the relative links
- *   keptClip    (voiceId, id) -> the path of a kept clip, or null
+ *   script        the current script (kinds and voices already chosen)
+ *   made          tools/audio-made.json's records
+ *   voices        the roles to list, in the page's order
+ *   sigOf         (voiceId, line) -> the signature a clip of it is made under now
+ *   rejectsDir    where the takes are
+ *   pageDir       where the page is written, for the relative links
+ *   keptClip      (voiceId, id) -> the path of a kept clip, or null
+ *   readingOrder  Map of a reading's key -> its place in the kanji pages'
+ *                 order; a reading it lacks comes after those it has
  */
-export function listenRows({ script, made, voices, sigOf, rejectsDir, pageDir, keptClip }) {
+export function listenRows({ script, made, voices, sigOf, rejectsDir, pageDir, keptClip, readingOrder = new Map() }) {
   const rank = (kind) => { const i = KIND_ORDER.indexOf(kind); return i < 0 ? KIND_ORDER.length : i; };
-  const lines = script.map((line, n) => ({ line, n })).sort((a, b) => rank(a.line.kind) - rank(b.line.kind) || a.n - b.n);
+  const within = (line) => {
+    if (line.kind === 'reading') return readingOrder.has(line.key) ? readingOrder.get(line.key) : LAST;
+    if (line.kind === 'common') return Number.isInteger(line.band) ? line.band : LAST;
+    return 0;
+  };
+  const lines = script.map((line, n) => ({ line, n }))
+    .sort((a, b) => rank(a.line.kind) - rank(b.line.kind) || within(a.line) - within(b.line) || a.n - b.n);
   const rows = [];
   for (const { line } of lines) {
     for (const v of voices) {
@@ -41,7 +66,11 @@ export function listenRows({ script, made, voices, sigOf, rejectsDir, pageDir, k
       (Array.isArray(rec.tries) ? rec.tries : []).forEach((t, take) => {
         const file = path.join(rejectsDir, rejectName(v.id, line.id, take));
         if (!fs.existsSync(file)) return;
-        takes.push({ take, src: relUrl(pageDir, file), sha: takeHash(fs.readFileSync(file)), sent: t.sent || '', heard: t.transcript || t.why || '', got: t.got || '' });
+        const unshaped = line.kind === 'kana' && fs.statSync(file).mtimeMs < BEAT_SHAPING_MS;
+        takes.push({
+          take, src: relUrl(pageDir, file), sha: takeHash(fs.readFileSync(file)), sent: t.sent || '', heard: t.transcript || t.why || '', got: t.got || '',
+          ...(unshaped ? { unshaped: true } : {}),
+        });
       });
       if (!takes.length) continue;
       const first = voices[0] && voices[0].id !== v.id ? keptClip(voices[0].id, line.id) : null;
@@ -52,6 +81,7 @@ export function listenRows({ script, made, voices, sigOf, rejectsDir, pageDir, k
         ja: line.ja,
         kana: line.kana && line.kana !== line.ja ? line.kana : '',
         kind: line.kind,
+        group: groupOf(line),
         want: rec.want || '',
         takes,
         compare: first ? { voice: voices[0].label.en, src: relUrl(pageDir, first) } : null,
@@ -212,6 +242,30 @@ function pageMain() {
   filter();
 }
 
+/** The rows' groups in the order the page lists them, each with its lines and takes. */
+export function listenGroups(rows) {
+  const out = new Map();
+  for (const r of rows) {
+    const g = out.get(r.group) || { group: r.group, lines: 0, takes: 0 };
+    g.lines += 1;
+    g.takes += r.takes.length;
+    out.set(r.group, g);
+  }
+  return [...out.values()];
+}
+
+/**
+ * What the page says above its rows while `n` beat takes on it were made
+ * before beat shaping (a take's `unshaped`, from its file's date): that
+ * they still hold their vowel, and that a beat shipped from one is shaped
+ * before it reaches a learner. Nothing is said when there are none.
+ */
+function beatNote(n) {
+  if (!n) return '';
+  const one = n === 1;
+  return `${n} of the beat takes here ${one ? 'was' : 'were'} made before beat shaping (6 November 2026, by ${one ? 'its file\'s date' : 'their files\' dates'}), so ${one ? 'it still holds its' : 'they still hold their'} vowel. After <code>--heard</code> ships a beat from one, run <code>node tools/tighten-beats.mjs</code> to see what it would change, then again with <code>--apply</code>, so the beat is shaped before the site is published or Naninani is built.`;
+}
+
 const escHtml = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 // JSON inside a script element: a "<" could close it, so every one is escaped.
 const inScript = (value) => JSON.stringify(value).replace(/</g, '\\u003c').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
@@ -219,6 +273,7 @@ const inScript = (value) => JSON.stringify(value).replace(/</g, '\\u003c').repla
 /** The page for these rows and the current heard-by entries. */
 export function listenPage(rows, heard, { generated }) {
   const takes = rows.reduce((n, r) => n + r.takes.length, 0);
+  const beats = beatNote(rows.reduce((n, r) => n + r.takes.filter((t) => t.unshaped).length, 0));
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -231,7 +286,8 @@ export function listenPage(rows, heard, { generated }) {
 <main>
 <h1>Takes to hear</h1>
 <p>Each take below failed the transcript check, so it is not on the site. The check can only turn a right take away, never let a wrong one through, and most of these are the transcriber writing a right sound another way. Play a take; if it says what is wanted, mark it right. One take per line ships.</p>
-<p class="muted">When you are done, copy the export into <code>tools/audio-heard.json</code> and run <code>node tools/build-audio.mjs --heard</code>, which ships the marked takes without calling ElevenLabs. Your marks stay in this browser until then. ${escHtml(String(rows.length))} lines, ${escHtml(String(takes))} takes, written ${escHtml(generated)}.</p>
+<p class="muted">When you are done, copy the export into <code>tools/audio-heard.json</code> and run <code>node tools/build-audio.mjs --heard</code>, which ships the marked takes without calling ElevenLabs. Your marks stay in this browser until then. ${escHtml(String(rows.length))} lines, ${escHtml(String(takes))} takes, written ${escHtml(generated)}. The most used come first: kanji readings, common words by band, the words of Yomu's own lines, then the beats.</p>
+${beats ? `<p class="muted">${beats}</p>\n` : ''}
 <div class="bar">
 <label>Heard by <input id="by" type="text" autocomplete="name" placeholder="your name" size="14"></label>
 <label>Voice <select id="f-voice"><option value="">All</option></select></label>

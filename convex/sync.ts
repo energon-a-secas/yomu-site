@@ -39,3 +39,8 @@ export const pushWords = mutation({
   args: { words: v.array(wordRowV) },
   handler: (ctx, args) => model.pushWords(ctx, args),
 });
+
+// Deleting an account: everything of the caller's goes, a batch a call
+// (convex/model/sync.ts erase). No page calls it; the iOS app does, before
+// it deletes the Clerk user.
+export const erase = mutation({ args: {}, handler: (ctx) => model.erase(ctx) });

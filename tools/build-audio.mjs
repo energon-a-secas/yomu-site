@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 // Records Yomu's own text with ElevenLabs: the sound notes, every beat, the
 // phrase library and the notes' examples, every word of that text, the
-// dictionary's most common words, and the kanji pages' readings and words
-// (tools/lib/audio-script.mjs), in the voices of tools/lib/audio-voices.mjs.
-// docs/AUDIO.md is the account.
+// dictionary's most common words, the kanji pages' readings and words, and,
+// only when asked with `--kinds=corpus`, the example sentences' words with no
+// clip, the most frequent first (tools/measure-audio-corpus.mjs says what a
+// --limit adds) (tools/lib/audio-script.mjs), in the voices of
+// tools/lib/audio-voices.mjs. docs/AUDIO.md is the account.
 //
 // THIS IS A MANUAL DATA STEP, NOT A BUILD. It spends credits from the owner's
 // ElevenLabs plan, so it makes only what is missing or changed. --budget
@@ -15,9 +17,13 @@
 //   node tools/build-audio.mjs --dry-run           what would be made, and roughly what it costs
 //   node tools/build-audio.mjs --budget=100 --limit=30   a small recording batch
 //     --voices=clear,calm   only these roles
-//     --kinds=sound,kana    only these parts of the script
+//     --kinds=sound,kana    only these parts of the script (by default every
+//                           kind but corpus, which a run makes only when named;
+//                           --listen lists every kind's takes)
 //     --limit=20            at most this many clips (a trial run)
 //     --retry-failed        try again the clips that failed their check
+//     --reserve=2000        credits a run leaves on the account (the default);
+//                           lower it only when the owner asks to spend the rest
 //
 //   node tools/build-audio.mjs --listen    write .forge/audio-listen.html, the takes that failed, to be heard
 //   node tools/build-audio.mjs --heard     ship the takes tools/audio-heard.json names, and stop
@@ -36,8 +42,9 @@
 // one a person heard and called right ships through tools/audio-heard.json.
 //
 // Writes data/audio/<voice>/<id>.mp3, data/audio/index.json and its key
-// shards data/audio/kNN.json, and tools/audio-made.json, the record of what
-// was sent, heard and kept.
+// shards data/audio/kNN.json, tools/audio-made.json, the record of what
+// was sent, heard and kept, and tools/audio-corpus.json, the corpus lines
+// with a kept clip, which stay in the script once paid for.
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -49,10 +56,10 @@ import { AUDIO_FORMAT, CLIPS_FORMAT, AUDIO_DIR, SILENCE_SRC } from '../js/audio.
 import { SITE } from './lib/emit.mjs';
 import { licenceBlock } from './lib/licence.mjs';
 import { apiKey, call, ApiError } from './lib/elevenlabs.mjs';
-import { fullScript, beatAliases, KINDS, WORD_KINDS } from './lib/audio-script.mjs';
+import { fullScript, beatAliases, kanjiPageLines, KINDS, DEFAULT_KINDS, WORD_KINDS, CORPUS_KEPT, readCorpusKept, corpusKept } from './lib/audio-script.mjs';
 import { madeKey, parseHeard, heardPlan, applyHeard } from './lib/audio-heard.mjs';
 import { indexEntries } from './lib/audio-index.mjs';
-import { listenRows, listenPage } from './lib/audio-listen.mjs';
+import { listenRows, listenPage, listenGroups } from './lib/audio-listen.mjs';
 import { makeCheck } from './lib/audio-check.mjs';
 import { finish, triple, silence } from './lib/audio-finish.mjs';
 import { VOICES, MODEL, RAW_FORMAT, STT_MODEL } from './lib/audio-voices.mjs';
@@ -70,8 +77,9 @@ const FINISH_VERSION = 1;
 // Credits per character, measured on eleven_v4 for Japanese (11 characters
 // cost 5); only the dry run's estimate uses it, the real cost is counted.
 const EST_PER_CHAR = 0.5;
-// Initial quota headroom only. TTS headers omit other charges; an account
-// balance check between bounded batches is still required.
+// Initial quota headroom only, unless --reserve says otherwise. TTS headers
+// omit other charges; an account balance check between bounded batches is
+// still required.
 const RESERVE = 2000;
 const PARALLEL = 3;
 const ATTEMPTS = 3;
@@ -79,7 +87,7 @@ const ATTEMPTS = 3;
 const SHARD_BYTES = 110000;
 
 function args(argv) {
-  const out = { dryRun: false, budget: 0, voices: VOICES.map((v) => v.id), kinds: [...KINDS], limit: Infinity, retryFailed: false, heard: false, listen: false, rejects: REJECTS };
+  const out = { dryRun: false, budget: 0, voices: VOICES.map((v) => v.id), kinds: null, limit: Infinity, retryFailed: false, heard: false, listen: false, rejects: REJECTS, reserve: RESERVE };
   for (const a of argv) {
     const [k, v] = a.replace(/^--/, '').split('=');
     if (k === 'dry-run') out.dryRun = true;
@@ -91,8 +99,12 @@ function args(argv) {
     else if (k === 'kinds') out.kinds = v.split(',');
     else if (k === 'limit') out.limit = Number(v);
     else if (k === 'retry-failed') out.retryFailed = true;
+    else if (k === 'reserve') out.reserve = Number(v);
     else throw new Error(`unknown option ${a}`);
   }
+  // The corpus is made only when named; a failed take of it, already paid
+  // for, is listed to be heard like any other.
+  if (!out.kinds) out.kinds = out.listen ? [...KINDS] : [...DEFAULT_KINDS];
   for (const v of out.voices) if (!VOICES.some((x) => x.id === v)) throw new Error(`unknown voice ${v}`);
   for (const k of out.kinds) if (!KINDS.includes(k)) throw new Error(`unknown kind ${k}`);
   if (!Number.isFinite(out.budget) || out.budget < 0) throw new Error('--budget must be a finite non-negative number');
@@ -240,6 +252,29 @@ function saveMade(made) {
 }
 
 /**
+ * The corpus lines with a kept clip (audio-script.mjs corpusKept), one a
+ * line, so the next run's script still holds each one however the ranking
+ * moves and its prune never deletes a clip already paid for. Not written
+ * until the first corpus clip is kept.
+ */
+function saveKept(full, made) {
+  const kept = (line) => voicesOf(line).some((v) => {
+    const rec = made[madeKey(v.id, line.id)];
+    return !!(rec && rec.ok && fs.existsSync(clipPath(v.id, line.id)));
+  });
+  const rows = corpusKept(full, kept, readCorpusKept(SITE));
+  const file = path.join(SITE, CORPUS_KEPT);
+  if (!rows.length && !fs.existsSync(file)) return;
+  fs.writeFileSync(file, `[\n${rows.map((r) => JSON.stringify(r)).join(',\n')}\n]\n`);
+}
+
+/** Both records, after any change to what was kept. */
+function saveRecords(full, made) {
+  saveMade(made);
+  saveKept(full, made);
+}
+
+/**
  * index.json and its key shards from what the record says was kept: every
  * key a line answers to, with the voices whose clip of it passed as a mask.
  * A line no voice kept is not in the index at all.
@@ -325,11 +360,16 @@ function writeListenPage(opts, script, made, heard) {
     return rec && rec.ok && fs.existsSync(clipPath(voice, id)) ? clipPath(voice, id) : null;
   };
   const sigOf = (voiceId, line) => signature(VOICES.find((v) => v.id === voiceId), line);
-  const rows = listenRows({ script, made, voices, sigOf, rejectsDir: opts.rejects, pageDir: path.dirname(LISTEN), keptClip });
+  // The readings in the kanji pages' order, the most frequent kanji first.
+  const readingOrder = new Map();
+  for (const l of kanjiPageLines(DATA)) if (l.kind === 'reading' && !readingOrder.has(l.key)) readingOrder.set(l.key, readingOrder.size);
+  const rows = listenRows({ script, made, voices, sigOf, rejectsDir: opts.rejects, pageDir: path.dirname(LISTEN), keptClip, readingOrder });
   fs.mkdirSync(path.dirname(LISTEN), { recursive: true });
   fs.writeFileSync(LISTEN, listenPage(rows, heard, { generated: new Date().toISOString().slice(0, 10) }));
   const takes = rows.reduce((n, r) => n + r.takes.length, 0);
   console.log(`build-audio: ${rows.length} lines, ${takes} takes to hear, in ${path.relative(SITE, LISTEN)} (open it from disk)`);
+  const many = (n, one) => `${n} ${one}${n === 1 ? '' : 's'}`;
+  for (const g of listenGroups(rows)) console.log(`  ${g.group}: ${many(g.lines, 'line')}, ${many(g.takes, 'take')}`);
 }
 
 async function main() {
@@ -360,7 +400,7 @@ async function main() {
   }
   if (hp.ship.length || hp.unship.length || opts.heard) {
     applyHeard(hp, { made, clipPathOf: clipPath });
-    saveMade(made);
+    saveRecords(full, made);
     const doc = writeIndex(full, made);
     console.log(`build-audio: ${shipping}; index rewritten, ${doc.keys} keys in ${doc.shards.length} shards`);
   }
@@ -370,7 +410,7 @@ async function main() {
   console.log(estimate(script, jobs));
   if (!jobs.length) {
     const removed = prune(full, made);
-    saveMade(made);
+    saveRecords(full, made);
     const doc = writeIndex(full, made);
     console.log(`build-audio: nothing to make; ${removed} old clips removed; index rewritten, ${doc.keys} keys in ${doc.shards.length} shards`);
     return;
@@ -380,8 +420,9 @@ async function main() {
   if (!key) throw new Error('no ElevenLabs key: set ELEVENLABS_API_TOKEN in .env');
   const sub = await call(key, '/v1/user/subscription');
   const left = sub.character_limit - sub.character_count;
-  const budget = Math.min(opts.budget, left - RESERVE);
-  if (!(budget > 0)) throw new Error(`no budget: --budget=${opts.budget}, ${left} credits left, ${RESERVE} kept in reserve`);
+  if (!(opts.reserve >= 0)) throw new Error(`--reserve must be a number of credits, not ${opts.reserve}`);
+  const budget = Math.min(opts.budget, left - opts.reserve);
+  if (!(budget > 0)) throw new Error(`no budget: --budget=${opts.budget}, ${left} credits left, ${opts.reserve} kept in reserve`);
   console.log(`build-audio: ${left} credits left this month; TTS-header threshold ${budget} (excludes other account charges; in-flight requests can exceed it)`);
 
   const ctx = { key, dict, made, check: makeCheck(dict), spent: 0, budget, stopping: false };
@@ -402,7 +443,7 @@ async function main() {
         console.log(`  FAILED ${job.voice.id} ${job.line.ja}: wanted ${rec.want || '?'}, heard ${JSON.stringify(rec.transcript || rec.why)} (${rec.got || ''})`);
       }
       if ((passed + failed) % 50 === 0) {
-        saveMade(made);
+        saveRecords(full, made);
         writeIndex(full, made);
         console.log(`  ${passed + failed}/${jobs.length}, ${ctx.spent} TTS-header credits so far`);
       }
@@ -415,7 +456,7 @@ async function main() {
   // one request fails. A rejected Promise.all used to lose completed takes.
   const results = await Promise.allSettled(Array.from({ length: PARALLEL }, worker));
   const removed = prune(full, made);
-  saveMade(made);
+  saveRecords(full, made);
   const doc = writeIndex(full, made);
   const remaining = plan(opts, script, made).length;
   const stopped = remaining ? `; ${remaining} jobs remain in this selection` : '';

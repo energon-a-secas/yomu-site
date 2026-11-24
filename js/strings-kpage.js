@@ -19,6 +19,11 @@ export const KPAGE_STRINGS = Object.freeze({
   kpSaved: { en: 'Saved', es: 'Guardado' },
   kpSay: { en: 'Say it', es: 'Decirlo' },
   kpSayWord: { en: 'Say {ch}', es: 'Decir {ch}' },
+  // A recorded voice is chosen and the device has no Japanese voice: what is not recorded cannot be said.
+  kpSayUnrecorded: {
+    en: 'Not every reading and word here is recorded yet, and this device has no Japanese voice to say the rest.',
+    es: 'No todas las lecturas y palabras de aquí tienen grabación todavía, y este dispositivo no tiene voz japonesa para decir las demás.',
+  },
   kpLooksLike: { en: 'Looks like', es: 'Se parece a' },
   kpApartHas: { en: 'Has {a} inside it', es: 'Lleva {a} dentro' },
   kpApartIn: { en: 'A part of {a}', es: 'Una parte de {a}' },

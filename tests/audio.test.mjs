@@ -14,11 +14,12 @@ import {
   audioKey, wordKey, clipId, keysOf, normalizeAudio, addShard, shardsFor, clipByKeys, clipInVoice, useAudio,
 } from '../js/audio.js';
 import {
-  audioScript, beatInventory, wordLines, kanjiPageLines, fullScript, KANJI_PAGE_VOICES,
+  audioScript, beatInventory, beatAliases, wordLines, kanjiPageLines, fullScript, KANJI_PAGE_VOICES,
 } from '../tools/lib/audio-script.mjs';
+import { indexEntries } from '../tools/lib/audio-index.mjs';
 import { makeCheck, unheld, foldSaid, barless } from '../tools/lib/audio-check.mjs';
 import { SOUND_NOTES } from '../js/notes-sounds.js';
-import { toKata, readingKana, readingRomaji, beats } from '../js/kana.js';
+import { toKata, readingKana, readingRomaji, beats, SAID_AS } from '../js/kana.js';
 import { dict, DATA } from './helpers/disk.mjs';
 
 const library = JSON.parse(readFileSync(new URL('../data/phrases/library.json', import.meta.url), 'utf8'));
@@ -91,6 +92,34 @@ test('the script records every sound example, both sides of every pair, and ever
   assert.ok(kyou.keys.includes(audioKey('きょう')) && kyou.keys.includes(wordKey('今日', 'きょう')));
   // Sounds come first, so a budget that runs out has made them.
   assert.equal(script[0].kind, 'sound');
+});
+
+test('a beat said as another is filed under that beat\'s clip, and only while it has one', () => {
+  assert.deepEqual(beatAliases(), { ...SAID_AS }, 'one source: the kana chart, a kana detail and the index agree');
+  for (const from of Object.keys(SAID_AS)) assert.ok(!beatInventory().includes(from), `${from} is not recorded`);
+  const beat = (key, id) => ({ kind: 'kana', key, keys: [key], id });
+  const script = [beat('じゃ', 'ja'), beat('え', 'e')];
+  const kept = (voice, id) => id === 'ja' || (id === 'e' && voice === 'clear');
+  const { entries } = indexEntries(script, { kept, voices: VOICES3, aliases: { 'ぢゃ': 'じゃ', 'ゑ': 'え', 'ゐ': 'い' } });
+  assert.deepEqual(entries.get('ぢゃ'), ['ja', 0b111]);
+  assert.deepEqual(entries.get('ゑ'), ['e', 0b001], 'with the voices of the beat it is said as');
+  assert.equal(entries.has('ゐ'), false, 'い has no clip here, so ゐ has none either');
+});
+
+test('ぢゃ, ぢゅ, ぢょ, ぢぇ, ゑ and ゐ play a recorded beat in every voice, in hiragana and katakana', () => {
+  const site = (p) => JSON.parse(readFileSync(new URL(`../${p}`, import.meta.url), 'utf8'));
+  const audio = normalizeAudio(site('data/audio/index.json'));
+  audio.srcs.forEach((src, n) => addShard(audio, n, site(src)));
+  assert.equal(audio.voices.length, 4);
+  for (const [from, to] of [['ぢゃ', 'じゃ'], ['ぢゅ', 'じゅ'], ['ぢょ', 'じょ'], ['ぢぇ', 'じぇ'], ['ゑ', 'え'], ['ゐ', 'い'], ['ぢ', 'じ'], ['づ', 'ず'], ['を', 'お']]) {
+    for (const text of [from, toKata(from)]) {
+      for (const v of audio.voices) {
+        const clip = clipByKeys(audio, keysOf(text), v.id);
+        assert.ok(clip, `${text} in ${v.id}`);
+        assert.deepEqual(clip, clipByKeys(audio, keysOf(to), v.id), `${text} plays ${to}'s clip in ${v.id}`);
+      }
+    }
+  }
 });
 
 test('the words of Yomu\'s own text are recorded, the おば and さん of おばさん among them', async () => {

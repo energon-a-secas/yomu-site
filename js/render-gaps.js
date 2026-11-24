@@ -12,36 +12,14 @@
 import { $, h, fill } from './utils.js';
 import { ui } from './strings.js';
 import { gapsAround, besideOf } from './gaps.js';
+import { reasonKey, reasonParts } from './gap-reasons.js';
 
-const KEY = Object.freeze({
-  particle: 'gapParticle',
-  copula: 'gapCopula',
-  script: 'gapScript',
-  loan: 'gapLoan',
-  nostart: 'gapNostart',
-  guess: 'gapGuess',
-  compound: 'gapCompound',
-  'nostart-extra': 'gapExtraNostart',
-  inside: 'gapExtraInside',
-});
-const WORD_KEY = Object.freeze({ form: 'gapWordForm', number: 'gapWordNumber', prefix: 'gapWordPrefix' });
-const SCRIPT_KEY = Object.freeze({
-  kanji: 'gapScriptKanji', hiragana: 'gapScriptHiragana', katakana: 'gapScriptKatakana', latin: 'gapScriptLatin', digit: 'gapScriptDigit',
-});
+export { reasonKey };
 
 /** What stands where a word has no gap, as the string that says so (gaps.js besideOf). */
 const BESIDE_KEY = Object.freeze({
   start: 'gapEdgeStart', end: 'gapEdgeEnd', punct: 'gapEdgePunct', space: 'gapEdgeSpace', latin: 'gapEdgeLatin', other: 'gapEdgeOther',
 });
-
-/** The string a reason is said with. */
-export function reasonKey(g) {
-  if (!g) return null;
-  if (g.why === 'name') return g.o ? 'gapNameO' : 'gapName';
-  if (g.why === 'guess' && g.k) return 'gapGuessNostart';
-  if (g.why === 'word') return WORD_KEY[g.f] || 'gapWord';
-  return KEY[g.why] || null;
-}
 
 /**
  * A gap's reason, one sentence, as nodes: the words it names in lang="ja"
@@ -50,26 +28,7 @@ export function reasonKey(g) {
  * reader who cannot see the dashed line still learns it.
  */
 export function reasonNodes(g) {
-  const key = reasonKey(g);
-  if (!key) return [];
-  const raw = ui(key);
-  const out = [];
-  let at = 0;
-  for (const m of raw.matchAll(/\{(\w+)\}/g)) {
-    if (m.index > at) out.push(raw.slice(at, m.index));
-    const name = m[1];
-    if (name === 'from' || name === 'to') out.push(ui(SCRIPT_KEY[g[name]] || 'gapScriptKanji'));
-    else if (name === 'o') out.push(String(g.o || ''));
-    else out.push(h('span', { lang: 'ja' }, String(g[name] ?? '')));
-    at = m.index + m[0].length;
-  }
-  if (at < raw.length) out.push(raw.slice(at));
-  if (g.guess && g.why !== 'guess') {
-    const last = out[out.length - 1];
-    if (typeof last === 'string' && last.endsWith('.')) out[out.length - 1] = last.slice(0, -1);
-    out.push(ui('gapGuessToo'));
-  }
-  return out;
+  return reasonParts(g).map((p) => (typeof p === 'string' ? p : h('span', { lang: 'ja' }, p.ja)));
 }
 
 /** The two parts on each side of a compound's edge, "クレア | オナニー". */

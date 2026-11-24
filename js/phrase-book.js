@@ -74,6 +74,7 @@ export class PhraseBook {
     this.sources = {};
     this.recovered = false;
     this.message = null;
+    this.listeners = new Set();
     if (document == null) return;
     if (!object(document) || document.format !== PHRASE_BOOK_FORMAT) { this.recovered = true; return; }
     const checked = cleanPhrases(document.phrases);
@@ -117,12 +118,47 @@ export class PhraseBook {
     }
     // A source-free paste never erases a known origin for the same phrase.
     if (valid && !this.sources[result.key]) this.sources[result.key] = this.reference(valid);
+    if (result.changed) this.emit({ type: 'save', key: result.key, at: now });
   }
 
   remove(key) {
     this.message = null;
-    unsaveText(this.data, key, false);
+    this.unsave(key);
+  }
+
+  // ── What sync needs of History (js/sync-watch.js) ────────────────────────
+  // A signed-in client syncs its saved readings as the page syncs History's
+  // saved phrases: storesAdapter reads savedList() and applies through
+  // unsave() and mergePhrases(), and watchStores stamps what a listener
+  // hears. The events are History's: { type: 'save', key, at },
+  // { type: 'unsave', key, saved }, { type: 'change' } for the rest.
+
+  onChange(fn) { this.listeners.add(fn); return () => this.listeners.delete(fn); }
+
+  emit(event) { for (const fn of this.listeners) fn(event); }
+
+  isSaved(key) {
+    const e = typeof key === 'string' ? this.data.entries[key] : null;
+    return !!(e && e.saved);
+  }
+
+  savedList() { return savedList(this.data); }
+
+  /** A phrase unsaved, by the learner or by sync: it goes whole (no History is kept), with its source. */
+  unsave(key) {
+    const was = typeof key === 'string' ? this.data.entries[key] : null;
+    const saved = was && was.saved;
+    if (!unsaveText(this.data, key, false)) return false;
     delete this.sources[key];
+    this.emit({ type: 'unsave', key, saved });
+    return true;
+  }
+
+  /** Phrases from the account, by History's merge. */
+  mergePhrases(phrases) {
+    const sum = mergePhrases(this.data, phrases);
+    if (sum.added || sum.updated) this.emit({ type: 'change' });
+    return sum;
   }
 
   view(query = '') {

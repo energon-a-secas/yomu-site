@@ -1,22 +1,24 @@
 // The Idioms pane (js/sets.js has the logic): the chosen collection's rows
 // that answer the filter, SET_PAGE at a time. A row's Read it finds its
 // word by `data-ix`, its place in the list this paint kept, so no Japanese
-// is written into an attribute.
+// is written into an attribute. In Spanish a row shows its Spanish where it
+// has any (its sixth item, tools/build-sets.mjs), else the English.
 
 import { h } from './utils.js';
-import { ui } from './strings.js';
+import { ui, currentLang } from './strings.js';
 import { wordRuby } from './render-save.js';
 import { romajiNodes } from './render-search.js';
 import { SET_PAGE } from './sets.js';
 
-function row([written, reading, glosses, , saidLine], kept) {
+function row([written, reading, glosses, , saidLine, es], kept) {
   const ix = kept.push(written) - 1;
+  const spanish = currentLang() === 'es' && Array.isArray(es) && es.length;
   return h('li', { class: 'sr-item' }, [
     h('div', { class: 'sr-head' }, [
       h('span', { class: 'sr-word' }, wordRuby([written, reading || written])),
       ...romajiNodes(reading || written, saidLine),
     ]),
-    h('p', { class: 'sr-gloss', lang: 'en' }, glosses.join(' · ')),
+    h('p', { class: 'sr-gloss', lang: spanish ? 'es' : 'en' }, (spanish ? es : glosses).join(' · ')),
     h('div', { class: 'sr-actions' }, [
       h('button', { type: 'button', class: 'btn btn--primary btn--sm sr-read', 'data-act': 'set-read', 'data-ix': ix }, [
         h('span', { 'aria-hidden': 'true' }, ui('searchRead')),

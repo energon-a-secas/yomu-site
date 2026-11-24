@@ -2,7 +2,7 @@
 // The explanations are { en, es }, in `lang`, which defaults to the current
 // language (strings.js useLang), as the notes do.
 import { t, currentLang } from './strings.js';
-import { beats, toHira, isKana } from './kana.js';
+import { beats, toHira, toKata, isKana, saidAs } from './kana.js';
 import { kanaRomaji } from './kana-chart.js';
 import { noteFor, SOUND_NOTES } from './notes.js';
 
@@ -20,7 +20,8 @@ export function kanaDetail(text, lang = currentLang(), extraRules = []) {
     });
     let formula = null;
     let romaji = kanaRomaji(kana);
-    let spoken = hira === 'っ' ? 'きって' : hira === 'ー' ? 'コーヒー' : ({'を':'お','ぢ':'じ','づ':'ず'}[hira] || kana);
+    // A beat said as another (を, ぢ, ゑ, ぢゃ) says that one: kana.js SAID_AS.
+    let spoken = hira === 'っ' ? 'きって' : hira === 'ー' ? 'コーヒー' : saidAs(kana);
     if (hira.length === 2 && BIG[hira[1]]) {
       const left = kanaRomaji(kana[0]);
       const right = kanaRomaji(BIG[hira[1]]);
@@ -55,6 +56,20 @@ export function kanaDetail(text, lang = currentLang(), extraRules = []) {
           ? say({ en: 'The two dots change the consonant to its voiced sound.', es: 'Los dos puntos cambian la consonante por su sonido sonoro.' })
           : say({ en: 'The small circle changes an h-row sound to p.', es: 'El pequeño círculo convierte un sonido de la fila h en p.' });
       }
+    }
+    // A beat said as another whose romaji is not that beat's (を wo, ゐ wi,
+    // ゑ we) says why the learner hears another sound; ぢ, づ, ぢゃ and ぢぇ
+    // already romanize as the beat they are said as. The sound is shown in
+    // the kana's own script.
+    const asBeat = saidAs(kana);
+    if (asBeat !== kana && kanaRomaji(asBeat) !== romaji) {
+      const heard = `${kana === hira ? asBeat : toKata(asBeat)} (${kanaRomaji(asBeat)})`;
+      explanation = hira === 'を'
+        ? say({
+          en: `${kana} is usually pronounced ${heard}; some charts write it ${romaji}.`,
+          es: `${kana} suele pronunciarse ${heard}; algunas tablas la escriben ${romaji}.`,
+        })
+        : say({ en: `An old kana: today it is said ${heard}.`, es: `Un kana antiguo: hoy se pronuncia ${heard}.` });
     }
     // A chart は is ha; the same glyph tapped as a topic particle is wa.
     // Context is supplied by the analyzer's rule ids, never inferred here.

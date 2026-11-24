@@ -46,6 +46,34 @@ test('voicing and timing marks link to real rules and use pronounceable examples
   assert.equal(kanaDetail('へ', 'en', ['particle-e']).parts[0].spoken, 'え');
 });
 
+test('a beat said as another says that one, in either script, and keeps its own spelling', () => {
+  const spoken = (text) => kanaDetail(text).parts.map((p) => p.spoken);
+  assert.deepEqual(spoken('を'), ['お']);
+  assert.deepEqual(spoken('ぢ、ヅ'), ['じ', 'ず']);
+  assert.deepEqual(spoken('ぢゃ、ヂュ、ぢょ'), ['じゃ', 'じゅ', 'じょ']);
+  assert.deepEqual(spoken('ぢぇ、ヂェ'), ['じぇ', 'じぇ']);
+  assert.deepEqual(spoken('ゑ、ヰ'), ['え', 'い']);
+  const dya = kanaDetail('ぢゃ').parts[0];
+  assert.deepEqual([dya.kana, dya.romaji], ['ぢゃ', 'ja'], 'the spelling and its romaji are untouched');
+  assert.deepEqual([kanaDetail('ぢぇ').parts[0].kana, kanaDetail('ぢぇ').parts[0].romaji], ['ぢぇ', 'je']);
+  assert.deepEqual(spoken('ちゃ、え'), ['ちゃ', 'え'], 'a beat said as itself is itself');
+});
+
+test('a kana whose romaji is not the sound it is said as says why, in English and Spanish', () => {
+  const part = (text, lang = 'en', rules = []) => kanaDetail(text, lang, rules).parts[0];
+  // ゐ and ゑ are old kana: the romaji keeps wi and we, the voice says い and え.
+  assert.deepEqual([part('ゑ').romaji, part('ゑ').spoken], ['we', 'え']);
+  assert.equal(part('ゑ').explanation, 'An old kana: today it is said え (e).');
+  assert.equal(part('ヰ').explanation, 'An old kana: today it is said イ (i).', 'in the script of the kana');
+  assert.equal(part('ゐ', 'es').explanation, 'Un kana antiguo: hoy se pronuncia い (i).');
+  // を is written wo by its chart and said お; as a particle, the particle's line wins.
+  assert.equal(part('を').explanation, 'を is usually pronounced お (o); some charts write it wo.');
+  assert.equal(part('ヲ', 'es').explanation, 'ヲ suele pronunciarse オ (o); algunas tablas la escriben wo.');
+  assert.equal(part('を', 'en', ['particle-o']).explanation, 'を is pronounced o here because it is a particle. The spelling stays を.');
+  // ぢ, づ and ぢゃ are written as they are said: nothing to explain.
+  for (const text of ['ぢ', 'づ', 'ぢぇ', 'え']) assert.ok(!/old kana|charts/.test(part(text).explanation), text);
+});
+
 test('yoroshiku gets contextual guidance without altering dictionary glosses or other words', async () => {
   for (const text of ['よろしくお願いします', 'よろしくおねがいします', 'よろしくお願いいたします']) {
     const result = await run(text);
@@ -84,7 +112,7 @@ test('in Spanish, a sound is explained in Spanish, by its lang argument or by us
 });
 
 test('every Spanish explanation is written, differs from the English, and has no em dash', () => {
-  const cases = [['あ'], ['きゃ'], ['ティ'], ['っ'], ['ー'], ['が'], ['ぱ'], ['は', ['particle-wa']], ['へ', ['particle-e']], ['を', ['particle-o']]];
+  const cases = [['あ'], ['きゃ'], ['ティ'], ['っ'], ['ー'], ['が'], ['ぱ'], ['は', ['particle-wa']], ['へ', ['particle-e']], ['を', ['particle-o']], ['を'], ['ゑ'], ['ヰ']];
   for (const [text, rules = []] of cases) {
     const [en] = kanaDetail(text, 'en', rules).parts;
     const [es] = kanaDetail(text, 'es', rules).parts;

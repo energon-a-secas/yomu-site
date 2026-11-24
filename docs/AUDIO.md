@@ -17,7 +17,10 @@ list:
    minimal pair (おばあさん and おばさん).
 2. **kana**: every beat Sound it out can play: the plain and voiced kana,
    the small-ya, yu and yo beats, and the loanword digraphs of `GENKI_MAP`.
-   ぢ and づ play じ and ず, and を plays お, which is how each is said.
+   ぢ and づ play じ and ず, を plays お, ぢゃ, ぢゅ, ぢょ and ぢぇ play じゃ,
+   じゅ, じょ and じぇ, and ゐ and ゑ, which modern spelling dropped, play い and え:
+   each is how the beat is said, so none is recorded (Beats said as
+   another, below).
 3. **phrase**: the phrase library and every dialogue line.
 4. **note**: the grammar notes' examples and the loanword notes' examples.
 5. **word**: every word of the lines above (`wordLines`), so a word chosen
@@ -37,8 +40,15 @@ list:
    page's on and kun readings, sent in katakana, then the pages' words, page
    by page, the kana pages first and then every kanji by frequency rank, so a
    run its budget cuts short has covered the most common pages whole. A
-   reading of one beat is a beat already. Only the N5 to N3 readings are
-   recorded (The kanji pages, below).
+   reading of one beat is a beat already. 1,453 readings are recorded: the
+   N5 to N3 ones on 6 November 2026 and 686 more, in the pages' order, on 13
+   November. None of the pages' words is recorded yet (Kanji readings, below).
+8. **corpus**: the words of the example sentences that have no clip, as the
+   reader meets them (conjugated forms included), in Clear alone, the most
+   frequent first (`corpusLines`). A run makes it only when it is named
+   (`--kinds=corpus`): a plain run makes every other kind (`DEFAULT_KINDS`).
+   Built 17 November 2026; nothing of it is recorded yet (Words of real text,
+   below).
 
 A word is filed under its spelling and reading (`audio.js wordKey`: 雨|あめ),
 never under its reading alone, so a homophone never plays another word's
@@ -142,8 +152,10 @@ transcript does not show. The listening list exists for those.
 ## Running it
 
 ```bash
-node tools/build-audio.mjs --dry-run              # what would be made, about what it costs
+node tools/build-audio.mjs --dry-run              # what would be made, about what it costs (every kind but corpus)
 node tools/build-audio.mjs --dry-run --kinds=reading,kanji   # one part of the script
+node tools/build-audio.mjs --dry-run --kinds=corpus --limit=500   # the corpus kind, which a run makes only when named
+node tools/measure-audio-corpus.mjs               # what the corpus kind's first 500, 1,000, 2,000 and all would add (free)
 node tools/build-audio.mjs --budget=100 --limit=30 # small pilot; compare account balances
 node tools/build-audio.mjs --budget=100 --limit=30 --retry-failed # bounded retry pilot
 ```
@@ -164,7 +176,10 @@ costs about 0.45 credits a character on `eleven_v4`; a lone kana costs
 nothing and a two-kana beat 1 credit. On those runs the balance fell by what
 the `character-cost` headers said; on the word runs it fell faster (What the
 word set holds), so budget by the balance. Everything, the audition, the
-trials and two full runs, came to 9,714 credits.
+trials and two full runs, came to 9,714 credits. Why it falls faster is the
+check's transcription, billed apart (What the account was charged, below).
+The account is no longer on Starter either (The plan changed, in the same
+section).
 
 ## What the first set holds
 
@@ -176,7 +191,7 @@ trials and two full runs, came to 9,714 credits.
 | phrase (124) | 124 | 124 | 124 | 124 |
 | note (99) | 99 | 98 | 99 | 99 |
 | sound (63) | 61 | 63 | 61 | 62 |
-| kana (137) | 114 | 113 | 108 | 111 |
+| kana (137) | 116 | 113 | 108 | 111 |
 
 What failed, and so plays in another voice or the device's:
 
@@ -184,7 +199,10 @@ What failed, and so plays in another voice or the device's:
   `GENKI_MAP`), 21 to 24 a voice: the transcriber writes them as English (T,
   D, "two", "oui", "yeah") or the voice says the native version (ヴァ as バ,
   which is how most speakers say it, though Yomu's romaji writes va). Retrying
-  with new seeds passed 2 of 54. A word with one is sounded out by the device.
+  with new seeds passed 2 of 54: Clear's でゅ and つぃ, counted in its 116
+  above. The cell read 114 until 17 November 2026, when it was checked
+  against the shards; the 1,586 total already held both. A word with one is
+  sounded out by the device.
 - **A few common beats** outside Clear: Bright ほ, り, ゆ, りゃ, みゃ; Calm ひゃ, べ;
   Male み, び, にゃ, ぴゃ. Some are the transcriber writing a right sound in
   another script (ゆ "You", み "Me", び "B", にゃ "Ня"); some may be real (ほ
@@ -256,11 +274,16 @@ node tools/build-audio.mjs --heard    # ship what tools/audio-heard.json names, 
 ```
 
 The listening page is opened from disk and sends nothing anywhere. It lists
-each failed record's takes (the beats first), with what was wanted, what was
-sent and what the transcriber wrote, and Clear's kept clip beside another
-voice's for comparison. Choose the take that is right, or none; the marks
-stay in that browser, and Copy or Download gives the whole file to put in
-`tools/audio-heard.json`, written by the same function the tool reads it with.
+each failed record's takes, with what was wanted, what was sent and what the
+transcriber wrote, and Clear's kept clip beside another voice's for
+comparison. The most used come first (since 17 November 2026; the beats led
+until then): the kanji readings in the kanji pages' frequency order, the
+order `kanjiPageLines` records them in, then the common words by band, then
+the words of Yomu's own lines, then the beats, and last the few sentences and
+examples. `--listen` prints how many records and takes each group holds.
+Choose the take that is right, or none; the marks stay in that browser, and
+Copy or Download gives the whole file to put in `tools/audio-heard.json`,
+written by the same function the tool reads it with.
 Then `--heard` copies each named take to its clip path, marks its record kept
 with `heardBy` (the record's other fields stay those of its last take), and
 rewrites the index. No ElevenLabs call, no credit. A recording run applies the
@@ -278,10 +301,38 @@ checkout's (a worktree's run, say).
 Built 2026-11-03 with nothing heard yet: 433 records wait, 1,297 takes
 (`--listen`), most of them common words in Clear and beats outside it.
 
+On 17 November 2026, still with nothing heard, 587 records wait, 1,759 takes:
+
+| Group | Records | Takes |
+|---|---|---|
+| reading | 154 | 462 |
+| common, band 1 | 115 | 345 |
+| common, band 2 | 50 | 150 |
+| common, band 3 | 155 | 465 |
+| word | 7 | 21 |
+| kana (beats) | 100 | 298 |
+| sound | 5 | 15 |
+| note | 1 | 3 |
+
+**A heard beat must be shaped before it ships to a learner.** On 17
+November every beat take that waited (298) was made on 17 October, before
+beat shaping (6 November 2026, below), so it still holds its vowel. After
+`--heard` ships a beat from such a take, run `node tools/tighten-beats.mjs`
+to see what it would change, then again with `--apply`, which shapes every
+kept beat not yet shaped, before the site is published or Naninani is built
+(its `scripts/bundle.sh` copies `data/audio/` as it stands). A later
+`--heard` leaves a shaped beat as it is: the entry still names the take in
+`.forge/`, and the clip counts as in place. The listening page says the same
+above its rows while any beat take older than beat shaping waits, counted by
+the take files' dates (`audio-listen.mjs`), so a take copied without its
+date is not counted; a beat take made since is shaped as it is finished.
+
 ## The kanji pages
 
-Built 2026-11-03 as script and check only; nothing is recorded. The kanji
-page needs no change to play them: a reading button, and the hero's Say it
+Built 2026-11-03 as script and check only. Since then 1,453 of the
+readings are recorded, in Clear, in two runs (Kanji readings, below); none
+of the pages' words is yet. The kanji page needed no change to play them: a
+reading button, and the hero's Say it
 for the first reading, speak `readingKana(r)`, which finds a reading's clip by
 its kana key, and a word button already looks up its `wordKey`. A reading is
 recorded once for every kanji that has it (にち serves 日 and every other
@@ -312,14 +363,35 @@ first kanji page.
 Run it in bounded batches with the balance read between them (Running it,
 above), after the owner sets a ceiling.
 
-The kanji page still gates its buttons on the device's Japanese voice
-(`canSpeak`), as the learner's text does. Once its readings and words are
-recorded it can take `events-say.js`'s gate for Yomu's own text (a recorded
-voice chosen, or the device's), so a device with no Japanese voice can use
-it; before that, a button with no clip would do nothing there.
+**The kanji page's gate, since 17 November 2026.** Until then the page gated
+its buttons on the device's Japanese voice (`canSpeak`), as the learner's text
+does, so on a device without one no recorded reading or word ever played. It
+now takes the gate of Yomu's own text (`events-say.js`: a recorded voice
+chosen, or the device's), asked of each button, since most of its readings
+and words have no clip yet: a reading, a word or Say it plays when its text
+has a clip in the chosen voice, or in Clear, which every voice borrows as
+`speak()` does, or when the device has a Japanese voice (`speech.js
+sayDecision`, through `canSay`). `canSay` answers yes until the shards a text
+needs have loaded, and on Chrome the device's voice list can arrive after the
+page is drawn, so once it is drawn the page waits for the voice list and,
+with a recorded voice chosen and no device voice, loads the shards its
+buttons name (`speech.js sayKnown`), then marks each button again in place
+(`render-kanji-page.js markSay`, from `events-kanji-page.js settleSay`); with
+a device voice, or This device's voice chosen, it fetches nothing. A button
+that has neither stays disabled (`aria-disabled`; a reading's frame goes dashed, a word's
+speaker dims) and names the line under Say it that says why: with a recorded
+voice, that not every reading and word is recorded yet and the device has no
+Japanese voice for the rest; with This device's voice, the reader's own reason
+(`render-chrome.js speechReason`). The buttons no longer carry `data-speak`,
+so the reader's `paintSpeech` neither gates them on the device again nor
+marks them when the voices arrive; `settleSay` does that.
+`tests/kanji-page-say.test.mjs` holds the decision, the buttons it draws and
+how they are marked once the shards load; `tests/kanji-page-voices.test.mjs`
+a page drawn before the voice list arrives.
 
-The tool's next kind would be the example sentences (`data/sent/`): Tatoeba's
+The example sentences themselves (`data/sent/`) are not recorded: Tatoeba's
 text, CC BY 2.0 FR, which a recording would carry the credit of. Not built.
+Their words are a kind of their own (Words of real text, below).
 
 **Two scripts of readings, merged on 9 November 2026.** The kanji pages'
 script (3 November) and Naninani 1.2.0's N5 to N3 readings (6 November) were
@@ -328,9 +400,14 @@ recorded from them keep their line and their record, and `kanjiPageLines`
 adds the rest. They differ in what they send: the recorded readings went out
 as their kana, while the kanji pages' script sends katakana and checks each
 take against `readingRomaji`, because the analyzer reads 131 of the 4,746
-distinct bare readings otherwise (a bare へき is へ and き). Whether any of the
-767 is among those 131 is not checked yet; a listening pass over them before
-the next paid run settles it.
+distinct bare readings otherwise (a bare へき is へ and き). Checked on 13
+November 2026 from `tools/audio-made.json`, with no API call: of the 767, 753
+were accepted against their own romaji and 5 more by their kana; none says
+another word's sound. Of the 9 left, 4 are right as recorded and differ only
+in how the two romaji write a verb's う or a seam (おもう, ととのう, まよう,
+たていと), and 5 end in a small っ (じっ, かっ, がっ, おっ, ほっ) and were
+kept saying the beat without its stop, which the kanji pages' script would
+not record at all. They are left in place for the owner's ear.
 
 ## Beat shaping
 
@@ -353,6 +430,35 @@ takes after a before/after listening page; re-recording beats from a spoken
 row of kana cut by alignment stays the alternative if they are ever not
 enough. `git checkout -- data/audio tools/audio-made.json` undoes it.
 
+## Beats said as another
+
+Six beats that are said as a recorded beat had no clip in any voice: ぢゃ,
+ぢゅ, ぢょ, ぢぇ, ゑ and ゐ. (Other beats have none either: the loanword
+digraphs that failed their check, What the first set holds, above, and kana
+outside the inventory such as ゎ and ヶ.) Each is said as a beat recorded in
+all four voices (じゃ, じゅ, じょ, じぇ, え and い), so since 17 November 2026
+they are aliases, as ぢ, づ and を already were: an alias key holds the same
+`[id, mask]` as the beat it is said as, so it plays that clip in every voice
+that has it, and a lookup in katakana folds onto it (`audioKey`). `js/kana.js
+SAID_AS` is the one table: `audio-script.mjs beatAliases` hands it to the
+index (`audio-index.mjs indexEntries`), and `kana-chart.js` and
+`kana-detail.js` give a kana's spoken form from it, so a kana detail of ゑ
+says え in the device's voice too. Where the romaji is not the sound's (を
+wo, ゐ wi, ゑ we), the kana detail says why: を is usually said お and some
+charts write it wo, and ゐ and ゑ are old kana. The chart has none of the
+six, so its cells did not change.
+
+Nothing was recorded and no credit spent: with `tools/audio-heard.json`
+empty, `node tools/build-audio.mjs --heard` only rewrote the index and its
+shards (its path reads files and writes files, and calls no API). The index
+went from 10,091 keys to 10,097. Every other key kept its entry, and
+`tools/audio-made.json` did not change; 11 keys moved to the next shard,
+because a shard is filled to its byte limit and the first five new keys moved
+three boundaries (`first` of shards 1 to 3 in `index.json`). ぢぇ, added
+after a review the same day, moved none.
+`tests/audio.test.mjs` holds each beat said as another, in hiragana and
+katakana, to its beat's clip in every voice, from the committed shards.
+
 ## Kanji readings
 
 Recorded 2026-11-06 in Clear only, at the owner's request ("N5 to N3 now"):
@@ -367,6 +473,242 @@ balance fell about 1.6 times faster than the headers, as on the word runs, so
 quote by the balance. A 60-clip pilot (108 credits) came first. The library
 now has **13,937 voice clips, 70.27 MB**. N2 and N1 (1,054 more readings by
 the same count) wait for an approved budget.
+
+**13 November 2026, the month's last credits.** The owner confirmed the four
+voices and approved the run ("For the voice I approve"); the ceiling was what
+the account had left above the tool's 2,000 reserve, since the plan allows no
+overage and the month's credits lapse on 17 November. A 60-clip pilot, then
+four bounded batches, the balance read between them, in the kanji pages'
+order (the most frequent kanji first), Clear only: **686 readings kept and 66
+rejected** of 752 tried (the transcriber read ひたい as したい, になう as
+似合う, かおる as 薫 read くん). The account fell from 4,676 to 2,345:
+**2,331 credits**, against 1,367 by the TTS headers, 1.7 times as on the
+earlier runs. Nothing was pruned. The library now has **14,623 voice clips
+(70.2 MB of MP3 by file size)** and 10,091 keys. Of the reading kind, 2,384
+clips remain to make (a dry run's count; the rejected are not tried again
+without `--retry-failed`), and none of the kanji pages' 7,198 words is recorded:
+they wait for the next month's credits and a ceiling.
+
+## What the account was charged
+
+Read on 16 November 2026 from ElevenLabs' usage API (`GET
+/v1/usage/character-stats`, broken down by product type and by model), which
+spends nothing.
+
+**The balance falls faster than the headers because of the check.** Every
+take is transcribed with Scribe (The check, above), and Scribe is billed as
+speech to text, which the text to speech `character-cost` headers do not
+count. On 13 November the usage API read 1,367 credits of text to speech and
+964 of speech to text: 2,331, exactly what the balance fell by, so that
+run's 1.7 times is the transcription. On 6 November it read 1,398 of text to
+speech and 1,088 of speech to text: 2,486. That is not the fall read right
+after the run (7,162 to 4,864, 2,298), but it is exactly the fall from 7,162
+to the 4,676 read before the 13 November run, and the usage API's daily
+split shows no use on any day between the two runs (only 17 October, 2, 3, 6
+and 13 November had any). So 188 credits of the 6 November run posted after
+the 4,864 reading, as Running it warns, its pilot is inside the 2,486 rather
+than on top of it, and that run cost 1.78 times its headers, not the 1.6 read
+straight after it. Either way a run
+costs its headers plus a transcription of every take, and only the balance,
+read between batches and again once late charges have posted, counts both.
+
+**Band 3's 1.52 credits a word stands.** The account fell 4,145 credits
+between the end of band 3 on 17 October (11,307 left) and the 6 November run
+(7,162 left). The usage API puts all of it on 2 and 3 November, on models
+this tool never calls: `eleven_v3` 2,475, `eleven_multilingual_v2` 1,487,
+voice generation 70 and alignment 113. None of it was a recording run, so
+the band 3 figure, and the kanji pages' estimate built on it (The kanji
+pages, above), keep their numbers.
+
+**The plan changed.** On 16 November the account read tier `payg`, a limit of
+10,000 credits, 0 used, and its next reset on 17 December 2026. It is no
+longer Starter's 40,000 a month, on which every figure above was measured.
+The tool would read 10,000 left and keep its 2,000 in reserve, but what those
+credits cost is not known here, so any run's ceiling waits for the owner to
+confirm the plan and its price.
+
+## Words of real text
+
+Built 17 November 2026 as script, check and measurement only: **nothing was
+recorded and no credit spent**. A study on 16 November found that the best
+use of a credit for the reader is the most frequent words of real text that
+have no clip in Clear, as they stand on the page, rather than common-word
+band 4: about half of what word by word misses is a conjugated form
+(している, 行った), whose dictionary form often has a clip already.
+
+**What the kind holds.** `corpusLines` reads the example sentences a word
+shows first (`data/sent/sNNN.json`, 31,512 sentences; not `more/`) with the
+analyzer and files each spoken token under the key Naninani's word by word
+looks it up by first (`spokenWord`, which is yomu-ios `Speech.spokenWord`
+and `written()` with `bridge/entry.js keysFor`): its spelling and reading
+(行った|いった), or its kana alone for a word in kana. It leaves out the
+punctuation, a particle in kana (said as a beat: は is わ), a number, a Latin
+word, a guess, a single beat (a beat already) and a name: the analyzer's
+names (トム, メアリー, ジョン), and a katakana word the sentence's English
+calls by a capitalized name that none of its glosses holds (`namedInEnglish`:
+Tatoeba's Sam and Ziri are read as サム "sum" and ジリ "Dili"; over every
+candidate this found six words, each a name in its sentence, and on kanji
+and hiragana words the same cue matched It, She and My, so it asks katakana
+only). Words are ranked by how many tokens they are in **the sentences with
+an even Tatoeba id** (`isRankingSentence`; 15,612 of them), most first,
+equal counts in key order; the odd ids (15,900) are held out to measure.
+
+**What it takes.** The kind is last in `KINDS` and in `fullScript`, which
+reads it against every other kind whatever `--kinds` asks for
+(`takeCorpus`): it never takes a key a line holds, recorded or not, nor a
+word whose other lookup key, its bare kana, a line holds, since the reader
+finds that clip first. Every key with a clip is some line's, so no word it
+ranks has a Clear clip already. A word sent as the same kana as a word above it
+is filed under that line's clip (行った|いった, 言った|いった and いった all
+send いった): 21 such keys in the first 2,000 lines. 6,654 lines remain of
+16,777 words, 1,914 of them met twice or more.
+
+**A kept clip stays.** The corpus is ranked again on every run, so a word
+could leave the script, and a run's prune deletes the clip of a line the
+script no longer has: when the analyzer or the sentences change the one or
+two sentences that ranked it (1,284 of the first 2,000 lines are met once or
+twice), or when another kind comes to hold its bare kana (68 of the first
+2,000 would, were common band 4 added). So `build-audio.mjs` writes each
+corpus line whose clip it keeps to `tools/audio-corpus.json` (`corpusKept`),
+as it was sent, and `fullScript` takes those lines back before any new word,
+whatever the ranking says (`keptCorpusLine`, `takeCorpus`). Only a key an
+earlier kind takes outranks a kept line: that kind's line has the clip's id,
+so the clip stays, and is made again only when that kind sends the word
+another way (2 of the first 2,000 under band 4). Deleting a row makes its
+word an ordinary corpus word again; if the ranking no longer takes it, the
+next run prunes its clip. The file is written from the first corpus clip
+kept, so it does not exist yet.
+
+**What it sends.** `wordTts`, as the other word kinds: a word in kanji goes
+in kanji only when every record of its spelling, or of an inflected form's
+dictionary form, gives one reading (食べた; 行った goes as いった, since 行く
+is いく or ゆく). An inflected form is also sent as its reading when another
+dictionary form the deinflector finds reads its kanji otherwise
+(`kanjiReadings`): 通って is 通う's かよって or 通る's とおって, 勝った 勝つ's
+or 勝る's, 断った 断つ's or 断る's, and a transcript shows the same kanji for
+both. That changed 12 of the first 2,000 lines; 498 of the 2,000 send kana, most
+of them words written in kana. A key that folds two spellings together
+(ジャガイモ and じゃがいも are both じゃがいも) sends the one the sentences
+write most, then the one with more katakana, which a voice reads only as the
+sound (`spellingOrder`), never the first met: the sentences' order would
+then decide what is sent, and a change of what is sent remakes a clip.
+
+**The check needs no new rule for conjugated forms.** A corpus line is a
+word kind: checked against its own reading and the said romaji the reader
+shows, from a triple take when it has two beats or fewer (39 of the first
+2,000). Read from `tools/audio-made.json`, with no API call: the inflected
+forms among the word kind's lines (Yomu's own text) passed 375 of 376 clips,
+368 on the first take; the one failure is Male's したり heard as English
+"Study". Copula forms passed 41 of 44 (じゃありませんでした came back
+じゃあありませんでした in three voices). The pieces that failed before (って,
+でし, んです, してい) were a particle in kana, which this kind leaves out, and
+fragments the analyzer no longer cuts. A right transcript of each of the
+first 2,000 lines, written as it is sent or as the sentence writes it,
+passes the check; the only ones that do not are loanwords written in
+hiragana with a long-vowel bar (おーぷん戦), which no transcriber writes.
+`tests/audio-corpus.test.mjs` holds the selection, the order, what is sent,
+what is taken and the check of a conjugated form.
+
+**Dry runs and coverage.** `node tools/build-audio.mjs --dry-run
+--kinds=corpus --limit=N` and `node tools/measure-audio-corpus.mjs`,
+17 November 2026, free. Coverage is word by word in Clear on the 15,900
+held-out sentences (108,984 spoken words), with the app's own key rule,
+counting every take as passing (an upper bound: 97 in 100 band-3 words
+passed). Before: **82.99%** of words, **25.76%** of sentences recorded from
+start to finish.
+
+| `--limit` | Clips | Characters | Met at least | Words | Whole sentences | Credits | Size |
+|---|---|---|---|---|---|---|---|
+| 500 | 500 | 1,850 | 3 times | 86.49% (+3.51 pp) | 34.88% (+9.12 pp) | about 1,000 to 1,700 | about 2.4 to 3.2 MB |
+| 1,000 | 1,000 | 3,724 | 2 times | 87.09% (+4.10 pp) | 36.67% (+10.91 pp) | about 2,000 to 3,400 | about 4.8 to 6.4 MB |
+| 2,000 | 2,000 | 7,174 | once | 88.00% (+5.01 pp) | 39.97% (+14.21 pp) | about 3,900 to 6,600 | about 9.6 to 12.4 MB |
+| every line | 6,654 | 26,621 | once | 90.27% (+7.28 pp) | 49.03% (+23.26 pp) | about 14,400 to 24,500 | about 32 to 46 MB |
+
+The last row is the most the kind can add as it is built: the ceiling, not a
+plan. The dry run's own estimate is 925, 1,862, 3,587 and 13,311 credits, at 0.5 a
+character before retakes and transcription. The credits are the account's
+measured rates per character sent, everything included: band 3's 7,852
+credits over the 14,462 characters its records send (0.54; 1.52 a word,
+its words averaging 2.8 characters) at the low end, and the two reading runs of 6 and
+13 November, 4,817 credits over 5,231 characters (0.92), at the high end.
+Corpus words are longer (3.6 characters on average), and October's transcription cost
+almost nothing beside November's, so the low end is a floor; the reading
+runs heard a fifth of their clips three times over, against 2 in 100 here,
+so the high end is a ceiling. The size is the 97 in 100 that pass, at band
+3's 4,952 bytes of MP3 a clip or its 1,781 a character sent; the app
+bundles all of `data/audio/`. The plan has changed since
+(What the account was charged): 10,000 credits a cycle, 2,000 of them kept
+back by the tool, at a price not known here. Run it in bounded batches with
+the balance read between them (Running it), after the owner sets a ceiling.
+
+The measurement also says whose the 18,539 missing words are. A line of
+this kind holds 7,916 of them (5,452 in its first 2,000, 2,464 after), so a
+run can record them. 4,748 are words this kind would take that the ranking
+half never meets, so no line holds them, and it leaves out 689 by its rule:
+356 numbers, 255 names (in 1.60% of the sentences, which therefore can never
+be recorded whole), 77 Latin words and 1 particle in kana. Every line
+recorded covers 7,936, 20 more than its own, because 20 words whose line of
+another kind has no clip would play a corpus word's clip by their bare kana
+(蜜蜂, a kanji page's word, by the corpus's みつばち). The rest are other
+kinds': 4,424 the kanji pages' words, not recorded yet, which this kind does
+not take (ranked by the same frequency, their first 500 would add 0.37 pp,
+so they are a long tail); 520 common words and 9 readings whose check failed
+(`--listen`); 216 kanji readings not recorded yet; and 17 sound examples.
+
+`--listen` lists this kind after every other (it is not in its order), in
+the script's order. Rerun the measurement after an analyzer change: what
+it ranks moves, though a kept clip does not (A kept clip stays, above).
+
+**The first run, 23 November 2026.** The owner approved up to 9,000 credits
+on 17 November for the first 2,000 words of this kind and then the kanji
+pages' words. The account read pay-as-you-go, a limit of 10,000, with 1,108
+already used that cycle by `eleven_v3` and alignment on 17 November (not this
+tool, which calls neither). A 60-word pilot kept all 60 for 122 credits by
+the balance. Then three batches, the balance read a minute after each, with
+a rule to start no batch that could carry the account past 8,600 used.
+
+**`--limit` counts the clips a run makes, not a place in the order.** The
+batches were run as `--limit=500`, `1000`, `1500`, `2000`, meant as the first
+500, 1,000, 1,500 and 2,000 lines, but each run made that many new clips, so
+the second made 1,000 and the third up to 1,500. The fourth was stopped by
+the rule (used 7,559). So the run made 2,843 words of this kind, 843 past the
+approved 2,000, and none of the kanji pages' words. To stop at a place in the
+order, pass the number still to make: the dry run's count for the wanted
+place, less what is already made.
+
+What it made: 2,759 kept, 84 rejected after three takes (1.04 takes a kept
+word). The balance went from 1,108 to 7,559: **6,451 credits**, 2.34 a kept
+word, in line with the pilot. By the usage API the split was 2,723 of speech
+(`eleven_v4`) and 3,134 of transcription (`scribe_v2`): on these short clips
+the check costs more than the speech, so a cheaper check is where the next
+saving is. The ledger now holds 18,053 records, 17,382 kept, and the index
+12,877 keys in 5 shards; `data/audio` is 123 MB on disk.
+
+Measured afterwards with `tools/measure-audio-corpus.mjs`, the held-out half
+(15,900 sentences, 108,984 spoken words, the app's own key rule): **88.33%**
+of words and **41.13%** of whole sentences recorded, from 82.99% and 25.76%
+before. That is above the table's line for 2,000 (88.00%, 39.97%), since
+2,759 words were kept. 3,895 lines of this kind remain. The kanji pages'
+words, the second half of the approval, were not reached; the account had
+2,441 left of its 10,000 at the end, under the tool's 2,000 reserve plus
+what one batch can post late, so nothing more was started.
+
+**The second run, 24 November 2026.** The owner said "spend the remaining
+tokens". The account cannot go past its limit (`can_extend_character_limit`
+false, so no overage), so the run went down to a 100-credit margin with
+`--reserve=100`, the option added for it: the tool keeps 2,000 by default.
+Kanji pages' words, in the order the tool deals them (the most frequent
+pages first), in batches sized from the balance read a minute after each
+(2.5 credits a clip, at most 300 a batch, `--limit` as the number of new
+clips): 300, 300, 300, then 104, and a stop at 79 left.
+
+What it made: 969 kept, 35 rejected after three takes. The balance went
+from 2,441 to 79 left: **2,362 credits**, 2.44 a kept word. One batch's
+charges posted after the minute's wait (39 credits), which the margin
+covered. The ledger now holds 19,057 records, 18,351 kept, and the index
+13,846 keys in 5 shards; `data/audio` is 131 MB on disk. Of the 7,197 kanji
+page lines, 6,193 remain. The account read 9,921 used of 10,000, until it
+resets on 17 December.
 
 ## The page
 
@@ -383,8 +725,10 @@ in `tests/audio-sequence.test.mjs`; no synthesis or new recordings are involved.
   the chosen voice, or hands the text to the device. Every caller gains
   recordings without change; a word's callers (Say the word, Sound it out's
   last step, a word on the kanji page) also pass its `wordKey` as `lookup`,
-  tried before the text. A particle passes none: は is said わ, and the clip
-  filed under は is the beat ha.
+  tried before the text. A particle in kana passes none: は is said わ, and
+  the clip filed under は is the beat ha. One whose spelling has a kanji
+  (結果 tagged as a particle) passes its `wordKey`, as any word does
+  (`events-say.js lookupOf`; Naninani's `Speech.written` keeps the same rule).
 - **The index is sharded.** `data/audio/index.json` (format yomu-audio/2)
   names the voices and the key ranges of `kNN.json` shards (yomu-audio-clips/1,
   `{ key: [id, mask] }`, bit i of the mask is voice i's). The page fetches the
@@ -406,6 +750,8 @@ in `tests/audio-sequence.test.mjs`; no synthesis or new recordings are involved.
 - **Two gates** (`events-say.js`). The learner's text needs the device's voice,
   as before. Yomu's own text (a note's examples, Hear both, Listen, Chunk it, a
   dialogue) works with a recorded voice on a device with no Japanese voice.
+  The kanji page asks the second gate of each button, whose text may have no
+  clip (The kanji pages, above).
 - **A dialogue** plays line by line, speaker B in a second voice (Male, or
   Clear when Male is chosen).
 

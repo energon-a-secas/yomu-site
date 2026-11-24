@@ -188,3 +188,38 @@ export async function pushWords(ctx: MutationCtx, args: { words?: unknown[] }) {
   }
   return { ok: true as const, wrote, skipped };
 }
+
+/**
+ * Rows one erase call deletes at most, far under what a Convex mutation may
+ * write, so an account of any size goes in a few calls.
+ */
+export const ERASE_BATCH = 1000;
+
+async function drop(ctx: MutationCtx, docs: { _id: any }[]) {
+  for (const doc of docs) await ctx.db.delete(doc._id);
+  return docs.length;
+}
+
+/**
+ * Erase everything this deployment holds for the caller: the kanji, the
+ * phrases, the words, Play, the preferences and the Clear all. It is the
+ * data's half of deleting an account (the iOS app's Delete account calls
+ * it, then deletes the Clerk user). At most ERASE_BATCH rows a call: `done`
+ * false means call again. Nothing is left as a tombstone, since nobody is
+ * left to sync with; erasing an empty account deletes nothing.
+ */
+export async function erase(ctx: MutationCtx) {
+  const owner = await ownerOf(ctx);
+  if (!owner) return { ...REFUSED, deleted: 0, done: false };
+  let left = ERASE_BATCH;
+  if (left > 0) left -= await drop(ctx, await ctx.db.query("kanji").withIndex("by_owner_char", (q) => q.eq("owner", owner)).take(left));
+  if (left > 0) left -= await drop(ctx, await ctx.db.query("phrases").withIndex("by_owner_key", (q) => q.eq("owner", owner)).take(left));
+  if (left > 0) left -= await drop(ctx, await ctx.db.query("words").withIndex("by_owner_key", (q) => q.eq("owner", owner)).take(left));
+  // A full batch may have left rows behind: the single rows wait for the call that finds none.
+  if (left <= 0) return { ok: true as const, deleted: ERASE_BATCH - left, done: false };
+  let deleted = ERASE_BATCH - left;
+  deleted += await drop(ctx, await ctx.db.query("play").withIndex("by_owner", (q) => q.eq("owner", owner)).collect());
+  deleted += await drop(ctx, await ctx.db.query("prefs").withIndex("by_owner", (q) => q.eq("owner", owner)).collect());
+  deleted += await drop(ctx, await ctx.db.query("clears").withIndex("by_owner", (q) => q.eq("owner", owner)).collect());
+  return { ok: true as const, deleted, done: true };
+}

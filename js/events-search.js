@@ -6,7 +6,7 @@
 // (`sr.token`), so results never belong to an older query.
 
 import { $, fill, h, debounce } from './utils.js';
-import { ui } from './strings.js';
+import { ui, currentLang } from './strings.js';
 import { fetchJson, kanjiInfo, sharedDict } from './reader.js';
 import { createSearch, byParts, queryKind } from './search.js';
 import {
@@ -77,21 +77,30 @@ async function run() {
   }
   setStatus(ui('searching'));
   try {
-    const found = await (await searcher()).search(q);
+    const lang = currentLang();
+    const found = await (await searcher()).search(q, { lang });
     const chars = [...new Set([...found.kanji, ...found.words.flatMap((w) => [...w.key])])];
     const forms = pageForms();
     const examples = pageExamples();
     const setWords = pageSetWords();
-    const written = byWord(found.words).filter(firstTier).map((w) => shownWord(w).written);
-    const [infos] = await Promise.all([
+    const words = byWord(found.words);
+    const written = words.filter(firstTier).map((w) => shownWord(w).written);
+    // In Spanish the meanings are shown in Spanish where the dictionary has
+    // them (data/es/, fetched for these records only); a file that fails
+    // leaves them English.
+    const dict = lang === 'es' ? await sharedDict() : null;
+    const [infos, , , , kanjiEs] = await Promise.all([
       kanjiInfo(chars),
       // Other spellings and examples are a nicety: a shard that fails leaves them out.
       forms.need(written).catch(() => {}),
       examples.need(written).catch(() => {}),
       setWords.need(written).catch(() => {}),
+      dict ? dict.kanjiEs(found.kanji).catch(() => new Map()) : new Map(),
+      dict ? dict.needEs(words.flatMap((w) => w.recs)).catch(() => {}) : null,
     ]);
     if (token !== sr.token) return;
-    const { nodes, kept, status } = resultNodes(found, infos, q, (k, r) => forms.formsOf(k, r), (k, r) => examples.examplesOf(k, r), (k) => setWords.inOf(k));
+    const es = dict ? { of: (rec) => dict.esOf(rec), kanji: kanjiEs } : {};
+    const { nodes, kept, status } = resultNodes(found, infos, q, (k, r) => forms.formsOf(k, r), (k, r) => examples.examplesOf(k, r), (k) => setWords.inOf(k), es);
     sr.kept = kept;
     fill(out, nodes);
     setStatus(status);
@@ -105,13 +114,15 @@ async function run() {
 
 const runSoon = debounce(run, 220);
 
-/** Queries to try, one of each kind, on an empty field. */
-const TRIES = Object.freeze(['eat', '食べた', 'sake']);
+/** Queries to try, one of each kind, on an empty field: a meaning in the page's language, Japanese, romaji. */
+const TRIES = Object.freeze({ en: ['eat', '食べた', 'sake'], es: ['comer', '食べた', 'sake'] });
+const tries = () => TRIES[currentLang()] || TRIES.en;
 
 function tryNodes() {
+  const lang = currentLang() === 'es' ? 'es' : 'en';
   return h('p', { class: 'sr-tries' }, [
     h('span', { class: 'quiet' }, ui('searchTry')),
-    ...TRIES.map((q, i) => h('button', { type: 'button', class: 'sr-try', 'data-act': 'sr-try', 'data-ix': i }, h('span', { lang: /[a-z]/.test(q) ? 'en' : 'ja' }, q))),
+    ...tries().map((q, i) => h('button', { type: 'button', class: 'sr-try', 'data-act': 'sr-try', 'data-ix': i }, h('span', { lang: /[a-z]/.test(q) ? lang : 'ja' }, q))),
   ]);
 }
 
@@ -180,7 +191,7 @@ export const SEARCH_ACTIONS = {
     document.querySelector(`#sr-counters [data-act="cn-pick"][data-ix="${sr.counter}"]`)?.focus({ preventScroll: true });
   },
   'sr-try': (b) => {
-    const q = TRIES[Number(b.dataset.ix)];
+    const q = tries()[Number(b.dataset.ix)];
     const input = $('sr-input');
     if (!q || !input) return;
     input.value = q;

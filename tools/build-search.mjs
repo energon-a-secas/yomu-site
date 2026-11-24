@@ -6,7 +6,7 @@
  * THIS IS A MANUAL DATA STEP, NOT A BUILD.
  * Run it by hand, commit the output, never wire it into CI or `make serve`:
  *
- *   node tools/build-search.mjs        (after build-dict, build-kanji, build-kanji-page)
+ *   node tools/build-search.mjs        (after build-dict, build-kanji, build-kanji-page and build-spanish)
  *
  * Read from the committed data only, so it needs no upstream.
  *
@@ -34,6 +34,23 @@
  *   never finds 喰べる twice over. The page reads it only when the first tier
  *   finds few words (js/search.js RARE_WHEN): "eat" wants 食べる, not 喰らう.
  *
+ * data/search/sNN.json, `yomu-search-es/1`, index data/search/es.json
+ *   (`yomu-search-es-index/1`): the same as eNN for the Spanish meanings,
+ *   JMdict's and KANJIDIC's Spanish as tools/build-spanish.mjs wrote them
+ *   under data/es/, each Spanish word (js/search-latin.js spanishWords:
+ *   folded, ñ kept) to `w` first-tier keys and `k` kanji, ranked as the
+ *   English are, each comma-separated gloss of a meaning counting as one.
+ *   A word spelled with ñ is listed under its plain spelling too, as `n`
+ *   (nino: { n: ['niño'] }), so typing n finds it after any word spelled
+ *   with n itself (ano, then año). The Spanish of a few common words is
+ *   written for Yomu (tools/lib/spanish-words.mjs), so these files carry
+ *   that input in their licence. The rare words have no Spanish index: their
+ *   Spanish covers one key in eight, and the index of it would be measured
+ *   against the app's download first (docs/ANALYZER.md, "Search in Spanish").
+ *   These are Search's files, not Spanish counterparts of English ones,
+ *   which is why they sit here and not under data/es/ (js/es-files.js esSrc
+ *   names data/es/X the Spanish of data/X).
+ *
  * data/search/parts.json, `yomu-parts/1`: for each part (a KanjiVG component)
  * the kanji that contain it at any depth, most frequent first: 語 is 言 and
  * 吾, and 吾 is 五 and 口, so 口 finds 語. `list` is the parts the picker
@@ -44,8 +61,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { licenceBlock } from './lib/licence.mjs';
 import { glossWords } from '../js/search.js';
+import { spanishWords, plainN } from '../js/search-latin.js';
 import { toHira } from '../js/kana.js';
 import { upstream } from './lib/sources.mjs';
+import { esSrc, AUTHORED_ES } from './lib/spanish.mjs';
 import {
   writeJson, serialize, MAX_BYTES, SITE, fmtBytes, pruneStale,
 } from './lib/emit.mjs';
@@ -139,6 +158,104 @@ function english(tier, info, listed) {
     out.set(w, e);
   }
   return out;
+}
+
+// ── Spanish ───────────────────────────────────────────────────────────────
+
+/** The Spanish of each first-tier key's records, as data/es/dict holds it beside each English file. */
+function spanishTier() {
+  const index = readJson('dict/index.json');
+  const out = new Map();
+  for (const src of [index.core.src, ...index.shards.map((sh) => sh.src)]) {
+    const doc = JSON.parse(fs.readFileSync(path.join(SITE, esSrc(src)), 'utf8'));
+    for (const [key, list] of Object.entries(doc.entries)) out.set(key, list);
+  }
+  return out;
+}
+
+/** KANJIDIC's Spanish meanings of every kanji that has any (data/es/kanji). */
+function spanishKanji() {
+  const index = readJson('kanji/index.json');
+  const out = new Map();
+  for (const sh of index.shards) {
+    const doc = JSON.parse(fs.readFileSync(path.join(SITE, esSrc(sh.src)), 'utf8'));
+    for (const [ch, m] of Object.entries(doc.entries)) out.set(ch, m);
+  }
+  return out;
+}
+
+/**
+ * Each Spanish word to its keys and kanji, as english() does it: one key per
+ * word (listedSpelling), ranked by band, record, meaning, where in its gloss
+ * the word sits and whether the gloss is the word alone. A meaning is one or
+ * two glosses joined by a comma (学生 "estudiante, alumno"), so each gloss
+ * between commas counts as one.
+ */
+function spanish(tier, listed, esOf, kanjiEs) {
+  const by = new Map(); // word -> Map(key -> score)
+  const keys = new Set(tier.map(([key]) => key));
+  const stats = { keys: 0 };
+  for (const [key, recs] of tier) {
+    // A key that is another plus a particle (今日は) is left out, as in
+    // English, unless it is usually written in kana: then it is a set
+    // phrase a learner looks for by its meaning (こんにちは is hola).
+    if (recs.every((r) => r.x) && !recs.every((r) => r.u)) continue;
+    if (!listedSpelling(key, recs[0], keys)) continue;
+    const es = esOf.get(key);
+    if (!es) continue;
+    stats.keys += 1;
+    recs.forEach((rec, ri) => {
+      const meanings = es[ri];
+      if (!Array.isArray(meanings)) return;
+      meanings.forEach((meaning, si) => {
+        meaning.replace(/\([^)]*\)/g, ' ').split(/[,;]/).forEach((piece, pi) => {
+          const words = spanishWords(piece, { alone: true });
+          const alone = words.length === 1;
+          words.forEach((w, wi) => {
+            // A set phrase (x) ranks a band lower by any gloss but its first:
+            // こんにちは is "hola, buenos días", and buenos días is おはよう first.
+            const score = (rec.q || 6) * 4 + (rec.x && pi > 0 ? 4 : 0) + (ri + si) * 3 + Math.min(pi + wi, 4) + (alone ? 0 : 3);
+            if (!by.has(w)) by.set(w, new Map());
+            const m = by.get(w);
+            if (!m.has(key) || m.get(key) > score) m.set(key, score);
+          });
+        });
+      });
+    });
+  }
+  const kanjiBy = new Map();
+  for (const ch of listed) {
+    for (const meaning of kanjiEs.get(ch) || []) {
+      for (const w of new Set(spanishWords(meaning, { alone: true }))) {
+        if (!kanjiBy.has(w)) kanjiBy.set(w, []);
+        const list = kanjiBy.get(w);
+        if (list.length < KANJI && !list.includes(ch)) list.push(ch);
+      }
+    }
+  }
+  const out = new Map();
+  for (const w of new Set([...by.keys(), ...kanjiBy.keys()])) {
+    const e = {};
+    const ks = by.get(w);
+    if (ks) {
+      e.w = [...ks].sort((a, b) => a[1] - b[1] || a[0].length - b[0].length || (a[0] < b[0] ? -1 : 1))
+        .slice(0, WORDS).map(([k]) => k);
+    }
+    if (kanjiBy.has(w)) e.k = kanjiBy.get(w).join('');
+    out.set(w, e);
+  }
+  // A word with ñ is found by its plain spelling too, after that spelling's own.
+  let enye = 0;
+  for (const w of [...out.keys()].sort()) {
+    const plain = plainN(w);
+    if (plain === w) continue;
+    if (!out.has(plain)) out.set(plain, {});
+    const e = out.get(plain);
+    e.n = [...(e.n || []), w];
+    enye += 1;
+  }
+  stats.enye = enye;
+  return { map: out, stats };
 }
 
 // ── English, the rare words ───────────────────────────────────────────────
@@ -321,6 +438,28 @@ function main() {
     written.push(file);
     return { src: `data/search/${name}`, first: doc.first };
   });
+  const esLicence = licenceBlock('edrdgSpanish', TOOL, {
+    upstream: [upstream('jmdictSpa'), upstream('kanjidicAll'), upstream('jmdictFull')],
+  });
+  const { generated_by: by, generated_at: at, ...esHead } = esLicence;
+  const es = spanish(tier, listed, spanishTier(), spanishKanji());
+  const esDocs = pack(es.map, 'yomu-search-es/1', { ...esHead, inputs: [{ ...AUTHORED_ES }], generated_by: by, generated_at: at });
+  const esSizes = [];
+  const esShards = esDocs.map((doc, i) => {
+    const name = `s${String(i).padStart(2, '0')}.json`;
+    const file = path.join(OUT, name);
+    esSizes.push(writeJson(file, doc));
+    written.push(file);
+    return { src: `data/search/${name}`, first: doc.first };
+  });
+  const esWords = esDocs.reduce((n, d) => n + Object.keys(d.entries).length, 0);
+  const esIndexBytes = writeJson(path.join(OUT, 'es.json'), {
+    _licence: esDocs[0]._licence,
+    format: 'yomu-search-es-index/1',
+    keys: esWords,
+    maxKey: Math.max(...esDocs.flatMap((d) => Object.keys(d.entries).map((k) => k.length))),
+    shards: esShards,
+  }, 'shards');
   const rareKeys = rareDocs.reduce((n, d) => n + Object.keys(d.entries).length, 0);
   writeJson(path.join(OUT, 'rare.json'), {
     _licence: licence,
@@ -332,10 +471,12 @@ function main() {
   const gone = [
     ...pruneStale(OUT, /^e\d+\.json$/, written),
     ...pruneStale(OUT, /^x\d+\.json$/, written),
+    ...pruneStale(OUT, /^s\d+\.json$/, written),
   ];
   process.stdout.write([
     `english: ${keys} words in ${docs.length} shards, ${fmtBytes(sizes.reduce((a, b) => a + b, 0))}`,
     `rare english: ${rareKeys} words in ${rareDocs.length} shards, ${fmtBytes(rareSizes.reduce((a, b) => a + b, 0))}`,
+    `spanish: ${esWords} words (${es.stats.enye} with ñ, listed under n too) from ${es.stats.keys} keys, in ${esDocs.length} shards, ${fmtBytes(esSizes.reduce((a, b) => a + b, 0))} and an index of ${fmtBytes(esIndexBytes)}`,
     `parts: ${Object.keys(map).length} parts, ${list.length} in the picker, ${fmtBytes(partBytes)}`,
     gone.length ? `removed ${gone.join(' ')}` : null,
     `wall time ${((Date.now() - t0) / 1000).toFixed(1)} s`,

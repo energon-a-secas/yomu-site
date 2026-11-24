@@ -18,10 +18,9 @@
 import { $, h, fill } from './utils.js';
 import { ui } from './strings.js';
 import { state } from './state.js';
-import { toHira } from './kana.js';
-import { toHiragana } from './vendor/wanakana.js';
+import { textMatches } from './saved-filter.js';
 import { dayOf } from './kanji-store.js';
-import { myHistory, normalizeText } from './history-store.js';
+import { myHistory } from './history-store.js';
 import { dayText, today, textToggle } from './render-save.js';
 
 /** The screen's own state: the filter, and the rows of each list as drawn (data-ix). */
@@ -32,18 +31,12 @@ const SOURCE_WORD = {
 };
 
 /**
- * Does a text match the filter: the words in it, with kana folded to
- * hiragana and romaji read as kana, so "ame", "あめ" and "アメ" all find 雨
- * written as あめ, the way render-mykanji.js matches() reads a reading.
+ * Does a text match the filter: the words in it, kana folded and romaji read
+ * as kana however it is typed (saved-filter.js textMatches: watashiwa finds
+ * わたしは). A text is what was pasted, with no reading kept, so romaji finds
+ * its kana and never its kanji.
  */
-export function textMatches(text, query) {
-  const q = normalizeText(query).toLowerCase();
-  if (!q) return true;
-  const hay = toHira(normalizeText(text).toLowerCase());
-  const kana = toHira(q);
-  const fromRomaji = /^[a-z' -]+$/.test(q) ? toHiragana(q.replace(/[ -]/g, '')) : '';
-  return hay.includes(q) || hay.includes(kana) || (!!fromRomaji && /^[぀-ゟ]+$/.test(fromRomaji) && hay.includes(fromRomaji));
-}
+export { textMatches };
 
 /** "Read 3 times · last Oct 2 · first Sep 28 · pasted". */
 export function metaLine(e, now = today()) {

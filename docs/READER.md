@@ -1,4 +1,4 @@
-# The reader: Gaps, the display choices, the Translation, the handwritten form
+# The reader: Gaps, the display choices, the Translation, the handwritten form, scanned text
 
 Moved out of the project's CLAUDE.md on 2026-10-16, word for word, when the
 file passed the 40,000 characters the fleet's smoke check allows an
@@ -136,3 +136,39 @@ the chart opens. The print font stays next in line, so a kanji Klee One lacks
 (2,847 of the shards' 10,384, 寬 among the name kanji) is drawn in print and
 the kanji page says so (`handMissing`). Google Fonts would have sent every
 visitor's address to Google; `font-src 'self'` stays as it is.
+
+## Scanned text
+
+**Scanned text is the page's text without its layout, in one pure module.**
+Naninani's Scan (1.3.0) reads a photo with Apple's Live Text and hands Read
+the text through `js/scan-text.js` (`cleanScan(text, analyze)`, the analyzer
+passed in; the app's bridge calls it as `scanText`). Measured on 11 November
+2026 on printed pages (Hiragino Mincho, read by macOS 27's engine): Vision's
+text request read horizontal Japanese but returned nothing for vertical
+columns, while Live Text read both, the columns right to left, so the app
+uses Live Text. What Live Text hands back carries three kinds of layout.
+Furigana comes back as lines of its own before the line it sits on (きょう,
+あめ, then the sentence; from a vertical page き よう, あめ, ふ, with a space
+inside and a small ょ read large). A vertical page keeps its column breaks,
+inside a word too (…見つ / けました。), where wrapped horizontal lines come
+back joined. A gap in the print becomes a space or a line break (a menu's
+ラーメン 800円 / 餃子 / 400円).
+
+**Each rule is decided by the analyzer.** A line of kana alone is furigana
+when it spells the readings of the kanji on the nearest line after it
+(failing that, before it): each kanji run's ruby from the token's `furigana`,
+in order, each whole, any skipped (printed furigana sits only over the kanji
+a reader may not know), with small kana folded large and katakana read as
+hiragana on both sides, and a kanji line's readings used once, so two lines
+never claim one kanji. A kana line that is not such a reading stays (はい
+before 今日は雨です。). A space between two Japanese characters closes when
+the analyzer reads a word across it (日本 語 is 日本語); お茶 無料 keeps its
+space. A line break closes when a word runs across it (見つ / けました), when
+the next line starts with a particle or a copula (no sentence does), when the
+line ends on a particle no sentence ends on (は, が, を, に and the like), or
+on 、. A break after 。, ! or ? or a closing bracket stays, and so does one
+beside anything that is not Japanese, so a menu keeps one item a line. A
+break between two words of one sentence that no rule sees (映画 / について,
+where について is one word) stays: the reading is right, the paragraph breaks
+early, and the learner can join it in the text box. `tests/scan-text.test.mjs`
+holds the measured scans.

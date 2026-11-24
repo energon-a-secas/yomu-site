@@ -14,8 +14,7 @@
 
 import { $, h, fill } from './utils.js';
 import { ui, currentLang } from './strings.js';
-import { toHira } from './kana.js';
-import { toHiragana } from './vendor/wanakana.js';
+import { kanjiMatches } from './saved-filter.js';
 import { myKanji, dayOf } from './kanji-store.js';
 import { myWords, nextDueAll } from './word-store.js';
 import { saveToggle, seenText, wordRuby, dayText, today, withKanji } from './render-save.js';
@@ -80,22 +79,11 @@ export function sortSaved(data, chars, sort) {
 
 /**
  * Does a saved kanji match the filter: its character, a meaning, an on or
- * kun reading, or a word it was met in. Kana is folded to hiragana and
- * romaji is read as kana too, so "ten", "てん" and "テン" all find 天.
+ * kun reading, or a word it was met in (saved-filter.js kanjiMatches, which
+ * the iOS app's My collection asks too). The page's info is KANJIDIC's
+ * English, which is what the list shows, so no Spanish meaning is read here.
  */
-export function matches(ch, info, seen, query) {
-  const q = String(query || '').trim().toLowerCase();
-  if (!q) return true;
-  const kana = toHira(q);
-  const fromRomaji = /^[a-z' -]+$/.test(q) ? toHiragana(q.replace(/[ -]/g, '')) : '';
-  const hay = [
-    ch,
-    ...(info && Array.isArray(info.m) ? info.m.map((m) => String(m).toLowerCase()) : []),
-    ...(info ? [...(info.on || []), ...(info.kun || [])].map((r) => toHira(String(r)).replace(/[.-]/g, '')) : []),
-    ...(seen && Array.isArray(seen.words) ? seen.words.flat() : []),
-  ];
-  return hay.some((x) => x.includes(q) || (kana && x.includes(kana)) || (fromRomaji && /^[぀-ゟ]+$/.test(fromRomaji) && x.includes(fromRomaji)));
-}
+export const matches = kanjiMatches;
 
 // ── Sections ──────────────────────────────────────────────────────────────
 

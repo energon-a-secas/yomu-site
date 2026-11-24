@@ -95,11 +95,27 @@ function chevron(dir) {
   }, [svg('path', { d: dir === 'left' ? 'M15 5l-7 7 7 7' : 'M9 5l7 7-7 7' })]);
 }
 
+/** The line that says why a say button cannot be pressed, which each such button names. */
+export const SPEECH_NOTE_ID = 'kp-speech-note';
+
+/**
+ * A say button's attributes for the gate's answer: nothing when it can be
+ * pressed, else disabled and described by the page's speech note. Not
+ * `data-speak`: that is the learner's text's gate (render-chrome.js
+ * paintSpeech), which needs the device's voice, and a recorded reading or
+ * word plays without it.
+ */
+export function sayAttrs(ok) {
+  return { 'aria-disabled': ok ? null : 'true', 'aria-describedby': ok ? null : SPEECH_NOTE_ID };
+}
+
 /**
  * The page's two actions: the save toggle, labelled (a kana has none), and
- * Say, which reads the kanji's first reading or the kana itself.
+ * Say, which reads the kanji's first reading (on before kun) or the kana
+ * itself, kept in `sounds` like every other say button.
  */
-function actionsPart(ch, mine, { save = true } = {}) {
+function actionsPart(ch, info, mine, sounds, gate, { save = true } = {}) {
+  const first = info ? [...(info.on || []), ...(info.kun || [])][0] : null;
   return h('div', { class: 'kp-actions' }, [
     save ? h('button', {
       type: 'button', class: 'kp-save-btn', 'data-act': 'kp-save', 'aria-pressed': mine.saved ? 'true' : 'false',
@@ -108,7 +124,7 @@ function actionsPart(ch, mine, { save = true } = {}) {
       h('span', { 'aria-hidden': 'true' }, ui(mine.saved ? 'kpSaved' : 'kpSave')),
       h('span', { class: 'sr-only' }, withKanji('saveKanji', ch)),
     ]) : null,
-    h('button', { type: 'button', class: 'btn btn--secondary kp-say', 'data-act': 'kp-say', 'data-speak': '' }, [
+    sayButton('btn btn--secondary kp-say', { text: first ? readingKana(first) : ch }, sounds, gate, [
       speakerIcon(), h('span', null, ui('kpSay')),
     ]),
   ]);
@@ -142,28 +158,33 @@ function strip(chars, drawn) {
   return h('div', { class: 'kp-strip' }, chars.map((c) => goTile(c, drawn, null)));
 }
 
-/** A button that says something kept in `sounds`, found by its `data-ix`; disabled with no Japanese voice. */
-function sayButton(cls, ix, speakable, kids) {
-  return h('button', {
-    type: 'button', class: cls, 'data-act': 'kp-say-item', 'data-ix': ix, 'data-speak': '', 'aria-disabled': speakable ? null : 'true',
-  }, kids);
+/**
+ * A button that says `item` ({ text, lookup }), kept in `sounds` and found
+ * by its `data-ix`. `gate.can(item)` says whether it can be pressed now, and
+ * `gate.off` counts the ones that cannot, for the speech note.
+ */
+function sayButton(cls, item, sounds, gate, kids) {
+  const ix = sounds.push(item) - 1;
+  const ok = gate.can(item);
+  if (!ok) gate.off += 1;
+  return h('button', { type: 'button', class: cls, 'data-act': 'kp-say-item', 'data-ix': ix, ...sayAttrs(ok) }, kids);
 }
 
 /** The common words, each with its romaji, a speaker, and Read it, found by `data-ix` in `words`. */
-function wordsPart(titleKey, words, wordsKept, sounds, speakable) {
+function wordsPart(titleKey, words, wordsKept, sounds, gate) {
   return h('section', { class: 'kp-sec' }, [
     h('h3', { class: 'word-sub' }, ui(titleKey)),
     words.length
       ? h('ul', { class: 'kp-words', role: 'list' }, words.map((w) => {
         const ix = wordsKept.push(w.written) - 1;
-        const say = sounds.push({ text: toHira(w.reading), lookup: [wordKey(w.written, w.reading)] }) - 1;
+        const say = { text: toHira(w.reading), lookup: [wordKey(w.written, w.reading)] };
         return h('li', { class: 'kp-word' }, [
           h('span', { class: 'kp-word-text' }, [
             wordRuby([w.written, w.reading]),
             h('span', { class: 'kp-word-rom' }, wordRomaji(toHira(w.reading))),
             h('span', { class: 'kp-gloss', lang: 'en' }, w.gloss),
           ]),
-          sayButton('kp-say-word', say, speakable, [speakerIcon(), h('span', { class: 'sr-only' }, withKanji('kpSayWord', w.written))]),
+          sayButton('kp-say-word', say, sounds, gate, [speakerIcon(), h('span', { class: 'sr-only' }, withKanji('kpSayWord', w.written))]),
           h('button', { type: 'button', class: 'btn btn--ghost btn--sm kp-read', 'data-act': 'kp-read', 'data-ix': ix }, [
             h('span', { 'aria-hidden': 'true' }, ui('searchRead')),
             h('span', { class: 'sr-only' }, ui('searchReadLabel', { w: w.written })),
@@ -228,10 +249,10 @@ function readingShown(r) {
 }
 
 /** The on and kun readings, each a button that says it, its romaji under it. */
-function readingsPart(info, sounds, speakable) {
+function readingsPart(info, sounds, gate) {
   const group = (label, items) => (Array.isArray(items) && items.length ? h('div', { class: 'kp-readgroup' }, [
     h('span', { class: 'kp-readlabel' }, label),
-    h('span', { class: 'kp-readings' }, items.map((r) => sayButton('kp-reading', sounds.push({ text: readingKana(r) }) - 1, speakable, [
+    h('span', { class: 'kp-readings' }, items.map((r) => sayButton('kp-reading', { text: readingKana(r) }, sounds, gate, [
       h('span', { class: 'sr-only' }, `${ui('kpSay')}: `),
       h('span', { class: 'kp-reading-kana', lang: 'ja' }, readingShown(r)),
       ...readingRomajiPair(r, 'kp-reading-rom'),
@@ -278,14 +299,16 @@ function likesPart(ch, likes, infos, drawn) {
  * A kana's page: how it is drawn, how it is spelled in romaji, the same
  * sound in the other script, and common words that start with it.
  */
-function kanaPage(ch, paths, page, nodes, drawn, wordsKept, mine, sounds, speakable, hand) {
+function kanaPage(ch, paths, page, nodes, drawn, wordsKept, mine, sounds, gate, hand) {
   const hira = isHiragana(ch);
   const other = hira ? toKata(ch) : toHira(ch);
   nodes.push(hero(ch, [
     h('p', { class: 'kp-mean', lang: 'ja-Latn' }, beatRomaji(ch) || ''),
     h('p', { class: 'mk-meta' }, ui(hira ? 'kpHiragana' : 'kpKatakana')),
   ], hand));
-  nodes.push(actionsPart(ch, mine, { save: false }));
+  // A kana has no KANJIDIC readings: Say says the kana itself.
+  nodes.push(actionsPart(ch, null, mine, sounds, gate, { save: false }));
+  nodes.push(gate.note);
   nodes.push(strokesPart(ch, paths));
   if (other && other !== ch) {
     nodes.push(h('section', { class: 'kp-sec' }, [
@@ -293,9 +316,47 @@ function kanaPage(ch, paths, page, nodes, drawn, wordsKept, mine, sounds, speaka
       strip([other], drawn),
     ]));
   }
-  nodes.push(wordsPart('kpStartsWith', page ? page.words : [], wordsKept, sounds, speakable));
+  nodes.push(wordsPart('kpStartsWith', page ? page.words : [], wordsKept, sounds, gate));
   nodes.push(h('p', { class: 'quiet kp-source' }, ui('kpSource')));
   return { nodes, drawn, words: wordsKept, sounds };
+}
+
+/**
+ * The gate the say buttons are drawn behind, and the line that says why a
+ * button cannot be pressed, filled and shown once every button is drawn
+ * (`showSpeechNote`), and only while one cannot be pressed.
+ */
+function sayGate(speakable) {
+  const can = typeof speakable === 'function' ? speakable : () => !!speakable;
+  return { can, off: 0, note: h('p', { class: 'quiet kp-speech-note', id: SPEECH_NOTE_ID }) };
+}
+
+/** Show the speech note while `off` buttons cannot be pressed and there is a reason to give. */
+export function showSpeechNote(note, off, reason) {
+  if (!note) return;
+  note.textContent = reason || '';
+  note.hidden = !(off > 0 && reason);
+}
+
+/**
+ * Mark drawn say buttons again, in place, as `can` answers now (each says
+ * `sounds[data-ix]`), and the speech note with them: the page after its
+ * voices and shards are known (events-kanji-page.js settleSay), without a
+ * repaint that would take focus and stop the stroke drawing. Returns how
+ * many cannot be pressed.
+ */
+export function markSay(buttons, note, sounds, can, reason) {
+  let off = 0;
+  for (const b of buttons) {
+    const item = sounds[Number(b.getAttribute('data-ix'))];
+    const ok = !!item && can(item);
+    if (!ok) off += 1;
+    for (const [k, v] of Object.entries(sayAttrs(ok))) {
+      if (v === null) b.removeAttribute(k); else b.setAttribute(k, v);
+    }
+  }
+  showSpeechNote(note, off, reason);
+  return off;
 }
 
 /**
@@ -311,13 +372,15 @@ function kanaPage(ch, paths, page, nodes, drawn, wordsKept, mine, sounds, speaka
  * @param {{ saved: boolean, n: number }} p.mine
  * @param {string} [p.state]        'loading' | 'failed' | 'ready'
  * @param {string[]} [p.likes]      its look-alikes, Play's
- * @param {boolean} [p.speakable]   a Japanese voice is there to say things
+ * @param {boolean|Function} [p.speakable]  whether a say button can be pressed:
+ *   a function of what it says ({ text, lookup }, speech.js canSay), or one answer for all
+ * @param {string} [p.sayReason]    why one cannot, for the speech note its buttons name
  * @returns {{ nodes: Node[], drawn: string[], words: string[], sounds: { text: string, lookup?: string[] }[] }}
  *   `drawn` the kanji its go buttons name, `words` the words Read it sends,
  *   `sounds` what its say buttons say: the kana, and for a word its own key (audio.js wordKey).
  */
 export function kanjiPageNodes({
-  ch, info, infos, paths, page, back, mine, state = 'ready', likes = [], speakable = false, jlpt = null, hand = null,
+  ch, info, infos, paths, page, back, mine, state = 'ready', likes = [], speakable = false, sayReason = '', jlpt = null, hand = null,
 }) {
   const drawn = [];
   const wordsKept = [];
@@ -339,15 +402,21 @@ export function kanjiPageNodes({
       sounds,
     };
   }
-  if (isKana(ch)) return kanaPage(ch, paths, page, nodes, drawn, wordsKept, mine, sounds, speakable, hand);
+  const gate = sayGate(speakable);
+  if (isKana(ch)) {
+    const out = kanaPage(ch, paths, page, nodes, drawn, wordsKept, mine, sounds, gate, hand);
+    showSpeechNote(gate.note, gate.off, sayReason);
+    return out;
+  }
   const meaning = meaningText(info, 5);
   nodes.push(hero(ch, [
     meaning ? h('p', { class: 'kp-mean', lang: 'en' }, meaning) : h('p', { class: 'quiet' }, ui('kanjiMissing')),
     facts(info, jlpt),
     mine.n ? h('p', { class: 'mk-meta' }, seenText(mine.n, true)) : null,
   ], hand));
-  if (info) nodes.push(readingsPart(info, sounds, speakable));
-  nodes.push(actionsPart(ch, mine));
+  if (info) nodes.push(readingsPart(info, sounds, gate));
+  nodes.push(actionsPart(ch, info, mine, sounds, gate));
+  nodes.push(gate.note);
   nodes.push(strokesPart(ch, paths));
   if (paths && info && Number.isInteger(info.s) && info.s !== paths.length) {
     nodes.push(h('p', { class: 'quiet kp-differs' }, ui('kpCountDiffers', { n: paths.length, s: info.s })));
@@ -391,7 +460,8 @@ export function kanjiPageNodes({
     ]));
   }
 
-  nodes.push(wordsPart('kpWords', page ? page.words : [], wordsKept, sounds, speakable));
+  nodes.push(wordsPart('kpWords', page ? page.words : [], wordsKept, sounds, gate));
   nodes.push(h('p', { class: 'quiet kp-source' }, ui('kpSource')));
+  showSpeechNote(gate.note, gate.off, sayReason);
   return { nodes, drawn, words: wordsKept, sounds };
 }

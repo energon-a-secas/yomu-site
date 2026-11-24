@@ -397,6 +397,25 @@ and not yet pushed can come back. Code shipped now cannot change what an
 old tab does; the window closes when the old tab reloads, and a push
 carries the removal about four seconds after the unsave.
 
+**A client that is not a page runs the same code.** The iOS app (Naninani)
+syncs through `js/sync-host.js`, which builds what `account.js` and
+`sync.js` take as arguments where a page has a DOM, storage, the kit and
+Convex's client: `documentStore()` (a store's storage over a document the
+host writes to a file), `prefsMirror()` (the six preferences carried
+through untouched: the app keeps its own settings and never stamps one),
+`hostKit()` (who is signed in, said by the host), `clientModule()` (query
+and mutation over the host's transport; a lost connection is a TypeError,
+as fetch's is), `pageless()` (the meta that names the key, and
+`shown()`/`online()` for the two events a host can tell of) and
+`startHost()`, which calls `startAccount()`. The host passes `sync.js` in
+(`engine`): this module imports no sync client, so the anonymous-visit rule
+above holds for it as for every module. The app's saved readings are its
+phrase book (`phrase-book.js`), which speaks History's part: `savedList()`,
+`unsave()`, `mergePhrases()`, `isSaved()` and the save and unsave events
+`sync-watch.js` stamps from. No rule lives in the host.
+`tests/sync-host.test.mjs` builds an app-shaped device from it and syncs it
+beside a browser-shaped one over the real handlers.
+
 **Sign-in cannot be tried on localhost.** The production key refuses it and
 the kit's dialog says so (expected). The functions are checked with
 `npx convex run sync:<fn> --identity '{"subject":"user_a","issuer":"https://clerk.neorgon.com"}'`
