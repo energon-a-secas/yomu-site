@@ -22,6 +22,8 @@
 //                           --listen lists every kind's takes)
 //     --limit=20            at most this many clips (a trial run)
 //     --retry-failed        try again the clips that failed their check
+//     --reserve=2000        credits a run leaves on the account (the default);
+//                           lower it only when the owner asks to spend the rest
 //
 //   node tools/build-audio.mjs --listen    write .forge/audio-listen.html, the takes that failed, to be heard
 //   node tools/build-audio.mjs --heard     ship the takes tools/audio-heard.json names, and stop
@@ -75,8 +77,9 @@ const FINISH_VERSION = 1;
 // Credits per character, measured on eleven_v4 for Japanese (11 characters
 // cost 5); only the dry run's estimate uses it, the real cost is counted.
 const EST_PER_CHAR = 0.5;
-// Initial quota headroom only. TTS headers omit other charges; an account
-// balance check between bounded batches is still required.
+// Initial quota headroom only, unless --reserve says otherwise. TTS headers
+// omit other charges; an account balance check between bounded batches is
+// still required.
 const RESERVE = 2000;
 const PARALLEL = 3;
 const ATTEMPTS = 3;
@@ -84,7 +87,7 @@ const ATTEMPTS = 3;
 const SHARD_BYTES = 110000;
 
 function args(argv) {
-  const out = { dryRun: false, budget: 0, voices: VOICES.map((v) => v.id), kinds: null, limit: Infinity, retryFailed: false, heard: false, listen: false, rejects: REJECTS };
+  const out = { dryRun: false, budget: 0, voices: VOICES.map((v) => v.id), kinds: null, limit: Infinity, retryFailed: false, heard: false, listen: false, rejects: REJECTS, reserve: RESERVE };
   for (const a of argv) {
     const [k, v] = a.replace(/^--/, '').split('=');
     if (k === 'dry-run') out.dryRun = true;
@@ -96,6 +99,7 @@ function args(argv) {
     else if (k === 'kinds') out.kinds = v.split(',');
     else if (k === 'limit') out.limit = Number(v);
     else if (k === 'retry-failed') out.retryFailed = true;
+    else if (k === 'reserve') out.reserve = Number(v);
     else throw new Error(`unknown option ${a}`);
   }
   // The corpus is made only when named; a failed take of it, already paid
@@ -416,8 +420,9 @@ async function main() {
   if (!key) throw new Error('no ElevenLabs key: set ELEVENLABS_API_TOKEN in .env');
   const sub = await call(key, '/v1/user/subscription');
   const left = sub.character_limit - sub.character_count;
-  const budget = Math.min(opts.budget, left - RESERVE);
-  if (!(budget > 0)) throw new Error(`no budget: --budget=${opts.budget}, ${left} credits left, ${RESERVE} kept in reserve`);
+  if (!(opts.reserve >= 0)) throw new Error(`--reserve must be a number of credits, not ${opts.reserve}`);
+  const budget = Math.min(opts.budget, left - opts.reserve);
+  if (!(budget > 0)) throw new Error(`no budget: --budget=${opts.budget}, ${left} credits left, ${opts.reserve} kept in reserve`);
   console.log(`build-audio: ${left} credits left this month; TTS-header threshold ${budget} (excludes other account charges; in-flight requests can exceed it)`);
 
   const ctx = { key, dict, made, check: makeCheck(dict), spent: 0, budget, stopping: false };
