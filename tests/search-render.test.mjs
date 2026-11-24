@@ -67,3 +67,10 @@ test('the shelf shows a row\'s Spanish on a page in Spanish, and its English oth
     assert.equal(plain.textContent, 'time is money', 'a row without Spanish keeps its English');
   } finally { useLang('en'); }
 });
+
+test('in Spanish a card says it was found by the learner\'s word as typed, accent and all (it said dias for días)', () => withLang('es', async () => {
+  const found = await s.search('días', { lang: 'es' });
+  const { nodes } = resultNodes(found, new Map(), 'días', undefined, undefined, undefined, { of: () => null });
+  assert.match(text(nodes), /Español: días/);
+  assert.doesNotMatch(text(nodes), /Español: dias/);
+}));

@@ -319,7 +319,12 @@ docs/ANALYZER.md "Search in Spanish, and romaji however it is typed"): romaji
 as kana however it is typed (`search-latin.js`: spaces, wa for は, a long
 vowel or a っ left out; a sentence typed together is read by the analyzer,
 `search-sentence.js`, which search-romaji.js imports only then, and offered only
-where it reads as one and no meaning names every word: agua is no ああ具ああ),
+where it reads as one, no meaning names every word (agua is no ああ具ああ) and
+`search-grammar.js trusted` holds it a reading to trust: a wrong sentence is
+worse than none, though its words are still listed; a sure name reads as the
+name through `data/search/names.json`, tanaka is 田中, never 棚か, but one with
+no honorific only where the reading without it fails, so eki no mae da stays
+駅の前だ),
 English through `data/search/`, an index of the first tier's gloss words to
 keys, and Spanish through `data/search/es.json`, the same over `data/es/`'s
 Spanish; the builder and the page split words with the same `glossWords` and

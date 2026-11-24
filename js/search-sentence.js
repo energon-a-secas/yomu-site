@@ -26,7 +26,7 @@
 
 import { keysForRun, pathOf } from './lattice.js';
 import { analyzeCore } from './analyze.js';
-import { applyEdits } from './search-latin.js';
+import { applyEdits, kanaForms } from './search-latin.js';
 import { toHira, isKanji } from './kana.js';
 
 /** At most this many first passes for one query, and this many edits kept. */
@@ -103,8 +103,10 @@ export function writtenToken(t) {
  * @param {object} dict  createDict()'s, shared with the reader
  * @param {{ forced?: Map<number, number>, budget?: number }} [o]  edits the learner
  *   typed apart, applied from the start; the first passes this read may spend
- * @returns {Promise<{ kana: string, tokens: object[], guesses: number, tried: number, written: Function }>}
- *   `written` writes a token as the analyzer reads it (writtenToken).
+ * @returns {Promise<{ kana: string, tokens: object[], guesses: number, tried: number, edits: object[], written: Function }>}
+ *   `edits` are the edits kept, each with the `option` chosen (its `at` is a
+ *   place in `kana` as given); `written` writes a token as the analyzer reads
+ *   it (writtenToken).
  */
 export async function readSentence(kana, edits, dict, { forced = new Map(), budget = SENTENCE_BUDGET } = {}) {
   await dict.ready();
@@ -159,8 +161,41 @@ export async function readSentence(kana, edits, dict, { forced = new Map(), budg
     tokens: a.tokens,
     guesses: a.unknown,
     tried,
+    edits: [...choice].map(([i, option]) => ({ ...edits[i], option })),
     written: writtenToken,
   };
+}
+
+/**
+ * The katakana words a stretch of hiragana may be (てれび is テレビ, こうひい
+ * コーヒー), as edits for readSentence: only where the hiragana is no key,
+ * and kana for kana, so no place moves. `dict` is createDict()'s.
+ */
+export async function katakanaEdits(text, dict, from = 2, to = 8) {
+  const small = /^[ぁぃぅぇぉゃゅょゎっんー]/;
+  const spans = [];
+  for (let a = 0; a < text.length; a += 1) {
+    if (small.test(text[a])) continue;
+    for (let len = from; len <= to && a + len <= text.length; len += 1) {
+      const hira = text.slice(a, a + len);
+      if (!/^[ぁ-ゖ]+$/.test(hira) || /^[ぁぃぅぇぉゃゅょゎ]/.test(text[a + len] || '')) continue;
+      spans.push({
+        a, len, hira, forms: kanaForms(hira).slice(1).filter((f) => f.length === len),
+      });
+    }
+  }
+  await dict.need([...new Set(spans.flatMap((x) => [x.hira, ...x.forms]))]);
+  return spans.filter((x) => !dict.get(x.hira)).flatMap((x) => {
+    const f = x.forms.find((k) => dict.get(k));
+    return f ? [{
+      at: x.a, kind: 'kata', len: x.len, options: [f],
+    }] : [];
+  });
+}
+
+/** `text` read by the analyzer's first two passes (analyze.js analyzeCore), for search-romaji.js. */
+export function analyzeText(text, dict) {
+  return analyzeCore(text, { dict });
 }
 
 /** The tokens of a reading a learner looks up as words: those with a dictionary record. */

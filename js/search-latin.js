@@ -118,7 +118,9 @@ const PARTICLE_PART = /^(?:wa|ha|wo|o|e|he|ni|to|de|ga|mo|no|ka|ya|ne|yo|kara|ma
 
 /** One space-free part of a romaji query, ready for wanakana. */
 function letters(part) {
-  return part.replace(/[āīūēōâîûêô]/g, (c) => MACRON[c]).replace(/m(?=[bmp])/g, 'n');
+  // A part that ends in nn ends in one ん, as an IME writes it: wanakana's
+  // こんん for konn read as 紺ん while a learner typed konnichiwa.
+  return part.replace(/[āīūēōâîûêô]/g, (c) => MACRON[c]).replace(/m(?=[bmp])/g, 'n').replace(/(?<=[aeiou])nn$/, 'n');
 }
 
 /**
@@ -149,6 +151,57 @@ export function romajiReading(q) {
     kana += k;
   }
   return { kana, starts, particles };
+}
+
+/**
+ * A query whose last letters are a syllable still being typed (kyouw,
+ * konnich, tabem): the romaji reading of what comes before them, and the
+ * letters held back. Only consonants are held, at most three (tch), and only
+ * where what is left reads as romaji; null for a query that is romaji
+ * already, and for one that would be nothing once held (ky). search.js reads
+ * it only where no meaning names every word, so dog and tab stay English.
+ *
+ * @returns {{ reading: { kana: string, starts: number[], particles: number[] }, held: string } | null}
+ */
+export function heldRomaji(q) {
+  const s = String(q ?? '').normalize('NFC').toLowerCase().trimEnd();
+  if (!s || romajiReading(s)) return null;
+  for (let cut = 1; cut <= 3 && cut < s.length; cut += 1) {
+    const held = s.slice(-cut);
+    if (!/^[bcdfghjkmprstvwyz]+$/.test(held)) break;
+    const head = s.slice(0, -cut).replace(/[\s-]+$/, '');
+    const reading = head ? romajiReading(head) : null;
+    if (reading) return { reading, held };
+  }
+  return null;
+}
+
+/**
+ * The words of `text` as the learner typed them, accents and capitals kept,
+ * each beside the folded word a lookup uses: `[{ shown, folded }]`. A word
+ * ends where `fold` leaves a character that is no `letter`, and what the
+ * text puts in parentheses is left out, as spanishWords and glossWords do,
+ * so a page can say "Spanish: días" of the dias it looked up.
+ */
+export function typedWords(text, { fold = (ch) => foldLatin(ch), letter = /^[a-zñ]+$/ } = {}) {
+  const out = [];
+  let shown = '';
+  let folded = '';
+  const end = () => { if (shown) out.push({ shown, folded }); shown = ''; folded = ''; };
+  for (const ch of String(text ?? '').normalize('NFC').replace(/\([^)]*\)/g, ' ')) {
+    const f = fold(ch);
+    if (f && letter.test(f)) { shown += ch; folded += f; } else end();
+  }
+  end();
+  return out;
+}
+
+/** spanishWords(text) as typed: the same words, in the same order, accents and capitals kept. */
+export function spanishWordsTyped(text, { alone = false } = {}) {
+  const all = typedWords(text);
+  const words = all.filter((w) => w.folded.length > 1 && !STOP_ES.has(w.folded));
+  if (!words.length && alone && all.length === 1) return all.map((w) => w.shown);
+  return words.map((w) => w.shown);
 }
 
 /** A particle typed on its own as it is written: wa is は, o を, e へ; the rest as typed. */

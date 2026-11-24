@@ -11,9 +11,7 @@
 // is offered whole above its words, with Read it.
 
 import { h, withJa } from './utils.js';
-import {
-  glossWords, byWord, writtenOf, foldLatin, spanishWords,
-} from './search.js';
+import { byWord, writtenOf, askedWords } from './search.js';
 import { ui, t, posWord, currentLang } from './strings.js';
 import { isKanji } from './kana.js';
 import { wordRomaji } from './render-romaji.js';
@@ -63,11 +61,16 @@ export function romajiNodes(reading, saidLine = '') {
   return wordRomaji(reading, { saidLine, extra: 'sr-romaji' });
 }
 
-/** How a result was reached, in words: "Dictionary form of 食べた", "English: eat", "Spanish: comer", "Romaji: さけ". */
-function viaText(res, q) {
+/**
+ * How a result was reached, in words: "Dictionary form of 食べた", "English:
+ * eat", "Spanish: días", "Romaji: さけ". A meaning names the learner's words
+ * as typed (search.js askedWords, `asked`): a Spanish word shown with its
+ * accent taken off reads as a spelling mistake.
+ */
+function viaText(res, q, asked = askedWords(q)) {
   if (res.via === 'form') return ui('searchViaFormOf', { q: res.romaji || q });
-  if (res.via === 'english') return ui('searchViaEnglish', { w: glossWords(foldLatin(q, { enye: false })).join(' ') });
-  if (res.via === 'spanish') return ui('searchViaSpanish', { w: spanishWords(q, { alone: true }).join(' ') });
+  if (res.via === 'english') return ui('searchViaEnglish', { w: asked.english });
+  if (res.via === 'spanish') return ui('searchViaSpanish', { w: asked.spanish });
   if (res.via === 'sentence') return ui('searchViaSentence', { kana: res.romaji || '' });
   if (res.via === 'rare') return ui('searchViaRare');
   if (res.via === 'name') return ui('searchViaName');
@@ -103,13 +106,13 @@ function kanjiTile(ch, kept, meaning, lang = 'en') {
   ]);
 }
 
-function wordItem(res, kept, infos, q, formsOf, examplesOf, setsOf, esOf) {
+function wordItem(res, kept, infos, q, formsOf, examplesOf, setsOf, esOf, asked) {
   const w = shownWord(res, esOf);
   // In Spanish, a meaning the dictionary has only in English says so.
   const english = currentLang() === 'es' && w.lang === 'en' && w.glosses.length;
   const ix = kept.words.push(w.written) - 1;
   const chars = [...new Set([...w.written].filter(isKanji))];
-  const via = viaText(res, q);
+  const via = viaText(res, q, asked);
   // A word that is itself an idiom or proverb says which collection holds it.
   const own = firstTier(res) ? (setsOf(w.written) || []).find((r) => r.written === w.written) : null;
   return h('li', { class: 'sr-item' }, [
@@ -157,7 +160,7 @@ function sentenceNodes(sentence, kept) {
 
 /**
  * The words pane's results.
- * @param {{ words: object[], kanji: string[], sentence?: { kana: string, text: string } }} found  search()
+ * @param {{ words: object[], kanji: string[], asked?: { english: string, spanish: string }, sentence?: { kana: string, text: string } }} found  search()
  * @param {Map} infos  kanjiInfo() of the kanji shown
  * @param {{ of?: Function, kanji?: Map }} [es]  a record's Spanish meanings (dict.esOf) and the kanji's (dict.kanjiEs), on a page in Spanish
  * @returns {{ nodes: Node[], kept: { words: string[], kanji: string[] }, status: string }}
@@ -177,7 +180,8 @@ export function resultNodes(found, infos, q = '', formsOf = () => null, examples
     ]));
   }
   const words = byWord(found.words);
-  if (words.length) nodes.push(h('ul', { class: 'sr-list', role: 'list' }, words.map((r) => wordItem(r, kept, infos, q, formsOf, examplesOf, setsOf, esOf))));
+  const asked = found.asked || askedWords(q, currentLang());
+  if (words.length) nodes.push(h('ul', { class: 'sr-list', role: 'list' }, words.map((r) => wordItem(r, kept, infos, q, formsOf, examplesOf, setsOf, esOf, asked))));
   const n = words.length;
   const status = n ? (n === 1 ? ui('searchOne') : ui('searchMany', { n })) : (found.kanji.length ? '' : ui('searchNone'));
   return { nodes, kept, status };

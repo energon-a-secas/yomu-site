@@ -23,7 +23,10 @@
 //   with the sentence, so a page can offer to read it. A sentence is
 //   offered only where it reads as one: no guess, a word and a particle,
 //   the copula or an inflection, and no meaning index that names every
-//   word of the query (agua is Spanish, not ああ具ああ).
+//   word of the query (agua is Spanish, not ああ具ああ); and only where the
+//   reading is one to trust, since a wrong sentence is worse than none
+//   (search-grammar.js trusted). A sure name reads as the name (tanaka is
+//   田中), and a syllable still being typed is held back (kyouw is kyou).
 // - English goes through data/search/ (tools/build-search.mjs): each word of
 //   the query names the dictionary keys whose glosses use it, and a query
 //   of several words keeps the keys every word names. When nothing common
@@ -35,7 +38,10 @@
 //   a form of (spanishForms: libros, roja, bebo). The rare words have no
 //   Spanish index: their Spanish covers one key in eight (docs/ANALYZER.md).
 //   An English learner sees Spanish only where English and romaji found
-//   nothing, and a Spanish one English only where it names every word.
+//   nothing, and a Spanish one English only where it names every word. The
+//   kanji the first Spanish words share come first (comer: 食), and a word
+//   the query only sits inside the Spanish of does not lead over one whose
+//   English or romaji is the query (tokyo is 東京 before 東京証券取引所).
 //
 // Every result keeps its records as the dictionary has them (English `g`),
 // and says how it was reached (`via`); showing a meaning in Spanish is the
@@ -49,26 +55,20 @@ import {
 import { deinflect, posMatches } from './deinflect.js';
 import { currentLang } from './strings.js';
 import {
-  foldLatin, spanishWords, spanishForms, romajiReading, STOP_ES, WEAK_ES,
+  spanishWords, spanishForms, romajiReading, heldRomaji, WEAK_ES,
 } from './search-latin.js';
+import {
+  englishWordsTyped, askedWords, intersect, byPlace, combineSpanish, spanishExact, englishExact, CLITIC_ES, RARE_WHEN,
+} from './search-meaning.js';
 import { createRomajiSearch } from './search-romaji.js';
 
 export {
-  foldLatin, spanishWords, romajiKana, romajiKanas, romajiReading, romajiVariants, looseRomaji, STOP_ES,
+  foldLatin, spanishWords, spanishWordsTyped, romajiKana, romajiKanas, romajiReading, romajiVariants, heldRomaji, looseRomaji, STOP_ES,
 } from './search-latin.js';
+export {
+  glossWords, englishWordsTyped, askedWords, RARE_WHEN,
+} from './search-meaning.js';
 
-/** Words that say nothing a learner searches for. The builder splits glosses with the same list. */
-const STOP = new Set(`a an the to of in on at by for with from as or and be is are was
-  one's someone something oneself etc e g i e s t esp usu`.split(/\s+/));
-
-/** A gloss's (or a query's) words, lower case, with what it puts in parentheses left out. */
-export function glossWords(text) {
-  return String(text).toLowerCase()
-    .replace(/\([^)]*\)/g, ' ')
-    .split(/[^a-z']+/)
-    .map((w) => w.replace(/^'+|'+$/g, ''))
-    .filter((w) => w.length > 1 && !STOP.has(w));
-}
 
 /**
  * How a result is written and read: a kana key under its usual kanji
@@ -99,8 +99,6 @@ export function byWord(results) {
 
 /** At most this many words in one answer. */
 export const MAX_RESULTS = 40;
-/** English finding fewer common words than this asks the rare words too. */
-export const RARE_WHEN = 5;
 /** At most this many rare words in one English answer. */
 export const RARE_MAX = 10;
 /** At most this many kanji offered for a meaning. */
@@ -173,55 +171,24 @@ export function mergeResults(lists) {
   return out;
 }
 
-/** Keys every list names, ranked by the sum of their places; [] when none is shared. */
-function shared(lists) {
-  if (!lists.length) return [];
-  const score = new Map();
-  lists[0].forEach((k, i) => score.set(k, i));
-  for (const list of lists.slice(1)) {
-    const here = new Map(list.map((k, i) => [k, i]));
-    for (const k of [...score.keys()]) {
-      if (here.has(k)) score.set(k, score.get(k) + here.get(k));
-      else score.delete(k);
-    }
-  }
-  return [...score].sort((a, b) => a[1] - b[1]).map(([k]) => k);
-}
 
-/** Keys every list names; the first list alone when none is shared (English). */
-function intersect(lists) {
-  if (!lists.length) return [];
-  const both = shared(lists);
-  return both.length ? both : lists[0];
-}
-
-/** Spanish pronouns that come before a verb: the word after one is read as a verb first. */
-const CLITIC_ES = new Set(['me', 'te', 'nos', 'os']);
-
-/** Every key the lists name, by its best place in any of them, an earlier list first among equals. */
-function byPlace(lists) {
-  const best = new Map();
-  lists.forEach((list, li) => list.forEach((k, i) => {
-    const score = i * 64 + li;
-    if (!best.has(k) || best.get(k) > score) best.set(k, score);
-  }));
-  return [...best].sort((a, b) => a[1] - b[1]).map(([k]) => k);
-}
+/** How many of a Spanish answer's first words are read for the kanji they share. */
+export const SHARED_KANJI_FROM = 6;
 
 /**
- * A Spanish query's keys: those every word names, then, where that is
- * fewer than RARE_WHEN, those its words other than WEAK_ES name together
- * (tengo hambre is hambre's; muy bien is 詳しい, then bien's よく); and where
- * the words share nothing, each one's by place (tomar agua).
+ * The kanji at least half of the first `n` words share, written as the page
+ * writes them (writtenOf), the most shared first: comer's 食べる, 食事, 食う,
+ * 外食 and 間食 share 食. Two of six is often a compound's partner (baño's
+ * お風呂 and 風呂場 share 風 and 呂).
  */
-function combineSpanish(lists, weak) {
-  const named = lists.filter((l) => l.length);
-  const strong = lists.filter((l, i) => l.length && !weak[i]);
-  const out = [...shared(named)];
-  if (out.length < RARE_WHEN && strong.length && strong.length < named.length) out.push(...shared(strong));
-  if (!out.length) out.push(...byPlace(strong.length ? strong : named));
-  return [...new Set(out)];
+export function sharedKanji(words, n = SHARED_KANJI_FROM) {
+  const count = new Map();
+  for (const res of words.slice(0, n)) {
+    for (const ch of new Set([...writtenOf(res).written].filter(isKanji))) count.set(ch, (count.get(ch) || 0) + 1);
+  }
+  return [...count].filter(([, c]) => c * 2 >= n).sort((a, b) => b[1] - a[1]).map(([ch]) => ch);
 }
+
 
 /**
  * @param {{ dict: object, fetchJson: Function, base?: string }} o
@@ -291,7 +258,7 @@ export function createSearch({ dict, fetchJson, base = 'data/' }) {
   }
 
   const { romajiWords, readRomaji, ownWord } = createRomajiSearch({
-    dict, japanese, common, result, japaneseKeys,
+    dict, japanese, common, result, japaneseKeys, loadNames: () => fetchJson(`${dir}search/names.json`),
   });
 
 
@@ -316,7 +283,7 @@ export function createSearch({ dict, fetchJson, base = 'data/' }) {
   async function inEnglish(q, lang) {
     // An accent says nothing in the English index, whose words are a to z: café is cafe.
     // On a Spanish page, a Spanish article is no English word (el gato is no El Salvador).
-    const words = glossWords(foldLatin(q, { enye: false })).filter((w) => lang !== 'es' || !STOP_ES.has(w));
+    const words = englishWordsTyped(q, lang).map((w) => w.folded);
     if (!words.length) return { words: [], kanji: [], asked: [], complete: false };
     await english.need(words);
     const entries = words.map((w) => english.get(w) || {});
@@ -363,7 +330,15 @@ export function createSearch({ dict, fetchJson, base = 'data/' }) {
     const weak = words.map((w) => WEAK_ES.has(w) && words.some((x) => !WEAK_ES.has(x)));
     const keys = combineSpanish(entries.map((e) => e.w), weak).slice(0, MAX_RESULTS);
     const kanji = combineSpanish(entries.map((e) => [...e.k]), weak);
-    return fromIndex(entries.filter((e, i) => !weak[i]), 'spanish', keys, kanji);
+    const found = await fromIndex(entries.filter((e, i) => !weak[i]), 'spanish', keys, kanji);
+    // KANJIDIC's Spanish names a kanji in few words (食 is alimento, comida,
+    // eclipse; 喫 consumir, comer). A kanji most of the first words share
+    // leads where the index names it (días: 日, then 旬), or where none the
+    // index names is written in them (comer: 食, then 喫; escuela adds no 学).
+    const written = found.words.slice(0, SHARED_KANJI_FROM).map((res) => writtenOf(res).written).join('');
+    const adds = found.kanji.length > 0 && !found.kanji.some((ch) => written.includes(ch));
+    const lead = sharedKanji(found.words).filter((ch) => adds || found.kanji.includes(ch));
+    return { ...found, kanji: [...new Set([...lead, ...found.kanji])] };
   }
 
   /** The rare words every word of the query names, from their index rows. */
@@ -379,20 +354,30 @@ export function createSearch({ dict, fetchJson, base = 'data/' }) {
    * @param {string} q
    * @param {{ lang?: string }} [o]  the learner's language, 'en' or 'es'
    *   (strings.js currentLang() by default): its meanings rank first
-   * @returns {Promise<{ kind: string, words: object[], kanji: string[], sentence?: { kana: string, text: string } }>}
+   * @returns {Promise<{ kind: string, words: object[], kanji: string[], asked?: { english: string, spanish: string }, held?: string, sentence?: { kana: string, text: string } }>}
    *   `kanji` are the kanji to offer pages for: those typed, or those whose
-   *   meanings use the words. `sentence` is a romaji sentence's reading.
+   *   meanings use the words (in Spanish the kanji the first words share
+   *   first). `asked` is the words a meaning was looked up by, as typed
+   *   (askedWords), for a page to name. `held` is the letters of a syllable
+   *   still being typed, held back from the romaji (kyouw is read as kyou).
+   *   `sentence` is a romaji sentence's reading, offered only where it is
+   *   one to trust (search-grammar.js trusted).
    */
   async function search(q, { lang = currentLang() } = {}) {
     const kind = queryKind(q);
     if (kind === 'empty') return { kind, words: [], kanji: [] };
     if (kind === 'ja') {
       const words = await japanese(q);
-      return { kind, words: words.slice(0, MAX_RESULTS), kanji: [...new Set([...q].filter(isKanji))] };
+      return {
+        kind, words: words.slice(0, MAX_RESULTS), kanji: [...new Set([...q].filter(isKanji))], asked: askedWords(q, lang),
+      };
     }
-    const reading = kind === 'romaji' ? romajiReading(q) : null;
-    const [rw, en0, es0] = await Promise.all([
-      reading ? romajiWords(reading) : { typed: [], edited: [], asTyped: [], sentence: null },
+    const none = {
+      typed: [], edited: [], asTyped: [], names: [], namesAfter: false, sentence: null,
+    };
+    let reading = kind === 'romaji' ? romajiReading(q) : null;
+    const [rw0, en0, es0] = await Promise.all([
+      reading ? romajiWords(reading) : none,
       inEnglish(q, lang),
       inSpanish(q),
     ]);
@@ -400,14 +385,33 @@ export function createSearch({ dict, fetchJson, base = 'data/' }) {
     // meaning's (agua, tea), unless a particle only Japanese types was typed
     // on its own (sore wa).
     const meaning = en0.complete || es0.complete;
-    const read = rw.sentence && (!meaning || rw.sentence.strong) ? await readRomaji(reading, rw.sentence) : null;
+    // A syllable still being typed (kyouw, konnich, taber) is held back, so
+    // the answer does not empty after every consonant; only where no meaning
+    // names every word (dog and tab are English).
+    // Only where what is left is a word of three kana or more or a sentence
+    // to trust: gat (gato, half typed) is no が, amig no 網.
+    let rw = rw0;
+    let read = null;
+    let held = !reading && !meaning ? heldRomaji(q) : null;
+    if (held) {
+      const left = await romajiWords(held.reading);
+      const heldRead = left.sentence ? await readRomaji(held.reading, left.sentence) : null;
+      if ((left.typed.length && [...held.reading.kana].length >= 3) || (heldRead && heldRead.sentence)) {
+        reading = held.reading;
+        rw = left;
+        read = heldRead;
+      } else held = null;
+    }
+    // A reading not to trust (no `sentence`) still lists its words, and no
+    // meaning that does not name every word (sure, below).
+    if (!held) read = rw.sentence && (!meaning || rw.sentence.strong) ? await readRomaji(reading, rw.sentence) : null;
     const said = read ? read.words : [];
     const own = rw.asTyped.filter((r) => ownWord(r, rw.edited));
     const rest = rw.asTyped.filter((r) => !own.includes(r));
     // Where the romaji found a word as typed, or a sentence, a meaning counts
     // only if every word of the query is one the index knows (sake is English
     // too; konnichi wa is not, and wa alone named 昭和).
-    const sure = said.length > 0 || rw.typed.length > 0;
+    const sure = said.length > 0 || rw.typed.length > 0 || rw.names.length > 0;
     const meant = (x) => (!sure || x.complete ? x : { ...x, words: [], kanji: [] });
     const firstTierRomaji = said.length + rw.typed.length + rw.edited.length;
     let en = meant(en0);
@@ -415,7 +419,7 @@ export function createSearch({ dict, fetchJson, base = 'data/' }) {
     // An English learner sees Spanish only where English and romaji found
     // nothing (sales is no 塩); a Spanish one sees English where it names
     // every word or Spanish found nothing.
-    const romajiAny = firstTierRomaji + rw.asTyped.length;
+    const romajiAny = firstTierRomaji + rw.asTyped.length + rw.names.length;
     const englishToo = lang !== 'es' || en0.complete || !es.words.length;
     if (!englishToo) en = { ...en, words: [], kanji: [] };
     if (lang !== 'es' && (en.words.length || romajiAny)) es = { ...es, words: [], kanji: [] };
@@ -428,9 +432,20 @@ export function createSearch({ dict, fetchJson, base = 'data/' }) {
     const [mine, other] = lang === 'es' ? [es, en] : [en, es];
     // A Spanish word read only as a verb form (ame as amar's) does not go before
     // the romaji it spells as typed (ame is 雨).
+    const lead = lang === 'es' && es.complete && (es.direct || !rw.typed.length) ? [es.words.slice(0, 1), rw.typed.slice(0, 1)] : [];
+    // Nor does one the query only sits inside of: tokyo is in the Spanish of
+    // 東京証券取引所, "Tokyo Stock Exchange (Bolsa de Tokio)", and 東京's
+    // English is Tokyo. A word the romaji spells as typed, or whose English is
+    // the query exactly, goes first.
+    if (lead.length && es.words.length && !(await spanishExact(dict, es.words[0], q))) {
+      const exact = [...rw.typed.filter((r) => r.via === 'exact'), ...(en0.complete ? en0.words.filter((r) => englishExact(r, en0.asked)) : [])];
+      if (exact.length) lead.unshift(exact.slice(0, 1));
+    }
+    // A name a typed word also spells follows it (satou is 砂糖, then 佐藤).
+    const [namesFirst, namesAfter] = rw.namesAfter ? [[], rw.names] : [rw.names, []];
     const lists = [
-      ...(lang === 'es' && es.complete && (es.direct || !rw.typed.length) ? [es.words.slice(0, 1), rw.typed.slice(0, 1)] : []),
-      said, rw.typed,
+      ...lead,
+      said, namesFirst, rw.typed, namesAfter,
       mine.complete ? mine.words : [],
       other.complete ? other.words : [],
       own, rw.edited, rest,
@@ -440,12 +455,15 @@ export function createSearch({ dict, fetchJson, base = 'data/' }) {
     ];
     const kanji = [...new Set([...mine.kanji, ...other.kanji])].slice(0, KANJI_MAX);
     return {
-      kind,
+      kind: held ? 'romaji' : kind,
       words: mergeResults(lists).slice(0, MAX_RESULTS),
       kanji,
-      ...(read ? { sentence: read.sentence } : {}),
+      asked: askedWords(q, lang),
+      ...(held ? { held: held.held } : {}),
+      ...(read && read.sentence ? { sentence: read.sentence } : {}),
     };
   }
+
 
   /** The parts picker's data: { list: [[part, strokes|null]], map: part -> kanji[] }. */
   async function loadParts() {

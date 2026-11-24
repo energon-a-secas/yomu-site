@@ -499,3 +499,272 @@ test('a sentence read keeps its edit prices, its budget and its length', async (
   assert.ok(romajiReading(long).kana.length > SENTENCE_MAX);
   assert.equal(await sentenceOf(long), undefined);
 });
+
+// ── The reviews of 2026-11-23 ──────────────────────────────────────────────
+//
+// Two reviewers ran the app's own bundle and found a romaji sentence offered
+// with wrong Japanese, confidently, with Read the sentence sending it to the
+// reader; results that emptied after every consonant typed; the Spanish
+// found-by tag showing the learner's word without its accents; and comer and
+// tokyo leading Spanish to the wrong thing. Each test names what the query
+// gave before, measured on 2026-11-23 with the code of the day.
+
+test('a said e before a verb of going or coming is へ (tokyoeikimasu was 問う虚栄来ます)', async () => {
+  for (const [q, text, words] of [
+    ['tokyoeikimasu', '東京へ行きます', ['東京', '行く']], // was 問う虚栄きます
+    ['nihoneikimasu', '日本へ行きます', ['日本', '行く']], // was に骨行きます: nihone is にほね
+    ['osakaeikimasu', '大阪へ行きます', ['大阪', '行く']], // was お坂へ行きます
+    ['ekieikimasu', '駅へ行きます', ['駅', '行く']],
+    ['tokyo e itta', '東京へ行った', ['東京', '行く']], // was 東京へいった, read as 要る
+  ]) {
+    const r = await s.search(q);
+    assert.equal(r.sentence && r.sentence.text, text, q);
+    assert.deepEqual(r.words.filter((w) => w.via === 'sentence').map((w) => writtenOf(w).written), words, q);
+  }
+  // Never a word that holds the e: tokyoekimade is 東京駅まで, no particle.
+  assert.notEqual((await sentenceOf('tokyoekimade'))?.text, '東京へ来までいきます');
+});
+
+test('an imperative read before a case particle is the noun its kana is (ashita ame ga furimasu was 明日編めが降ります)', async () => {
+  for (const q of ['ashita ame ga furimasu', 'ashitaamegafurimasu']) {
+    const r = await s.search(q);
+    assert.equal(r.sentence.text, '明日雨が降ります', q);
+    assert.deepEqual(r.words.filter((w) => w.via === 'sentence').map((w) => writtenOf(w).written), ['明日', '雨', '降る'], q);
+  }
+});
+
+test('a sure name reads as the name, alone or with san or desu (tanaka was 棚か)', async () => {
+  const tanaka = await s.search('tanaka');
+  assert.equal(tanaka.sentence, undefined, 'a name alone is no sentence');
+  assert.equal(tanaka.words[0].key, '田中');
+  assert.equal(tanaka.words[0].via, 'name');
+  assert.equal(tanaka.words[0].romaji, 'たなか');
+  assert.equal((await first('tanaka', 'es')).key, '田中', 'in Spanish too');
+  for (const [q, text] of [
+    ['tanaka san', '田中さん'], // was 棚か三
+    ['tanaka san desu', '田中さんです'], // was 棚か三です
+    ['tanaka desu', '田中です'],
+    ['watashi no namae wa tanaka desu', '私の名前は田中です'], // was 私の名前は棚かです
+    ['watashinonamaewatanakadesu', '私の名前は田中です'], // was 私の名前わた中です
+  ]) {
+    const r = await s.search(q);
+    assert.equal(r.sentence && r.sentence.text, text, q);
+    assert.ok(r.words.some((w) => w.key === '田中' && w.via === 'name'), `${q}: 田中 as a name`);
+    assert.ok(r.sentence.kana.includes('たなか'), `${q}: the sentence's kana keeps the name's reading`);
+  }
+  // A name of two spellings cannot be written in a sentence: both, and no sentence (itou san desu was 一等さんです).
+  const itou = await s.search('itou san desu');
+  assert.equal(itou.sentence, undefined);
+  assert.deepEqual(itou.words.slice(0, 2).map((w) => w.key).sort(), ['伊東', '伊藤']);
+  // A common word is the word unless an honorific follows: satou desu is 砂糖です, satou san 佐藤さん.
+  assert.equal((await sentenceOf('satou desu')).text, '砂糖です');
+  assert.equal((await sentenceOf('satou san')).text, '佐藤さん');
+  // A name never splits a word that starts where it does: hiraganadekaitekudasai is not 比良が穴で.
+  assert.equal((await sentenceOf('hiraganadekaitekudasai')).text, 'ひらがなで書いてください');
+});
+
+test('a sentence is offered only where its reading is one to trust', async () => {
+  // Still read: the sentences the owner and the tests ask for.
+  for (const [q, text] of [
+    ['korewapendesu', 'これはペンです'], ['watashiwagakuseidesu', '私は学生です'], ['kyouwaamedesu', '今日は雨です'],
+    ['kirin ga suki desu', 'きりんが好きです'], ['anokokosuiteimasuka', 'あのここ空いていますか'],
+    ['irasshaimaseobentooatatamemasuka', 'いらっしゃいませお弁当温めますか'], ['haiatosupuunmoonegaishimasu', 'はい後スプーンもお願いします'],
+  ]) assert.equal((await sentenceOf(q))?.text, text, q);
+  // No longer offered: each was a wrong sentence (the phrase library's said
+  // romaji typed together, and the reviewers' cases).
+  for (const [q, was] of [
+    ['konni', '紺に'], ['kyouwaa', '今日はああ'], ['kinouwatomodachitore', '昨日は友達取れ'],
+    ['kinouwatomodachitoresutora', '昨日は友達とレス虎'], ['watashiwamariadesu', '私浜リアです'],
+    ['sumimasenekiwadochiradesuka', '隅増せね気はどちらですか'], ['nanbansenkarademasuka', '南蛮千から出ますか'],
+    ['ohashiwaotsukeshimasuka', 'お橋は乙消しますか'], ['okaasannotamagoyakiwasuremasen', 'お母さんの卵や気忘れません'],
+    ['iidesunenanjinidokodeaimasuka', 'いいですね何時にどこ出会いますか'], ['juuichijiyonjuugofundattatoomou', '十一時４０ご分だった十もう'],
+    ['satoodesukonokurasuwahajimetedesuka', '砂糖ですこの暮らすは初めてですか'],
+  ]) assert.equal(await sentenceOf(q), undefined, `${q} was ${was}`);
+  // Where no reading is trusted, the words come back as before.
+  assert.ok((await s.search('kinouwatomodachitore')).words.every((w) => w.via !== 'sentence'));
+});
+
+test('a syllable still being typed is held back, and the answer does not empty after each consonant', async () => {
+  // Each was 0 words before (kyouw, kyouwaamed, konnichiw) or 紺ん (konn).
+  for (const [q, as] of [['kyouw', 'kyou'], ['kyouwaamed', 'kyouwaame'], ['kyouwaamedes', 'kyouwaamede'], ['konnichiw', 'konnichi'], ['watashiwagakuseid', 'watashiwagakusei'], ['toirew', 'toire']]) {
+    const [r, held] = await Promise.all([s.search(q), s.search(as)]);
+    assert.deepEqual(r.words.map((w) => w.key), held.words.map((w) => w.key), q);
+    assert.equal(r.sentence?.text, held.sentence?.text, q);
+    assert.equal(r.held, q.slice(as.length), `${q}: says what it held back`);
+  }
+  // Only where what is left is a word of three kana or more, or a sentence:
+  // a Spanish or English word half typed is no kana word (gat was が, amig
+  // 網, perr ぺ, hous 方, watr わ, chott ちょ).
+  for (const [q, lang] of [['gat', 'es'], ['amig', 'es'], ['perr', 'es'], ['hous', 'en'], ['watr', 'en'], ['chott', 'en']]) {
+    const r = await s.search(q, { lang });
+    assert.equal(r.held, undefined, q);
+    assert.ok(r.words.every((w) => !['exact', 'form'].includes(w.via)), `${q}: ${r.words.map((w) => w.key)}`);
+  }
+  assert.equal((await first('konn')).key, 'こん', 'a final nn is one ん, as an IME writes it');
+  assert.equal(await sentenceOf('konn'), undefined, 'was 紺ん');
+  // Only where no meaning names every word: dog and tab stay English.
+  assert.equal((await first('dog')).key, '犬');
+  assert.ok((await s.search('tab')).words.every((w) => w.via !== 'exact'));
+  // Typed letter by letter, a sentence offered on the way is always one of these.
+  for (const [full, fine] of [
+    ['kyouwaamedesu', ['今日は', '今日は雨', '今日は雨で', '今日は雨です']],
+    ['watashiwagakuseidesu', ['私は', '私は学', '私は学生', '私は学生で', '私は学生です']],
+  ]) {
+    for (let n = 2; n <= full.length; n += 1) {
+      const got = await sentenceOf(full.slice(0, n));
+      if (got) assert.ok(fine.includes(got.text), `${full.slice(0, n)}: ${got.text}`);
+    }
+  }
+});
+
+test('in Spanish, a found-by tag names the words as typed, accents kept (días was dias)', async () => {
+  const { askedWords } = await import('../js/search.js');
+  for (const [q, spanish] of [['días', 'días'], ['pájaro', 'pájaro'], ['corazón', 'corazón'], ['Buenos días', 'Buenos días'], ['el pájaro', 'pájaro']]) {
+    assert.equal((await s.search(q, { lang: 'es' })).asked.spanish, spanish, q);
+  }
+  assert.equal(askedWords('café', 'en').english, 'café', 'English is looked up as cafe and named as typed');
+  assert.deepEqual(askedWords('el gato', 'es'), { english: 'gato', spanish: 'gato' }, 'stop words dropped as before');
+  assert.equal(askedWords('qué', 'es').spanish, 'qué', 'a stop word alone kept, as the lookup keeps it');
+});
+
+test('in Spanish, comer offers 食, and tokyo is 東京 first', async () => {
+  // comer offered only 喫 (KANJIDIC's Spanish of 食 is alimento, comida, eclipse).
+  const comer = await s.search('comer', { lang: 'es' });
+  assert.equal(comer.kanji[0], '食', comer.kanji.join(''));
+  assert.ok(comer.kanji.includes('喫'));
+  // tokyo put 東京証券取引所 ("Tokyo Stock Exchange (Bolsa de Tokio)") first, tagged Spanish.
+  const tokyo = (await s.search('tokyo', { lang: 'es' })).words;
+  assert.equal(tokyo[0].key, '東京');
+  assert.ok(tokyo.some((w) => w.key === '東京証券取引所'));
+  // A Spanish gloss that is the query whole still leads: manga is 袖, then 漫画; gato 猫.
+  assert.equal((await first('manga', 'es')).key, '袖');
+  assert.equal((await first('gato', 'es')).key, '猫');
+  assert.equal((await first('tokyo', 'en')).key, '東京', 'English unchanged');
+});
+
+// ── The review of the reviews' changes, 2026-11-23 ─────────────────────────
+//
+// A third review typed about 430 learner queries and 3,300 Tatoeba lines
+// through the changes above and found right sentences turned wrong (a sure
+// name written over ordinary Japanese), right sentences refused (one ending
+// in でした, a loanword before する) and the word list that took a refused
+// sentence's place full of English the learner never typed. Each test names
+// what the query gave before, measured on 2026-11-23 with the code of the day.
+
+test('a sure name never takes the place of ordinary Japanese (eki no mae da was 駅の前田)', async () => {
+  for (const [q, text] of [
+    ['eki no mae da', '駅の前だ'], // was 駅の前田
+    ['kore wa ike da', 'これは池だ'], // was これは池田
+    ['eiga o mita', '映画を見た'], // was 映画を三田
+    ['jikan ga sugita', '時間が過ぎた'], // was 時間が杉田
+    ['hoshi ga kagayaite imasu', '星が輝いています'], // was 星が加賀やいています
+    ['hashigaomomideochita', '橋が重みで落ちた'], // was 歯志賀重みで落ちた
+    ['korewawatashinosenmongaida', 'これは私の専門外だ'], // was これは私の専門が井田
+    ['kinoonotekiwakyoonotomo', '昨日の敵は今日の友'], // was 木野をの敵は今日の友
+    ['mou akita', 'もう飽きた'], // was no sentence, 秋田犬 listed
+  ]) assert.equal((await sentenceOf(q))?.text, text, q);
+  assert.equal(await sentenceOf('taihenoishiidesu'), undefined, 'was たいへの石井です');
+  // Where the reading without it is no sentence, the name still reads as the name.
+  for (const [q, text] of [
+    ['watashi no namae wa yamada desu', '私の名前は山田です'], // 山だです is two copulas
+    ['watashinonamaewatanakadesu', '私の名前は田中です'], // わた|なか cuts たなか
+    ['tanaka desu', '田中です'], // 棚かです puts か before the copula
+    ['watashi no namae wa tanaka', '私の名前は田中'], // 棚|か spells たなか at the end
+  ]) assert.equal((await sentenceOf(q))?.text, text, q);
+});
+
+test('a sentence may end in the copula, past or negative (ame deshita was refused)', async () => {
+  for (const [q, text] of [
+    ['ame deshita', '雨でした'], ['ame datta', '雨だった'], ['gakusei ja nai', '学生じゃない'],
+    ['watashi wa sensei ja arimasen', '私は先生じゃありません'], ['korewapendewaarimasen', 'これはペンではありません'],
+    ['kinoowaamedeshita', '昨日は雨でした'], ['fuyunoshizukanayorudatta', '冬の静かな夜だった'],
+  ]) assert.equal((await sentenceOf(q))?.text, text, q);
+});
+
+test('dewa typed apart is では, though でわ is the name 出羽 (kore wa pen dewa arimasen was これはペンで我ありません)', async () => {
+  for (const [q, text] of [
+    ['kore wa pen dewa arimasen', 'これはペンではありません'], ['watashi wa gakusei dewa arimasen', '私は学生ではありません'],
+    ['ashita wa ame dewa nai', '明日は雨ではない'], ['dewa kore de shitsureeshimasu', 'ではこれで失礼します'],
+  ]) assert.equal((await sentenceOf(q))?.text, text, q);
+  assert.notEqual((await sentenceOf('dewa mata ashita'))?.text, '出わまた明日');
+  // A sure name typed alone is still never edited into a word: itou is no 一等.
+  assert.notEqual((await sentenceOf('itou san desu'))?.text, '一等さんです');
+});
+
+test('a said e is no へ where the kana is the word\'s own (iine ikimashou was 委員へ行きましょう)', async () => {
+  for (const [q, text] of [
+    ['iine ikimashou', 'いいね行きましょう'], // was 委員へ行きましょう
+    ['okane irimasu', 'お金いります'], ['okaneirimasu', 'お金いります'], // was 悪寒へ入ります
+    ['booru ga takaku haneagatta', 'ボールが高く跳ね上がった'], // was ボールが高く版へ上がった
+    ['sensee kimashita', '先生きました'], // was 先生へきました
+    ['ekimae kite kudasai', '駅前きてください'], ['ekimaekitekudasai', '駅前きてください'], // were refused
+  ]) assert.equal((await sentenceOf(q))?.text, text, q);
+});
+
+test('a loanword takes する and a verb, and a noun できる (kopii shite kudasai was refused)', async () => {
+  for (const [q, text] of [
+    ['kopii shite kudasai', 'コピーしてください'], ['kopiishitekudasai', 'コピーしてください'], ['jogingu shimasu', 'ジョギングします'],
+    ['mainichi jogingu shimasu', '毎日ジョギングします'], ['terebi mimasu', 'テレビ見ます'], ['moopizatanondayo', 'もうピザ頼んだよ'],
+    ['unten dekimasu ka', '運転できますか'], ['untendekimasuka', '運転できますか'], ['nihongo de setsumei dekimasu ka', '日本語で説明できますか'],
+    ['watashiniwameegafutariiru', '私には姪が二人いる'], ['sushi tabetai', '寿司食べたい'],
+    ['okane wa aru ga jikan ga nai', 'お金はあるが時間がない'], // a verb before が is "but"
+    ['mizu kudasai', '水ください'], ['koohii ippai kudasai', 'コーヒー一杯ください'], ['biiru kudasai', 'ビールください'], // ください is grammar enough
+  ]) assert.equal((await sentenceOf(q))?.text, text, q);
+});
+
+test('wrong sentences stay unoffered, and a name read as words lists the name (watashi wa saitou desu was 私は際頭です)', async () => {
+  for (const [q, was] of [
+    ['tanakasanniaimashita', '田中さん似合いました'], ['tanakasankaramerugakimashita', '田中さんカラメルがきました'],
+    ['maria desu', 'まリアです'], ['basu wa manin datta', 'バスは間人だった'], ['hitori de o rusuban dekiru', '一人でを留守番できる'],
+    ['nori sute dekimasu ka', '乗り吸ってできますか'], ['shiawase na renai ga shitai', '幸せなれないがしたい'],
+    ['karewagenchiotorareta', '彼は現地劣られた'], ['sentakukiwakattano', '洗濯機わかったの'], ['soreoshoomeedekimasuka', 'それお証明できますか'],
+    ['ohashiwaotsukeshimasuka', 'お橋は乙消しますか'],
+  ]) assert.equal(await sentenceOf(q), undefined, `${q} was ${was}`);
+  for (const [q, names] of [['watashi wa saitou desu', ['斉藤', '斎藤']], ['watashi wa itou desu', ['伊東', '伊藤']], ['watashi wa abe desu', ['安倍', '安部', '阿部']]]) {
+    const r = await s.search(q);
+    assert.equal(r.sentence, undefined, q);
+    assert.deepEqual(r.words.filter((w) => w.via === 'name').map((w) => w.key).sort(), names, q);
+  }
+  // かれわ at the start is 彼は, never 枯葉.
+  assert.equal((await sentenceOf('karewagakuseidesu')).text, '彼は学生です');
+  assert.equal((await sentenceOf('kanojowasenseidesu')).text, '彼女は先生です');
+});
+
+test('a reading not to trust lists the words it read, never English the learner did not type', async () => {
+  // Was 昭和 and 矢切の渡し (watashi wa sensei ja arimasen), 十日えびす (unten
+  // dekimasu ka), 愛する on an English page (ame deshita), each where a
+  // refused sentence had stood.
+  for (const q of ['tanakasanniaimashita', 'tarou san', 'kinouwatomodachitore', 'watashi wa abe desu']) {
+    const r = await s.search(q);
+    assert.equal(r.sentence, undefined, q);
+    assert.ok(r.words.length > 0, `${q}: some words`);
+    assert.ok(r.words.every((w) => !['english', 'spanish', 'rare', 'sentence'].includes(w.via)), `${q}: ${r.words.map((w) => `${w.key}:${w.via}`)}`);
+  }
+});
+
+test('a name a word also spells follows the word, and a noun takes san (satou was 砂糖 only)', async () => {
+  for (const [q, word, name] of [['satou', '砂糖', '佐藤'], ['endou', '沿道', '遠藤']]) {
+    assert.deepEqual((await s.search(q)).words.slice(0, 2).map((w) => [writtenOf(w).written, w.via]), [[word, 'exact'], [name, 'name']], q);
+  }
+  assert.equal((await sentenceOf('satou desu')).text, '砂糖です', 'the word still reads first in a sentence');
+  for (const [q, text] of [['hayashi san', '林さん'], ['yuki san', '雪さん'], ['suzuki san desu ka', '鈴木さんですか']]) {
+    assert.equal((await sentenceOf(q))?.text, text, q); // hayashi san was サンフランシスコ, in English
+  }
+});
+
+test('in Spanish, only a kanji most of the first words share is added, and ñ counts as n', async () => {
+  for (const [q, kanji, not] of [
+    ['escuela', '校', '学中'], // was 学校中
+    ['baño', '浴', '風呂'], // was 風呂浴
+    ['profesor', '師', '教授'], // was 教師授
+    ['beber', '飲', '水'], // was 飲水喫呑
+    ['libro', '本', '書'], // was 書本簿帳
+  ]) {
+    const got = (await s.search(q, { lang: 'es' })).kanji;
+    assert.equal(got[0], kanji, `${q}: ${got.join('')}`);
+    assert.ok(![...not].some((ch) => got.includes(ch)), `${q}: ${got.join('')}`);
+  }
+  assert.deepEqual((await s.search('tokio', { lang: 'es' })).kanji, [], 'was 京');
+  assert.equal((await s.search('comer', { lang: 'es' })).kanji[0], '食', 'the index names 喫 alone, and none of the first words writes it');
+  assert.equal((await first('ano', 'es')).key, '年', 'was あの: año is filed under ano');
+});

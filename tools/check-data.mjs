@@ -65,6 +65,8 @@
  *   - search's English and Spanish indexes (data/search/) held to the range rule, a word
  *     that is not lower-case English, a key the first tier does not hold,
  *     and a parts picker (data/search/parts.json) out of its shape
+ *   - search's sure names by reading (data/search/names.json) that are not
+ *     what the names shards give (tools/lib/name-readings.mjs)
  *   - the collections (data/sets/): a row out of its shape, a set the index
  *     does not list, or a count the files do not hold
  *   - the kanji page's files (data/strokes/, data/kpage/) held to the range
@@ -108,6 +110,7 @@ import { SPACES_FORMAT, SPACES_SRC, spacesProblems } from './lib/spaces.mjs';
 import { ES_FORMATS } from './lib/spanish.mjs';
 import { spanishShape, spanishProblems } from './lib/spanish-check.mjs';
 import { rowSpanish, recordsFrom, SET_ES } from './lib/sets-spanish.mjs';
+import { NAME_READINGS_FORMAT, nameReadingsProblems } from './lib/name-readings.mjs';
 
 const DATA = process.argv[2] ? path.resolve(process.argv[2]) : path.join(SITE, 'data');
 // Paths are reported, and index `src` values resolved, relative to the
@@ -391,6 +394,7 @@ const FORMATS = {
   'yomu-search-es-index/1': null,
   'yomu-search-es/1': checkSearchEsShard,
   'yomu-parts/1': checkParts,
+  [NAME_READINGS_FORMAT]: null,
   'yomu-sets-index/1': null,
   'yomu-set/1': checkSet,
   'yomu-sets-words-index/1': null,
@@ -662,6 +666,22 @@ function checkPopular(docs) {
     for (const s of index.shards || []) for (const [k, v] of Object.entries((docs.get(s.src) || {}).entries || {})) names.set(k, v);
   }
   for (const reason of popularProblems(doc, { names, licence: index ? index._licence : null })) fail(rel, reason);
+}
+
+/**
+ * Search's sure names by reading (data/search/names.json): what
+ * tools/lib/name-readings.mjs builds from the names shards beside it, and
+ * there whenever the names tier is.
+ */
+function checkNameReadings(docs) {
+  const rel = 'data/search/names.json';
+  const doc = docs.get(rel);
+  const index = docs.get('data/names/index.json');
+  if (!doc) { if (index) fail(rel, 'missing, but the names tier exists; run node tools/build-name-readings.mjs'); return; }
+  if (!index) return;
+  const entries = [];
+  for (const s of index.shards || []) entries.push(...Object.entries((docs.get(s.src) || {}).entries || {}));
+  for (const reason of nameReadingsProblems(doc, entries)) fail(rel, reason);
 }
 
 /** The last entry of `list` whose `first` is <= key, or null. */
@@ -1066,6 +1086,7 @@ function main() {
   checkSetsSpanish(docs);
   checkRangeIndex(docs, 'data/sets/words.json', 'yomu-sets-words/1');
   checkPopular(docs);
+  checkNameReadings(docs);
   checkLikeIndex(docs);
   checkLookalikes(docs);
   checkSpaces(docs);
