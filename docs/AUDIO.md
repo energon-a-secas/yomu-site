@@ -693,6 +693,23 @@ words, the second half of the approval, were not reached; the account had
 2,441 left of its 10,000 at the end, under the tool's 2,000 reserve plus
 what one batch can post late, so nothing more was started.
 
+**The second run, 24 November 2026.** The owner said "spend the remaining
+tokens". The account cannot go past its limit (`can_extend_character_limit`
+false, so no overage), so the run went down to a 100-credit margin with
+`--reserve=100`, the option added for it: the tool keeps 2,000 by default.
+Kanji pages' words, in the order the tool deals them (the most frequent
+pages first), in batches sized from the balance read a minute after each
+(2.5 credits a clip, at most 300 a batch, `--limit` as the number of new
+clips): 300, 300, 300, then 104, and a stop at 79 left.
+
+What it made: 969 kept, 35 rejected after three takes. The balance went
+from 2,441 to 79 left: **2,362 credits**, 2.44 a kept word. One batch's
+charges posted after the minute's wait (39 credits), which the margin
+covered. The ledger now holds 19,057 records, 18,351 kept, and the index
+13,846 keys in 5 shards; `data/audio` is 131 MB on disk. Of the 7,197 kanji
+page lines, 6,193 remain. The account read 9,921 used of 10,000, until it
+resets on 17 December.
+
 ## The page
 
 Native word-by-word playback uses `audio.js wordSequence(audio, keysList, voice)`.
