@@ -46,3 +46,7 @@ skills-archived/
 # wrangler's local state and the Worker's dev secrets.
 .wrangler/
 .dev.vars*
+
+# The iOS app's bridge bundle (yomu-ios scripts/bundle.sh output). It belongs
+# to the private app repo; one written here by mistake was committed once.
+/analyzer.js
