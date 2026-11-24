@@ -659,6 +659,40 @@ so they are a long tail); 520 common words and 9 readings whose check failed
 the script's order. Rerun the measurement after an analyzer change: what
 it ranks moves, though a kept clip does not (A kept clip stays, above).
 
+**The first run, 23 November 2026.** The owner approved up to 9,000 credits
+on 17 November for the first 2,000 words of this kind and then the kanji
+pages' words. The account read pay-as-you-go, a limit of 10,000, with 1,108
+already used that cycle by `eleven_v3` and alignment on 17 November (not this
+tool, which calls neither). A 60-word pilot kept all 60 for 122 credits by
+the balance. Then three batches, the balance read a minute after each, with
+a rule to start no batch that could carry the account past 8,600 used.
+
+**`--limit` counts the clips a run makes, not a place in the order.** The
+batches were run as `--limit=500`, `1000`, `1500`, `2000`, meant as the first
+500, 1,000, 1,500 and 2,000 lines, but each run made that many new clips, so
+the second made 1,000 and the third up to 1,500. The fourth was stopped by
+the rule (used 7,559). So the run made 2,843 words of this kind, 843 past the
+approved 2,000, and none of the kanji pages' words. To stop at a place in the
+order, pass the number still to make: the dry run's count for the wanted
+place, less what is already made.
+
+What it made: 2,759 kept, 84 rejected after three takes (1.04 takes a kept
+word). The balance went from 1,108 to 7,559: **6,451 credits**, 2.34 a kept
+word, in line with the pilot. By the usage API the split was 2,723 of speech
+(`eleven_v4`) and 3,134 of transcription (`scribe_v2`): on these short clips
+the check costs more than the speech, so a cheaper check is where the next
+saving is. The ledger now holds 18,053 records, 17,382 kept, and the index
+12,877 keys in 5 shards; `data/audio` is 123 MB on disk.
+
+Measured afterwards with `tools/measure-audio-corpus.mjs`, the held-out half
+(15,900 sentences, 108,984 spoken words, the app's own key rule): **88.33%**
+of words and **41.13%** of whole sentences recorded, from 82.99% and 25.76%
+before. That is above the table's line for 2,000 (88.00%, 39.97%), since
+2,759 words were kept. 3,895 lines of this kind remain. The kanji pages'
+words, the second half of the approval, were not reached; the account had
+2,441 left of its 10,000 at the end, under the tool's 2,000 reserve plus
+what one batch can post late, so nothing more was started.
+
 ## The page
 
 Native word-by-word playback uses `audio.js wordSequence(audio, keysList, voice)`.
