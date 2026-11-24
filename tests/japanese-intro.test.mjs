@@ -1,8 +1,8 @@
 // The first look at Japanese (js/japanese-intro.js): both languages for every
 // text, no em dash, the first sentence's colours, every example read by the
 // analyzer exactly as the intro writes it (its kana and its romaji), the
-// numbers it states held to the data, and a report of how many examples the
-// recorded voices already cover.
+// numbers it states held to the data, words set side by side said each whole,
+// and a report of how many examples the recorded voices already cover.
 //
 //   node --test tests/japanese-intro.test.mjs
 //
@@ -14,7 +14,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
-import { INTRO, INTRO_SCRIPTS, LANGS, introFor, scriptParts, scriptOf } from '../js/japanese-intro.js';
+import { INTRO, INTRO_SCRIPTS, LANGS, SIDE_BY_SIDE, introFor, sayOf, scriptParts, scriptOf } from '../js/japanese-intro.js';
 import { JAPANESE_KINDS } from '../js/analyze.js';
 import { hasKanji } from '../js/kana.js';
 import { BASIC_KANA } from '../js/kana-chart.js';
@@ -69,6 +69,21 @@ function romajiOf(r) {
     else out += said.trim() ? said : ' ';
   }
   return out.replace(/\s+/g, ' ').trim();
+}
+
+/**
+ * The romaji of words set side by side with ・, as they are said: each word's
+ * tokens as one word (the reader's おば and さん are obasan), a space between
+ * words.
+ */
+function sideBySideRomajiOf(r) {
+  const out = [''];
+  for (const t of r.tokens) {
+    if (t.surface === SIDE_BY_SIDE) { out.push(''); continue; }
+    const said = (t.romaji && t.romaji.said) || '';
+    if (JAPANESE_KINDS.has(t.kind)) out[out.length - 1] += said.replace(/\s+/g, '');
+  }
+  return out.join(' ');
 }
 
 const words = (s) => s.split(/\s+/).filter(Boolean).length;
@@ -143,8 +158,31 @@ test('every example is read as the intro writes it, kana and romaji, with no gue
     const guessed = r.tokens.filter((t) => JAPANESE_KINDS.has(t.kind) && (t.confidence === 'guess' || t.kind === 'unknown'));
     assert.deepEqual(guessed.map((t) => t.surface), [], `${e.ja}: ${cut(r)}`);
     assert.equal(kanaOf(r), e.kana, `${e.ja}: ${cut(r)}`);
-    assert.equal(e.romaji, romajiOf(r), `${e.ja}: the romaji is the reader's`);
+    if (sayOf(e)) assert.equal(e.romaji, sideBySideRomajiOf(r), `${e.ja}: each word's romaji as it is said`);
+    else assert.equal(e.romaji, romajiOf(r), `${e.ja}: the romaji is the reader's`);
   }
+});
+
+test('words set side by side are said one at a time, each whole', async () => {
+  // The reader splits おばさん into おば and さん; said word by word, that put
+  // a pause inside the four beats the note counts. sayOf gives the words to
+  // say whole, each with its kana, for every example written with ・.
+  const listed = examples().filter((e) => e.ja.includes(SIDE_BY_SIDE));
+  assert.deepEqual(listed.map((e) => e.ja), ['紙・髪・神', 'おばさん・おばあさん', 'きって・きて', '箸・橋']);
+  for (const e of listed) {
+    const say = sayOf(e);
+    assert.ok(say && say.length >= 2, e.ja);
+    assert.equal(say.map((w) => w.text).join(SIDE_BY_SIDE), e.ja);
+    assert.equal(say.map((w) => w.kana).join(SIDE_BY_SIDE), e.kana);
+    assert.equal(say.length, e.romaji.split(' ').length, `${e.ja}: one romaji word per word said`);
+  }
+  assert.deepEqual(sayOf(listed[1]), [{ text: 'おばさん', kana: 'おばさん' }, { text: 'おばあさん', kana: 'おばあさん' }]);
+  assert.deepEqual(sayOf(listed[0]).map((w) => w.kana), ['かみ', 'かみ', 'かみ']);
+  const r = await run('おばさん');
+  assert.ok(r.tokens.length > 1, 'the reason: the reader reads おばさん as more than one word');
+  for (const e of examples().filter((x) => !x.ja.includes(SIDE_BY_SIDE))) assert.equal(sayOf(e), null, e.ja);
+  assert.equal(sayOf({ ja: '紙・髪', kana: 'かみ' }), null, 'words and kana that do not pair up');
+  assert.equal(sayOf(null), null);
 });
 
 test('the numbers the intro states are the data\'s', () => {
@@ -197,6 +235,7 @@ test('introFor gives one language, and says when English stood in', () => {
         const x = out.examples[j];
         assert.deepEqual([x.ja, x.kana, x.romaji, x.translation], [e.ja, e.kana, e.romaji, e[lang]]);
         assert.equal(x.note, e.note ? e.note[lang] : undefined);
+        assert.deepEqual(x.say, sayOf(e) || undefined, `${e.ja}: the words to say whole`);
       });
     });
   }
@@ -232,7 +271,7 @@ test('report: the examples the recorded voices already say', async (t) => {
   // Reported, never failed: a recording is a bonus, and an example is chosen
   // for what it teaches. A line is looked up whole first, then word by word
   // as the reader says it (a particle as it is said, a word with kanji by its
-  // spelling and reading).
+  // spelling and reading); words set side by side, each whole (sayOf).
   const audio = normalizeAudio(JSON.parse(fs.readFileSync(new URL('data/audio/index.json', ROOT), 'utf8')));
   const need = (keys) => {
     for (const n of shardsFor(audio, keys)) addShard(audio, n, JSON.parse(fs.readFileSync(new URL(audio.srcs[n], ROOT), 'utf8')));
@@ -244,9 +283,13 @@ test('report: the examples the recorded voices already say', async (t) => {
   const tally = { line: [], words: [], some: [], none: [] };
   for (const e of examples()) {
     if (clip(keysOf(e.ja))) { tally.line.push(e.ja); continue; }
-    const r = await run(e.ja);
-    const ws = r.tokens.filter((x) => JAPANESE_KINDS.has(x.kind));
-    const missing = ws.filter((w) => !clip(keysOf(sayable(w), hasKanji(w.surface) ? [wordKey(w.surface, w.reading)] : [])));
+    const say = sayOf(e);
+    const r = say ? null : await run(e.ja);
+    const ws = say
+      ? say.map((w) => ({ surface: w.text, keys: keysOf(w.kana, hasKanji(w.text) ? [wordKey(w.text, w.kana)] : []) }))
+      : r.tokens.filter((x) => JAPANESE_KINDS.has(x.kind))
+        .map((w) => ({ surface: w.surface, keys: keysOf(sayable(w), hasKanji(w.surface) ? [wordKey(w.surface, w.reading)] : []) }));
+    const missing = ws.filter((w) => !clip(w.keys));
     if (!missing.length) tally.words.push(e.ja);
     else if (missing.length < ws.length) tally.some.push(`${e.ja} (not ${missing.map((w) => w.surface).join(', ')})`);
     else tally.none.push(e.ja);

@@ -15,6 +15,11 @@
 //     as the reader shows it (the particle は is wa), since a beginner cannot
 //     read kana yet; a word a paragraph or a note asks the reader to say gets
 //     its romaji in brackets, unless an example beside it already shows it;
+//   - an example that sets words side by side with ・ (おばさん・おばあさん) is
+//     said a word at a time, each word whole (sayOf), and its romaji writes
+//     each word as one, as it is said: the reader splits おばさん into おば and
+//     さん, and said word by word that put a pause inside the very word whose
+//     four beats the note counts;
 //   - every number is the data's: 46 is kana-chart.js BASIC_KANA, 2,136 is
 //     data/kanji/joyo.json, and "most kanji have more than one reading" is
 //     KANJIDIC's count over the jōyō list;
@@ -194,7 +199,7 @@ export const INTRO = freeze({
         {
           ja: 'おばさん・おばあさん',
           kana: 'おばさん・おばあさん',
-          romaji: 'oba san obaasan',
+          romaji: 'obasan obaasan',
           en: 'aunt, grandmother',
           es: 'tía, abuela',
           note: p('Four beats, o-ba-sa-n, then five, o-ba-a-sa-n: a different person.',
@@ -306,6 +311,27 @@ export function scriptParts(text) {
   return out;
 }
 
+// ── Words side by side ────────────────────────────────────────────────────
+
+/** What sets words side by side in an example: 紙・髪・神. */
+export const SIDE_BY_SIDE = '・';
+
+/**
+ * The words an example sets side by side, each with its kana, to be said one
+ * at a time and each whole (おばさん, then おばあさん), never as the reader
+ * splits them (おば, さん): null for an example that is one text.
+ *
+ * @param {{ ja: string, kana: string }} e
+ * @returns {{ text: string, kana: string }[] | null}
+ */
+export function sayOf(e) {
+  if (!e || typeof e.ja !== 'string' || !e.ja.includes(SIDE_BY_SIDE)) return null;
+  const written = e.ja.split(SIDE_BY_SIDE);
+  const kana = String(e.kana ?? '').split(SIDE_BY_SIDE);
+  if (kana.length !== written.length || written.some((w) => !w) || kana.some((k) => !k)) return null;
+  return written.map((text, i) => ({ text, kana: kana[i] }));
+}
+
 // ── One language ──────────────────────────────────────────────────────────
 
 /**
@@ -315,8 +341,9 @@ export function scriptParts(text) {
  * @param {object} intro  the content, INTRO unless a test passes its own
  * @returns {{ lang, fallback, sections }} sections as [{ id, title, body:
  *          [string], examples: [{ ja, kana, romaji, translation, note?,
- *          parts? }] }]; `fallback` is true when any string was missing in
- *          `lang` and the English stood in, as in notes.js noteFor
+ *          parts?, say? }] }]; `say` is sayOf's words for an example that
+ *          sets words side by side; `fallback` is true when any string was
+ *          missing in `lang` and the English stood in, as in notes.js noteFor
  */
 export function introFor(lang = 'en', intro = INTRO) {
   const want = LANGS.includes(lang) ? lang : 'en';
@@ -331,6 +358,8 @@ export function introFor(lang = 'en', intro = INTRO) {
     const r = { ja: e.ja, kana: e.kana, romaji: e.romaji || '', translation: pick({ en: e.en, es: e.es }) };
     if (e.note) r.note = pick(e.note);
     if (e.parts) r.parts = e.parts.map((x) => ({ text: x.text, script: x.script }));
+    const say = sayOf(e);
+    if (say) r.say = say;
     return r;
   };
   const sections = ((intro && intro.sections) || []).map((s) => ({
